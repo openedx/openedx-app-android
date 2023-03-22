@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="course_enroll_now">Enroll now</string>
+    <string name="course_view_course">View course</string>
+    <string name="course_details">Course details</string>
+    <string name="course_outline">Course Outline</string>
+    <string name="course_content">Course content</string>
+    <string name="course_units">Course units</string>
+    <string name="course_subsections">Course subsections</string>
+    <string name="course_videos">Videos</string>
+    <string name="course_passed_course">You have passed the course! Now you can get the certificate</string>
+    <string name="course_passed">You’ve passed the course</string>
+    <string name="course_congratulations">Congratulations!</string>
+    <string name="course_view_certificate">View the certificate</string>
+    <string name="course_you_can_get_certificate">You can get a certificate after completing the course (earn required grade)</string>
+    <string name="course_get_certificate">Get the certificate</string>
+    <string name="course_navigation_prev">Previous</string>
+    <string name="course_navigation_prev_unit">Previous Unit</string>
+    <string name="course_navigation_next">Next</string>
+    <string name="course_navigation_next_unit">Next Unit</string>
+    <string name="course_navigation_finish">Finish</string>
+    <string name="course_video_rotate_for_fullscreen">Rotate your device to view this video in full screen.</string>
+    <string name="course_does_not_include_videos">This course does not include any videos.</string>
+    <string name="course_resume_unit_title">Last unit:</string>
+    <string name="course_resume_unit_btn">Resume</string>
+    <string name="course_discussion">Discussion</string>
+    <string name="course_handouts">Handouts</string>
+    <string name="course_announcements">Announcements</string>
+    <string name="course_find_important_info">Find important course information</string>
+    <string name="course_latest_news">Keep up with the latest news</string>
+    <string name="course_good_work">Good work!</string>
+    <string name="course_section_finished">Section \"%s\" is finished.</string>
+    <string name="course_back_to_outline">Back to outline</string>
+    <string name="course_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
+    <string name="course_not_started">This course hasn’t started yet.</string>
+    <string name="course_access_expired">Your access to this course has expired.</string>
+    <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
+    <string name="course_navigation_course">Course</string>
+    <string name="course_navigation_video">Video</string>
+    <string name="course_navigation_discussion">Discussion</string>
+    <string name="course_navigation_handouts">Handouts</string>
+    <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
+    <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
+    <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
+    <string name="course_open_in_browser">Open in browser</string>
+
+</resources>

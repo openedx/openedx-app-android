@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discovery_Discovery">Нові курси</string>
+    <string name="discovery_discovery_new">Знайти нові курси</string>
+    <string name="discovery_lets_find">Давайте знайдемо щось нове для вас</string>
+    <string name="discovery_search_results">Результати пошуку</string>
+    <string name="discovery_start_typing_to_find">Почніть вводити, щоб знайти курс</string>
+
+    <plurals name="discovery_found_courses">
+        <item quantity="one">Знайдено %s курс за вашим запитом</item>
+        <item quantity="few">Знайдено %s курси за вашим запитом</item>
+        <item quantity="many">Знайдено %s курсів за вашим запитом</item>
+        <item quantity="other">Знайдено %s курсів за вашим запитом</item>
+    </plurals>
+
+</resources>

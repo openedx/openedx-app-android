@@ -1,0 +1,48 @@
+buildscript {
+    ext {
+        kotlin_version = '1.8.10'
+        coroutines_version = '1.6.4'
+        compose_version = '1.3.1'
+        compose_compiler_version = '1.4.2'
+    }
+}
+
+plugins {
+    id 'com.android.application' version '7.3.1' apply false
+    id 'com.android.library' version '7.3.1' apply false
+    id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    core_version = "1.9.0"
+    appcompat_version = "1.5.1"
+    material_version = "1.7.0"
+    lifecycle_version = "2.5.1"
+    fragment_version = "1.5.5"
+    constraintlayout_version = "2.1.4"
+    viewpager2_version = "1.0.0"
+    exoplayer_version = "2.18.2"
+    youtubeplayer_version = "11.1.0"
+
+    retrofit_version = '2.9.0'
+    logginginterceptor_version = '4.9.1'
+
+    koin_version = '3.2.0'
+
+    coil_version = '2.1.0'
+
+    jsoup_version = '1.11.2'
+
+    room_version = '2.5.0'
+
+    work_version = '2.8.0'
+
+    //testing
+    mockk_version = '1.13.3'
+    android_arch_version = '2.1.0'
+    junit_version = '4.13.2'
+}

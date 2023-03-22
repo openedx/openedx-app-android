@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_results">Результати</string>
+    <string name="core_error_invalid_grant">Неправильні облікові дані</string>
+    <string name="core_error_no_connection">Повільне або відсутнє з\'єднання з Інтернетом</string>
+    <string name="core_error_unknown_error">Щось пішло не так</string>
+    <string name="core_error_try_again">Спробуйте ще раз</string>
+    <string name="core_privacy_policy">Політика конфіденційності</string>
+    <string name="core_terms_of_use">Умови використання</string>
+    <string name="core_profile">Профіль</string>
+    <string name="core_cancel">Скасувати</string>
+    <string name="core_search">Пошук</string>
+    <string name="core_select_value">Виберіть значення</string>
+    <string name="core_label_starting">Починається %1$s</string>
+    <string name="core_label_ended">Закінчився %1$s</string>
+    <string name="core_label_ending">Закінчується %1$s</string>
+    <string name="core_label_expires">Термін дії курсу закінчується %1$s</string>
+    <string name="core_label_expires_on">Термін дії курсу закінчується %1$s</string>
+    <string name="core_label_expired">Термін дії курсу минув %1$s</string>
+    <string name="core_label_expired_on">Термін дії курсу минув %1$s</string>
+    <string name="core_password">Пароль</string>
+    <string name="core_assessment_soon">незабаром</string>
+    <string name="auto_recommended_text">Авто (Рекомендовано)</string>
+    <string name="video_quality_p360">360p (Найменший розмір)</string>
+    <string name="video_quality_p540">540p</string>
+    <string name="video_quality_p720">720p (Найкраща якість)</string>
+    <string name="core_offline">Офлайн</string>
+    <string name="core_dismiss">Закрити</string>
+    <string name="core_reload">Перезавантажити</string>
+    <string name="core_downloading_in_progress">Завантаження у процесі.</string>
+    <string name="core_user_not_active">Обліковий запис користувача не активовано. Будь ласка, спочатку активуйте свій обліковий запис.</string>
+
+
+    <string name="core_date_format_MMMM_dd">dd MMMM</string>
+    <string name="core_full_date_with_time">dd MMM yyyy HH:mm</string>
+
+</resources>

@@ -1,0 +1,90 @@
+<resources>
+    <string name="discussion_discussions">Discussions</string>
+    <string name="discussion_all_posts">All Posts</string>
+    <string name="discussion_unread">Unread</string>
+    <string name="discussion_unanswered">Unanswered</string>
+    <string name="discussion_posts_following">Posts I\'m following</string>
+    <string name="discussion_refine">Refine:</string>
+    <string name="discussion_recent_activity">Recent activity</string>
+    <string name="discussion_most_activity">Most activity</string>
+    <string name="discussion_most_votes">Most votes</string>
+    <string name="discussion_create_post">Create new post</string>
+    <string name="discussion_add_response">Add a response</string>
+    <string name="discussion_last_post">Last post: %1$s</string>
+    <string name="discussion_follow">Follow</string>
+    <string name="discussion_report">Report</string>
+    <string name="discussion_unreport">Unreport</string>
+    <string name="discussion_add_comment">Add a comment</string>
+    <string name="discussion_comments_title">Comment</string>
+    <string name="discussion_comment_added">Comment Successfully added</string>
+    <string name="discussion_discussion">Discussion</string>
+    <string name="discussion_question">Question</string>
+    <string name="discussion_title">Title</string>
+    <string name="discussion_follow_discussion">Follow this discussion</string>
+    <string name="discussion_follow_question">Follow this question</string>
+    <string name="discussion_post_discussion">Post discussion</string>
+    <string name="discussion_post_question">Post question</string>
+    <string name="discussion_general">General</string>
+    <string name="discussion_search_all_posts">Search all posts</string>
+    <string name="discussion_main_categories">Main categories</string>
+    <string name="discussion_select_post_type">Select post type</string>
+    <string name="discussion_topic">Topic</string>
+    <string name="discussion_search_results">Search results</string>
+    <string name="discussion_start_typing_to_find">Start typing to find the thread</string>
+
+
+    <plurals name="discussion_votes">
+        <item quantity="zero">%1$d votes</item>
+        <item quantity="one">%1$d vote</item>
+        <item quantity="two">%1$d votes</item>
+        <item quantity="few">%1$d votes</item>
+        <item quantity="many">%1$d votes</item>
+        <item quantity="other">%1$d votes</item>
+    </plurals>
+
+    <plurals name="discussion_comments">
+        <item quantity="zero">%1$d Comments</item>
+        <item quantity="one">%1$d Comment</item>
+        <item quantity="two">%1$d Comments</item>
+        <item quantity="few">%1$d Comments</item>
+        <item quantity="many">%1$d Comments</item>
+        <item quantity="other">%1$d Comments</item>
+    </plurals>
+
+    <plurals name="discussion_missed_posts">
+        <item quantity="zero">%1$d Missed posts</item>
+        <item quantity="one">%1$d Missed post</item>
+        <item quantity="two">%1$d Missed posts</item>
+        <item quantity="few">%1$d Missed posts</item>
+        <item quantity="many">%1$d Missed posts</item>
+        <item quantity="other">%1$d Missed posts</item>
+    </plurals>
+
+    <plurals name="discussion_responses">
+        <item quantity="zero">%1$d responses</item>
+        <item quantity="one">%1$d response</item>
+        <item quantity="two">%1$d responses</item>
+        <item quantity="few">%1$d responses</item>
+        <item quantity="many">%1$d responses</item>
+        <item quantity="other">%1$d responses</item>
+    </plurals>
+
+    <plurals name="discussion_responses_capitalized">
+        <item quantity="zero">%1$d Responses</item>
+        <item quantity="one">%1$d Response</item>
+        <item quantity="two">%1$d Responses</item>
+        <item quantity="few">%1$d Responses</item>
+        <item quantity="many">%1$d Responses</item>
+        <item quantity="other">%1$d Responses</item>
+    </plurals>
+
+    <plurals name="discussion_found_threads">
+        <item quantity="zero">Found %s posts</item>
+        <item quantity="one">Found %s post</item>
+        <item quantity="two">Found %s posts</item>
+        <item quantity="few">Found %s posts</item>
+        <item quantity="many">Found %s posts</item>
+        <item quantity="other">Found %s posts</item>
+    </plurals>
+
+</resources>

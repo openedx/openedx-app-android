@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">New Open edX</string>
+
+    <string name="core_results">Results</string>
+    <string name="core_error_invalid_grant">Invalid credentials</string>
+    <string name="core_error_no_connection">Slow or no internet connection</string>
+    <string name="core_error_unknown_error">Something went wrong</string>
+    <string name="core_error_try_again">Try again</string>
+    <string name="core_privacy_policy">Privacy policy</string>
+    <string name="core_terms_of_use">Terms of use</string>
+    <string name="core_profile">Profile</string>
+    <string name="core_cancel">Cancel</string>
+    <string name="core_search">Search</string>
+    <string name="core_select_value">Select value</string>
+    <string name="core_label_starting">Starting %1$s</string>
+    <string name="core_label_ended">Ended %1$s</string>
+    <string name="core_label_ending">Ending %1$s</string>
+    <string name="core_label_expires">Course access expires %1$s</string>
+    <string name="core_label_expires_on">Course access expires on %1$s</string>
+    <string name="core_label_expired">Course access expired %1$s</string>
+    <string name="core_label_expired_on">Course access expired on %1$s</string>
+    <string name="core_password">Password</string>
+    <string name="core_assessment_soon">Soon</string>
+    <string name="core_offline">Offline</string>
+    <string name="core_dismiss">Dismiss</string>
+    <string name="core_reload">Reload</string>
+    <string name="core_downloading_in_progress">Downloading in progress</string>
+    <string name="auto_recommended_text">Auto (Recommended)</string>
+    <string name="video_quality_p360">360p (Smallest file size)</string>
+    <string name="video_quality_p540">540p</string>
+    <string name="video_quality_p720">720p (Best quality)</string>
+    <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
+
+    <string name="core_date_format_MMMM_dd">MMMM dd</string>
+    <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
+</resources>

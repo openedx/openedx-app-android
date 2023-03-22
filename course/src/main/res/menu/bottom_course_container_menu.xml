@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/outline"
+        android:title="@string/course_navigation_course"
+        android:enabled="true"
+        android:icon="@drawable/ic_course_navigation_outline"/>
+
+    <item
+        android:id="@+id/videos"
+        android:title="@string/course_navigation_video"
+        android:enabled="true"
+        android:icon="@drawable/ic_course_navigation_video"/>
+
+    <item
+        android:id="@+id/discussions"
+        android:title="@string/course_navigation_discussion"
+        android:enabled="true"
+        android:icon="@drawable/ic_course_navigation_discussions"/>
+
+    <item
+        android:id="@+id/resources"
+        android:title="@string/course_navigation_handouts"
+        android:enabled="true"
+        android:icon="@drawable/ic_course_navigation_more"/>
+
+</menu>

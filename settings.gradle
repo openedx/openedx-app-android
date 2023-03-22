@@ -1,0 +1,23 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "NewEdX"
+include ':app'
+include ':core'
+include ':auth'
+include ':course'
+include ':dashboard'
+include ':discovery'
+include ':profile'
+include ':discussion'

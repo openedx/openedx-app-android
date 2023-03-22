@@ -1,0 +1,27 @@
+environments:
+  DEV:
+    URLS:
+      API_HOST_URL: "https://dev-example.com/"
+      privacyPolicy: "https://dev-example.com/privacy"
+      termsOfService: "https://dev-example.com/tos"
+      contactUs: "https://dev-example.com/contact"
+      FEEDBACK_EMAIL_ADDRESS: "support@example.com"
+    OAUTH_CLIENT_ID: "DEV_OAUTH_CLIENT_ID"
+  STAGE:
+    URLS:
+      API_HOST_URL: "http://stage-example.com/"
+      privacyPolicy: "http://stage-example.com/privacy"
+      termsOfService: "http://stage-example.com/tos"
+      contactUs: "http://stage-example.com/contact"
+      FEEDBACK_EMAIL_ADDRESS: "support@example.com"
+    OAUTH_CLIENT_ID: "STAGE_OAUTH_CLIENT_ID"
+  PROD:
+    URLS:
+      API_HOST_URL: "https://example.com/"
+      privacyPolicy: "https://example.com/privacy"
+      termsOfService: "https://example.com/tos"
+      contactUs: "https://example.com/contact"
+      FEEDBACK_EMAIL_ADDRESS: "support@example.com"
+    OAUTH_CLIENT_ID: "PROD_OAUTH_CLIENT_ID"
+platformName: "New Open edX"
+platformFullName: "New Open edX"

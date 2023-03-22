@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_sign_up">Sign up</string>
+    <string name="auth_register">Register</string>
+    <string name="auth_registration">Registration</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_invalid_email">Invalid email</string>
+    <string name="auth_invalid_password">Password is too short</string>
+    <string name="auth_welcome_back">Welcome back! Please authorize to continue.</string>
+    <string name="auth_show_optional_fields">Show optional fields</string>
+    <string name="auth_hide_optional_fields">Hide optional fields</string>
+    <string name="auth_create_account">Create account</string>
+    <string name="auth_reset_password">Reset password</string>
+    <string name="auth_forgot_your_password">Forgot password</string>
+    <string name="auth_please_enter_your_log_in">Please enter your log-in or recovery email address below and we will send you an email with instructions.</string>
+    <string name="auth_check_your_email">Check your email</string>
+    <string name="auth_restore_password_success">We have sent a password recover instructions to your email %s</string>
+    <string name="auth_example_email" translatable="false">username@domain.com</string>
+    <string name="auth_enter_password">Enter password</string>
+    <string name="auth_create_new_account">Create new account.</string>
+</resources>

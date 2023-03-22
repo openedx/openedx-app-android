@@ -1,0 +1,158 @@
+import org.yaml.snakeyaml.Yaml
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.33'
+    }
+}
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-parcelize'
+    id 'kotlin-kapt'
+}
+
+
+def config = new Yaml().load(new File("config.yaml").newInputStream())
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    namespace 'com.raccoongang.core'
+
+    flavorDimensions "tier"
+    productFlavors {
+        prod {
+            def envMap = config.environments.find { it.key == "PROD" }
+            def clientId = envMap.value.OAUTH_CLIENT_ID
+            def envUrls = envMap.value.URLS
+
+            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
+            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+            resValue "string", "platform_name", config.platformName
+            resValue "string", "platform_full_name", config.platformFullName
+            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
+            resValue "string", "terms_of_service_link", envUrls.termsOfService
+            resValue "string", "contact_us_link", envUrls.contactUs
+        }
+        develop {
+            def envMap = config.environments.find { it.key == "DEV" }
+            def clientId = envMap.value.OAUTH_CLIENT_ID
+            def envUrls = envMap.value.URLS
+
+            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
+            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+            resValue "string", "platform_name", config.platformName
+            resValue "string", "platform_full_name", config.platformFullName
+            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
+            resValue "string", "terms_of_service_link", envUrls.termsOfService
+            resValue "string", "contact_us_link", envUrls.contactUs
+        }
+        stage {
+            def envMap = config.environments.find { it.key == "STAGE" }
+            def clientId = envMap.value.OAUTH_CLIENT_ID
+            def envUrls = envMap.value.URLS
+
+            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
+            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+            resValue "string", "platform_name", config.platformName
+            resValue "string", "platform_full_name", config.platformFullName
+            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
+            resValue "string", "terms_of_service_link", envUrls.termsOfService
+            resValue "string", "contact_us_link", envUrls.contactUs
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11
+    }
+
+    buildFeatures {
+        viewBinding true
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "$compose_compiler_version"
+    }
+}
+
+dependencies {
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation 'org.yaml:snakeyaml:1.33'
+
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+
+    //AndroidX
+    api "androidx.core:core-ktx:$core_version"
+    api "androidx.appcompat:appcompat:$appcompat_version"
+    api "com.google.android.material:material:$material_version"
+    api "androidx.fragment:fragment-ktx:$fragment_version"
+    api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+    api "androidx.viewpager2:viewpager2:$viewpager2_version"
+
+    //Android Jetpack
+    api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    //Compose
+    api "androidx.compose.runtime:runtime:$compose_version"
+    api "androidx.compose.runtime:runtime-livedata:$compose_version"
+    api "androidx.compose.ui:ui:$compose_version"
+    api "androidx.compose.material:material:$compose_version"
+    debugApi "androidx.compose.ui:ui-tooling:$compose_version"
+    api "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    api "androidx.compose.material:material-icons-extended:$compose_version"
+    debugApi "androidx.customview:customview:1.2.0-alpha01"
+    debugApi "androidx.customview:customview-poolingcontainer:1.0.0"
+
+    //Networking
+    api "com.squareup.retrofit2:retrofit:$retrofit_version"
+    api "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    api "com.squareup.okhttp3:logging-interceptor:$logginginterceptor_version"
+
+    // Koin DI
+    api "io.insert-koin:koin-core:$koin_version"
+    api "io.insert-koin:koin-android:$koin_version"
+
+    api "io.coil-kt:coil-compose:$coil_version"
+    api "io.coil-kt:coil-gif:$coil_version"
+
+    api "org.jsoup:jsoup:$jsoup_version"
+
+    // Room
+    api "androidx.room:room-runtime:$room_version"
+    api "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
+    api "androidx.work:work-runtime-ktx:$work_version"
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}

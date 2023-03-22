@@ -1,0 +1,195 @@
+package com.raccoongang.dashboard.presentation
+
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import com.raccoongang.core.system.connection.NetworkConnection
+import com.raccoongang.core.R
+import com.raccoongang.core.UIMessage
+import com.raccoongang.core.system.ResourceManager
+import com.raccoongang.core.system.notifier.CourseDashboardUpdate
+import com.raccoongang.core.system.notifier.CourseNotifier
+import com.raccoongang.dashboard.domain.interactor.DashboardInteractor
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.*
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestRule
+import java.net.UnknownHostException
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class DashboardViewModelTest {
+
+    @get:Rule
+    val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
+
+
+    private val dispatcher = StandardTestDispatcher()
+
+    private val resourceManager = mockk<ResourceManager>()
+    private val interactor = mockk<DashboardInteractor>()
+    private val networkConnection = mockk<NetworkConnection>()
+    private val notifier = mockk<CourseNotifier>()
+
+    private val noInternet = "Slow or no internet connection"
+    private val somethingWrong = "Something went wrong"
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+        every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
+        every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `getCourses no internet connection`() = runTest {
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses() } throws UnknownHostException()
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        assertEquals(noInternet, message?.message)
+        assert(viewModel.uiState.value is DashboardUIState.Loading)
+    }
+
+    @Test
+    fun `getCourses unknown error`() = runTest {
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses() } throws Exception()
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        assertEquals(somethingWrong, message?.message)
+        assert(viewModel.uiState.value is DashboardUIState.Loading)
+    }
+
+    @Test
+    fun `getCourses from network`() = runTest {
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.uiState.value is DashboardUIState.Courses)
+    }
+
+    @Test
+    fun `getCourses from cache`() = runTest {
+        every { networkConnection.isOnline() } returns false
+        coEvery { interactor.getEnrolledCoursesFromCache() } returns emptyList()
+
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 1) { interactor.getEnrolledCoursesFromCache() }
+
+        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.uiState.value is DashboardUIState.Courses)
+    }
+
+    @Test
+    fun `updateCourses no internet error`() = runTest {
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+
+        coEvery { interactor.getEnrolledCourses() } throws UnknownHostException()
+        viewModel.updateCourses()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        assertEquals(noInternet, message?.message)
+        assert(viewModel.updating.value == false)
+        assert(viewModel.uiState.value is DashboardUIState.Loading)
+    }
+
+    @Test
+    fun `updateCourses unknown exception`() = runTest {
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+
+        coEvery { interactor.getEnrolledCourses() } throws Exception()
+        viewModel.updateCourses()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        assertEquals(somethingWrong, message?.message)
+        assert(viewModel.updating.value == false)
+        assert(viewModel.uiState.value is DashboardUIState.Loading)
+    }
+
+    @Test
+    fun `updateCourses success`() = runTest {
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+
+        viewModel.updateCourses()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.updating.value == false)
+        assert(viewModel.uiState.value is DashboardUIState.Courses)
+    }
+
+    @Test
+    fun `CourseDashboardUpdate notifier test`() = runTest {
+        coEvery { notifier.notifier } returns flow { emit(CourseDashboardUpdate()) }
+
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+
+        val mockLifeCycleOwner: LifecycleOwner = mockk()
+        val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
+        lifecycleRegistry.addObserver(viewModel)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+    }
+
+
+}
