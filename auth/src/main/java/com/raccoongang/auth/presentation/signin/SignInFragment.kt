@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -274,7 +275,11 @@ private fun PasswordTextField(
     onValueChanged: (String) -> Unit,
     onPressDone: () -> Unit,
 ) {
-    var passwordTextFieldValue by rememberSaveable { mutableStateOf("") }
+    var passwordTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(
+            TextFieldValue("")
+        )
+    }
     val focusManager = LocalFocusManager.current
     Text(
         modifier = Modifier.fillMaxWidth(),
@@ -288,7 +293,7 @@ private fun PasswordTextField(
         value = passwordTextFieldValue,
         onValueChange = {
             passwordTextFieldValue = it
-            onValueChanged(it.trim())
+            onValueChanged(it.text.trim())
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,

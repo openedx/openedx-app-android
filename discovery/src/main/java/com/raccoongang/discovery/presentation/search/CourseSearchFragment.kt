@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -123,8 +124,8 @@ private fun CourseSearchScreen(
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
-    var searchText by rememberSaveable {
-        mutableStateOf("")
+    var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(""))
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -217,17 +218,17 @@ private fun CourseSearchScreen(
                             .then(searchTab),
                         label = "",
                         requestFocus = true,
-                        searchValue = searchText,
+                        searchValue = textFieldValue,
                         keyboardActions = {
                             focusManager.clearFocus()
                         },
                         onValueChanged = { text ->
-                            searchText = text
-                            onSearchTextChanged(searchText)
+                            textFieldValue = text
+                            onSearchTextChanged(textFieldValue.text)
                         },
                         onClearValue = {
-                            searchText = ""
-                            onSearchTextChanged(searchText)
+                            textFieldValue = TextFieldValue("")
+                            onSearchTextChanged(textFieldValue.text)
                         }
                     )
                     Spacer(modifier = Modifier.height(20.dp))
@@ -241,7 +242,7 @@ private fun CourseSearchScreen(
                             .pullRefresh(pullRefreshState)
                     ) {
                         val typingText =
-                            if (searchText.isEmpty()) {
+                            if (textFieldValue.text.isEmpty()) {
                                 stringResource(id = discoveryR.string.discovery_start_typing_to_find)
                             } else {
                                 pluralStringResource(

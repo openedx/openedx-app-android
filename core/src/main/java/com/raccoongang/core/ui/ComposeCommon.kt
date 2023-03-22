@@ -35,15 +35,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -105,11 +102,11 @@ fun StaticSearchBar(
 @Composable
 fun SearchBar(
     modifier: Modifier,
-    searchValue: String,
+    searchValue: TextFieldValue,
     requestFocus: Boolean = false,
     label: String = stringResource(id = R.string.core_search),
     keyboardActions: () -> Unit,
-    onValueChanged: (String) -> Unit = {},
+    onValueChanged: (TextFieldValue) -> Unit = {},
     onClearValue: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -123,6 +120,9 @@ fun SearchBar(
     var isFocused by rememberSaveable {
         mutableStateOf(false)
     }
+    var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(searchValue)
+    }
     OutlinedTextField(
         modifier = Modifier
             .focusRequester(focusRequester)
@@ -132,9 +132,14 @@ fun SearchBar(
             .clip(MaterialTheme.appShapes.textFieldShape)
             .then(modifier),
         shape = MaterialTheme.appShapes.textFieldShape,
-        value = searchValue,
+        value = textFieldValue,
         onValueChange = {
-            onValueChanged(it)
+            if (it.text != textFieldValue.text) {
+                textFieldValue = it
+                onValueChanged(textFieldValue)
+            } else {
+                textFieldValue = it
+            }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
@@ -161,8 +166,9 @@ fun SearchBar(
             )
         },
         trailingIcon = {
-            if (searchValue.isNotEmpty()) {
+            if (searchValue.text.isNotEmpty()) {
                 IconButton(onClick = {
+                    textFieldValue = TextFieldValue("")
                     onClearValue()
                 }) {
                     Icon(
@@ -476,8 +482,10 @@ fun NewEdxOutlinedTextField(
     keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) },
     onValueChanged: (String) -> Unit,
 ) {
-    var inputFieldValue by rememberSaveable {
-        mutableStateOf("")
+    var inputFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(
+            TextFieldValue("")
+        )
     }
     val focusManager = LocalFocusManager.current
 
@@ -502,7 +510,7 @@ fun NewEdxOutlinedTextField(
             value = inputFieldValue,
             onValueChange = {
                 inputFieldValue = it
-                onValueChanged(it)
+                onValueChanged(it.text)
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
@@ -859,7 +867,7 @@ private fun SearchBarPreview() {
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
-        searchValue = "",
+        searchValue = TextFieldValue(),
         keyboardActions = {},
         onClearValue = {}
     )
