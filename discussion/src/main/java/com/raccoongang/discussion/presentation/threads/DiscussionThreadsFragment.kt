@@ -437,7 +437,9 @@ private fun DiscussionThreadsScreen(
                                             }
                                         }
                                         NewEdxButton(
-                                            width = Modifier.widthIn(184.dp, Dp.Unspecified),
+                                            width = Modifier
+                                                .padding(bottom = 24.dp)
+                                                .widthIn(184.dp, Dp.Unspecified),
                                             text = stringResource(id = discussionR.string.discussion_create_post),
                                             onClick = {
                                                 onCreatePostClick()
@@ -456,7 +458,6 @@ private fun DiscussionThreadsScreen(
                                                 )
                                             }
                                         )
-                                        Spacer(Modifier.height(24.dp))
                                     }
                                 }
                                 is DiscussionThreadsUIState.Loading -> {
