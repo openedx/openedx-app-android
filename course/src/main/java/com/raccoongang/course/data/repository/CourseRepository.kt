@@ -121,4 +121,5 @@ class CourseRepository(
 
     suspend fun getAnnouncements(url: String) = api.getAnnouncements(url).map { it.mapToDomain() }
 
+    suspend fun getProgress(courseId: String) = api.getProgress(courseId).mapToDomain()
 }

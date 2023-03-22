@@ -25,4 +25,11 @@
         android:enabled="true"
         android:icon="@drawable/ic_course_navigation_more"/>
 
+    <item
+        android:id="@+id/progress"
+        android:title="@string/course_navigation_progress"
+        android:enabled="true"
+        android:icon="@drawable/ic_course_navigation_progress"/>
+
+
 </menu>

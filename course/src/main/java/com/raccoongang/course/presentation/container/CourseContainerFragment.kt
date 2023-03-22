@@ -14,6 +14,7 @@ import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentCourseContainerBinding
 import com.raccoongang.course.presentation.handouts.HandoutsFragment
 import com.raccoongang.course.presentation.outline.CourseOutlineFragment
+import com.raccoongang.course.presentation.progress.CourseProgressFragment
 import com.raccoongang.course.presentation.videos.CourseVideosFragment
 import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -55,6 +56,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 R.id.videos -> binding.viewPager.setCurrentItem(1, false)
                 R.id.discussions -> binding.viewPager.setCurrentItem(2, false)
                 R.id.resources -> binding.viewPager.setCurrentItem(3, false)
+                R.id.progress -> binding.viewPager.setCurrentItem(4, false)
             }
             true
         }
@@ -88,12 +90,13 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.viewPager.offscreenPageLimit = 4
+        binding.viewPager.offscreenPageLimit = 5
         adapter = CourseNavigationFragmentAdapter(this).apply {
             addFragment(CourseOutlineFragment.newInstance(viewModel.courseId,courseTitle, courseImage, courseCertificate))
             addFragment(CourseVideosFragment.newInstance(viewModel.courseId,courseTitle, courseImage, courseCertificate))
             addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId))
             addFragment(HandoutsFragment.newInstance(viewModel.courseId))
+            addFragment(CourseProgressFragment.newInstance(viewModel.courseId, courseTitle, courseImage))
         }
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false

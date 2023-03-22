@@ -13,6 +13,7 @@ import com.raccoongang.course.presentation.container.CourseContainerViewModel
 import com.raccoongang.course.presentation.detail.CourseDetailsViewModel
 import com.raccoongang.course.presentation.handouts.HandoutsViewModel
 import com.raccoongang.course.presentation.outline.CourseOutlineViewModel
+import com.raccoongang.course.presentation.progress.CourseProgressViewModel
 import com.raccoongang.discovery.presentation.search.CourseSearchViewModel
 import com.raccoongang.course.presentation.section.CourseSectionViewModel
 import com.raccoongang.course.presentation.unit.container.CourseUnitContainerViewModel
@@ -87,6 +88,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get()) }
+    viewModel { (courseId: String) ->  CourseProgressViewModel(courseId, get(), get()) }
 
     single { DiscussionRepository(get()) }
     factory { DiscussionInteractor(get()) }

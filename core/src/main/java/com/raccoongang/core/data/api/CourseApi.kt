@@ -64,4 +64,7 @@ interface CourseApi {
 
     @GET
     suspend fun getAnnouncements(@Url url: String): List<AnnouncementModel>
+
+    @GET("/mobile_api_extensions/v1/courses/{course_id}/progress")
+    suspend fun getProgress( @Path("course_id") courseId: String?): ProgressResponse
 }

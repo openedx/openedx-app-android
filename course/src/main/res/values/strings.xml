@@ -39,6 +39,7 @@
     <string name="course_navigation_video">Video</string>
     <string name="course_navigation_discussion">Discussion</string>
     <string name="course_navigation_handouts">Handouts</string>
+    <string name="course_navigation_progress">Progress</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
     <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
     <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
