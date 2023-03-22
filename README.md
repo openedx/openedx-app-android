@@ -1,18 +1,18 @@
 
-# NewEdX Android
+# EducationX Android
 
-Modern vision of the mobile application for Open EdX from Raccoon Gang.
+Modern vision of the mobile application for the Open EdX platform from Raccoon Gang.
 
 ## Building
 1. Check out the source code:
 
-        git clone https://github.com/raccoongang/new-edx-app-android.git
+        git clone https://github.com/raccoongang/educationx-app-ios.git
 
 2. Open Android Studio and choose Open an Existing Android Studio Project.
 
-3. Choose ``new-edx-app-android``.
+3. Choose ``educationx-app-android``.
 
-4. Configure the [``config.yaml`` file](https://github.com/raccoongang/new-edx-app-android/blob/main/config.yaml) with URLs and OAuth credentials for your Open edX instance.
+4. Configure the [``config.yaml`` file](https://github.com/raccoongang/educationx-app-android/blob/main/config.yaml) with URLs and OAuth credentials for your Open edX instance.
 
 5. Select the build variant ``develop``, ``stage``, or ``prod``.
 
@@ -35,4 +35,4 @@ Please feel welcome to develop any of the suggested features below and submit a 
 ## License
 The code in this repository is licensed under the AGPL v3 license unless otherwise noted.
 
-Please see [LICENSE](https://github.com/raccoongang/new-edx-app-android/blob/main/LICENSE) file for details.
+Please see [LICENSE](https://github.com/raccoongang/educationx-app-android/blob/main/LICENSE) file for details.
