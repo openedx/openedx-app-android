@@ -2,12 +2,9 @@ package com.raccoongang.course.presentation.progress
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,28 +22,22 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.CourseProgress
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appTypography
-import com.raccoongang.course.presentation.ui.CourseImageHeader
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import java.text.DecimalFormat
 
 class CourseProgressFragment : Fragment() {
 
@@ -156,22 +147,15 @@ private fun CourseProgressScreen(
             contentAlignment = Alignment.TopCenter
         ) {
 
-            Column(
-                screenWidth
-            ) {
+            Column(modifier = screenWidth) {
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .zIndex(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    IconButton(modifier = Modifier,
-                        onClick = { onBackClick() }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.core_ic_back),
-                            contentDescription = "back",
-                            tint = MaterialTheme.appColors.primary
-                        )
+                    BackBtn {
+                        onBackClick()
                     }
                     Text(
                         modifier = Modifier
@@ -189,16 +173,81 @@ private fun CourseProgressScreen(
                 Surface(
                     color = MaterialTheme.appColors.background
                 ) {
-                    //Start implementation here
-                    Text(
-                        "Implementation here",
-                        Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+                    /** A layout composable that places its children in a vertical sequence */
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        //Start implementation here
+                        Text(
+                            "Implementation here",
+                            Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+
+                        //TODO Image banner
+
+                        when (uiState) {
+                            is CourseProgressUIState.Loading -> {
+                                //TODO ProgressBar
+                            }
+                            is CourseProgressUIState.Data -> {
+                                /** The vertically scrolling list that only composes and
+                                 * lays out the currently visible items */
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                                    contentPadding = PaddingValues(vertical = 10.dp)
+                                ) {
+                                    /** Adds a single item to LazyColumn*/
+                                    item {
+                                        //TODO Overall course progress
+                                    }
+
+                                    /** Adds a list of items to LazyColumn*/
+                                    items(uiState.sections) { section ->
+                                        //TODO Section View
+
+                                        Column(
+                                            modifier = Modifier.padding(vertical = 10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                                        ) {
+                                            for (subsection in section.subsections) {
+                                                //TODO Subsection View
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+}
 
+@Composable
+private fun CourseProgressBar(
+    modifier: Modifier,
+    progress: Int,
+) {
+    val primaryColor = MaterialTheme.appColors.primary
 
+    Canvas(modifier) {
+        drawLine(
+            brush = SolidColor(Color.LightGray),
+            start = Offset.Zero,
+            end = Offset(this.size.width, 0f),
+            strokeWidth = 10.dp.toPx(),
+            cap = StrokeCap.Round
+        )
+
+        if (progress > 0) {
+            drawLine(
+                brush = SolidColor(primaryColor),
+                start = Offset.Zero,
+                end = Offset(this.size.width / 100f * progress, 0f),
+                strokeWidth = 10.dp.toPx(),
+                cap = StrokeCap.Round
+            )
         }
     }
 }
@@ -221,15 +270,30 @@ private fun CourseProgressScreenPreview() {
     }
 }
 
+@Preview
+@Composable
+private fun CourseProgressBarPreview() {
+    NewEdxTheme {
+        CourseProgressBar(
+            modifier = Modifier
+                .height(20.dp)
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+                .padding(horizontal = 24.dp),
+            progress = 35
+        )
+    }
+}
+
 private val mockSection1 = CourseProgress.Section(
     displayName = "Section 1",
     subsections = listOf(
         CourseProgress.Subsection(
-            earned = 3f,
-            total = 4f,
+            earned = "3f",
+            total = "4f",
             percentageString = "75%",
             displayName = "Subsection 1",
-            score = listOf(CourseProgress.Score(1f, 1f), CourseProgress.Score(0f, 1f)),
+            score = listOf(CourseProgress.Score("1f", "1f"), CourseProgress.Score("0f", "1f")),
             showGrades = true,
             graded = true,
             gradeType = "Final Exam"
@@ -241,18 +305,18 @@ private val mockSection2 = CourseProgress.Section(
     displayName = "Section 2",
     subsections = listOf(
         CourseProgress.Subsection(
-            earned = 4f,
-            total = 4f,
+            earned = "4f",
+            total = "4f",
             percentageString = "100%",
             displayName = "Subsection 2",
-            score = listOf(CourseProgress.Score(2f, 2f), CourseProgress.Score(2f, 2f)),
+            score = listOf(CourseProgress.Score("2f", "2f"), CourseProgress.Score("2f", "2f")),
             showGrades = true,
             graded = true,
             gradeType = "Final Exam"
         ),
         CourseProgress.Subsection(
-            earned = 0f,
-            total = 0f,
+            earned = "0f",
+            total = "0f",
             percentageString = "0%",
             displayName = "Subsection 3",
             score = emptyList(),

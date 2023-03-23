@@ -2,6 +2,7 @@ package com.raccoongang.core.data.model
 
 import com.google.gson.annotations.SerializedName
 import com.raccoongang.core.domain.model.CourseProgress
+import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 data class ProgressResponse(
@@ -9,16 +10,16 @@ data class ProgressResponse(
     val sections: List<Section>?
 ) {
 
-    fun mapToDomain(): CourseProgress {
-        val sections = sections?.map { it.mapToDomain() } ?: emptyList()
+    fun mapToDomain(formatter: DecimalFormat): CourseProgress {
+        val sections = sections?.map { it.mapToDomain(formatter) } ?: emptyList()
 
         var earned = 0f
         var total = 0f
         for (section in sections) {
             for (subsection in section.subsections) {
                 if (subsection.score.isNotEmpty()) {
-                    earned += subsection.earned
-                    total += subsection.total
+                    earned += subsection.earned.toFloatOrNull() ?: 0f
+                    total += subsection.total.toFloatOrNull() ?: 0f
                 }
             }
         }
@@ -37,10 +38,10 @@ data class ProgressResponse(
         @SerializedName("subsections")
         val subsections: List<Subsection>?
     ) {
-        fun mapToDomain(): CourseProgress.Section {
+        fun mapToDomain(formatter: DecimalFormat): CourseProgress.Section {
             return CourseProgress.Section(
                 displayName ?: "",
-                subsections?.map { it.mapToDomain() } ?: emptyList()
+                subsections?.map { it.mapToDomain(formatter) } ?: emptyList()
             )
         }
     }
@@ -63,13 +64,13 @@ data class ProgressResponse(
         @SerializedName("grade_type")
         val gradeType: String?
     ) {
-        fun mapToDomain(): CourseProgress.Subsection {
+        fun mapToDomain(formatter: DecimalFormat): CourseProgress.Subsection {
             return CourseProgress.Subsection(
-                earned ?: 0f,
-                total ?: 0f,
+                formatter.format(earned ?: 0f),
+                formatter.format(total ?: 0f),
                 percentageString ?: "",
                 displayName ?: "",
-                score?.map { it.mapToDomain() } ?: emptyList(),
+                score?.map { it.mapToDomain(formatter) } ?: emptyList(),
                 showGrades ?: false,
                 graded ?: false,
                 gradeType ?: ""
@@ -83,8 +84,8 @@ data class ProgressResponse(
         @SerializedName("possible")
         val possible: Float?
     ) {
-        fun mapToDomain(): CourseProgress.Score {
-            return CourseProgress.Score(earned ?: 0f, possible ?: 0f)
+        fun mapToDomain(formatter: DecimalFormat): CourseProgress.Score {
+            return CourseProgress.Score(formatter.format(earned ?: 0f), formatter.format(possible ?: 0f))
         }
     }
 }

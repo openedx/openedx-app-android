@@ -11,8 +11,8 @@ data class CourseProgress(
     )
 
     data class Subsection(
-        val earned: Float,
-        val total: Float,
+        val earned: String,
+        val total: String,
         val percentageString: String,
         val displayName: String,
         val score: List<Score>,
@@ -22,7 +22,7 @@ data class CourseProgress(
     )
 
     data class Score(
-        val earned: Float,
-        val possible: Float,
+        val earned: String,
+        val possible: String,
     )
 }

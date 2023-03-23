@@ -12,6 +12,7 @@ import com.raccoongang.course.data.model.BlockDbEntity
 import com.raccoongang.course.data.storage.CourseDao
 import kotlinx.coroutines.flow.map
 import okhttp3.ResponseBody
+import java.text.DecimalFormat
 
 class CourseRepository(
     private val api: CourseApi,
@@ -121,5 +122,5 @@ class CourseRepository(
 
     suspend fun getAnnouncements(url: String) = api.getAnnouncements(url).map { it.mapToDomain() }
 
-    suspend fun getProgress(courseId: String) = api.getProgress(courseId).mapToDomain()
+    suspend fun getProgress(courseId: String) = api.getProgress(courseId).mapToDomain(DecimalFormat("0.#"))
 }
