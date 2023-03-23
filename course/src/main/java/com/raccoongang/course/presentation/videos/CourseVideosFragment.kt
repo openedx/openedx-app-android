@@ -279,8 +279,7 @@ private fun CourseVideosScreen(
                                 is CourseVideosUIState.CourseData -> {
                                     CourseImageHeader(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(imageHeight)
+                                            .aspectRatio(1.86f)
                                             .padding(6.dp),
                                         courseImage = courseImage,
                                         courseCertificate = courseCertificate

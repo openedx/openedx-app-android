@@ -40,6 +40,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     private var windowSize: WindowSize? = null
     private var orientationListener: OrientationEventListener? = null
+    private var _youTubePlayer: YouTubePlayer? = null
 
     private var blockId = ""
 
@@ -67,6 +68,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                         viewModel.fullscreenHandled = false
                     }
                 }
+            }
+        }
+
+        viewModel.isVideoPaused.observe(this) {
+            _youTubePlayer?.let {
+                it.pause()
             }
         }
     }
@@ -125,6 +132,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
+                _youTubePlayer = youTubePlayer
                 val defPlayerUiController = DefaultPlayerUiController(
                     binding.youtubePlayerView,
                     youTubePlayer
@@ -150,7 +158,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
         viewModel.isPopUpViewShow.observe(viewLifecycleOwner) {
             if (windowSize?.isTablet != true) {
-                binding.cvRotateHelper?.isVisible = it
+                binding.cvRotateHelper.isVisible = it
             }
         }
     }

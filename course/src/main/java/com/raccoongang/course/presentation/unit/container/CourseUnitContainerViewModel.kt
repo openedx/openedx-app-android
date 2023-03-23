@@ -1,18 +1,23 @@
 package com.raccoongang.course.presentation.unit.container
 
+import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.Block
 import com.raccoongang.core.module.db.DownloadModel
 import com.raccoongang.core.module.db.DownloadedState
 import com.raccoongang.core.presentation.course.CourseViewMode
+import com.raccoongang.core.system.notifier.CourseNotifier
+import com.raccoongang.core.system.notifier.CoursePauseVideo
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
+    private val notifier: CourseNotifier,
     val courseId: String
 ) : BaseViewModel() {
 
@@ -87,6 +92,12 @@ class CourseUnitContainerViewModel(
             return block
         }
         return null
+    }
+
+    fun sendEventPauseVideo() {
+        viewModelScope.launch {
+            notifier.send(CoursePauseVideo())
+        }
     }
 
     private fun updateVerticalIndex(blockId: String) {

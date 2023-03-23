@@ -212,8 +212,8 @@ internal fun CourseOutlineScreen(
         val imageHeight by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = 260.dp,
-                    compact = 200.dp
+                    expanded = 300.dp,
+                    compact = 250.dp
                 )
             )
         }
@@ -289,8 +289,7 @@ internal fun CourseOutlineScreen(
                                 ) {
                                     CourseImageHeader(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(imageHeight)
+                                            .aspectRatio(1.86f)
                                             .padding(6.dp),
                                         courseImage = courseImage,
                                         courseCertificate = courseCertificate

@@ -73,6 +73,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 }
             }
         }
+
+        viewModel.isVideoPaused.observe(this) {
+            exoPlayer?.let {
+                it.pause()
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

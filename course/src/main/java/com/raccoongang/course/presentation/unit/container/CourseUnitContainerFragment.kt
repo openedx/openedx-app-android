@@ -120,6 +120,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                     hasNextBlock = bool
                                 }
                             } else {
+                                viewModel.sendEventPauseVideo()
                                 val dialog = ChapterEndFragmentDialog.newInstance(block.displayName)
                                 dialog.show(
                                     requireActivity().supportFragmentManager,
