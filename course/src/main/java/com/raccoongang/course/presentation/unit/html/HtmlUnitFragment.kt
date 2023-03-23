@@ -172,7 +172,7 @@ private fun HTMLContentView(
                             (clickUrl.startsWith("http://") ||
                                     clickUrl.startsWith("https://"))
                         ) {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                             true
                         } else {
                             false
