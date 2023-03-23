@@ -8,6 +8,7 @@ import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
+import com.raccoongang.core.system.notifier.CoursePauseVideo
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
 import com.raccoongang.course.data.repository.CourseRepository
 import kotlinx.coroutines.delay
@@ -36,6 +37,10 @@ class VideoUnitViewModel(
     val isPopUpViewShow: LiveData<Boolean>
         get() = _isPopUpViewShow
 
+    private val _isVideoPaused = MutableLiveData<Boolean>()
+    val isVideoPaused: LiveData<Boolean>
+        get() = _isVideoPaused
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -50,10 +55,12 @@ class VideoUnitViewModel(
         super.onCreate(owner)
         viewModelScope.launch {
             notifier.notifier.collect {
-                _isUpdated.value = false
                 if (it is CourseVideoPositionChanged && videoUrl == it.videoUrl) {
+                    _isUpdated.value = false
                     currentVideoTime = it.videoTime
                     _isUpdated.value = true
+                } else if (it is CoursePauseVideo) {
+                    _isVideoPaused.value = true
                 }
             }
         }

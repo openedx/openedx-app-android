@@ -1,10 +1,13 @@
 package com.raccoongang.course.presentation.detail
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.Configuration.*
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.*
@@ -344,8 +347,7 @@ private fun CourseDetailNativeContent(
     Column {
         CourseImageHeader(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight)
+                .aspectRatio(1.86f)
                 .padding(6.dp),
             courseImage = course.media.image?.large,
             courseCertificate = null
@@ -522,6 +524,22 @@ private fun CourseDescription(
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
                     onWebPageLoaded()
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val clickUrl = request?.url?.toString() ?: ""
+                    return if (clickUrl.isNotEmpty() &&
+                        (clickUrl.startsWith("http://") ||
+                                clickUrl.startsWith("https://"))
+                    ) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        true
+                    } else {
+                        false
+                    }
                 }
             }
             with(settings) {

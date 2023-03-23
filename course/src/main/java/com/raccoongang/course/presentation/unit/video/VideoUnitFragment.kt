@@ -15,8 +15,8 @@ import androidx.fragment.app.Fragment
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.extension.dpToPixel
-import com.raccoongang.core.presentation.global.WindowSizeHolder
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
@@ -48,7 +48,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        windowSize = (requireActivity() as WindowSizeHolder).windowSize
+        windowSize = computeWindowSizeClasses()
         lifecycle.addObserver(viewModel)
         viewModel.videoUrl = requireArguments().getString(ARG_VIDEO_URL, "")
         viewModel.isDownloaded = requireArguments().getBoolean(ARG_DOWNLOADED)
@@ -72,6 +72,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     }
                 }
             }
+        }
+
+        viewModel.isVideoPaused.observe(this) {
+            exoPlayer?.pause()
         }
     }
 
@@ -139,39 +143,34 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             if (exoPlayer == null) {
                 exoPlayer = ExoPlayer.Builder(requireContext())
                     .build()
-                playerView.player = exoPlayer
-                playerView.setShowNextButton(false)
-                playerView.setShowPreviousButton(false)
-                val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
-                exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime.toLong())
-                exoPlayer?.prepare()
-                exoPlayer?.playWhenReady = true
-
-                playerView.setFullscreenButtonClickListener { isFullScreen ->
-                    router.navigateToFullScreenVideo(
-                        requireActivity().supportFragmentManager,
-                        viewModel.videoUrl,
-                        exoPlayer?.currentPosition ?: 0L,
-                        blockId,
-                        viewModel.courseId
-                    )
-                    viewModel.fullscreenHandled = true
-                }
-
-                exoPlayer?.addListener(object : Player.Listener {
-                    override fun onPlaybackStateChanged(playbackState: Int) {
-                        super.onPlaybackStateChanged(playbackState)
-                        if (playbackState == Player.STATE_ENDED) {
-                            viewModel.markBlockCompleted(blockId)
-                        }
-                    }
-                })
-            } else {
-                val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
-                exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime.toLong())
-                exoPlayer?.prepare()
-                exoPlayer?.playWhenReady = true
             }
+            playerView.player = exoPlayer
+            playerView.setShowNextButton(false)
+            playerView.setShowPreviousButton(false)
+            val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
+            exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime)
+            exoPlayer?.prepare()
+            exoPlayer?.playWhenReady = !(viewModel.isVideoPaused.value ?: false)
+
+            playerView.setFullscreenButtonClickListener { isFullScreen ->
+                router.navigateToFullScreenVideo(
+                    requireActivity().supportFragmentManager,
+                    viewModel.videoUrl,
+                    exoPlayer?.currentPosition ?: 0L,
+                    blockId,
+                    viewModel.courseId
+                )
+                viewModel.fullscreenHandled = true
+            }
+
+            exoPlayer?.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    super.onPlaybackStateChanged(playbackState)
+                    if (playbackState == Player.STATE_ENDED) {
+                        viewModel.markBlockCompleted(blockId)
+                    }
+                }
+            })
         }
     }
 
@@ -190,6 +189,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     override fun onDestroyView() {
         exoPlayer?.release()
+        exoPlayer = null
         super.onDestroyView()
     }
 

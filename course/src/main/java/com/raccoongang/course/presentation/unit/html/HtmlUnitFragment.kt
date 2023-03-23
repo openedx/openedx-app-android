@@ -1,6 +1,8 @@
 package com.raccoongang.course.presentation.unit.html
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,7 +14,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -160,6 +161,22 @@ private fun HTMLContentView(
                         super.onPageCommitVisible(view, url)
                         Log.d("HTML", "onPageCommitVisible")
                         onWebPageLoaded()
+                    }
+
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        val clickUrl = request?.url?.toString() ?: ""
+                        return if (clickUrl.isNotEmpty() &&
+                            (clickUrl.startsWith("http://") ||
+                                    clickUrl.startsWith("https://"))
+                        ) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                            true
+                        } else {
+                            false
+                        }
                     }
 
                     override fun onReceivedHttpError(

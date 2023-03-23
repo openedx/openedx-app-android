@@ -15,10 +15,9 @@ import com.raccoongang.core.domain.model.Block
 import com.raccoongang.core.extension.serializable
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.presentation.global.InsetHolder
-import com.raccoongang.core.presentation.global.WindowSizeHolder
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.BackBtn
-import com.raccoongang.core.ui.WindowSize
+import com.raccoongang.core.ui.rememberWindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentCourseUnitContainerBinding
@@ -41,8 +40,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
 
-    private var windowSize: WindowSize? = null
-
     private var blockId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +48,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
         viewModel.setupCurrentIndex(blockId)
-        windowSize = (requireActivity() as WindowSizeHolder).windowSize
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -85,6 +81,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     mutableStateOf(viewModel.hasNextBlock)
                 }
 
+                val windowSize = rememberWindowSize()
+
                 updateNavigationButtons { prev, next, bool ->
                     prevButtonText = prev
                     nextButtonText = next
@@ -92,7 +90,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 }
 
                 NavigationUnitsButtons(
-                    windowSize = windowSize!!,
+                    windowSize = windowSize,
                     prevButtonText = prevButtonText,
                     nextButtonText = nextButtonText,
                     hasNextBlock = hasNextBlock,
@@ -120,6 +118,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                     hasNextBlock = bool
                                 }
                             } else {
+                                viewModel.sendEventPauseVideo()
                                 val dialog = ChapterEndFragmentDialog.newInstance(block.displayName)
                                 dialog.show(
                                     requireActivity().supportFragmentManager,
