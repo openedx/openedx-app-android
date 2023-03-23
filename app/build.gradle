@@ -76,7 +76,6 @@ dependencies {
 
     kapt "androidx.room:room-compiler:$room_version"
 
-    implementation "androidx.window:window:1.0.0"
     implementation 'androidx.core:core-splashscreen:1.0.0'
     testImplementation 'junit:junit:4.13.2'
 

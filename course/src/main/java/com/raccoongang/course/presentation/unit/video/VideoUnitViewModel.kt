@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
-import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
@@ -38,7 +37,7 @@ class VideoUnitViewModel(
     val isPopUpViewShow: LiveData<Boolean>
         get() = _isPopUpViewShow
 
-    private val _isVideoPaused = SingleEventLiveData<Boolean>()
+    private val _isVideoPaused = MutableLiveData<Boolean>()
     val isVideoPaused: LiveData<Boolean>
         get() = _isVideoPaused
 
@@ -60,7 +59,7 @@ class VideoUnitViewModel(
                     _isUpdated.value = false
                     currentVideoTime = it.videoTime
                     _isUpdated.value = true
-                } else if (it is CoursePauseVideo){
+                } else if (it is CoursePauseVideo) {
                     _isVideoPaused.value = true
                 }
             }

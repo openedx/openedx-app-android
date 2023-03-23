@@ -114,6 +114,7 @@ dependencies {
     api "androidx.fragment:fragment-ktx:$fragment_version"
     api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
     api "androidx.viewpager2:viewpager2:$viewpager2_version"
+    api "androidx.window:window:$window_version"
 
     //Android Jetpack
     api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"

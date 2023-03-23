@@ -15,7 +15,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
-import com.raccoongang.core.presentation.global.WindowSizeHolder
+import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
@@ -46,7 +46,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        windowSize = (requireActivity() as WindowSizeHolder).windowSize
+        windowSize = computeWindowSizeClasses()
         lifecycle.addObserver(viewModel)
         viewModel.videoUrl = requireArguments().getString(ARG_VIDEO_URL, "")
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
@@ -72,9 +72,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         }
 
         viewModel.isVideoPaused.observe(this) {
-            _youTubePlayer?.let {
-                it.pause()
-            }
+            _youTubePlayer?.pause()
         }
     }
 
@@ -151,6 +149,9 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
                 youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat())
+                if (viewModel.isVideoPaused.value == true) {
+                    youTubePlayer.pause()
+                }
             }
         }
 
