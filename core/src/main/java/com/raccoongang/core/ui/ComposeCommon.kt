@@ -517,7 +517,7 @@ fun NewEdxOutlinedTextField(
                 textColor = MaterialTheme.appColors.textFieldText,
                 backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 errorBorderColor = MaterialTheme.appColors.error,
-                ),
+            ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
@@ -678,19 +678,20 @@ fun IconText(
 
 @Composable
 fun IconText(
+    modifier: Modifier = Modifier,
     text: String,
     painter: Painter,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
     onClick: (() -> Unit)? = null,
 ) {
-    val modifier = if (onClick == null) {
+    val modifierClickable = if (onClick == null) {
         Modifier
     } else {
         Modifier.noRippleClickable { onClick.invoke() }
     }
     Row(
-        modifier = modifier,
+        modifier = modifier.then(modifierClickable),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -782,15 +783,17 @@ fun NewEdxButton(
     backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
     content: (@Composable RowScope.() -> Unit)? = null
 ) {
-    Button(modifier = Modifier
-        .then(width)
-        .height(42.dp),
+    Button(
+        modifier = Modifier
+            .then(width)
+            .height(42.dp),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = backgroundColor
         ),
         enabled = enabled,
-        onClick = onClick) {
+        onClick = onClick
+    ) {
         if (content == null) {
             Text(
                 text = text,

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.raccoongang.profile.presentation.edit
 
 import android.content.res.Configuration
@@ -36,7 +38,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.*
@@ -611,7 +612,8 @@ private fun EditProfileScreen(
                                 onValueChanged = {
                                     mapFields[BIO] = it
                                 },
-                                mapFields = mapFields
+                                mapFields = mapFields,
+                                onDoneClick = { onSaveClick(mapFields.toMap()) }
                             )
                             Spacer(Modifier.height(40.dp))
                             IconText(
@@ -780,6 +782,7 @@ private fun ProfileFields(
     mapFields: MutableMap<String, Any?>,
     onFieldClick: (String) -> Unit,
     onValueChanged: (String) -> Unit,
+    onDoneClick: () -> Unit
 ) {
     val languageProficiency = (mapFields[LANGUAGE] as List<LanguageProficiency>)
     val lang = if (languageProficiency.isNotEmpty()) {
@@ -814,7 +817,8 @@ private fun ProfileFields(
                     .height(132.dp),
                 name = stringResource(id = profileR.string.profile_about_me),
                 initialValue = mapFields[BIO].toString(),
-                onValueChanged = onValueChanged
+                onValueChanged = onValueChanged,
+                onDoneClick = onDoneClick
             )
         }
     }
@@ -887,7 +891,9 @@ private fun InputEditField(
     initialValue: String,
     disabled: Boolean = false,
     onValueChanged: (String) -> Unit,
+    onDoneClick: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val keyboardType = KeyboardType.Text
 
@@ -919,10 +925,12 @@ private fun InputEditField(
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = keyboardType,
-                imeAction = ImeAction.Next
+                imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions {
-                focusManager.moveFocus(FocusDirection.Down)
+                keyboardController?.hide()
+                focusManager.clearFocus()
+                onDoneClick()
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
             modifier = modifier

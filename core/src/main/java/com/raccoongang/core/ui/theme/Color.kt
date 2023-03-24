@@ -23,6 +23,7 @@ data class AppColors(
 
     val cardViewBackground: Color,
     val cardViewBorder: Color,
+    val divider: Color,
 
     val certificateForeground: Color,
     val bottomSheetToggle: Color,

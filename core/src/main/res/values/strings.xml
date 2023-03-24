@@ -31,6 +31,13 @@
     <string name="video_quality_p540">540p</string>
     <string name="video_quality_p720">720p (Best quality)</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
+    <string name="core_email_chooser_header">Send email using...</string>
+    <string name="core_email_client_not_present">No e-mail clients installed</string>
+    <string name="core_app_version">App Version: </string>
+    <string name="core_android_os_version">Android OS: </string>
+    <string name="core_android_device_model">Device Model: </string>
+    <string name="core_insert_feedback">Feedback: </string>
+    <string name="core_email_subject">Customer Feedback</string>
 
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
