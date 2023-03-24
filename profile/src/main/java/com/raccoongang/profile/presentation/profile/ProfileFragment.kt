@@ -39,11 +39,14 @@ import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.Account
 import com.raccoongang.core.domain.model.ProfileImage
+import com.raccoongang.core.presentation.global.AppData
+import com.raccoongang.core.presentation.global.AppDataHolder
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.profile.presentation.ProfileRouter
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -75,6 +78,7 @@ class ProfileFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
+                    appData = (requireActivity() as AppDataHolder).appData,
                     logout = {
                         viewModel.logout()
                     },
@@ -106,6 +110,7 @@ class ProfileFragment : Fragment() {
 private fun ProfileScreen(
     windowSize: WindowSize,
     uiState: ProfileUIState,
+    appData: AppData,
     uiMessage: UIMessage?,
     onVideoSettingsClick: () -> Unit,
     logout: () -> Unit,
@@ -257,7 +262,7 @@ private fun ProfileScreen(
 
                                 Spacer(modifier = Modifier.height(24.dp))
 
-                                SupportInfoSection()
+                                SupportInfoSection(appData)
 
                                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -278,7 +283,8 @@ private fun ProfileScreen(
 
 @Composable
 private fun ProfileInfoSection(account: Account) {
-    if (account.yearOfBirth !=null || account.bio.isNotEmpty()) {
+
+    if (account.yearOfBirth != null || account.bio.isNotEmpty()) {
         Column {
             Text(
                 text = stringResource(id = com.raccoongang.profile.R.string.profile_prof_info),
@@ -378,7 +384,7 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 }
 
 @Composable
-private fun SupportInfoSection() {
+private fun SupportInfoSection(appData: AppData) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     Column {
@@ -403,7 +409,11 @@ private fun SupportInfoSection() {
                 ProfileInfoItem(
                     text = stringResource(id = com.raccoongang.profile.R.string.profile_contact_support),
                     onClick = {
-                        uriHandler.openUri(context.getString(R.string.contact_us_link))
+                        EmailUtil.showFeedbackScreen(
+                            context,
+                            context.getString(R.string.core_email_subject),
+                            appData.versionName
+                        )
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -561,7 +571,8 @@ private fun ProfileScreenPreview() {
             uiMessage = null,
             logout = {},
             editAccountClicked = {},
-            onVideoSettingsClick = {}
+            onVideoSettingsClick = {},
+            appData = AppData("1")
         )
     }
 }
@@ -578,7 +589,8 @@ private fun ProfileScreenTabletPreview() {
             uiMessage = null,
             logout = {},
             editAccountClicked = {},
-            onVideoSettingsClick = {}
+            onVideoSettingsClick = {},
+            appData = AppData("1")
         )
     }
 }
