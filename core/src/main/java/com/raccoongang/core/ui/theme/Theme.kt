@@ -41,8 +41,9 @@ private val DarkColorPalette = AppColors(
     buttonBackground = Color(0xFF5478F9),
     buttonText = Color.White,
 
-    cardViewBackground = Color(0xE2242A38),
+    cardViewBackground = Color(0xFF273346),
     cardViewBorder = Color(0xFF273346),
+    divider = Color(0xFF4E5A70),
 
     certificateForeground = Color(0xD92EB865),
     bottomSheetToggle = Color(0xFF4E5A70),
@@ -81,8 +82,9 @@ private val LightColorPalette = AppColors(
     buttonBackground = Color(0xFF3C68FF),
     buttonText = Color.White,
 
-    cardViewBackground = Color.White,
+    cardViewBackground = Color(0xFFF9FAFB),
     cardViewBorder = Color(0xFFCCD4E0),
+    divider = Color(0xFFCCD4E0),
 
     certificateForeground = Color(0xD94BD191),
     bottomSheetToggle = Color(0xFF4E5A70),

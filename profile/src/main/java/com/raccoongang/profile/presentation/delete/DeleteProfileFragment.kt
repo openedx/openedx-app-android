@@ -249,6 +249,7 @@ fun DeleteProfileScreen(
                     NewEdxButton(
                         text = stringResource(id = profileR.string.profile_yes_delete_account),
                         enabled = uiState !is DeleteProfileFragmentUIState.Loading,
+                        backgroundColor = MaterialTheme.appColors.error,
                         onClick = {
                             onDeleteClick(password)
                         }
