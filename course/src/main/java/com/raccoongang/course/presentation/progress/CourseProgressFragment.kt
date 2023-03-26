@@ -315,8 +315,8 @@ private val mockSection2 = CourseProgress.Section(
             gradeType = "Final Exam"
         ),
         CourseProgress.Subsection(
-            earned = "0f",
-            total = "0f",
+            earned = "0",
+            total = "0",
             percentageString = "0%",
             displayName = "Subsection 3",
             score = emptyList(),
