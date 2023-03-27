@@ -9,12 +9,12 @@ environments:
     OAUTH_CLIENT_ID: "DEV_OAUTH_CLIENT_ID"
   STAGE:
     URLS:
-      API_HOST_URL: "http://stage-example.com/"
-      privacyPolicy: "http://stage-example.com/privacy"
-      termsOfService: "http://stage-example.com/tos"
-      contactUs: "http://stage-example.com/contact"
+      API_HOST_URL: "https://lms-rg-app-ios-stage.raccoongang.com/"
+      privacyPolicy: "https://lms-rg-app-ios-stage.raccoongang.com/privacy"
+      termsOfService: "https://lms-rg-app-ios-stage.raccoongang.com/tos"
+      contactUs: "https://lms-rg-app-ios-stage.raccoongang.com/contact"
       FEEDBACK_EMAIL_ADDRESS: "support@example.com"
-    OAUTH_CLIENT_ID: "STAGE_OAUTH_CLIENT_ID"
+    OAUTH_CLIENT_ID: "lEHG6kjjDvarhj1hGPTAA3Cdodt9uajRZlUZkcDx"
   PROD:
     URLS:
       API_HOST_URL: "https://example.com/"
