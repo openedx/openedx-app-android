@@ -5,6 +5,7 @@ import java.util.*
 object AppDataConstants {
     const val USER_MIN_YEAR = 18
     const val USER_MAX_YEAR = 77
+    const val TEXT_FIELD_LIMIT = 300
     const val DEFAULT_MIME_TYPE = "image/jpeg"
     val defaultLocale = Locale("en")
 

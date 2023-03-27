@@ -58,6 +58,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import coil.compose.rememberAsyncImagePainter
 import com.raccoongang.core.AppDataConstants.DEFAULT_MIME_TYPE
+import com.raccoongang.core.AppDataConstants.TEXT_FIELD_LIMIT
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.Account
@@ -821,7 +822,9 @@ private fun ProfileFields(
                     .height(132.dp),
                 name = stringResource(id = profileR.string.profile_about_me),
                 initialValue = mapFields[BIO].toString(),
-                onValueChanged = onValueChanged,
+                onValueChanged = {
+                    onValueChanged(it.take(TEXT_FIELD_LIMIT))
+                },
                 onDoneClick = onDoneClick
             )
         }
