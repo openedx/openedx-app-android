@@ -13,12 +13,12 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = AppColors(
     material = darkColors(
-        primary = Color(0xFF5478F9),
+        primary = Color(0xFFDF7A5E),
         primaryVariant = Color(0xFF3700B3),
         secondary = Color(0xFF03DAC6),
         secondaryVariant = Color(0xFF373E4F),
-        background = Color(0xFF19212F),
-        surface = Color(0xFF273346),
+        background = Color(0xFF3C405B),
+        surface = Color(0xFF3C405B),
         error = Color(0xFFFF3D71),
         onPrimary = Color.Black,
         onSecondary = Color.Black,
@@ -30,19 +30,19 @@ private val DarkColorPalette = AppColors(
     textPrimaryVariant = Color(0xFF79889F),
     textSecondary = Color(0xFFB3B3B3),
     textDark = Color(0xFF19212F),
-    textAccent = Color(0xFF5478F9),
+    textAccent = Color(0xCCDF7A5E),
 
-    textFieldBackground = Color(0xFF273346),
+    textFieldBackground = Color(0xFF585D81),
     textFieldBackgroundVariant = Color(0xFF273346),
-    textFieldBorder = Color(0xFF4E5A70),
+    textFieldBorder = Color(0xFF97A5BB),
     textFieldText = Color.White,
     textFieldHint = Color(0xFF79889F),
 
-    buttonBackground = Color(0xFF5478F9),
+    buttonBackground = Color(0xFFDF7A5E),
     buttonText = Color.White,
 
-    cardViewBackground = Color(0xE2242A38),
-    cardViewBorder = Color(0xFF273346),
+    cardViewBackground = Color(0xFF3C405B),
+    cardViewBorder = Color(0xFF3C405B),
 
     certificateForeground = Color(0xD92EB865),
     bottomSheetToggle = Color(0xFF4E5A70),
@@ -53,7 +53,7 @@ private val DarkColorPalette = AppColors(
 
 private val LightColorPalette = AppColors(
     material = lightColors(
-        primary = Color(0xFF3C68FF),
+        primary = Color(0xFF307A59),
         primaryVariant = Color(0x9ADEFAFF),
         secondary = Color(0xFF94D3DD),
         secondaryVariant = Color(0xFF94D3DD),
@@ -70,7 +70,7 @@ private val LightColorPalette = AppColors(
     textPrimaryVariant = Color(0xFF3D4964),
     textSecondary = Color(0xFFB3B3B3),
     textDark = Color(0xFF19212F),
-    textAccent = Color(0xFF3C68FF),
+    textAccent = Color(0xCC307A59),
 
     textFieldBackground = Color(0xFFF7F7F8),
     textFieldBackgroundVariant = Color.White,
@@ -78,7 +78,7 @@ private val LightColorPalette = AppColors(
     textFieldText = Color(0xFF3D4964),
     textFieldHint = Color(0xFF97A5BB),
 
-    buttonBackground = Color(0xFF3C68FF),
+    buttonBackground = Color(0xFF307A59),
     buttonText = Color.White,
 
     cardViewBackground = Color.White,

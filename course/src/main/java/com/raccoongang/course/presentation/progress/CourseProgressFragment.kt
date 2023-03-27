@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,6 +37,7 @@ import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.course.presentation.ui.CourseImageHeader
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -175,18 +177,27 @@ private fun CourseProgressScreen(
                 ) {
                     /** A layout composable that places its children in a vertical sequence */
                     Column(modifier = Modifier.fillMaxSize()) {
-                        //Start implementation here
-                        Text(
-                            "Implementation here",
-                            Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                        //Image banner
+                        CourseImageHeader(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(imageHeight)
+                                .padding(6.dp),
+                            courseImage = courseImage,
+                            courseCertificate = null
                         )
-
-                        //TODO Image banner
 
                         when (uiState) {
                             is CourseProgressUIState.Loading -> {
-                                //TODO ProgressBar
+                                //ProgressBar
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 50.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
                             is CourseProgressUIState.Data -> {
                                 /** The vertically scrolling list that only composes and
@@ -198,19 +209,60 @@ private fun CourseProgressScreen(
                                 ) {
                                     /** Adds a single item to LazyColumn*/
                                     item {
-                                        //TODO Overall course progress
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 20.dp)
+                                                .padding(top = 20.dp, bottom = 10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Overall course progress",
+                                                style = MaterialTheme.appTypography.titleMedium,
+                                                color = MaterialTheme.appColors.textPrimary
+                                            )
+
+                                            Text(
+                                                text = "${uiState.progress}%",
+                                                style = MaterialTheme.appTypography.titleMedium,
+                                                color = MaterialTheme.appColors.textPrimary
+                                            )
+                                        }
+
+                                        CourseProgressBar(
+                                            modifier = Modifier
+                                                .height(20.dp)
+                                                .fillMaxWidth()
+                                                .padding(top = 10.dp)
+                                                .padding(horizontal = 24.dp),
+                                            uiState.progress
+                                        )
+
+                                        Spacer(modifier = Modifier.height(20.dp))
                                     }
 
                                     /** Adds a list of items to LazyColumn*/
                                     items(uiState.sections) { section ->
-                                        //TODO Section View
+                                        //Section View
+                                        Text(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(
+                                                    MaterialTheme.appColors.primary.copy(0.5f)
+                                                )
+                                                .padding(vertical = 5.dp, horizontal = 20.dp),
+                                            text = section.displayName,
+                                            style = MaterialTheme.appTypography.bodyLarge,
+                                            color = MaterialTheme.appColors.textPrimary
+                                        )
 
                                         Column(
                                             modifier = Modifier.padding(vertical = 10.dp),
                                             verticalArrangement = Arrangement.spacedBy(20.dp)
                                         ) {
                                             for (subsection in section.subsections) {
-                                                //TODO Subsection View
+                                                //Subsection View
+                                                ProgressSubsectionItem(subsection)
                                             }
                                         }
                                     }
@@ -220,6 +272,34 @@ private fun CourseProgressScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ProgressSubsectionItem(subsection: CourseProgress.Subsection) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+        Text(
+            text = subsection.title,
+            style = MaterialTheme.appTypography.titleMedium,
+            color = MaterialTheme.appColors.primary
+        )
+
+        if (subsection.score.isEmpty()) {
+            Text(
+                text = "Without Progress",
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textPrimary
+            )
+        } else {
+            val score = subsection.score.joinToString(separator = "   ") { score ->
+                "${score.earned}/${score.possible}"
+            }
+            Text(
+                text = "Progress: $score",
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textPrimary
+            )
         }
     }
 }
