@@ -98,11 +98,11 @@ class CourseDetailFragment : Fragment() {
                     onButtonClick = {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
-                            if (currentState.enrolledCourse != null) {
+                            if (currentState.course.isEnrolled) {
                                 router.navigateToCourseOutline(
                                     requireActivity().supportFragmentManager,
                                     currentState.course.courseId,
-                                    currentState.enrolledCourse.course.name,
+                                    currentState.enrolledCourse!!.course.name,
                                     currentState.enrolledCourse.course.courseImage,
                                     currentState.enrolledCourse.certificate ?: Certificate(""),
                                     currentState.enrolledCourse.course.coursewareAccess,
@@ -236,7 +236,7 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.enrolledCourse != null,
+                                        uiState.course.isEnrolled,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -245,7 +245,7 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.enrolledCourse != null,
+                                        uiState.course.isEnrolled,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -615,5 +615,6 @@ private val mockCourse = Course(
     end = "end",
     startDisplay = "startDisplay",
     startType = "startType",
-    overview = ""
+    overview = "",
+    isEnrolled = false
 )

@@ -20,13 +20,14 @@ interface CourseApi {
         @Query("mobile") mobile: Boolean,
         @Query("username") username: String? = null,
         @Query("org") org: String? = null,
-        @Query("permissions") permission: List<String> = listOf("enroll","see_in_catalog","see_about_page")
+        @Query("permissions") permission: List<String> = listOf("enroll", "see_in_catalog", "see_about_page")
     ): CourseList
 
-    @GET("/api/courses/v1/courses/{course_id}")
+    @GET("/mobile_api_extensions/v1/courses/{course_id}")
     suspend fun getCourseDetail(
         @Path("course_id") courseId: String?,
         @Query("username") username: String? = null,
+        @Query("is_enrolled") isEnrolled: Boolean = true,
     ): CourseDetails
 
     @GET(

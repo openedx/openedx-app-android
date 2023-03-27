@@ -87,9 +87,10 @@ class CourseDetailsViewModel(
             try {
                 interactor.enrollInACourse(id)
                 val enrolledCourse = interactor.getEnrolledCourseById(id)
+                val course = interactor.getCourseDetails(id)
                 val courseData = _uiState.value
                 if (courseData is CourseDetailsUIState.CourseData) {
-                    _uiState.value = courseData.copy(enrolledCourse = enrolledCourse)
+                    _uiState.value = courseData.copy(course = course, enrolledCourse = enrolledCourse)
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
