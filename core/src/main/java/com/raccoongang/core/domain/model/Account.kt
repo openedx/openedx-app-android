@@ -48,4 +48,6 @@ data class Account(
         ALL_USERS
     }
 
+    fun isLimited() = accountPrivacy == Privacy.PRIVATE
+
 }

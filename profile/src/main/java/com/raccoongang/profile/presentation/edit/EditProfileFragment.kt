@@ -119,7 +119,12 @@ class EditProfileFragment : Fragment() {
             NewEdxTheme {
                 val windowSize = rememberWindowSize()
 
-                val uiState by viewModel.uiState.observeAsState(EditProfileUIState(viewModel.account))
+                val uiState by viewModel.uiState.observeAsState(
+                    EditProfileUIState(
+                        viewModel.account,
+                        isLimited = viewModel.isLimitedProfile
+                    )
+                )
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val selectedImageUri by viewModel.selectedImageUri.observeAsState()
                 val isImageDeleted by viewModel.deleteImage.observeAsState(false)
@@ -175,6 +180,9 @@ class EditProfileFragment : Fragment() {
                     },
                     onDeleteImageClick = {
                         viewModel.deleteImage()
+                    },
+                    onLimitedProfileChange = {
+                        viewModel.isLimitedProfile = it
                     }
                 )
             }
@@ -264,6 +272,7 @@ private fun EditProfileScreen(
     leaveDialog: Boolean,
     onKeepEdit: () -> Unit,
     onDataChanged: (Boolean) -> Unit,
+    onLimitedProfileChange: (Boolean) -> Unit,
     onBackClick: (Boolean) -> Unit,
     onSaveClick: (Map<String, Any?>) -> Unit,
     onDeleteClick: () -> Unit,
@@ -273,12 +282,12 @@ private fun EditProfileScreen(
     val scaffoldState = rememberScaffoldState()
     val coroutine = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
-    var accountPrivacy by rememberSaveable {
-        mutableStateOf(uiState.account.accountPrivacy)
-    }
-    var isLimited by rememberSaveable {
-        mutableStateOf(uiState.account.accountPrivacy == Account.Privacy.PRIVATE)
-    }
+//    var accountPrivacy by rememberSaveable {
+//        mutableStateOf(uiState.account.accountPrivacy)
+//    }
+//    var isLimited by rememberSaveable {
+//        mutableStateOf(uiState.account.accountPrivacy == Account.Privacy.PRIVATE)
+//    }
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
@@ -300,7 +309,7 @@ private fun EditProfileScreen(
             Pair(LANGUAGE, uiState.account.languageProficiencies),
             Pair(COUNTRY, uiState.account.country),
             Pair(BIO, uiState.account.bio),
-            Pair(ACCOUNT_PRIVACY, accountPrivacy.name.lowercase())
+            Pair(ACCOUNT_PRIVACY, uiState.account.accountPrivacy.name.lowercase())
         )
     }
 
@@ -310,7 +319,7 @@ private fun EditProfileScreen(
             && uiState.account.bio == mapFields[BIO]
             && selectedImageUri == null
             && !isImageDeleted
-            && uiState.account.accountPrivacy == accountPrivacy)
+            && uiState.isLimited == uiState.account.isLimited())
     onDataChanged(saveButtonEnabled)
 
     val serverFieldName = rememberSaveable {
@@ -420,11 +429,7 @@ private fun EditProfileScreen(
                 ChangeImageDialog(
                     onSelectFromGalleryClick = {
                         isOpenChangeImageDialogState = false
-                        if (!isLimited) {
-                            onSelectImageClick()
-                        } else {
-                            openDialog = true
-                        }
+                        onSelectImageClick()
                     },
                     onRemoveImageClick = {
                         onDeleteImageClick()
@@ -509,7 +514,7 @@ private fun EditProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = stringResource(if (isLimited) profileR.string.profile_limited_profile else profileR.string.profile_full_profile),
+                                text = stringResource(if (uiState.isLimited) profileR.string.profile_limited_profile else profileR.string.profile_full_profile),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.titleSmall
                             )
@@ -558,25 +563,24 @@ private fun EditProfileScreen(
                             Text(
                                 modifier = Modifier.clickable {
                                     if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
-                                        isLimited = !isLimited
-                                        accountPrivacy =
-                                            if (accountPrivacy == Account.Privacy.PRIVATE) {
-                                                Account.Privacy.ALL_USERS
-                                            } else {
-                                                Account.Privacy.PRIVATE
-                                            }
-                                        mapFields[ACCOUNT_PRIVACY] = accountPrivacy
+                                        val privacy = if (uiState.isLimited) {
+                                            Account.Privacy.ALL_USERS
+                                        } else {
+                                            Account.Privacy.PRIVATE
+                                        }
+                                        mapFields[ACCOUNT_PRIVACY] = privacy
+                                        onLimitedProfileChange(!uiState.isLimited)
                                     } else {
                                         openDialog = true
                                     }
                                 },
-                                text = stringResource(if (isLimited) profileR.string.profile_switch_to_full else profileR.string.profile_switch_to_limited),
+                                text = stringResource(if (uiState.isLimited) profileR.string.profile_switch_to_full else profileR.string.profile_switch_to_limited),
                                 color = MaterialTheme.appColors.textAccent,
                                 style = MaterialTheme.appTypography.labelLarge
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             ProfileFields(
-                                disabled = isLimited,
+                                disabled = uiState.isLimited,
                                 onFieldClick = { it ->
                                     if (it == YEAR_OF_BIRTH) {
                                         serverFieldName.value = YEAR_OF_BIRTH
@@ -1020,7 +1024,7 @@ private fun EditProfileScreenPreview() {
     NewEdxTheme {
         EditProfileScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = EditProfileUIState(account = mockAccount, isUpdating = false),
+            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
             selectedImageUri = null,
             uiMessage = null,
             isImageDeleted = true,
@@ -1031,7 +1035,8 @@ private fun EditProfileScreenPreview() {
             onSelectImageClick = {},
             onDeleteImageClick = {},
             onDataChanged = {},
-            onKeepEdit = {}
+            onKeepEdit = {},
+            onLimitedProfileChange = {}
         )
     }
 }
@@ -1043,7 +1048,7 @@ private fun EditProfileScreenTabletPreview() {
     NewEdxTheme {
         EditProfileScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = EditProfileUIState(account = mockAccount, isUpdating = false),
+            uiState = EditProfileUIState(account = mockAccount, isUpdating = false, false),
             selectedImageUri = null,
             uiMessage = null,
             isImageDeleted = true,
@@ -1054,7 +1059,8 @@ private fun EditProfileScreenTabletPreview() {
             onSelectImageClick = {},
             onDeleteImageClick = {},
             onDataChanged = {},
-            onKeepEdit = {}
+            onKeepEdit = {},
+            onLimitedProfileChange = {}
         )
     }
 }
