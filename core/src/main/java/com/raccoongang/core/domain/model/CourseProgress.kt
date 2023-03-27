@@ -2,7 +2,7 @@ package com.raccoongang.core.domain.model
 
 data class CourseProgress(
     val sections: List<Section>,
-    val progress: Int
+    val progress: Int,
 ) {
 
     data class Section(
@@ -19,7 +19,12 @@ data class CourseProgress(
         val showGrades: Boolean,
         val graded: Boolean,
         val gradeType: String,
-    )
+    ) {
+        val title: String
+            get() {
+                return "$displayName ($earned/$total)"
+            }
+    }
 
     data class Score(
         val earned: String,
