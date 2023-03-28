@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.raccoongang.core.UIMessage
+import com.raccoongang.core.domain.model.ProfileImage
 import com.raccoongang.core.extension.TextConverter
 import com.raccoongang.core.extension.parcelable
 import com.raccoongang.core.ui.*
@@ -523,5 +524,6 @@ private val mockComment = DiscussionComment(
     "",
     21,
     emptyList(),
-    emptyMap()
+    profileImage = ProfileImage("", "", "", "", false),
+    mapOf()
 )

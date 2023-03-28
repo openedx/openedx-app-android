@@ -12,7 +12,6 @@ import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.discussion.domain.interactor.DiscussionInteractor
 import com.raccoongang.discussion.domain.model.DiscussionComment
-import com.raccoongang.discussion.domain.model.DiscussionProfile
 import com.raccoongang.discussion.system.notifier.DiscussionCommentDataChanged
 import com.raccoongang.discussion.system.notifier.DiscussionNotifier
 import kotlinx.coroutines.launch
@@ -156,15 +155,7 @@ class DiscussionResponsesViewModel(
     fun createComment(rawBody: String) {
         viewModelScope.launch {
             try {
-                var response = interactor.createComment(comment.threadId, rawBody, comment.id)
-                response = response.copy(
-                    users = mapOf(
-                        Pair(
-                            preferencesManager.profile?.username ?: "",
-                            DiscussionProfile(preferencesManager.profile?.profileImage)
-                        )
-                    )
-                )
+                val response = interactor.createComment(comment.threadId, rawBody, comment.id)
                 comment = comment.copy(childCount = comment.childCount + 1)
                 sendUpdatedComment()
                 if (page == -1) {

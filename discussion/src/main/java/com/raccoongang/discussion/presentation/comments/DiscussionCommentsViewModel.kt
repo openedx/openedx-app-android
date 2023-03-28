@@ -13,7 +13,6 @@ import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.discussion.domain.interactor.DiscussionInteractor
 import com.raccoongang.discussion.domain.model.DiscussionComment
-import com.raccoongang.discussion.domain.model.DiscussionProfile
 import com.raccoongang.discussion.domain.model.DiscussionType
 import com.raccoongang.discussion.system.notifier.DiscussionCommentAdded
 import com.raccoongang.discussion.system.notifier.DiscussionCommentDataChanged
@@ -269,15 +268,7 @@ class DiscussionCommentsViewModel(
     fun createComment(rawBody: String) {
         viewModelScope.launch {
             try {
-                var response = interactor.createComment(thread.id, rawBody, null)
-                response = response.copy(
-                    users = mapOf(
-                        Pair(
-                            preferencesManager.profile?.username ?: "",
-                            DiscussionProfile(preferencesManager.profile?.profileImage)
-                        )
-                    )
-                )
+                val response = interactor.createComment(thread.id, rawBody, null)
                 thread = thread.copy(commentCount = thread.commentCount + 1)
                 sendThreadUpdated()
                 if (page == -1) {

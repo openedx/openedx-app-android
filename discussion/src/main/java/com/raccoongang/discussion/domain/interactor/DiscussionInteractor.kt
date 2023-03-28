@@ -10,19 +10,26 @@ class DiscussionInteractor(
 
     fun getCachedTopics(courseId: String) = repository.getCachedTopics(courseId)
 
-    suspend fun getAllThreads(courseId: String, orderBy: String, page: Int) =
-        repository.getCourseThreads(courseId, null, null, orderBy, page)
+    suspend fun getAllThreads(courseId: String, orderBy: String, view: String? = null, page: Int) =
+        repository.getCourseThreads(courseId, null, null, orderBy, view, page)
 
     suspend fun getFollowingThreads(
         courseId: String,
         following: Boolean,
         orderBy: String,
+        view: String? = null,
         page: Int
     ) =
-        repository.getCourseThreads(courseId, following, null, orderBy, page)
+        repository.getCourseThreads(courseId, following, null, orderBy, view, page)
 
-    suspend fun getThreads(courseId: String, topicId: String, orderBy: String, page: Int) =
-        repository.getCourseThreads(courseId, null, topicId, orderBy, page)
+    suspend fun getThreads(
+        courseId: String,
+        topicId: String,
+        orderBy: String,
+        view: String? = null,
+        page: Int
+    ) =
+        repository.getCourseThreads(courseId, null, topicId, orderBy, view, page)
 
     suspend fun searchThread(courseId: String, query: String, page: Int) =
         repository.searchThread(courseId, query, page)

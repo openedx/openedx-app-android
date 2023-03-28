@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -79,6 +80,7 @@ class DiscussionThreadsFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(DiscussionThreadsUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
+                val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
 
                 DiscussionThreadsScreen(
@@ -86,6 +88,7 @@ class DiscussionThreadsFragment : Fragment() {
                     title = requireArguments().getString(ARG_TITLE, ""),
                     uiState = uiState,
                     uiMessage = uiMessage,
+                    canLoadMore = canLoadMore,
                     viewType = viewType,
                     refreshing = refreshing,
                     onSwipeRefresh = {
@@ -110,6 +113,9 @@ class DiscussionThreadsFragment : Fragment() {
                             id,
                             viewModel.courseId
                         )
+                    },
+                    paginationCallback = {
+                        viewModel.fetchMore()
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
@@ -153,6 +159,7 @@ private fun DiscussionThreadsScreen(
     title: String,
     uiState: DiscussionThreadsUIState,
     uiMessage: UIMessage?,
+    canLoadMore: Boolean,
     viewType: FragmentViewType,
     refreshing: Boolean,
     onSwipeRefresh: () -> Unit,
@@ -160,6 +167,7 @@ private fun DiscussionThreadsScreen(
     updatedFilter: (String) -> Unit,
     onItemClick: (com.raccoongang.discussion.domain.model.Thread) -> Unit,
     onCreatePostClick: () -> Unit,
+    paginationCallback: () -> Unit,
     onBackClick: () -> Unit
 ) {
 
@@ -171,6 +179,10 @@ private fun DiscussionThreadsScreen(
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
     val coroutine = rememberCoroutineScope()
+    val scrollState = rememberLazyListState()
+    val firstVisibleIndex = remember {
+        mutableStateOf(scrollState.firstVisibleItemIndex)
+    }
     val context = LocalContext.current
     var sortType by rememberSaveable {
         mutableStateOf(
@@ -418,7 +430,8 @@ private fun DiscussionThreadsScreen(
                                             Divider()
                                             LazyColumn(
                                                 modifier = Modifier.fillMaxSize(),
-                                                contentPadding = listPadding
+                                                contentPadding = listPadding,
+                                                state = scrollState
                                             ) {
                                                 item {
                                                     Text(
@@ -433,6 +446,25 @@ private fun DiscussionThreadsScreen(
                                                         onItemClick(it)
                                                     })
                                                     Divider()
+                                                }
+                                                item {
+                                                    if (canLoadMore) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(vertical = 16.dp),
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            CircularProgressIndicator()
+                                                        }
+                                                    }
+                                                }
+                                                if (scrollState.shouldLoadMore(
+                                                        firstVisibleIndex,
+                                                        4
+                                                    )
+                                                ) {
+                                                    paginationCallback()
                                                 }
                                             }
                                         }
@@ -501,7 +533,9 @@ private fun DiscussionThreadsScreenPreview() {
             onCreatePostClick = {},
             viewType = FragmentViewType.FULL_CONTENT,
             onSwipeRefresh = {},
-            refreshing = false
+            paginationCallback = {},
+            refreshing = false,
+            canLoadMore = false
         )
     }
 }
@@ -523,7 +557,9 @@ private fun DiscussionThreadsScreenTabletPreview() {
             onCreatePostClick = {},
             viewType = FragmentViewType.FULL_CONTENT,
             onSwipeRefresh = {},
-            refreshing = false
+            paginationCallback = {},
+            refreshing = false,
+            canLoadMore = false,
         )
     }
 }
