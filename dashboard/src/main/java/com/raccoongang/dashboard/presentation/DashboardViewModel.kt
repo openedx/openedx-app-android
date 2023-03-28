@@ -26,6 +26,8 @@ class DashboardViewModel(
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
+    private var page = 1
+    private var isLoading = false
     private val _uiState = MutableLiveData<DashboardUIState>(DashboardUIState.Loading)
     val uiState: LiveData<DashboardUIState>
         get() = _uiState
@@ -40,6 +42,10 @@ class DashboardViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    private val _canLoadMore = MutableLiveData<Boolean>()
+    val canLoadMore: LiveData<Boolean>
+        get() = _canLoadMore
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -63,12 +69,21 @@ class DashboardViewModel(
     }
 
     fun updateCourses() {
-        _updating.value = true
         viewModelScope.launch {
             try {
-                val response = interactor.getEnrolledCourses()
+                _updating.value = true
+                isLoading = true
+                page = 1
+                val response = interactor.getEnrolledCourses(page)
+                if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
+                    _canLoadMore.value = true
+                    page++
+                } else {
+                    _canLoadMore.value = false
+                    page = -1
+                }
                 coursesList.clear()
-                coursesList.addAll(response.toList())
+                coursesList.addAll(response.courses)
                 if (coursesList.isEmpty()) {
                     _uiState.value = DashboardUIState.Empty
                 } else {
@@ -85,18 +100,34 @@ class DashboardViewModel(
                 }
             }
             _updating.value = false
+            isLoading = false
         }
     }
 
     private fun internalLoadingCourses() {
         viewModelScope.launch {
             try {
-                val response = if (networkConnection.isOnline()) {
-                    interactor.getEnrolledCourses()
+                isLoading = true
+                val response = if (networkConnection.isOnline() || page > 1) {
+                    interactor.getEnrolledCourses(page)
                 } else {
-                    interactor.getEnrolledCoursesFromCache()
+                    null
                 }
-                coursesList.addAll(response.toList())
+                if (response !=null) {
+                    if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
+                        _canLoadMore.value = true
+                        page++
+                    } else {
+                        _canLoadMore.value = false
+                        page = -1
+                    }
+                    coursesList.addAll(response.courses)
+                } else {
+                    val cachedList = interactor.getEnrolledCoursesFromCache()
+                    _canLoadMore.value = false
+                    page = -1
+                    coursesList.addAll(cachedList)
+                }
                 if (coursesList.isEmpty()) {
                     _uiState.value = DashboardUIState.Empty
                 } else {
@@ -112,6 +143,14 @@ class DashboardViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
             }
+            _updating.value = false
+            isLoading = false
+        }
+    }
+
+    fun fetchMore() {
+        if (!isLoading && page != -1) {
+            internalLoadingCourses()
         }
     }
 

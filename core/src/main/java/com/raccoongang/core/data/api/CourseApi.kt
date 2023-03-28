@@ -6,14 +6,15 @@ import retrofit2.http.*
 
 interface CourseApi {
 
-    @GET("/api/mobile/v1/users/{username}/course_enrollments")
+    @GET("/mobile_api_extensions/v1/users/{username}/course_enrollments")
     suspend fun getEnrolledCourses(
         @Header("Cache-Control") cacheControlHeaderParam: String? = null,
         @Path("username") username: String,
         @Query("org") org: String? = null,
-    ): List<EnrolledCourse>
+        @Query("page") page: Int
+    ): DashboardCourseList
 
-    @GET("/api/courses/v1/courses/")
+    @GET("/mobile_api_extensions/courses/v1/courses/")
     suspend fun getCourseList(
         @Query("search_term") searchQuery: String? = null,
         @Query("page") page: Int,

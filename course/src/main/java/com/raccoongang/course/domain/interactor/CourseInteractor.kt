@@ -3,7 +3,6 @@ package com.raccoongang.course.domain.interactor
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.Block
 import com.raccoongang.core.domain.model.CourseStructure
-import com.raccoongang.core.module.db.DownloadModel
 import com.raccoongang.course.data.repository.CourseRepository
 
 class CourseInteractor(
@@ -66,8 +65,6 @@ class CourseInteractor(
         }
         return courseStructure.copy(blockData = resultBlocks.toList())
     }
-
-    suspend fun getEnrolledCourseById(courseId: String) = repository.getEnrolledCourseById(courseId)
 
     suspend fun getEnrolledCourseFromCacheById(courseId: String) =
         repository.getEnrolledCourseFromCacheById(courseId)

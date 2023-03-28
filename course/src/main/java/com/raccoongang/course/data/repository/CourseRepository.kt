@@ -92,17 +92,6 @@ class CourseRepository(
         }
     }
 
-    suspend fun getEnrolledCourseById(courseId: String): EnrolledCourse? {
-        val user = preferencesManager.user
-        val enrolledCourse = api.getEnrolledCourses(
-            username = user?.username ?: ""
-        )
-        val course = enrolledCourse.find {
-            it.course?.id == courseId
-        }
-        return course?.mapToDomain()
-    }
-
     suspend fun getEnrolledCourseFromCacheById(courseId: String): EnrolledCourse? {
         val course = courseDao.getEnrolledCourseById(courseId)
         return course?.mapToDomain()
