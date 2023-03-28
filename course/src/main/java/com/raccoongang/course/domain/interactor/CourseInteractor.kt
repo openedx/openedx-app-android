@@ -74,9 +74,9 @@ class CourseInteractor(
 
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
 
-    suspend fun getHandouts(url: String) = repository.getHandouts(url)
+    suspend fun getHandouts(courseId: String) = repository.getHandouts(courseId)
 
-    suspend fun getAnnouncements(url: String) = repository.getAnnouncements(url)
+    suspend fun getAnnouncements(courseId: String) = repository.getAnnouncements(courseId)
 
     suspend fun removeDownloadModel(id: String) = repository.removeDownloadModel(id)
 

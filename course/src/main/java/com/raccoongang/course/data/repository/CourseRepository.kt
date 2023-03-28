@@ -123,8 +123,8 @@ class CourseRepository(
         return api.markBlocksCompletion(blocksCompletionBody)
     }
 
-    suspend fun getHandouts(url: String) = api.getHandouts(url).mapToDomain()
+    suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
-    suspend fun getAnnouncements(url: String) = api.getAnnouncements(url).map { it.mapToDomain() }
+    suspend fun getAnnouncements(courseId: String) = api.getAnnouncements(courseId).map { it.mapToDomain() }
 
 }

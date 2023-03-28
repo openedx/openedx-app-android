@@ -20,7 +20,11 @@ interface CourseApi {
         @Query("mobile") mobile: Boolean,
         @Query("username") username: String? = null,
         @Query("org") org: String? = null,
-        @Query("permissions") permission: List<String> = listOf("enroll", "see_in_catalog", "see_about_page")
+        @Query("permissions") permission: List<String> = listOf(
+            "enroll",
+            "see_in_catalog",
+            "see_about_page"
+        )
     ): CourseList
 
     @GET("/mobile_api_extensions/v1/courses/{course_id}")
@@ -60,9 +64,9 @@ interface CourseApi {
         blocksCompletionBody: BlocksCompletionBody
     )
 
-    @GET
-    suspend fun getHandouts(@Url url: String): HandoutsModel
+    @GET("/api/mobile/v1/course_info/{course_id}/handouts")
+    suspend fun getHandouts(@Path("course_id") courseId: String): HandoutsModel
 
-    @GET
-    suspend fun getAnnouncements(@Url url: String): List<AnnouncementModel>
+    @GET("/api/mobile/v1/course_info/{course_id}/updates")
+    suspend fun getAnnouncements(@Path("course_id") courseId: String): List<AnnouncementModel>
 }
