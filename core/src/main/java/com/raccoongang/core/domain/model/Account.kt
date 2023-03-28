@@ -2,6 +2,7 @@ package com.raccoongang.core.domain.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.raccoongang.core.AppDataConstants.USER_MIN_YEAR
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -49,5 +50,10 @@ data class Account(
     }
 
     fun isLimited() = accountPrivacy == Privacy.PRIVATE
+
+    fun isOlderThanMinAge() : Boolean {
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        return yearOfBirth != null && currentYear - yearOfBirth > USER_MIN_YEAR
+    }
 
 }

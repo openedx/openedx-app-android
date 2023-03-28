@@ -283,12 +283,7 @@ private fun EditProfileScreen(
     val scaffoldState = rememberScaffoldState()
     val coroutine = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
-//    var accountPrivacy by rememberSaveable {
-//        mutableStateOf(uiState.account.accountPrivacy)
-//    }
-//    var isLimited by rememberSaveable {
-//        mutableStateOf(uiState.account.accountPrivacy == Account.Privacy.PRIVATE)
-//    }
+
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
@@ -426,7 +421,7 @@ private fun EditProfileScreen(
 
             HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-            if (isOpenChangeImageDialogState) {
+            if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
                 ChangeImageDialog(
                     onSelectFromGalleryClick = {
                         isOpenChangeImageDialogState = false
@@ -440,6 +435,8 @@ private fun EditProfileScreen(
                         isOpenChangeImageDialogState = false
                     }
                 )
+            } else {
+                isOpenChangeImageDialogState = false
             }
 
             if (leaveDialog) {
