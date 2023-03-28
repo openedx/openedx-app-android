@@ -20,6 +20,7 @@ class CourseRepository(
     private val preferencesManager: PreferencesManager,
 ) {
     private val blocksList = mutableListOf<Block>()
+    private var courseStructure: CourseStructure? = null
 
     suspend fun getCourseDetail(id: String): Course {
         val course = api.getCourseDetail(id)
@@ -56,31 +57,36 @@ class CourseRepository(
             preferencesManager.user?.username,
             courseId
         )
-        val courseStructure = response.mapToDomain()
         courseDao.insertCourseBlocks(
             *response.blockData.values
                 .map {
                     BlockDbEntity.createFrom(it, courseId)
                 }.toTypedArray()
         )
+        courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
         blocksList.clear()
-        blocksList.addAll(courseStructure.blockData.values.toList())
+        courseStructure = null
+        courseStructure = response.mapToDomain()
+        blocksList.addAll(courseStructure!!.blockData)
     }
 
     suspend fun preloadCourseStructureFromCache(courseId: String) {
         val response = courseDao.getCourseBlocksById(courseId)
+        val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
         blocksList.clear()
-        if (!response.isNullOrEmpty()) {
+        courseStructure = null
+        if (!response.isNullOrEmpty() && cachedCourseStructure != null) {
             blocksList.addAll(response.map { it.mapToDomain() })
+            courseStructure = cachedCourseStructure.mapToDomain(blocksList)
         } else {
             throw NoCachedDataException()
         }
     }
 
     @Throws(IllegalStateException::class)
-    fun getCourseStructureFromCache(): List<Block> {
-        if (blocksList.isNotEmpty()) {
-            return blocksList
+    fun getCourseStructureFromCache(): CourseStructure {
+        if (courseStructure != null) {
+            return courseStructure!!
         } else {
             throw IllegalStateException("Course structure is empty")
         }

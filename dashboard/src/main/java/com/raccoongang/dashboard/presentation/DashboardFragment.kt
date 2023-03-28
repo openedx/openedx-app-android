@@ -89,11 +89,7 @@ class DashboardFragment : Fragment() {
                         router.navigateToCourseOutline(
                             requireParentFragment().parentFragmentManager,
                             it.course.id,
-                            it.course.name,
-                            it.course.courseImage,
-                            it.certificate ?: Certificate(""),
-                            it.course.coursewareAccess,
-                            it.auditAccessExpires
+                            it.course.name
                         )
                     },
                     onSwipeRefresh = {

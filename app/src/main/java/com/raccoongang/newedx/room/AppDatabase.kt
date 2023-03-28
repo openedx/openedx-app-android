@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.raccoongang.core.data.model.room.CourseEntity
+import com.raccoongang.core.data.model.room.CourseStructureEntity
 import com.raccoongang.core.data.model.room.discovery.EnrolledCourseEntity
 import com.raccoongang.core.module.db.DownloadDao
 import com.raccoongang.core.module.db.DownloadModelEntity
@@ -21,6 +22,7 @@ const val DATABASE_NAME = "newEdx_db"
     entities = [
         CourseEntity::class,
         EnrolledCourseEntity::class,
+        CourseStructureEntity::class,
         BlockDbEntity::class,
         DownloadModelEntity::class
     ],

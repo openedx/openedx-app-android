@@ -57,10 +57,11 @@ class CourseSectionViewModel(
         _uiState.value = CourseSectionUIState.Loading
         viewModelScope.launch {
             try {
-                val blocks = when (mode) {
+                val courseStructure = when (mode) {
                     CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
                     CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
                 }
+                val blocks = courseStructure.blockData
                 setBlocks(blocks)
                 val newList = getDescendantBlocks(blocks, blockId)
                 initDownloadModelsStatus()

@@ -31,7 +31,7 @@ interface CourseApi {
     ): CourseDetails
 
     @GET(
-        "/api/courses/{api_version}/blocks/?" +
+        "/mobile_api_extensions/{api_version}/blocks/?" +
                 "depth=all&" +
                 "requested_fields=contains_gated_content,show_gated_sections,special_exam_info,graded,format,student_view_multi_device,due,completion&" +
                 "student_view_data=video,discussion&" +

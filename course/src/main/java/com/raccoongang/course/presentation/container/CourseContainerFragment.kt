@@ -7,15 +7,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
-import com.raccoongang.core.domain.model.Certificate
-import com.raccoongang.core.extension.parcelable
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentCourseContainerBinding
+import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.handouts.HandoutsFragment
 import com.raccoongang.course.presentation.outline.CourseOutlineFragment
 import com.raccoongang.course.presentation.videos.CourseVideosFragment
 import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -25,19 +25,17 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private val viewModel by viewModel<CourseContainerViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
+    private val router by inject<CourseRouter>()
+
 
     private var adapter: CourseNavigationFragmentAdapter? = null
 
     private var courseTitle = ""
-    private var courseImage = ""
-    private var courseCertificate = Certificate("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         with(requireArguments()) {
-            courseImage = getString(ARG_IMAGE, "")
             courseTitle = getString(ARG_TITLE, "")
-            courseCertificate = parcelable(ARG_CERTIFICATE)!!
         }
         viewModel.preloadCourseStructure()
     }
@@ -66,11 +64,20 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun observe() {
-        viewModel.dataReady.observe(viewLifecycleOwner) { ready ->
-            if (ready) {
-                binding.viewPager.isVisible = true
-                binding.bottomNavView.isVisible = true
-                initViewPager()
+        viewModel.dataReady.observe(viewLifecycleOwner) { coursewareAccess ->
+            if (coursewareAccess != null) {
+                if (coursewareAccess.hasAccess) {
+                    binding.viewPager.isVisible = true
+                    binding.bottomNavView.isVisible = true
+                    initViewPager()
+                } else {
+                    router.navigateToNoAccess(
+                        requireActivity().supportFragmentManager,
+                        courseTitle,
+                        coursewareAccess,
+                        null
+                    )
+                }
             }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) {
@@ -90,8 +97,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4
         adapter = CourseNavigationFragmentAdapter(this).apply {
-            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId,courseTitle, courseImage, courseCertificate))
-            addFragment(CourseVideosFragment.newInstance(viewModel.courseId,courseTitle, courseImage, courseCertificate))
+            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
+            addFragment(CourseVideosFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId))
             addFragment(HandoutsFragment.newInstance(viewModel.courseId))
         }
@@ -99,27 +106,21 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.viewPager.isUserInputEnabled = false
     }
 
-    fun updateCourseStructure(withSwipeRefresh: Boolean){
+    fun updateCourseStructure(withSwipeRefresh: Boolean) {
         viewModel.updateData(withSwipeRefresh)
     }
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
-        private const val ARG_IMAGE = "image"
-        private const val ARG_CERTIFICATE = "certificate"
         fun newInstance(
             courseId: String,
-            title: String,
-            image: String,
-            certificate: Certificate
+            courseTitle: String
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_TITLE to title,
-                ARG_IMAGE to image,
-                ARG_CERTIFICATE to certificate
+                ARG_TITLE to courseTitle
             )
             return fragment
         }

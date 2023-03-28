@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName
 import com.raccoongang.core.data.model.room.discovery.EnrolledCourseEntity
 import com.raccoongang.core.domain.model.EnrolledCourse
 import com.raccoongang.core.utils.TimeUtils
-import java.sql.Time
 
 data class EnrolledCourse(
     @SerializedName("audit_access_expires")
@@ -22,7 +21,7 @@ data class EnrolledCourse(
 ) {
     fun mapToDomain(): EnrolledCourse {
         return EnrolledCourse(
-            auditAccessExpires = TimeUtils.iso8601ToDate(auditAccessExpires?:""),
+            auditAccessExpires = TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
             created = created ?: "",
             mode = mode ?: "",
             isActive = isActive ?: false,

@@ -7,6 +7,7 @@ import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.R
 import com.raccoongang.core.SingleEventLiveData
+import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.exception.NoCachedDataException
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
@@ -23,8 +24,8 @@ class CourseContainerViewModel(
     private val networkConnection: NetworkConnection
 ) : BaseViewModel() {
 
-    private val _dataReady = MutableLiveData<Boolean>()
-    val dataReady: LiveData<Boolean>
+    private val _dataReady = MutableLiveData<CoursewareAccess>()
+    val dataReady: LiveData<CoursewareAccess>
         get() = _dataReady
 
     private val _errorMessage = SingleEventLiveData<String>()
@@ -48,7 +49,8 @@ class CourseContainerViewModel(
                 } else {
                     interactor.preloadCourseStructureFromCache(courseId)
                 }
-                _dataReady.value = true
+                val courseStructure = interactor.getCourseStructureFromCache()
+                _dataReady.value = courseStructure.coursewareAccess
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
                     _errorMessage.value =

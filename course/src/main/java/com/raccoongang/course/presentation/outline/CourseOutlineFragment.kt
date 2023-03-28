@@ -37,7 +37,6 @@ import com.raccoongang.core.BlockType
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.*
-import com.raccoongang.core.extension.parcelable
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
@@ -64,11 +63,8 @@ class CourseOutlineFragment : Fragment() {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         with(requireArguments()) {
-            viewModel.courseImage = getString(ARG_IMAGE, "")
             viewModel.courseTitle = getString(ARG_TITLE, "")
-            viewModel.courseCertificate = parcelable(ARG_CERTIFICATE)!!
         }
-        viewModel.getCourseData()
     }
 
     override fun onCreateView(
@@ -88,9 +84,7 @@ class CourseOutlineFragment : Fragment() {
                 CourseOutlineScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
-                    courseImage = viewModel.courseImage,
                     courseTitle = viewModel.courseTitle,
-                    courseCertificate = viewModel.courseCertificate,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
                     onSwipeRefresh = {
@@ -146,20 +140,14 @@ class CourseOutlineFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
-        private const val ARG_IMAGE = "image"
-        private const val ARG_CERTIFICATE = "certificate"
         fun newInstance(
             courseId: String,
-            title: String,
-            image: String,
-            certificate: Certificate
+            title: String
         ): CourseOutlineFragment {
             val fragment = CourseOutlineFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_TITLE to title,
-                ARG_IMAGE to image,
-                ARG_CERTIFICATE to certificate
+                ARG_TITLE to title
             )
             return fragment
         }
@@ -173,8 +161,6 @@ internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
     courseTitle: String,
-    courseImage: String,
-    courseCertificate: Certificate,
     uiMessage: UIMessage?,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
@@ -291,14 +277,15 @@ internal fun CourseOutlineScreen(
                                         modifier = Modifier
                                             .aspectRatio(1.86f)
                                             .padding(6.dp),
-                                        courseImage = courseImage,
-                                        courseCertificate = courseCertificate
+                                        courseImage = uiState.courseStructure.media?.image?.large
+                                            ?: "",
+                                        courseCertificate = uiState.courseStructure.certificate
                                     )
                                     LazyColumn(
                                         modifier = Modifier.fillMaxWidth(),
                                         contentPadding = listPadding
                                     ) {
-                                        items(uiState.blocks) { block ->
+                                        items(uiState.courseStructure.blockData) { block ->
                                             if (block.type == BlockType.CHAPTER) {
                                                 Text(
                                                     modifier = Modifier.padding(
@@ -406,15 +393,11 @@ private fun CourseOutlineScreenPreview() {
         CourseOutlineScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseOutlineUIState.CourseData(
-                listOf(
-                    mockSequentialBlock, mockSequentialBlock
-                ),
+                mockCourseStructure,
                 mapOf(),
                 mockChapterBlock
             ),
             courseTitle = "",
-            courseImage = "",
-            courseCertificate = Certificate(""),
             uiMessage = null,
             refreshing = false,
             hasInternetConnection = true,
@@ -436,15 +419,11 @@ private fun CourseOutlineScreenTabletPreview() {
         CourseOutlineScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseOutlineUIState.CourseData(
-                listOf(
-                    mockSequentialBlock, mockSequentialBlock
-                ),
+                mockCourseStructure,
                 mapOf(),
                 mockChapterBlock
             ),
             courseTitle = "",
-            courseImage = "",
-            courseCertificate = Certificate(""),
             uiMessage = null,
             refreshing = false,
             hasInternetConnection = true,
@@ -467,42 +446,6 @@ private fun ResumeCoursePreview() {
     }
 }
 
-private val mockCourse = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)
 private val mockChapterBlock = Block(
     id = "id",
     blockId = "blockId",
@@ -532,4 +475,28 @@ private val mockSequentialBlock = Block(
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
     completion = 0.0
+)
+
+private val mockCourseStructure = CourseStructure(
+    root = "",
+    blockData = listOf(mockSequentialBlock, mockSequentialBlock),
+    id = "id",
+    name = "Course name",
+    number = "",
+    org = "Org",
+    start = Date(),
+    startDisplay = "",
+    startType = "",
+    end = Date(),
+    coursewareAccess = CoursewareAccess(
+        true,
+        "",
+        "",
+        "",
+        "",
+        ""
+    ),
+    media = null,
+    certificate = null,
+    isSelfPaced = false
 )
