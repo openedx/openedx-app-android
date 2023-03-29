@@ -71,27 +71,6 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     //region DashboardRouter
 
-//    override fun navigateToCourseOutline(
-//        fm: FragmentManager,
-//        courseId: String,
-//        title: String,
-//        image: String,
-//        certificate: Certificate,
-//        coursewareAccess: CoursewareAccess,
-//        auditAccessExpires: Date?
-//    ) {
-//        val destinationFragment = if (coursewareAccess.hasAccess) {
-//            CourseContainerFragment.newInstance(courseId, title, image, certificate)
-//        } else {
-//            NoAccessCourseContainerFragment.newInstance(title, coursewareAccess, auditAccessExpires)
-//        }
-//
-//        replaceFragmentWithBackStack(
-//            fm,
-//            destinationFragment
-//        )
-//    }
-
     override fun navigateToCourseOutline(
         fm: FragmentManager,
         courseId: String,
