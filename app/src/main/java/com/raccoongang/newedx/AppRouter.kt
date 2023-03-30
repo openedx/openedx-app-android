@@ -194,10 +194,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         )
     }
 
-    override fun navigateToDiscussionResponses(fm: FragmentManager, comment: DiscussionComment) {
+    override fun navigateToDiscussionResponses(
+        fm: FragmentManager,
+        comment: DiscussionComment,
+        isClosed: Boolean
+    ) {
         replaceFragmentWithBackStack(
             fm,
-            DiscussionResponsesFragment.newInstance(comment)
+            DiscussionResponsesFragment.newInstance(comment, isClosed)
         )
     }
 

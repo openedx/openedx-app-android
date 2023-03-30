@@ -232,7 +232,7 @@ private fun ProfileScreen(
                                     .padding(2.dp)
                                     .size(100.dp)
                                     .clip(CircleShape)
-                                    .background(Color.Gray)
+
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             Text(

@@ -44,6 +44,7 @@ import com.raccoongang.core.extension.parcelable
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
+import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.discussion.domain.model.DiscussionComment
 import com.raccoongang.discussion.domain.model.DiscussionType
@@ -98,17 +99,22 @@ class DiscussionCommentsFragment : Fragment() {
                         viewModel.fetchMore()
                     },
                     onItemClick = { action, id, bool ->
-                        when (action) {
-                            ACTION_UPVOTE_COMMENT -> viewModel.setCommentUpvoted(id, bool)
-                            ACTION_REPORT_COMMENT -> viewModel.setCommentReported(id, bool)
-                            ACTION_UPVOTE_THREAD -> viewModel.setThreadUpvoted(bool)
-                            ACTION_REPORT_THREAD -> viewModel.setThreadReported(bool)
-                            ACTION_FOLLOW_THREAD -> viewModel.setThreadFollowed(bool)
+                        if (!viewModel.thread.closed) {
+                            when (action) {
+                                ACTION_UPVOTE_COMMENT -> viewModel.setCommentUpvoted(id, bool)
+                                ACTION_UPVOTE_THREAD -> viewModel.setThreadUpvoted(bool)
+                                ACTION_FOLLOW_THREAD -> viewModel.setThreadFollowed(bool)
+                            }
+                        } else {
+                            when (action) {
+                                ACTION_REPORT_COMMENT -> viewModel.setCommentReported(id, bool)
+                                ACTION_REPORT_THREAD -> viewModel.setThreadReported(bool)
+                            }
                         }
                     },
                     onCommentClick = {
                         router.navigateToDiscussionResponses(
-                            requireActivity().supportFragmentManager, it
+                            requireActivity().supportFragmentManager, it, viewModel.thread.closed
                         )
                     },
                     onAddResponseClick = {
@@ -178,7 +184,7 @@ private fun DiscussionCommentsScreen(
     }
 
     val iconButtonColor = if (responseValue.isEmpty()) {
-        MaterialTheme.appColors.cardViewBorder
+        MaterialTheme.appColors.textFieldBackgroundVariant
     } else {
         Color.White
     }
@@ -326,7 +332,7 @@ private fun DiscussionCommentsScreen(
                                 if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
                                     paginationCallBack()
                                 }
-                                Divider(color = MaterialTheme.appColors.cardViewBorder)
+                                Divider(color = MaterialTheme.appColors.cardViewBorderVariant)
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
@@ -350,6 +356,7 @@ private fun DiscussionCommentsScreen(
                                             onValueChange = { str ->
                                                 responseValue = str
                                             },
+                                            shape = MaterialTheme.appShapes.buttonShape,
                                             textStyle = MaterialTheme.appTypography.labelLarge,
                                             maxLines = 3,
                                             placeholder = {
@@ -363,7 +370,8 @@ private fun DiscussionCommentsScreen(
                                                 backgroundColor = MaterialTheme.appColors.textFieldBackgroundVariant,
                                                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                                                 textColor = MaterialTheme.appColors.textFieldText
-                                            )
+                                            ),
+                                            enabled = !uiState.thread.closed
                                         )
                                         Box(
                                             modifier = Modifier
@@ -498,7 +506,10 @@ private val mockThread = com.raccoongang.discussion.domain.model.Thread(
     4,
     false,
     false,
-    mapOf()
+    mapOf(),
+    10,
+    false,
+    false
 )
 
 private val mockComment = DiscussionComment(

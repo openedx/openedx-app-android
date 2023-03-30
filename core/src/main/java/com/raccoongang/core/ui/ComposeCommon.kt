@@ -91,7 +91,7 @@ fun StaticSearchBar(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = text,
-                color = MaterialTheme.appColors.textSecondary
+                color = MaterialTheme.appColors.textFieldHint
             )
         }
     }
@@ -285,6 +285,7 @@ fun HyperlinkText(
 @Composable
 fun HyperlinkImageText(
     modifier: Modifier = Modifier,
+    title: String = "",
     imageText: LinkedImageText,
     textStyle: TextStyle = TextStyle.Default,
     linkTextColor: Color = MaterialTheme.appColors.primary,
@@ -295,6 +296,10 @@ fun HyperlinkImageText(
     val fullText = imageText.text
     val hyperLinks = imageText.links
     val annotatedString = buildAnnotatedString {
+        if(title.isNotEmpty()) {
+            append(title)
+            append("\n\n")
+        }
         append(fullText)
         addStyle(
             style = SpanStyle(
@@ -302,11 +307,11 @@ fun HyperlinkImageText(
                 fontSize = fontSize
             ),
             start = 0,
-            end = fullText.length
+            end = this.length
         )
 
         for ((key, value) in hyperLinks) {
-            val startIndex = fullText.indexOf(key)
+            val startIndex = this.toString().indexOf(key)
             if (startIndex == -1) continue
             val endIndex = startIndex + key.length
             addStyle(
@@ -326,8 +331,19 @@ fun HyperlinkImageText(
                 end = endIndex
             )
         }
+        if (title.isNotEmpty()) {
+            addStyle(
+                style = SpanStyle(
+                    color = MaterialTheme.appColors.textPrimary,
+                    fontSize = MaterialTheme.appTypography.titleLarge.fontSize,
+                    fontWeight = MaterialTheme.appTypography.titleLarge.fontWeight
+                ),
+                start = 0,
+                end = title.length
+            )
+        }
         for (item in imageText.headers) {
-            val startIndex = fullText.indexOf(item)
+            val startIndex = this.toString().indexOf(item)
             if (startIndex == -1) continue
             val endIndex = startIndex + item.length
             addStyle(
@@ -345,7 +361,7 @@ fun HyperlinkImageText(
                 fontSize = fontSize
             ),
             start = 0,
-            end = fullText.length
+            end = this.length
         )
     }
 

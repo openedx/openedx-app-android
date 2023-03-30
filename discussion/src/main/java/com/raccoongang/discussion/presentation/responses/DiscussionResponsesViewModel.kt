@@ -41,6 +41,8 @@ class DiscussionResponsesViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    var isThreadClosed: Boolean = false
+
     private val comments = mutableListOf<DiscussionComment>()
     private var page = 1
     private var isLoading = false

@@ -409,5 +409,8 @@ private val mockThread = com.raccoongang.discussion.domain.model.Thread(
     4,
     false,
     false,
-    mapOf()
+    mapOf(),
+    10,
+    false,
+    false
 )

@@ -32,6 +32,7 @@
     <string name="discussion_topic">Тема</string>
     <string name="discussion_search_results">Результати пошуку</string>
     <string name="discussion_start_typing_to_find">Почніть вводити, щоб знайти тему</string>
+    <string name="discussion_anonymous">anonymous</string>
 
     <plurals name="discussion_votes">
         <item quantity="one">%1$d голос</item>

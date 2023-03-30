@@ -22,7 +22,8 @@ interface DiscussionRouter {
 
     fun navigateToDiscussionResponses(
         fm: FragmentManager,
-        comment: DiscussionComment
+        comment: DiscussionComment,
+        isClosed: Boolean
     )
 
     fun navigateToAddThread(

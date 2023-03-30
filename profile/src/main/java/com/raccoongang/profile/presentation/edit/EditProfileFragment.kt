@@ -532,7 +532,7 @@ private fun EditProfileScreen(
                                         .padding(2.dp)
                                         .size(100.dp)
                                         .clip(CircleShape)
-                                        .background(Color.Gray)
+
                                         .noRippleClickable {
                                             isOpenChangeImageDialogState = true
                                         }

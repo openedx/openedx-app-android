@@ -482,7 +482,7 @@ private fun EnrollOverLabel() {
             )
             .border(
                 1.dp,
-                MaterialTheme.appColors.cardViewBorder,
+                MaterialTheme.appColors.cardViewBorderVariant,
                 MaterialTheme.appShapes.material.medium
             )
     ) {
