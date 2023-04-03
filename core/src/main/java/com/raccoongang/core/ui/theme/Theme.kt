@@ -42,7 +42,7 @@ private val DarkColorPalette = AppColors(
     buttonText = Color.White,
 
     cardViewBackground = Color(0xFF273346),
-    cardViewBorder = Color(0xFF273346),
+    cardViewBorder = Color(0xFF4E5A70),
     divider = Color(0xFF4E5A70),
 
     certificateForeground = Color(0xD92EB865),

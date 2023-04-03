@@ -361,6 +361,7 @@ private fun CourseDetailNativeContent(
             val enrollmentEnd = course.enrollmentEnd
             if (enrollmentEnd != null && Date() > enrollmentEnd) {
                 EnrollOverLabel()
+                Spacer(Modifier.height(24.dp))
             }
             Text(
                 text = course.shortDescription,
@@ -469,6 +470,11 @@ private fun CourseDetailNativeContentLandscape(
 
 @Composable
 private fun EnrollOverLabel() {
+    val borderColor = if (!isSystemInDarkTheme()) {
+        MaterialTheme.appColors.cardViewBorder
+    } else {
+        MaterialTheme.appColors.surface
+    }
     Box(
         Modifier
             .fillMaxWidth()
@@ -482,7 +488,7 @@ private fun EnrollOverLabel() {
             )
             .border(
                 1.dp,
-                MaterialTheme.appColors.cardViewBorder,
+                borderColor,
                 MaterialTheme.appShapes.material.medium
             )
     ) {

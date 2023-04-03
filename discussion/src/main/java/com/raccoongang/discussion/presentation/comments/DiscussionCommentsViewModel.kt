@@ -29,7 +29,7 @@ class DiscussionCommentsViewModel(
     thread: com.raccoongang.discussion.domain.model.Thread,
 ) : BaseViewModel() {
 
-    val title = thread.title
+    val title = resourceManager.getString(thread.type.resId)
 
     var thread: com.raccoongang.discussion.domain.model.Thread
         private set
