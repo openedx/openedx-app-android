@@ -8,7 +8,6 @@ import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.*
 import com.raccoongang.core.exception.NoCachedDataException
 import com.raccoongang.core.module.db.DownloadDao
-import com.raccoongang.course.data.model.BlockDbEntity
 import com.raccoongang.course.data.storage.CourseDao
 import kotlinx.coroutines.flow.map
 import okhttp3.ResponseBody
@@ -19,7 +18,6 @@ class CourseRepository(
     private val downloadDao: DownloadDao,
     private val preferencesManager: PreferencesManager,
 ) {
-    private val blocksList = mutableListOf<Block>()
     private var courseStructure: CourseStructure? = null
 
     suspend fun getCourseDetail(id: String): Course {
@@ -57,27 +55,16 @@ class CourseRepository(
             preferencesManager.user?.username,
             courseId
         )
-        courseDao.insertCourseBlocks(
-            *response.blockData.values
-                .map {
-                    BlockDbEntity.createFrom(it, courseId)
-                }.toTypedArray()
-        )
         courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
-        blocksList.clear()
         courseStructure = null
         courseStructure = response.mapToDomain()
-        blocksList.addAll(courseStructure!!.blockData)
     }
 
     suspend fun preloadCourseStructureFromCache(courseId: String) {
-        val response = courseDao.getCourseBlocksById(courseId)
         val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
-        blocksList.clear()
         courseStructure = null
-        if (!response.isNullOrEmpty() && cachedCourseStructure != null) {
-            blocksList.addAll(response.map { it.mapToDomain() })
-            courseStructure = cachedCourseStructure.mapToDomain(blocksList)
+        if (cachedCourseStructure != null) {
+            courseStructure = cachedCourseStructure.mapToDomain()
         } else {
             throw NoCachedDataException()
         }
@@ -114,6 +101,7 @@ class CourseRepository(
 
     suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
-    suspend fun getAnnouncements(courseId: String) = api.getAnnouncements(courseId).map { it.mapToDomain() }
+    suspend fun getAnnouncements(courseId: String) =
+        api.getAnnouncements(courseId).map { it.mapToDomain() }
 
 }

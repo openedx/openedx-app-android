@@ -231,7 +231,6 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.course.isEnrolled,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -240,7 +239,6 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.course.isEnrolled,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -303,7 +301,6 @@ internal fun CourseDetailsScreen(
 private fun CourseDetailNativeContent(
     windowSize: WindowSize,
     course: Course,
-    isEnrolled: Boolean,
     onButtonClick: () -> Unit,
 ) {
     val buttonWidth by remember(key1 = windowSize) {
@@ -324,7 +321,7 @@ private fun CourseDetailNativeContent(
         )
     }
 
-    val buttonText = if (isEnrolled) {
+    val buttonText = if (course.isEnrolled) {
         stringResource(id = R.string.course_view_course)
     } else {
         stringResource(id = R.string.course_enroll_now)
@@ -382,7 +379,6 @@ private fun CourseDetailNativeContent(
 private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
     course: Course,
-    isEnrolled: Boolean,
     onButtonClick: () -> Unit,
 ) {
     val buttonWidth by remember(key1 = windowSize) {
@@ -394,7 +390,7 @@ private fun CourseDetailNativeContentLandscape(
         )
     }
 
-    val buttonText = if (isEnrolled) {
+    val buttonText = if (course.isEnrolled) {
         stringResource(id = R.string.course_view_course)
     } else {
         stringResource(id = R.string.course_enroll_now)

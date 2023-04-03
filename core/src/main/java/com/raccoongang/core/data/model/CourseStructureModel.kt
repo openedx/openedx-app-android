@@ -1,6 +1,7 @@
 package com.raccoongang.core.data.model
 
 import com.google.gson.annotations.SerializedName
+import com.raccoongang.core.data.model.room.BlockDb
 import com.raccoongang.core.data.model.room.CourseStructureEntity
 import com.raccoongang.core.data.model.room.MediaDb
 import com.raccoongang.core.domain.model.CourseStructure
@@ -60,6 +61,7 @@ data class CourseStructureModel(
     fun mapToRoomEntity(): CourseStructureEntity {
         return CourseStructureEntity(
             root,
+            blocks = blockData.map { BlockDb.createFrom(it.value) },
             id = id ?: "",
             name = name ?: "",
             number = number ?: "",
@@ -72,7 +74,6 @@ data class CourseStructureModel(
             media = MediaDb.createFrom(media),
             certificate = certificate?.mapToRoomEntity(),
             isSelfPaced = isSelfPaced ?: false
-
         )
     }
 }

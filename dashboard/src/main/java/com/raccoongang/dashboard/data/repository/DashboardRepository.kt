@@ -18,7 +18,7 @@ class DashboardRepository(
             username = user?.username ?: "",
             page = page
         )
-        dao.clearCachedData()
+        if (page == 1) dao.clearCachedData()
         dao.insertEnrolledCourseEntity(*result.results.map { it.mapToRoomEntity() }.toTypedArray())
         return result.mapToDomain()
     }
