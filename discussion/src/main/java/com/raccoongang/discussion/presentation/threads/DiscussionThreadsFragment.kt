@@ -242,8 +242,13 @@ private fun DiscussionThreadsScreen(
         val listPadding by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = PaddingValues(vertical = 24.dp),
-                    compact = PaddingValues(24.dp)
+                    expanded = PaddingValues(top = 24.dp, bottom = 80.dp),
+                    compact = PaddingValues(
+                        start = 24.dp,
+                        end = 24.dp,
+                        top = 24.dp,
+                        bottom = 80.dp
+                    )
                 )
             )
         }
