@@ -31,7 +31,6 @@ private val DarkColorPalette = AppColors(
     textSecondary = Color(0xFFB3B3B3),
     textDark = Color(0xFF19212F),
     textAccent = Color(0xFF5478F9),
-    textDate = Color.White,
 
     textFieldBackground = Color(0xFF273346),
     textFieldBackgroundVariant = Color(0xFF273346),
@@ -44,7 +43,6 @@ private val DarkColorPalette = AppColors(
 
     cardViewBackground = Color(0xFF273346),
     cardViewBorder = Color(0xFF4E5A70),
-    cardViewBorderVariant = Color(0xFF273346),
     divider = Color(0xFF4E5A70),
 
     certificateForeground = Color(0xD92EB865),
@@ -74,7 +72,6 @@ private val LightColorPalette = AppColors(
     textSecondary = Color(0xFFB3B3B3),
     textDark = Color(0xFF19212F),
     textAccent = Color(0xFF3C68FF),
-    textDate = Color(0xFF97A5BB),
 
     textFieldBackground = Color(0xFFF7F7F8),
     textFieldBackgroundVariant = Color.White,
@@ -87,7 +84,6 @@ private val LightColorPalette = AppColors(
 
     cardViewBackground = Color(0xFFF9FAFB),
     cardViewBorder = Color(0xFFCCD4E0),
-    cardViewBorderVariant = Color(0xFFCCD4E0),
     divider = Color(0xFFCCD4E0),
 
     certificateForeground = Color(0xD94BD191),

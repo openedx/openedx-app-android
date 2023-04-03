@@ -104,7 +104,7 @@ fun ThreadMainItem(
                 Text(
                     text = TimeUtils.iso8601ToDateWithTime(context, thread.createdAt),
                     style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textDate
+                    color = MaterialTheme.appColors.textPrimaryVariant
                 )
             }
             IconText(
@@ -237,7 +237,7 @@ fun CommentItem(
                     Text(
                         text = TimeUtils.iso8601ToDateWithTime(context, comment.createdAt),
                         style = MaterialTheme.appTypography.labelSmall,
-                        color = MaterialTheme.appColors.textDate
+                        color = MaterialTheme.appColors.textPrimaryVariant
                     )
                 }
                 IconText(
@@ -373,7 +373,7 @@ fun CommentMainItem(
                     Text(
                         text = TimeUtils.iso8601ToDateWithTime(context, comment.createdAt),
                         style = MaterialTheme.appTypography.labelSmall,
-                        color = MaterialTheme.appColors.textDate
+                        color = MaterialTheme.appColors.textPrimaryVariant
                     )
                 }
             }
@@ -505,7 +505,7 @@ fun ThreadItem(
                 TimeUtils.iso8601ToDateWithTime(context, thread.updatedAt)
             ),
             style = MaterialTheme.appTypography.labelSmall,
-            color = MaterialTheme.appColors.textDate
+            color = MaterialTheme.appColors.textPrimaryVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
         IconText(

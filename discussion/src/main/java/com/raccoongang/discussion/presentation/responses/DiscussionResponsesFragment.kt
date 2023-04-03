@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -126,7 +127,10 @@ class DiscussionResponsesFragment : Fragment() {
         private const val ARG_COMMENT = "comment"
         private const val ARG_IS_CLOSED = "isClosed"
 
-        fun newInstance(comment: DiscussionComment, isClosed: Boolean): DiscussionResponsesFragment {
+        fun newInstance(
+            comment: DiscussionComment,
+            isClosed: Boolean
+        ): DiscussionResponsesFragment {
             val fragment = DiscussionResponsesFragment()
             fragment.arguments = bundleOf(
                 ARG_COMMENT to comment,
@@ -345,7 +349,9 @@ private fun DiscussionResponsesScreen(
                                         paginationCallBack()
                                     }
                                 }
-                                Divider(color = MaterialTheme.appColors.cardViewBorderVariant)
+                                if (!isSystemInDarkTheme()) {
+                                    Divider(color = MaterialTheme.appColors.cardViewBorder)
+                                }
                                 Box(
                                     Modifier
                                         .fillMaxWidth()

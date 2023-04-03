@@ -11,7 +11,6 @@ data class AppColors(
     val textSecondary: Color,
     val textDark: Color,
     val textAccent: Color,
-    val textDate: Color,
 
     val textFieldBackground: Color,
     val textFieldBackgroundVariant: Color,
@@ -24,7 +23,6 @@ data class AppColors(
 
     val cardViewBackground: Color,
     val cardViewBorder: Color,
-    val cardViewBorderVariant: Color,
     val divider: Color,
 
     val certificateForeground: Color,
