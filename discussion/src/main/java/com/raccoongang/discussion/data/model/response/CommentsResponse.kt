@@ -2,6 +2,7 @@ package com.raccoongang.discussion.data.model.response
 
 import com.google.gson.annotations.SerializedName
 import com.raccoongang.core.data.model.Pagination
+import com.raccoongang.core.data.model.ProfileImage
 import com.raccoongang.core.extension.TextConverter
 import com.raccoongang.discussion.domain.model.CommentsData
 import com.raccoongang.discussion.domain.model.DiscussionComment
@@ -63,6 +64,8 @@ data class CommentResult(
     val children: List<String>,
     @SerializedName("abuse_flagged_any_user")
     val abuseFlaggedAnyUser: String?,
+    @SerializedName("profile_image")
+    val profileImage: ProfileImage?,
     @SerializedName("users")
     val users: Map<String, ThreadsResponse.Thread.DiscussionProfile>?
 ) {
@@ -89,6 +92,7 @@ data class CommentResult(
             endorsedAt ?: "",
             childCount,
             children,
+            profileImage?.mapToDomain(),
             users?.entries?.associate { it.key to it.value.mapToDomain() }
         )
     }

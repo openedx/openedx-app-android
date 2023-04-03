@@ -48,8 +48,6 @@ class CourseOutlineViewModel(
         get() = _isUpdating
 
     var courseTitle = ""
-    var courseImage = ""
-    var courseCertificate = Certificate("")
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -71,13 +69,17 @@ class CourseOutlineViewModel(
                 if (_uiState.value is CourseOutlineUIState.CourseData) {
                     val state = _uiState.value as CourseOutlineUIState.CourseData
                     _uiState.value = CourseOutlineUIState.CourseData(
-                        blocks = state.blocks,
+                        courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
                         resumeBlock = state.resumeBlock
                     )
                 }
             }
         }
+    }
+
+    init {
+        getCourseData()
     }
 
     fun setIsUpdating() {
@@ -109,7 +111,8 @@ class CourseOutlineViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
-            val blocks = interactor.getCourseStructureFromCache()
+            var courseStructure = interactor.getCourseStructureFromCache()
+            val blocks = courseStructure.blockData
 
             try {
                 val courseStatus = if (networkConnection.isOnline()) {
@@ -118,11 +121,11 @@ class CourseOutlineViewModel(
                     CourseComponentStatus("")
                 }
                 setBlocks(blocks)
-                val list = sortBlocks(blocks)
+                courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
 
                 _uiState.value = CourseOutlineUIState.CourseData(
-                    blocks = list,
+                    courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
                     resumeBlock = blocks.firstOrNull { it.id == courseStatus.lastVisitedBlockId }
                 )

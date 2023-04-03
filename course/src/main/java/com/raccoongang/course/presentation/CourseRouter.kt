@@ -1,7 +1,6 @@
 package com.raccoongang.course.presentation
 
 import androidx.fragment.app.FragmentManager
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.course.presentation.handouts.HandoutsType
@@ -12,12 +11,16 @@ interface CourseRouter {
     fun navigateToCourseOutline(
         fm: FragmentManager,
         courseId: String,
+        courseTitle: String
+    )
+
+    fun navigateToNoAccess(
+        fm: FragmentManager,
         title: String,
-        image: String,
-        certificate: Certificate,
         coursewareAccess: CoursewareAccess,
         auditAccessExpires: Date?
     )
+
     fun navigateToCourseUnits(
         fm: FragmentManager,
         courseId: String,

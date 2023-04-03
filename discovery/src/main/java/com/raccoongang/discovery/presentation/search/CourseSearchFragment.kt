@@ -386,5 +386,6 @@ private val mockCourse = Course(
     end = "end",
     startDisplay = "startDisplay",
     startType = "startType",
-    overview = ""
+    overview = "",
+    isEnrolled = false
 )

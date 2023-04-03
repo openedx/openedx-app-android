@@ -33,9 +33,10 @@ class DiscussionRepository(private val api: DiscussionApi) {
         following: Boolean?,
         topicId: String?,
         orderBy: String,
+        view: String?,
         page: Int
     ): ThreadsData {
-        return api.getCourseThreads(courseId, following, topicId, orderBy, page).mapToDomain()
+        return api.getCourseThreads(courseId, following, topicId, orderBy, view, page).mapToDomain()
     }
 
     suspend fun searchThread(

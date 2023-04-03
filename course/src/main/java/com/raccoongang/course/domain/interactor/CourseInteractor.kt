@@ -2,7 +2,7 @@ package com.raccoongang.course.domain.interactor
 
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.Block
-import com.raccoongang.core.module.db.DownloadModel
+import com.raccoongang.core.domain.model.CourseStructure
 import com.raccoongang.course.data.repository.CourseRepository
 
 class CourseInteractor(
@@ -27,8 +27,9 @@ class CourseInteractor(
     fun getCourseStructureFromCache() = repository.getCourseStructureFromCache()
 
     @Throws(IllegalStateException::class)
-    fun getCourseStructureForVideos(): List<Block> {
-        val blocks = repository.getCourseStructureFromCache()
+    fun getCourseStructureForVideos(): CourseStructure {
+        val courseStructure = repository.getCourseStructureFromCache()
+        val blocks = courseStructure.blockData
         val videoBlocks = blocks.filter { it.type == BlockType.VIDEO }
         val resultBlocks = ArrayList<Block>()
         videoBlocks.forEach { videoBlock ->
@@ -62,19 +63,17 @@ class CourseInteractor(
 
             }
         }
-        return resultBlocks.toList()
+        return courseStructure.copy(blockData = resultBlocks.toList())
     }
-
-    suspend fun getEnrolledCourseById(courseId: String) = repository.getEnrolledCourseById(courseId)
 
     suspend fun getEnrolledCourseFromCacheById(courseId: String) =
         repository.getEnrolledCourseFromCacheById(courseId)
 
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
 
-    suspend fun getHandouts(url: String) = repository.getHandouts(url)
+    suspend fun getHandouts(courseId: String) = repository.getHandouts(courseId)
 
-    suspend fun getAnnouncements(url: String) = repository.getAnnouncements(url)
+    suspend fun getAnnouncements(courseId: String) = repository.getAnnouncements(courseId)
 
     suspend fun removeDownloadModel(id: String) = repository.removeDownloadModel(id)
 

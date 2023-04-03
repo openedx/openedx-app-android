@@ -20,6 +20,7 @@ interface DiscussionApi {
         @Query("following") following: Boolean?,
         @Query("topic_id") topicId: String?,
         @Query("order_by") orderBy: String,
+        @Query("view") view: String?,
         @Query("page") page: Int = 1,
         @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
     ): ThreadsResponse
@@ -96,10 +97,9 @@ interface DiscussionApi {
         @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
     ): CommentsResponse
 
-    @POST("/api/discussion/v1/comments/")
+    @POST("/mobile_api_extensions/discussion/v1/comments/")
     suspend fun createComment(
-        @Body commentBody: CommentBody,
-        @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
+        @Body commentBody: CommentBody
     ) : CommentResult
 
     @POST("/api/discussion/v1/threads/")

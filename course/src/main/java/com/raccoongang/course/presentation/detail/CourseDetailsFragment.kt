@@ -39,7 +39,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.raccoongang.core.BuildConfig
 import com.raccoongang.core.UIMessage
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.domain.model.Course
 import com.raccoongang.core.domain.model.Media
 import com.raccoongang.core.ui.*
@@ -57,7 +56,7 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import com.raccoongang.course.R as courseR
 
-class CourseDetailFragment : Fragment() {
+class CourseDetailsFragment : Fragment() {
 
     private val viewModel by viewModel<CourseDetailsViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
@@ -98,15 +97,11 @@ class CourseDetailFragment : Fragment() {
                     onButtonClick = {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
-                            if (currentState.enrolledCourse != null) {
+                            if (currentState.course.isEnrolled) {
                                 router.navigateToCourseOutline(
                                     requireActivity().supportFragmentManager,
                                     currentState.course.courseId,
-                                    currentState.enrolledCourse.course.name,
-                                    currentState.enrolledCourse.course.courseImage,
-                                    currentState.enrolledCourse.certificate ?: Certificate(""),
-                                    currentState.enrolledCourse.course.coursewareAccess,
-                                    currentState.enrolledCourse.auditAccessExpires
+                                    currentState.course.name
                                 )
                             } else {
                                 viewModel.enrollInACourse(currentState.course.courseId)
@@ -119,8 +114,8 @@ class CourseDetailFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String): CourseDetailFragment {
-            val fragment = CourseDetailFragment()
+        fun newInstance(courseId: String): CourseDetailsFragment {
+            val fragment = CourseDetailsFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId
             )
@@ -236,7 +231,6 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.enrolledCourse != null,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -245,7 +239,6 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.enrolledCourse != null,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -308,7 +301,6 @@ internal fun CourseDetailsScreen(
 private fun CourseDetailNativeContent(
     windowSize: WindowSize,
     course: Course,
-    isEnrolled: Boolean,
     onButtonClick: () -> Unit,
 ) {
     val buttonWidth by remember(key1 = windowSize) {
@@ -316,15 +308,6 @@ private fun CourseDetailNativeContent(
             windowSize.windowSizeValue(
                 expanded = Modifier.width(230.dp),
                 compact = Modifier.fillMaxWidth()
-            )
-        )
-    }
-
-    val imageHeight by remember(key1 = windowSize) {
-        mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = 260.dp,
-                compact = 200.dp
             )
         )
     }
@@ -338,7 +321,7 @@ private fun CourseDetailNativeContent(
         )
     }
 
-    val buttonText = if (isEnrolled) {
+    val buttonText = if (course.isEnrolled) {
         stringResource(id = R.string.course_view_course)
     } else {
         stringResource(id = R.string.course_enroll_now)
@@ -397,7 +380,6 @@ private fun CourseDetailNativeContent(
 private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
     course: Course,
-    isEnrolled: Boolean,
     onButtonClick: () -> Unit,
 ) {
     val buttonWidth by remember(key1 = windowSize) {
@@ -409,7 +391,7 @@ private fun CourseDetailNativeContentLandscape(
         )
     }
 
-    val buttonText = if (isEnrolled) {
+    val buttonText = if (course.isEnrolled) {
         stringResource(id = R.string.course_view_course)
     } else {
         stringResource(id = R.string.course_enroll_now)
@@ -572,7 +554,7 @@ private fun CourseDetailNativeContentPreview() {
     NewEdxTheme {
         CourseDetailsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = CourseDetailsUIState.CourseData(mockCourse, null),
+            uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
@@ -590,7 +572,7 @@ private fun CourseDetailNativeContentTabletPreview() {
     NewEdxTheme {
         CourseDetailsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = CourseDetailsUIState.CourseData(mockCourse, null),
+            uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
@@ -621,5 +603,6 @@ private val mockCourse = Course(
     end = "end",
     startDisplay = "startDisplay",
     startType = "startType",
-    overview = ""
+    overview = "",
+    isEnrolled = false
 )

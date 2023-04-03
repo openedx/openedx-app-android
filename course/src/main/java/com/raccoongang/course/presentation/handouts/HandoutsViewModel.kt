@@ -16,8 +16,6 @@ class HandoutsViewModel(
     private val interactor: CourseInteractor
 ) : BaseViewModel() {
 
-    private var course: EnrolledCourse? = null
-
     private val _htmlContent = MutableLiveData<String>()
     val htmlContent: LiveData<String>
         get() = _htmlContent
@@ -29,14 +27,11 @@ class HandoutsViewModel(
     private fun getEnrolledCourse() {
         viewModelScope.launch {
             try {
-                if (course == null) {
-                    course = interactor.getEnrolledCourseFromCacheById(courseId)
-                }
                 if (HandoutsType.valueOf(handoutsType) == HandoutsType.Handouts) {
-                    val handouts = interactor.getHandouts(course!!.course.courseHandouts)
+                    val handouts = interactor.getHandouts(courseId)
                     _htmlContent.value = handoutsToHtml(handouts)
                 } else {
-                    val announcements = interactor.getAnnouncements(course!!.course.courseUpdates)
+                    val announcements = interactor.getAnnouncements(courseId)
                     _htmlContent.value = announcementsToHtml(announcements)
                 }
             } catch (e: Exception) {

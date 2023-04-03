@@ -8,13 +8,12 @@ import com.raccoongang.auth.presentation.signin.SignInFragment
 import com.raccoongang.auth.presentation.signup.SignUpFragment
 import com.raccoongang.core.FragmentViewType
 import com.raccoongang.core.domain.model.Account
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.container.CourseContainerFragment
 import com.raccoongang.course.presentation.container.NoAccessCourseContainerFragment
-import com.raccoongang.course.presentation.detail.CourseDetailFragment
+import com.raccoongang.course.presentation.detail.CourseDetailsFragment
 import com.raccoongang.course.presentation.handouts.HandoutsType
 import com.raccoongang.course.presentation.handouts.WebViewFragment
 import com.raccoongang.discovery.presentation.search.CourseSearchFragment
@@ -38,7 +37,7 @@ import com.raccoongang.profile.presentation.delete.DeleteProfileFragment
 import com.raccoongang.profile.presentation.edit.EditProfileFragment
 import com.raccoongang.profile.presentation.settings.video.VideoQualityFragment
 import com.raccoongang.profile.presentation.settings.video.VideoSettingsFragment
-import java.util.Date
+import java.util.*
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
     ProfileRouter {
@@ -62,7 +61,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     //region DiscoveryRouter
     override fun navigateToCourseDetail(fm: FragmentManager, courseId: String) {
-        replaceFragmentWithBackStack(fm, CourseDetailFragment.newInstance(courseId))
+        replaceFragmentWithBackStack(fm, CourseDetailsFragment.newInstance(courseId))
     }
 
     override fun navigateToCourseSearch(fm: FragmentManager) {
@@ -71,25 +70,25 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     //endregion
 
     //region DashboardRouter
+
     override fun navigateToCourseOutline(
         fm: FragmentManager,
         courseId: String,
+        courseTitle: String
+    ) {
+        replaceFragmentWithBackStack(
+            fm,
+            CourseContainerFragment.newInstance(courseId, courseTitle)
+        )
+    }
+
+    override fun navigateToNoAccess(
+        fm: FragmentManager,
         title: String,
-        image: String,
-        certificate: Certificate,
         coursewareAccess: CoursewareAccess,
         auditAccessExpires: Date?
     ) {
-        val destinationFragment = if (coursewareAccess.hasAccess) {
-            CourseContainerFragment.newInstance(courseId, title, image, certificate)
-        } else {
-            NoAccessCourseContainerFragment.newInstance(title, coursewareAccess, auditAccessExpires)
-        }
-
-        replaceFragmentWithBackStack(
-            fm,
-            destinationFragment
-        )
+        replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title,coursewareAccess, auditAccessExpires))
     }
     //endregion
 

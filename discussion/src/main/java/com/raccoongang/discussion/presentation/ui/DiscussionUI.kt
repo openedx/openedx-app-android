@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.raccoongang.core.domain.model.ProfileImage
 import com.raccoongang.core.extension.TextConverter
 import com.raccoongang.core.ui.AutoSizeText
 import com.raccoongang.core.ui.HyperlinkImageText
@@ -166,7 +167,8 @@ fun CommentItem(
     onClick: (String, String, Boolean) -> Unit,
     onAddCommentClick: () -> Unit = {},
 ) {
-    val profileImageUrl = comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = comment.profileImage?.imageUrlFull
+        ?: comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
 
     val reportText = if (comment.abuseFlagged) {
         stringResource(id = R.string.discussion_unreport)
@@ -310,7 +312,8 @@ fun CommentMainItem(
     comment: DiscussionComment,
     onClick: (String, String, Boolean) -> Unit,
 ) {
-    val profileImageUrl = comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = comment.profileImage?.imageUrlFull
+        ?: comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
 
     val reportText = if (comment.abuseFlagged) {
         stringResource(id = R.string.discussion_unreport)
@@ -659,7 +662,8 @@ private val mockComment = DiscussionComment(
     "",
     21,
     emptyList(),
-    emptyMap()
+    ProfileImage("", "", "", "", false),
+    mapOf()
 )
 
 private val mockThread = com.raccoongang.discussion.domain.model.Thread(

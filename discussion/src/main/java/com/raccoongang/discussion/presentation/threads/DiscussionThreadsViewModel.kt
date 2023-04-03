@@ -11,7 +11,6 @@ import com.raccoongang.core.UIMessage
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.discussion.domain.interactor.DiscussionInteractor
-import com.raccoongang.discussion.domain.model.DiscussionType
 import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment
 import com.raccoongang.discussion.system.notifier.DiscussionNotifier
 import com.raccoongang.discussion.system.notifier.DiscussionThreadAdded
@@ -38,12 +37,17 @@ class DiscussionThreadsViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    private val _canLoadMore = MutableLiveData<Boolean>()
+    val canLoadMore: LiveData<Boolean>
+        get() = _canLoadMore
 
     private val threadsList = mutableListOf<com.raccoongang.discussion.domain.model.Thread>()
     private var nextPage = 1
+    private var isLoading = false
 
     var topicId = ""
     private var lastOrderBy = ""
+    private var filterType: String? = null
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -73,10 +77,23 @@ class DiscussionThreadsViewModel(
 
     fun updateThread(orderBy: String) {
         _isUpdating.value = true
+        threadsList.clear()
+        nextPage = 1
         internalLoadThreads(orderBy)
     }
 
+    fun fetchMore() {
+        if (!isLoading && nextPage != -1) {
+            isLoading = true
+            internalLoadThreads(lastOrderBy)
+        }
+    }
+
     private fun internalLoadThreads(orderBy: String) {
+        if (lastOrderBy != orderBy) {
+            threadsList.clear()
+            nextPage = 1
+        }
         lastOrderBy = orderBy
         when (threadType) {
             DiscussionTopicsFragment.ALL_POSTS -> {
@@ -94,32 +111,45 @@ class DiscussionThreadsViewModel(
         }
     }
 
-    fun filterThreads(filter: String) {
-        when (filter) {
-            FilterType.ALL_POSTS.value -> {
-                _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
+    fun filterThreads(filter: String?) {
+        if (filterType != filter || (filter != FilterType.ALL_POSTS.value && filterType.isNullOrEmpty())) {
+            threadsList.clear()
+            nextPage = 1
+        }
+        filterType = if (filter == FilterType.ALL_POSTS.value) {
+            null
+        } else {
+            filter
+        }
+        when (threadType) {
+            DiscussionTopicsFragment.ALL_POSTS -> {
+                getAllThreads(lastOrderBy)
             }
-            FilterType.UNREAD.value -> {
-                _uiState.value = DiscussionThreadsUIState.Threads(threadsList.filter { !it.read })
+            DiscussionTopicsFragment.FOLLOWING_POSTS -> {
+                getFollowingThreads(lastOrderBy)
             }
-            FilterType.UNANSWERED.value -> {
-                _uiState.value = DiscussionThreadsUIState.Threads(threadsList.filter {
-                    it.type == DiscussionType.QUESTION && !it.hasEndorsed
-                })
+            DiscussionTopicsFragment.TOPIC -> {
+                getThreads(
+                    topicId,
+                    lastOrderBy
+                )
             }
         }
     }
 
     private fun getThreads(topicId: String, orderBy: String) {
-        nextPage = 1
-        threadsList.clear()
         viewModelScope.launch {
             try {
-                while (nextPage > 0) {
-                    val response = interactor.getThreads(courseId, topicId, orderBy, nextPage)
-                    if (response.pagination.next.isNotEmpty()) nextPage++ else nextPage = -1
-                    threadsList.addAll(response.results)
+                val response =
+                    interactor.getThreads(courseId, topicId, orderBy, filterType, nextPage)
+                if (response.pagination.next.isNotEmpty()) {
+                    _canLoadMore.value = true
+                    nextPage++
+                } else {
+                    _canLoadMore.value = false
+                    nextPage = -1
                 }
+                threadsList.addAll(response.results)
                 _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -131,19 +161,22 @@ class DiscussionThreadsViewModel(
                 }
             }
             _isUpdating.value = false
+            isLoading = false
         }
     }
 
     private fun getAllThreads(orderBy: String) {
-        nextPage = 1
-        threadsList.clear()
         viewModelScope.launch {
             try {
-                while (nextPage > 0) {
-                    val response = interactor.getAllThreads(courseId, orderBy, nextPage)
-                    if (response.pagination.next.isNotEmpty()) nextPage++ else nextPage = -1
-                    threadsList.addAll(response.results)
+                val response = interactor.getAllThreads(courseId, orderBy, filterType, nextPage)
+                if (response.pagination.next.isNotEmpty()) {
+                    _canLoadMore.value = true
+                    nextPage++
+                } else {
+                    _canLoadMore.value = false
+                    nextPage = -1
                 }
+                threadsList.addAll(response.results)
                 _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -155,19 +188,23 @@ class DiscussionThreadsViewModel(
                 }
             }
             _isUpdating.value = false
+            isLoading = false
         }
     }
 
     private fun getFollowingThreads(orderBy: String) {
-        nextPage = 1
-        threadsList.clear()
         viewModelScope.launch {
             try {
-                while (nextPage > 0) {
-                    val response = interactor.getFollowingThreads(courseId, true, orderBy, nextPage)
-                    if (response.pagination.next.isNotEmpty()) nextPage++ else nextPage = -1
-                    threadsList.addAll(response.results)
+                val response =
+                    interactor.getFollowingThreads(courseId, true, orderBy, page = nextPage)
+                if (response.pagination.next.isNotEmpty()) {
+                    _canLoadMore.value = true
+                    nextPage++
+                } else {
+                    _canLoadMore.value = false
+                    nextPage = -1
                 }
+                threadsList.addAll(response.results)
                 _uiState.value = DiscussionThreadsUIState.Threads(threadsList.toList())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -179,6 +216,7 @@ class DiscussionThreadsViewModel(
                 }
             }
             _isUpdating.value = false
+            isLoading = false
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.raccoongang.discussion.domain.model
 
 import android.os.Parcelable
+import com.raccoongang.core.domain.model.ProfileImage
 import com.raccoongang.core.extension.LinkedImageText
 import kotlinx.parcelize.Parcelize
 
@@ -27,5 +28,6 @@ data class DiscussionComment(
     val endorsedAt: String,
     val childCount: Int,
     val children: List<String>,
+    val profileImage: ProfileImage?,
     val users: Map<String, DiscussionProfile>?
 ) : Parcelable

@@ -1,17 +1,11 @@
-package com.raccoongang.course.data.model
+package com.raccoongang.core.data.model.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.*
 
-@Entity(tableName = "course_blocks_table")
-data class BlockDbEntity(
-    @ColumnInfo("courseId")
-    val courseId: String,
-    @PrimaryKey
+data class BlockDb(
     @ColumnInfo("id")
     val id: String,
     @ColumnInfo("blockId")
@@ -60,12 +54,10 @@ data class BlockDbEntity(
     companion object {
 
         fun createFrom(
-            block: com.raccoongang.core.data.model.Block,
-            courseId: String
-        ): BlockDbEntity {
+            block: com.raccoongang.core.data.model.Block
+        ): BlockDb {
             with(block) {
-                return BlockDbEntity(
-                    courseId = courseId,
+                return BlockDb(
                     id = id ?: "",
                     blockId = blockId ?: "",
                     lmsWebUrl = lmsWebUrl ?: "",

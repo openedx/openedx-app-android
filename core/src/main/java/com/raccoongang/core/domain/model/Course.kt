@@ -23,5 +23,6 @@ data class Course(
     val end: String,
     val startDisplay: String,
     val startType: String,
-    val overview : String
+    val overview : String,
+    val isEnrolled: Boolean
 )

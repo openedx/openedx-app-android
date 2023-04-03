@@ -44,10 +44,11 @@ class CourseUnitContainerViewModel(
 
     fun loadBlocks(mode: CourseViewMode) {
         try {
-            val blocks = when (mode) {
+            val courseStructure = when (mode) {
                 CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
                 CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
             }
+            val blocks = courseStructure.blockData
             this.blocks.clear()
             this.blocks.addAll(blocks)
         } catch (e: Exception) {

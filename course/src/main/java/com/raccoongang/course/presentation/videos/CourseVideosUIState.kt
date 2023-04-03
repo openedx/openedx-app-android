@@ -1,11 +1,11 @@
 package com.raccoongang.course.presentation.videos
 
-import com.raccoongang.core.domain.model.Block
+import com.raccoongang.core.domain.model.CourseStructure
 import com.raccoongang.core.module.db.DownloadedState
 
 sealed class CourseVideosUIState {
     data class CourseData(
-        val blocks: List<Block>,
+        val courseStructure: CourseStructure,
         val downloadedState: Map<String, DownloadedState>,
     ) : CourseVideosUIState()
 

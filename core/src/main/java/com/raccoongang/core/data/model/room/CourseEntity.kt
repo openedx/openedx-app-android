@@ -50,7 +50,9 @@ data class CourseEntity(
     @ColumnInfo("startType")
     val startType: String,
     @ColumnInfo("overview")
-    val overview: String
+    val overview: String,
+    @ColumnInfo("isEnrolled")
+    val isEnrolled: Boolean
 ) {
 
     fun mapToDomain(): Course {
@@ -75,6 +77,7 @@ data class CourseEntity(
             startDisplay = startDisplay,
             startType = startType,
             overview = overview,
+            isEnrolled = isEnrolled
         )
     }
 
@@ -101,7 +104,8 @@ data class CourseEntity(
                     startType = startType ?: "",
                     pacing = pacing ?: "",
                     overview = overview ?: "",
-                    media = MediaDb.createFrom(media)
+                    media = MediaDb.createFrom(media),
+                    isEnrolled = isEnrolled ?: false
                 )
             }
         }

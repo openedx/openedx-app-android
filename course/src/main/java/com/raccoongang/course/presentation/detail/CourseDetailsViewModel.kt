@@ -8,17 +8,13 @@ import com.raccoongang.core.R
 import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.Course
-import com.raccoongang.core.domain.model.EnrolledCourse
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseDashboardUpdate
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.course.domain.interactor.CourseInteractor
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 
 class CourseDetailsViewModel(
     private val courseId: String,
@@ -48,28 +44,12 @@ class CourseDetailsViewModel(
         _uiState.value = CourseDetailsUIState.Loading
         viewModelScope.launch {
             try {
-                supervisorScope {
-                    val courseJob = async {
-                        if (networkConnection.isOnline()) {
-                            interactor.getCourseDetails(courseId)
-                        } else {
-                            interactor.getCourseDetailsFromCache(courseId)
-                        }
-                    }
-                    val enrolledCourse = async {
-                        if (networkConnection.isOnline()) {
-                            interactor.getEnrolledCourseById(courseId)
-                        } else {
-                            interactor.getEnrolledCourseFromCacheById(courseId)
-                        }
-                    }
-                    val data = awaitAll(courseJob, enrolledCourse)
-                    course = data[0] as Course
-                    _uiState.value = CourseDetailsUIState.CourseData(
-                        course = course!!,
-                        data[1] as EnrolledCourse?
-                    )
+                course = if (networkConnection.isOnline()) {
+                    interactor.getCourseDetails(courseId)
+                } else {
+                    interactor.getCourseDetailsFromCache(courseId)
                 }
+                _uiState.value = CourseDetailsUIState.CourseData(course = course!!)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -86,10 +66,10 @@ class CourseDetailsViewModel(
         viewModelScope.launch {
             try {
                 interactor.enrollInACourse(id)
-                val enrolledCourse = interactor.getEnrolledCourseById(id)
+                val course = interactor.getCourseDetails(id)
                 val courseData = _uiState.value
                 if (courseData is CourseDetailsUIState.CourseData) {
-                    _uiState.value = courseData.copy(enrolledCourse = enrolledCourse)
+                    _uiState.value = courseData.copy(course = course)
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
