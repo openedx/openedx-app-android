@@ -12,6 +12,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -74,11 +77,14 @@ class ProfileFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState()
                 val logoutSuccess by viewModel.successLogout.observeAsState(false)
                 val uiMessage by viewModel.uiMessage.observeAsState()
+                val refreshing by viewModel.isUpdating.observeAsState(false)
+
                 ProfileScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
                     appData = (requireActivity() as AppDataHolder).appData,
+                    refreshing = refreshing,
                     logout = {
                         viewModel.logout()
                     },
@@ -87,6 +93,9 @@ class ProfileFragment : Fragment() {
                             requireParentFragment().parentFragmentManager,
                             it
                         )
+                    },
+                    onSwipeRefresh = {
+                         viewModel.updateAccount()
                     },
                     onVideoSettingsClick = {
                         router.navigateToVideoSettings(
@@ -106,18 +115,24 @@ class ProfileFragment : Fragment() {
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ProfileScreen(
     windowSize: WindowSize,
     uiState: ProfileUIState,
     appData: AppData,
     uiMessage: UIMessage?,
+    refreshing: Boolean,
     onVideoSettingsClick: () -> Unit,
     logout: () -> Unit,
+    onSwipeRefresh: () -> Unit,
     editAccountClicked: (Account) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
+
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -194,87 +209,100 @@ private fun ProfileScreen(
                     }
                 )
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                color = MaterialTheme.appColors.background
             ) {
-                when (uiState) {
-                    is ProfileUIState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is ProfileUIState.Data -> {
-                        Column(
-                            Modifier
-                                .fillMaxHeight()
-                                .then(contentWidth)
-                                .verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(
-                                    model = uiState.account.profileImage.imageUrlFull,
-                                    placeholder = painterResource(id = R.drawable.core_ic_default_profile_picture),
-                                    error = painterResource(id = R.drawable.core_ic_default_profile_picture)
-                                ),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .border(
-                                        2.dp,
-                                        MaterialTheme.appColors.onSurface,
-                                        CircleShape
-                                    )
-                                    .padding(2.dp)
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-
-                            )
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Text(
-                                text = uiState.account.name,
-                                color = MaterialTheme.appColors.textPrimary,
-                                style = MaterialTheme.appTypography.headlineSmall
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "@${uiState.account.username}",
-                                color = MaterialTheme.appColors.textPrimaryVariant,
-                                style = MaterialTheme.appTypography.labelLarge
-                            )
-                            Spacer(modifier = Modifier.height(36.dp))
-
-                            Column(
-                                Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                ProfileInfoSection(uiState.account)
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                SettingsSection(onVideoSettingsClick = {
-                                    onVideoSettingsClick()
-                                })
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                SupportInfoSection(appData)
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                LogoutButton(
-                                    onClick = { showLogoutDialog = true }
-                                )
-
-                                Spacer(Modifier.height(30.dp))
+                Box(
+                    modifier = Modifier.pullRefresh(pullRefreshState),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        when (uiState) {
+                            is ProfileUIState.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
+                            is ProfileUIState.Data -> {
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .then(contentWidth)
+                                        .verticalScroll(rememberScrollState()),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            model = uiState.account.profileImage.imageUrlFull,
+                                            placeholder = painterResource(id = R.drawable.core_ic_default_profile_picture),
+                                            error = painterResource(id = R.drawable.core_ic_default_profile_picture)
+                                        ),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .border(
+                                                2.dp,
+                                                MaterialTheme.appColors.onSurface,
+                                                CircleShape
+                                            )
+                                            .padding(2.dp)
+                                            .size(100.dp)
+                                            .clip(CircleShape)
+                                    )
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Text(
+                                        text = uiState.account.name,
+                                        color = MaterialTheme.appColors.textPrimary,
+                                        style = MaterialTheme.appTypography.headlineSmall
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "@${uiState.account.username}",
+                                        color = MaterialTheme.appColors.textPrimaryVariant,
+                                        style = MaterialTheme.appTypography.labelLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(36.dp))
 
+                                    Column(
+                                        Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        ProfileInfoSection(uiState.account)
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        SettingsSection(onVideoSettingsClick = {
+                                            onVideoSettingsClick()
+                                        })
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        SupportInfoSection(appData)
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        LogoutButton(
+                                            onClick = { showLogoutDialog = true }
+                                        )
+
+                                        Spacer(Modifier.height(30.dp))
+                                    }
+
+                                }
+                            }
                         }
                     }
+                    PullRefreshIndicator(
+                        refreshing,
+                        pullRefreshState,
+                        Modifier.align(Alignment.TopCenter)
+                    )
                 }
             }
         }
@@ -569,7 +597,9 @@ private fun ProfileScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = ProfileUIState.Data(mockAccount),
             uiMessage = null,
+            refreshing = false,
             logout = {},
+            onSwipeRefresh = {},
             editAccountClicked = {},
             onVideoSettingsClick = {},
             appData = AppData("1")
@@ -587,7 +617,9 @@ private fun ProfileScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = ProfileUIState.Data(mockAccount),
             uiMessage = null,
+            refreshing = false,
             logout = {},
+            onSwipeRefresh = {},
             editAccountClicked = {},
             onVideoSettingsClick = {},
             appData = AppData("1")
