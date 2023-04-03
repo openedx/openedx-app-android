@@ -58,7 +58,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import coil.compose.rememberAsyncImagePainter
 import com.raccoongang.core.AppDataConstants.DEFAULT_MIME_TYPE
-import com.raccoongang.core.AppDataConstants.TEXT_FIELD_LIMIT
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.Account
@@ -79,6 +78,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import com.raccoongang.profile.R as profileR
+
+private const val BIO_TEXT_FIELD_LIMIT = 300
 
 class EditProfileFragment : Fragment() {
 
@@ -820,7 +821,7 @@ private fun ProfileFields(
                 name = stringResource(id = profileR.string.profile_about_me),
                 initialValue = mapFields[BIO].toString(),
                 onValueChanged = {
-                    onValueChanged(it.take(TEXT_FIELD_LIMIT))
+                    onValueChanged(it.take(BIO_TEXT_FIELD_LIMIT))
                 },
                 onDoneClick = onDoneClick
             )
