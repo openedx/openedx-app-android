@@ -103,14 +103,23 @@ class CourseOutlineFragment : Fragment() {
                         )
                     },
                     onResumeClick = { blockId ->
-                        viewModel.resumeVerticalBlock?.let {
-                            router.navigateToCourseUnits(
+                        viewModel.resumeSectionBlock?.let { sequential ->
+                            router.navigateToCourseSubsections(
                                 requireActivity().supportFragmentManager,
                                 viewModel.courseId,
-                                it.id,
-                                it.displayName,
+                                sequential.id,
+                                sequential.displayName,
                                 CourseViewMode.FULL
                             )
+                            viewModel.resumeVerticalBlock?.let { vertical ->
+                                router.navigateToCourseUnits(
+                                    requireActivity().supportFragmentManager,
+                                    viewModel.courseId,
+                                    vertical.id,
+                                    vertical.displayName,
+                                    CourseViewMode.FULL
+                                )
+                            }
                         }
                     },
                     onBackClick = {

@@ -48,6 +48,8 @@ class CourseOutlineViewModel(
 
     var courseTitle = ""
 
+    var resumeSectionBlock: Block? = null
+        private set
     var resumeVerticalBlock: Block? = null
         private set
 
@@ -170,6 +172,9 @@ class CourseOutlineViewModel(
         val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
         resumeVerticalBlock = blocks.find {
             it.descendants.contains(resumeBlock?.id) && it.type == BlockType.VERTICAL
+        }
+        resumeSectionBlock = blocks.find {
+            it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
         }
         return resumeBlock
     }
