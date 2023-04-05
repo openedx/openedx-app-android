@@ -376,7 +376,7 @@ private fun DiscussionAddThreadScreen(
                                 }
                                 Spacer(Modifier.height(44.dp))
                                 if (isLoading) {
-                                    CircularProgressIndicator(color = MaterialTheme.colors.primary)
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 } else {
                                     NewEdxButton(
                                         width = buttonWidth,

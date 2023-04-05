@@ -102,7 +102,7 @@ class HtmlUnitFragment : Fragment() {
                                     .zIndex(1f),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                     }

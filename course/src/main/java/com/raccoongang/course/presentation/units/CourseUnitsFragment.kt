@@ -223,7 +223,7 @@ private fun CourseUnitsScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is CourseUnitsUIState.Blocks -> {
@@ -317,7 +317,10 @@ private fun CourseUnitItem(
                     }
                 } else if (block.isDownloadable) {
                     Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(modifier = Modifier.size(34.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(34.dp),
+                            color = MaterialTheme.appColors.primary
+                        )
                         IconButton(modifier = iconModifier,
                             onClick = { onDownloadClick(block) }) {
                             Icon(

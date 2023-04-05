@@ -204,7 +204,7 @@ internal fun MyCoursesScreen(
                                 Modifier
                                     .fillMaxSize(), contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is DashboardUIState.Courses -> {
@@ -249,7 +249,7 @@ internal fun MyCoursesScreen(
                                                         .padding(vertical = 16.dp),
                                                     contentAlignment = Alignment.Center
                                                 ) {
-                                                    CircularProgressIndicator()
+                                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                                 }
                                             }
                                         }
