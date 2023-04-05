@@ -460,7 +460,7 @@ private fun DiscussionThreadsScreen(
                                                                 .padding(vertical = 16.dp),
                                                             contentAlignment = Alignment.Center
                                                         ) {
-                                                            CircularProgressIndicator()
+                                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                                         }
                                                     }
                                                 }
@@ -502,7 +502,7 @@ private fun DiscussionThreadsScreen(
                                         Modifier
                                             .fillMaxSize(), contentAlignment = Alignment.Center
                                     ) {
-                                        CircularProgressIndicator()
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }
                                 }
                             }

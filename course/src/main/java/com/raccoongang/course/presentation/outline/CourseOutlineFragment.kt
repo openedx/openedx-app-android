@@ -265,7 +265,7 @@ internal fun CourseOutlineScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    CircularProgressIndicator()
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
                             is CourseOutlineUIState.CourseData -> {

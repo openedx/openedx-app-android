@@ -222,7 +222,7 @@ internal fun CourseDetailsScreen(
                                     .padding(it),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is CourseDetailsUIState.CourseData -> {
@@ -255,7 +255,7 @@ internal fun CourseDetailsScreen(
                                                 .padding(top = 20.dp),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            CircularProgressIndicator()
+                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                         }
                                     }
                                     Surface(

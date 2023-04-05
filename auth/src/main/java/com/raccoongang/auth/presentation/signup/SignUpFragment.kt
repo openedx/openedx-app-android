@@ -290,7 +290,7 @@ internal fun RegistrationScreen(
                                     Modifier
                                         .fillMaxSize(), contentAlignment = Alignment.Center
                                 ) {
-                                    CircularProgressIndicator()
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
                             is SignUpUIState.Fields -> {
@@ -380,7 +380,7 @@ internal fun RegistrationScreen(
                                                 .height(42.dp),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            CircularProgressIndicator()
+                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                         }
                                     } else {
                                         NewEdxButton(

@@ -326,7 +326,7 @@ private fun DiscussionCommentsScreen(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                CircularProgressIndicator()
+                                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                             }
                                         }
                                     }
@@ -406,7 +406,7 @@ private fun DiscussionCommentsScreen(
                                 Modifier
                                     .fillMaxSize(), contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                     }

@@ -177,38 +177,38 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
             BlockType.VIDEO -> {
                 val encodedVideos = block.studentViewData!!.encodedVideos!!
-                if (encodedVideos.youtube != null) {
-                    YoutubeVideoUnitFragment.newInstance(
-                        block.id,
-                        viewModel.courseId,
-                        encodedVideos.youtube?.url!!,
-                        block.displayName
-                    )
-                } else {
-                    with(encodedVideos) {
-                        var isDownloaded = false
-                        val videoUrl = if (viewModel.getDownloadModelById(block.id) != null) {
-                            isDownloaded = true
-                            viewModel.getDownloadModelById(block.id)!!.path
-                        } else if (fallback != null) {
-                            fallback!!.url
-                        } else if (hls != null) {
-                            hls!!.url
-                        } else if (desktopMp4 != null) {
-                            desktopMp4!!.url
-                        } else if (mobileHigh != null) {
-                            mobileHigh!!.url
-                        } else if (mobileLow != null) {
-                            mobileLow!!.url
-                        } else {
-                            ""
-                        }
+                with(encodedVideos) {
+                    var isDownloaded = false
+                    val videoUrl = if (viewModel.getDownloadModelById(block.id) != null) {
+                        isDownloaded = true
+                        viewModel.getDownloadModelById(block.id)!!.path
+                    } else if (fallback != null) {
+                        fallback!!.url
+                    } else if (hls != null) {
+                        hls!!.url
+                    } else if (desktopMp4 != null) {
+                        desktopMp4!!.url
+                    } else if (mobileHigh != null) {
+                        mobileHigh!!.url
+                    } else if (mobileLow != null) {
+                        mobileLow!!.url
+                    } else {
+                        ""
+                    }
+                    if (videoUrl.isNotEmpty()) {
                         VideoUnitFragment.newInstance(
                             block.id,
                             viewModel.courseId,
                             videoUrl,
                             block.displayName,
                             isDownloaded
+                        )
+                    } else {
+                        YoutubeVideoUnitFragment.newInstance(
+                            block.id,
+                            viewModel.courseId,
+                            encodedVideos.youtube?.url!!,
+                            block.displayName
                         )
                     }
                 }

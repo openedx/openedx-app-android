@@ -221,7 +221,7 @@ private fun CourseSectionScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is CourseSectionUIState.Blocks -> {
@@ -315,7 +315,10 @@ private fun CourseSubsectionItem(
                 } else if (downloadedState != null) {
                     Box(contentAlignment = Alignment.Center) {
                         if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
-                            CircularProgressIndicator(modifier = Modifier.size(34.dp))
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(34.dp),
+                                color = MaterialTheme.appColors.primary
+                            )
                         }
                         IconButton(modifier = iconModifier,
                             onClick = { onDownloadClick(block) }) {

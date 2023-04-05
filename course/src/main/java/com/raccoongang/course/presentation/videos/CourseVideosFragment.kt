@@ -73,7 +73,7 @@ class CourseVideosFragment : Fragment() {
             NewEdxTheme {
                 val windowSize = rememberWindowSize()
 
-                val uiState by viewModel.uiState.observeAsState(CourseVideosUIState.Empty(""))
+                val uiState by viewModel.uiState.observeAsState(CourseVideosUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val isUpdating by viewModel.isUpdating.observeAsState(false)
 
@@ -259,6 +259,14 @@ private fun CourseVideosScreen(
                                             textAlign = TextAlign.Center,
                                             modifier = Modifier.padding(horizontal = 40.dp)
                                         )
+                                    }
+                                }
+                                is CourseVideosUIState.Loading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }
                                 }
                                 is CourseVideosUIState.CourseData -> {
