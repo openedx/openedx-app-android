@@ -47,6 +47,7 @@ import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.course.R
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.ui.CardArrow
+import com.raccoongang.course.presentation.units.CourseUnitsFragment.Companion.getUnitBlockIcon
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
@@ -138,6 +139,15 @@ class CourseUnitsFragment : Fragment() {
                 ARG_MODE to mode
             )
             return fragment
+        }
+
+        fun getUnitBlockIcon(block: Block): Int {
+            return when (block.type) {
+                BlockType.VIDEO -> R.drawable.ic_course_video
+                BlockType.PROBLEM -> R.drawable.ic_course_pen
+                BlockType.DISCUSSION -> R.drawable.ic_course_discussion
+                else -> R.drawable.ic_course_block
+            }
         }
     }
 }
@@ -336,15 +346,6 @@ private fun CourseUnitItem(
                 )
             }
         }
-    }
-}
-
-private fun getUnitBlockIcon(block: Block): Int {
-    return when (block.type) {
-        BlockType.VIDEO -> R.drawable.ic_course_video
-        BlockType.PROBLEM -> R.drawable.ic_course_pen
-        BlockType.DISCUSSION -> R.drawable.ic_course_discussion
-        else -> R.drawable.ic_course_block
     }
 }
 

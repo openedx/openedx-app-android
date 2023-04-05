@@ -750,6 +750,34 @@ fun TextIcon(
 }
 
 @Composable
+fun TextIcon(
+    text: String,
+    painter: Painter,
+    color: Color,
+    textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
+    onClick: (() -> Unit)? = null,
+) {
+    val modifier = if (onClick == null) {
+        Modifier
+    } else {
+        Modifier.noRippleClickable { onClick.invoke() }
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(text = text, color = color, style = textStyle)
+        Icon(
+            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            painter = painter,
+            contentDescription = null,
+            tint = color
+        )
+    }
+}
+
+@Composable
 fun OfflineModeDialog(
     modifier: Modifier,
     onDismissCLick: () -> Unit,
