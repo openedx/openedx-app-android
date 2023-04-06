@@ -296,10 +296,18 @@ internal fun CourseOutlineScreen(
                                     ) {
                                         if (uiState.resumeBlock != null) {
                                             item {
-                                                ResumeCourse(
-                                                    block = uiState.resumeBlock,
-                                                    onResumeClick = onResumeClick
-                                                )
+                                                Spacer(Modifier.height(28.dp))
+                                                if (windowSize.isTablet) {
+                                                    ResumeCourseTablet(
+                                                        block = uiState.resumeBlock,
+                                                        onResumeClick = onResumeClick
+                                                    )
+                                                } else {
+                                                    ResumeCourse(
+                                                        block = uiState.resumeBlock,
+                                                        onResumeClick = onResumeClick
+                                                    )
+                                                }
                                             }
                                         }
                                         items(uiState.courseStructure.blockData) { block ->
@@ -363,7 +371,6 @@ private fun ResumeCourse(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Spacer(Modifier.height(28.dp))
         Text(
             text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
             style = MaterialTheme.appTypography.labelMedium,
@@ -378,6 +385,60 @@ private fun ResumeCourse(
         )
         Spacer(Modifier.height(24.dp))
         NewEdxButton(
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+            onClick = {
+                onResumeClick(block.id)
+            },
+            content = {
+                TextIcon(
+                    text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    color = MaterialTheme.appColors.buttonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun ResumeCourseTablet(
+    block: Block,
+    onResumeClick: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
+                style = MaterialTheme.appTypography.labelMedium,
+                color = MaterialTheme.appColors.textPrimaryVariant
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size((MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
+                    painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.textPrimary
+                )
+                Text(
+                    text = block.displayName,
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.titleMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4
+                )
+            }
+        }
+        NewEdxButton(
+            width = Modifier.width(194.dp),
             text = stringResource(id = com.raccoongang.course.R.string.course_continue),
             onClick = {
                 onResumeClick(block.id)
