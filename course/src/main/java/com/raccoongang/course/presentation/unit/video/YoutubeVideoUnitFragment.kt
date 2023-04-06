@@ -5,7 +5,11 @@ import android.view.OrientationEventListener
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -25,6 +29,7 @@ import com.raccoongang.course.databinding.FragmentYoutubeVideoUnitBinding
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.ui.ConnectionErrorView
 import com.raccoongang.course.presentation.ui.VideoRotateView
+import com.raccoongang.course.presentation.ui.VideoSubtitles
 import com.raccoongang.course.presentation.ui.VideoTitle
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -48,8 +53,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         super.onCreate(savedInstanceState)
         windowSize = computeWindowSizeClasses()
         lifecycle.addObserver(viewModel)
-        viewModel.videoUrl = requireArguments().getString(ARG_VIDEO_URL, "")
-        blockId = requireArguments().getString(ARG_BLOCK_ID, "")
+        requireArguments().apply {
+            viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
+            viewModel.transcriptUrl = getString(ARG_TRANSCRIPT_URL, "")
+            blockId = getString(ARG_BLOCK_ID, "")
+        }
+        viewModel.downloadSubtitles()
         orientationListener = object : OrientationEventListener(requireActivity()) {
             override fun onOrientationChanged(orientation: Int) {
                 if (windowSize?.isTablet != true) {
@@ -58,7 +67,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                             router.navigateToFullScreenYoutubeVideo(
                                 requireActivity().supportFragmentManager,
                                 viewModel.videoUrl,
-                                viewModel.currentVideoTime,
+                                viewModel.getCurrentVideoTime(),
                                 blockId,
                                 viewModel.courseId
                             )
@@ -103,6 +112,19 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             }
         }
 
+        binding.subtitles.setContent {
+            NewEdxTheme {
+                val state = rememberLazyListState()
+                val currentIndex by viewModel.currentIndex.collectAsState(0)
+                val transcriptObject by viewModel.transcriptObject.observeAsState()
+                VideoSubtitles(
+                    listState = state,
+                    timedTextObject = transcriptObject,
+                    currentIndex = currentIndex
+                )
+            }
+        }
+
         binding.connectionError.isVisible = !viewModel.hasInternetConnection
 
         lifecycle.addObserver(binding.youtubePlayerView)
@@ -125,7 +147,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
-                viewModel.currentVideoTime = second.toLong()
+                viewModel.setCurrentVideoTime((second * 1000f).toLong())
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
@@ -140,7 +162,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     router.navigateToFullScreenYoutubeVideo(
                         requireActivity().supportFragmentManager,
                         viewModel.videoUrl,
-                        viewModel.currentVideoTime,
+                        viewModel.getCurrentVideoTime(),
                         blockId,
                         viewModel.courseId
                     )
@@ -148,7 +170,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat())
+                youTubePlayer.loadVideo(videoId, viewModel.getCurrentVideoTime().toFloat())
                 if (viewModel.isVideoPaused.value == true) {
                     youTubePlayer.pause()
                 }
@@ -177,19 +199,24 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     }
 
     companion object {
+
         private const val ARG_VIDEO_URL = "videoUrl"
+        private const val ARG_TRANSCRIPT_URL = "transcriptUrl"
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "blockTitle"
+
         fun newInstance(
             blockId: String,
             courseId: String,
             videoUrl: String,
+            transcriptUrl: String?,
             blockTitle: String
         ): YoutubeVideoUnitFragment {
             val fragment = YoutubeVideoUnitFragment()
             fragment.arguments = bundleOf(
                 ARG_VIDEO_URL to videoUrl,
+                ARG_TRANSCRIPT_URL to transcriptUrl,
                 ARG_BLOCK_ID to blockId,
                 ARG_COURSE_ID to courseId,
                 ARG_TITLE to blockTitle

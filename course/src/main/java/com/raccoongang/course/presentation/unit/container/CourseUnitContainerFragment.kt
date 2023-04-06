@@ -177,11 +177,13 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
             BlockType.VIDEO -> {
                 val encodedVideos = block.studentViewData!!.encodedVideos!!
+                val transcripts = block.studentViewData!!.transcripts
                 if (encodedVideos.youtube != null) {
                     YoutubeVideoUnitFragment.newInstance(
                         block.id,
                         viewModel.courseId,
                         encodedVideos.youtube?.url!!,
+                        transcripts?.en,
                         block.displayName
                     )
                 } else {
@@ -207,6 +209,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             block.id,
                             viewModel.courseId,
                             videoUrl,
+                            transcripts?.en,
                             block.displayName,
                             isDownloaded
                         )

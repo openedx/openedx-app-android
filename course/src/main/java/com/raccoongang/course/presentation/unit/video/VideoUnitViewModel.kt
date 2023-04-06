@@ -6,24 +6,33 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.data.storage.PreferencesManager
+import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CoursePauseVideo
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
 import com.raccoongang.course.data.repository.CourseRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import subtitleFile.TimedTextObject
 
 class VideoUnitViewModel(
     val courseId: String,
     private val courseRepository: CourseRepository,
     private val preferencesManager: PreferencesManager,
     private val notifier: CourseNotifier,
-    private val networkConnection: NetworkConnection
+    private val networkConnection: NetworkConnection,
+    private val transcriptManager: TranscriptManager
 ) : BaseViewModel() {
 
     var videoUrl = ""
-    var currentVideoTime = 0L
+    var transcriptUrl = ""
+
+    private val _currentVideoTime = MutableLiveData<Long>(0)
+    val currentVideoTime: LiveData<Long>
+        get() = _currentVideoTime
 
     var fullscreenHandled = false
 
@@ -41,6 +50,15 @@ class VideoUnitViewModel(
     val isVideoPaused: LiveData<Boolean>
         get() = _isVideoPaused
 
+    private val _currentIndex = MutableStateFlow(0)
+    val currentIndex = _currentIndex.asStateFlow()
+
+    private val _transcriptObject = MutableLiveData<TimedTextObject?>()
+    val transcriptObject: LiveData<TimedTextObject?>
+        get() = _transcriptObject
+
+    private var timeList: List<Long>? = emptyList()
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -57,11 +75,21 @@ class VideoUnitViewModel(
             notifier.notifier.collect {
                 if (it is CourseVideoPositionChanged && videoUrl == it.videoUrl) {
                     _isUpdated.value = false
-                    currentVideoTime = it.videoTime
+                    _currentVideoTime.value = it.videoTime
                     _isUpdated.value = true
                 } else if (it is CoursePauseVideo) {
                     _isVideoPaused.value = true
                 }
+            }
+        }
+    }
+
+    fun downloadSubtitles() {
+        viewModelScope.launch {
+            transcriptManager.downloadTranscriptsForVideo(transcriptUrl)?.let { result ->
+                _transcriptObject.value = result
+                timeList = result.captions.values.toList()
+                    .map { it.start.mseconds.toLong() }
             }
         }
     }
@@ -78,4 +106,19 @@ class VideoUnitViewModel(
             }
         }
     }
+
+    fun setCurrentVideoTime(value: Long) {
+        _currentVideoTime.value = value
+        timeList?.let {
+            val index = it.indexOfLast { subtitleTime ->
+                subtitleTime < value
+            }
+            if (index != currentIndex.value) {
+                _currentIndex.value = index
+            }
+        }
+    }
+
+    fun getCurrentVideoTime() = currentVideoTime.value ?: 0
+
 }

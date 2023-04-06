@@ -90,7 +90,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
-                viewModel.currentVideoTime = second.toLong()
+                viewModel.currentVideoTime = (second * 1000f).toLong()
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
