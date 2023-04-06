@@ -11,6 +11,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -33,10 +34,13 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.raccoongang.core.BuildConfig
+import com.raccoongang.core.extension.isEmailValid
+import com.raccoongang.core.extension.replaceLinkTags
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.core.utils.EmailUtil
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.nio.charset.StandardCharsets
@@ -192,6 +196,7 @@ private fun WebContentScreen(
 @SuppressLint("SetJavaScriptEnabled")
 private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
     val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
     AndroidView(modifier = Modifier, factory = {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
@@ -211,6 +216,14 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
                     ) {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                         true
+                    } else if (clickUrl.startsWith("mailto:")) {
+                        val email = clickUrl.replace("mailto:", "")
+                        if (email.isEmailValid()) {
+                            EmailUtil.sendEmailIntent(context, email, "", "")
+                            true
+                        } else {
+                            false
+                        }
                     } else {
                         false
                     }
@@ -227,12 +240,20 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             loadDataWithBaseURL(
-                BuildConfig.BASE_URL, body, "text/html", StandardCharsets.UTF_8.name(), null
+                BuildConfig.BASE_URL,
+                body.replaceLinkTags(isDarkTheme),
+                "text/html",
+                StandardCharsets.UTF_8.name(),
+                null
             )
         }
     }, update = {
         it.loadDataWithBaseURL(
-            BuildConfig.BASE_URL, body, "text/html", StandardCharsets.UTF_8.name(), null
+            BuildConfig.BASE_URL,
+            body.replaceLinkTags(isDarkTheme),
+            "text/html",
+            StandardCharsets.UTF_8.name(),
+            null
         )
     })
 }

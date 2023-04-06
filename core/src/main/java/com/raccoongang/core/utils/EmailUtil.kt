@@ -30,7 +30,7 @@ object EmailUtil {
         sendEmailIntent(context, to, subject, body.toString())
     }
 
-    private fun sendEmailIntent(
+    fun sendEmailIntent(
         context: Context?,
         to: String,
         subject: String,
