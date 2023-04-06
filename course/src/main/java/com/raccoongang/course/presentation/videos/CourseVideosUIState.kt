@@ -10,4 +10,5 @@ sealed class CourseVideosUIState {
     ) : CourseVideosUIState()
 
     data class Empty(val message: String) : CourseVideosUIState()
+    object Loading : CourseVideosUIState()
 }

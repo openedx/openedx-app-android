@@ -14,6 +14,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Report
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -22,10 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -222,7 +221,7 @@ internal fun CourseDetailsScreen(
                                     .padding(it),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is CourseDetailsUIState.CourseData -> {
@@ -255,7 +254,7 @@ internal fun CourseDetailsScreen(
                                                 .padding(top = 20.dp),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            CircularProgressIndicator()
+                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                         }
                                     }
                                     Surface(
@@ -303,6 +302,7 @@ private fun CourseDetailNativeContent(
     course: Course,
     onButtonClick: () -> Unit,
 ) {
+    val uriHandler = LocalUriHandler.current
     val buttonWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -328,13 +328,29 @@ private fun CourseDetailNativeContent(
     }
 
     Column {
-        CourseImageHeader(
-            modifier = Modifier
-                .aspectRatio(1.86f)
-                .padding(6.dp),
-            courseImage = course.media.image?.large,
-            courseCertificate = null
-        )
+        Box(contentAlignment = Alignment.Center) {
+            CourseImageHeader(
+                modifier = Modifier
+                    .aspectRatio(1.86f)
+                    .padding(6.dp),
+                courseImage = course.media.image?.large,
+                courseCertificate = null
+            )
+            if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
+                IconButton(
+                    onClick = {
+                        uriHandler.openUri(course.media.courseVideo?.uri!!)
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(64.dp),
+                        imageVector = Icons.Filled.PlayCircle,
+                        contentDescription = null,
+                        tint = Color.LightGray
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(16.dp))
         Column(
             Modifier
@@ -382,6 +398,7 @@ private fun CourseDetailNativeContentLandscape(
     course: Course,
     onButtonClick: () -> Unit,
 ) {
+    val uriHandler = LocalUriHandler.current
     val buttonWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -440,13 +457,29 @@ private fun CourseDetailNativeContentLandscape(
             }
         }
         Spacer(Modifier.width(24.dp))
-        CourseImageHeader(
-            modifier = Modifier
-                .width(263.dp)
-                .height(200.dp),
-            courseImage = course.media.image?.large,
-            courseCertificate = null
-        )
+        Box(contentAlignment = Alignment.Center) {
+            CourseImageHeader(
+                modifier = Modifier
+                    .width(263.dp)
+                    .height(200.dp),
+                courseImage = course.media.image?.large,
+                courseCertificate = null
+            )
+            if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
+                IconButton(
+                    onClick = {
+                        uriHandler.openUri(course.media.courseVideo?.uri!!)
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(64.dp),
+                        imageVector = Icons.Filled.PlayCircle,
+                        contentDescription = null,
+                        tint = Color.LightGray
+                    )
+                }
+            }
+        }
     }
 }
 

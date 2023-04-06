@@ -170,7 +170,10 @@ fun CourseSectionCard(
                 } else if (downloadedState != null) {
                     Box(contentAlignment = Alignment.Center) {
                         if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
-                            CircularProgressIndicator(modifier = Modifier.size(34.dp))
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(34.dp),
+                                color = MaterialTheme.appColors.primary
+                            )
                         }
                         IconButton(modifier = iconModifier,
                             onClick = { onDownloadClick(block) }) {

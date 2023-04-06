@@ -179,7 +179,7 @@ private fun WebContentScreen(
                                 .zIndex(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                         }
                     }
                 }

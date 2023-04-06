@@ -255,7 +255,7 @@ private fun AuthForm(
         }
 
         if (isLoading) {
-            CircularProgressIndicator(color = MaterialTheme.colors.primary)
+            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
             NewEdxButton(
                 width = buttonWidth,

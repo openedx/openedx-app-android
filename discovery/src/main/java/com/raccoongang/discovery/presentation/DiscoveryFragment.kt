@@ -199,7 +199,7 @@ internal fun DiscoveryScreen(
                                 Modifier
                                     .fillMaxSize(), contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is DiscoveryUIState.Courses -> {
@@ -247,7 +247,7 @@ internal fun DiscoveryScreen(
                                                     .padding(vertical = 16.dp),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                CircularProgressIndicator()
+                                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                             }
                                         }
                                     }
