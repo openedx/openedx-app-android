@@ -176,7 +176,7 @@ class CourseOutlineViewModel(
         resumeSectionBlock = blocks.find {
             it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
         }
-        return resumeBlock
+        return resumeVerticalBlock
     }
 
 }
