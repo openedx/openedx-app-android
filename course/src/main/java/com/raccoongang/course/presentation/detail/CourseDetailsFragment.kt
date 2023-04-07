@@ -40,11 +40,13 @@ import com.raccoongang.core.BuildConfig
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.Course
 import com.raccoongang.core.domain.model.Media
+import com.raccoongang.core.extension.isEmailValid
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.course.R
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.ui.CourseImageHeader
@@ -558,6 +560,14 @@ private fun CourseDescription(
                     ) {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                         true
+                    } else if (clickUrl.startsWith("mailto:")) {
+                        val email = clickUrl.replace("mailto:", "")
+                        if (email.isEmailValid()) {
+                            EmailUtil.sendEmailIntent(context, email, "", "")
+                            true
+                        } else {
+                            false
+                        }
                     } else {
                         false
                     }

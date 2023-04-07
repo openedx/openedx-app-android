@@ -8,17 +8,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,6 +33,7 @@ import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.course.presentation.CourseRouter
+import com.raccoongang.course.presentation.ui.CardArrow
 import org.koin.android.ext.android.inject
 import com.raccoongang.course.R as courseR
 
@@ -112,10 +112,11 @@ private fun HandoutsScreen(
             )
         }
 
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(it)
-            .statusBarsInset(),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(it)
+                .statusBarsInset(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {
@@ -146,70 +147,71 @@ private fun HandoutsScreen(
                 ) {
                     LazyColumn(
                         Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 10.dp)
+                        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 24.dp)
                     ) {
                         item {
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onHandoutsClick() }
-                                    .padding(vertical = 16.dp, horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Description,
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(id = courseR.string.course_handouts),
-                                        style = MaterialTheme.appTypography.titleLarge,
-                                        color = MaterialTheme.appColors.textPrimary
-                                    )
-                                    Text(
-                                        text = stringResource(id = courseR.string.course_find_important_info),
-                                        style = MaterialTheme.appTypography.bodySmall,
-                                        color = MaterialTheme.appColors.textPrimary
-                                    )
-                                }
-                            }
-                            Divider()
+                            HandoutsItem(
+                                title = stringResource(id = courseR.string.course_handouts),
+                                description = stringResource(id = courseR.string.course_find_important_info),
+                                painter = painterResource(id = courseR.drawable.course_ic_handouts),
+                                onClick = onHandoutsClick
+                            )
                         }
                         item {
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onAnnouncementsClick() }
-                                    .padding(vertical = 16.dp, horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(imageVector = Icons.Filled.Campaign, contentDescription = null)
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Column(
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(id = courseR.string.course_announcements),
-                                        style = MaterialTheme.appTypography.titleLarge,
-                                        color = MaterialTheme.appColors.textPrimary
-                                    )
-                                    Text(
-                                        text = stringResource(id = courseR.string.course_latest_news),
-                                        style = MaterialTheme.appTypography.bodySmall,
-                                        color = MaterialTheme.appColors.textPrimary
-                                    )
-                                }
-                            }
-                            Divider()
+                            HandoutsItem(
+                                title = stringResource(id = courseR.string.course_announcements),
+                                description = stringResource(id = courseR.string.course_latest_news),
+                                painter = painterResource(id = courseR.drawable.course_ic_announcements),
+                                onClick = onAnnouncementsClick
+                            )
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun HandoutsItem(
+    title: String,
+    description: String,
+    painter: Painter,
+    onClick: () -> Unit
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 16.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                tint = MaterialTheme.appColors.textPrimary
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.appTypography.titleSmall,
+                    color = MaterialTheme.appColors.textPrimary
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = MaterialTheme.appColors.textFieldHint
+                )
+            }
+        }
+        CardArrow(degrees = 0f)
+    }
+    Divider()
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)

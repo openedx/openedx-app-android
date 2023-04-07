@@ -55,7 +55,7 @@ class DiscussionThreadsViewModel(
             notifier.notifier.collect {
                 if (it is DiscussionThreadAdded) {
                     if (lastOrderBy.isNotEmpty()) {
-                        getThreadByType(lastOrderBy)
+                        updateThread(lastOrderBy)
                     }
                 } else if (it is DiscussionThreadDataChanged) {
                     val index = threadsList.indexOfFirst { thread ->

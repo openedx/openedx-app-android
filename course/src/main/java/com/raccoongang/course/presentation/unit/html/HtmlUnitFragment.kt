@@ -24,6 +24,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.raccoongang.core.extension.isEmailValid
 import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.ui.WindowSize
@@ -32,6 +33,7 @@ import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.windowSizeValue
+import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.course.presentation.ui.ConnectionErrorView
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -174,6 +176,14 @@ private fun HTMLContentView(
                         ) {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                             true
+                        } else if (clickUrl.startsWith("mailto:")) {
+                            val email = clickUrl.replace("mailto:", "")
+                            if (email.isEmailValid()) {
+                                EmailUtil.sendEmailIntent(context, email, "", "")
+                                true
+                            } else {
+                                false
+                            }
                         } else {
                             false
                         }
