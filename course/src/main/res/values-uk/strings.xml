@@ -43,7 +43,7 @@
     <string name="course_this_interactive_component">Ця інтерактивна компонента ще не доступна</string>
     <string name="course_explore_other_parts">Досліджуйте інші частини цього курсу або перегляньте це на веб-сайті.</string>
     <string name="course_open_in_browser">Відкрити в браузері</string>
-    <string name="course_continue_with">Продовжити за допомогою:</string>
+    <string name="course_continue_with">Остання активність:</string>
     <string name="course_continue">Продовжити</string>
 
 </resources>
