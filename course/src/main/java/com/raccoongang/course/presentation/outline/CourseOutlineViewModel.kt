@@ -10,7 +10,6 @@ import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.Block
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.domain.model.CourseComponentStatus
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.module.DownloadWorkerController
@@ -48,6 +47,11 @@ class CourseOutlineViewModel(
         get() = _isUpdating
 
     var courseTitle = ""
+
+    var resumeSectionBlock: Block? = null
+        private set
+    var resumeVerticalBlock: Block? = null
+        private set
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -127,7 +131,7 @@ class CourseOutlineViewModel(
                 _uiState.value = CourseOutlineUIState.CourseData(
                     courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
-                    resumeBlock = blocks.firstOrNull { it.id == courseStatus.lastVisitedBlockId }
+                    resumeBlock = getResumeBlock(blocks, courseStatus.lastVisitedBlockId)
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -159,6 +163,20 @@ class CourseOutlineViewModel(
             }
         }
         return resultBlocks.toList()
+    }
+
+    private fun getResumeBlock(
+        blocks: List<Block>,
+        continueBlockId: String
+    ): Block? {
+        val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
+        resumeVerticalBlock = blocks.find {
+            it.descendants.contains(resumeBlock?.id) && it.type == BlockType.VERTICAL
+        }
+        resumeSectionBlock = blocks.find {
+            it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
+        }
+        return resumeVerticalBlock
     }
 
 }

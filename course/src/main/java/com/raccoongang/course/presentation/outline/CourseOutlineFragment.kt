@@ -5,13 +5,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -22,8 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -46,6 +43,7 @@ import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.container.CourseContainerFragment
 import com.raccoongang.course.presentation.ui.CourseImageHeader
 import com.raccoongang.course.presentation.ui.CourseSectionCard
+import com.raccoongang.course.presentation.units.CourseUnitsFragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -105,13 +103,24 @@ class CourseOutlineFragment : Fragment() {
                         )
                     },
                     onResumeClick = { blockId ->
-                        router.navigateToCourseContainer(
-                            requireActivity().supportFragmentManager,
-                            blockId = blockId,
-                            courseId = viewModel.courseId,
-                            courseName = viewModel.courseTitle,
-                            mode = CourseViewMode.FULL
-                        )
+                        viewModel.resumeSectionBlock?.let { sequential ->
+                            router.navigateToCourseSubsections(
+                                requireActivity().supportFragmentManager,
+                                viewModel.courseId,
+                                sequential.id,
+                                sequential.displayName,
+                                CourseViewMode.FULL
+                            )
+                            viewModel.resumeVerticalBlock?.let { vertical ->
+                                router.navigateToCourseUnits(
+                                    requireActivity().supportFragmentManager,
+                                    viewModel.courseId,
+                                    vertical.id,
+                                    vertical.displayName,
+                                    CourseViewMode.FULL
+                                )
+                            }
+                        }
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
@@ -285,6 +294,22 @@ internal fun CourseOutlineScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         contentPadding = listPadding
                                     ) {
+                                        if (uiState.resumeBlock != null) {
+                                            item {
+                                                Spacer(Modifier.height(28.dp))
+                                                if (windowSize.isTablet) {
+                                                    ResumeCourseTablet(
+                                                        block = uiState.resumeBlock,
+                                                        onResumeClick = onResumeClick
+                                                    )
+                                                } else {
+                                                    ResumeCourse(
+                                                        block = uiState.resumeBlock,
+                                                        onResumeClick = onResumeClick
+                                                    )
+                                                }
+                                            }
+                                        }
                                         items(uiState.courseStructure.blockData) { block ->
                                             if (block.type == BlockType.CHAPTER) {
                                                 Text(
@@ -343,42 +368,87 @@ private fun ResumeCourse(
     block: Block,
     onResumeClick: (String) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.appColors.secondaryVariant)
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(id = com.raccoongang.course.R.string.course_resume_unit_title),
-                style = MaterialTheme.appTypography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.appColors.textPrimary
-            )
-            Text(
-                text = block.displayName,
-                style = MaterialTheme.appTypography.bodyLarge,
-                color = MaterialTheme.appColors.textPrimary
-            )
-        }
-        NewEdxOutlinedButton(
-            modifier = Modifier,
-            borderColor = MaterialTheme.appColors.textFieldBorder,
-            textColor = MaterialTheme.appColors.textPrimary,
-            text = stringResource(id = com.raccoongang.course.R.string.course_resume_unit_btn),
+        Text(
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
+            style = MaterialTheme.appTypography.labelMedium,
+            color = MaterialTheme.appColors.textPrimaryVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        IconText(
+            text = block.displayName,
+            painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
+            color = MaterialTheme.appColors.textPrimary,
+            textStyle = MaterialTheme.appTypography.titleMedium
+        )
+        Spacer(Modifier.height(24.dp))
+        NewEdxButton(
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue),
             onClick = {
                 onResumeClick(block.id)
             },
             content = {
-                Text(text = stringResource(id = com.raccoongang.course.R.string.course_resume_unit_btn).uppercase())
+                TextIcon(
+                    text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    color = MaterialTheme.appColors.buttonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun ResumeCourseTablet(
+    block: Block,
+    onResumeClick: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
+                style = MaterialTheme.appTypography.labelMedium,
+                color = MaterialTheme.appColors.textPrimaryVariant
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Filled.ChevronRight,
+                    modifier = Modifier.size((MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
+                    painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .offset(x = 4.dp)
+                    tint = MaterialTheme.appColors.textPrimary
+                )
+                Text(
+                    text = block.displayName,
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.titleMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4
+                )
+            }
+        }
+        NewEdxButton(
+            width = Modifier.width(194.dp),
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+            onClick = {
+                onResumeClick(block.id)
+            },
+            content = {
+                TextIcon(
+                    text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    color = MaterialTheme.appColors.buttonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
         )

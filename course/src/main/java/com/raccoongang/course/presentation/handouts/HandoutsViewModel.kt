@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.domain.model.AnnouncementModel
-import com.raccoongang.core.domain.model.EnrolledCourse
 import com.raccoongang.core.domain.model.HandoutsModel
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.launch
@@ -58,6 +57,7 @@ class HandoutsViewModel(
             append("<body>")
             for (model in announcements) {
                 append("<div class=\"header\">")
+                append("<br>")
                 append(model.date)
                 append("</div>")
                 append("<div class=\"separator\"></div>")

@@ -293,7 +293,7 @@ private fun EditProfileScreen(
     var expandedList by rememberSaveable {
         mutableStateOf(emptyList<RegistrationField.Option>())
     }
-    var openDialog by rememberSaveable {
+    var openWarningMessageDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -539,6 +539,9 @@ private fun EditProfileScreen(
 
                                         .noRippleClickable {
                                             isOpenChangeImageDialogState = true
+                                            if (!uiState.account.isOlderThanMinAge()) {
+                                                openWarningMessageDialog = true
+                                            }
                                         }
                                 )
                                 Icon(
@@ -570,7 +573,7 @@ private fun EditProfileScreen(
                                         mapFields[ACCOUNT_PRIVACY] = privacy
                                         onLimitedProfileChange(!uiState.isLimited)
                                     } else {
-                                        openDialog = true
+                                        openWarningMessageDialog = true
                                     }
                                 },
                                 text = stringResource(if (uiState.isLimited) profileR.string.profile_switch_to_full else profileR.string.profile_switch_to_limited),
@@ -629,11 +632,11 @@ private fun EditProfileScreen(
                                 })
                             Spacer(Modifier.height(52.dp))
                         }
-                        if (openDialog) {
+                        if (openWarningMessageDialog) {
                             LimitedProfileDialog(
                                 modifier = popUpModifier
                             ) {
-                                openDialog = false
+                                openWarningMessageDialog = false
                             }
                         }
                     }
