@@ -177,6 +177,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
             BlockType.VIDEO -> {
                 val encodedVideos = block.studentViewData!!.encodedVideos!!
+                val transcripts = block.studentViewData!!.transcripts
                 with(encodedVideos) {
                     var isDownloaded = false
                     val videoUrl = if (viewModel.getDownloadModelById(block.id) != null) {
@@ -200,6 +201,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             block.id,
                             viewModel.courseId,
                             videoUrl,
+                            transcripts?.en,
                             block.displayName,
                             isDownloaded
                         )
@@ -208,6 +210,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             block.id,
                             viewModel.courseId,
                             encodedVideos.youtube?.url!!,
+                            transcripts?.en,
                             block.displayName
                         )
                     }

@@ -43,7 +43,7 @@
     <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
     <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
+    <string name="course_subtitles">Subtitles</string>
     <string name="course_continue_with">Continue with:</string>
     <string name="course_continue">Continue</string>
-
 </resources>

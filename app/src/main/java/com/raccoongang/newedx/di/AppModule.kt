@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder
 import com.raccoongang.auth.presentation.AuthRouter
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.module.DownloadWorkerController
+import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.module.download.FileDownloader
 import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.ResourceManager
@@ -99,4 +100,6 @@ val appModule = module {
     single {
         DownloadWorkerController(get(), get(), get())
     }
+
+    single { TranscriptManager(get()) }
 }

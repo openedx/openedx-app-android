@@ -5,13 +5,13 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +40,10 @@ import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.course.R
+import org.jsoup.Jsoup
+import subtitleFile.TimedTextObject
 import java.util.*
+import com.raccoongang.course.R as courseR
 
 @Composable
 fun CourseImageHeader(
@@ -419,6 +422,52 @@ fun ConnectionErrorView(
     }
 }
 
+@Composable
+fun VideoSubtitles(
+    listState: LazyListState,
+    timedTextObject: TimedTextObject?,
+    currentIndex: Int
+) {
+    timedTextObject?.let {
+        LaunchedEffect(key1 = currentIndex) {
+            if (currentIndex > 1) {
+                listState.animateScrollToItem(currentIndex - 1)
+            }
+        }
+        val scaffoldState = rememberScaffoldState()
+        val subtitles = timedTextObject.captions.values.toList()
+        Scaffold(scaffoldState = scaffoldState) {
+            Column(Modifier.padding(it)) {
+                Text(
+                    text = stringResource(id = courseR.string.course_subtitles),
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.titleMedium
+                )
+                Spacer(Modifier.height(24.dp))
+                LazyColumn(
+                    state = listState,
+                    userScrollEnabled = false
+                ) {
+                    itemsIndexed(subtitles) { index, item ->
+                        val textColor =
+                            if (currentIndex == index) {
+                                MaterialTheme.appColors.textPrimary
+                            } else {
+                                MaterialTheme.appColors.textFieldBorder
+                            }
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = Jsoup.parse(item.content).text(),
+                            color = textColor,
+                            style = MaterialTheme.appTypography.bodyMedium
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
