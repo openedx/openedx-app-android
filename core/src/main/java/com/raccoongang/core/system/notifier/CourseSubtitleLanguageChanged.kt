@@ -1,5 +1,5 @@
 package com.raccoongang.core.system.notifier
 
-data class CourseSelectValueChanged(
+data class CourseSubtitleLanguageChanged(
     val value: String
 ) : CourseEvent

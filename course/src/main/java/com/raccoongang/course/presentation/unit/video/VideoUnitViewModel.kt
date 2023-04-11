@@ -11,7 +11,7 @@ import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CoursePauseVideo
-import com.raccoongang.core.system.notifier.CourseSelectValueChanged
+import com.raccoongang.core.system.notifier.CourseSubtitleLanguageChanged
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
 import com.raccoongang.course.data.repository.CourseRepository
 import kotlinx.coroutines.delay
@@ -83,7 +83,7 @@ class VideoUnitViewModel(
                     _isUpdated.value = true
                 } else if (it is CoursePauseVideo) {
                     _isVideoPaused.value = true
-                } else if (it is CourseSelectValueChanged) {
+                } else if (it is CourseSubtitleLanguageChanged) {
                     transcriptLanguage = it.value
                     _transcriptObject.value = null
                     downloadSubtitles()
