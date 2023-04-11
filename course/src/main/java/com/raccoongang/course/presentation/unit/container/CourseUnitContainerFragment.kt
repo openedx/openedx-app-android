@@ -201,7 +201,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             block.id,
                             viewModel.courseId,
                             videoUrl,
-                            transcripts?.en,
+                            transcripts?.toMap() ?: emptyMap(),
                             block.displayName,
                             isDownloaded
                         )
@@ -210,7 +210,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             block.id,
                             viewModel.courseId,
                             encodedVideos.youtube?.url!!,
-                            transcripts?.en,
+                            transcripts?.toMap() ?: emptyMap(),
                             block.displayName
                         )
                     }

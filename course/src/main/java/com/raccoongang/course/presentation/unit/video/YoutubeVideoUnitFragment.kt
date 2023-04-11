@@ -20,10 +20,14 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
 import com.raccoongang.core.extension.computeWindowSizeClasses
+import com.raccoongang.core.extension.objectToString
+import com.raccoongang.core.extension.stringToObject
+import com.raccoongang.core.presentation.dialog.SelectBottomDialogFragment
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
+import com.raccoongang.core.utils.LocaleUtils
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentYoutubeVideoUnitBinding
 import com.raccoongang.course.presentation.CourseRouter
@@ -55,7 +59,9 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         lifecycle.addObserver(viewModel)
         requireArguments().apply {
             viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
-            viewModel.transcriptUrl = getString(ARG_TRANSCRIPT_URL, "")
+            viewModel.transcripts = stringToObject<Map<String, String>>(
+                getString(ARG_TRANSCRIPT_URL, "")
+            ) ?: emptyMap()
             blockId = getString(ARG_BLOCK_ID, "")
         }
         viewModel.downloadSubtitles()
@@ -120,7 +126,19 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 VideoSubtitles(
                     listState = state,
                     timedTextObject = transcriptObject,
-                    currentIndex = currentIndex
+                    subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
+                    currentIndex = currentIndex,
+                    onSettingsClick = {
+                        _youTubePlayer?.pause()
+                        val dialog =
+                            SelectBottomDialogFragment.newInstance(
+                                LocaleUtils.getLanguages(viewModel.transcripts.keys.toList())
+                            )
+                        dialog.show(
+                            requireActivity().supportFragmentManager,
+                            SelectBottomDialogFragment::class.simpleName
+                        )
+                    }
                 )
             }
         }
@@ -210,13 +228,13 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             blockId: String,
             courseId: String,
             videoUrl: String,
-            transcriptUrl: String?,
+            transcriptsUrl: Map<String, String>,
             blockTitle: String
         ): YoutubeVideoUnitFragment {
             val fragment = YoutubeVideoUnitFragment()
             fragment.arguments = bundleOf(
                 ARG_VIDEO_URL to videoUrl,
-                ARG_TRANSCRIPT_URL to transcriptUrl,
+                ARG_TRANSCRIPT_URL to objectToString(transcriptsUrl),
                 ARG_BLOCK_ID to blockId,
                 ARG_COURSE_ID to courseId,
                 ARG_TITLE to blockTitle

@@ -14,7 +14,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.outlined.Report
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -25,6 +24,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.*
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -345,8 +345,8 @@ private fun CourseDetailNativeContent(
                     }
                 ) {
                     Icon(
-                        modifier = Modifier.size(64.dp),
-                        imageVector = Icons.Filled.PlayCircle,
+                        modifier = Modifier.size(40.dp),
+                        painter = painterResource(courseR.drawable.course_ic_play),
                         contentDescription = null,
                         tint = Color.LightGray
                     )
@@ -474,8 +474,8 @@ private fun CourseDetailNativeContentLandscape(
                     }
                 ) {
                     Icon(
-                        modifier = Modifier.size(64.dp),
-                        imageVector = Icons.Filled.PlayCircle,
+                        modifier = Modifier.size(40.dp),
+                        painter = painterResource(courseR.drawable.course_ic_play),
                         contentDescription = null,
                         tint = Color.LightGray
                     )

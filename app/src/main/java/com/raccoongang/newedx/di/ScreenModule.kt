@@ -7,6 +7,7 @@ import com.raccoongang.auth.presentation.signin.SignInViewModel
 import com.raccoongang.auth.presentation.signup.SignUpViewModel
 import com.raccoongang.core.Validator
 import com.raccoongang.core.domain.model.Account
+import com.raccoongang.core.presentation.dialog.SelectDialogViewModel
 import com.raccoongang.course.data.repository.CourseRepository
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import com.raccoongang.course.presentation.container.CourseContainerViewModel
@@ -87,6 +88,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get()) }
+    viewModel { SelectDialogViewModel(get()) }
 
     single { DiscussionRepository(get()) }
     factory { DiscussionInteractor(get()) }
