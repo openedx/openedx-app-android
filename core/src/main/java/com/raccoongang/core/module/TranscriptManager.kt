@@ -2,10 +2,7 @@ package com.raccoongang.core.module
 
 import android.content.Context
 import com.raccoongang.core.module.download.AbstractDownloader
-import com.raccoongang.core.utils.Directories
-import com.raccoongang.core.utils.FileUtil
-import com.raccoongang.core.utils.IOUtils
-import com.raccoongang.core.utils.Sha1Util
+import com.raccoongang.core.utils.*
 import okhttp3.OkHttpClient
 import subtitleFile.FormatSRT
 import subtitleFile.TimedTextObject
@@ -14,6 +11,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.Charset
+import java.util.concurrent.TimeUnit
 
 class TranscriptManager(
     val context: Context
@@ -30,7 +28,7 @@ class TranscriptManager(
         val transcriptDir = getTranscriptDir() ?: return false
         val hash = Sha1Util.SHA1(url)
         val file = File(transcriptDir, hash)
-        return file.exists()
+        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(12)
     }
 
     fun get(url: String): String? {

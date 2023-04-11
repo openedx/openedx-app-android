@@ -4,12 +4,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.raccoongang.core.AppDataConstants
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CoursePauseVideo
+import com.raccoongang.core.system.notifier.CourseSelectValueChanged
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
 import com.raccoongang.course.data.repository.CourseRepository
 import kotlinx.coroutines.delay
@@ -28,7 +30,9 @@ class VideoUnitViewModel(
 ) : BaseViewModel() {
 
     var videoUrl = ""
-    var transcriptUrl = ""
+    var transcripts = emptyMap<String, String>()
+    var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
+        private set
 
     private val _currentVideoTime = MutableLiveData<Long>(0)
     val currentVideoTime: LiveData<Long>
@@ -79,6 +83,10 @@ class VideoUnitViewModel(
                     _isUpdated.value = true
                 } else if (it is CoursePauseVideo) {
                     _isVideoPaused.value = true
+                } else if (it is CourseSelectValueChanged) {
+                    transcriptLanguage = it.value
+                    _transcriptObject.value = null
+                    downloadSubtitles()
                 }
             }
         }
@@ -86,13 +94,25 @@ class VideoUnitViewModel(
 
     fun downloadSubtitles() {
         viewModelScope.launch {
-            transcriptManager.downloadTranscriptsForVideo(transcriptUrl)?.let { result ->
+            transcriptManager.downloadTranscriptsForVideo(getTranscriptUrl())?.let { result ->
                 _transcriptObject.value = result
                 timeList = result.captions.values.toList()
                     .map { it.start.mseconds.toLong() }
             }
         }
     }
+
+    private fun getTranscriptUrl(): String {
+        val defaultTranscripts = transcripts[transcriptLanguage]
+        if (!defaultTranscripts.isNullOrEmpty()) {
+            return defaultTranscripts
+        }
+        if (transcripts.values.isNotEmpty()) {
+            return transcripts.values.toList().first()
+        }
+        return ""
+    }
+
 
     fun markBlockCompleted(blockId: String) {
         viewModelScope.launch {

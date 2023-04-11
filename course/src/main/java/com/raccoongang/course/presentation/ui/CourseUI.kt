@@ -426,7 +426,9 @@ fun ConnectionErrorView(
 fun VideoSubtitles(
     listState: LazyListState,
     timedTextObject: TimedTextObject?,
-    currentIndex: Int
+    subtitleLanguage: String,
+    currentIndex: Int,
+    onSettingsClick: () -> Unit
 ) {
     timedTextObject?.let {
         LaunchedEffect(key1 = currentIndex) {
@@ -438,11 +440,26 @@ fun VideoSubtitles(
         val subtitles = timedTextObject.captions.values.toList()
         Scaffold(scaffoldState = scaffoldState) {
             Column(Modifier.padding(it)) {
-                Text(
-                    text = stringResource(id = courseR.string.course_subtitles),
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(id = courseR.string.course_subtitles),
+                        color = MaterialTheme.appColors.textPrimary,
+                        style = MaterialTheme.appTypography.titleMedium
+                    )
+                    IconText(
+                        modifier = Modifier.noRippleClickable {
+                            onSettingsClick()
+                        },
+                        text = subtitleLanguage,
+                        painter = painterResource(id = courseR.drawable.course_ic_cc),
+                        color = MaterialTheme.appColors.textAccent,
+                        textStyle = MaterialTheme.appTypography.labelLarge
+                    )
+                }
                 Spacer(Modifier.height(24.dp))
                 LazyColumn(
                     state = listState,

@@ -3,7 +3,6 @@ package com.raccoongang.core.utils
 import com.raccoongang.core.AppDataConstants.USER_MAX_YEAR
 import com.raccoongang.core.AppDataConstants.defaultLocale
 import com.raccoongang.core.domain.model.RegistrationField
-import com.raccoongang.core.utils.LocaleUtils.getLanguages
 import java.util.*
 
 object LocaleUtils {
@@ -27,6 +26,10 @@ object LocaleUtils {
     fun getCountries() = getAvailableCountries()
 
     fun getLanguages() = getAvailableLanguages()
+
+    fun getLanguages(languages: List<String>) = getAvailableLanguages().filter {
+        languages.contains(it.value)
+    }
 
     fun getCountryByCountryCode(code: String): String? {
         val countryISO = Locale.getISOCountries().firstOrNull { it == code }
@@ -60,8 +63,8 @@ object LocaleUtils {
         .sortedBy { it.name }
         .toList()
 
-}
+    fun getDisplayLanguage(languageCode: String): String {
+        return Locale(languageCode, "").getDisplayLanguage(defaultLocale)
+    }
 
-fun main() {
-    println(getLanguages())
 }

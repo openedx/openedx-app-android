@@ -296,8 +296,8 @@ private fun DiscussionCommentsScreen(
                                                     .padding(top = 24.dp, bottom = 4.dp),
                                                 text = pluralStringResource(
                                                     id = com.raccoongang.discussion.R.plurals.discussion_responses_capitalized,
-                                                    uiState.thread.commentCount - 1,
-                                                    uiState.thread.commentCount - 1
+                                                    uiState.count,
+                                                    uiState.count
                                                 ),
                                                 color = MaterialTheme.appColors.textPrimary,
                                                 style = MaterialTheme.appTypography.titleLarge
@@ -433,7 +433,8 @@ private fun DiscussionCommentsScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionCommentsUIState.Success(
                 mockThread,
-                listOf(mockComment, mockComment)
+                listOf(mockComment, mockComment),
+                2
             ),
             uiMessage = null,
             title = "Test Screen",
@@ -462,7 +463,8 @@ private fun DiscussionCommentsScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionCommentsUIState.Success(
                 mockThread,
-                listOf(mockComment, mockComment)
+                listOf(mockComment, mockComment),
+                2
             ),
             uiMessage = null,
             title = "Test Screen",

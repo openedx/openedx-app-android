@@ -52,13 +52,9 @@ data class Block(
 data class StudentViewData(
     val onlyOnWeb: Boolean,
     val duration: Any,
-    val transcripts: Transcripts?,
+    val transcripts: HashMap<String, String>?,
     val encodedVideos: EncodedVideos?,
     val topicId: String
-)
-
-data class Transcripts(
-    val en: String
 )
 
 data class EncodedVideos(

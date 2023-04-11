@@ -23,10 +23,14 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.extension.dpToPixel
+import com.raccoongang.core.extension.objectToString
+import com.raccoongang.core.extension.stringToObject
+import com.raccoongang.core.presentation.dialog.SelectBottomDialogFragment
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
+import com.raccoongang.core.utils.LocaleUtils
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentVideoUnitBinding
 import com.raccoongang.course.presentation.CourseRouter
@@ -73,7 +77,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         handler.post(videoTimeRunnable)
         requireArguments().apply {
             viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
-            viewModel.transcriptUrl = getString(ARG_TRANSCRIPT_URL, "")
+            viewModel.transcripts =
+                stringToObject<Map<String, String>>(
+                    getString(ARG_TRANSCRIPT_URL, "")
+                ) ?: emptyMap()
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
             blockId = getString(ARG_BLOCK_ID, "")
         }
@@ -140,7 +147,18 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 VideoSubtitles(
                     listState = state,
                     timedTextObject = transcriptObject,
-                    currentIndex = currentIndex
+                    subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
+                    currentIndex = currentIndex,
+                    onSettingsClick = {
+                        exoPlayer?.pause()
+                        val dialog = SelectBottomDialogFragment.newInstance(
+                            LocaleUtils.getLanguages(viewModel.transcripts.keys.toList())
+                        )
+                        dialog.show(
+                            requireActivity().supportFragmentManager,
+                            SelectBottomDialogFragment::class.simpleName
+                        )
+                    }
                 )
             }
         }
@@ -247,7 +265,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             blockId: String,
             courseId: String,
             videoUrl: String,
-            transcriptUrl: String?,
+            transcriptsUrl: Map<String, String>,
             title: String,
             isDownloaded: Boolean
         ): VideoUnitFragment {
@@ -256,7 +274,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 ARG_BLOCK_ID to blockId,
                 ARG_COURSE_ID to courseId,
                 ARG_VIDEO_URL to videoUrl,
-                ARG_TRANSCRIPT_URL to transcriptUrl,
+                ARG_TRANSCRIPT_URL to objectToString(transcriptsUrl),
                 ARG_TITLE to title,
                 ARG_DOWNLOADED to isDownloaded
             )

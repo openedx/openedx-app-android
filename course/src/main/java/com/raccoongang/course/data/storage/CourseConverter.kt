@@ -45,4 +45,16 @@ class CourseConverter {
         return Gson().fromJson(value, type)
     }
 
+    @TypeConverter
+    fun fromStringToMap(value: String?): Map<String, String> {
+        val mapType = genericType<HashMap<String, String>>()
+        return Gson().fromJson(value, mapType)
+    }
+
+    @TypeConverter
+    fun fromMapToString(map: Map<String, String>): String {
+        val gson = Gson()
+        return gson.toJson(map)
+    }
+
 }

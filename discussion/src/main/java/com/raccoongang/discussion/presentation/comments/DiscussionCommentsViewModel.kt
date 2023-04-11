@@ -32,6 +32,7 @@ class DiscussionCommentsViewModel(
 
     var thread: com.raccoongang.discussion.domain.model.Thread
         private set
+    private var commentCount = 0
 
     private val _uiState = MutableLiveData<DiscussionCommentsUIState>()
     val uiState: LiveData<DiscussionCommentsUIState>
@@ -64,8 +65,11 @@ class DiscussionCommentsViewModel(
                 if (it is DiscussionCommentAdded) {
                     if (page == -1) {
                         comments.add(it.comment)
-                        _uiState.value =
-                            DiscussionCommentsUIState.Success(thread, comments.toList())
+                        _uiState.value = DiscussionCommentsUIState.Success(
+                            thread,
+                            comments.toList(),
+                            commentCount
+                        )
                         _scrollToBottom.value = true
                     } else {
                         _uiMessage.value =
@@ -79,8 +83,11 @@ class DiscussionCommentsViewModel(
                     }
                     if (index >= 0) {
                         comments[index] = it.discussionComment
-                        _uiState.value =
-                            DiscussionCommentsUIState.Success(thread, comments.toList())
+                        _uiState.value = DiscussionCommentsUIState.Success(
+                            thread,
+                            comments.toList(),
+                            commentCount
+                        )
                     }
                 }
             }
@@ -114,8 +121,10 @@ class DiscussionCommentsViewModel(
                     _canLoadMore.value = false
                     page = -1
                 }
+                commentCount = response.pagination.count
                 comments.addAll(response.results)
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
 
                 if (markReadIfSuccessful) {
                     markRead()
@@ -139,7 +148,10 @@ class DiscussionCommentsViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.setThreadRead(thread.id)
-                thread = thread.copy(read = response.read, unreadCommentCount = response.unreadCommentCount)
+                thread = thread.copy(
+                    read = response.read,
+                    unreadCommentCount = response.unreadCommentCount
+                )
                 sendThreadUpdated()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -170,7 +182,8 @@ class DiscussionCommentsViewModel(
             try {
                 val response = interactor.setThreadVoted(thread.id, vote)
                 thread = thread.copy(voted = response.voted, voteCount = response.voteCount)
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
                 sendThreadUpdated()
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -189,7 +202,8 @@ class DiscussionCommentsViewModel(
             try {
                 val response = interactor.setThreadFollowed(thread.id, followed)
                 thread = thread.copy(following = response.following)
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
                 sendThreadUpdated()
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -208,7 +222,8 @@ class DiscussionCommentsViewModel(
             try {
                 val response = interactor.setThreadFlagged(thread.id, reported)
                 thread = thread.copy(abuseFlagged = response.abuseFlagged)
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
                 sendThreadUpdated()
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -231,7 +246,8 @@ class DiscussionCommentsViewModel(
                 }
                 comments[index] =
                     comments[index].copy(voted = response.voted, voteCount = response.voteCount)
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -252,7 +268,8 @@ class DiscussionCommentsViewModel(
                     it.id == response.id
                 }
                 comments[index] = comments[index].copy(abuseFlagged = response.abuseFlagged)
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -277,7 +294,8 @@ class DiscussionCommentsViewModel(
                     _uiMessage.value =
                         UIMessage.ToastMessage(resourceManager.getString(com.raccoongang.discussion.R.string.discussion_comment_added))
                 }
-                _uiState.value = DiscussionCommentsUIState.Success(thread, comments.toList())
+                _uiState.value =
+                    DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

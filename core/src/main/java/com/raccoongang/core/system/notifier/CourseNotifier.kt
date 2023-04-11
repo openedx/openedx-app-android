@@ -14,5 +14,6 @@ class CourseNotifier {
     suspend fun send(event: CourseStructureUpdated) = channel.emit(event)
     suspend fun send(event: CourseDashboardUpdate) = channel.emit(event)
     suspend fun send(event: CoursePauseVideo) = channel.emit(event)
+    suspend fun send(event: CourseSelectValueChanged) = channel.emit(event)
 
 }
