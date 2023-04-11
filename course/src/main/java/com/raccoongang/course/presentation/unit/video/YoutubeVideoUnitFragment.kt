@@ -127,6 +127,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     listState = state,
                     timedTextObject = transcriptObject,
                     subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
+                    showSubtitleLanguage = viewModel.transcripts.size > 1,
                     currentIndex = currentIndex,
                     onSettingsClick = {
                         _youTubePlayer?.pause()
