@@ -76,13 +76,6 @@ data class StudentViewData(
     }
 }
 
-//class Transcripts : HashMap<String, String>() {
-//
-//    fun mapToDomain(): com.raccoongang.core.domain.model.Transcripts {
-//        return this.map { com.raccoongang.core.domain.model.Transcripts() }
-//    }
-//}
-
 data class EncodedVideos(
     @SerializedName("youtube")
     var videoInfo: VideoInfo?,
