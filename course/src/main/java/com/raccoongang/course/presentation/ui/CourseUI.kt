@@ -427,6 +427,7 @@ fun VideoSubtitles(
     listState: LazyListState,
     timedTextObject: TimedTextObject?,
     subtitleLanguage: String,
+    showSubtitleLanguage: Boolean,
     currentIndex: Int,
     onSettingsClick: () -> Unit
 ) {
@@ -450,15 +451,17 @@ fun VideoSubtitles(
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium
                     )
-                    IconText(
-                        modifier = Modifier.noRippleClickable {
-                            onSettingsClick()
-                        },
-                        text = subtitleLanguage,
-                        painter = painterResource(id = courseR.drawable.course_ic_cc),
-                        color = MaterialTheme.appColors.textAccent,
-                        textStyle = MaterialTheme.appTypography.labelLarge
-                    )
+                    if (showSubtitleLanguage) {
+                        IconText(
+                            modifier = Modifier.noRippleClickable {
+                                onSettingsClick()
+                            },
+                            text = subtitleLanguage,
+                            painter = painterResource(id = courseR.drawable.course_ic_cc),
+                            color = MaterialTheme.appColors.textAccent,
+                            textStyle = MaterialTheme.appTypography.labelLarge
+                        )
+                    }
                 }
                 Spacer(Modifier.height(24.dp))
                 LazyColumn(

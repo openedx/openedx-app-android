@@ -108,7 +108,8 @@ class VideoUnitViewModel(
             return defaultTranscripts
         }
         if (transcripts.values.isNotEmpty()) {
-            return transcripts.values.toList().first()
+            transcriptLanguage = transcripts.keys.toList().first()
+            return transcripts[transcriptLanguage]?:""
         }
         return ""
     }
