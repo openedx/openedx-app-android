@@ -115,10 +115,10 @@ class CourseOutlineViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
-            var courseStructure = interactor.getCourseStructureFromCache()
-            val blocks = courseStructure.blockData
-
             try {
+                var courseStructure = interactor.getCourseStructureFromCache()
+                val blocks = courseStructure.blockData
+
                 val courseStatus = if (networkConnection.isOnline()) {
                     interactor.getCourseStatus(courseId)
                 } else {

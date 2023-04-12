@@ -423,7 +423,7 @@ private fun ResumeCourseTablet(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column {
+        Column(Modifier.weight(1f)) {
             Text(
                 text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
                 style = MaterialTheme.appTypography.labelMedium,
@@ -431,7 +431,7 @@ private fun ResumeCourseTablet(
             )
             Spacer(Modifier.height(6.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
