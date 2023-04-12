@@ -377,12 +377,24 @@ private fun ResumeCourse(
             color = MaterialTheme.appColors.textPrimaryVariant
         )
         Spacer(Modifier.height(6.dp))
-        IconText(
-            text = block.displayName,
-            painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
-            color = MaterialTheme.appColors.textPrimary,
-            textStyle = MaterialTheme.appTypography.titleMedium
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
+                contentDescription = null,
+                tint = MaterialTheme.appColors.textPrimary
+            )
+            Text(
+                text = block.displayName,
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
         Spacer(Modifier.height(24.dp))
         NewEdxButton(
             text = stringResource(id = com.raccoongang.course.R.string.course_continue),
