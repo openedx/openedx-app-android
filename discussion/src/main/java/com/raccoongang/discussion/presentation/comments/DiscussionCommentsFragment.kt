@@ -106,6 +106,8 @@ class DiscussionCommentsFragment : Fragment() {
                                 ACTION_UPVOTE_COMMENT -> viewModel.setCommentUpvoted(id, bool)
                                 ACTION_UPVOTE_THREAD -> viewModel.setThreadUpvoted(bool)
                                 ACTION_FOLLOW_THREAD -> viewModel.setThreadFollowed(bool)
+                                ACTION_REPORT_COMMENT -> viewModel.setCommentReported(id, bool)
+                                ACTION_REPORT_THREAD -> viewModel.setThreadReported(bool)
                             }
                         } else {
                             when (action) {
