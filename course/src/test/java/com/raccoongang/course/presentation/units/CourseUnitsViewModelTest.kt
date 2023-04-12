@@ -111,6 +111,15 @@ class CourseUnitsViewModelTest {
         )
     )
 
+    private val courseStructure = CourseStructure(
+        "", blocks, "", "", "", "",
+        null, "", "", null,
+        CoursewareAccess(false, "", "", "", "", ""),
+        null,
+        null,
+        false
+    )
+
     private val downloadModel = DownloadModel(
         "id",
         "title",
@@ -189,8 +198,8 @@ class CourseUnitsViewModelTest {
             networkConnection,
             workerController
         )
-        every { interactor.getCourseStructureFromCache() } returns blocks
-        every { interactor.getCourseStructureForVideos() } returns blocks
+        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        every { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { interactor.getDownloadModels() } returns flow {
             emit(listOf(downloadModel))
         }
@@ -213,8 +222,8 @@ class CourseUnitsViewModelTest {
             networkConnection,
             workerController
         )
-        every { interactor.getCourseStructureFromCache() } returns blocks
-        every { interactor.getCourseStructureForVideos() } returns blocks
+        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        every { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { interactor.getDownloadModels() } returns flow {
             emit(listOf(downloadModel))
         }
@@ -237,8 +246,8 @@ class CourseUnitsViewModelTest {
             networkConnection,
             workerController
         )
-        every { interactor.getCourseStructureFromCache() } returns blocks
-        every { interactor.getCourseStructureForVideos() } returns blocks
+        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        every { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { interactor.getDownloadModels() } returns flow {
             repeat(5) {
                 delay(10000)

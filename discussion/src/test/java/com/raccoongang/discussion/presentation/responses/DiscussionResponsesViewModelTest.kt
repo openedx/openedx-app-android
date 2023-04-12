@@ -69,7 +69,10 @@ class DiscussionResponsesViewModelTest {
         4,
         false,
         false,
-        mapOf()
+        mapOf(),
+        0,
+        false,
+        false
     )
 
     //endregion
@@ -98,6 +101,7 @@ class DiscussionResponsesViewModelTest {
         "",
         21,
         emptyList(),
+        null,
         emptyMap()
     )
 
@@ -516,14 +520,11 @@ class DiscussionResponsesViewModelTest {
             mockComment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
-        every { preferencesManager.profile?.username } returns ""
-        every { preferencesManager.profile?.profileImage } returns mockk()
 
         viewModel.createComment("")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
-        verify(exactly = 2) { preferencesManager.profile }
 
 
         assert(viewModel.uiMessage.value != null)

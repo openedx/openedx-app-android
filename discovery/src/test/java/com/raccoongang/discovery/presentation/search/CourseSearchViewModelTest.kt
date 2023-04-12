@@ -60,7 +60,8 @@ class CourseSearchViewModelTest {
         end = "end",
         startDisplay = "startDisplay",
         startType = "startType",
-        overview = ""
+        overview = "",
+        false
     )
 
     //endregion

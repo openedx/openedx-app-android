@@ -73,7 +73,10 @@ class DiscussionAddThreadViewModelTest {
         4,
         false,
         false,
-        mapOf()
+        mapOf(),
+        0,
+        false,
+        false
     )
 
     //endregion
@@ -102,6 +105,7 @@ class DiscussionAddThreadViewModelTest {
         "",
         21,
         emptyList(),
+        null,
         emptyMap()
     )
 
@@ -127,6 +131,7 @@ class DiscussionAddThreadViewModelTest {
         "",
         21,
         emptyList(),
+        null,
         mapOf("" to DiscussionProfile(ProfileImage("", "", "", "", false)))
     )
 
