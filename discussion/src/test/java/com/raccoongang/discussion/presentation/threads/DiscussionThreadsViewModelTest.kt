@@ -76,7 +76,10 @@ class DiscussionThreadsViewModelTest {
         4,
         false,
         false,
-        mapOf()
+        mapOf(),
+        0,
+        false,
+        false
     )
 
     //endregion
@@ -109,11 +112,18 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.ALL_POSTS
         )
-        coEvery { interactor.getAllThreads(any(), any(), any()) } throws UnknownHostException()
+        coEvery {
+            interactor.getAllThreads(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws UnknownHostException()
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -130,11 +140,11 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.ALL_POSTS
         )
-        coEvery { interactor.getAllThreads(any(), any(), any()) } throws Exception()
+        coEvery { interactor.getAllThreads(any(), any(), any(), any()) } throws Exception()
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -151,12 +161,12 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.ALL_POSTS
         )
-        coEvery { interactor.getAllThreads("", "", range(1, 2)) } returns ThreadsData(
+        coEvery { interactor.getAllThreads("", "", null, range(1, 2)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "2", 4, "1")
         )
-        coEvery { interactor.getAllThreads("", "", eq(3)) } returns ThreadsData(
+        coEvery { interactor.getAllThreads("", "", null, eq(3)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "", 4, "1")
@@ -164,7 +174,7 @@ class DiscussionThreadsViewModelTest {
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 3) { interactor.getAllThreads(any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getAllThreads(any(), any(), any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.isUpdating.value == false)
@@ -185,13 +195,14 @@ class DiscussionThreadsViewModelTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } throws UnknownHostException()
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -208,11 +219,19 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.FOLLOWING_POSTS
         )
-        coEvery { interactor.getFollowingThreads(any(), any(), any(), any()) } throws Exception()
+        coEvery {
+            interactor.getFollowingThreads(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws Exception()
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -229,12 +248,20 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.FOLLOWING_POSTS
         )
-        coEvery { interactor.getFollowingThreads("", any(), "", range(1, 2)) } returns ThreadsData(
+        coEvery {
+            interactor.getFollowingThreads(
+                "",
+                any(),
+                "",
+                null,
+                range(1, 2)
+            )
+        } returns ThreadsData(
             threads,
             "",
             Pagination(10, "2", 4, "1")
         )
-        coEvery { interactor.getFollowingThreads("", any(), "", eq(3)) } returns ThreadsData(
+        coEvery { interactor.getFollowingThreads("", any(), "", null, eq(3)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "", 4, "1")
@@ -242,7 +269,7 @@ class DiscussionThreadsViewModelTest {
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 3) { interactor.getFollowingThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getFollowingThreads(any(), any(), any(), any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.isUpdating.value == false)
@@ -258,11 +285,19 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
-        coEvery { interactor.getThreads(any(), any(), any(), any()) } throws UnknownHostException()
+        coEvery {
+            interactor.getThreads(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws UnknownHostException()
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -279,11 +314,11 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
-        coEvery { interactor.getThreads(any(), any(), any(), any()) } throws Exception()
+        coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } throws Exception()
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -300,12 +335,12 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
-        coEvery { interactor.getThreads("", any(), "", range(1, 2)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), "", null, range(1, 2)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "2", 4, "1")
         )
-        coEvery { interactor.getThreads("", any(), "", eq(3)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), "", null, eq(3)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "", 4, "1")
@@ -313,7 +348,7 @@ class DiscussionThreadsViewModelTest {
         viewModel.getThreadByType("")
         advanceUntilIdle()
 
-        coVerify(exactly = 3) { interactor.getThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.isUpdating.value == false)
@@ -329,6 +364,11 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
+        coEvery { interactor.getThreads(any(),any(), any(), any(), any()) } returns ThreadsData(
+            threads,
+            "",
+            pagination = Pagination(10,"", 2,"")
+        )
         viewModel.filterThreads(FilterType.ALL_POSTS.value)
         advanceUntilIdle()
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Threads)
@@ -342,6 +382,11 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             DiscussionTopicsFragment.TOPIC
+        )
+        coEvery { interactor.getThreads(any(),any(), any(), any(), any()) } returns ThreadsData(
+            threads,
+            "",
+            pagination = Pagination(10,"", 2,"")
         )
         viewModel.filterThreads(FilterType.UNREAD.value)
         advanceUntilIdle()
@@ -357,6 +402,11 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
+        coEvery { interactor.getThreads(any(),any(), any(), any(), any()) } returns ThreadsData(
+            threads,
+            "",
+            pagination = Pagination(10,"", 2,"")
+        )
         viewModel.filterThreads(FilterType.UNANSWERED.value)
         advanceUntilIdle()
         assert(viewModel.uiState.value is DiscussionThreadsUIState.Threads)
@@ -371,12 +421,12 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
-        coEvery { interactor.getThreads("", any(), "", range(1, 2)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), "", null, range(1, 2)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "2", 4, "1")
         )
-        coEvery { interactor.getThreads("", any(), "", eq(3)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), "", null, eq(3)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "", 4, "1")
@@ -384,7 +434,7 @@ class DiscussionThreadsViewModelTest {
         viewModel.updateThread("")
         advanceUntilIdle()
 
-        coVerify(exactly = 3) { interactor.getThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.isUpdating.value == false)
@@ -400,12 +450,12 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
-        coEvery { interactor.getThreads("", any(), any(), range(1, 2)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), any(), null, range(1, 2)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "2", 4, "1")
         )
-        coEvery { interactor.getThreads("", any(), any(), eq(3)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), any(), null, eq(3)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "", 4, "1")
@@ -425,7 +475,7 @@ class DiscussionThreadsViewModelTest {
         viewModel.updateThread("date")
         advanceUntilIdle()
 
-        coVerify(exactly = 6) { interactor.getThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 2) { interactor.getThreads(any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -437,12 +487,12 @@ class DiscussionThreadsViewModelTest {
             "",
             DiscussionTopicsFragment.TOPIC
         )
-        coEvery { interactor.getThreads("", any(), any(), range(1, 2)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), any(), null,range(1, 2)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "2", 4, "1")
         )
-        coEvery { interactor.getThreads("", any(), any(), eq(3)) } returns ThreadsData(
+        coEvery { interactor.getThreads("", any(), any(), null,eq(3)) } returns ThreadsData(
             threads,
             "",
             Pagination(10, "", 4, "1")
@@ -462,7 +512,7 @@ class DiscussionThreadsViewModelTest {
         viewModel.updateThread("date")
         advanceUntilIdle()
 
-        coVerify(exactly = 3) { interactor.getThreads(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { interactor.getThreads(any(), any(), any(), any(), any()) }
     }
 
 
