@@ -25,10 +25,7 @@ import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.raccoongang.auth.R
@@ -194,8 +191,10 @@ fun LoginTextField(
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) }
 ) {
-    var loginTextFieldValue by rememberSaveable {
-        mutableStateOf("")
+    var loginTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(
+            TextFieldValue("")
+        )
     }
     val focusManager = LocalFocusManager.current
     Text(
@@ -209,7 +208,7 @@ fun LoginTextField(
         value = loginTextFieldValue,
         onValueChange = {
             loginTextFieldValue = it
-            onValueChanged(it.trim())
+            onValueChanged(it.text.trim())
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,

@@ -57,7 +57,7 @@ data class StudentViewData(
     @SerializedName("duration")
     var duration: Any?,
     @SerializedName("transcripts")
-    var transcripts: Transcripts?,
+    var transcripts: HashMap<String, String>?,
     @SerializedName("encoded_videos")
     var encodedVideos: EncodedVideos?,
     @SerializedName("all_sources")
@@ -69,19 +69,10 @@ data class StudentViewData(
         return com.raccoongang.core.domain.model.StudentViewData(
             onlyOnWeb = onlyOnWeb ?: false,
             duration = duration ?: "",
-            transcripts = transcripts?.mapToDomain(),
+            transcripts = transcripts,
             encodedVideos = encodedVideos?.mapToDomain(),
             topicId = topicId ?: ""
         )
-    }
-}
-
-data class Transcripts(
-    @SerializedName("en")
-    var en: String?
-) {
-    fun mapToDomain(): com.raccoongang.core.domain.model.Transcripts {
-        return com.raccoongang.core.domain.model.Transcripts(en = en ?: "")
     }
 }
 

@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.domain.model.AnnouncementModel
-import com.raccoongang.core.domain.model.EnrolledCourse
 import com.raccoongang.core.domain.model.HandoutsModel
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.launch
@@ -15,8 +14,6 @@ class HandoutsViewModel(
     private val handoutsType: String,
     private val interactor: CourseInteractor
 ) : BaseViewModel() {
-
-    private var course: EnrolledCourse? = null
 
     private val _htmlContent = MutableLiveData<String>()
     val htmlContent: LiveData<String>
@@ -29,14 +26,11 @@ class HandoutsViewModel(
     private fun getEnrolledCourse() {
         viewModelScope.launch {
             try {
-                if (course == null) {
-                    course = interactor.getEnrolledCourseFromCacheById(courseId)
-                }
                 if (HandoutsType.valueOf(handoutsType) == HandoutsType.Handouts) {
-                    val handouts = interactor.getHandouts(course!!.course.courseHandouts)
+                    val handouts = interactor.getHandouts(courseId)
                     _htmlContent.value = handoutsToHtml(handouts)
                 } else {
-                    val announcements = interactor.getAnnouncements(course!!.course.courseUpdates)
+                    val announcements = interactor.getAnnouncements(courseId)
                     _htmlContent.value = announcementsToHtml(announcements)
                 }
             } catch (e: Exception) {
@@ -63,6 +57,7 @@ class HandoutsViewModel(
             append("<body>")
             for (model in announcements) {
                 append("<div class=\"header\">")
+                append("<br>")
                 append(model.date)
                 append("</div>")
                 append("<div class=\"separator\"></div>")

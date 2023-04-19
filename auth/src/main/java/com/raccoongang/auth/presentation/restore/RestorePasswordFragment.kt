@@ -224,7 +224,7 @@ private fun RestorePasswordScreen(
                                             .height(42.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        CircularProgressIndicator(color = MaterialTheme.colors.primary)
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }
                                 } else {
                                     NewEdxButton(

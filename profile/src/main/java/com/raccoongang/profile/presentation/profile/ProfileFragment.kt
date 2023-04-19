@@ -12,6 +12,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,6 +28,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,11 +42,14 @@ import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.Account
 import com.raccoongang.core.domain.model.ProfileImage
+import com.raccoongang.core.presentation.global.AppData
+import com.raccoongang.core.presentation.global.AppDataHolder
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.profile.presentation.ProfileRouter
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -69,10 +77,14 @@ class ProfileFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState()
                 val logoutSuccess by viewModel.successLogout.observeAsState(false)
                 val uiMessage by viewModel.uiMessage.observeAsState()
+                val refreshing by viewModel.isUpdating.observeAsState(false)
+
                 ProfileScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
+                    appData = (requireActivity() as AppDataHolder).appData,
+                    refreshing = refreshing,
                     logout = {
                         viewModel.logout()
                     },
@@ -81,6 +93,9 @@ class ProfileFragment : Fragment() {
                             requireParentFragment().parentFragmentManager,
                             it
                         )
+                    },
+                    onSwipeRefresh = {
+                         viewModel.updateAccount()
                     },
                     onVideoSettingsClick = {
                         router.navigateToVideoSettings(
@@ -100,17 +115,24 @@ class ProfileFragment : Fragment() {
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ProfileScreen(
     windowSize: WindowSize,
     uiState: ProfileUIState,
+    appData: AppData,
     uiMessage: UIMessage?,
+    refreshing: Boolean,
     onVideoSettingsClick: () -> Unit,
     logout: () -> Unit,
+    onSwipeRefresh: () -> Unit,
     editAccountClicked: (Account) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
+
+    val pullRefreshState =
+        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -172,102 +194,115 @@ private fun ProfileScreen(
                     style = MaterialTheme.appTypography.titleMedium
                 )
 
-                IconButton(
+                IconText(
                     modifier = Modifier
-                        .padding(end = 8.dp),
+                        .height(48.dp)
+                        .padding(end = 24.dp),
+                    text = stringResource(com.raccoongang.profile.R.string.profile_edit),
+                    painter = painterResource(id = R.drawable.core_ic_edit),
+                    textStyle = MaterialTheme.appTypography.labelLarge,
+                    color = MaterialTheme.appColors.primary,
                     onClick = {
                         if (uiState is ProfileUIState.Data) {
                             editAccountClicked(uiState.account)
                         }
-                    }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.core_ic_edit),
-                        tint = MaterialTheme.appColors.onBackground,
-                        contentDescription = null
-                    )
-                }
+                    }
+                )
             }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                color = MaterialTheme.appColors.background
             ) {
-                when (uiState) {
-                    is ProfileUIState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is ProfileUIState.Data -> {
-                        Column(
-                            Modifier
-                                .fillMaxHeight()
-                                .then(contentWidth)
-                                .verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Image(
-                                painter = rememberAsyncImagePainter(
-                                    model = uiState.account.profileImage.imageUrlFull,
-                                    placeholder = painterResource(id = R.drawable.core_ic_default_profile_picture),
-                                    error = painterResource(id = R.drawable.core_ic_default_profile_picture)
-                                ),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .border(
-                                        2.dp,
-                                        MaterialTheme.appColors.onSurface,
-                                        CircleShape
-                                    )
-                                    .padding(2.dp)
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Gray)
-                            )
-                            Spacer(modifier = Modifier.height(20.dp))
-                            Text(
-                                text = uiState.account.name,
-                                color = MaterialTheme.appColors.textPrimary,
-                                style = MaterialTheme.appTypography.headlineSmall
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "@${uiState.account.username}",
-                                color = MaterialTheme.appColors.textPrimaryVariant,
-                                style = MaterialTheme.appTypography.labelLarge
-                            )
-                            Spacer(modifier = Modifier.height(36.dp))
-
-                            Column(
-                                Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                ProfileInfoSection(uiState.account)
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                SettingsSection(onVideoSettingsClick = {
-                                    onVideoSettingsClick()
-                                })
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                SupportInfoSection()
-
-                                Spacer(modifier = Modifier.height(24.dp))
-
-                                LogoutButton(
-                                    onClick = { showLogoutDialog = true }
-                                )
-
-                                Spacer(Modifier.height(30.dp))
+                Box(
+                    modifier = Modifier.pullRefresh(pullRefreshState),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        when (uiState) {
+                            is ProfileUIState.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                }
                             }
+                            is ProfileUIState.Data -> {
+                                Column(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .then(contentWidth)
+                                        .verticalScroll(rememberScrollState()),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            model = uiState.account.profileImage.imageUrlFull,
+                                            placeholder = painterResource(id = R.drawable.core_ic_default_profile_picture),
+                                            error = painterResource(id = R.drawable.core_ic_default_profile_picture)
+                                        ),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .border(
+                                                2.dp,
+                                                MaterialTheme.appColors.onSurface,
+                                                CircleShape
+                                            )
+                                            .padding(2.dp)
+                                            .size(100.dp)
+                                            .clip(CircleShape)
+                                    )
+                                    Spacer(modifier = Modifier.height(20.dp))
+                                    Text(
+                                        text = uiState.account.name,
+                                        color = MaterialTheme.appColors.textPrimary,
+                                        style = MaterialTheme.appTypography.headlineSmall
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "@${uiState.account.username}",
+                                        color = MaterialTheme.appColors.textPrimaryVariant,
+                                        style = MaterialTheme.appTypography.labelLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(36.dp))
 
+                                    Column(
+                                        Modifier
+                                            .fillMaxWidth()
+                                    ) {
+                                        ProfileInfoSection(uiState.account)
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        SettingsSection(onVideoSettingsClick = {
+                                            onVideoSettingsClick()
+                                        })
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        SupportInfoSection(appData)
+
+                                        Spacer(modifier = Modifier.height(24.dp))
+
+                                        LogoutButton(
+                                            onClick = { showLogoutDialog = true }
+                                        )
+
+                                        Spacer(Modifier.height(30.dp))
+                                    }
+
+                                }
+                            }
                         }
                     }
+                    PullRefreshIndicator(
+                        refreshing,
+                        pullRefreshState,
+                        Modifier.align(Alignment.TopCenter)
+                    )
                 }
             }
         }
@@ -276,46 +311,71 @@ private fun ProfileScreen(
 
 @Composable
 private fun ProfileInfoSection(account: Account) {
-    Column {
-        Text(
-            text = stringResource(id = com.raccoongang.profile.R.string.profile_prof_info),
-            style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textSecondary
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-        Card(
-            modifier = Modifier.border(
-                1.dp,
-                MaterialTheme.appColors.cardViewBorder,
-                MaterialTheme.appShapes.cardShape
-            ),
-            shape = MaterialTheme.appShapes.cardShape,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+
+    if (account.yearOfBirth != null || account.bio.isNotEmpty()) {
+        Column {
+            Text(
+                text = stringResource(id = com.raccoongang.profile.R.string.profile_prof_info),
+                style = MaterialTheme.appTypography.labelLarge,
+                color = MaterialTheme.appColors.textSecondary
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Card(
+                modifier = Modifier,
+                shape = MaterialTheme.appShapes.cardShape,
+                elevation = 0.dp,
+                backgroundColor = MaterialTheme.appColors.cardViewBackground
             ) {
-                Text(
-                    text = stringResource(
-                        id = com.raccoongang.profile.R.string.profile_year_of_birth,
-                        if (account.yearOfBirth != null) {
-                            account.yearOfBirth.toString()
-                        } else ""
-                    ),
-                    style = MaterialTheme.appTypography.titleMedium,
-                    color = MaterialTheme.appColors.textPrimary
-                )
-                Text(
-                    text = stringResource(
-                        id = com.raccoongang.profile.R.string.profile_bio,
-                        account.bio
-                    ),
-                    style = MaterialTheme.appTypography.titleMedium,
-                    color = MaterialTheme.appColors.textPrimary
-                )
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (account.yearOfBirth != null) {
+                        Text(
+                            text = buildAnnotatedString {
+                                val value = if (account.yearOfBirth != null) {
+                                    account.yearOfBirth.toString()
+                                } else ""
+                                val text = stringResource(
+                                    id = com.raccoongang.profile.R.string.profile_year_of_birth,
+                                    value
+                                )
+                                append(text)
+                                addStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.appColors.textPrimaryVariant
+                                    ),
+                                    start = 0,
+                                    end = text.length - value.length
+                                )
+                            },
+                            style = MaterialTheme.appTypography.titleMedium,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    }
+                    if (account.bio.isNotEmpty()) {
+                        Text(
+                            text = buildAnnotatedString {
+                                val text = stringResource(
+                                    id = com.raccoongang.profile.R.string.profile_bio,
+                                    account.bio
+                                )
+                                append(text)
+                                addStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.appColors.textPrimaryVariant
+                                    ),
+                                    start = 0,
+                                    end = text.length - account.bio.length
+                                )
+                            },
+                            style = MaterialTheme.appTypography.titleMedium,
+                            color = MaterialTheme.appColors.textPrimary
+                        )
+                    }
+                }
             }
         }
     }
@@ -331,12 +391,9 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(14.dp))
         Card(
-            modifier = Modifier.border(
-                1.dp,
-                MaterialTheme.appColors.cardViewBorder,
-                MaterialTheme.appShapes.cardShape
-            ),
+            modifier = Modifier,
             shape = MaterialTheme.appShapes.cardShape,
+            elevation = 0.dp,
             backgroundColor = MaterialTheme.appColors.cardViewBackground
         ) {
             Column(
@@ -355,7 +412,7 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 }
 
 @Composable
-private fun SupportInfoSection() {
+private fun SupportInfoSection(appData: AppData) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     Column {
@@ -366,12 +423,9 @@ private fun SupportInfoSection() {
         )
         Spacer(modifier = Modifier.height(14.dp))
         Card(
-            modifier = Modifier.border(
-                1.dp,
-                MaterialTheme.appColors.cardViewBorder,
-                MaterialTheme.appShapes.cardShape
-            ),
+            modifier = Modifier,
             shape = MaterialTheme.appShapes.cardShape,
+            elevation = 0.dp,
             backgroundColor = MaterialTheme.appColors.cardViewBackground
         ) {
             Column(
@@ -383,15 +437,21 @@ private fun SupportInfoSection() {
                 ProfileInfoItem(
                     text = stringResource(id = com.raccoongang.profile.R.string.profile_contact_support),
                     onClick = {
-                        uriHandler.openUri(context.getString(R.string.contact_us_link))
+                        EmailUtil.showFeedbackScreen(
+                            context,
+                            context.getString(R.string.core_email_subject),
+                            appData.versionName
+                        )
                     }
                 )
+                Divider(color = MaterialTheme.appColors.divider)
                 ProfileInfoItem(
                     text = stringResource(id = R.string.core_terms_of_use),
                     onClick = {
                         uriHandler.openUri(context.getString(R.string.terms_of_service_link))
                     }
                 )
+                Divider(color = MaterialTheme.appColors.divider)
                 ProfileInfoItem(
                     text = stringResource(id = R.string.core_privacy_policy),
                     onClick = {
@@ -408,15 +468,11 @@ private fun LogoutButton(onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                1.dp,
-                MaterialTheme.appColors.cardViewBorder,
-                MaterialTheme.appShapes.cardShape
-            )
             .clickable {
                 onClick()
             },
         shape = MaterialTheme.appShapes.cardShape,
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.appColors.cardViewBackground
     ) {
         Row(
@@ -541,9 +597,12 @@ private fun ProfileScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = ProfileUIState.Data(mockAccount),
             uiMessage = null,
+            refreshing = false,
             logout = {},
+            onSwipeRefresh = {},
             editAccountClicked = {},
-            onVideoSettingsClick = {}
+            onVideoSettingsClick = {},
+            appData = AppData("1")
         )
     }
 }
@@ -558,9 +617,12 @@ private fun ProfileScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = ProfileUIState.Data(mockAccount),
             uiMessage = null,
+            refreshing = false,
             logout = {},
+            onSwipeRefresh = {},
             editAccountClicked = {},
-            onVideoSettingsClick = {}
+            onVideoSettingsClick = {},
+            appData = AppData("1")
         )
     }
 }

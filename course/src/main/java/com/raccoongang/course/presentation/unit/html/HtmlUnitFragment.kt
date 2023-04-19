@@ -1,6 +1,8 @@
 package com.raccoongang.course.presentation.unit.html
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,7 +14,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +24,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.raccoongang.core.extension.isEmailValid
 import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.ui.WindowSize
@@ -31,6 +33,7 @@ import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.windowSizeValue
+import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.course.presentation.ui.ConnectionErrorView
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -101,7 +104,7 @@ class HtmlUnitFragment : Fragment() {
                                     .zIndex(1f),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                     }
@@ -160,6 +163,30 @@ private fun HTMLContentView(
                         super.onPageCommitVisible(view, url)
                         Log.d("HTML", "onPageCommitVisible")
                         onWebPageLoaded()
+                    }
+
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        val clickUrl = request?.url?.toString() ?: ""
+                        return if (clickUrl.isNotEmpty() &&
+                            (clickUrl.startsWith("http://") ||
+                                    clickUrl.startsWith("https://"))
+                        ) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                            true
+                        } else if (clickUrl.startsWith("mailto:")) {
+                            val email = clickUrl.replace("mailto:", "")
+                            if (email.isEmailValid()) {
+                                EmailUtil.sendEmailIntent(context, email, "", "")
+                                true
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
                     }
 
                     override fun onReceivedHttpError(

@@ -8,7 +8,6 @@ import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.*
 import com.raccoongang.core.exception.NoCachedDataException
 import com.raccoongang.core.module.db.DownloadDao
-import com.raccoongang.course.data.model.BlockDbEntity
 import com.raccoongang.course.data.storage.CourseDao
 import kotlinx.coroutines.flow.map
 import okhttp3.ResponseBody
@@ -19,7 +18,7 @@ class CourseRepository(
     private val downloadDao: DownloadDao,
     private val preferencesManager: PreferencesManager,
 ) {
-    private val blocksList = mutableListOf<Block>()
+    private var courseStructure: CourseStructure? = null
 
     suspend fun getCourseDetail(id: String): Course {
         val course = api.getCourseDetail(id)
@@ -56,45 +55,28 @@ class CourseRepository(
             preferencesManager.user?.username,
             courseId
         )
-        val courseStructure = response.mapToDomain()
-        courseDao.insertCourseBlocks(
-            *response.blockData.values
-                .map {
-                    BlockDbEntity.createFrom(it, courseId)
-                }.toTypedArray()
-        )
-        blocksList.clear()
-        blocksList.addAll(courseStructure.blockData.values.toList())
+        courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
+        courseStructure = null
+        courseStructure = response.mapToDomain()
     }
 
     suspend fun preloadCourseStructureFromCache(courseId: String) {
-        val response = courseDao.getCourseBlocksById(courseId)
-        blocksList.clear()
-        if (!response.isNullOrEmpty()) {
-            blocksList.addAll(response.map { it.mapToDomain() })
+        val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
+        courseStructure = null
+        if (cachedCourseStructure != null) {
+            courseStructure = cachedCourseStructure.mapToDomain()
         } else {
             throw NoCachedDataException()
         }
     }
 
     @Throws(IllegalStateException::class)
-    fun getCourseStructureFromCache(): List<Block> {
-        if (blocksList.isNotEmpty()) {
-            return blocksList
+    fun getCourseStructureFromCache(): CourseStructure {
+        if (courseStructure != null) {
+            return courseStructure!!
         } else {
             throw IllegalStateException("Course structure is empty")
         }
-    }
-
-    suspend fun getEnrolledCourseById(courseId: String): EnrolledCourse? {
-        val user = preferencesManager.user
-        val enrolledCourse = api.getEnrolledCourses(
-            username = user?.username ?: ""
-        )
-        val course = enrolledCourse.find {
-            it.course?.id == courseId
-        }
-        return course?.mapToDomain()
     }
 
     suspend fun getEnrolledCourseFromCacheById(courseId: String): EnrolledCourse? {
@@ -117,8 +99,9 @@ class CourseRepository(
         return api.markBlocksCompletion(blocksCompletionBody)
     }
 
-    suspend fun getHandouts(url: String) = api.getHandouts(url).mapToDomain()
+    suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
-    suspend fun getAnnouncements(url: String) = api.getAnnouncements(url).map { it.mapToDomain() }
+    suspend fun getAnnouncements(courseId: String) =
+        api.getAnnouncements(courseId).map { it.mapToDomain() }
 
 }

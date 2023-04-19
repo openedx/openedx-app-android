@@ -31,6 +31,7 @@
     <string name="discussion_topic">Topic</string>
     <string name="discussion_search_results">Search results</string>
     <string name="discussion_start_typing_to_find">Start typing to find the thread</string>
+    <string name="discussion_anonymous">anonymous</string>
 
 
     <plurals name="discussion_votes">

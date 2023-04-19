@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,11 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.raccoongang.core.UIMessage
+import com.raccoongang.core.domain.model.ProfileImage
 import com.raccoongang.core.extension.TextConverter
 import com.raccoongang.core.extension.parcelable
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
+import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.discussion.domain.model.DiscussionComment
 import com.raccoongang.discussion.presentation.comments.DiscussionCommentsFragment
@@ -61,6 +64,7 @@ class DiscussionResponsesFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
+        viewModel.isThreadClosed = requireArguments().getBoolean(ARG_IS_CLOSED, false)
     }
 
     override fun onCreateView(
@@ -84,6 +88,7 @@ class DiscussionResponsesFragment : Fragment() {
                     uiMessage = uiMessage,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
+                    isClosed = viewModel.isThreadClosed,
                     onSwipeRefresh = {
                         viewModel.updateCommentResponses()
                     },
@@ -93,10 +98,12 @@ class DiscussionResponsesFragment : Fragment() {
                     onItemClick = { action, id, bool ->
                         when (action) {
                             DiscussionCommentsFragment.ACTION_UPVOTE_COMMENT -> {
-                                viewModel.setCommentUpvoted(
-                                    id,
-                                    bool
-                                )
+                                if (!viewModel.isThreadClosed) {
+                                    viewModel.setCommentUpvoted(
+                                        id,
+                                        bool
+                                    )
+                                }
                             }
                             DiscussionCommentsFragment.ACTION_REPORT_COMMENT -> {
                                 viewModel.setCommentReported(
@@ -119,11 +126,16 @@ class DiscussionResponsesFragment : Fragment() {
 
     companion object {
         private const val ARG_COMMENT = "comment"
+        private const val ARG_IS_CLOSED = "isClosed"
 
-        fun newInstance(comment: DiscussionComment): DiscussionResponsesFragment {
+        fun newInstance(
+            comment: DiscussionComment,
+            isClosed: Boolean
+        ): DiscussionResponsesFragment {
             val fragment = DiscussionResponsesFragment()
             fragment.arguments = bundleOf(
-                ARG_COMMENT to comment
+                ARG_COMMENT to comment,
+                ARG_IS_CLOSED to isClosed
             )
             return fragment
         }
@@ -138,11 +150,12 @@ private fun DiscussionResponsesScreen(
     uiMessage: UIMessage?,
     canLoadMore: Boolean,
     refreshing: Boolean,
+    isClosed: Boolean,
     onSwipeRefresh: () -> Unit,
     paginationCallBack: () -> Unit,
     onItemClick: (String, String, Boolean) -> Unit,
     addCommentClick: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -162,7 +175,7 @@ private fun DiscussionResponsesScreen(
     }
 
     val iconButtonColor = if (commentValue.isEmpty()) {
-        MaterialTheme.appColors.cardViewBorder
+        MaterialTheme.appColors.textFieldBackgroundVariant
     } else {
         Color.White
     }
@@ -328,7 +341,7 @@ private fun DiscussionResponsesScreen(
                                                     modifier = Modifier.fillMaxWidth(),
                                                     contentAlignment = Alignment.Center
                                                 ) {
-                                                    CircularProgressIndicator()
+                                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                                 }
                                             }
                                         }
@@ -337,7 +350,9 @@ private fun DiscussionResponsesScreen(
                                         paginationCallBack()
                                     }
                                 }
-                                Divider(color = MaterialTheme.appColors.cardViewBorder)
+                                if (!isSystemInDarkTheme()) {
+                                    Divider(color = MaterialTheme.appColors.cardViewBorder)
+                                }
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
@@ -363,6 +378,7 @@ private fun DiscussionResponsesScreen(
                                             },
                                             textStyle = MaterialTheme.appTypography.labelLarge,
                                             maxLines = 3,
+                                            shape = MaterialTheme.appShapes.buttonShape,
                                             placeholder = {
                                                 Text(
                                                     text = stringResource(id = com.raccoongang.discussion.R.string.discussion_add_comment),
@@ -374,7 +390,8 @@ private fun DiscussionResponsesScreen(
                                                 backgroundColor = MaterialTheme.appColors.textFieldBackgroundVariant,
                                                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                                                 textColor = MaterialTheme.appColors.textFieldText
-                                            )
+                                            ),
+                                            enabled = !isClosed
                                         )
                                         Box(
                                             modifier = Modifier
@@ -405,7 +422,7 @@ private fun DiscussionResponsesScreen(
                                 Modifier
                                     .fillMaxSize(), contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                     }
@@ -438,6 +455,7 @@ private fun DiscussionResponsesScreenPreview() {
             uiMessage = null,
             canLoadMore = false,
             refreshing = false,
+            onSwipeRefresh = {},
             paginationCallBack = { },
             onItemClick = { _, _, _ ->
 
@@ -446,7 +464,7 @@ private fun DiscussionResponsesScreenPreview() {
 
             },
             onBackClick = {},
-            onSwipeRefresh = {}
+            isClosed = false
         )
     }
 }
@@ -467,6 +485,7 @@ private fun DiscussionResponsesScreenTabletPreview() {
             uiMessage = null,
             canLoadMore = false,
             refreshing = false,
+            onSwipeRefresh = {},
             paginationCallBack = { },
             onItemClick = { _, _, _ ->
 
@@ -475,7 +494,7 @@ private fun DiscussionResponsesScreenTabletPreview() {
 
             },
             onBackClick = {},
-            onSwipeRefresh = {}
+            isClosed = false
         )
     }
 }
@@ -502,7 +521,8 @@ private val mockComment = DiscussionComment(
     "",
     21,
     emptyList(),
-    emptyMap()
+    ProfileImage("", "", "", "", false),
+    mapOf()
 )
 
 

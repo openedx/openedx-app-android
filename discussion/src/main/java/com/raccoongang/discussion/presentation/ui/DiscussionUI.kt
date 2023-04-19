@@ -13,16 +13,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.StarRate
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -35,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.raccoongang.core.domain.model.ProfileImage
 import com.raccoongang.core.extension.TextConverter
 import com.raccoongang.core.ui.AutoSizeText
 import com.raccoongang.core.ui.HyperlinkImageText
@@ -86,12 +83,14 @@ fun ThreadMainItem(
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = rememberAsyncImagePainter(profileImageUrl),
+                painter = rememberAsyncImagePainter(
+                    model = profileImageUrl,
+                    error = painterResource(id = com.raccoongang.core.R.drawable.core_ic_default_profile_picture)
+                ),
                 contentDescription = null,
                 modifier = Modifier
                     .size(48.dp)
                     .clip(MaterialTheme.appShapes.material.medium)
-                    .background(Color.Gray)
             )
             Spacer(Modifier.width(16.dp))
             Column(
@@ -99,19 +98,19 @@ fun ThreadMainItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = thread.author,
+                    text = thread.author.ifEmpty { stringResource(id = R.string.discussion_anonymous) },
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleMedium
                 )
                 Text(
                     text = TimeUtils.iso8601ToDateWithTime(context, thread.createdAt),
                     style = MaterialTheme.appTypography.labelSmall,
-                    color = MaterialTheme.appColors.textSecondary
+                    color = MaterialTheme.appColors.textPrimaryVariant
                 )
             }
             IconText(
                 text = stringResource(id = R.string.discussion_follow),
-                icon = if (thread.following) Icons.Filled.Star else Icons.Outlined.StarRate,
+                painter = painterResource(if (thread.following) R.drawable.discussion_star_filled else R.drawable.discussion_star),
                 textStyle = MaterialTheme.appTypography.labelLarge,
                 color = MaterialTheme.appColors.textPrimaryVariant,
                 onClick = {
@@ -120,6 +119,7 @@ fun ThreadMainItem(
         }
         Spacer(modifier = Modifier.height(24.dp))
         HyperlinkImageText(
+            title = thread.title,
             imageText = thread.parsedRenderedBody,
             linkTextColor = MaterialTheme.appColors.primary
         )
@@ -145,7 +145,7 @@ fun ThreadMainItem(
             )
             IconText(
                 text = reportText,
-                icon = Icons.Outlined.Flag,
+                painter = painterResource(id = R.drawable.discussion_ic_report),
                 textStyle = MaterialTheme.appTypography.labelLarge,
                 color = reportColor,
                 onClick = {
@@ -167,7 +167,8 @@ fun CommentItem(
     onClick: (String, String, Boolean) -> Unit,
     onAddCommentClick: () -> Unit = {},
 ) {
-    val profileImageUrl = comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = comment.profileImage?.imageUrlFull
+        ?: comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
 
     val reportText = if (comment.abuseFlagged) {
         stringResource(id = R.string.discussion_unreport)
@@ -215,12 +216,15 @@ fun CommentItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(profileImageUrl),
+                    painter = rememberAsyncImagePainter(
+                        model = profileImageUrl,
+                        error = painterResource(id = com.raccoongang.core.R.drawable.core_ic_default_profile_picture)
+                    ),
                     contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(Color.Gray)
+
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(
@@ -235,12 +239,12 @@ fun CommentItem(
                     Text(
                         text = TimeUtils.iso8601ToDateWithTime(context, comment.createdAt),
                         style = MaterialTheme.appTypography.labelSmall,
-                        color = MaterialTheme.appColors.textSecondary
+                        color = MaterialTheme.appColors.textPrimaryVariant
                     )
                 }
                 IconText(
                     text = reportText,
-                    icon = Icons.Outlined.Flag,
+                    painter = painterResource(id = R.drawable.discussion_ic_report),
                     textStyle = MaterialTheme.appTypography.labelMedium,
                     color = reportColor,
                     onClick = {
@@ -308,7 +312,8 @@ fun CommentMainItem(
     comment: DiscussionComment,
     onClick: (String, String, Boolean) -> Unit,
 ) {
-    val profileImageUrl = comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = comment.profileImage?.imageUrlFull
+        ?: comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
 
     val reportText = if (comment.abuseFlagged) {
         stringResource(id = R.string.discussion_unreport)
@@ -348,12 +353,15 @@ fun CommentMainItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(profileImageUrl),
+                    painter = rememberAsyncImagePainter(
+                        model = profileImageUrl,
+                        error = painterResource(id = com.raccoongang.core.R.drawable.core_ic_default_profile_picture)
+                    ),
                     contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(Color.Gray)
+
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(
@@ -368,7 +376,7 @@ fun CommentMainItem(
                     Text(
                         text = TimeUtils.iso8601ToDateWithTime(context, comment.createdAt),
                         style = MaterialTheme.appTypography.labelSmall,
-                        color = MaterialTheme.appColors.textSecondary
+                        color = MaterialTheme.appColors.textPrimaryVariant
                     )
                 }
             }
@@ -403,7 +411,7 @@ fun CommentMainItem(
                 )
                 IconText(
                     text = reportText,
-                    icon = Icons.Outlined.Flag,
+                    painter = painterResource(id = R.drawable.discussion_ic_report),
                     textStyle = MaterialTheme.appTypography.labelLarge,
                     color = reportColor,
                     onClick = {
@@ -654,7 +662,8 @@ private val mockComment = DiscussionComment(
     "",
     21,
     emptyList(),
-    emptyMap()
+    ProfileImage("", "", "", "", false),
+    mapOf()
 )
 
 private val mockThread = com.raccoongang.discussion.domain.model.Thread(
@@ -686,7 +695,10 @@ private val mockThread = com.raccoongang.discussion.domain.model.Thread(
     4,
     false,
     false,
-    mapOf()
+    mapOf(),
+    10,
+    false,
+    false
 )
 
 private val mockTopic = Topic(

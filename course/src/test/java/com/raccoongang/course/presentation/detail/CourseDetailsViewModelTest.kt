@@ -55,11 +55,9 @@ class CourseDetailsViewModelTest {
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } throws UnknownHostException()
-        coEvery { interactor.getEnrolledCourseById(any()) } throws UnknownHostException()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseDetails(any()) }
-        coVerify(exactly = 1) { interactor.getEnrolledCourseById(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -73,11 +71,9 @@ class CourseDetailsViewModelTest {
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } throws Exception()
-        coEvery { interactor.getEnrolledCourseById(any()) } throws Exception()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseDetails(any()) }
-        coVerify(exactly = 1) { interactor.getEnrolledCourseById(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -91,12 +87,10 @@ class CourseDetailsViewModelTest {
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockk()
-        coEvery { interactor.getEnrolledCourseById(any()) } returns mockk()
 
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseDetails(any()) }
-        coVerify(exactly = 1) { interactor.getEnrolledCourseById(any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
@@ -108,14 +102,11 @@ class CourseDetailsViewModelTest {
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getCourseDetailsFromCache(any()) } returns mockk()
-        coEvery { interactor.getEnrolledCourseFromCacheById(any()) } returns mockk()
 
         advanceUntilIdle()
 
         coVerify(exactly = 0) { interactor.getCourseDetails(any()) }
-        coVerify(exactly = 0) { interactor.getEnrolledCourseById(any()) }
         coVerify(exactly = 1) { interactor.getCourseDetailsFromCache(any()) }
-        coVerify(exactly = 1) { interactor.getEnrolledCourseFromCacheById(any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
@@ -126,7 +117,6 @@ class CourseDetailsViewModelTest {
         val viewModel =
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         coEvery { interactor.enrollInACourse(any()) } throws UnknownHostException()
-        coEvery { interactor.getEnrolledCourseById(any()) } returns mockk()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockk()
@@ -147,7 +137,6 @@ class CourseDetailsViewModelTest {
         val viewModel =
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         coEvery { interactor.enrollInACourse(any()) } throws Exception()
-        coEvery { interactor.getEnrolledCourseById(any()) } returns mockk()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockk()
@@ -168,7 +157,6 @@ class CourseDetailsViewModelTest {
         val viewModel =
             CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
         coEvery { interactor.enrollInACourse(any()) } returns Unit
-        coEvery { interactor.getEnrolledCourseById(any()) } returns mockk()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockk()
@@ -179,7 +167,6 @@ class CourseDetailsViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
-        coVerify(exactly = 2) { interactor.getEnrolledCourseById(any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)

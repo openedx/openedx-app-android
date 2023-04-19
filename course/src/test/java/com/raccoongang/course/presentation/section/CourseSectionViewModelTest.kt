@@ -10,6 +10,8 @@ import com.raccoongang.core.UIMessage
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.Block
 import com.raccoongang.core.domain.model.BlockCounts
+import com.raccoongang.core.domain.model.CourseStructure
+import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.module.db.*
 import com.raccoongang.core.presentation.course.CourseViewMode
@@ -32,6 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import java.net.UnknownHostException
+import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseSectionViewModelTest {
@@ -99,6 +102,30 @@ class CourseSectionViewModelTest {
             descendants = emptyList(),
             completion = 0.0
         )
+    )
+
+    private val courseStructure = CourseStructure(
+        root = "",
+        blockData = blocks,
+        id = "id",
+        name = "Course name",
+        number = "",
+        org = "Org",
+        start = Date(),
+        startDisplay = "",
+        startType = "",
+        end = Date(),
+        coursewareAccess = CoursewareAccess(
+            true,
+            "",
+            "",
+            "",
+            "",
+            ""
+        ),
+        media = null,
+        certificate = null,
+        isSelfPaced = false
     )
 
     private val downloadModel = DownloadModel(
@@ -192,8 +219,8 @@ class CourseSectionViewModelTest {
         coEvery { downloadDao.readAllData() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
-        coEvery { interactor.getCourseStructureFromCache() } returns emptyList()
-        coEvery { interactor.getCourseStructureForVideos() } returns blocks
+        coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
 
         viewModel.getBlocks("id", CourseViewMode.VIDEOS)
         advanceUntilIdle()
@@ -289,8 +316,8 @@ class CourseSectionViewModelTest {
                 emit(emptyList())
             }
         }
-        coEvery { interactor.getCourseStructureFromCache() } returns emptyList()
-        coEvery { interactor.getCourseStructureForVideos() } returns blocks
+        coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

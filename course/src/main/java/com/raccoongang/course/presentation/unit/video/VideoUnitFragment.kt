@@ -2,12 +2,18 @@ package com.raccoongang.course.presentation.unit.video
 
 import android.graphics.Point
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.OrientationEventListener
 import android.view.View
 import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -15,17 +21,22 @@ import androidx.fragment.app.Fragment
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.extension.dpToPixel
-import com.raccoongang.core.presentation.global.WindowSizeHolder
+import com.raccoongang.core.extension.objectToString
+import com.raccoongang.core.extension.stringToObject
+import com.raccoongang.core.presentation.dialog.SelectBottomDialogFragment
 import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
+import com.raccoongang.core.utils.LocaleUtils
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentVideoUnitBinding
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.ui.ConnectionErrorView
 import com.raccoongang.course.presentation.ui.VideoRotateView
+import com.raccoongang.course.presentation.ui.VideoSubtitles
 import com.raccoongang.course.presentation.ui.VideoTitle
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -46,13 +57,34 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     private var orientationListener: OrientationEventListener? = null
     private var blockId = ""
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var videoTimeRunnable: Runnable = object : Runnable {
+        override fun run() {
+            exoPlayer?.let {
+                if (it.isPlaying) {
+                    viewModel.setCurrentVideoTime(it.currentPosition)
+                }
+            }
+            handler.postDelayed(this, 200)
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        windowSize = (requireActivity() as WindowSizeHolder).windowSize
+        windowSize = computeWindowSizeClasses()
         lifecycle.addObserver(viewModel)
-        viewModel.videoUrl = requireArguments().getString(ARG_VIDEO_URL, "")
-        viewModel.isDownloaded = requireArguments().getBoolean(ARG_DOWNLOADED)
-        blockId = requireArguments().getString(ARG_BLOCK_ID, "")
+        handler.post(videoTimeRunnable)
+        requireArguments().apply {
+            viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
+            viewModel.transcripts =
+                stringToObject<Map<String, String>>(
+                    getString(ARG_TRANSCRIPT_URL, "")
+                ) ?: emptyMap()
+            viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
+            blockId = getString(ARG_BLOCK_ID, "")
+        }
+        viewModel.downloadSubtitles()
         orientationListener = object : OrientationEventListener(requireActivity()) {
             override fun onOrientationChanged(orientation: Int) {
                 if (windowSize?.isTablet != true) {
@@ -61,7 +93,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                             router.navigateToFullScreenVideo(
                                 requireActivity().supportFragmentManager,
                                 viewModel.videoUrl,
-                                exoPlayer?.currentPosition ?: viewModel.currentVideoTime,
+                                exoPlayer?.currentPosition ?: viewModel.getCurrentVideoTime(),
                                 blockId,
                                 viewModel.courseId
                             )
@@ -72,6 +104,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     }
                 }
             }
+        }
+
+        viewModel.isVideoPaused.observe(this) {
+            exoPlayer?.pause()
         }
     }
 
@@ -100,6 +136,31 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     binding.connectionError.isVisible =
                         !viewModel.hasInternetConnection && !viewModel.isDownloaded
                 }
+            }
+        }
+
+        binding.subtitles.setContent {
+            NewEdxTheme {
+                val state = rememberLazyListState()
+                val currentIndex by viewModel.currentIndex.collectAsState(0)
+                val transcriptObject by viewModel.transcriptObject.observeAsState()
+                VideoSubtitles(
+                    listState = state,
+                    timedTextObject = transcriptObject,
+                    subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
+                    showSubtitleLanguage = viewModel.transcripts.size > 1,
+                    currentIndex = currentIndex,
+                    onSettingsClick = {
+                        exoPlayer?.pause()
+                        val dialog = SelectBottomDialogFragment.newInstance(
+                            LocaleUtils.getLanguages(viewModel.transcripts.keys.toList())
+                        )
+                        dialog.show(
+                            requireActivity().supportFragmentManager,
+                            SelectBottomDialogFragment::class.simpleName
+                        )
+                    }
+                )
             }
         }
 
@@ -139,39 +200,34 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             if (exoPlayer == null) {
                 exoPlayer = ExoPlayer.Builder(requireContext())
                     .build()
-                playerView.player = exoPlayer
-                playerView.setShowNextButton(false)
-                playerView.setShowPreviousButton(false)
-                val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
-                exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime.toLong())
-                exoPlayer?.prepare()
-                exoPlayer?.playWhenReady = true
-
-                playerView.setFullscreenButtonClickListener { isFullScreen ->
-                    router.navigateToFullScreenVideo(
-                        requireActivity().supportFragmentManager,
-                        viewModel.videoUrl,
-                        exoPlayer?.currentPosition ?: 0L,
-                        blockId,
-                        viewModel.courseId
-                    )
-                    viewModel.fullscreenHandled = true
-                }
-
-                exoPlayer?.addListener(object : Player.Listener {
-                    override fun onPlaybackStateChanged(playbackState: Int) {
-                        super.onPlaybackStateChanged(playbackState)
-                        if (playbackState == Player.STATE_ENDED) {
-                            viewModel.markBlockCompleted(blockId)
-                        }
-                    }
-                })
-            } else {
-                val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
-                exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime.toLong())
-                exoPlayer?.prepare()
-                exoPlayer?.playWhenReady = true
             }
+            playerView.player = exoPlayer
+            playerView.setShowNextButton(false)
+            playerView.setShowPreviousButton(false)
+            val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
+            exoPlayer?.setMediaItem(mediaItem, viewModel.getCurrentVideoTime())
+            exoPlayer?.prepare()
+            exoPlayer?.playWhenReady = !(viewModel.isVideoPaused.value ?: false)
+
+            playerView.setFullscreenButtonClickListener { isFullScreen ->
+                router.navigateToFullScreenVideo(
+                    requireActivity().supportFragmentManager,
+                    viewModel.videoUrl,
+                    exoPlayer?.currentPosition ?: 0L,
+                    blockId,
+                    viewModel.courseId
+                )
+                viewModel.fullscreenHandled = true
+            }
+
+            exoPlayer?.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    super.onPlaybackStateChanged(playbackState)
+                    if (playbackState == Player.STATE_ENDED) {
+                        viewModel.markBlockCompleted(blockId)
+                    }
+                }
+            })
         }
     }
 
@@ -190,12 +246,19 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     override fun onDestroyView() {
         exoPlayer?.release()
+        exoPlayer = null
         super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacks(videoTimeRunnable)
+        super.onDestroy()
     }
 
     companion object {
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_VIDEO_URL = "videoUrl"
+        private const val ARG_TRANSCRIPT_URL = "transcriptUrl"
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
         private const val ARG_DOWNLOADED = "isDownloaded"
@@ -203,6 +266,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             blockId: String,
             courseId: String,
             videoUrl: String,
+            transcriptsUrl: Map<String, String>,
             title: String,
             isDownloaded: Boolean
         ): VideoUnitFragment {
@@ -211,6 +275,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 ARG_BLOCK_ID to blockId,
                 ARG_COURSE_ID to courseId,
                 ARG_VIDEO_URL to videoUrl,
+                ARG_TRANSCRIPT_URL to objectToString(transcriptsUrl),
                 ARG_TITLE to title,
                 ARG_DOWNLOADED to isDownloaded
             )

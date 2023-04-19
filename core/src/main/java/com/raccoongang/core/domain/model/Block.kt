@@ -52,13 +52,9 @@ data class Block(
 data class StudentViewData(
     val onlyOnWeb: Boolean,
     val duration: Any,
-    val transcripts: Transcripts?,
+    val transcripts: HashMap<String, String>?,
     val encodedVideos: EncodedVideos?,
     val topicId: String
-)
-
-data class Transcripts(
-    val en: String
 )
 
 data class EncodedVideos(
@@ -70,11 +66,11 @@ data class EncodedVideos(
     var mobileLow: VideoInfo?
 ) {
     val hasDownloadableVideo: Boolean
-        get() = (youtube == null && (!hls?.url.isNullOrEmpty() ||
-                !fallback?.url.isNullOrEmpty() ||
-                !desktopMp4?.url.isNullOrEmpty() ||
-                !mobileHigh?.url.isNullOrEmpty() ||
-                !mobileLow?.url.isNullOrEmpty()))
+        get() = isPreferredVideoInfo(hls) ||
+                isPreferredVideoInfo(fallback) ||
+                isPreferredVideoInfo(desktopMp4) ||
+                isPreferredVideoInfo(mobileHigh) ||
+                isPreferredVideoInfo(mobileLow)
 
     fun getPreferredVideoInfoForDownloading(preferredVideoQuality: VideoQuality): VideoInfo? {
         var preferredVideoInfo = when (preferredVideoQuality) {

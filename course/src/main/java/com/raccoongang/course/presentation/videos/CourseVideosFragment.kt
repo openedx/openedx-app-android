@@ -31,10 +31,7 @@ import androidx.fragment.app.Fragment
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
-import com.raccoongang.core.domain.model.Block
-import com.raccoongang.core.domain.model.BlockCounts
-import com.raccoongang.core.domain.model.Certificate
-import com.raccoongang.core.extension.parcelable
+import com.raccoongang.core.domain.model.*
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
@@ -49,6 +46,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import java.io.File
+import java.util.*
 
 class CourseVideosFragment : Fragment() {
 
@@ -61,11 +59,8 @@ class CourseVideosFragment : Fragment() {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         with(requireArguments()) {
-            viewModel.courseImage = getString(ARG_IMAGE, "")
             viewModel.courseTitle = getString(ARG_TITLE, "")
-            viewModel.courseCertificate = parcelable(ARG_CERTIFICATE)!!
         }
-        viewModel.getVideos()
     }
 
     override fun onCreateView(
@@ -78,17 +73,15 @@ class CourseVideosFragment : Fragment() {
             NewEdxTheme {
                 val windowSize = rememberWindowSize()
 
-                val uiState by viewModel.uiState.observeAsState()
+                val uiState by viewModel.uiState.observeAsState(CourseVideosUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val isUpdating by viewModel.isUpdating.observeAsState(false)
 
                 CourseVideosScreen(
                     windowSize = windowSize,
-                    uiState = uiState!!,
+                    uiState = uiState,
                     uiMessage = uiMessage,
-                    courseImage = viewModel.courseImage,
                     courseTitle = viewModel.courseTitle,
-                    courseCertificate = viewModel.courseCertificate,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     isUpdating = isUpdating,
                     onSwipeRefresh = {
@@ -133,20 +126,14 @@ class CourseVideosFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
-        private const val ARG_IMAGE = "image"
-        private const val ARG_CERTIFICATE = "certificate"
         fun newInstance(
             courseId: String,
-            title: String,
-            image: String,
-            certificate: Certificate
+            title: String
         ): CourseVideosFragment {
             val fragment = CourseVideosFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_TITLE to title,
-                ARG_IMAGE to image,
-                ARG_CERTIFICATE to certificate
+                ARG_TITLE to title
             )
             return fragment
         }
@@ -163,8 +150,6 @@ private fun CourseVideosScreen(
     hasInternetConnection: Boolean,
     onSwipeRefresh: () -> Unit,
     courseTitle: String,
-    courseImage: String,
-    courseCertificate: Certificate,
     onItemClick: (Block) -> Unit,
     onReloadClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -276,20 +261,28 @@ private fun CourseVideosScreen(
                                         )
                                     }
                                 }
+                                is CourseVideosUIState.Loading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                    }
+                                }
                                 is CourseVideosUIState.CourseData -> {
                                     CourseImageHeader(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(imageHeight)
+                                            .aspectRatio(1.86f)
                                             .padding(6.dp),
-                                        courseImage = courseImage,
-                                        courseCertificate = courseCertificate
+                                        courseImage = uiState.courseStructure.media?.image?.large
+                                            ?: "",
+                                        courseCertificate = uiState.courseStructure.certificate
                                     )
                                     LazyColumn(
                                         modifier = Modifier.fillMaxWidth(),
                                         contentPadding = listPadding
                                     ) {
-                                        items(uiState.blocks) { block ->
+                                        items(uiState.courseStructure.blockData) { block ->
                                             if (block.type == BlockType.CHAPTER) {
                                                 Text(
                                                     modifier = Modifier.padding(
@@ -351,13 +344,9 @@ private fun CourseVideosScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
             uiState = CourseVideosUIState.CourseData(
-                listOf(
-                    mockSequentialBlock, mockSequentialBlock
-                ),
+                mockCourseStructure,
                 emptyMap()
             ),
-            courseCertificate = Certificate(""),
-            courseImage = "",
             courseTitle = "Course",
             onItemClick = { },
             onBackClick = {},
@@ -381,8 +370,6 @@ private fun CourseVideosScreenEmptyPreview() {
             uiState = CourseVideosUIState.Empty(
                 "This course does not include any videos."
             ),
-            courseCertificate = Certificate(""),
-            courseImage = "",
             courseTitle = "Course",
             onItemClick = { },
             onBackClick = {},
@@ -404,13 +391,9 @@ private fun CourseVideosScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiMessage = null,
             uiState = CourseVideosUIState.CourseData(
-                listOf(
-                    mockSequentialBlock, mockSequentialBlock
-                ),
+                mockCourseStructure,
                 emptyMap()
             ),
-            courseCertificate = Certificate(""),
-            courseImage = "",
             courseTitle = "Course",
             onItemClick = { },
             onBackClick = {},
@@ -454,4 +437,28 @@ private val mockSequentialBlock = Block(
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
     completion = 0.0
+)
+
+private val mockCourseStructure = CourseStructure(
+    root = "",
+    blockData = listOf(mockSequentialBlock, mockChapterBlock),
+    id = "id",
+    name = "Course name",
+    number = "",
+    org = "Org",
+    start = Date(),
+    startDisplay = "",
+    startType = "",
+    end = Date(),
+    coursewareAccess = CoursewareAccess(
+        true,
+        "",
+        "",
+        "",
+        "",
+        ""
+    ),
+    media = null,
+    certificate = null,
+    isSelfPaced = false
 )

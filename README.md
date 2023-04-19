@@ -18,10 +18,15 @@ Modern vision of the mobile application for the Open EdX platform from Raccoon G
 
 6. Click the **Run** button.
 
+## API plugin
+This project uses custom APIs to improve performance and reduce the number of requests to the server.
+
+You can find the plugin with the API and installation guide [here](https://github.com/raccoongang/mobile-api-extensions).
+
 ## Roadmap
 Please feel welcome to develop any of the suggested features below and submit a pull request.
 
-- Migrate to the new APIs
+- ✅ ~~Migrate to the new APIs~~
 - Recent searches
 - Migrate to the Olive and JWT token
 - UnAuth User mode

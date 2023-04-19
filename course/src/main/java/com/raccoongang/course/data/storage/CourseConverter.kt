@@ -2,9 +2,9 @@ package com.raccoongang.course.data.storage
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
+import com.raccoongang.core.data.model.room.BlockDb
+import com.raccoongang.core.data.model.room.VideoInfoDb
 import com.raccoongang.core.extension.genericType
-import com.raccoongang.course.data.model.BlockDbEntity
-import com.raccoongang.course.data.model.VideoInfoDb
 
 class CourseConverter {
 
@@ -34,15 +34,27 @@ class CourseConverter {
     }
 
     @TypeConverter
-    fun fromListOfBlockDbEntity(value: List<BlockDbEntity>): String {
+    fun fromListOfBlockDbEntity(value: List<BlockDb>): String {
         val json = Gson().toJson(value)
         return json.toString()
     }
 
     @TypeConverter
-    fun toListOfBlockDbEntity(value: String): List<BlockDbEntity> {
-        val type = genericType<List<BlockDbEntity>>()
+    fun toListOfBlockDbEntity(value: String): List<BlockDb> {
+        val type = genericType<List<BlockDb>>()
         return Gson().fromJson(value, type)
+    }
+
+    @TypeConverter
+    fun fromStringToMap(value: String?): Map<String, String> {
+        val mapType = genericType<HashMap<String, String>>()
+        return Gson().fromJson(value, mapType)
+    }
+
+    @TypeConverter
+    fun fromMapToString(map: Map<String, String>): String {
+        val gson = Gson()
+        return gson.toJson(map)
     }
 
 }

@@ -5,13 +5,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -22,8 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -37,7 +34,6 @@ import com.raccoongang.core.BlockType
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.*
-import com.raccoongang.core.extension.parcelable
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
@@ -47,6 +43,7 @@ import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.container.CourseContainerFragment
 import com.raccoongang.course.presentation.ui.CourseImageHeader
 import com.raccoongang.course.presentation.ui.CourseSectionCard
+import com.raccoongang.course.presentation.units.CourseUnitsFragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -64,11 +61,8 @@ class CourseOutlineFragment : Fragment() {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         with(requireArguments()) {
-            viewModel.courseImage = getString(ARG_IMAGE, "")
             viewModel.courseTitle = getString(ARG_TITLE, "")
-            viewModel.courseCertificate = parcelable(ARG_CERTIFICATE)!!
         }
-        viewModel.getCourseData()
     }
 
     override fun onCreateView(
@@ -88,9 +82,7 @@ class CourseOutlineFragment : Fragment() {
                 CourseOutlineScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
-                    courseImage = viewModel.courseImage,
                     courseTitle = viewModel.courseTitle,
-                    courseCertificate = viewModel.courseCertificate,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
                     onSwipeRefresh = {
@@ -111,13 +103,24 @@ class CourseOutlineFragment : Fragment() {
                         )
                     },
                     onResumeClick = { blockId ->
-                        router.navigateToCourseContainer(
-                            requireActivity().supportFragmentManager,
-                            blockId = blockId,
-                            courseId = viewModel.courseId,
-                            courseName = viewModel.courseTitle,
-                            mode = CourseViewMode.FULL
-                        )
+                        viewModel.resumeSectionBlock?.let { sequential ->
+                            router.navigateToCourseSubsections(
+                                requireActivity().supportFragmentManager,
+                                viewModel.courseId,
+                                sequential.id,
+                                sequential.displayName,
+                                CourseViewMode.FULL
+                            )
+                            viewModel.resumeVerticalBlock?.let { vertical ->
+                                router.navigateToCourseUnits(
+                                    requireActivity().supportFragmentManager,
+                                    viewModel.courseId,
+                                    vertical.id,
+                                    vertical.displayName,
+                                    CourseViewMode.FULL
+                                )
+                            }
+                        }
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
@@ -146,20 +149,14 @@ class CourseOutlineFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
-        private const val ARG_IMAGE = "image"
-        private const val ARG_CERTIFICATE = "certificate"
         fun newInstance(
             courseId: String,
-            title: String,
-            image: String,
-            certificate: Certificate
+            title: String
         ): CourseOutlineFragment {
             val fragment = CourseOutlineFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_TITLE to title,
-                ARG_IMAGE to image,
-                ARG_CERTIFICATE to certificate
+                ARG_TITLE to title
             )
             return fragment
         }
@@ -173,8 +170,6 @@ internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
     courseTitle: String,
-    courseImage: String,
-    courseCertificate: Certificate,
     uiMessage: UIMessage?,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
@@ -212,8 +207,8 @@ internal fun CourseOutlineScreen(
         val imageHeight by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = 260.dp,
-                    compact = 200.dp
+                    expanded = 300.dp,
+                    compact = 250.dp
                 )
             )
         }
@@ -279,7 +274,7 @@ internal fun CourseOutlineScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    CircularProgressIndicator()
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
                             is CourseOutlineUIState.CourseData -> {
@@ -289,17 +284,33 @@ internal fun CourseOutlineScreen(
                                 ) {
                                     CourseImageHeader(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(imageHeight)
+                                            .aspectRatio(1.86f)
                                             .padding(6.dp),
-                                        courseImage = courseImage,
-                                        courseCertificate = courseCertificate
+                                        courseImage = uiState.courseStructure.media?.image?.large
+                                            ?: "",
+                                        courseCertificate = uiState.courseStructure.certificate
                                     )
                                     LazyColumn(
                                         modifier = Modifier.fillMaxWidth(),
                                         contentPadding = listPadding
                                     ) {
-                                        items(uiState.blocks) { block ->
+                                        if (uiState.resumeBlock != null) {
+                                            item {
+                                                Spacer(Modifier.height(28.dp))
+                                                if (windowSize.isTablet) {
+                                                    ResumeCourseTablet(
+                                                        block = uiState.resumeBlock,
+                                                        onResumeClick = onResumeClick
+                                                    )
+                                                } else {
+                                                    ResumeCourse(
+                                                        block = uiState.resumeBlock,
+                                                        onResumeClick = onResumeClick
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        items(uiState.courseStructure.blockData) { block ->
                                             if (block.type == BlockType.CHAPTER) {
                                                 Text(
                                                     modifier = Modifier.padding(
@@ -357,42 +368,99 @@ private fun ResumeCourse(
     block: Block,
     onResumeClick: (String) -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.appColors.secondaryVariant)
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(id = com.raccoongang.course.R.string.course_resume_unit_title),
-                style = MaterialTheme.appTypography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.appColors.textPrimary
+        Text(
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
+            style = MaterialTheme.appTypography.labelMedium,
+            color = MaterialTheme.appColors.textPrimaryVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
+                contentDescription = null,
+                tint = MaterialTheme.appColors.textPrimary
             )
             Text(
                 text = block.displayName,
-                style = MaterialTheme.appTypography.bodyLarge,
-                color = MaterialTheme.appColors.textPrimary
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
-        NewEdxOutlinedButton(
-            modifier = Modifier,
-            borderColor = MaterialTheme.appColors.textFieldBorder,
-            textColor = MaterialTheme.appColors.textPrimary,
-            text = stringResource(id = com.raccoongang.course.R.string.course_resume_unit_btn),
+        Spacer(Modifier.height(24.dp))
+        NewEdxButton(
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue),
             onClick = {
                 onResumeClick(block.id)
             },
             content = {
-                Text(text = stringResource(id = com.raccoongang.course.R.string.course_resume_unit_btn).uppercase())
+                TextIcon(
+                    text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    color = MaterialTheme.appColors.buttonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun ResumeCourseTablet(
+    block: Block,
+    onResumeClick: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(Modifier.weight(1f).padding(end = 35.dp)) {
+            Text(
+                text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
+                style = MaterialTheme.appTypography.labelMedium,
+                color = MaterialTheme.appColors.textPrimaryVariant
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.Filled.ChevronRight,
+                    modifier = Modifier.size((MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
+                    painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .offset(x = 4.dp)
+                    tint = MaterialTheme.appColors.textPrimary
+                )
+                Text(
+                    text = block.displayName,
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.titleMedium,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4
+                )
+            }
+        }
+        NewEdxButton(
+            width = Modifier.width(194.dp),
+            text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+            onClick = {
+                onResumeClick(block.id)
+            },
+            content = {
+                TextIcon(
+                    text = stringResource(id = com.raccoongang.course.R.string.course_continue),
+                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    color = MaterialTheme.appColors.buttonText,
+                    textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
         )
@@ -407,15 +475,11 @@ private fun CourseOutlineScreenPreview() {
         CourseOutlineScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseOutlineUIState.CourseData(
-                listOf(
-                    mockSequentialBlock, mockSequentialBlock
-                ),
+                mockCourseStructure,
                 mapOf(),
                 mockChapterBlock
             ),
             courseTitle = "",
-            courseImage = "",
-            courseCertificate = Certificate(""),
             uiMessage = null,
             refreshing = false,
             hasInternetConnection = true,
@@ -437,15 +501,11 @@ private fun CourseOutlineScreenTabletPreview() {
         CourseOutlineScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseOutlineUIState.CourseData(
-                listOf(
-                    mockSequentialBlock, mockSequentialBlock
-                ),
+                mockCourseStructure,
                 mapOf(),
                 mockChapterBlock
             ),
             courseTitle = "",
-            courseImage = "",
-            courseCertificate = Certificate(""),
             uiMessage = null,
             refreshing = false,
             hasInternetConnection = true,
@@ -468,42 +528,6 @@ private fun ResumeCoursePreview() {
     }
 }
 
-private val mockCourse = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)
 private val mockChapterBlock = Block(
     id = "id",
     blockId = "blockId",
@@ -533,4 +557,28 @@ private val mockSequentialBlock = Block(
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
     completion = 0.0
+)
+
+private val mockCourseStructure = CourseStructure(
+    root = "",
+    blockData = listOf(mockSequentialBlock, mockSequentialBlock),
+    id = "id",
+    name = "Course name",
+    number = "",
+    org = "Org",
+    start = Date(),
+    startDisplay = "",
+    startType = "",
+    end = Date(),
+    coursewareAccess = CoursewareAccess(
+        true,
+        "",
+        "",
+        "",
+        "",
+        ""
+    ),
+    media = null,
+    certificate = null,
+    isSelfPaced = false
 )

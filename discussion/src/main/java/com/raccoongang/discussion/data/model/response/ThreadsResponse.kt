@@ -19,7 +19,7 @@ data class ThreadsResponse(
         @SerializedName("id")
         val id: String,
         @SerializedName("author")
-        val author: String,
+        val author: String?,
         @SerializedName("author_label")
         val authorLabel: String?,
         @SerializedName("created_at")
@@ -40,6 +40,10 @@ data class ThreadsResponse(
         val editableFields: List<String>,
         @SerializedName("can_delete")
         val canDelete: Boolean,
+        @SerializedName("anonymous")
+        val anonymous: Boolean,
+        @SerializedName("anonymous_to_peers")
+        val anonymousToPeers: Boolean,
         @SerializedName("course_id")
         val courseId: String,
         @SerializedName("topic_id")
@@ -70,6 +74,8 @@ data class ThreadsResponse(
         val read: Boolean,
         @SerializedName("has_endorsed")
         val hasEndorsed: Boolean,
+        @SerializedName("response_count")
+        val responseCount: Int,
         @SerializedName("users")
         val users: Map<String, DiscussionProfile>?
     ) {
@@ -92,7 +98,7 @@ data class ThreadsResponse(
         fun mapToDomain(): com.raccoongang.discussion.domain.model.Thread {
             return com.raccoongang.discussion.domain.model.Thread(
                 id,
-                author,
+                author ?: "",
                 authorLabel ?: "",
                 createdAt,
                 updatedAt,
@@ -119,7 +125,10 @@ data class ThreadsResponse(
                 unreadCommentCount,
                 read,
                 hasEndorsed,
-                users?.entries?.associate { it.key to it.value.mapToDomain() }
+                users?.entries?.associate { it.key to it.value.mapToDomain() },
+                responseCount,
+                anonymous,
+                anonymousToPeers
             )
         }
 

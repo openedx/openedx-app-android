@@ -1,10 +1,13 @@
 package com.raccoongang.course.presentation.detail
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.Configuration.*
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.*
@@ -19,10 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,14 +38,15 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.raccoongang.core.BuildConfig
 import com.raccoongang.core.UIMessage
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.domain.model.Course
 import com.raccoongang.core.domain.model.Media
+import com.raccoongang.core.extension.isEmailValid
 import com.raccoongang.core.ui.*
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.course.R
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.ui.CourseImageHeader
@@ -54,7 +57,7 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import com.raccoongang.course.R as courseR
 
-class CourseDetailFragment : Fragment() {
+class CourseDetailsFragment : Fragment() {
 
     private val viewModel by viewModel<CourseDetailsViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
@@ -95,15 +98,11 @@ class CourseDetailFragment : Fragment() {
                     onButtonClick = {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
-                            if (currentState.enrolledCourse != null) {
+                            if (currentState.course.isEnrolled) {
                                 router.navigateToCourseOutline(
                                     requireActivity().supportFragmentManager,
                                     currentState.course.courseId,
-                                    currentState.enrolledCourse.course.name,
-                                    currentState.enrolledCourse.course.courseImage,
-                                    currentState.enrolledCourse.certificate ?: Certificate(""),
-                                    currentState.enrolledCourse.course.coursewareAccess,
-                                    currentState.enrolledCourse.auditAccessExpires
+                                    currentState.course.name
                                 )
                             } else {
                                 viewModel.enrollInACourse(currentState.course.courseId)
@@ -116,8 +115,8 @@ class CourseDetailFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String): CourseDetailFragment {
-            val fragment = CourseDetailFragment()
+        fun newInstance(courseId: String): CourseDetailsFragment {
+            val fragment = CourseDetailsFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId
             )
@@ -224,7 +223,7 @@ internal fun CourseDetailsScreen(
                                     .padding(it),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is CourseDetailsUIState.CourseData -> {
@@ -233,7 +232,6 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.enrolledCourse != null,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -242,7 +240,6 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
                                         course = uiState.course,
-                                        uiState.enrolledCourse != null,
                                         onButtonClick = {
                                             onButtonClick()
                                         }
@@ -259,7 +256,7 @@ internal fun CourseDetailsScreen(
                                                 .padding(top = 20.dp),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            CircularProgressIndicator()
+                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                         }
                                     }
                                     Surface(
@@ -305,23 +302,14 @@ internal fun CourseDetailsScreen(
 private fun CourseDetailNativeContent(
     windowSize: WindowSize,
     course: Course,
-    isEnrolled: Boolean,
     onButtonClick: () -> Unit,
 ) {
+    val uriHandler = LocalUriHandler.current
     val buttonWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
                 expanded = Modifier.width(230.dp),
                 compact = Modifier.fillMaxWidth()
-            )
-        )
-    }
-
-    val imageHeight by remember(key1 = windowSize) {
-        mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = 260.dp,
-                compact = 200.dp
             )
         )
     }
@@ -335,21 +323,36 @@ private fun CourseDetailNativeContent(
         )
     }
 
-    val buttonText = if (isEnrolled) {
+    val buttonText = if (course.isEnrolled) {
         stringResource(id = R.string.course_view_course)
     } else {
         stringResource(id = R.string.course_enroll_now)
     }
 
     Column {
-        CourseImageHeader(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight)
-                .padding(6.dp),
-            courseImage = course.media.image?.large,
-            courseCertificate = null
-        )
+        Box(contentAlignment = Alignment.Center) {
+            CourseImageHeader(
+                modifier = Modifier
+                    .aspectRatio(1.86f)
+                    .padding(6.dp),
+                courseImage = course.media.image?.large,
+                courseCertificate = null
+            )
+            if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
+                IconButton(
+                    onClick = {
+                        uriHandler.openUri(course.media.courseVideo?.uri!!)
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(40.dp),
+                        painter = painterResource(courseR.drawable.course_ic_play),
+                        contentDescription = null,
+                        tint = Color.LightGray
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(16.dp))
         Column(
             Modifier
@@ -359,6 +362,7 @@ private fun CourseDetailNativeContent(
             val enrollmentEnd = course.enrollmentEnd
             if (enrollmentEnd != null && Date() > enrollmentEnd) {
                 EnrollOverLabel()
+                Spacer(Modifier.height(24.dp))
             }
             Text(
                 text = course.shortDescription,
@@ -394,9 +398,9 @@ private fun CourseDetailNativeContent(
 private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
     course: Course,
-    isEnrolled: Boolean,
     onButtonClick: () -> Unit,
 ) {
+    val uriHandler = LocalUriHandler.current
     val buttonWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -406,7 +410,7 @@ private fun CourseDetailNativeContentLandscape(
         )
     }
 
-    val buttonText = if (isEnrolled) {
+    val buttonText = if (course.isEnrolled) {
         stringResource(id = R.string.course_view_course)
     } else {
         stringResource(id = R.string.course_enroll_now)
@@ -455,18 +459,39 @@ private fun CourseDetailNativeContentLandscape(
             }
         }
         Spacer(Modifier.width(24.dp))
-        CourseImageHeader(
-            modifier = Modifier
-                .width(263.dp)
-                .height(200.dp),
-            courseImage = course.media.image?.large,
-            courseCertificate = null
-        )
+        Box(contentAlignment = Alignment.Center) {
+            CourseImageHeader(
+                modifier = Modifier
+                    .width(263.dp)
+                    .height(200.dp),
+                courseImage = course.media.image?.large,
+                courseCertificate = null
+            )
+            if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
+                IconButton(
+                    onClick = {
+                        uriHandler.openUri(course.media.courseVideo?.uri!!)
+                    }
+                ) {
+                    Icon(
+                        modifier = Modifier.size(40.dp),
+                        painter = painterResource(courseR.drawable.course_ic_play),
+                        contentDescription = null,
+                        tint = Color.LightGray
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
 private fun EnrollOverLabel() {
+    val borderColor = if (!isSystemInDarkTheme()) {
+        MaterialTheme.appColors.cardViewBorder
+    } else {
+        MaterialTheme.appColors.surface
+    }
     Box(
         Modifier
             .fillMaxWidth()
@@ -480,7 +505,7 @@ private fun EnrollOverLabel() {
             )
             .border(
                 1.dp,
-                MaterialTheme.appColors.cardViewBorder,
+                borderColor,
                 MaterialTheme.appShapes.material.medium
             )
     ) {
@@ -523,6 +548,30 @@ private fun CourseDescription(
                     super.onPageCommitVisible(view, url)
                     onWebPageLoaded()
                 }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val clickUrl = request?.url?.toString() ?: ""
+                    return if (clickUrl.isNotEmpty() &&
+                        (clickUrl.startsWith("http://") ||
+                                clickUrl.startsWith("https://"))
+                    ) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                        true
+                    } else if (clickUrl.startsWith("mailto:")) {
+                        val email = clickUrl.replace("mailto:", "")
+                        if (email.isEmailValid()) {
+                            EmailUtil.sendEmailIntent(context, email, "", "")
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        false
+                    }
+                }
             }
             with(settings) {
                 javaScriptEnabled = true
@@ -548,7 +597,7 @@ private fun CourseDetailNativeContentPreview() {
     NewEdxTheme {
         CourseDetailsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = CourseDetailsUIState.CourseData(mockCourse, null),
+            uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
@@ -566,7 +615,7 @@ private fun CourseDetailNativeContentTabletPreview() {
     NewEdxTheme {
         CourseDetailsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = CourseDetailsUIState.CourseData(mockCourse, null),
+            uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
@@ -597,5 +646,6 @@ private val mockCourse = Course(
     end = "end",
     startDisplay = "startDisplay",
     startType = "startType",
-    overview = ""
+    overview = "",
+    isEnrolled = false
 )

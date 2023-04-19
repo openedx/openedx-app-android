@@ -47,6 +47,7 @@ android {
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
             resValue "string", "terms_of_service_link", envUrls.termsOfService
             resValue "string", "contact_us_link", envUrls.contactUs
+            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
         develop {
             def envMap = config.environments.find { it.key == "DEV" }
@@ -60,6 +61,7 @@ android {
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
             resValue "string", "terms_of_service_link", envUrls.termsOfService
             resValue "string", "contact_us_link", envUrls.contactUs
+            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
         stage {
             def envMap = config.environments.find { it.key == "STAGE" }
@@ -73,6 +75,7 @@ android {
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
             resValue "string", "terms_of_service_link", envUrls.termsOfService
             resValue "string", "contact_us_link", envUrls.contactUs
+            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
     }
 
@@ -114,6 +117,7 @@ dependencies {
     api "androidx.fragment:fragment-ktx:$fragment_version"
     api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
     api "androidx.viewpager2:viewpager2:$viewpager2_version"
+    api "androidx.window:window:$window_version"
 
     //Android Jetpack
     api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"

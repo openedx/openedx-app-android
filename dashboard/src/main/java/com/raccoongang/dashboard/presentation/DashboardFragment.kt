@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -25,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -75,11 +75,13 @@ class DashboardFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
+                val canLoadMore by viewModel.canLoadMore.observeAsState(false)
 
                 MyCoursesScreen(
                     windowSize = windowSize,
                     uiState!!,
                     uiMessage,
+                    canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     onReloadClick = {
@@ -89,15 +91,14 @@ class DashboardFragment : Fragment() {
                         router.navigateToCourseOutline(
                             requireParentFragment().parentFragmentManager,
                             it.course.id,
-                            it.course.name,
-                            it.course.courseImage,
-                            it.certificate ?: Certificate(""),
-                            it.course.coursewareAccess,
-                            it.auditAccessExpires
+                            it.course.name
                         )
                     },
                     onSwipeRefresh = {
                         viewModel.updateCourses()
+                    },
+                    paginationCallback = {
+                        viewModel.fetchMore()
                     }
                 )
             }
@@ -111,19 +112,24 @@ internal fun MyCoursesScreen(
     windowSize: WindowSize,
     state: DashboardUIState,
     uiMessage: UIMessage?,
+    canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
+    paginationCallback: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val configuration = LocalConfiguration.current
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
+    }
+    val scrollState = rememberLazyListState()
+    val firstVisibleIndex = remember {
+        mutableStateOf(scrollState.firstVisibleItemIndex)
     }
 
     Scaffold(
@@ -198,7 +204,7 @@ internal fun MyCoursesScreen(
                                 Modifier
                                     .fillMaxSize(), contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator()
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
                         is DashboardUIState.Courses -> {
@@ -210,6 +216,7 @@ internal fun MyCoursesScreen(
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .then(contentWidth),
+                                    state = scrollState,
                                     contentPadding = contentPaddings,
                                     content = {
                                         item() {
@@ -234,7 +241,22 @@ internal fun MyCoursesScreen(
                                             })
                                             Divider()
                                         }
+                                        item {
+                                            if (canLoadMore) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(vertical = 16.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                                }
+                                            }
+                                        }
                                     })
+                                if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                    paginationCallback()
+                                }
                             }
                         }
                         is DashboardUIState.Empty -> {
@@ -467,7 +489,9 @@ private fun MyCoursesScreenDay() {
             onItemClick = {},
             onReloadClick = {},
             hasInternetConnection = true,
-            refreshing = false
+            refreshing = false,
+            canLoadMore = false,
+            paginationCallback = {}
         )
     }
 }
@@ -494,7 +518,9 @@ private fun MyCoursesScreenTabletPreview() {
             onItemClick = {},
             onReloadClick = {},
             hasInternetConnection = true,
-            refreshing = false
+            refreshing = false,
+            canLoadMore = false,
+            paginationCallback = {}
         )
     }
 }

@@ -10,7 +10,6 @@ import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.Block
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.domain.model.CourseComponentStatus
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.module.DownloadWorkerController
@@ -48,8 +47,11 @@ class CourseOutlineViewModel(
         get() = _isUpdating
 
     var courseTitle = ""
-    var courseImage = ""
-    var courseCertificate = Certificate("")
+
+    var resumeSectionBlock: Block? = null
+        private set
+    var resumeVerticalBlock: Block? = null
+        private set
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -71,13 +73,17 @@ class CourseOutlineViewModel(
                 if (_uiState.value is CourseOutlineUIState.CourseData) {
                     val state = _uiState.value as CourseOutlineUIState.CourseData
                     _uiState.value = CourseOutlineUIState.CourseData(
-                        blocks = state.blocks,
+                        courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
                         resumeBlock = state.resumeBlock
                     )
                 }
             }
         }
+    }
+
+    init {
+        getCourseData()
     }
 
     fun setIsUpdating() {
@@ -109,22 +115,23 @@ class CourseOutlineViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
-            val blocks = interactor.getCourseStructureFromCache()
-
             try {
+                var courseStructure = interactor.getCourseStructureFromCache()
+                val blocks = courseStructure.blockData
+
                 val courseStatus = if (networkConnection.isOnline()) {
                     interactor.getCourseStatus(courseId)
                 } else {
                     CourseComponentStatus("")
                 }
                 setBlocks(blocks)
-                val list = sortBlocks(blocks)
+                courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
 
                 _uiState.value = CourseOutlineUIState.CourseData(
-                    blocks = list,
+                    courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
-                    resumeBlock = blocks.firstOrNull { it.id == courseStatus.lastVisitedBlockId }
+                    resumeBlock = getResumeBlock(blocks, courseStatus.lastVisitedBlockId)
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -156,6 +163,20 @@ class CourseOutlineViewModel(
             }
         }
         return resultBlocks.toList()
+    }
+
+    private fun getResumeBlock(
+        blocks: List<Block>,
+        continueBlockId: String
+    ): Block? {
+        val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
+        resumeVerticalBlock = blocks.find {
+            it.descendants.contains(resumeBlock?.id) && it.type == BlockType.VERTICAL
+        }
+        resumeSectionBlock = blocks.find {
+            it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
+        }
+        return resumeVerticalBlock
     }
 
 }

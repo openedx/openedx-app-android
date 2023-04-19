@@ -35,15 +35,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -94,7 +91,7 @@ fun StaticSearchBar(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = text,
-                color = MaterialTheme.appColors.textSecondary
+                color = MaterialTheme.appColors.textFieldHint
             )
         }
     }
@@ -105,11 +102,11 @@ fun StaticSearchBar(
 @Composable
 fun SearchBar(
     modifier: Modifier,
-    searchValue: String,
+    searchValue: TextFieldValue,
     requestFocus: Boolean = false,
     label: String = stringResource(id = R.string.core_search),
     keyboardActions: () -> Unit,
-    onValueChanged: (String) -> Unit = {},
+    onValueChanged: (TextFieldValue) -> Unit = {},
     onClearValue: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -123,6 +120,9 @@ fun SearchBar(
     var isFocused by rememberSaveable {
         mutableStateOf(false)
     }
+    var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(searchValue)
+    }
     OutlinedTextField(
         modifier = Modifier
             .focusRequester(focusRequester)
@@ -132,9 +132,14 @@ fun SearchBar(
             .clip(MaterialTheme.appShapes.textFieldShape)
             .then(modifier),
         shape = MaterialTheme.appShapes.textFieldShape,
-        value = searchValue,
+        value = textFieldValue,
         onValueChange = {
-            onValueChanged(it)
+            if (it.text != textFieldValue.text) {
+                textFieldValue = it
+                onValueChanged(textFieldValue)
+            } else {
+                textFieldValue = it
+            }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
@@ -161,8 +166,9 @@ fun SearchBar(
             )
         },
         trailingIcon = {
-            if (searchValue.isNotEmpty()) {
+            if (searchValue.text.isNotEmpty()) {
                 IconButton(onClick = {
+                    textFieldValue = TextFieldValue("")
                     onClearValue()
                 }) {
                     Icon(
@@ -279,6 +285,7 @@ fun HyperlinkText(
 @Composable
 fun HyperlinkImageText(
     modifier: Modifier = Modifier,
+    title: String = "",
     imageText: LinkedImageText,
     textStyle: TextStyle = TextStyle.Default,
     linkTextColor: Color = MaterialTheme.appColors.primary,
@@ -289,6 +296,10 @@ fun HyperlinkImageText(
     val fullText = imageText.text
     val hyperLinks = imageText.links
     val annotatedString = buildAnnotatedString {
+        if(title.isNotEmpty()) {
+            append(title)
+            append("\n\n")
+        }
         append(fullText)
         addStyle(
             style = SpanStyle(
@@ -296,11 +307,11 @@ fun HyperlinkImageText(
                 fontSize = fontSize
             ),
             start = 0,
-            end = fullText.length
+            end = this.length
         )
 
         for ((key, value) in hyperLinks) {
-            val startIndex = fullText.indexOf(key)
+            val startIndex = this.toString().indexOf(key)
             if (startIndex == -1) continue
             val endIndex = startIndex + key.length
             addStyle(
@@ -320,8 +331,19 @@ fun HyperlinkImageText(
                 end = endIndex
             )
         }
+        if (title.isNotEmpty()) {
+            addStyle(
+                style = SpanStyle(
+                    color = MaterialTheme.appColors.textPrimary,
+                    fontSize = MaterialTheme.appTypography.titleLarge.fontSize,
+                    fontWeight = MaterialTheme.appTypography.titleLarge.fontWeight
+                ),
+                start = 0,
+                end = title.length
+            )
+        }
         for (item in imageText.headers) {
-            val startIndex = fullText.indexOf(item)
+            val startIndex = this.toString().indexOf(item)
             if (startIndex == -1) continue
             val endIndex = startIndex + item.length
             addStyle(
@@ -339,7 +361,7 @@ fun HyperlinkImageText(
                 fontSize = fontSize
             ),
             start = 0,
-            end = fullText.length
+            end = this.length
         )
     }
 
@@ -476,8 +498,10 @@ fun NewEdxOutlinedTextField(
     keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) },
     onValueChanged: (String) -> Unit,
 ) {
-    var inputFieldValue by rememberSaveable {
-        mutableStateOf("")
+    var inputFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(
+            TextFieldValue("")
+        )
     }
     val focusManager = LocalFocusManager.current
 
@@ -502,14 +526,14 @@ fun NewEdxOutlinedTextField(
             value = inputFieldValue,
             onValueChange = {
                 inputFieldValue = it
-                onValueChanged(it)
+                onValueChanged(it.text)
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 textColor = MaterialTheme.appColors.textFieldText,
                 backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 errorBorderColor = MaterialTheme.appColors.error,
-                ),
+            ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
@@ -670,19 +694,20 @@ fun IconText(
 
 @Composable
 fun IconText(
+    modifier: Modifier = Modifier,
     text: String,
     painter: Painter,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
     onClick: (() -> Unit)? = null,
 ) {
-    val modifier = if (onClick == null) {
+    val modifierClickable = if (onClick == null) {
         Modifier
     } else {
         Modifier.noRippleClickable { onClick.invoke() }
     }
     Row(
-        modifier = modifier,
+        modifier = modifier.then(modifierClickable),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -718,6 +743,34 @@ fun TextIcon(
         Icon(
             modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
+            contentDescription = null,
+            tint = color
+        )
+    }
+}
+
+@Composable
+fun TextIcon(
+    text: String,
+    painter: Painter,
+    color: Color,
+    textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
+    onClick: (() -> Unit)? = null,
+) {
+    val modifier = if (onClick == null) {
+        Modifier
+    } else {
+        Modifier.noRippleClickable { onClick.invoke() }
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(text = text, color = color, style = textStyle)
+        Icon(
+            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            painter = painter,
             contentDescription = null,
             tint = color
         )
@@ -774,15 +827,17 @@ fun NewEdxButton(
     backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
     content: (@Composable RowScope.() -> Unit)? = null
 ) {
-    Button(modifier = Modifier
-        .then(width)
-        .height(42.dp),
+    Button(
+        modifier = Modifier
+            .then(width)
+            .height(42.dp),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = backgroundColor
         ),
         enabled = enabled,
-        onClick = onClick) {
+        onClick = onClick
+    ) {
         if (content == null) {
             Text(
                 text = text,
@@ -859,7 +914,7 @@ private fun SearchBarPreview() {
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
-        searchValue = "",
+        searchValue = TextFieldValue(),
         keyboardActions = {},
         onClearValue = {}
     )

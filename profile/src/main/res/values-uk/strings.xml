@@ -11,6 +11,7 @@
     <string name="profile_full_profile">Повний профіль</string>
     <string name="profile_limited_profile">Обмежений профіль</string>
     <string name="profile_edit_profile">Редагувати профіль</string>
+    <string name="profile_edit">Редагувати</string>
     <string name="profile_save">Зберегти</string>
     <string name="profile_delete_profile">Видалити профіль</string>
     <string name="profile_must_be_over">Вам повинно бути не менше 13 років, щоб мати повний доступ до інформації в профілі</string>

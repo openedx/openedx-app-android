@@ -1,5 +1,6 @@
 package com.raccoongang.core.ui
 
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.raccoongang.core.presentation.global.InsetHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
 
 inline val isPreview: Boolean
     @ReadOnlyComposable
@@ -73,6 +77,20 @@ fun <T : Any> rememberSaveableMap(init: () -> MutableMap<String, T?>): MutableMa
         )
     ) {
         init()
+    }
+}
+
+fun LazyListState.disableScrolling(scope: CoroutineScope) {
+    scope.launch {
+        scroll(scrollPriority = MutatePriority.PreventUserInput) {
+            awaitCancellation()
+        }
+    }
+}
+
+fun LazyListState.reEnableScrolling(scope: CoroutineScope) {
+    scope.launch {
+        scroll(scrollPriority = MutatePriority.PreventUserInput) {}
     }
 }
 

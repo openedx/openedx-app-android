@@ -43,6 +43,11 @@ class EditProfileViewModel(
         get() = _deleteImage
 
     var profileDataChanged = false
+    var isLimitedProfile: Boolean = account.isLimited()
+        set(value) {
+            field = value
+            _uiState.value = EditProfileUIState(account, isLimited = value)
+        }
 
     private val _showLeaveDialog = MutableLiveData<Boolean>()
     val showLeaveDialog: LiveData<Boolean>
@@ -50,18 +55,22 @@ class EditProfileViewModel(
 
 
     fun updateAccount(fields: Map<String, Any?>) {
-        _uiState.value = EditProfileUIState(account, true)
+        _uiState.value = EditProfileUIState(account, true, isLimitedProfile)
         viewModelScope.launch {
             try {
                 if (deleteImage.value == true) {
                     interactor.deleteProfileImage()
                 }
-                val account = interactor.updateAccount(fields)
-                _uiState.value = EditProfileUIState(account, isUpdating = false)
+                val updatedAccount = interactor.updateAccount(fields)
+                account = updatedAccount
+                isLimitedProfile = updatedAccount.isLimited()
+                _uiState.value =
+                    EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
                 sendAccountUpdated()
                 _deleteImage.value = false
+                _selectedImageUri.value = null
             } catch (e: Exception) {
-                _uiState.value = EditProfileUIState(account.copy())
+                _uiState.value = EditProfileUIState(account.copy(), isLimited = isLimitedProfile)
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
@@ -74,16 +83,19 @@ class EditProfileViewModel(
     }
 
     fun updateAccountAndImage(fields: Map<String, Any?>, file: File, mimeType: String) {
-        _uiState.value = EditProfileUIState(account, true)
+        _uiState.value = EditProfileUIState(account, true, isLimitedProfile)
         viewModelScope.launch {
             try {
                 interactor.setProfileImage(file, mimeType)
                 val updatedAccount = interactor.updateAccount(fields)
-                _uiState.value = EditProfileUIState(updatedAccount, isUpdating = false)
+                account = updatedAccount
+                isLimitedProfile = updatedAccount.isLimited()
+                _uiState.value =
+                    EditProfileUIState(updatedAccount, isUpdating = false, isLimitedProfile)
                 _selectedImageUri.value = null
                 sendAccountUpdated()
             } catch (e: Exception) {
-                _uiState.value = EditProfileUIState(account.copy())
+                _uiState.value = EditProfileUIState(account.copy(), isLimited = isLimitedProfile)
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
@@ -108,7 +120,6 @@ class EditProfileViewModel(
     fun setShowLeaveDialog(value: Boolean) {
         _showLeaveDialog.value = value
     }
-
 
     private suspend fun sendAccountUpdated() {
         notifier.send(AccountUpdated())

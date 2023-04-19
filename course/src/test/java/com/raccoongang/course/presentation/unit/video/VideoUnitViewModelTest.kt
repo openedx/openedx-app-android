@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.raccoongang.core.data.storage.PreferencesManager
+import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
@@ -34,6 +35,7 @@ class VideoUnitViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val preferencesManager = mockk<PreferencesManager>()
     private val networkConnection = mockk<NetworkConnection>()
+    private val transcriptManager = mockk<TranscriptManager>()
 
 
     @Before
@@ -48,7 +50,14 @@ class VideoUnitViewModelTest {
 
     @Test
     fun `markBlockCompleted exception`() = runTest {
-        val viewModel = VideoUnitViewModel("", courseRepository, preferencesManager, notifier, networkConnection)
+        val viewModel = VideoUnitViewModel(
+            "",
+            courseRepository,
+            preferencesManager,
+            notifier,
+            networkConnection,
+            transcriptManager
+        )
         coEvery {
             courseRepository.markBlocksCompletion(
                 any(),
@@ -68,7 +77,14 @@ class VideoUnitViewModelTest {
 
     @Test
     fun `markBlockCompleted success`() = runTest {
-        val viewModel = VideoUnitViewModel("", courseRepository, preferencesManager, notifier, networkConnection)
+        val viewModel = VideoUnitViewModel(
+            "",
+            courseRepository,
+            preferencesManager,
+            notifier,
+            networkConnection,
+            transcriptManager
+        )
         coEvery {
             courseRepository.markBlocksCompletion(
                 any(),
@@ -88,7 +104,14 @@ class VideoUnitViewModelTest {
 
     @Test
     fun `CourseVideoPositionChanged notifier test`() = runTest {
-        val viewModel = VideoUnitViewModel("", courseRepository, preferencesManager, notifier, networkConnection)
+        val viewModel = VideoUnitViewModel(
+            "",
+            courseRepository,
+            preferencesManager,
+            notifier,
+            networkConnection,
+            transcriptManager
+        )
         coEvery { notifier.notifier } returns flow { emit(CourseVideoPositionChanged("", 10)) }
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -97,7 +120,7 @@ class VideoUnitViewModelTest {
 
         advanceUntilIdle()
 
-        assert(viewModel.currentVideoTime == 10L)
+        assert(viewModel.currentVideoTime.value == 10L)
         assert(viewModel.isUpdated.value == true)
     }
 

@@ -9,7 +9,6 @@ import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.Block
-import com.raccoongang.core.domain.model.Certificate
 import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.module.db.DownloadDao
 import com.raccoongang.core.module.download.BaseDownloadViewModel
@@ -32,15 +31,11 @@ class CourseVideoViewModel(
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
 
-    private val _uiState = MutableLiveData<CourseVideosUIState>(
-        CourseVideosUIState.CourseData(emptyList(), emptyMap())
-    )
+    private val _uiState = MutableLiveData<CourseVideosUIState>()
     val uiState: LiveData<CourseVideosUIState>
         get() = _uiState
 
     var courseTitle = ""
-    var courseImage = ""
-    var courseCertificate = Certificate("")
 
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
@@ -70,12 +65,16 @@ class CourseVideoViewModel(
                 if (_uiState.value is CourseVideosUIState.CourseData) {
                     val state = _uiState.value as CourseVideosUIState.CourseData
                     _uiState.value = CourseVideosUIState.CourseData(
-                        blocks = state.blocks,
+                        courseStructure = state.courseStructure,
                         downloadedState = it.toMap()
                     )
                 }
             }
         }
+    }
+
+    init {
+        getVideos()
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -102,16 +101,18 @@ class CourseVideoViewModel(
 
     fun getVideos() {
         viewModelScope.launch {
-            val blocks = interactor.getCourseStructureForVideos()
+            var courseStructure = interactor.getCourseStructureForVideos()
+            val blocks = courseStructure.blockData
             if (blocks.isEmpty()) {
                 _uiState.value = CourseVideosUIState.Empty(
                     message = resourceManager.getString(R.string.course_does_not_include_videos)
                 )
             } else {
-                setBlocks(blocks)
-                val list = sortBlocks(blocks)
+                setBlocks(courseStructure.blockData)
+                courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
-                _uiState.value = CourseVideosUIState.CourseData(list, getDownloadModelsStatus())
+                _uiState.value =
+                    CourseVideosUIState.CourseData(courseStructure, getDownloadModelsStatus())
             }
         }
     }

@@ -15,6 +15,8 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.raccoongang.auth.presentation.signin.SignInFragment
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.extension.requestApplyInsetsWhenAttached
+import com.raccoongang.core.presentation.global.AppData
+import com.raccoongang.core.presentation.global.AppDataHolder
 import com.raccoongang.core.presentation.global.InsetHolder
 import com.raccoongang.core.presentation.global.WindowSizeHolder
 import com.raccoongang.core.ui.WindowSize
@@ -24,7 +26,7 @@ import com.raccoongang.profile.presentation.ProfileRouter
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
+class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataHolder {
 
     override val topInset: Int
         get() = _insetTop
@@ -33,6 +35,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     override val windowSize: WindowSize
         get() = _windowSize
+
+    override val appData: AppData
+        get() = AppData(BuildConfig.VERSION_NAME)
 
     private lateinit var binding: ActivityAppBinding
     private val preferencesManager by inject<PreferencesManager>()

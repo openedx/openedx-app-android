@@ -8,6 +8,8 @@ import com.raccoongang.core.BlockType
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.Block
 import com.raccoongang.core.domain.model.BlockCounts
+import com.raccoongang.core.domain.model.CourseStructure
+import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.module.db.DownloadDao
 import com.raccoongang.core.system.ResourceManager
@@ -27,6 +29,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseVideoViewModelTest {
@@ -44,7 +47,6 @@ class CourseVideoViewModelTest {
     private val workerController = mockk<DownloadWorkerController>()
 
     private val cantDownload = "You can download content only from Wi-fi"
-
 
     private val blocks = listOf(
         Block(
@@ -94,6 +96,30 @@ class CourseVideoViewModelTest {
         )
     )
 
+    private val courseStructure = CourseStructure(
+        root = "",
+        blockData = blocks,
+        id = "id",
+        name = "Course name",
+        number = "",
+        org = "Org",
+        start = Date(),
+        startDisplay = "",
+        startType = "",
+        end = Date(),
+        coursewareAccess = CoursewareAccess(
+            true,
+            "",
+            "",
+            "",
+            "",
+            ""
+        ),
+        media = null,
+        certificate = null,
+        isSelfPaced = false
+    )
+
 
     @Before
     fun setUp() {
@@ -109,6 +135,9 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos empty list`() = runTest {
+        every { interactor.getCourseStructureForVideos() } returns courseStructure.copy(blockData = emptyList())
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+
         val viewModel = CourseVideoViewModel(
             "",
             interactor,
@@ -120,17 +149,18 @@ class CourseVideoViewModelTest {
             workerController
         )
 
-        every { interactor.getCourseStructureForVideos() } returns emptyList()
         viewModel.getVideos()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
 
         assert(viewModel.uiState.value is CourseVideosUIState.Empty)
     }
 
     @Test
     fun `getVideos success`() = runTest {
+        every { interactor.getCourseStructureForVideos() } returns courseStructure
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseVideoViewModel(
             "",
             interactor,
@@ -142,29 +172,18 @@ class CourseVideoViewModelTest {
             workerController
         )
 
-        every { interactor.getCourseStructureForVideos() } returns blocks
+
         viewModel.getVideos()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
 
         assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
     }
 
     @Test
     fun `updateVideos success`() = runTest {
-        val viewModel = CourseVideoViewModel(
-            "",
-            interactor,
-            resourceManager,
-            networkConnection,
-            preferencesManager,
-            notifier,
-            downloadDao,
-            workerController
-        )
-
-        every { interactor.getCourseStructureForVideos() } returns blocks
+        every { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("", false)) }
         every { downloadDao.readAllData() } returns flow {
             repeat(5) {
@@ -172,6 +191,16 @@ class CourseVideoViewModelTest {
                 emit(emptyList())
             }
         }
+        val viewModel = CourseVideoViewModel(
+            "",
+            interactor,
+            resourceManager,
+            networkConnection,
+            preferencesManager,
+            notifier,
+            downloadDao,
+            workerController
+        )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -180,7 +209,7 @@ class CourseVideoViewModelTest {
 
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
 
         assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
         assert(viewModel.isUpdating.value == false)

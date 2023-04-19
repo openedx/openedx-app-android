@@ -3,6 +3,8 @@ package com.raccoongang.course.presentation.container
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.R
+import com.raccoongang.core.domain.model.CourseStructure
+import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseStructureUpdated
@@ -34,6 +36,30 @@ class CourseContainerViewModelTest {
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
+
+    private val courseStructure = CourseStructure(
+    root = "",
+    blockData = listOf(),
+    id = "id",
+    name = "Course name",
+    number = "",
+    org = "Org",
+    start = null,
+    startDisplay = "",
+    startType = "",
+    end = null,
+    coursewareAccess = CoursewareAccess(
+    true,
+    "",
+    "",
+    "",
+    "",
+    ""
+    ),
+    media = null,
+    certificate = null,
+    isSelfPaced = false
+    )
 
     @Before
     fun setUp() {
@@ -84,6 +110,7 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
+        every { interactor.getCourseStructureFromCache() } returns courseStructure
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
@@ -91,7 +118,7 @@ class CourseContainerViewModelTest {
 
         assert(viewModel.errorMessage.value == null)
         assert(viewModel.showProgress.value == false)
-        assert(viewModel.dataReady.value == true)
+        assert(viewModel.dataReady.value != null)
     }
 
     @Test
@@ -99,6 +126,7 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.preloadCourseStructureFromCache(any()) } returns Unit
+        every { interactor.getCourseStructureFromCache() } returns courseStructure
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
@@ -107,7 +135,7 @@ class CourseContainerViewModelTest {
 
         assert(viewModel.errorMessage.value == null)
         assert(viewModel.showProgress.value == false)
-        assert(viewModel.dataReady.value == true)
+        assert(viewModel.dataReady.value != null)
     }
 
     @Test

@@ -42,6 +42,10 @@ class ProfileViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
+    private val _isUpdating = MutableLiveData<Boolean>()
+    val isUpdating: LiveData<Boolean>
+        get() = _isUpdating
+
     init {
         getAccount()
     }
@@ -74,8 +78,15 @@ class ProfileViewModel(
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
+            } finally {
+                _isUpdating.value = false
             }
         }
+    }
+
+    fun updateAccount() {
+        _isUpdating.value = true
+        getAccount()
     }
 
     fun logout() {

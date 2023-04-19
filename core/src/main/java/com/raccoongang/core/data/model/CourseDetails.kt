@@ -45,7 +45,9 @@ data class CourseDetails(
     @SerializedName("start_type")
     val startType: String?,
     @SerializedName("overview")
-    val overview: String?
+    val overview: String?,
+    @SerializedName("is_enrolled")
+    val isEnrolled: Boolean?,
 ) {
 
     fun mapToDomain(): Course {
@@ -69,6 +71,7 @@ data class CourseDetails(
             startType = startType ?: "",
             pacing = pacing ?: "",
             overview = overview ?: "",
+            isEnrolled = isEnrolled ?: false,
             media = media?.mapToDomain() ?: com.raccoongang.core.domain.model.Media()
         )
     }

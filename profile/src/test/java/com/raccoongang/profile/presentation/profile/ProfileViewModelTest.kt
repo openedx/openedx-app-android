@@ -8,6 +8,7 @@ import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.Account
+import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.profile.domain.interactor.ProfileInteractor
@@ -43,6 +44,7 @@ class ProfileViewModelTest {
     private val interactor = mockk<ProfileInteractor>()
     private val notifier = mockk<ProfileNotifier>()
     private val cookieManager = mockk<AppCookieManager>()
+    private val workerController = mockk<DownloadWorkerController>()
 
     private val account = mockk<Account>()
 
@@ -64,7 +66,15 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection`() = runTest {
         val viewModel =
-            ProfileViewModel(interactor, preferencesManager, resourceManager, notifier, dispatcher, cookieManager)
+            ProfileViewModel(
+                interactor,
+                preferencesManager,
+                resourceManager,
+                notifier,
+                dispatcher,
+                cookieManager,
+                workerController
+            )
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
@@ -78,7 +88,15 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount unknown exception`() = runTest {
         val viewModel =
-            ProfileViewModel(interactor, preferencesManager, resourceManager, notifier, dispatcher, cookieManager)
+            ProfileViewModel(
+                interactor,
+                preferencesManager,
+                resourceManager,
+                notifier,
+                dispatcher,
+                cookieManager,
+                workerController
+            )
         coEvery { interactor.getAccount() } throws Exception()
         advanceUntilIdle()
 
@@ -92,7 +110,15 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount success`() = runTest {
         val viewModel =
-            ProfileViewModel(interactor, preferencesManager, resourceManager, notifier, dispatcher, cookieManager)
+            ProfileViewModel(
+                interactor,
+                preferencesManager,
+                resourceManager,
+                notifier,
+                dispatcher,
+                cookieManager,
+                workerController
+            )
         coEvery { interactor.getAccount() } returns account
         every { preferencesManager.profile = any() } returns Unit
         advanceUntilIdle()
@@ -106,8 +132,17 @@ class ProfileViewModelTest {
     @Test
     fun `logout no internet connection`() = runTest {
         val viewModel =
-            ProfileViewModel(interactor, preferencesManager, resourceManager, notifier, dispatcher, cookieManager)
+            ProfileViewModel(
+                interactor,
+                preferencesManager,
+                resourceManager,
+                notifier,
+                dispatcher,
+                cookieManager,
+                workerController
+            )
         coEvery { interactor.logout() } throws UnknownHostException()
+        coEvery { workerController.cancelWork() } returns Unit
 
         viewModel.logout()
         advanceUntilIdle()
@@ -122,8 +157,17 @@ class ProfileViewModelTest {
     @Test
     fun `logout unknown exception`() = runTest {
         val viewModel =
-            ProfileViewModel(interactor, preferencesManager, resourceManager, notifier, dispatcher, cookieManager)
+            ProfileViewModel(
+                interactor,
+                preferencesManager,
+                resourceManager,
+                notifier,
+                dispatcher,
+                cookieManager,
+                workerController
+            )
         coEvery { interactor.logout() } throws Exception()
+        coEvery { workerController.cancelWork() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
 
@@ -142,11 +186,13 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             dispatcherIO,
-            cookieManager
+            cookieManager,
+            workerController
         )
         coEvery { interactor.getAccount() } returns mockk()
         every { preferencesManager.profile = any() } returns Unit
         coEvery { interactor.logout() } returns Unit
+        coEvery { workerController.cancelWork() } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
@@ -165,7 +211,8 @@ class ProfileViewModelTest {
             resourceManager,
             notifier,
             dispatcherIO,
-            cookieManager
+            cookieManager,
+            workerController
         )
         every { notifier.notifier } returns flow { emit(AccountUpdated()) }
         val mockLifeCycleOwner: LifecycleOwner = mockk()

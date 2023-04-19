@@ -316,7 +316,7 @@ private fun DiscussionTopicsScreen(
                                         Modifier
                                             .fillMaxSize(), contentAlignment = Alignment.Center
                                     ) {
-                                        CircularProgressIndicator()
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }
                                 }
                             }
