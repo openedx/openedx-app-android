@@ -39,6 +39,7 @@ private val DarkColorPalette = AppColors(
     textFieldHint = Color(0xFF79889F),
 
     buttonBackground = Color(0xFF5478F9),
+    buttonSecondaryBackground = Color(0xFF79889F),
     buttonText = Color.White,
 
     cardViewBackground = Color(0xFF273346),
@@ -80,6 +81,7 @@ private val LightColorPalette = AppColors(
     textFieldHint = Color(0xFF97A5BB),
 
     buttonBackground = Color(0xFF3C68FF),
+    buttonSecondaryBackground = Color(0xFF79889F),
     buttonText = Color.White,
 
     cardViewBackground = Color(0xFFF9FAFB),

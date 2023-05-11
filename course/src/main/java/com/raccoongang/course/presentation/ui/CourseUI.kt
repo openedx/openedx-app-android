@@ -1,17 +1,46 @@
 package com.raccoongang.course.presentation.ui
 
 import android.content.res.Configuration
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,10 +60,21 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.BuildConfig
-import com.raccoongang.core.domain.model.*
+import com.raccoongang.core.domain.model.Block
+import com.raccoongang.core.domain.model.BlockCounts
+import com.raccoongang.core.domain.model.Certificate
+import com.raccoongang.core.domain.model.CourseSharingUtmParameters
+import com.raccoongang.core.domain.model.CoursewareAccess
+import com.raccoongang.core.domain.model.EnrolledCourse
+import com.raccoongang.core.domain.model.EnrolledCourseData
 import com.raccoongang.core.extension.isLinkValid
 import com.raccoongang.core.module.db.DownloadedState
-import com.raccoongang.core.ui.*
+import com.raccoongang.core.ui.IconText
+import com.raccoongang.core.ui.NewEdxButton
+import com.raccoongang.core.ui.NewEdxOutlinedButton
+import com.raccoongang.core.ui.WindowSize
+import com.raccoongang.core.ui.WindowType
+import com.raccoongang.core.ui.noRippleClickable
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
@@ -42,7 +82,7 @@ import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.course.R
 import org.jsoup.Jsoup
 import subtitleFile.TimedTextObject
-import java.util.*
+import java.util.Date
 import com.raccoongang.course.R as courseR
 
 @Composable
@@ -285,105 +325,116 @@ fun VideoTitle(text: String) {
 @Composable
 fun NavigationUnitsButtons(
     windowSize: WindowSize,
-    prevButtonText: String?,
     nextButtonText: String,
+    hasPrevBlock: Boolean,
     hasNextBlock: Boolean,
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit
 ) {
     val nextButtonIcon = if (hasNextBlock) {
-        painterResource(id = com.raccoongang.core.R.drawable.core_ic_forward)
+        painterResource(id = com.raccoongang.core.R.drawable.core_ic_down)
     } else {
         painterResource(id = com.raccoongang.core.R.drawable.core_ic_check)
     }
 
-    Box(
-        Modifier
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.appColors.surface),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
 
-            val buttonWidth by remember(key1 = windowSize) {
-                mutableStateOf(
-                    windowSize.windowSizeValue(
-                        expanded = Modifier.widthIn(152.dp, 162.dp),
-                        compact = Modifier.weight(1f)
-                    )
+        Button(
+            modifier = Modifier
+                .width(124.dp)
+                .height(42.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.appColors.buttonSecondaryBackground
+            ),
+            elevation = null,
+            shape = MaterialTheme.appShapes.navigationButtonShape,
+            onClick = onPrevClick,
+            enabled = hasPrevBlock
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.course_navigation_prev),
+                    color = MaterialTheme.appColors.buttonText,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    painter = painterResource(id = com.raccoongang.core.R.drawable.core_ic_up),
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.buttonText
                 )
             }
-
-            if (prevButtonText != null) {
-                OutlinedButton(
-                    modifier = Modifier
-                        .then(buttonWidth)
-                        .height(42.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.appColors.primary,
-                        backgroundColor = Color.Transparent
-                    ),
-                    border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
-                    elevation = null,
-                    shape = MaterialTheme.appShapes.buttonShape,
-                    onClick = onPrevClick
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Icon(
-                            painter = painterResource(id = com.raccoongang.core.R.drawable.core_ic_back),
-                            contentDescription = null,
-                            tint = MaterialTheme.appColors.primary
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = prevButtonText,
-                            color = MaterialTheme.appColors.primary,
-                            style = MaterialTheme.appTypography.labelLarge
-                        )
-                    }
-                }
-                Spacer(Modifier.width(24.dp))
-            }
-            Button(
-                modifier = Modifier
-                    .then(buttonWidth)
-                    .height(42.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.appColors.buttonBackground
-                ),
-                elevation = null,
-                shape = MaterialTheme.appShapes.buttonShape,
-                onClick = onNextClick
+        }
+        Spacer(Modifier.width(7.dp))
+        Button(
+            modifier = Modifier
+                .width(124.dp)
+                .height(42.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.appColors.buttonBackground
+            ),
+            elevation = null,
+            shape = MaterialTheme.appShapes.navigationButtonShape,
+            onClick = onNextClick
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = if (prevButtonText != null) Arrangement.SpaceBetween else Arrangement.Center
-                ) {
-                    Text(
-                        text = nextButtonText,
-                        color = MaterialTheme.appColors.buttonText,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Icon(
-                        painter = nextButtonIcon,
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText
-                    )
-                }
-
+                Text(
+                    text = nextButtonText,
+                    color = MaterialTheme.appColors.buttonText,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    painter = nextButtonIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.buttonText
+                )
             }
+        }
+    }
+}
+
+@Composable
+fun CountUnits(
+    units: Int,
+    currentIndex: Int
+) {
+    val index by remember(currentIndex) {
+        mutableStateOf(currentIndex)
+    }
+    Column(
+        Modifier
+            .width(24.dp)
+            .padding(end = 6.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        repeat(units) { iteration ->
+            val (color, size) = if (iteration == currentIndex) {
+                Pair(MaterialTheme.appColors.primary, 7)
+            } else {
+                Pair(MaterialTheme.appColors.bottomSheetToggle, 5)
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .size(size.dp)
+            )
         }
     }
 }
@@ -496,7 +547,7 @@ private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
     NewEdxTheme {
         NavigationUnitsButtons(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            prevButtonText = null,
+            hasPrevBlock = true,
             hasNextBlock = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}
@@ -510,7 +561,7 @@ private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
     NewEdxTheme {
         NavigationUnitsButtons(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            prevButtonText = null,
+            hasPrevBlock = true,
             hasNextBlock = false,
             nextButtonText = "Finish",
             onPrevClick = {}) {}
@@ -524,7 +575,7 @@ private fun NavigationUnitsButtonsWithFinishPreview() {
     NewEdxTheme {
         NavigationUnitsButtons(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            prevButtonText = "Previous",
+            hasPrevBlock = true,
             hasNextBlock = false,
             nextButtonText = "Finish",
             onPrevClick = {}) {}
@@ -538,7 +589,7 @@ private fun NavigationUnitsButtonsWithNextPreview() {
     NewEdxTheme {
         NavigationUnitsButtons(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            prevButtonText = "Previous",
+            hasPrevBlock = true,
             hasNextBlock = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}

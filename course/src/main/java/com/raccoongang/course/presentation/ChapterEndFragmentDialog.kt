@@ -7,8 +7,16 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.raccoongang.core.ui.NewEdxButton
+import com.raccoongang.core.ui.NewEdxOutlinedButton
+import com.raccoongang.core.ui.TextIcon
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
@@ -31,6 +41,8 @@ import com.raccoongang.course.R
 import com.raccoongang.course.presentation.section.CourseSectionFragment
 
 class ChapterEndFragmentDialog : DialogFragment() {
+
+    var listener: DialogListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,12 +57,16 @@ class ChapterEndFragmentDialog : DialogFragment() {
             NewEdxTheme {
                 ChapterEndDialogScreen(
                     sectionName = requireArguments().getString(ARG_SECTION_NAME) ?: "",
-                    onButtonClick = {
+                    onBackButtonClick = {
                         dismiss()
                         requireActivity().supportFragmentManager.popBackStack(
                             CourseSectionFragment::class.java.simpleName,
                             0
                         )
+                    },
+                    onProceedButtonClick = {
+                        dismiss()
+                        listener?.onClick(true)
                     }
                 )
             }
@@ -72,10 +88,15 @@ class ChapterEndFragmentDialog : DialogFragment() {
     }
 }
 
+interface DialogListener {
+    fun <T> onClick(value: T)
+}
+
 @Composable
 private fun ChapterEndDialogScreen(
     sectionName: String,
-    onButtonClick: () -> Unit
+    onBackButtonClick: () -> Unit,
+    onProceedButtonClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -114,8 +135,23 @@ private fun ChapterEndDialogScreen(
             )
             Spacer(Modifier.height(42.dp))
             NewEdxButton(
+                text = stringResource(id = R.string.course_proceed),
+                content = {
+                    TextIcon(
+                        text = stringResource(id = R.string.course_proceed),
+                        painter = painterResource(com.raccoongang.core.R.drawable.core_ic_forward),
+                        color = MaterialTheme.appColors.buttonText,
+                        textStyle = MaterialTheme.appTypography.labelLarge
+                    )
+                },
+                onClick = onProceedButtonClick
+            )
+            Spacer(Modifier.height(16.dp))
+            NewEdxOutlinedButton(
+                borderColor = MaterialTheme.appColors.buttonBackground,
+                textColor = MaterialTheme.appColors.buttonBackground,
                 text = stringResource(id = R.string.course_back_to_outline),
-                onClick = onButtonClick
+                onClick = onBackButtonClick
             )
         }
     }
@@ -126,6 +162,10 @@ private fun ChapterEndDialogScreen(
 @Composable
 fun ChapterEndDialogScreenPreview() {
     NewEdxTheme {
-        ChapterEndDialogScreen(sectionName = "Section", onButtonClick = {})
+        ChapterEndDialogScreen(
+            sectionName = "Section",
+            onBackButtonClick = {},
+            onProceedButtonClick = {}
+        )
     }
 }

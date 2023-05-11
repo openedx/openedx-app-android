@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 data class AppShapes(
     val material: Shapes,
     val buttonShape: CornerBasedShape,
+    val navigationButtonShape: CornerBasedShape,
     val textFieldShape: CornerBasedShape,
     val screenBackgroundShape: CornerBasedShape,
     val cardShape: CornerBasedShape,
@@ -32,6 +33,7 @@ internal val LocalShapes = staticCompositionLocalOf {
             large = RoundedCornerShape(0.dp)
         ),
         buttonShape = RoundedCornerShape(8.dp),
+        navigationButtonShape = RoundedCornerShape(21.dp),
         textFieldShape = RoundedCornerShape(CornerSize(8.dp)),
         screenBackgroundShape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
         cardShape = RoundedCornerShape(12.dp),

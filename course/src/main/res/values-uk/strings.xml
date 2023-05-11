@@ -30,6 +30,7 @@
     <string name="course_latest_news">Будьте в курсі останніх новин</string>
     <string name="course_good_work">Гарна робота!</string>
     <string name="course_section_finished">Секція \"%s\" завершена.</string>
+    <string name="course_proceed">Продовжити</string>
     <string name="course_back_to_outline">Повернутися до змісту</string>
     <string name="course_you_cant_enroll">Ви не можете записатися на цей курс, оскільки термін запису вже минув.</string>
     <string name="course_not_started">Цей курс ще не розпочався.</string>

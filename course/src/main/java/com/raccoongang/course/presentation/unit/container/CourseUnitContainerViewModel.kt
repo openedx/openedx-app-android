@@ -1,9 +1,12 @@
 package com.raccoongang.course.presentation.unit.container
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.Block
+import com.raccoongang.core.extension.indexOfFirstFromIndex
 import com.raccoongang.core.module.db.DownloadModel
 import com.raccoongang.core.module.db.DownloadedState
 import com.raccoongang.core.presentation.course.CourseViewMode
@@ -27,10 +30,12 @@ class CourseUnitContainerViewModel(
         private set
     var currentVerticalIndex = 0
         private set
+    var verticalIndex = 0
+        private set
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return blocks[currentVerticalIndex].descendants.first() == blocks[currentIndex].id
+            return blocks.indexOfFirst { !it.type.isContainer() } == currentIndex
         }
 
     val isLastIndexInContainer: Boolean
@@ -38,7 +43,15 @@ class CourseUnitContainerViewModel(
             return blocks[currentVerticalIndex].descendants.last() == blocks[currentIndex].id
         }
 
-    var prevButtonText: String? = null
+
+    private val _verticalBlockCounts = MutableLiveData<Int>()
+    val verticalBlockCounts: LiveData<Int>
+        get() = _verticalBlockCounts
+
+    private val _indexInContainer = MutableLiveData<Int>()
+    val indexInContainer: LiveData<Int>
+        get() = _indexInContainer
+
     var nextButtonText = ""
     var hasNextBlock = false
 
@@ -61,9 +74,24 @@ class CourseUnitContainerViewModel(
             if (block.id == blockId) {
                 currentIndex = index
                 updateVerticalIndex(blockId)
+                if (currentVerticalIndex != -1) {
+                    _indexInContainer.value =
+                        blocks[currentVerticalIndex].descendants.indexOf(blocks[currentIndex].id)
+                }
                 return
             }
         }
+    }
+
+    fun proceedToNext(): Block? {
+        currentVerticalIndex = blocks.indexOfFirstFromIndex(verticalIndex) {
+            it.type == BlockType.VERTICAL && it.id != blocks[verticalIndex].id
+        }
+        blocks[currentVerticalIndex].descendants.firstOrNull()?.let { id ->
+            currentIndex = blocks.indexOfFirst { id == it.id } - 1
+            return moveToNextBlock()
+        }
+        return null
     }
 
     fun getDownloadModelById(id: String): DownloadModel? = runBlocking(Dispatchers.IO) {
@@ -80,6 +108,10 @@ class CourseUnitContainerViewModel(
             val block = blocks[i]
             currentIndex = i
             updateVerticalIndex(block.id)
+            if (currentVerticalIndex != -1) {
+                _indexInContainer.value =
+                    blocks[currentVerticalIndex].descendants.indexOf(blocks[currentIndex].id)
+            }
             return block
         }
         return null
@@ -88,9 +120,15 @@ class CourseUnitContainerViewModel(
     fun moveToPrevBlock(): Block? {
         for (i in currentIndex - 1 downTo 0) {
             val block = blocks[i]
-            currentIndex = i
-            updateVerticalIndex(block.id)
-            return block
+            if (!block.type.isContainer()) {
+                currentIndex = i
+                updateVerticalIndex(block.id)
+                if (currentVerticalIndex != -1) {
+                    _indexInContainer.value =
+                        blocks[currentVerticalIndex].descendants.indexOf(blocks[currentIndex].id)
+                }
+                return block
+            }
         }
         return null
     }
@@ -104,5 +142,9 @@ class CourseUnitContainerViewModel(
     private fun updateVerticalIndex(blockId: String) {
         currentVerticalIndex =
             blocks.indexOfFirst { it.type == BlockType.VERTICAL && it.descendants.contains(blockId) }
+        if (currentVerticalIndex != -1) {
+            _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
+            verticalIndex = currentVerticalIndex
+        }
     }
 }

@@ -19,6 +19,7 @@ data class AppColors(
     val textFieldHint: Color,
 
     val buttonBackground: Color,
+    val buttonSecondaryBackground: Color,
     val buttonText: Color,
 
     val cardViewBackground: Color,

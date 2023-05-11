@@ -31,6 +31,7 @@
     <string name="course_good_work">Good work!</string>
     <string name="course_section_finished">Section \"%s\" is finished.</string>
     <string name="course_back_to_outline">Back to outline</string>
+    <string name="course_proceed">Proceed</string>
     <string name="course_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_access_expired">Your access to this course has expired.</string>
