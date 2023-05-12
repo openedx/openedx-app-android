@@ -185,9 +185,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         updatedData(nextButtonText, hasPrevBlock, hasNextBlock)
     }
 
-    private fun navigateToUnit(block: Block, containerId: Int, navigateUp: Boolean) {
+    private fun navigateToUnit(block: Block, containerId: Int, navigateToPrev: Boolean) {
         with(childFragmentManager.beginTransaction()) {
-            if (navigateUp) {
+            if (navigateToPrev) {
                 setCustomAnimations(R.anim.course_slide_out_down, R.anim.course_slide_in_down)
             } else {
                 setCustomAnimations(R.anim.course_slide_out_up, R.anim.course_slide_in_up)
