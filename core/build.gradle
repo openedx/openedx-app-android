@@ -129,6 +129,7 @@ dependencies {
     api "androidx.compose.runtime:runtime-livedata:$compose_version"
     api "androidx.compose.ui:ui:$compose_version"
     api "androidx.compose.material:material:$compose_version"
+    api "androidx.compose.foundation:foundation:$compose_version"
     debugApi "androidx.compose.ui:ui-tooling:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
     api "androidx.compose.material:material-icons-extended:$compose_version"

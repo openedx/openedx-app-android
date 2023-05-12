@@ -2,11 +2,17 @@ package com.raccoongang.course.presentation.unit.container
 
 import android.os.Bundle
 import android.view.View
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -20,12 +26,13 @@ import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.BackBtn
 import com.raccoongang.core.ui.rememberWindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
+import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentCourseUnitContainerBinding
 import com.raccoongang.course.presentation.ChapterEndFragmentDialog
 import com.raccoongang.course.presentation.DialogListener
-import com.raccoongang.course.presentation.ui.CountUnits
 import com.raccoongang.course.presentation.ui.NavigationUnitsButtons
+import com.raccoongang.course.presentation.ui.VerticalPageIndicator
 import com.raccoongang.course.presentation.unit.NotSupportedUnitFragment
 import com.raccoongang.course.presentation.unit.html.HtmlUnitFragment
 import com.raccoongang.course.presentation.unit.video.VideoUnitFragment
@@ -53,6 +60,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         viewModel.setupCurrentIndex(blockId)
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -158,7 +166,17 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 val index by viewModel.indexInContainer.observeAsState(1)
                 val units by viewModel.verticalBlockCounts.observeAsState(1)
 
-                CountUnits(units = units, currentIndex = index)
+                VerticalPageIndicator(
+                    numberOfPages = units,
+                    selectedColor = MaterialTheme.appColors.primary,
+                    defaultColor = MaterialTheme.appColors.bottomSheetToggle,
+                    selectedPage = index,
+                    defaultRadius = 5.dp,
+                    selectedLength = 7.dp,
+                    modifier = Modifier
+                        .width(24.dp)
+                        .padding(end = 6.dp)
+                )
             }
         }
 

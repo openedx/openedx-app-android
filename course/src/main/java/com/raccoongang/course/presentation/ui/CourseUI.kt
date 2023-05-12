@@ -1,6 +1,9 @@
 package com.raccoongang.course.presentation.ui
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,8 +42,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -407,36 +408,58 @@ fun NavigationUnitsButtons(
 }
 
 @Composable
-fun CountUnits(
-    units: Int,
-    currentIndex: Int
+fun VerticalPageIndicator(
+    numberOfPages: Int,
+    selectedPage: Int = 0,
+    selectedColor: Color = Color.White,
+    defaultColor: Color = Color.Gray,
+    defaultRadius: Dp = 8.dp,
+    selectedLength: Dp = 25.dp,
+    space: Dp = 4.dp,
+    modifier: Modifier = Modifier
 ) {
-    val index by remember(currentIndex) {
-        mutableStateOf(currentIndex)
-    }
     Column(
-        Modifier
-            .width(24.dp)
-            .padding(end = 6.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
     ) {
-        repeat(units) { iteration ->
-            val (color, size) = if (iteration == currentIndex) {
-                Pair(MaterialTheme.appColors.primary, 7)
-            } else {
-                Pair(MaterialTheme.appColors.bottomSheetToggle, 5)
-            }
-
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 4.dp)
-                    .clip(CircleShape)
-                    .background(color)
-                    .size(size.dp)
+        repeat(numberOfPages) {
+            Indicator(
+                isSelected = it == selectedPage,
+                selectedColor = selectedColor,
+                defaultColor = defaultColor,
+                defaultRadius = defaultRadius,
+                selectedSize = selectedLength,
+                modifier = Modifier.padding(vertical = space)
             )
         }
     }
+}
+
+@Composable
+fun Indicator(
+    isSelected: Boolean,
+    selectedColor: Color,
+    defaultColor: Color,
+    defaultRadius: Dp,
+    selectedSize: Dp,
+    modifier: Modifier = Modifier
+) {
+    val size by animateDpAsState(
+        targetValue = if (isSelected) selectedSize else defaultRadius,
+        animationSpec = tween(300)
+    )
+    val color by animateColorAsState(
+        targetValue = if (isSelected) selectedColor else defaultColor,
+        animationSpec = tween(300)
+    )
+
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(color)
+            .size(size)
+    )
 }
 
 @Composable
