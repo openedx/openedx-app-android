@@ -57,6 +57,7 @@ class ChapterEndFragmentDialog : DialogFragment() {
             NewEdxTheme {
                 ChapterEndDialogScreen(
                     sectionName = requireArguments().getString(ARG_SECTION_NAME) ?: "",
+                    nextSectionName = requireArguments().getString(ARG_NEXT_SECTION_NAME) ?: "",
                     onBackButtonClick = {
                         dismiss()
                         requireActivity().supportFragmentManager.popBackStack(
@@ -75,12 +76,15 @@ class ChapterEndFragmentDialog : DialogFragment() {
 
     companion object {
         private const val ARG_SECTION_NAME = "sectionName"
+        private const val ARG_NEXT_SECTION_NAME = "nexSectionName"
         fun newInstance(
-            sectionName: String
+            sectionName: String,
+            nextSectionName: String
         ): ChapterEndFragmentDialog {
             val dialog = ChapterEndFragmentDialog()
             dialog.arguments = bundleOf(
-                ARG_SECTION_NAME to sectionName
+                ARG_SECTION_NAME to sectionName,
+                ARG_NEXT_SECTION_NAME to nextSectionName
             )
             dialog.isCancelable = false
             return dialog
@@ -95,6 +99,7 @@ interface DialogListener {
 @Composable
 private fun ChapterEndDialogScreen(
     sectionName: String,
+    nextSectionName: String,
     onBackButtonClick: () -> Unit,
     onProceedButtonClick: () -> Unit
 ) {
@@ -134,25 +139,37 @@ private fun ChapterEndDialogScreen(
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(42.dp))
-            NewEdxButton(
-                text = stringResource(id = R.string.course_proceed),
-                content = {
-                    TextIcon(
-                        text = stringResource(id = R.string.course_proceed),
-                        painter = painterResource(com.raccoongang.core.R.drawable.core_ic_forward),
-                        color = MaterialTheme.appColors.buttonText,
-                        textStyle = MaterialTheme.appTypography.labelLarge
-                    )
-                },
-                onClick = onProceedButtonClick
-            )
-            Spacer(Modifier.height(16.dp))
+            if (nextSectionName.isNotEmpty()) {
+                NewEdxButton(
+                    text = stringResource(id = R.string.course_next_section),
+                    content = {
+                        TextIcon(
+                            text = stringResource(id = R.string.course_next_section),
+                            painter = painterResource(com.raccoongang.core.R.drawable.core_ic_forward),
+                            color = MaterialTheme.appColors.buttonText,
+                            textStyle = MaterialTheme.appTypography.labelLarge
+                        )
+                    },
+                    onClick = onProceedButtonClick
+                )
+                Spacer(Modifier.height(16.dp))
+            }
             NewEdxOutlinedButton(
                 borderColor = MaterialTheme.appColors.buttonBackground,
                 textColor = MaterialTheme.appColors.buttonBackground,
                 text = stringResource(id = R.string.course_back_to_outline),
                 onClick = onBackButtonClick
             )
+            if (nextSectionName.isNotEmpty()) {
+                Spacer(Modifier.height(24.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.course_to_proceed, nextSectionName),
+                    color = MaterialTheme.appColors.textPrimaryVariant,
+                    style = MaterialTheme.appTypography.labelSmall,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -164,6 +181,7 @@ fun ChapterEndDialogScreenPreview() {
     NewEdxTheme {
         ChapterEndDialogScreen(
             sectionName = "Section",
+            nextSectionName = "Section2",
             onBackButtonClick = {},
             onProceedButtonClick = {}
         )

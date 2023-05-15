@@ -99,9 +99,11 @@ class DiscussionThreadsViewModel(
             DiscussionTopicsFragment.ALL_POSTS -> {
                 getAllThreads(orderBy)
             }
+
             DiscussionTopicsFragment.FOLLOWING_POSTS -> {
                 getFollowingThreads(orderBy)
             }
+
             DiscussionTopicsFragment.TOPIC -> {
                 getThreads(
                     topicId,
@@ -125,9 +127,11 @@ class DiscussionThreadsViewModel(
             DiscussionTopicsFragment.ALL_POSTS -> {
                 getAllThreads(lastOrderBy)
             }
+
             DiscussionTopicsFragment.FOLLOWING_POSTS -> {
                 getFollowingThreads(lastOrderBy)
             }
+
             DiscussionTopicsFragment.TOPIC -> {
                 getThreads(
                     topicId,

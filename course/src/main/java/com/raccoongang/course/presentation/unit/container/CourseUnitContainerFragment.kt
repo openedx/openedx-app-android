@@ -134,7 +134,12 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                 }
                             } else {
                                 viewModel.sendEventPauseVideo()
-                                val dialog = ChapterEndFragmentDialog.newInstance(block.displayName)
+                                val nextBlockName =
+                                    viewModel.getNextVerticalBlock()?.displayName ?: ""
+                                val dialog = ChapterEndFragmentDialog.newInstance(
+                                    block.displayName,
+                                    nextBlockName
+                                )
                                 dialog.listener = object : DialogListener {
                                     override fun <T> onClick(value: T) {
                                         viewModel.proceedToNext()?.let {

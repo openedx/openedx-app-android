@@ -133,6 +133,13 @@ class CourseUnitContainerViewModel(
         return null
     }
 
+    fun getNextVerticalBlock(): Block? {
+        val index = blocks.indexOfFirstFromIndex(verticalIndex) {
+            it.type == BlockType.VERTICAL && it.id != blocks[verticalIndex].id
+        }
+        return blocks.getOrNull(index)
+    }
+
     fun sendEventPauseVideo() {
         viewModelScope.launch {
             notifier.send(CoursePauseVideo())
