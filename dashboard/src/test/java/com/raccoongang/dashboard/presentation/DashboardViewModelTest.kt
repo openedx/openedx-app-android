@@ -7,6 +7,8 @@ import androidx.lifecycle.LifecycleRegistry
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
+import com.raccoongang.core.domain.model.DashboardCourseList
+import com.raccoongang.core.domain.model.Pagination
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.notifier.CourseDashboardUpdate
 import com.raccoongang.core.system.notifier.CourseNotifier
@@ -33,7 +35,6 @@ class DashboardViewModelTest {
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
 
-
     private val dispatcher = StandardTestDispatcher()
 
     private val resourceManager = mockk<ResourceManager>()
@@ -43,6 +44,11 @@ class DashboardViewModelTest {
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
+
+    private val dashboardCourseList = DashboardCourseList(
+        Pagination(10, "", 3, ""),
+        listOf(mockk())
+    )
 
     @Before
     fun setUp() {
@@ -60,11 +66,11 @@ class DashboardViewModelTest {
     fun `getCourses no internet connection`() = runTest {
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses() } throws UnknownHostException()
+        coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
 
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 1) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -76,11 +82,11 @@ class DashboardViewModelTest {
     fun `getCourses unknown error`() = runTest {
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses() } throws Exception()
+        coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
 
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 1) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -92,11 +98,35 @@ class DashboardViewModelTest {
     fun `getCourses from network`() = runTest {
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
+        coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
 
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 1) { interactor.getEnrolledCourses(any()) }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.uiState.value is DashboardUIState.Courses)
+    }
+
+    @Test
+    fun `getCourses from network with next page`() = runTest {
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(
+            Pagination(
+                10,
+                "2",
+                2,
+                ""
+            )
+        )
+        coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
 
         assert(viewModel.uiMessage.value == null)
@@ -106,13 +136,13 @@ class DashboardViewModelTest {
     @Test
     fun `getCourses from cache`() = runTest {
         every { networkConnection.isOnline() } returns false
-        coEvery { interactor.getEnrolledCoursesFromCache() } returns emptyList()
+        coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
 
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
 
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 0) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 1) { interactor.getEnrolledCoursesFromCache() }
 
         assert(viewModel.uiMessage.value == null)
@@ -122,14 +152,14 @@ class DashboardViewModelTest {
     @Test
     fun `updateCourses no internet error`() = runTest {
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
 
-        coEvery { interactor.getEnrolledCourses() } throws UnknownHostException()
+        coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
         viewModel.updateCourses()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 2) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -141,15 +171,15 @@ class DashboardViewModelTest {
     @Test
     fun `updateCourses unknown exception`() = runTest {
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
 
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
 
-        coEvery { interactor.getEnrolledCourses() } throws Exception()
+        coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
         viewModel.updateCourses()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 2) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -161,13 +191,30 @@ class DashboardViewModelTest {
     @Test
     fun `updateCourses success`() = runTest {
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses() } returns emptyList()
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
         val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
 
         viewModel.updateCourses()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 2) { interactor.getEnrolledCourses(any()) }
+        coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
+
+        assert(viewModel.uiMessage.value == null)
+        assert(viewModel.updating.value == false)
+        assert(viewModel.uiState.value is DashboardUIState.Courses)
+    }
+
+    @Test
+    fun `updateCourses success with next page`() = runTest {
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(Pagination(10,"2",2,""))
+        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier)
+
+        viewModel.updateCourses()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { interactor.getEnrolledCourses(any()) }
         coVerify(exactly = 0) { interactor.getEnrolledCoursesFromCache() }
 
         assert(viewModel.uiMessage.value == null)
@@ -188,7 +235,7 @@ class DashboardViewModelTest {
 
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrolledCourses() }
+        coVerify(exactly = 1) { interactor.getEnrolledCourses(any()) }
     }
 
 

@@ -423,7 +423,7 @@ private fun ResumeCourseTablet(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f).padding(end = 35.dp)) {
             Text(
                 text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
                 style = MaterialTheme.appTypography.labelMedium,

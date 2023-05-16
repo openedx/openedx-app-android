@@ -28,44 +28,10 @@ class HandoutsViewModelTest {
 
     private val interactor = mockk<CourseInteractor>()
 
-    //region mockEnrolledCourse
+    //region mockHandoutsModel
 
-    private val mockCourseEnrolled = EnrolledCourse(
-        auditAccessExpires = Date(),
-        created = "created",
-        certificate = Certificate(""),
-        mode = "mode",
-        isActive = true,
-        course = EnrolledCourseData(
-            id = "id",
-            name = "name",
-            number = "",
-            org = "Org",
-            start = Date(),
-            startDisplay = "",
-            startType = "",
-            end = null,
-            dynamicUpgradeDeadline = "",
-            subscriptionId = "",
-            coursewareAccess = CoursewareAccess(
-                true,
-                "",
-                "",
-                "",
-                "",
-                ""
-            ),
-            media = null,
-            courseImage = "",
-            courseAbout = "",
-            courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-            courseUpdates = "",
-            courseHandouts = "",
-            discussionUrl = "",
-            videoOutline = "",
-            isSelfPaced = false
-        )
-    )
+    private val handoutsModel = HandoutsModel("")
+
     //endregion
 
     @Before
@@ -80,36 +46,29 @@ class HandoutsViewModelTest {
 
     @Test
     fun `getEnrolledCourse no internet connection exception`() = runTest {
-        val viewModel = HandoutsViewModel("","Handouts", interactor)
-        coEvery { interactor.getEnrolledCourseFromCacheById(any()) } throws UnknownHostException()
-        coEvery { interactor.getAnnouncements(any()) } returns mockk()
+        val viewModel = HandoutsViewModel("", "Handouts", interactor)
+        coEvery { interactor.getHandouts(any()) } throws UnknownHostException()
 
         advanceUntilIdle()
-        coVerify(exactly = 1) { interactor.getEnrolledCourseFromCacheById(any()) }
 
         assert(viewModel.htmlContent.value == null)
     }
 
     @Test
     fun `getEnrolledCourse unknown exception`() = runTest {
-        val viewModel = HandoutsViewModel("","Handouts", interactor)
-        coEvery { interactor.getEnrolledCourseFromCacheById(any()) } throws Exception()
-        coEvery { interactor.getAnnouncements(any()) } returns mockk()
-
+        val viewModel = HandoutsViewModel("", "Handouts", interactor)
+        coEvery { interactor.getHandouts(any()) } throws Exception()
         advanceUntilIdle()
-        coVerify(exactly = 1) { interactor.getEnrolledCourseFromCacheById(any()) }
 
         assert(viewModel.htmlContent.value == null)
     }
 
     @Test
     fun `getEnrolledCourse handouts success`() = runTest {
-        val viewModel = HandoutsViewModel("",HandoutsType.Handouts.name, interactor)
-        coEvery { interactor.getEnrolledCourseFromCacheById(any()) } returns mockCourseEnrolled
+        val viewModel = HandoutsViewModel("", HandoutsType.Handouts.name, interactor)
         coEvery { interactor.getHandouts(any()) } returns HandoutsModel("hello")
 
         advanceUntilIdle()
-        coVerify(exactly = 1) { interactor.getEnrolledCourseFromCacheById(any()) }
         coVerify(exactly = 1) { interactor.getHandouts(any()) }
         coVerify(exactly = 0) { interactor.getAnnouncements(any()) }
 
@@ -118,12 +77,15 @@ class HandoutsViewModelTest {
 
     @Test
     fun `getEnrolledCourse announcements success`() = runTest {
-        val viewModel = HandoutsViewModel("",HandoutsType.Announcements.name, interactor)
-        coEvery { interactor.getEnrolledCourseFromCacheById(any()) } returns mockCourseEnrolled
-        coEvery { interactor.getAnnouncements(any()) } returns listOf(AnnouncementModel("date","content"))
+        val viewModel = HandoutsViewModel("", HandoutsType.Announcements.name, interactor)
+        coEvery { interactor.getAnnouncements(any()) } returns listOf(
+            AnnouncementModel(
+                "date",
+                "content"
+            )
+        )
 
         advanceUntilIdle()
-        coVerify(exactly = 1) { interactor.getEnrolledCourseFromCacheById(any()) }
         coVerify(exactly = 0) { interactor.getHandouts(any()) }
         coVerify(exactly = 1) { interactor.getAnnouncements(any()) }
 
@@ -132,12 +94,19 @@ class HandoutsViewModelTest {
 
     @Test
     fun `injectDarkMode test`() = runTest {
-        val viewModel = HandoutsViewModel("",HandoutsType.Announcements.name, interactor)
-        coEvery { interactor.getEnrolledCourseFromCacheById(any()) } returns mockCourseEnrolled
-        coEvery { interactor.getAnnouncements(any()) } returns listOf(AnnouncementModel("date","content"))
-        viewModel.injectDarkMode(viewModel.htmlContent.value.toString(), ULong.MAX_VALUE, ULong.MAX_VALUE)
+        val viewModel = HandoutsViewModel("", HandoutsType.Announcements.name, interactor)
+        coEvery { interactor.getAnnouncements(any()) } returns listOf(
+            AnnouncementModel(
+                "date",
+                "content"
+            )
+        )
+        viewModel.injectDarkMode(
+            viewModel.htmlContent.value.toString(),
+            ULong.MAX_VALUE,
+            ULong.MAX_VALUE
+        )
         advanceUntilIdle()
-        coVerify(exactly = 1) { interactor.getEnrolledCourseFromCacheById(any()) }
         coVerify(exactly = 0) { interactor.getHandouts(any()) }
         coVerify(exactly = 1) { interactor.getAnnouncements(any()) }
 
