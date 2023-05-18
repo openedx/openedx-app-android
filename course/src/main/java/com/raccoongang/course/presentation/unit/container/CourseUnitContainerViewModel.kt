@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.Block
+import com.raccoongang.core.extension.clearAndAddAll
 import com.raccoongang.core.extension.indexOfFirstFromIndex
 import com.raccoongang.core.module.db.DownloadModel
 import com.raccoongang.core.module.db.DownloadedState
@@ -30,19 +31,16 @@ class CourseUnitContainerViewModel(
         private set
     var currentVerticalIndex = 0
         private set
-    var verticalIndex = 0
-        private set
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return blocks.indexOfFirst { !it.type.isContainer() } == currentIndex
+            return descendants.first() == descendants[currentIndex]
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return blocks[currentVerticalIndex].descendants.last() == blocks[currentIndex].id
+            return descendants.last() == descendants[currentIndex]
         }
-
 
     private val _verticalBlockCounts = MutableLiveData<Int>()
     val verticalBlockCounts: LiveData<Int>
@@ -55,6 +53,8 @@ class CourseUnitContainerViewModel(
     var nextButtonText = ""
     var hasNextBlock = false
 
+    private val descendants = mutableListOf<String>()
+
     fun loadBlocks(mode: CourseViewMode) {
         try {
             val courseStructure = when (mode) {
@@ -62,8 +62,7 @@ class CourseUnitContainerViewModel(
                 CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
             }
             val blocks = courseStructure.blockData
-            this.blocks.clear()
-            this.blocks.addAll(blocks)
+            this.blocks.clearAndAddAll(blocks)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -72,26 +71,31 @@ class CourseUnitContainerViewModel(
     fun setupCurrentIndex(blockId: String) {
         blocks.forEachIndexed { index, block ->
             if (block.id == blockId) {
-                currentIndex = index
-                updateVerticalIndex(blockId)
+                currentVerticalIndex = index
+                if (block.descendants.isNotEmpty()) {
+                    descendants.clearAndAddAll(block.descendants)
+                } else {
+                    setNextVerticalIndex()
+                }
                 if (currentVerticalIndex != -1) {
-                    _indexInContainer.value =
-                        blocks[currentVerticalIndex].descendants.indexOf(blocks[currentIndex].id)
+                    _indexInContainer.value = 0
+                    _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
                 }
                 return
             }
         }
     }
 
-    fun proceedToNext(): Block? {
-        currentVerticalIndex = blocks.indexOfFirstFromIndex(verticalIndex) {
-            it.type == BlockType.VERTICAL && it.id != blocks[verticalIndex].id
+    private fun setNextVerticalIndex() {
+        currentVerticalIndex = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
+            it.type == BlockType.VERTICAL
         }
-        blocks[currentVerticalIndex].descendants.firstOrNull()?.let { id ->
-            currentIndex = blocks.indexOfFirst { id == it.id } - 1
-            return moveToNextBlock()
+    }
+
+    fun proceedToNext() {
+        currentVerticalIndex = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
+            it.type == BlockType.VERTICAL
         }
-        return null
     }
 
     fun getDownloadModelById(id: String): DownloadModel? = runBlocking(Dispatchers.IO) {
@@ -104,13 +108,11 @@ class CourseUnitContainerViewModel(
     }
 
     fun moveToNextBlock(): Block? {
-        for (i in currentIndex + 1 until blocks.size) {
-            val block = blocks[i]
+        for (i in currentIndex + 1 until descendants.size) {
+            val block = blocks.firstOrNull { descendants[i] == it.id }
             currentIndex = i
-            updateVerticalIndex(block.id)
             if (currentVerticalIndex != -1) {
-                _indexInContainer.value =
-                    blocks[currentVerticalIndex].descendants.indexOf(blocks[currentIndex].id)
+                _indexInContainer.value = currentIndex
             }
             return block
         }
@@ -119,25 +121,14 @@ class CourseUnitContainerViewModel(
 
     fun moveToPrevBlock(): Block? {
         for (i in currentIndex - 1 downTo 0) {
-            val block = blocks[i]
-            if (!block.type.isContainer()) {
-                currentIndex = i
-                updateVerticalIndex(block.id)
-                if (currentVerticalIndex != -1) {
-                    _indexInContainer.value =
-                        blocks[currentVerticalIndex].descendants.indexOf(blocks[currentIndex].id)
-                }
-                return block
+            val block = blocks.firstOrNull { descendants[i] == it.id }
+            currentIndex = i
+            if (currentVerticalIndex != -1) {
+                _indexInContainer.value = currentIndex
             }
+            return block
         }
         return null
-    }
-
-    fun getNextVerticalBlock(): Block? {
-        val index = blocks.indexOfFirstFromIndex(verticalIndex) {
-            it.type == BlockType.VERTICAL && it.id != blocks[verticalIndex].id
-        }
-        return blocks.getOrNull(index)
     }
 
     fun sendEventPauseVideo() {
@@ -146,12 +137,7 @@ class CourseUnitContainerViewModel(
         }
     }
 
-    private fun updateVerticalIndex(blockId: String) {
-        currentVerticalIndex =
-            blocks.indexOfFirst { it.type == BlockType.VERTICAL && it.descendants.contains(blockId) }
-        if (currentVerticalIndex != -1) {
-            _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
-            verticalIndex = currentVerticalIndex
-        }
-    }
+    fun getCurrentVerticalBlock(): Block? = blocks.getOrNull(currentVerticalIndex)
+
+    fun getUnitBlocks(): List<Block> = blocks.filter { descendants.contains(it.id) }
 }

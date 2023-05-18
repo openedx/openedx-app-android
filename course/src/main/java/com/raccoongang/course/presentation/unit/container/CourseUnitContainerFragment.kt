@@ -2,7 +2,6 @@ package com.raccoongang.course.presentation.unit.container
 
 import android.os.Bundle
 import android.view.View
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
@@ -16,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.ViewPager2
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.FragmentViewType
 import com.raccoongang.core.domain.model.Block
@@ -30,7 +30,9 @@ import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.course.R
 import com.raccoongang.course.databinding.FragmentCourseUnitContainerBinding
 import com.raccoongang.course.presentation.ChapterEndFragmentDialog
+import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.DialogListener
+import com.raccoongang.course.presentation.container.CourseNavigationFragmentAdapter
 import com.raccoongang.course.presentation.ui.NavigationUnitsButtons
 import com.raccoongang.course.presentation.ui.VerticalPageIndicator
 import com.raccoongang.course.presentation.unit.NotSupportedUnitFragment
@@ -39,6 +41,7 @@ import com.raccoongang.course.presentation.unit.video.VideoUnitFragment
 import com.raccoongang.course.presentation.unit.video.YoutubeVideoUnitFragment
 import com.raccoongang.discussion.presentation.threads.DiscussionThreadsFragment
 import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -50,7 +53,11 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
 
+    private val router by inject<CourseRouter>()
+
     private var blockId: String = ""
+
+    private lateinit var adapter: CourseNavigationFragmentAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +67,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         viewModel.setupCurrentIndex(blockId)
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -73,15 +79,18 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         bottomNavigationParams.bottomMargin = insetHolder.bottomInset
         binding.cvNavigationBar.layoutParams = bottomNavigationParams
         val containerParams =
-            binding.unitContainer.layoutParams as ConstraintLayout.LayoutParams
+            binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
-        binding.unitContainer.layoutParams = containerParams
+        binding.viewPager.layoutParams = containerParams
 
-        if (savedInstanceState == null && childFragmentManager.findFragmentById(R.id.unitContainer) == null) {
-            val fragment = unitBlockFragment(viewModel.getCurrentBlock())
-            childFragmentManager.beginTransaction()
-                .replace(R.id.unitContainer, fragment)
-                .commit()
+        initViewPager()
+        if (savedInstanceState == null) {
+            val currentBlockIndex = viewModel.getUnitBlocks().indexOfFirst {
+                viewModel.getCurrentBlock().id == it.id
+            }
+            if (currentBlockIndex != -1) {
+                binding.viewPager.currentItem = currentBlockIndex
+            }
         }
 
         binding.cvNavigationBar.setContent {
@@ -113,7 +122,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         val block = viewModel.moveToPrevBlock()
                         if (block != null) {
                             if (!block.type.isContainer()) {
-                                navigateToUnit(block, R.id.unitContainer, true)
+                                binding.viewPager.setCurrentItem(
+                                    binding.viewPager.currentItem - 1,
+                                    true
+                                )
                                 updateNavigationButtons { next, hasPrev, hasNext ->
                                     nextButtonText = next
                                     hasPrevBlock = hasPrev
@@ -126,39 +138,44 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         val block = viewModel.moveToNextBlock()
                         if (block != null) {
                             if (!block.type.isContainer()) {
-                                navigateToUnit(block, R.id.unitContainer, false)
+                                binding.viewPager.setCurrentItem(
+                                    binding.viewPager.currentItem + 1,
+                                    true
+                                )
                                 updateNavigationButtons { next, hasPrev, hasNext ->
                                     nextButtonText = next
                                     hasPrevBlock = hasPrev
                                     hasNextBlock = hasNext
                                 }
-                            } else {
-                                viewModel.sendEventPauseVideo()
-                                val nextBlockName =
-                                    viewModel.getNextVerticalBlock()?.displayName ?: ""
-                                val dialog = ChapterEndFragmentDialog.newInstance(
-                                    block.displayName,
-                                    nextBlockName
-                                )
-                                dialog.listener = object : DialogListener {
-                                    override fun <T> onClick(value: T) {
-                                        viewModel.proceedToNext()?.let {
-                                            if (!it.type.isContainer()) {
-                                                navigateToUnit(it, R.id.unitContainer, false)
-                                                updateNavigationButtons { next, hasPrev, hasNext ->
-                                                    nextButtonText = next
-                                                    hasPrevBlock = hasPrev
-                                                    hasNextBlock = hasNext
-                                                }
-                                            }
+                            }
+                        } else {
+                            val currentVerticalBlock = viewModel.getCurrentVerticalBlock()
+                            viewModel.proceedToNext()
+                            val nextVerticalBlock = viewModel.getCurrentVerticalBlock()
+                            viewModel.sendEventPauseVideo()
+                            val dialog = ChapterEndFragmentDialog.newInstance(
+                                currentVerticalBlock?.displayName ?: "",
+                                nextVerticalBlock?.displayName ?: ""
+                            )
+                            dialog.listener = object : DialogListener {
+                                override fun <T> onClick(value: T) {
+                                    nextVerticalBlock?.let {
+                                        if (it.type.isContainer()) {
+                                            router.replaceCourseContainer(
+                                                requireActivity().supportFragmentManager,
+                                                it.id,
+                                                viewModel.courseId,
+                                                requireArguments().getString(ARG_COURSE_NAME, ""),
+                                                requireArguments().serializable(ARG_MODE)!!
+                                            )
                                         }
                                     }
                                 }
-                                dialog.show(
-                                    requireActivity().supportFragmentManager,
-                                    ChapterEndFragmentDialog::class.simpleName
-                                )
                             }
+                            dialog.show(
+                                requireActivity().supportFragmentManager,
+                                ChapterEndFragmentDialog::class.simpleName
+                            )
                         }
                     }
                 )
@@ -208,16 +225,15 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         updatedData(nextButtonText, hasPrevBlock, hasNextBlock)
     }
 
-    private fun navigateToUnit(block: Block, containerId: Int, navigateToPrev: Boolean) {
-        with(childFragmentManager.beginTransaction()) {
-            if (navigateToPrev) {
-                setCustomAnimations(R.anim.course_slide_out_down, R.anim.course_slide_in_down)
-            } else {
-                setCustomAnimations(R.anim.course_slide_out_up, R.anim.course_slide_in_up)
+    private fun initViewPager() {
+        binding.viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        adapter = CourseNavigationFragmentAdapter(this).apply {
+            viewModel.getUnitBlocks().forEach {
+                addFragment(unitBlockFragment(it))
             }
-            replace(containerId, unitBlockFragment(block))
-            commit()
         }
+        binding.viewPager.adapter = adapter
+        binding.viewPager.isUserInputEnabled = false
     }
 
     private fun unitBlockFragment(block: Block): Fragment {
@@ -294,10 +310,12 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     }
 
     companion object {
+
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_COURSE_NAME = "courseName"
         private const val ARG_MODE = "mode"
+
         fun newInstance(
             blockId: String,
             courseId: String,
@@ -314,4 +332,5 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             return fragment
         }
     }
+
 }

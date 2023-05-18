@@ -45,6 +45,14 @@ interface CourseRouter {
         mode: CourseViewMode
     )
 
+    fun replaceCourseContainer(
+        fm: FragmentManager,
+        blockId: String,
+        courseId: String,
+        courseName: String,
+        mode: CourseViewMode
+    )
+
     fun navigateToFullScreenVideo(
         fm: FragmentManager,
         videoUrl: String,

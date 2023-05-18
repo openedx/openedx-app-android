@@ -120,7 +120,7 @@ class CourseSectionFragment : Fragment() {
                         if (block.descendants.isNotEmpty()) {
                             router.navigateToCourseContainer(
                                 requireActivity().supportFragmentManager,
-                                block.descendants[0],
+                                block.id,
                                 courseId = viewModel.courseId,
                                 courseName = block.displayName,
                                 mode = viewModel.mode
