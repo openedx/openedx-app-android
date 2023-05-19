@@ -22,7 +22,6 @@ import com.raccoongang.course.presentation.section.CourseSectionFragment
 import com.raccoongang.course.presentation.unit.container.CourseUnitContainerFragment
 import com.raccoongang.course.presentation.unit.video.VideoFullScreenFragment
 import com.raccoongang.course.presentation.unit.video.YoutubeVideoFullScreenFragment
-import com.raccoongang.course.presentation.units.CourseUnitsFragment
 import com.raccoongang.dashboard.presentation.DashboardRouter
 import com.raccoongang.discovery.presentation.DiscoveryRouter
 import com.raccoongang.discussion.domain.model.DiscussionComment
@@ -94,18 +93,6 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     //endregion
 
     //region CourseRouter
-    override fun navigateToCourseUnits(
-        fm: FragmentManager,
-        courseId: String,
-        blockId: String,
-        courseName: String,
-        mode: CourseViewMode,
-    ) {
-        replaceFragmentWithBackStack(
-            fm,
-            CourseUnitsFragment.newInstance(courseId, blockId, courseName, mode)
-        )
-    }
 
     override fun navigateToCourseSubsections(
         fm: FragmentManager,

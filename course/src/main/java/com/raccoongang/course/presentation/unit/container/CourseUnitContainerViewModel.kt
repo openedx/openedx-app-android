@@ -13,6 +13,7 @@ import com.raccoongang.core.module.db.DownloadedState
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CoursePauseVideo
+import com.raccoongang.core.system.notifier.CourseSectionChanged
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -31,6 +32,7 @@ class CourseUnitContainerViewModel(
         private set
     var currentVerticalIndex = 0
         private set
+    private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
         get() {
@@ -72,6 +74,9 @@ class CourseUnitContainerViewModel(
         blocks.forEachIndexed { index, block ->
             if (block.id == blockId) {
                 currentVerticalIndex = index
+                currentSectionIndex = blocks.indexOfFirst {
+                    it.descendants.contains(blocks[currentVerticalIndex].id)
+                }
                 if (block.descendants.isNotEmpty()) {
                     descendants.clearAndAddAll(block.descendants)
                 } else {
@@ -95,6 +100,15 @@ class CourseUnitContainerViewModel(
     fun proceedToNext() {
         currentVerticalIndex = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
             it.type == BlockType.VERTICAL
+        }
+        val sectionIndex = blocks.indexOfFirst {
+            it.descendants.contains(blocks[currentVerticalIndex].id)
+        }
+        if (sectionIndex != currentSectionIndex) {
+            currentSectionIndex = sectionIndex
+            blocks.getOrNull(currentSectionIndex)?.id?.let {
+                sendCourseSectionChanged(it)
+            }
         }
     }
 
@@ -134,6 +148,12 @@ class CourseUnitContainerViewModel(
     fun sendEventPauseVideo() {
         viewModelScope.launch {
             notifier.send(CoursePauseVideo())
+        }
+    }
+
+    private fun sendCourseSectionChanged(blockId: String) {
+        viewModelScope.launch {
+            notifier.send(CourseSectionChanged(blockId))
         }
     }
 

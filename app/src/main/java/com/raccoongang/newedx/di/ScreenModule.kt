@@ -19,7 +19,6 @@ import com.raccoongang.course.presentation.section.CourseSectionViewModel
 import com.raccoongang.course.presentation.unit.container.CourseUnitContainerViewModel
 import com.raccoongang.course.presentation.unit.video.VideoUnitViewModel
 import com.raccoongang.course.presentation.unit.video.VideoViewModel
-import com.raccoongang.course.presentation.units.CourseUnitsViewModel
 import com.raccoongang.course.presentation.videos.CourseVideoViewModel
 import com.raccoongang.dashboard.data.repository.DashboardRepository
 import com.raccoongang.dashboard.domain.interactor.DashboardInteractor
@@ -80,8 +79,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { CourseUnitsViewModel(get(), get(),get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), courseId) }
+    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }

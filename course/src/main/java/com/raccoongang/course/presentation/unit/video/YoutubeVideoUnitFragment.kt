@@ -87,10 +87,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 }
             }
         }
-
-        viewModel.isVideoPaused.observe(this) {
-            _youTubePlayer?.pause()
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -207,6 +203,10 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             if (windowSize?.isTablet != true) {
                 binding.cvRotateHelper.isVisible = it
             }
+        }
+
+        viewModel.isVideoPaused.observe(viewLifecycleOwner) {
+            _youTubePlayer?.pause()
         }
     }
 

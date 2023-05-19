@@ -17,6 +17,8 @@ import com.raccoongang.core.module.download.BaseDownloadViewModel
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.connection.NetworkConnection
+import com.raccoongang.core.system.notifier.CourseNotifier
+import com.raccoongang.core.system.notifier.CourseSectionChanged
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.launch
 
@@ -25,6 +27,7 @@ class CourseSectionViewModel(
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: PreferencesManager,
+    private val notifier: CourseNotifier,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
     val courseId: String
@@ -48,6 +51,14 @@ class CourseSectionViewModel(
                     val list = (uiState.value as CourseSectionUIState.Blocks).blocks
                     _uiState.value =
                         CourseSectionUIState.Blocks(ArrayList(list), downloadModels.toMap())
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            notifier.notifier.collect{event ->
+                if (event is CourseSectionChanged) {
+                    getBlocks(event.blockId, mode)
                 }
             }
         }
