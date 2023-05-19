@@ -2,6 +2,7 @@ package com.raccoongang.course.presentation.unit.container
 
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
@@ -16,9 +17,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
-import com.raccoongang.core.BlockType
-import com.raccoongang.core.FragmentViewType
-import com.raccoongang.core.domain.model.Block
 import com.raccoongang.core.extension.serializable
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.presentation.global.InsetHolder
@@ -32,15 +30,8 @@ import com.raccoongang.course.databinding.FragmentCourseUnitContainerBinding
 import com.raccoongang.course.presentation.ChapterEndFragmentDialog
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.DialogListener
-import com.raccoongang.course.presentation.container.CourseContainerAdapter
 import com.raccoongang.course.presentation.ui.NavigationUnitsButtons
 import com.raccoongang.course.presentation.ui.VerticalPageIndicator
-import com.raccoongang.course.presentation.unit.NotSupportedUnitFragment
-import com.raccoongang.course.presentation.unit.html.HtmlUnitFragment
-import com.raccoongang.course.presentation.unit.video.VideoUnitFragment
-import com.raccoongang.course.presentation.unit.video.YoutubeVideoUnitFragment
-import com.raccoongang.discussion.presentation.threads.DiscussionThreadsFragment
-import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -79,7 +70,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         bottomNavigationParams.bottomMargin = insetHolder.bottomInset
         binding.cvNavigationBar.layoutParams = bottomNavigationParams
         val containerParams =
-            binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
+            binding.viewPager.layoutParams as FrameLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
 
