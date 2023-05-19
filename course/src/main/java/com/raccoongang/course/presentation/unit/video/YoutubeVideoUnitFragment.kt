@@ -53,6 +53,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     private var blockId = ""
 
+    private var isPlayerInitialized = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         windowSize = computeWindowSizeClasses()
@@ -196,7 +198,10 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             }
         }
 
-        binding.youtubePlayerView.initialize(listener, options)
+        if (!isPlayerInitialized) {
+            binding.youtubePlayerView.initialize(listener, options)
+            isPlayerInitialized = true
+        }
 
         viewModel.isPopUpViewShow.observe(viewLifecycleOwner) {
             if (windowSize?.isTablet != true) {
@@ -215,6 +220,11 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     override fun onPause() {
         super.onPause()
         orientationListener?.disable()
+    }
+
+    override fun onDestroyView() {
+        isPlayerInitialized = false
+        super.onDestroyView()
     }
 
     companion object {

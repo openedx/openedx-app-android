@@ -32,7 +32,7 @@ import com.raccoongang.course.databinding.FragmentCourseUnitContainerBinding
 import com.raccoongang.course.presentation.ChapterEndFragmentDialog
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.DialogListener
-import com.raccoongang.course.presentation.container.CourseNavigationFragmentAdapter
+import com.raccoongang.course.presentation.container.CourseContainerAdapter
 import com.raccoongang.course.presentation.ui.NavigationUnitsButtons
 import com.raccoongang.course.presentation.ui.VerticalPageIndicator
 import com.raccoongang.course.presentation.unit.NotSupportedUnitFragment
@@ -57,7 +57,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private var blockId: String = ""
 
-    private lateinit var adapter: CourseNavigationFragmentAdapter
+    private lateinit var adapter: CourseUnitContainerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -227,86 +227,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
-        adapter = CourseNavigationFragmentAdapter(this).apply {
-            viewModel.getUnitBlocks().forEach {
-                addFragment(unitBlockFragment(it))
-            }
-        }
+        adapter = CourseUnitContainerAdapter(this, viewModel, viewModel.getUnitBlocks())
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
-    }
-
-    private fun unitBlockFragment(block: Block): Fragment {
-        return when (block.type) {
-            BlockType.HTML,
-            BlockType.PROBLEM,
-            BlockType.OPENASSESSMENT,
-            BlockType.DRAG_AND_DROP_V2,
-            BlockType.WORD_CLOUD,
-            BlockType.LTI_CONSUMER,
-            -> {
-                HtmlUnitFragment.newInstance(block.id, block.studentViewUrl)
-            }
-
-            BlockType.VIDEO -> {
-                val encodedVideos = block.studentViewData!!.encodedVideos!!
-                val transcripts = block.studentViewData!!.transcripts
-                with(encodedVideos) {
-                    var isDownloaded = false
-                    val videoUrl = if (viewModel.getDownloadModelById(block.id) != null) {
-                        isDownloaded = true
-                        viewModel.getDownloadModelById(block.id)!!.path
-                    } else if (fallback != null) {
-                        fallback!!.url
-                    } else if (hls != null) {
-                        hls!!.url
-                    } else if (desktopMp4 != null) {
-                        desktopMp4!!.url
-                    } else if (mobileHigh != null) {
-                        mobileHigh!!.url
-                    } else if (mobileLow != null) {
-                        mobileLow!!.url
-                    } else {
-                        ""
-                    }
-                    if (videoUrl.isNotEmpty()) {
-                        VideoUnitFragment.newInstance(
-                            block.id,
-                            viewModel.courseId,
-                            videoUrl,
-                            transcripts?.toMap() ?: emptyMap(),
-                            block.displayName,
-                            isDownloaded
-                        )
-                    } else {
-                        YoutubeVideoUnitFragment.newInstance(
-                            block.id,
-                            viewModel.courseId,
-                            encodedVideos.youtube?.url!!,
-                            transcripts?.toMap() ?: emptyMap(),
-                            block.displayName
-                        )
-                    }
-                }
-            }
-
-            BlockType.DISCUSSION -> {
-                DiscussionThreadsFragment.newInstance(
-                    DiscussionTopicsFragment.TOPIC,
-                    viewModel.courseId,
-                    block.studentViewData?.topicId ?: "",
-                    block.displayName,
-                    FragmentViewType.MAIN_CONTENT.name
-                )
-            }
-
-            else -> {
-                NotSupportedUnitFragment.newInstance(
-                    block.id,
-                    block.lmsWebUrl
-                )
-            }
-        }
     }
 
     companion object {

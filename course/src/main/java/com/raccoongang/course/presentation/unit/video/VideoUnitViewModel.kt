@@ -26,7 +26,7 @@ class VideoUnitViewModel(
     private val preferencesManager: PreferencesManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
-    private val transcriptManager: TranscriptManager
+    private val transcriptManager: TranscriptManager,
 ) : BaseViewModel() {
 
     var videoUrl = ""
