@@ -1,6 +1,8 @@
 package com.raccoongang.course.data.storage
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.raccoongang.core.data.model.room.CourseEntity
@@ -22,6 +24,6 @@ interface CourseDao {
     @Update
     suspend fun updateCourseEntity(courseEntity: CourseEntity)
 
-    @Update
-    suspend fun updateCourseStructureEntity(courseStructureEntity: CourseStructureEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCourseStructureEntity(vararg courseStructureEntity: CourseStructureEntity)
 }

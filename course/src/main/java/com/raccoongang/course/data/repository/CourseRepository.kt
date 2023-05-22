@@ -55,7 +55,7 @@ class CourseRepository(
             preferencesManager.user?.username,
             courseId
         )
-        courseDao.updateCourseStructureEntity(response.mapToRoomEntity())
+        courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
         courseStructure = null
         courseStructure = response.mapToDomain()
     }
