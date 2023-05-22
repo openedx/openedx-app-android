@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.AppDataConstants
 import com.raccoongang.core.BaseViewModel
-import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
@@ -62,6 +61,8 @@ class VideoUnitViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    private var isBlockAlreadyCompleted = false
+
     init {
         viewModelScope.launch {
             delay(4000)
@@ -103,21 +104,25 @@ class VideoUnitViewModel(
         }
         if (transcripts.values.isNotEmpty()) {
             transcriptLanguage = transcripts.keys.toList().first()
-            return transcripts[transcriptLanguage]?:""
+            return transcripts[transcriptLanguage] ?: ""
         }
         return ""
     }
 
 
     fun markBlockCompleted(blockId: String) {
-        viewModelScope.launch {
-            try {
-                courseRepository.markBlocksCompletion(
-                    courseId,
-                    listOf(blockId)
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
+        if (!isBlockAlreadyCompleted) {
+            viewModelScope.launch {
+                try {
+                    isBlockAlreadyCompleted = true
+                    courseRepository.markBlocksCompletion(
+                        courseId,
+                        listOf(blockId)
+                    )
+                } catch (e: Exception) {
+                    isBlockAlreadyCompleted = false
+                    e.printStackTrace()
+                }
             }
         }
     }

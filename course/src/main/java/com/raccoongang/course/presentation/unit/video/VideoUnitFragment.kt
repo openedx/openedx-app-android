@@ -64,6 +64,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 if (it.isPlaying) {
                     viewModel.setCurrentVideoTime(it.currentPosition)
                 }
+                val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
+                if (completePercentage >= 0.8f) {
+                    viewModel.markBlockCompleted(blockId)
+                }
             }
             handler.postDelayed(this, 200)
         }

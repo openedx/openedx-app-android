@@ -87,7 +87,7 @@ class DashboardViewModel(
                 if (coursesList.isEmpty()) {
                     _uiState.value = DashboardUIState.Empty
                 } else {
-                    _uiState.value = DashboardUIState.Courses(coursesList)
+                    _uiState.value = DashboardUIState.Courses(ArrayList(coursesList))
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

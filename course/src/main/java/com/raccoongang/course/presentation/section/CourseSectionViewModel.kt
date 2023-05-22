@@ -77,7 +77,7 @@ class CourseSectionViewModel(
                 val newList = getDescendantBlocks(blocks, blockId)
                 initDownloadModelsStatus()
 
-                _uiState.value = CourseSectionUIState.Blocks(newList, getDownloadModelsStatus())
+                _uiState.value = CourseSectionUIState.Blocks(ArrayList(newList), getDownloadModelsStatus())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

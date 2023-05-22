@@ -65,7 +65,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         }
         binding.root.requestApplyInsetsWhenAttached()
         initPlayer()
-//        updateCurrentVideoTime()
     }
 
     private fun initPlayer() {

@@ -22,7 +22,7 @@ class CourseRepository(
 
     suspend fun getCourseDetail(id: String): Course {
         val course = api.getCourseDetail(id)
-        courseDao.insertCourseEntity(CourseEntity.createFrom(course))
+        courseDao.updateCourseEntity(CourseEntity.createFrom(course))
         return course.mapToDomain()
     }
 
@@ -55,7 +55,7 @@ class CourseRepository(
             preferencesManager.user?.username,
             courseId
         )
-        courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
+        courseDao.updateCourseStructureEntity(response.mapToRoomEntity())
         courseStructure = null
         courseStructure = response.mapToDomain()
     }

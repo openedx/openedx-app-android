@@ -18,6 +18,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstan
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
 import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.extension.objectToString
@@ -68,13 +69,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 PlayerConstants.PlayerState.PAUSED -> {
                     viewModel.isVideoPaused = true
                 }
-                PlayerConstants.PlayerState.ENDED -> {
-                    viewModel.markBlockCompleted(blockId)
-                }
                 else -> {}
             }
         }
     }
+
+    private val youtubeTrackerListener = YouTubePlayerTracker()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,6 +176,10 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
+                val completePercentage = second / youtubeTrackerListener.videoDuration
+                if (completePercentage >= 0.8f) {
+                    viewModel.markBlockCompleted(blockId)
+                }
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
@@ -198,8 +202,9 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat())
+                youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
                 youTubePlayer.addListener(youtubeListener)
+                youTubePlayer.addListener(youtubeTrackerListener)
             }
         }
 
