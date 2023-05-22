@@ -69,6 +69,19 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
+    private val exoPlayerListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            if (playbackState == Player.STATE_ENDED) {
+                viewModel.markBlockCompleted(blockId)
+            }
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
+            viewModel.isVideoPaused = !isPlaying
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,10 +117,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     }
                 }
             }
-        }
-
-        viewModel.isVideoPaused.observe(this) {
-            exoPlayer?.pause()
         }
     }
 
@@ -204,10 +213,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             playerView.player = exoPlayer
             playerView.setShowNextButton(false)
             playerView.setShowPreviousButton(false)
+            playerView.controllerAutoShow = true
+            playerView.controllerShowTimeoutMs = 2000
             val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
             exoPlayer?.setMediaItem(mediaItem, viewModel.getCurrentVideoTime())
             exoPlayer?.prepare()
-            exoPlayer?.playWhenReady = !(viewModel.isVideoPaused.value ?: false)
 
             playerView.setFullscreenButtonClickListener { isFullScreen ->
                 router.navigateToFullScreenVideo(
@@ -219,15 +229,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 )
                 viewModel.fullscreenHandled = true
             }
-
-            exoPlayer?.addListener(object : Player.Listener {
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    super.onPlaybackStateChanged(playbackState)
-                    if (playbackState == Player.STATE_ENDED) {
-                        viewModel.markBlockCompleted(blockId)
-                    }
-                }
-            })
         }
     }
 
@@ -236,10 +237,13 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         if (orientationListener?.canDetectOrientation() == true) {
             orientationListener?.enable()
         }
+        exoPlayer?.addListener(exoPlayerListener)
+        exoPlayer?.playWhenReady = !viewModel.isVideoPaused
     }
 
     override fun onPause() {
         super.onPause()
+        exoPlayer?.removeListener(exoPlayerListener)
         exoPlayer?.pause()
         orientationListener?.disable()
     }

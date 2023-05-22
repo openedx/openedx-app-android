@@ -10,7 +10,6 @@ import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
-import com.raccoongang.core.system.notifier.CoursePauseVideo
 import com.raccoongang.core.system.notifier.CourseSubtitleLanguageChanged
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
 import com.raccoongang.course.data.repository.CourseRepository
@@ -23,7 +22,6 @@ import subtitleFile.TimedTextObject
 class VideoUnitViewModel(
     val courseId: String,
     private val courseRepository: CourseRepository,
-    private val preferencesManager: PreferencesManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val transcriptManager: TranscriptManager,
@@ -34,13 +32,15 @@ class VideoUnitViewModel(
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
 
-    private val _currentVideoTime = MutableLiveData<Long>(0)
-    val currentVideoTime: LiveData<Long>
-        get() = _currentVideoTime
-
     var fullscreenHandled = false
 
     var isDownloaded = false
+
+    var isVideoPaused = false
+
+    private val _currentVideoTime = MutableLiveData<Long>(0)
+    val currentVideoTime: LiveData<Long>
+        get() = _currentVideoTime
 
     private val _isUpdated = MutableLiveData(true)
     val isUpdated: LiveData<Boolean>
@@ -49,10 +49,6 @@ class VideoUnitViewModel(
     private val _isPopUpViewShow = MutableLiveData(true)
     val isPopUpViewShow: LiveData<Boolean>
         get() = _isPopUpViewShow
-
-    private val _isVideoPaused = MutableLiveData<Boolean>()
-    val isVideoPaused: LiveData<Boolean>
-        get() = _isVideoPaused
 
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex = _currentIndex.asStateFlow()
@@ -81,8 +77,6 @@ class VideoUnitViewModel(
                     _isUpdated.value = false
                     _currentVideoTime.value = it.videoTime
                     _isUpdated.value = true
-                } else if (it is CoursePauseVideo) {
-                    _isVideoPaused.value = true
                 } else if (it is CourseSubtitleLanguageChanged) {
                     transcriptLanguage = it.value
                     _transcriptObject.value = null

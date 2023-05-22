@@ -83,7 +83,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
-    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get()) }
     viewModel { SelectDialogViewModel(get()) }

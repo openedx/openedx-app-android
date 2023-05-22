@@ -12,7 +12,6 @@ import com.raccoongang.core.module.db.DownloadModel
 import com.raccoongang.core.module.db.DownloadedState
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.notifier.CourseNotifier
-import com.raccoongang.core.system.notifier.CoursePauseVideo
 import com.raccoongang.core.system.notifier.CourseSectionChanged
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.Dispatchers
@@ -143,12 +142,6 @@ class CourseUnitContainerViewModel(
             return block
         }
         return null
-    }
-
-    fun sendEventPauseVideo() {
-        viewModelScope.launch {
-            notifier.send(CoursePauseVideo())
-        }
     }
 
     private fun sendCourseSectionChanged(blockId: String) {

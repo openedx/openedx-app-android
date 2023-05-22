@@ -143,7 +143,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             val currentVerticalBlock = viewModel.getCurrentVerticalBlock()
                             viewModel.proceedToNext()
                             val nextVerticalBlock = viewModel.getCurrentVerticalBlock()
-                            viewModel.sendEventPauseVideo()
                             val dialog = ChapterEndFragmentDialog.newInstance(
                                 currentVerticalBlock?.displayName ?: "",
                                 nextVerticalBlock?.displayName ?: ""
@@ -218,6 +217,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        binding.viewPager.offscreenPageLimit = 1
         adapter = CourseUnitContainerAdapter(this, viewModel, viewModel.getUnitBlocks())
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false

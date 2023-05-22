@@ -55,6 +55,27 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     private var isPlayerInitialized = false
 
+    private val youtubeListener = object : AbstractYouTubePlayerListener() {
+        override fun onStateChange(
+            youTubePlayer: YouTubePlayer,
+            state: PlayerConstants.PlayerState,
+        ) {
+            super.onStateChange(youTubePlayer, state)
+            when(state) {
+                PlayerConstants.PlayerState.PLAYING -> {
+                    viewModel.isVideoPaused = false
+                }
+                PlayerConstants.PlayerState.PAUSED -> {
+                    viewModel.isVideoPaused = true
+                }
+                PlayerConstants.PlayerState.ENDED -> {
+                    viewModel.markBlockCompleted(blockId)
+                }
+                else -> {}
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         windowSize = computeWindowSizeClasses()
@@ -152,16 +173,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             .build()
 
         val listener = object : AbstractYouTubePlayerListener() {
-            override fun onStateChange(
-                youTubePlayer: YouTubePlayer,
-                state: PlayerConstants.PlayerState
-            ) {
-                super.onStateChange(youTubePlayer, state)
-                if (state == PlayerConstants.PlayerState.ENDED) {
-                    viewModel.markBlockCompleted(blockId)
-                }
-            }
-
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
@@ -187,10 +198,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.loadVideo(videoId, viewModel.getCurrentVideoTime().toFloat())
-                if (viewModel.isVideoPaused.value == true) {
-                    youTubePlayer.pause()
-                }
+                youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat())
+                youTubePlayer.addListener(youtubeListener)
             }
         }
 
@@ -204,10 +213,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 binding.cvRotateHelper.isVisible = it
             }
         }
-
-        viewModel.isVideoPaused.observe(viewLifecycleOwner) {
-            _youTubePlayer?.pause()
-        }
     }
 
     override fun onResume() {
@@ -215,15 +220,22 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         if (orientationListener?.canDetectOrientation() == true) {
             orientationListener?.enable()
         }
+        _youTubePlayer?.addListener(youtubeListener)
+        if (!viewModel.isVideoPaused) {
+            _youTubePlayer?.play()
+        }
     }
 
     override fun onPause() {
         super.onPause()
+        _youTubePlayer?.removeListener(youtubeListener)
+        _youTubePlayer?.pause()
         orientationListener?.disable()
     }
 
     override fun onDestroyView() {
         isPlayerInitialized = false
+        _youTubePlayer = null
         super.onDestroyView()
     }
 
