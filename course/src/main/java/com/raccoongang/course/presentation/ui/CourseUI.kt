@@ -348,7 +348,6 @@ fun NavigationUnitsButtons(
 
         Button(
             modifier = Modifier
-                .width(124.dp)
                 .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonSecondaryBackground
@@ -378,7 +377,6 @@ fun NavigationUnitsButtons(
         Spacer(Modifier.width(7.dp))
         Button(
             modifier = Modifier
-                .width(124.dp)
                 .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
