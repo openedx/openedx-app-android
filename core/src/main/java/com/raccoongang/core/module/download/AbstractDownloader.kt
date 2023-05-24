@@ -66,7 +66,11 @@ abstract class AbstractDownloader {
     suspend fun cancelDownloading() {
         isCanceled = true
         withContext(Dispatchers.IO) {
-            input?.close()
+            try {
+                input?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         currentDownloadingFilePath?.let {
             val file = File(it)
