@@ -86,7 +86,6 @@ class ChapterEndFragmentDialog : DialogFragment() {
                 ARG_SECTION_NAME to sectionName,
                 ARG_NEXT_SECTION_NAME to nextSectionName
             )
-            dialog.isCancelable = false
             return dialog
         }
     }

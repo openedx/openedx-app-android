@@ -100,13 +100,15 @@ class CourseUnitContainerViewModel(
         currentVerticalIndex = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
             it.type == BlockType.VERTICAL
         }
-        val sectionIndex = blocks.indexOfFirst {
-            it.descendants.contains(blocks[currentVerticalIndex].id)
-        }
-        if (sectionIndex != currentSectionIndex) {
-            currentSectionIndex = sectionIndex
-            blocks.getOrNull(currentSectionIndex)?.id?.let {
-                sendCourseSectionChanged(it)
+        if (currentVerticalIndex != -1) {
+            val sectionIndex = blocks.indexOfFirst {
+                it.descendants.contains(blocks[currentVerticalIndex].id)
+            }
+            if (sectionIndex != currentSectionIndex) {
+                currentSectionIndex = sectionIndex
+                blocks.getOrNull(currentSectionIndex)?.id?.let {
+                    sendCourseSectionChanged(it)
+                }
             }
         }
     }
@@ -151,6 +153,13 @@ class CourseUnitContainerViewModel(
     }
 
     fun getCurrentVerticalBlock(): Block? = blocks.getOrNull(currentVerticalIndex)
+
+    fun getNextVerticalBlock(): Block? {
+        val index = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
+            it.type == BlockType.VERTICAL
+        }
+        return blocks.getOrNull(index)
+    }
 
     fun getUnitBlocks(): List<Block> = blocks.filter { descendants.contains(it.id) }
 }
