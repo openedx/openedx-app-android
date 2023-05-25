@@ -25,6 +25,7 @@ abstract class AbstractDownloader {
     var isCanceled = false
 
     private var input: InputStream? = null
+    private var fos: FileOutputStream? = null
 
     open suspend fun download(
         url: String,
@@ -41,14 +42,14 @@ abstract class AbstractDownloader {
                 file.createNewFile()
                 input = response.byteStream()
                 currentDownloadingFilePath = path
-                val fos = FileOutputStream(file)
+                fos = FileOutputStream(file)
                 fos.use { output ->
                     val buffer = ByteArray(4 * 1024)
                     var read: Int
                     while (input!!.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
+                        output?.write(buffer, 0, read)
                     }
-                    output.flush()
+                    output?.flush()
                 }
                 true
             } else {
@@ -58,6 +59,7 @@ abstract class AbstractDownloader {
             e.printStackTrace()
             false
         } finally {
+            fos?.close()
             input?.close()
         }
     }
@@ -67,6 +69,7 @@ abstract class AbstractDownloader {
         isCanceled = true
         withContext(Dispatchers.IO) {
             try {
+                fos?.close()
                 input?.close()
             } catch (e: Exception) {
                 e.printStackTrace()
