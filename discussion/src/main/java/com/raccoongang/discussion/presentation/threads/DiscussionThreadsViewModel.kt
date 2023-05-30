@@ -70,6 +70,10 @@ class DiscussionThreadsViewModel(
         }
     }
 
+    init {
+        getThreadByType(SortType.LAST_ACTIVITY_AT.queryParam)
+    }
+
     fun getThreadByType(orderBy: String) {
         _uiState.value = DiscussionThreadsUIState.Loading
         internalLoadThreads(orderBy)

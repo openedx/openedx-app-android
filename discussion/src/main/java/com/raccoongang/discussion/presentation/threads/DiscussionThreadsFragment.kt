@@ -68,7 +68,6 @@ class DiscussionThreadsFragment : Fragment() {
         viewType =
             FragmentViewType.valueOf(requireArguments().getString(ARG_FRAGMENT_VIEW_TYPE, ""))
         viewModel.topicId = requireArguments().getString(ARG_TOPIC_ID, "")
-        viewModel.getThreadByType(SortType.LAST_ACTIVITY_AT.queryParam)
     }
 
     override fun onCreateView(
