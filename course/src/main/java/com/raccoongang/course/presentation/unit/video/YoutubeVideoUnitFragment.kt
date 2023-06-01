@@ -1,8 +1,10 @@
 package com.raccoongang.course.presentation.unit.video
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.OrientationEventListener
 import android.view.View
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,7 +25,6 @@ import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.extension.objectToString
 import com.raccoongang.core.extension.stringToObject
 import com.raccoongang.core.presentation.dialog.SelectBottomDialogFragment
-import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
@@ -45,7 +46,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
-    private val binding by viewBinding(FragmentYoutubeVideoUnitBinding::bind)
+    private var _binding: FragmentYoutubeVideoUnitBinding? = null
+    private val binding get() = _binding!!
 
     private var windowSize: WindowSize? = null
     private var orientationListener: OrientationEventListener? = null
@@ -89,6 +91,15 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 }
             }
         }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentYoutubeVideoUnitBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -166,21 +177,23 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
                 _youTubePlayer = youTubePlayer
-                val defPlayerUiController = DefaultPlayerUiController(
-                    binding.youtubePlayerView,
-                    youTubePlayer
-                )
-                defPlayerUiController.setFullScreenButtonClickListener {
-                    viewModel.fullscreenHandled = true
-                    router.navigateToFullScreenYoutubeVideo(
-                        requireActivity().supportFragmentManager,
-                        viewModel.videoUrl,
-                        viewModel.getCurrentVideoTime(),
-                        blockId,
-                        viewModel.courseId
+                if (_binding != null) {
+                    val defPlayerUiController = DefaultPlayerUiController(
+                        binding.youtubePlayerView,
+                        youTubePlayer
                     )
+                    defPlayerUiController.setFullScreenButtonClickListener {
+                        viewModel.fullscreenHandled = true
+                        router.navigateToFullScreenYoutubeVideo(
+                            requireActivity().supportFragmentManager,
+                            viewModel.videoUrl,
+                            viewModel.getCurrentVideoTime(),
+                            blockId,
+                            viewModel.courseId
+                        )
+                    }
+                    binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
                 }
-                binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
                 youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
@@ -217,6 +230,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         isPlayerInitialized = false
         _youTubePlayer = null
         super.onDestroyView()
+        _binding = null
     }
 
     companion object {

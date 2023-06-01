@@ -33,7 +33,7 @@ internal val LocalShapes = staticCompositionLocalOf {
             large = RoundedCornerShape(0.dp)
         ),
         buttonShape = RoundedCornerShape(8.dp),
-        navigationButtonShape = RoundedCornerShape(21.dp),
+        navigationButtonShape = RoundedCornerShape(8.dp),
         textFieldShape = RoundedCornerShape(CornerSize(8.dp)),
         screenBackgroundShape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
         cardShape = RoundedCornerShape(12.dp),

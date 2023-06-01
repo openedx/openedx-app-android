@@ -194,8 +194,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     selectedColor = MaterialTheme.appColors.primary,
                     defaultColor = MaterialTheme.appColors.bottomSheetToggle,
                     selectedPage = index,
-                    defaultRadius = 5.dp,
-                    selectedLength = 7.dp,
+                    defaultRadius = 3.dp,
+                    selectedLength = 5.dp,
                     modifier = Modifier
                         .width(24.dp)
                         .padding(end = 6.dp)

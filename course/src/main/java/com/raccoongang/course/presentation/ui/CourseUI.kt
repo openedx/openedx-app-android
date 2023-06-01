@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -338,6 +340,10 @@ fun NavigationUnitsButtons(
         painterResource(id = com.raccoongang.core.R.drawable.core_ic_check)
     }
 
+    val nextButtonModifier = if (hasPrevBlock) {
+        Modifier
+    } else Modifier.fillMaxWidth(0.6f)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -345,39 +351,40 @@ fun NavigationUnitsButtons(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-
-        Button(
-            modifier = Modifier
-                .height(42.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.buttonSecondaryBackground
-            ),
-            elevation = null,
-            shape = MaterialTheme.appShapes.navigationButtonShape,
-            onClick = onPrevClick,
-            enabled = hasPrevBlock
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+        if (hasPrevBlock) {
+            OutlinedButton(
+                modifier = Modifier
+                    .height(42.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    backgroundColor = MaterialTheme.appColors.background
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
+                elevation = null,
+                shape = MaterialTheme.appShapes.navigationButtonShape,
+                onClick = onPrevClick,
             ) {
-                Text(
-                    text = stringResource(R.string.course_navigation_prev),
-                    color = MaterialTheme.appColors.buttonText,
-                    style = MaterialTheme.appTypography.labelLarge
-                )
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    painter = painterResource(id = com.raccoongang.core.R.drawable.core_ic_up),
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.buttonText
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.course_navigation_prev),
+                        color = MaterialTheme.appColors.primary,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        painter = painterResource(id = com.raccoongang.core.R.drawable.core_ic_up),
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.primary
+                    )
+                }
             }
+            Spacer(Modifier.width(16.dp))
         }
-        Spacer(Modifier.width(7.dp))
         Button(
             modifier = Modifier
-                .height(42.dp),
+                .height(42.dp).then(nextButtonModifier),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
             ),

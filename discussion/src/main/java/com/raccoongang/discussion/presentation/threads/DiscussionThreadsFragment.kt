@@ -540,8 +540,8 @@ private fun DiscussionThreadsScreen(
                                                             textAlign = TextAlign.Center
                                                         )
                                                         Spacer(Modifier.height(40.dp))
-                                                        NewEdxButton(
-                                                            width = Modifier
+                                                        NewEdxOutlinedButton(
+                                                            modifier = Modifier
                                                                 .widthIn(184.dp, Dp.Unspecified),
                                                             text = stringResource(id = discussionR.string.discussion_create_post),
                                                             onClick = {
@@ -551,15 +551,17 @@ private fun DiscussionThreadsScreen(
                                                                 Icon(
                                                                     painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
                                                                     contentDescription = null,
-                                                                    tint = MaterialTheme.appColors.buttonText
+                                                                    tint = MaterialTheme.appColors.primary
                                                                 )
                                                                 Spacer(modifier = Modifier.width(6.dp))
                                                                 Text(
                                                                     text = stringResource(id = discussionR.string.discussion_create_post),
-                                                                    color = MaterialTheme.appColors.buttonText,
+                                                                    color = MaterialTheme.appColors.primary,
                                                                     style = MaterialTheme.appTypography.labelLarge
                                                                 )
-                                                            }
+                                                            },
+                                                            borderColor = MaterialTheme.appColors.primary,
+                                                            textColor = MaterialTheme.appColors.primary
                                                         )
                                                     }
                                                 }
