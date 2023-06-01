@@ -133,7 +133,7 @@ private fun ChapterEndDialogScreen(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.course_section_finished, sectionName),
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldText,
                 style = MaterialTheme.appTypography.titleSmall,
                 textAlign = TextAlign.Center
             )
