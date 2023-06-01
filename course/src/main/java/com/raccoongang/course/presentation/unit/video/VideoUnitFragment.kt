@@ -80,11 +80,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 viewModel.markBlockCompleted(blockId)
             }
         }
-
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            super.onIsPlayingChanged(isPlaying)
-            viewModel.isVideoPaused = !isPlaying
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -242,7 +237,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             orientationListener?.enable()
         }
         exoPlayer?.addListener(exoPlayerListener)
-        exoPlayer?.playWhenReady = !viewModel.isVideoPaused
     }
 
     override fun onPause() {

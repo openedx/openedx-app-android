@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
@@ -55,24 +54,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     private var blockId = ""
 
     private var isPlayerInitialized = false
-
-    private val youtubeListener = object : AbstractYouTubePlayerListener() {
-        override fun onStateChange(
-            youTubePlayer: YouTubePlayer,
-            state: PlayerConstants.PlayerState,
-        ) {
-            super.onStateChange(youTubePlayer, state)
-            when(state) {
-                PlayerConstants.PlayerState.PLAYING -> {
-                    viewModel.isVideoPaused = false
-                }
-                PlayerConstants.PlayerState.PAUSED -> {
-                    viewModel.isVideoPaused = true
-                }
-                else -> {}
-            }
-        }
-    }
 
     private val youtubeTrackerListener = YouTubePlayerTracker()
 
@@ -203,7 +184,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
                 youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
-                youTubePlayer.addListener(youtubeListener)
                 youTubePlayer.addListener(youtubeTrackerListener)
             }
         }
@@ -225,15 +205,10 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         if (orientationListener?.canDetectOrientation() == true) {
             orientationListener?.enable()
         }
-        _youTubePlayer?.addListener(youtubeListener)
-        if (!viewModel.isVideoPaused) {
-            _youTubePlayer?.play()
-        }
     }
 
     override fun onPause() {
         super.onPause()
-        _youTubePlayer?.removeListener(youtubeListener)
         _youTubePlayer?.pause()
         orientationListener?.disable()
     }

@@ -104,7 +104,7 @@ private fun ChapterEndDialogScreen(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(0.95f)
             .clip(MaterialTheme.appShapes.courseImageShape),
         backgroundColor = MaterialTheme.appColors.background,
         shape = MaterialTheme.appShapes.courseImageShape

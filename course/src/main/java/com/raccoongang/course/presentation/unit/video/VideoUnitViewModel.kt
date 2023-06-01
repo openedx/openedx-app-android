@@ -35,8 +35,6 @@ class VideoUnitViewModel(
 
     var isDownloaded = false
 
-    var isVideoPaused = false
-
     private val _currentVideoTime = MutableLiveData<Long>(0)
     val currentVideoTime: LiveData<Long>
         get() = _currentVideoTime

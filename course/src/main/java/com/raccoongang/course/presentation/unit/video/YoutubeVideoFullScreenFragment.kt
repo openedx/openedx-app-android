@@ -113,7 +113,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                youTubePlayer.cueVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
                 youTubePlayer.addListener(youtubeTrackerListener)
 
             }
