@@ -69,6 +69,10 @@ class CourseUnitContainerViewModel(
         }
     }
 
+    init {
+        _indexInContainer.value = 0
+    }
+
     fun setupCurrentIndex(blockId: String) {
         blocks.forEachIndexed { index, block ->
             if (block.id == blockId) {
@@ -82,7 +86,6 @@ class CourseUnitContainerViewModel(
                     setNextVerticalIndex()
                 }
                 if (currentVerticalIndex != -1) {
-                    _indexInContainer.value = 0
                     _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
                 }
                 return
