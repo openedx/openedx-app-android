@@ -82,7 +82,8 @@ class CourseUnitContainerAdapter(
                     viewModel.courseId,
                     block.studentViewData?.topicId ?: "",
                     block.displayName,
-                    FragmentViewType.MAIN_CONTENT.name
+                    FragmentViewType.MAIN_CONTENT.name,
+                    block.id
                 )
             }
 

@@ -49,6 +49,8 @@ class DiscussionThreadsViewModel(
     private var lastOrderBy = ""
     private var filterType: String? = null
 
+    private var isBlockAlreadyCompleted = false
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -225,6 +227,23 @@ class DiscussionThreadsViewModel(
             }
             _isUpdating.value = false
             isLoading = false
+        }
+    }
+
+    fun markBlockCompleted(blockId: String) {
+        if (!isBlockAlreadyCompleted) {
+            viewModelScope.launch {
+                try {
+                    isBlockAlreadyCompleted = true
+                    interactor.markBlocksCompletion(
+                        courseId,
+                        listOf(blockId)
+                    )
+                } catch (e: Exception) {
+                    isBlockAlreadyCompleted = false
+                    e.printStackTrace()
+                }
+            }
         }
     }
 }

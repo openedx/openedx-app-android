@@ -86,4 +86,6 @@ class DiscussionInteractor(
         rawBody: String,
         follow: Boolean
     ) = repository.createThread(topicId, courseId, type, title, rawBody, follow)
+
+    suspend fun markBlocksCompletion(courseId: String, blocksId: List<String>) = repository.markBlocksCompletion(courseId, blocksId)
 }

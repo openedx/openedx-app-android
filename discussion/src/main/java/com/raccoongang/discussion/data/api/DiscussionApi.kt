@@ -1,5 +1,6 @@
 package com.raccoongang.discussion.data.api
 
+import com.raccoongang.core.data.model.BlocksCompletionBody
 import com.raccoongang.discussion.data.model.request.*
 import com.raccoongang.discussion.data.model.response.CommentResult
 import com.raccoongang.discussion.data.model.response.CommentsResponse
@@ -104,5 +105,11 @@ interface DiscussionApi {
 
     @POST("/api/discussion/v1/threads/")
     suspend fun createThread(@Body threadBody: ThreadBody) : ThreadsResponse.Thread
+
+    @POST("/api/completion/v1/completion-batch")
+    suspend fun markBlocksCompletion(
+        @Body
+        blocksCompletionBody: BlocksCompletionBody
+    )
 
 }

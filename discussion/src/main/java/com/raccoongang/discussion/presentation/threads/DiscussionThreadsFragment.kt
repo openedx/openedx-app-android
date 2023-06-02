@@ -67,6 +67,9 @@ class DiscussionThreadsFragment : Fragment() {
         lifecycle.addObserver(viewModel)
         viewType =
             FragmentViewType.valueOf(requireArguments().getString(ARG_FRAGMENT_VIEW_TYPE, ""))
+        if (viewType == FragmentViewType.MAIN_CONTENT) {
+            viewModel.markBlockCompleted(requireArguments().getString(ARG_BLOCK_ID, ""))
+        }
         viewModel.topicId = requireArguments().getString(ARG_TOPIC_ID, "")
     }
 
@@ -130,6 +133,7 @@ class DiscussionThreadsFragment : Fragment() {
     companion object {
         private const val ARG_THREAD_TYPE = "threadType"
         private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_TOPIC_ID = "topicId"
         private const val ARG_TITLE = "title"
         private const val ARG_FRAGMENT_VIEW_TYPE = "fragmentViewType"
@@ -139,7 +143,8 @@ class DiscussionThreadsFragment : Fragment() {
             courseId: String,
             topicId: String,
             title: String,
-            viewType: String
+            viewType: String,
+            blockId: String = ""
         ): DiscussionThreadsFragment {
             val fragment = DiscussionThreadsFragment()
             fragment.arguments = bundleOf(
@@ -147,7 +152,8 @@ class DiscussionThreadsFragment : Fragment() {
                 ARG_COURSE_ID to courseId,
                 ARG_TOPIC_ID to topicId,
                 ARG_TITLE to title,
-                ARG_FRAGMENT_VIEW_TYPE to viewType
+                ARG_FRAGMENT_VIEW_TYPE to viewType,
+                ARG_BLOCK_ID to blockId
             )
             return fragment
         }
