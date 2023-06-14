@@ -91,7 +91,7 @@ val screenModule = module {
     single { DiscussionRepository(get(), get()) }
     factory { DiscussionInteractor(get()) }
     viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), courseId) }
-    viewModel { (courseId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, threadType) }
+    viewModel { (courseId: String, topicId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, topicId, threadType) }
     viewModel { (thread: com.raccoongang.discussion.domain.model.Thread) -> DiscussionCommentsViewModel(get(), get(), get(), get(), thread) }
     viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), get(), comment) }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }

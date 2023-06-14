@@ -56,6 +56,7 @@ class DiscussionThreadsFragment : Fragment() {
     private val viewModel by viewModel<DiscussionThreadsViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_TOPIC_ID, ""),
             requireArguments().getString(ARG_THREAD_TYPE, "")
         )
     }
@@ -70,7 +71,6 @@ class DiscussionThreadsFragment : Fragment() {
         if (viewType == FragmentViewType.MAIN_CONTENT) {
             viewModel.markBlockCompleted(requireArguments().getString(ARG_BLOCK_ID, ""))
         }
-        viewModel.topicId = requireArguments().getString(ARG_TOPIC_ID, "")
     }
 
     override fun onCreateView(
@@ -457,6 +457,7 @@ private fun DiscussionThreadsScreen(
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
                                                             Text(
+                                                                modifier = Modifier.weight(1f),
                                                                 text = title,
                                                                 color = MaterialTheme.appColors.textPrimary,
                                                                 style = MaterialTheme.appTypography.titleLarge

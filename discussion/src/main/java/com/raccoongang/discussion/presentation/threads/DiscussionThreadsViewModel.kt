@@ -22,6 +22,7 @@ class DiscussionThreadsViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscussionNotifier,
     val courseId: String,
+    val topicId: String,
     private val threadType: String
 ) : BaseViewModel() {
 
@@ -44,8 +45,6 @@ class DiscussionThreadsViewModel(
     private val threadsList = mutableListOf<com.raccoongang.discussion.domain.model.Thread>()
     private var nextPage = 1
     private var isLoading = false
-
-    var topicId = ""
     private var lastOrderBy = ""
     private var filterType: String? = null
 
