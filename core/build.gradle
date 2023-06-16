@@ -133,7 +133,7 @@ dependencies {
     debugApi "androidx.compose.ui:ui-tooling:$compose_version"
     api "androidx.compose.ui:ui-tooling-preview:$compose_version"
     api "androidx.compose.material:material-icons-extended:$compose_version"
-    debugApi "androidx.customview:customview:1.2.0-alpha01"
+    debugApi "androidx.customview:customview:1.2.0-alpha02"
     debugApi "androidx.customview:customview-poolingcontainer:1.0.0"
 
     //Networking
