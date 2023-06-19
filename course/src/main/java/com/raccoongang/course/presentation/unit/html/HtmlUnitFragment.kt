@@ -73,7 +73,8 @@ class HtmlUnitFragment : Fragment() {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.White),
+                            .background(Color.White)
+                            .padding(bottom = 72.dp),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (hasInternetConnection) {
