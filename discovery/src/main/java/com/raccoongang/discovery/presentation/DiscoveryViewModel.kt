@@ -69,7 +69,7 @@ class DiscoveryViewModel(
                     page = -1
                     coursesList.addAll(cachedList)
                 }
-                _uiState.value = DiscoveryUIState.Courses(coursesList)
+                _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -112,7 +112,7 @@ class DiscoveryViewModel(
                 }
                 coursesList.clear()
                 coursesList.addAll(response.results)
-                _uiState.value = DiscoveryUIState.Courses(coursesList)
+                _uiState.value = DiscoveryUIState.Courses(ArrayList(coursesList))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

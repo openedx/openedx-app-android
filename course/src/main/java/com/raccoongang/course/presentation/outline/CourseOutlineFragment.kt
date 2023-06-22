@@ -41,9 +41,9 @@ import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appTypography
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.container.CourseContainerFragment
+import com.raccoongang.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
 import com.raccoongang.course.presentation.ui.CourseImageHeader
 import com.raccoongang.course.presentation.ui.CourseSectionCard
-import com.raccoongang.course.presentation.units.CourseUnitsFragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -111,15 +111,6 @@ class CourseOutlineFragment : Fragment() {
                                 sequential.displayName,
                                 CourseViewMode.FULL
                             )
-                            viewModel.resumeVerticalBlock?.let { vertical ->
-                                router.navigateToCourseUnits(
-                                    requireActivity().supportFragmentManager,
-                                    viewModel.courseId,
-                                    vertical.id,
-                                    vertical.displayName,
-                                    CourseViewMode.FULL
-                                )
-                            }
                         }
                     },
                     onBackClick = {
@@ -159,6 +150,15 @@ class CourseOutlineFragment : Fragment() {
                 ARG_TITLE to title
             )
             return fragment
+        }
+
+        fun getUnitBlockIcon(block: Block): Int {
+            return when (block.type) {
+                BlockType.VIDEO -> com.raccoongang.course.R.drawable.ic_course_video
+                BlockType.PROBLEM -> com.raccoongang.course.R.drawable.ic_course_pen
+                BlockType.DISCUSSION -> com.raccoongang.course.R.drawable.ic_course_discussion
+                else -> com.raccoongang.course.R.drawable.ic_course_block
+            }
         }
     }
 }
@@ -383,7 +383,7 @@ private fun ResumeCourse(
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
-                painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
+                painter = painterResource(id = getUnitBlockIcon(block)),
                 contentDescription = null,
                 tint = MaterialTheme.appColors.textPrimary
             )
@@ -436,7 +436,7 @@ private fun ResumeCourseTablet(
             ) {
                 Icon(
                     modifier = Modifier.size((MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
-                    painter = painterResource(id = CourseUnitsFragment.getUnitBlockIcon(block)),
+                    painter = painterResource(id = getUnitBlockIcon(block)),
                     contentDescription = null,
                     tint = MaterialTheme.appColors.textPrimary
                 )

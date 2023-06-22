@@ -22,7 +22,7 @@ class CourseRepository(
 
     suspend fun getCourseDetail(id: String): Course {
         val course = api.getCourseDetail(id)
-        courseDao.insertCourseEntity(CourseEntity.createFrom(course))
+        courseDao.updateCourseEntity(CourseEntity.createFrom(course))
         return course.mapToDomain()
     }
 

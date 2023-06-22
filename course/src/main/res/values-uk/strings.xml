@@ -14,9 +14,9 @@
     <string name="course_view_certificate">Переглянути сертифікат</string>
     <string name="course_you_can_get_certificate">Ви можете отримати сертифікат після проходження курсу (заробіть необхідну оцінку)</string>
     <string name="course_get_certificate">Отримати сертифікат</string>
-    <string name="course_navigation_prev">Попередній</string>
+    <string name="course_navigation_prev">Назад</string>
     <string name="course_navigation_prev_unit">Попередня одиниця</string>
-    <string name="course_navigation_next">Наступний</string>
+    <string name="course_navigation_next">Далі</string>
     <string name="course_navigation_next_unit">Наступна одиниця</string>
     <string name="course_navigation_finish">Завершити</string>
     <string name="course_video_rotate_for_fullscreen">Поверніть свій пристрій для перегляду цього відео на повний екран.</string>
@@ -30,7 +30,8 @@
     <string name="course_latest_news">Будьте в курсі останніх новин</string>
     <string name="course_good_work">Гарна робота!</string>
     <string name="course_section_finished">Секція \"%s\" завершена.</string>
-    <string name="course_back_to_outline">Повернутися до змісту</string>
+    <string name="course_next_section">Наступний розділ</string>
+    <string name="course_back_to_outline">Повернутись до модуля</string>
     <string name="course_you_cant_enroll">Ви не можете записатися на цей курс, оскільки термін запису вже минув.</string>
     <string name="course_not_started">Цей курс ще не розпочався.</string>
     <string name="course_access_expired">Ваш доступ до цього курсу закінчився.</string>
@@ -46,4 +47,5 @@
     <string name="course_subtitles">Субтитри</string>
     <string name="course_continue_with">Остання активність:</string>
     <string name="course_continue">Продовжити</string>
+    <string name="course_to_proceed">Щоб перейти до \"%s\", натисніть \"Наступний розділ\".</string>
 </resources>

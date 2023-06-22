@@ -19,7 +19,6 @@ import com.raccoongang.course.presentation.section.CourseSectionViewModel
 import com.raccoongang.course.presentation.unit.container.CourseUnitContainerViewModel
 import com.raccoongang.course.presentation.unit.video.VideoUnitViewModel
 import com.raccoongang.course.presentation.unit.video.VideoViewModel
-import com.raccoongang.course.presentation.units.CourseUnitsViewModel
 import com.raccoongang.course.presentation.videos.CourseVideoViewModel
 import com.raccoongang.dashboard.data.repository.DashboardRepository
 import com.raccoongang.dashboard.domain.interactor.DashboardInteractor
@@ -80,20 +79,19 @@ val screenModule = module {
     viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { CourseUnitsViewModel(get(), get(),get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), courseId) }
+    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
-    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
-    single { DiscussionRepository(get()) }
+    single { DiscussionRepository(get(), get()) }
     factory { DiscussionInteractor(get()) }
     viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), courseId) }
-    viewModel { (courseId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, threadType) }
+    viewModel { (courseId: String, topicId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, topicId, threadType) }
     viewModel { (thread: com.raccoongang.discussion.domain.model.Thread) -> DiscussionCommentsViewModel(get(), get(), get(), get(), thread) }
     viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), get(), comment) }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }

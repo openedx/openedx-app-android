@@ -22,6 +22,7 @@ class DiscussionThreadsViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscussionNotifier,
     val courseId: String,
+    val topicId: String,
     private val threadType: String
 ) : BaseViewModel() {
 
@@ -44,10 +45,10 @@ class DiscussionThreadsViewModel(
     private val threadsList = mutableListOf<com.raccoongang.discussion.domain.model.Thread>()
     private var nextPage = 1
     private var isLoading = false
-
-    var topicId = ""
     private var lastOrderBy = ""
     private var filterType: String? = null
+
+    private var isBlockAlreadyCompleted = false
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -68,6 +69,10 @@ class DiscussionThreadsViewModel(
                 }
             }
         }
+    }
+
+    init {
+        getThreadByType(SortType.LAST_ACTIVITY_AT.queryParam)
     }
 
     fun getThreadByType(orderBy: String) {
@@ -99,9 +104,11 @@ class DiscussionThreadsViewModel(
             DiscussionTopicsFragment.ALL_POSTS -> {
                 getAllThreads(orderBy)
             }
+
             DiscussionTopicsFragment.FOLLOWING_POSTS -> {
                 getFollowingThreads(orderBy)
             }
+
             DiscussionTopicsFragment.TOPIC -> {
                 getThreads(
                     topicId,
@@ -125,9 +132,11 @@ class DiscussionThreadsViewModel(
             DiscussionTopicsFragment.ALL_POSTS -> {
                 getAllThreads(lastOrderBy)
             }
+
             DiscussionTopicsFragment.FOLLOWING_POSTS -> {
                 getFollowingThreads(lastOrderBy)
             }
+
             DiscussionTopicsFragment.TOPIC -> {
                 getThreads(
                     topicId,
@@ -217,6 +226,23 @@ class DiscussionThreadsViewModel(
             }
             _isUpdating.value = false
             isLoading = false
+        }
+    }
+
+    fun markBlockCompleted(blockId: String) {
+        if (!isBlockAlreadyCompleted) {
+            viewModelScope.launch {
+                try {
+                    isBlockAlreadyCompleted = true
+                    interactor.markBlocksCompletion(
+                        courseId,
+                        listOf(blockId)
+                    )
+                } catch (e: Exception) {
+                    isBlockAlreadyCompleted = false
+                    e.printStackTrace()
+                }
+            }
         }
     }
 }

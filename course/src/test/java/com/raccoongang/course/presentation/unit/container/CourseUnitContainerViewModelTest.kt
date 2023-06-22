@@ -188,40 +188,6 @@ class CourseUnitContainerViewModelTest {
     }
 
     @Test
-    fun `prevVertical`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
-        every { interactor.getCourseStructureForVideos() } returns courseStructure
-
-        viewModel.loadBlocks(CourseViewMode.VIDEOS)
-        viewModel.setupCurrentIndex("id2")
-
-        advanceUntilIdle()
-
-        verify(exactly = 0) { interactor.getCourseStructureFromCache() }
-        verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(!viewModel.isLastIndexInContainer)
-        assert(viewModel.isFirstIndexInContainer)
-    }
-
-    @Test
-    fun `nextVertical null`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
-        every { interactor.getCourseStructureForVideos() } returns courseStructure
-
-        viewModel.loadBlocks(CourseViewMode.VIDEOS)
-        viewModel.setupCurrentIndex("id2")
-
-        advanceUntilIdle()
-
-        verify(exactly = 0) { interactor.getCourseStructureFromCache() }
-        verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(!viewModel.isLastIndexInContainer)
-        assert(viewModel.isFirstIndexInContainer)
-    }
-
-    @Test
     fun `getCurrentBlock test`() = runTest {
         val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
@@ -266,7 +232,7 @@ class CourseUnitContainerViewModelTest {
 
         verify(exactly = 0) { interactor.getCourseStructureFromCache() }
         verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(viewModel.moveToPrevBlock() != null)
+        assert(viewModel.moveToPrevBlock() == null)
     }
 
     @Test
@@ -299,24 +265,6 @@ class CourseUnitContainerViewModelTest {
         verify(exactly = 0) { interactor.getCourseStructureFromCache() }
         verify(exactly = 1) { interactor.getCourseStructureForVideos() }
         assert(viewModel.moveToNextBlock() != null)
-    }
-
-    @Test
-    fun `currentIndex equals 0`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
-        every { interactor.getCourseStructureForVideos() } returns courseStructure
-
-        viewModel.loadBlocks(CourseViewMode.VIDEOS)
-        viewModel.setupCurrentIndex("id")
-
-        advanceUntilIdle()
-
-        verify(exactly = 0) { interactor.getCourseStructureFromCache() }
-        verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(viewModel.currentIndex == 0)
-        assert(viewModel.currentVerticalIndex > 0)
-        assert(!viewModel.isFirstIndexInContainer)
     }
 
     @Test

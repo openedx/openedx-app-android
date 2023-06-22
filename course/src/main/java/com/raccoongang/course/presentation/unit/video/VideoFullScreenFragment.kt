@@ -65,7 +65,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         }
         binding.root.requestApplyInsetsWhenAttached()
         initPlayer()
-//        updateCurrentVideoTime()
     }
 
     private fun initPlayer() {
@@ -80,7 +79,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
             exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime.toLong())
             exoPlayer?.prepare()
-            exoPlayer?.playWhenReady = true
+            exoPlayer?.playWhenReady = false
 
             playerView.setFullscreenButtonClickListener { isFullScreen ->
                 requireActivity().supportFragmentManager.popBackStackImmediate()

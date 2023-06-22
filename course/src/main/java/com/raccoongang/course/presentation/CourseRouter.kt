@@ -21,14 +21,6 @@ interface CourseRouter {
         auditAccessExpires: Date?
     )
 
-    fun navigateToCourseUnits(
-        fm: FragmentManager,
-        courseId: String,
-        blockId: String,
-        courseName: String,
-        mode: CourseViewMode,
-    )
-
     fun navigateToCourseSubsections(
         fm: FragmentManager,
         courseId: String,
@@ -38,6 +30,14 @@ interface CourseRouter {
     )
 
     fun navigateToCourseContainer(
+        fm: FragmentManager,
+        blockId: String,
+        courseId: String,
+        courseName: String,
+        mode: CourseViewMode
+    )
+
+    fun replaceCourseContainer(
         fm: FragmentManager,
         blockId: String,
         courseId: String,

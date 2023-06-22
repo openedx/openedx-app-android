@@ -3,7 +3,7 @@ package com.raccoongang.course.presentation.container
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class CourseNavigationFragmentAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
+class CourseContainerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
 
     private val fragments = ArrayList<Fragment>()
 

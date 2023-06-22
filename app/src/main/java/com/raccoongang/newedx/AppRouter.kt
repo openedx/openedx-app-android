@@ -2,6 +2,7 @@ package com.raccoongang.newedx
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.raccoongang.auth.presentation.AuthRouter
 import com.raccoongang.auth.presentation.restore.RestorePasswordFragment
 import com.raccoongang.auth.presentation.signin.SignInFragment
@@ -21,7 +22,6 @@ import com.raccoongang.course.presentation.section.CourseSectionFragment
 import com.raccoongang.course.presentation.unit.container.CourseUnitContainerFragment
 import com.raccoongang.course.presentation.unit.video.VideoFullScreenFragment
 import com.raccoongang.course.presentation.unit.video.YoutubeVideoFullScreenFragment
-import com.raccoongang.course.presentation.units.CourseUnitsFragment
 import com.raccoongang.dashboard.presentation.DashboardRouter
 import com.raccoongang.discovery.presentation.DiscoveryRouter
 import com.raccoongang.discussion.domain.model.DiscussionComment
@@ -93,18 +93,6 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     //endregion
 
     //region CourseRouter
-    override fun navigateToCourseUnits(
-        fm: FragmentManager,
-        courseId: String,
-        blockId: String,
-        courseName: String,
-        mode: CourseViewMode,
-    ) {
-        replaceFragmentWithBackStack(
-            fm,
-            CourseUnitsFragment.newInstance(courseId, blockId, courseName, mode)
-        )
-    }
 
     override fun navigateToCourseSubsections(
         fm: FragmentManager,
@@ -129,6 +117,20 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(
             fm,
             CourseUnitContainerFragment.newInstance(blockId, courseId, courseName, mode)
+        )
+    }
+
+    override fun replaceCourseContainer(
+        fm: FragmentManager,
+        blockId: String,
+        courseId: String,
+        courseName: String,
+        mode: CourseViewMode
+    ) {
+        replaceFragment(
+            fm,
+            CourseUnitContainerFragment.newInstance(blockId, courseId, courseName, mode),
+            FragmentTransaction.TRANSIT_FRAGMENT_FADE
         )
     }
 
@@ -259,8 +261,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             .commit()
     }
 
-    private fun replaceFragment(fm: FragmentManager, fragment: Fragment) {
+    private fun replaceFragment(fm: FragmentManager, fragment: Fragment, transaction: Int = FragmentTransaction.TRANSIT_NONE) {
         fm.beginTransaction()
+            .setTransition(transaction)
             .replace(R.id.container, fragment, fragment.javaClass.simpleName)
             .commit()
     }

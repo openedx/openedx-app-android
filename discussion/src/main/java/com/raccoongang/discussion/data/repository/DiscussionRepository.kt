@@ -1,12 +1,17 @@
 package com.raccoongang.discussion.data.repository
 
+import com.raccoongang.core.data.model.BlocksCompletionBody
+import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.discussion.data.api.DiscussionApi
 import com.raccoongang.discussion.data.model.request.*
 import com.raccoongang.discussion.domain.model.CommentsData
 import com.raccoongang.discussion.domain.model.ThreadsData
 import com.raccoongang.discussion.domain.model.Topic
 
-class DiscussionRepository(private val api: DiscussionApi) {
+class DiscussionRepository(
+    private val api: DiscussionApi,
+    private val preferencesManager: PreferencesManager
+    ) {
 
     private val topics = mutableListOf<Topic>()
     private var currentCourseId = ""
@@ -112,5 +117,15 @@ class DiscussionRepository(private val api: DiscussionApi) {
         rawBody: String,
         follow: Boolean
     ) = api.createThread(ThreadBody(type, topicId, courseId, title, rawBody, follow)).mapToDomain()
+
+    suspend fun markBlocksCompletion(courseId: String, blocksId: List<String>) {
+        val username = preferencesManager.user?.username ?: ""
+        val blocksCompletionBody = BlocksCompletionBody(
+            username,
+            courseId,
+            blocksId.associateWith { "1" }.toMap()
+        )
+        return api.markBlocksCompletion(blocksCompletionBody)
+    }
 
 }

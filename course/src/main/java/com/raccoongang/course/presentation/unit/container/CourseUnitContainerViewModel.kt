@@ -1,14 +1,18 @@
 package com.raccoongang.course.presentation.unit.container
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.BlockType
 import com.raccoongang.core.domain.model.Block
+import com.raccoongang.core.extension.clearAndAddAll
+import com.raccoongang.core.extension.indexOfFirstFromIndex
 import com.raccoongang.core.module.db.DownloadModel
 import com.raccoongang.core.module.db.DownloadedState
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.notifier.CourseNotifier
-import com.raccoongang.core.system.notifier.CoursePauseVideo
+import com.raccoongang.core.system.notifier.CourseSectionChanged
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -27,20 +31,30 @@ class CourseUnitContainerViewModel(
         private set
     var currentVerticalIndex = 0
         private set
+    private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return blocks[currentVerticalIndex].descendants.first() == blocks[currentIndex].id
+            return descendants.first() == descendants[currentIndex]
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return blocks[currentVerticalIndex].descendants.last() == blocks[currentIndex].id
+            return descendants.last() == descendants[currentIndex]
         }
 
-    var prevButtonText: String? = null
+    private val _verticalBlockCounts = MutableLiveData<Int>()
+    val verticalBlockCounts: LiveData<Int>
+        get() = _verticalBlockCounts
+
+    private val _indexInContainer = MutableLiveData<Int>()
+    val indexInContainer: LiveData<Int>
+        get() = _indexInContainer
+
     var nextButtonText = ""
     var hasNextBlock = false
+
+    private val descendants = mutableListOf<String>()
 
     fun loadBlocks(mode: CourseViewMode) {
         try {
@@ -49,19 +63,55 @@ class CourseUnitContainerViewModel(
                 CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
             }
             val blocks = courseStructure.blockData
-            this.blocks.clear()
-            this.blocks.addAll(blocks)
+            this.blocks.clearAndAddAll(blocks)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
+    init {
+        _indexInContainer.value = 0
+    }
+
     fun setupCurrentIndex(blockId: String) {
         blocks.forEachIndexed { index, block ->
             if (block.id == blockId) {
-                currentIndex = index
-                updateVerticalIndex(blockId)
+                currentVerticalIndex = index
+                currentSectionIndex = blocks.indexOfFirst {
+                    it.descendants.contains(blocks[currentVerticalIndex].id)
+                }
+                if (block.descendants.isNotEmpty()) {
+                    descendants.clearAndAddAll(block.descendants)
+                } else {
+                    setNextVerticalIndex()
+                }
+                if (currentVerticalIndex != -1) {
+                    _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
+                }
                 return
+            }
+        }
+    }
+
+    private fun setNextVerticalIndex() {
+        currentVerticalIndex = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
+            it.type == BlockType.VERTICAL
+        }
+    }
+
+    fun proceedToNext() {
+        currentVerticalIndex = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
+            it.type == BlockType.VERTICAL
+        }
+        if (currentVerticalIndex != -1) {
+            val sectionIndex = blocks.indexOfFirst {
+                it.descendants.contains(blocks[currentVerticalIndex].id)
+            }
+            if (sectionIndex != currentSectionIndex) {
+                currentSectionIndex = sectionIndex
+                blocks.getOrNull(currentSectionIndex)?.id?.let {
+                    sendCourseSectionChanged(it)
+                }
             }
         }
     }
@@ -76,10 +126,12 @@ class CourseUnitContainerViewModel(
     }
 
     fun moveToNextBlock(): Block? {
-        for (i in currentIndex + 1 until blocks.size) {
-            val block = blocks[i]
+        for (i in currentIndex + 1 until descendants.size) {
+            val block = blocks.firstOrNull { descendants[i] == it.id }
             currentIndex = i
-            updateVerticalIndex(block.id)
+            if (currentVerticalIndex != -1) {
+                _indexInContainer.value = currentIndex
+            }
             return block
         }
         return null
@@ -87,22 +139,30 @@ class CourseUnitContainerViewModel(
 
     fun moveToPrevBlock(): Block? {
         for (i in currentIndex - 1 downTo 0) {
-            val block = blocks[i]
+            val block = blocks.firstOrNull { descendants[i] == it.id }
             currentIndex = i
-            updateVerticalIndex(block.id)
+            if (currentVerticalIndex != -1) {
+                _indexInContainer.value = currentIndex
+            }
             return block
         }
         return null
     }
 
-    fun sendEventPauseVideo() {
+    private fun sendCourseSectionChanged(blockId: String) {
         viewModelScope.launch {
-            notifier.send(CoursePauseVideo())
+            notifier.send(CourseSectionChanged(blockId))
         }
     }
 
-    private fun updateVerticalIndex(blockId: String) {
-        currentVerticalIndex =
-            blocks.indexOfFirst { it.type == BlockType.VERTICAL && it.descendants.contains(blockId) }
+    fun getCurrentVerticalBlock(): Block? = blocks.getOrNull(currentVerticalIndex)
+
+    fun getNextVerticalBlock(): Block? {
+        val index = blocks.indexOfFirstFromIndex(currentVerticalIndex) {
+            it.type == BlockType.VERTICAL
+        }
+        return blocks.getOrNull(index)
     }
+
+    fun getUnitBlocks(): List<Block> = blocks.filter { descendants.contains(it.id) }
 }

@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -19,6 +21,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
@@ -53,6 +56,7 @@ class DiscussionThreadsFragment : Fragment() {
     private val viewModel by viewModel<DiscussionThreadsViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_TOPIC_ID, ""),
             requireArguments().getString(ARG_THREAD_TYPE, "")
         )
     }
@@ -64,8 +68,9 @@ class DiscussionThreadsFragment : Fragment() {
         lifecycle.addObserver(viewModel)
         viewType =
             FragmentViewType.valueOf(requireArguments().getString(ARG_FRAGMENT_VIEW_TYPE, ""))
-        viewModel.topicId = requireArguments().getString(ARG_TOPIC_ID, "")
-        viewModel.getThreadByType(SortType.LAST_ACTIVITY_AT.queryParam)
+        if (viewType == FragmentViewType.MAIN_CONTENT) {
+            viewModel.markBlockCompleted(requireArguments().getString(ARG_BLOCK_ID, ""))
+        }
     }
 
     override fun onCreateView(
@@ -128,6 +133,7 @@ class DiscussionThreadsFragment : Fragment() {
     companion object {
         private const val ARG_THREAD_TYPE = "threadType"
         private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_TOPIC_ID = "topicId"
         private const val ARG_TITLE = "title"
         private const val ARG_FRAGMENT_VIEW_TYPE = "fragmentViewType"
@@ -137,7 +143,8 @@ class DiscussionThreadsFragment : Fragment() {
             courseId: String,
             topicId: String,
             title: String,
-            viewType: String
+            viewType: String,
+            blockId: String = ""
         ): DiscussionThreadsFragment {
             val fragment = DiscussionThreadsFragment()
             fragment.arguments = bundleOf(
@@ -145,7 +152,8 @@ class DiscussionThreadsFragment : Fragment() {
                 ARG_COURSE_ID to courseId,
                 ARG_TOPIC_ID to topicId,
                 ARG_TITLE to title,
-                ARG_FRAGMENT_VIEW_TYPE to viewType
+                ARG_FRAGMENT_VIEW_TYPE to viewType,
+                ARG_BLOCK_ID to blockId
             )
             return fragment
         }
@@ -299,6 +307,7 @@ private fun DiscussionThreadsScreen(
                                 filterType = item
                                 updatedFilter(filterType.second)
                             }
+
                             SortType.type -> {
                                 sortType = item
                                 updatedOrder(sortType.second)
@@ -433,70 +442,141 @@ private fun DiscussionThreadsScreen(
                                                 )
                                             }
                                             Divider()
-                                            LazyColumn(
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentPadding = listPadding,
-                                                state = scrollState
-                                            ) {
-                                                item {
+                                            if (uiState.data.isNotEmpty()) {
+                                                LazyColumn(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentPadding = listPadding,
+                                                    state = scrollState
+                                                ) {
+                                                    item {
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(vertical = 8.dp),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            Text(
+                                                                modifier = Modifier.weight(1f),
+                                                                text = title,
+                                                                color = MaterialTheme.appColors.textPrimary,
+                                                                style = MaterialTheme.appTypography.titleLarge
+                                                            )
+                                                            Box(
+                                                                Modifier
+                                                                    .size(40.dp)
+                                                                    .clip(CircleShape)
+                                                                    .background(MaterialTheme.appColors.primary)
+                                                                    .clickable {
+                                                                        onCreatePostClick()
+                                                                    },
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                Icon(
+                                                                    modifier = Modifier.size(16.dp),
+                                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
+                                                                    contentDescription = null,
+                                                                    tint = MaterialTheme.appColors.buttonText
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                    items(uiState.data) { threadItem ->
+                                                        ThreadItem(thread = threadItem, onClick = {
+                                                            onItemClick(it)
+                                                        })
+                                                        Divider()
+                                                    }
+                                                    item {
+                                                        if (canLoadMore) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(vertical = 16.dp),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                                            }
+                                                        }
+                                                    }
+                                                    if (scrollState.shouldLoadMore(
+                                                            firstVisibleIndex,
+                                                            4
+                                                        )
+                                                    ) {
+                                                        paginationCallback()
+                                                    }
+                                                }
+                                            } else {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.TopStart
+                                                ) {
                                                     Text(
-                                                        modifier = Modifier.padding(vertical = 8.dp),
+                                                        modifier = Modifier
+                                                            .padding(start = 24.dp, top = 32.dp),
                                                         text = title,
                                                         color = MaterialTheme.appColors.textPrimary,
                                                         style = MaterialTheme.appTypography.titleLarge
                                                     )
-                                                }
-                                                items(uiState.data) { threadItem ->
-                                                    ThreadItem(thread = threadItem, onClick = {
-                                                        onItemClick(it)
-                                                    })
-                                                    Divider()
-                                                }
-                                                item {
-                                                    if (canLoadMore) {
-                                                        Box(
+                                                    Column(
+                                                        modifier = Modifier.align(Alignment.Center),
+                                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                                        verticalArrangement = Arrangement.Center
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.size(100.dp),
+                                                            painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.appColors.textPrimary
+                                                        )
+                                                        Spacer(Modifier.height(36.dp))
+                                                        Text(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            text = stringResource(discussionR.string.discussion_no_yet),
+                                                            style = MaterialTheme.appTypography.titleLarge,
+                                                            color = MaterialTheme.appColors.textPrimary,
+                                                            textAlign = TextAlign.Center
+                                                        )
+                                                        Spacer(Modifier.height(12.dp))
+                                                        Text(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            text = stringResource(discussionR.string.discussion_click_button_create_discussion),
+                                                            style = MaterialTheme.appTypography.bodyLarge,
+                                                            color = MaterialTheme.appColors.textPrimary,
+                                                            textAlign = TextAlign.Center
+                                                        )
+                                                        Spacer(Modifier.height(40.dp))
+                                                        NewEdxOutlinedButton(
                                                             modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .padding(vertical = 16.dp),
-                                                            contentAlignment = Alignment.Center
-                                                        ) {
-                                                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                                        }
+                                                                .widthIn(184.dp, Dp.Unspecified),
+                                                            text = stringResource(id = discussionR.string.discussion_create_post),
+                                                            onClick = {
+                                                                onCreatePostClick()
+                                                            },
+                                                            content = {
+                                                                Icon(
+                                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
+                                                                    contentDescription = null,
+                                                                    tint = MaterialTheme.appColors.primary
+                                                                )
+                                                                Spacer(modifier = Modifier.width(6.dp))
+                                                                Text(
+                                                                    text = stringResource(id = discussionR.string.discussion_create_post),
+                                                                    color = MaterialTheme.appColors.primary,
+                                                                    style = MaterialTheme.appTypography.labelLarge
+                                                                )
+                                                            },
+                                                            borderColor = MaterialTheme.appColors.primary,
+                                                            textColor = MaterialTheme.appColors.primary
+                                                        )
                                                     }
-                                                }
-                                                if (scrollState.shouldLoadMore(
-                                                        firstVisibleIndex,
-                                                        4
-                                                    )
-                                                ) {
-                                                    paginationCallback()
                                                 }
                                             }
                                         }
-                                        NewEdxButton(
-                                            width = Modifier
-                                                .padding(bottom = 24.dp)
-                                                .widthIn(184.dp, Dp.Unspecified),
-                                            text = stringResource(id = discussionR.string.discussion_create_post),
-                                            onClick = {
-                                                onCreatePostClick()
-                                            },
-                                            content = {
-                                                Icon(
-                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.appColors.buttonText
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Text(
-                                                    text = stringResource(id = discussionR.string.discussion_create_post),
-                                                    color = MaterialTheme.appColors.buttonText,
-                                                    style = MaterialTheme.appTypography.labelLarge
-                                                )
-                                            }
-                                        )
                                     }
                                 }
+
                                 is DiscussionThreadsUIState.Loading -> {
                                     Box(
                                         Modifier

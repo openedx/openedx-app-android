@@ -19,6 +19,9 @@ class VideoViewModel(
     var videoUrl = ""
     var currentVideoTime = 0L
 
+    private var isBlockAlreadyCompleted = false
+
+
     fun sendTime() {
         if (currentVideoTime != C.TIME_UNSET) {
             viewModelScope.launch {
@@ -28,14 +31,18 @@ class VideoViewModel(
     }
 
     fun markBlockCompleted(blockId: String) {
-        viewModelScope.launch {
-            try {
-                courseRepository.markBlocksCompletion(
-                    courseId,
-                    listOf(blockId)
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
+        if (!isBlockAlreadyCompleted) {
+            viewModelScope.launch {
+                try {
+                    isBlockAlreadyCompleted = true
+                    courseRepository.markBlocksCompletion(
+                        courseId,
+                        listOf(blockId)
+                    )
+                } catch (e: Exception) {
+                    isBlockAlreadyCompleted = false
+                    e.printStackTrace()
+                }
             }
         }
     }

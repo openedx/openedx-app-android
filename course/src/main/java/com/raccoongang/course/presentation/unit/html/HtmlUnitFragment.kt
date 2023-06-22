@@ -31,7 +31,6 @@ import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.rememberWindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
-import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.windowSizeValue
 import com.raccoongang.core.utils.EmailUtil
 import com.raccoongang.course.presentation.ui.ConnectionErrorView
@@ -69,13 +68,13 @@ class HtmlUnitFragment : Fragment() {
                     mutableStateOf(networkConnection.isOnline())
                 }
                 Surface(
-                    shape = MaterialTheme.appShapes.screenBackgroundShape,
                     color = Color.White
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.White),
+                            .background(Color.White)
+                            .padding(bottom = 72.dp),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (hasInternetConnection) {

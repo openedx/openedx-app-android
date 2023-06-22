@@ -5,13 +5,34 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -19,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -39,11 +59,17 @@ import com.raccoongang.core.domain.model.BlockCounts
 import com.raccoongang.core.extension.serializable
 import com.raccoongang.core.module.db.DownloadedState
 import com.raccoongang.core.presentation.course.CourseViewMode
-import com.raccoongang.core.ui.*
+import com.raccoongang.core.ui.BackBtn
+import com.raccoongang.core.ui.HandleUIMessage
+import com.raccoongang.core.ui.WindowSize
+import com.raccoongang.core.ui.WindowType
+import com.raccoongang.core.ui.rememberWindowSize
+import com.raccoongang.core.ui.statusBarsInset
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
 import com.raccoongang.core.ui.theme.appShapes
 import com.raccoongang.core.ui.theme.appTypography
+import com.raccoongang.core.ui.windowSizeValue
 import com.raccoongang.course.R
 import com.raccoongang.course.presentation.CourseRouter
 import com.raccoongang.course.presentation.ui.CardArrow
@@ -91,13 +117,15 @@ class CourseSectionFragment : Fragment() {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
                     onItemClick = { block ->
-                        router.navigateToCourseUnits(
-                            requireActivity().supportFragmentManager,
-                            courseId = viewModel.courseId,
-                            blockId = block.id,
-                            courseName = block.displayName,
-                            mode = viewModel.mode
-                        )
+                        if (block.descendants.isNotEmpty()) {
+                            router.navigateToCourseContainer(
+                                requireActivity().supportFragmentManager,
+                                block.id,
+                                courseId = viewModel.courseId,
+                                courseName = block.displayName,
+                                mode = viewModel.mode
+                            )
+                        }
                     },
                     onDownloadClick = {
                         if (viewModel.isBlockDownloading(it.id)) {
@@ -224,6 +252,7 @@ private fun CourseSectionScreen(
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
+
                         is CourseSectionUIState.Blocks -> {
                             Column(Modifier.fillMaxSize()) {
                                 LazyColumn(

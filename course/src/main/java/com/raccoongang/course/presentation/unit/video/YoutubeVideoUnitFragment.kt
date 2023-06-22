@@ -1,8 +1,10 @@
 package com.raccoongang.course.presentation.unit.video
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.OrientationEventListener
 import android.view.View
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,16 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
 import com.raccoongang.core.extension.computeWindowSizeClasses
 import com.raccoongang.core.extension.objectToString
 import com.raccoongang.core.extension.stringToObject
 import com.raccoongang.core.presentation.dialog.SelectBottomDialogFragment
-import com.raccoongang.core.presentation.global.viewBinding
 import com.raccoongang.core.ui.WindowSize
 import com.raccoongang.core.ui.theme.NewEdxTheme
 import com.raccoongang.core.ui.theme.appColors
@@ -45,13 +46,18 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
-    private val binding by viewBinding(FragmentYoutubeVideoUnitBinding::bind)
+    private var _binding: FragmentYoutubeVideoUnitBinding? = null
+    private val binding get() = _binding!!
 
     private var windowSize: WindowSize? = null
     private var orientationListener: OrientationEventListener? = null
     private var _youTubePlayer: YouTubePlayer? = null
 
     private var blockId = ""
+
+    private var isPlayerInitialized = false
+
+    private val youtubeTrackerListener = YouTubePlayerTracker()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,10 +91,15 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 }
             }
         }
+    }
 
-        viewModel.isVideoPaused.observe(this) {
-            _youTubePlayer?.pause()
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentYoutubeVideoUnitBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -154,49 +165,46 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             .build()
 
         val listener = object : AbstractYouTubePlayerListener() {
-            override fun onStateChange(
-                youTubePlayer: YouTubePlayer,
-                state: PlayerConstants.PlayerState
-            ) {
-                super.onStateChange(youTubePlayer, state)
-                if (state == PlayerConstants.PlayerState.ENDED) {
-                    viewModel.markBlockCompleted(blockId)
-                }
-            }
-
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
+                val completePercentage = second / youtubeTrackerListener.videoDuration
+                if (completePercentage >= 0.8f) {
+                    viewModel.markBlockCompleted(blockId)
+                }
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
                 _youTubePlayer = youTubePlayer
-                val defPlayerUiController = DefaultPlayerUiController(
-                    binding.youtubePlayerView,
-                    youTubePlayer
-                )
-                defPlayerUiController.setFullScreenButtonClickListener {
-                    viewModel.fullscreenHandled = true
-                    router.navigateToFullScreenYoutubeVideo(
-                        requireActivity().supportFragmentManager,
-                        viewModel.videoUrl,
-                        viewModel.getCurrentVideoTime(),
-                        blockId,
-                        viewModel.courseId
+                if (_binding != null) {
+                    val defPlayerUiController = DefaultPlayerUiController(
+                        binding.youtubePlayerView,
+                        youTubePlayer
                     )
+                    defPlayerUiController.setFullScreenButtonClickListener {
+                        viewModel.fullscreenHandled = true
+                        router.navigateToFullScreenYoutubeVideo(
+                            requireActivity().supportFragmentManager,
+                            viewModel.videoUrl,
+                            viewModel.getCurrentVideoTime(),
+                            blockId,
+                            viewModel.courseId
+                        )
+                    }
+                    binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
                 }
-                binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.loadVideo(videoId, viewModel.getCurrentVideoTime().toFloat())
-                if (viewModel.isVideoPaused.value == true) {
-                    youTubePlayer.pause()
-                }
+                youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
+                youTubePlayer.addListener(youtubeTrackerListener)
             }
         }
 
-        binding.youtubePlayerView.initialize(listener, options)
+        if (!isPlayerInitialized) {
+            binding.youtubePlayerView.initialize(listener, options)
+            isPlayerInitialized = true
+        }
 
         viewModel.isPopUpViewShow.observe(viewLifecycleOwner) {
             if (windowSize?.isTablet != true) {
@@ -214,7 +222,15 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     override fun onPause() {
         super.onPause()
+        _youTubePlayer?.pause()
         orientationListener?.disable()
+    }
+
+    override fun onDestroyView() {
+        isPlayerInitialized = false
+        _youTubePlayer = null
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

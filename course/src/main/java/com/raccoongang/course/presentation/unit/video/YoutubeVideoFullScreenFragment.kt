@@ -13,6 +13,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstan
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
 import com.raccoongang.core.extension.requestApplyInsetsWhenAttached
 import com.raccoongang.core.presentation.global.WindowSizeHolder
@@ -33,6 +34,9 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
 
     private var blockId = ""
     private var isTabletDevice = false
+
+    private val youtubeTrackerListener = YouTubePlayerTracker()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +95,10 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.currentVideoTime = (second * 1000f).toLong()
+                val completePercentage = second / youtubeTrackerListener.videoDuration
+                if (completePercentage >= 0.8f) {
+                    viewModel.markBlockCompleted(blockId)
+                }
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
@@ -105,7 +113,8 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat())
+                youTubePlayer.cueVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                youTubePlayer.addListener(youtubeTrackerListener)
 
             }
 

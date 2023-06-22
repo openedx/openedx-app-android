@@ -33,7 +33,6 @@ class VideoUnitViewModelTest {
 
     private val courseRepository = mockk<CourseRepository>()
     private val notifier = mockk<CourseNotifier>()
-    private val preferencesManager = mockk<PreferencesManager>()
     private val networkConnection = mockk<NetworkConnection>()
     private val transcriptManager = mockk<TranscriptManager>()
 
@@ -53,7 +52,6 @@ class VideoUnitViewModelTest {
         val viewModel = VideoUnitViewModel(
             "",
             courseRepository,
-            preferencesManager,
             notifier,
             networkConnection,
             transcriptManager
@@ -80,7 +78,6 @@ class VideoUnitViewModelTest {
         val viewModel = VideoUnitViewModel(
             "",
             courseRepository,
-            preferencesManager,
             notifier,
             networkConnection,
             transcriptManager
@@ -107,7 +104,6 @@ class VideoUnitViewModelTest {
         val viewModel = VideoUnitViewModel(
             "",
             courseRepository,
-            preferencesManager,
             notifier,
             networkConnection,
             transcriptManager

@@ -6,11 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.AppDataConstants
 import com.raccoongang.core.BaseViewModel
-import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.module.TranscriptManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
-import com.raccoongang.core.system.notifier.CoursePauseVideo
 import com.raccoongang.core.system.notifier.CourseSubtitleLanguageChanged
 import com.raccoongang.core.system.notifier.CourseVideoPositionChanged
 import com.raccoongang.course.data.repository.CourseRepository
@@ -23,10 +21,9 @@ import subtitleFile.TimedTextObject
 class VideoUnitViewModel(
     val courseId: String,
     private val courseRepository: CourseRepository,
-    private val preferencesManager: PreferencesManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
-    private val transcriptManager: TranscriptManager
+    private val transcriptManager: TranscriptManager,
 ) : BaseViewModel() {
 
     var videoUrl = ""
@@ -34,13 +31,13 @@ class VideoUnitViewModel(
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
 
-    private val _currentVideoTime = MutableLiveData<Long>(0)
-    val currentVideoTime: LiveData<Long>
-        get() = _currentVideoTime
-
     var fullscreenHandled = false
 
     var isDownloaded = false
+
+    private val _currentVideoTime = MutableLiveData<Long>(0)
+    val currentVideoTime: LiveData<Long>
+        get() = _currentVideoTime
 
     private val _isUpdated = MutableLiveData(true)
     val isUpdated: LiveData<Boolean>
@@ -49,10 +46,6 @@ class VideoUnitViewModel(
     private val _isPopUpViewShow = MutableLiveData(true)
     val isPopUpViewShow: LiveData<Boolean>
         get() = _isPopUpViewShow
-
-    private val _isVideoPaused = MutableLiveData<Boolean>()
-    val isVideoPaused: LiveData<Boolean>
-        get() = _isVideoPaused
 
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex = _currentIndex.asStateFlow()
@@ -65,6 +58,8 @@ class VideoUnitViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    private var isBlockAlreadyCompleted = false
 
     init {
         viewModelScope.launch {
@@ -81,8 +76,6 @@ class VideoUnitViewModel(
                     _isUpdated.value = false
                     _currentVideoTime.value = it.videoTime
                     _isUpdated.value = true
-                } else if (it is CoursePauseVideo) {
-                    _isVideoPaused.value = true
                 } else if (it is CourseSubtitleLanguageChanged) {
                     transcriptLanguage = it.value
                     _transcriptObject.value = null
@@ -109,21 +102,25 @@ class VideoUnitViewModel(
         }
         if (transcripts.values.isNotEmpty()) {
             transcriptLanguage = transcripts.keys.toList().first()
-            return transcripts[transcriptLanguage]?:""
+            return transcripts[transcriptLanguage] ?: ""
         }
         return ""
     }
 
 
     fun markBlockCompleted(blockId: String) {
-        viewModelScope.launch {
-            try {
-                courseRepository.markBlocksCompletion(
-                    courseId,
-                    listOf(blockId)
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
+        if (!isBlockAlreadyCompleted) {
+            viewModelScope.launch {
+                try {
+                    isBlockAlreadyCompleted = true
+                    courseRepository.markBlocksCompletion(
+                        courseId,
+                        listOf(blockId)
+                    )
+                } catch (e: Exception) {
+                    isBlockAlreadyCompleted = false
+                    e.printStackTrace()
+                }
             }
         }
     }

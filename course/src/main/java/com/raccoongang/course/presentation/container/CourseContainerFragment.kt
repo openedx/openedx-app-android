@@ -28,7 +28,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private val router by inject<CourseRouter>()
 
 
-    private var adapter: CourseNavigationFragmentAdapter? = null
+    private var adapter: CourseContainerAdapter? = null
 
     private var courseTitle = ""
 
@@ -96,7 +96,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4
-        adapter = CourseNavigationFragmentAdapter(this).apply {
+        adapter = CourseContainerAdapter(this).apply {
             addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(CourseVideosFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId))
