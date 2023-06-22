@@ -12,6 +12,7 @@ import com.raccoongang.core.domain.model.CourseStructure
 import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.module.db.DownloadDao
+import com.raccoongang.core.module.db.DownloadModelEntity
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
@@ -120,6 +121,9 @@ class CourseVideoViewModelTest {
         isSelfPaced = false
     )
 
+    private val downloadModelEntity =
+        DownloadModelEntity("", "", 1, "", "", "VIDEO", "DOWNLOADED", null)
+
 
     @Before
     fun setUp() {
@@ -227,6 +231,8 @@ class CourseVideoViewModelTest {
             downloadDao,
             workerController
         )
+        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         viewModel.setIsUpdating()
         advanceUntilIdle()
 
@@ -245,6 +251,8 @@ class CourseVideoViewModelTest {
             downloadDao,
             workerController
         )
+        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
@@ -267,6 +275,8 @@ class CourseVideoViewModelTest {
             downloadDao,
             workerController
         )
+        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
@@ -292,6 +302,8 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
         every { networkConnection.isOnline() } returns false
+        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
 
         viewModel.saveDownloadModels("", "")

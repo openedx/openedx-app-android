@@ -17,6 +17,7 @@ import com.raccoongang.core.module.db.*
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.connection.NetworkConnection
+import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.course.domain.interactor.CourseInteractor
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -50,6 +51,7 @@ class CourseSectionViewModelTest {
     private val workerController = mockk<DownloadWorkerController>()
     private val networkConnection = mockk<NetworkConnection>()
     private val preferencesManager = mockk<PreferencesManager>()
+    private val notifier = mockk<CourseNotifier>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -159,6 +161,7 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
             ""
@@ -185,6 +188,7 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
             ""
@@ -211,6 +215,7 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
             ""
@@ -239,9 +244,10 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
-            "",
+            ""
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
@@ -260,9 +266,10 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
-            "",
+            ""
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
@@ -281,9 +288,10 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
-            "",
+            ""
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
@@ -305,9 +313,10 @@ class CourseSectionViewModelTest {
             resourceManager,
             networkConnection,
             preferencesManager,
+            notifier,
             workerController,
             downloadDao,
-            "",
+            ""
         )
 
         every { downloadDao.readAllData() } returns flow {
@@ -316,6 +325,7 @@ class CourseSectionViewModelTest {
                 emit(emptyList())
             }
         }
+        coEvery { notifier.notifier } returns flow {  }
         coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
 
