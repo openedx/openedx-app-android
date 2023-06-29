@@ -20,6 +20,7 @@ import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseSectionChanged
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
 
 class CourseSectionViewModel(
@@ -28,6 +29,7 @@ class CourseSectionViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: PreferencesManager,
     private val notifier: CourseNotifier,
+    private val analytics: CourseAnalytics,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
     val courseId: String
@@ -49,14 +51,19 @@ class CourseSectionViewModel(
             downloadModelsStatusFlow.collect { downloadModels ->
                 if (uiState.value is CourseSectionUIState.Blocks) {
                     val list = (uiState.value as CourseSectionUIState.Blocks).blocks
+                    val courseName = (uiState.value as CourseSectionUIState.Blocks).courseName
                     _uiState.value =
-                        CourseSectionUIState.Blocks(ArrayList(list), downloadModels.toMap())
+                        CourseSectionUIState.Blocks(
+                            ArrayList(list),
+                            downloadModels.toMap(),
+                            courseName
+                        )
                 }
             }
         }
 
         viewModelScope.launch {
-            notifier.notifier.collect{event ->
+            notifier.notifier.collect { event ->
                 if (event is CourseSectionChanged) {
                     getBlocks(event.blockId, mode)
                 }
@@ -76,8 +83,12 @@ class CourseSectionViewModel(
                 setBlocks(blocks)
                 val newList = getDescendantBlocks(blocks, blockId)
                 initDownloadModelsStatus()
-
-                _uiState.value = CourseSectionUIState.Blocks(ArrayList(newList), getDownloadModelsStatus())
+                _uiState.value =
+                    CourseSectionUIState.Blocks(
+                        ArrayList(newList),
+                        getDownloadModelsStatus(),
+                        courseStructure.name
+                    )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -121,5 +132,12 @@ class CourseSectionViewModel(
             } else continue
         }
         return resultList
+    }
+
+    fun verticalClickedEvent(blockId: String, blockName: String) {
+        val currentState = uiState.value
+        if (currentState is CourseSectionUIState.Blocks) {
+            analytics.verticalClickedEvent(courseId, currentState.courseName, blockId, blockName)
+        }
     }
 }

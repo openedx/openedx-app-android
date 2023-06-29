@@ -1,12 +1,12 @@
 package com.raccoongang.discovery.presentation
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.CourseList
 import com.raccoongang.core.domain.model.Pagination
 import com.raccoongang.core.system.ResourceManager
+import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.discovery.domain.interactor.DiscoveryInteractor
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -35,6 +35,7 @@ class DiscoveryViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscoveryInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
+    private val analytics = mockk<DiscoveryAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -53,7 +54,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList no internet connection`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws UnknownHostException()
         advanceUntilIdle()
@@ -69,7 +71,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList unknown exception`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws Exception()
         advanceUntilIdle()
@@ -85,7 +88,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList from cache`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getCoursesListFromCache() } returns emptyList()
         advanceUntilIdle()
@@ -100,7 +104,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList from network with next page`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
             Pagination(
@@ -122,7 +127,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList from network without next page`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
             Pagination(
@@ -145,7 +151,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData no internet connection`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
 
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws UnknownHostException()
@@ -163,7 +170,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData unknown exception`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
 
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws Exception()
@@ -181,7 +189,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData success with next page`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
 
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
@@ -205,7 +214,8 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData success without next page`() = runTest {
-        val viewModel = DiscoveryViewModel(networkConnection, interactor, resourceManager)
+        val viewModel =
+            DiscoveryViewModel(networkConnection, interactor, resourceManager, analytics)
         every { networkConnection.isOnline() } returns true
 
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(

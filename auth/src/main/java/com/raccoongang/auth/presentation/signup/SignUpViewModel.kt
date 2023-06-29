@@ -4,7 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.auth.domain.interactor.AuthInteractor
-import com.raccoongang.core.*
+import com.raccoongang.auth.presentation.AuthAnalytics
+import com.raccoongang.core.ApiConstants
+import com.raccoongang.core.BaseViewModel
+import com.raccoongang.core.R
+import com.raccoongang.core.SingleEventLiveData
+import com.raccoongang.core.UIMessage
 import com.raccoongang.core.domain.model.RegistrationField
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
@@ -12,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class SignUpViewModel(
     private val interactor: AuthInteractor,
-    private val resourceManager: ResourceManager
+    private val resourceManager: ResourceManager,
+    private val analytics: AuthAnalytics
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<SignUpUIState>(SignUpUIState.Loading)
@@ -64,6 +70,7 @@ class SignUpViewModel(
     }
 
     fun register(mapFields: Map<String, String>) {
+        analytics.createAccountClickedEvent("")
         val resultMap = mapFields.toMutableMap()
         optionalFields.forEach { (k, v) ->
             if (mapFields[k].isNullOrEmpty()) {
@@ -84,6 +91,7 @@ class SignUpViewModel(
                         resultMap.getValue(ApiConstants.EMAIL),
                         resultMap.getValue(ApiConstants.PASSWORD)
                     )
+                    analytics.registrationSuccessEvent("")
                     _successLogin.value = true
                 }
                 _isButtonLoading.value = false
@@ -117,4 +125,10 @@ class SignUpViewModel(
         )
     }
 
+}
+
+private enum class RegisterProvider(val keyName: String) {
+    GOOGLE("google-oauth2"),
+    AZURE("azuread-oauth2"),
+    FACEBOOK("facebook")
 }

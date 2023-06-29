@@ -19,6 +19,7 @@ import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -52,6 +53,7 @@ class CourseSectionViewModelTest {
     private val networkConnection = mockk<NetworkConnection>()
     private val preferencesManager = mockk<PreferencesManager>()
     private val notifier = mockk<CourseNotifier>()
+    private val analytics = mockk<CourseAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -162,6 +164,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -189,6 +192,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -216,6 +220,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -245,6 +250,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -267,6 +273,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -289,6 +296,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -314,6 +322,7 @@ class CourseSectionViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             workerController,
             downloadDao,
             ""
@@ -325,7 +334,7 @@ class CourseSectionViewModelTest {
                 emit(emptyList())
             }
         }
-        coEvery { notifier.notifier } returns flow {  }
+        coEvery { notifier.notifier } returns flow { }
         coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
         coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
 

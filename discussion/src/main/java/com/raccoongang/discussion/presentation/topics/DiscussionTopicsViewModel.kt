@@ -10,11 +10,16 @@ import com.raccoongang.core.UIMessage
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.discussion.domain.interactor.DiscussionInteractor
+import com.raccoongang.discussion.presentation.DiscussionAnalytics
+import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment.Companion.ALL_POSTS
+import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment.Companion.FOLLOWING_POSTS
+import com.raccoongang.discussion.presentation.topics.DiscussionTopicsFragment.Companion.TOPIC
 import kotlinx.coroutines.launch
 
 class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
+    private val analytics: DiscussionAnalytics,
     val courseId: String
 ) : BaseViewModel() {
 
@@ -29,6 +34,8 @@ class DiscussionTopicsViewModel(
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
+
+    var courseName = ""
 
     fun updateCourseTopics() {
         viewModelScope.launch {
@@ -67,6 +74,22 @@ class DiscussionTopicsViewModel(
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
+            }
+        }
+    }
+
+    fun discussionClickedEvent(action: String, data: String, title: String) {
+        when (action) {
+            ALL_POSTS -> {
+                analytics.discussionAllPostsClickedEvent(courseId, courseName)
+            }
+
+            FOLLOWING_POSTS -> {
+                analytics.discussionFollowingClickedEvent(courseId, courseName)
+            }
+
+            TOPIC -> {
+                analytics.discussionTopicClickedEvent(courseId, courseName, data, title)
             }
         }
     }

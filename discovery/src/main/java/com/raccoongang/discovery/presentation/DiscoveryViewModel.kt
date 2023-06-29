@@ -15,6 +15,7 @@ class DiscoveryViewModel(
     private val networkConnection: NetworkConnection,
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
+    private val analytics: DiscoveryAnalytics
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
@@ -133,5 +134,13 @@ class DiscoveryViewModel(
         if (!isLoading && page != -1) {
             loadCoursesInternal()
         }
+    }
+
+    fun discoverySearchBarClickedEvent() {
+        analytics.discoverySearchBarClickedEvent()
+    }
+
+    fun discoveryCourseClicked(courseId: String, courseName: String) {
+        analytics.discoveryCourseClickedEvent(courseId, courseName)
     }
 }

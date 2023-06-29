@@ -148,6 +148,7 @@ class EditProfileFragment : Fragment() {
                         }
                     },
                     onSaveClick = { fields ->
+                        viewModel.profileEditDoneClickedEvent()
                         if (selectedImageUri == null) {
                             viewModel.updateAccount(fields)
                         } else {
@@ -173,6 +174,7 @@ class EditProfileFragment : Fragment() {
                         viewModel.setShowLeaveDialog(false)
                     },
                     onDeleteClick = {
+                        viewModel.profileDeleteAccountClickedEvent()
                         router.navigateToDeleteAccount(
                             requireActivity().supportFragmentManager
                         )

@@ -64,6 +64,7 @@ class DiscoveryFragment : Fragment() {
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     onSearchClick = {
+                        viewModel.discoverySearchBarClickedEvent()
                         router.navigateToCourseSearch(
                             requireActivity().supportFragmentManager
                         )
@@ -77,10 +78,11 @@ class DiscoveryFragment : Fragment() {
                     onReloadClick = {
                         viewModel.getCoursesList()
                     },
-                    onItemClick = { courseId ->
+                    onItemClick = { course ->
+                        viewModel.discoveryCourseClicked(course.id, course.name)
                         router.navigateToCourseDetail(
                             requireParentFragment().parentFragmentManager,
-                            courseId
+                            course.id
                         )
                     })
             }
@@ -102,7 +104,7 @@ internal fun DiscoveryScreen(
     onSwipeRefresh: () -> Unit,
     onReloadClick: () -> Unit,
     paginationCallback: () -> Unit,
-    onItemClick: (String) -> Unit
+    onItemClick: (Course) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -202,6 +204,7 @@ internal fun DiscoveryScreen(
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
+
                         is DiscoveryUIState.Courses -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -235,7 +238,7 @@ internal fun DiscoveryScreen(
                                             course,
                                             windowSize = windowSize,
                                             onClick = { courseId ->
-                                                onItemClick(courseId)
+                                                onItemClick(course)
                                             })
                                         Divider()
                                     }

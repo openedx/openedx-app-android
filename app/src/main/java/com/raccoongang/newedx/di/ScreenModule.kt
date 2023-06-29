@@ -49,14 +49,14 @@ import org.koin.dsl.module
 
 val screenModule = module {
 
-    viewModel { AppViewModel(get(), get(), get(), get(named("IODispatcher"))) }
+    viewModel { AppViewModel(get(), get(), get(), get(named("IODispatcher")), get()) }
 
     factory { AuthRepository(get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
-    viewModel { SignInViewModel(get(), get(), get()) }
-    viewModel { SignUpViewModel(get(), get()) }
-    viewModel { RestorePasswordViewModel(get(), get()) }
+    viewModel { SignInViewModel(get(), get(), get(), get()) }
+    viewModel { SignUpViewModel(get(), get(), get()) }
+    viewModel { RestorePasswordViewModel(get(), get(), get()) }
 
     factory { DashboardRepository(get(), get(),get()) }
     factory { DashboardInteractor(get()) }
@@ -64,33 +64,33 @@ val screenModule = module {
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get()) }
+    viewModel { DiscoveryViewModel(get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get()) }
     factory { ProfileInteractor(get()) }
-    viewModel { ProfileViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get(), get()) }
-    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), account) }
+    viewModel { ProfileViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get(), get(), get()) }
+    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get()) }
     viewModel { VideoQualityViewModel(get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get()) }
 
     single { CourseRepository(get(), get(), get(),get()) }
     factory { CourseInteractor(get()) }
-    viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), courseId) }
-    viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), courseId) }
+    viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), courseId) }
+    viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
-    viewModel { CourseSearchViewModel(get(), get()) }
+    viewModel { CourseSearchViewModel(get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
     single { DiscussionRepository(get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), courseId) }
+    viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String, topicId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, topicId, threadType) }
     viewModel { (thread: com.raccoongang.discussion.domain.model.Thread) -> DiscussionCommentsViewModel(get(), get(), get(), get(), thread) }
     viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), get(), comment) }

@@ -56,6 +56,7 @@ class DiscussionTopicsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.courseName = requireArguments().getString(ARG_COURSE_NAME, "")
         viewModel.getCourseTopics()
     }
 
@@ -81,6 +82,7 @@ class DiscussionTopicsFragment : Fragment() {
                         viewModel.updateCourseTopics()
                     },
                     onItemClick = { action, data, title ->
+                        viewModel.discussionClickedEvent(action, data, title)
                         router.navigateToDiscussionThread(
                             requireActivity().supportFragmentManager,
                             action,
@@ -110,12 +112,15 @@ class DiscussionTopicsFragment : Fragment() {
         const val FOLLOWING_POSTS = "Following"
 
         private const val ARG_COURSE_ID = "argCourseID"
+        private const val ARG_COURSE_NAME = "argCourseName"
         fun newInstance(
-            courseId: String
+            courseId: String,
+            courseName: String
         ): DiscussionTopicsFragment {
             val fragment = DiscussionTopicsFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_COURSE_NAME to courseName,
             )
             return fragment
         }
@@ -311,6 +316,7 @@ private fun DiscussionTopicsScreen(
                                         }
                                     }
                                 }
+
                                 DiscussionTopicsUIState.Loading -> {
                                     Box(
                                         Modifier

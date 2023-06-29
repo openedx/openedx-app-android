@@ -9,6 +9,7 @@ import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -33,6 +34,7 @@ class CourseUnitContainerViewModelTest {
 
     private val interactor = mockk<CourseInteractor>()
     private val notifier = mockk<CourseNotifier>()
+    private val analytics = mockk<CourseAnalytics>()
 
     private val blocks = listOf(
         Block(
@@ -121,7 +123,7 @@ class CourseUnitContainerViewModelTest {
         certificate = null,
         isSelfPaced = false
     )
-    
+
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
@@ -134,7 +136,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `getBlocks no internet connection exception`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
 
         every { interactor.getCourseStructureFromCache() } throws UnknownHostException()
         every { interactor.getCourseStructureForVideos() } throws UnknownHostException()
@@ -147,7 +149,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `getBlocks unknown exception`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
 
         every { interactor.getCourseStructureFromCache() } throws UnknownHostException()
         every { interactor.getCourseStructureForVideos() } throws UnknownHostException()
@@ -160,7 +162,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `getBlocks unknown success`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
 
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
@@ -175,7 +177,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `setupCurrentIndex`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 
@@ -189,7 +191,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `getCurrentBlock test`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 
@@ -205,7 +207,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `moveToPrevBlock null`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 
@@ -221,7 +223,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `moveToPrevBlock not null`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 
@@ -237,7 +239,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `moveToNextBlock null`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 
@@ -253,7 +255,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `moveToNextBlock not null`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 
@@ -269,7 +271,7 @@ class CourseUnitContainerViewModelTest {
 
     @Test
     fun `currentIndex isLastIndex`() = runTest {
-        val viewModel = CourseUnitContainerViewModel(interactor, notifier, "")
+        val viewModel = CourseUnitContainerViewModel(interactor, notifier, analytics, "")
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { interactor.getCourseStructureForVideos() } returns courseStructure
 

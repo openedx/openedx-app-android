@@ -14,6 +14,7 @@ import com.raccoongang.core.presentation.course.CourseViewMode
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseSectionChanged
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -22,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
+    private val analytics: CourseAnalytics,
     val courseId: String
 ) : BaseViewModel() {
 
@@ -53,6 +55,7 @@ class CourseUnitContainerViewModel(
 
     var nextButtonText = ""
     var hasNextBlock = false
+    private var courseName = ""
 
     private val descendants = mutableListOf<String>()
 
@@ -63,6 +66,7 @@ class CourseUnitContainerViewModel(
                 CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
             }
             val blocks = courseStructure.blockData
+            courseName = courseStructure.name
             this.blocks.clearAndAddAll(blocks)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -165,4 +169,24 @@ class CourseUnitContainerViewModel(
     }
 
     fun getUnitBlocks(): List<Block> = blocks.filter { descendants.contains(it.id) }
+
+    fun nextBlockClickedEvent(blockId: String, blockName: String) {
+        analytics.nextBlockClickedEvent(courseId, courseName, blockId, blockName)
+    }
+
+    fun prevBlockClickedEvent(blockId: String, blockName: String) {
+        analytics.prevBlockClickedEvent(courseId, courseName, blockId, blockName)
+    }
+
+    fun finishVerticalClickedEvent(blockId: String, blockName: String) {
+        analytics.finishVerticalClickedEvent(courseId, courseName, blockId, blockName)
+    }
+
+    fun finishVerticalNextClickedEvent(blockId: String, blockName: String) {
+        analytics.finishVerticalNextClickedEvent(courseId, courseName, blockId, blockName)
+    }
+
+    fun finishVerticalBackClickedEvent() {
+        analytics.finishVerticalBackClickedEvent(courseId, courseName)
+    }
 }

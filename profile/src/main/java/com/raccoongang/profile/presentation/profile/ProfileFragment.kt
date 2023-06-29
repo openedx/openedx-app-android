@@ -89,18 +89,27 @@ class ProfileFragment : Fragment() {
                         viewModel.logout()
                     },
                     editAccountClicked = {
+                        viewModel.profileEditClickedEvent()
                         router.navigateToEditProfile(
                             requireParentFragment().parentFragmentManager,
                             it
                         )
                     },
                     onSwipeRefresh = {
-                         viewModel.updateAccount()
+                        viewModel.updateAccount()
                     },
                     onVideoSettingsClick = {
+                        viewModel.profileVideoSettingsClickedEvent()
                         router.navigateToVideoSettings(
                             requireParentFragment().parentFragmentManager
                         )
+                    },
+                    onSupportClick = { action ->
+                        when (action) {
+                            SupportClickAction.SUPPORT -> viewModel.emailSupportClickedEvent()
+                            SupportClickAction.COOKIE_POLICY -> viewModel.cookiePolicyClickedEvent()
+                            SupportClickAction.PRIVACY_POLICY -> viewModel.privacyPolicyClickedEvent()
+                        }
                     }
                 )
 
@@ -112,6 +121,10 @@ class ProfileFragment : Fragment() {
             }
         }
     }
+}
+
+private enum class SupportClickAction {
+    SUPPORT, PRIVACY_POLICY, COOKIE_POLICY
 }
 
 
@@ -126,6 +139,7 @@ private fun ProfileScreen(
     onVideoSettingsClick: () -> Unit,
     logout: () -> Unit,
     onSwipeRefresh: () -> Unit,
+    onSupportClick: (SupportClickAction) -> Unit,
     editAccountClicked: (Account) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -230,6 +244,7 @@ private fun ProfileScreen(
                                     CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
+
                             is ProfileUIState.Data -> {
                                 Column(
                                     Modifier
@@ -283,7 +298,7 @@ private fun ProfileScreen(
 
                                         Spacer(modifier = Modifier.height(24.dp))
 
-                                        SupportInfoSection(appData)
+                                        SupportInfoSection(appData, onClick = onSupportClick)
 
                                         Spacer(modifier = Modifier.height(24.dp))
 
@@ -412,7 +427,10 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 }
 
 @Composable
-private fun SupportInfoSection(appData: AppData) {
+private fun SupportInfoSection(
+    appData: AppData,
+    onClick: (SupportClickAction) -> Unit
+) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     Column {
@@ -437,6 +455,7 @@ private fun SupportInfoSection(appData: AppData) {
                 ProfileInfoItem(
                     text = stringResource(id = com.raccoongang.profile.R.string.profile_contact_support),
                     onClick = {
+                        onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
                             context,
                             context.getString(R.string.core_email_subject),
@@ -448,6 +467,7 @@ private fun SupportInfoSection(appData: AppData) {
                 ProfileInfoItem(
                     text = stringResource(id = R.string.core_terms_of_use),
                     onClick = {
+                        onClick(SupportClickAction.COOKIE_POLICY)
                         uriHandler.openUri(context.getString(R.string.terms_of_service_link))
                     }
                 )
@@ -455,6 +475,7 @@ private fun SupportInfoSection(appData: AppData) {
                 ProfileInfoItem(
                     text = stringResource(id = R.string.core_privacy_policy),
                     onClick = {
+                        onClick(SupportClickAction.PRIVACY_POLICY)
                         uriHandler.openUri(context.getString(R.string.privacy_policy_link))
                     }
                 )
@@ -602,6 +623,7 @@ private fun ProfileScreenPreview() {
             onSwipeRefresh = {},
             editAccountClicked = {},
             onVideoSettingsClick = {},
+            onSupportClick = {},
             appData = AppData("1")
         )
     }
@@ -622,6 +644,7 @@ private fun ProfileScreenTabletPreview() {
             onSwipeRefresh = {},
             editAccountClicked = {},
             onVideoSettingsClick = {},
+            onSupportClick = {},
             appData = AppData("1")
         )
     }

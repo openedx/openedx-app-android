@@ -88,6 +88,7 @@ class DashboardFragment : Fragment() {
                         viewModel.getCourses()
                     },
                     onItemClick = {
+
                         router.navigateToCourseOutline(
                             requireParentFragment().parentFragmentManager,
                             it.course.id,
@@ -207,6 +208,7 @@ internal fun MyCoursesScreen(
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
+
                         is DashboardUIState.Courses -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -259,6 +261,7 @@ internal fun MyCoursesScreen(
                                 }
                             }
                         }
+
                         is DashboardUIState.Empty -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),

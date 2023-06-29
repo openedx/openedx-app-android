@@ -4,16 +4,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.core.BaseViewModel
-import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.R
 import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.domain.model.CoursewareAccess
 import com.raccoongang.core.exception.NoCachedDataException
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
+import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseStructureUpdated
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
 
 class CourseContainerViewModel(
@@ -21,7 +22,8 @@ class CourseContainerViewModel(
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
-    private val networkConnection: NetworkConnection
+    private val networkConnection: NetworkConnection,
+    private val analytics: CourseAnalytics
 ) : BaseViewModel() {
 
     private val _dataReady = MutableLiveData<CoursewareAccess>()
@@ -35,6 +37,8 @@ class CourseContainerViewModel(
     private val _showProgress = MutableLiveData<Boolean>()
     val showProgress: LiveData<Boolean>
         get() = _showProgress
+
+    private var courseName = ""
 
     fun preloadCourseStructure() {
         if (_dataReady.value != null) {
@@ -50,6 +54,7 @@ class CourseContainerViewModel(
                     interactor.preloadCourseStructureFromCache(courseId)
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
+                courseName = courseStructure.name
                 _dataReady.value = courseStructure.coursewareAccess
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
@@ -83,5 +88,20 @@ class CourseContainerViewModel(
         }
     }
 
+    fun courseTabClickedEvent() {
+        analytics.courseTabClickedEvent(courseId, courseName)
+    }
+
+    fun videoTabClickedEvent() {
+        analytics.videoTabClickedEvent(courseId, courseName)
+    }
+
+    fun discussionTabClickedEvent() {
+        analytics.discussionTabClickedEvent(courseId, courseName)
+    }
+
+    fun handoutsTabClickedEvent() {
+        analytics.handoutsTabClickedEvent(courseId, courseName)
+    }
 
 }

@@ -49,10 +49,25 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
         binding.bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.outline -> binding.viewPager.setCurrentItem(0, false)
-                R.id.videos -> binding.viewPager.setCurrentItem(1, false)
-                R.id.discussions -> binding.viewPager.setCurrentItem(2, false)
-                R.id.resources -> binding.viewPager.setCurrentItem(3, false)
+                R.id.outline -> {
+                    viewModel.courseTabClickedEvent()
+                    binding.viewPager.setCurrentItem(0, false)
+                }
+
+                R.id.videos -> {
+                    viewModel.videoTabClickedEvent()
+                    binding.viewPager.setCurrentItem(1, false)
+                }
+
+                R.id.discussions -> {
+                    viewModel.discussionTabClickedEvent()
+                    binding.viewPager.setCurrentItem(2, false)
+                }
+
+                R.id.resources -> {
+                    viewModel.handoutsTabClickedEvent()
+                    binding.viewPager.setCurrentItem(3, false)
+                }
             }
             true
         }
@@ -99,7 +114,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         adapter = CourseContainerAdapter(this).apply {
             addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(CourseVideosFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId))
+            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(HandoutsFragment.newInstance(viewModel.courseId))
         }
         binding.viewPager.adapter = adapter

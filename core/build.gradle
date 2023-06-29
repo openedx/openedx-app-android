@@ -39,9 +39,14 @@ android {
             def envMap = config.environments.find { it.key == "PROD" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
+            def firebase = envMap.value.FIREBASE
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
+            buildConfigField "String", "FIREBASE_APPLICATION_ID", "\"${firebase.APPLICATION_ID}\""
+            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
+            resValue "string", "google_app_id", firebase.APPLICATION_ID
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
@@ -53,9 +58,13 @@ android {
             def envMap = config.environments.find { it.key == "DEV" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
+            def firebase = envMap.value.FIREBASE
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
+            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
+            resValue "string", "google_app_id", firebase.APPLICATION_ID
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
@@ -67,9 +76,14 @@ android {
             def envMap = config.environments.find { it.key == "STAGE" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
+            def firebase = envMap.value.FIREBASE
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
+            buildConfigField "String", "FIREBASE_APPLICATION_ID", "\"${firebase.APPLICATION_ID}\""
+            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
+            resValue "string", "google_app_id", firebase.APPLICATION_ID
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
@@ -156,6 +170,12 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
 
     api "androidx.work:work-runtime-ktx:$work_version"
+
+    api 'com.google.firebase:firebase-common-ktx:20.3.3'
+    api platform('com.google.firebase:firebase-bom:32.1.0')
+    api 'com.google.android.gms:play-services-measurement-api:21.3.0'
+    api "com.google.firebase:firebase-crashlytics-ktx"
+    api "com.google.firebase:firebase-analytics-ktx"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.raccoongang.auth.R
 import com.raccoongang.auth.domain.interactor.AuthInteractor
+import com.raccoongang.auth.presentation.AuthAnalytics
 import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
@@ -19,6 +20,7 @@ class SignInViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val validator: Validator,
+    private val analytics: AuthAnalytics
 ) : BaseViewModel() {
 
     private val _showProgress = MutableLiveData<Boolean>()
@@ -50,6 +52,7 @@ class SignInViewModel(
             try {
                 interactor.login(username, password)
                 _loginSuccess.value = true
+                analytics.userLoginEvent(LoginMethod.PASSWORD.methodName)
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =
@@ -65,5 +68,20 @@ class SignInViewModel(
             _showProgress.value = false
         }
     }
+
+    fun signUpClickedEvent() {
+        analytics.signUpClickedEvent()
+    }
+
+    fun forgotPasswordClickedEvent() {
+        analytics.forgotPasswordClickedEvent()
+    }
+}
+
+private enum class LoginMethod(val methodName: String) {
+    PASSWORD("Password"),
+    FACEBOOK("Facebook"),
+    GOOGLE("Google"),
+    MICROSOFT("Microsoft")
 }
 

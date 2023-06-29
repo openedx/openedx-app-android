@@ -99,6 +99,7 @@ class CourseDetailsFragment : Fragment() {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
                             if (currentState.course.isEnrolled) {
+                                viewModel.viewCourseClickedEvent(currentState.course.courseId, currentState.course.name)
                                 router.navigateToCourseOutline(
                                     requireActivity().supportFragmentManager,
                                     currentState.course.courseId,

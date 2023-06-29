@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.raccoongang.auth.presentation.AuthAnalytics
 import com.raccoongang.auth.presentation.AuthRouter
 import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.module.DownloadWorkerController
@@ -13,15 +14,22 @@ import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
+import com.raccoongang.course.presentation.CourseAnalytics
 import com.raccoongang.course.presentation.CourseRouter
+import com.raccoongang.dashboard.presentation.DashboardAnalytics
 import com.raccoongang.dashboard.presentation.DashboardRouter
+import com.raccoongang.discovery.presentation.DiscoveryAnalytics
 import com.raccoongang.discovery.presentation.DiscoveryRouter
+import com.raccoongang.discussion.presentation.DiscussionAnalytics
 import com.raccoongang.discussion.presentation.DiscussionRouter
 import com.raccoongang.discussion.system.notifier.DiscussionNotifier
+import com.raccoongang.newedx.AnalyticsManager
+import com.raccoongang.newedx.AppAnalytics
 import com.raccoongang.newedx.AppRouter
 import com.raccoongang.newedx.room.AppDatabase
 import com.raccoongang.newedx.room.DATABASE_NAME
 import com.raccoongang.newedx.system.notifier.AppNotifier
+import com.raccoongang.profile.presentation.ProfileAnalytics
 import com.raccoongang.profile.presentation.ProfileRouter
 import com.raccoongang.profile.system.notifier.ProfileNotifier
 import kotlinx.coroutines.Dispatchers
@@ -102,4 +110,13 @@ val appModule = module {
     }
 
     single { TranscriptManager(get()) }
+
+    single { AnalyticsManager(get()) }
+    single<DashboardAnalytics> { get<AnalyticsManager>() }
+    single<AuthAnalytics> { get<AnalyticsManager>() }
+    single<AppAnalytics> { get<AnalyticsManager>() }
+    single<DiscoveryAnalytics> { get<AnalyticsManager>() }
+    single<ProfileAnalytics> { get<AnalyticsManager>() }
+    single<CourseAnalytics> { get<AnalyticsManager>() }
+    single<DiscussionAnalytics> { get<AnalyticsManager>() }
 }

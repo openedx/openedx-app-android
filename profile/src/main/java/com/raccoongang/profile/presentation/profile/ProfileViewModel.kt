@@ -13,6 +13,7 @@ import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.profile.domain.interactor.ProfileInteractor
+import com.raccoongang.profile.presentation.ProfileAnalytics
 import com.raccoongang.profile.system.notifier.AccountDeactivated
 import com.raccoongang.profile.system.notifier.AccountUpdated
 import com.raccoongang.profile.system.notifier.ProfileNotifier
@@ -27,7 +28,8 @@ class ProfileViewModel(
     private val notifier: ProfileNotifier,
     private val dispatcher: CoroutineDispatcher,
     private val cookieManager: AppCookieManager,
-    private val workerController: DownloadWorkerController
+    private val workerController: DownloadWorkerController,
+    private val analytics: ProfileAnalytics
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<ProfileUIState>(ProfileUIState.Loading)
@@ -97,6 +99,7 @@ class ProfileViewModel(
                     interactor.logout()
                 }
                 cookieManager.clearWebViewCookie()
+                analytics.logoutEvent(false)
                 _successLogout.value = true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -109,6 +112,26 @@ class ProfileViewModel(
                 }
             }
         }
+    }
+
+    fun profileEditClickedEvent() {
+        analytics.profileEditClickedEvent()
+    }
+
+    fun profileVideoSettingsClickedEvent() {
+        analytics.profileVideoSettingsClickedEvent()
+    }
+
+    fun privacyPolicyClickedEvent() {
+        analytics.privacyPolicyClickedEvent()
+    }
+
+    fun cookiePolicyClickedEvent() {
+        analytics.cookiePolicyClickedEvent()
+    }
+
+    fun emailSupportClickedEvent() {
+        analytics.emailSupportClickedEvent()
     }
 
 }

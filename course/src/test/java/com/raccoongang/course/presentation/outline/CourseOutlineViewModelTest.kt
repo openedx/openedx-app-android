@@ -16,6 +16,7 @@ import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseStructureUpdated
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,6 +47,7 @@ class CourseOutlineViewModelTest {
     private val notifier = spyk<CourseNotifier>()
     private val downloadDao = mockk<DownloadDao>()
     private val workerController = mockk<DownloadWorkerController>()
+    private val analytics = mockk<CourseAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -160,6 +162,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -187,6 +190,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -224,6 +228,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -260,6 +265,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -296,6 +302,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -320,6 +327,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -363,6 +371,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -391,6 +400,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )
@@ -417,6 +427,7 @@ class CourseOutlineViewModelTest {
             notifier,
             networkConnection,
             preferencesManager,
+            analytics,
             downloadDao,
             workerController
         )

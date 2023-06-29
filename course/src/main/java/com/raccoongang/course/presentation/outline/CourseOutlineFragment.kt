@@ -94,6 +94,7 @@ class CourseOutlineFragment : Fragment() {
                         (parentFragment as CourseContainerFragment).updateCourseStructure(false)
                     },
                     onItemClick = { block ->
+                        viewModel.sequentialClickedEvent(block.blockId, block.displayName)
                         router.navigateToCourseSubsections(
                             requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
@@ -104,6 +105,7 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onResumeClick = { blockId ->
                         viewModel.resumeSectionBlock?.let { sequential ->
+                            viewModel.resumeCourseTappedEvent(sequential.blockId)
                             router.navigateToCourseSubsections(
                                 requireActivity().supportFragmentManager,
                                 viewModel.courseId,

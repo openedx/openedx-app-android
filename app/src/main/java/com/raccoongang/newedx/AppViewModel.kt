@@ -17,7 +17,8 @@ class AppViewModel(
     private val notifier: AppNotifier,
     private val room: RoomDatabase,
     private val preferencesManager: PreferencesManager,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val analytics: AppAnalytics
 ) : BaseViewModel() {
 
     val logoutUser: LiveData<Unit>
@@ -36,6 +37,7 @@ class AppViewModel(
                     withContext(dispatcher) {
                         room.clearAllTables()
                     }
+                    analytics.logoutEvent(true)
                     _logoutUser.value = Unit
                 }
             }

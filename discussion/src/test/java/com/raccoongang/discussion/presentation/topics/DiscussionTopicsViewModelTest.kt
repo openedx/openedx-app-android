@@ -5,6 +5,7 @@ import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.discussion.domain.interactor.DiscussionInteractor
+import com.raccoongang.discussion.presentation.DiscussionAnalytics
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -30,6 +31,7 @@ class DiscussionTopicsViewModelTest {
 
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscussionInteractor>()
+    private val analytics = mockk<DiscussionAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -48,7 +50,7 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `getCourseTopics no internet exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, "")
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
 
         coEvery { interactor.getCourseTopics(any()) } throws UnknownHostException()
         viewModel.getCourseTopics()
@@ -63,7 +65,7 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `getCourseTopics unknown exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, "")
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
 
         coEvery { interactor.getCourseTopics(any()) } throws Exception()
         viewModel.getCourseTopics()
@@ -78,7 +80,7 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `getCourseTopics success`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, "")
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
 
         coEvery { interactor.getCourseTopics(any()) } returns mockk()
         viewModel.getCourseTopics()
@@ -92,7 +94,7 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `updateCourseTopics no internet exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, "")
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
 
         coEvery { interactor.getCourseTopics(any()) } throws UnknownHostException()
         viewModel.updateCourseTopics()
@@ -107,7 +109,7 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `updateCourseTopics unknown exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, "")
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
 
         coEvery { interactor.getCourseTopics(any()) } throws Exception()
         viewModel.updateCourseTopics()
@@ -122,7 +124,7 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `updateCourseTopics success`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, "")
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
 
         coEvery { interactor.getCourseTopics(any()) } returns mockk()
         viewModel.updateCourseTopics()

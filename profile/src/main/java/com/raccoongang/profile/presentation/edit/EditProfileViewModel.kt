@@ -11,6 +11,7 @@ import com.raccoongang.core.domain.model.Account
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.profile.domain.interactor.ProfileInteractor
+import com.raccoongang.profile.presentation.ProfileAnalytics
 import com.raccoongang.profile.system.notifier.AccountUpdated
 import com.raccoongang.profile.system.notifier.ProfileNotifier
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ class EditProfileViewModel(
     private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
+    private val analytics: ProfileAnalytics,
     account: Account
 ) : BaseViewModel() {
 
@@ -123,6 +125,14 @@ class EditProfileViewModel(
 
     private suspend fun sendAccountUpdated() {
         notifier.send(AccountUpdated())
+    }
+
+    fun profileEditDoneClickedEvent() {
+        analytics.profileEditDoneClickedEvent()
+    }
+
+    fun profileDeleteAccountClickedEvent() {
+        analytics.profileDeleteAccountClickedEvent()
     }
 
 }

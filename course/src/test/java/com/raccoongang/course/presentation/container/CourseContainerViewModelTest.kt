@@ -9,6 +9,7 @@ import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseStructureUpdated
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,32 +34,33 @@ class CourseContainerViewModelTest {
     private val interactor = mockk<CourseInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
     private val notifier = spyk<CourseNotifier>()
+    private val analytics = mockk<CourseAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
     private val courseStructure = CourseStructure(
-    root = "",
-    blockData = listOf(),
-    id = "id",
-    name = "Course name",
-    number = "",
-    org = "Org",
-    start = null,
-    startDisplay = "",
-    startType = "",
-    end = null,
-    coursewareAccess = CoursewareAccess(
-    true,
-    "",
-    "",
-    "",
-    "",
-    ""
-    ),
-    media = null,
-    certificate = null,
-    isSelfPaced = false
+        root = "",
+        blockData = listOf(),
+        id = "id",
+        name = "Course name",
+        number = "",
+        org = "Org",
+        start = null,
+        startDisplay = "",
+        startType = "",
+        end = null,
+        coursewareAccess = CoursewareAccess(
+            true,
+            "",
+            "",
+            "",
+            "",
+            ""
+        ),
+        media = null,
+        certificate = null,
+        isSelfPaced = false
     )
 
     @Before
@@ -75,7 +77,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `preloadCourseStructure internet connection exception`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
         viewModel.preloadCourseStructure()
@@ -91,7 +100,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `preloadCourseStructure unknown exception`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
         viewModel.preloadCourseStructure()
@@ -107,7 +123,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `preloadCourseStructure success with internet`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
         every { interactor.getCourseStructureFromCache() } returns courseStructure
@@ -123,7 +146,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `preloadCourseStructure success without internet`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.preloadCourseStructureFromCache(any()) } returns Unit
         every { interactor.getCourseStructureFromCache() } returns courseStructure
@@ -140,7 +170,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `updateData no internet connection exception`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
         viewModel.updateData(false)
@@ -155,7 +192,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `updateData unknown exception`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
         viewModel.updateData(false)
@@ -170,7 +214,14 @@ class CourseContainerViewModelTest {
 
     @Test
     fun `updateData success`() = runTest {
-        val viewModel = CourseContainerViewModel("", interactor,resourceManager, notifier, networkConnection)
+        val viewModel = CourseContainerViewModel(
+            "",
+            interactor,
+            resourceManager,
+            notifier,
+            networkConnection,
+            analytics
+        )
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
         viewModel.updateData(false)
