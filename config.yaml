@@ -11,6 +11,7 @@ environments:
       PROJECT_ID: ""
       APPLICATION_ID: ""
       API_KEY: ""
+      GCM_SENDER_ID: ""
   STAGE:
     URLS:
       API_HOST_URL: "http://stage-example.com/"
@@ -23,6 +24,7 @@ environments:
       PROJECT_ID: ""
       APPLICATION_ID: ""
       API_KEY: ""
+      GCM_SENDER_ID: ""
   PROD:
     URLS:
       API_HOST_URL: "https://example.com/"
@@ -35,5 +37,6 @@ environments:
       PROJECT_ID: ""
       APPLICATION_ID: ""
       API_KEY: ""
+      GCM_SENDER_ID: ""
 platformName: "New Open edX"
 platformFullName: "New Open edX"

@@ -46,6 +46,7 @@ android {
             buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
             buildConfigField "String", "FIREBASE_APPLICATION_ID", "\"${firebase.APPLICATION_ID}\""
             buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
+            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.GCM_SENDER_ID}\""
             resValue "string", "google_app_id", firebase.APPLICATION_ID
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
@@ -64,6 +65,7 @@ android {
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
             buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
             buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
+            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.GCM_SENDER_ID}\""
             resValue "string", "google_app_id", firebase.APPLICATION_ID
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
@@ -83,6 +85,7 @@ android {
             buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
             buildConfigField "String", "FIREBASE_APPLICATION_ID", "\"${firebase.APPLICATION_ID}\""
             buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
+            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.GCM_SENDER_ID}\""
             resValue "string", "google_app_id", firebase.APPLICATION_ID
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName

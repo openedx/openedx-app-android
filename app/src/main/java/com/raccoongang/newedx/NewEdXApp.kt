@@ -28,8 +28,9 @@ class NewEdXApp : Application() {
             .setProjectId(BuildConfig.FIREBASE_PROJECT_ID)
             .setApplicationId(getString(com.raccoongang.core.R.string.google_app_id))
             .setApiKey(BuildConfig.FIREBASE_API_KEY)
+            .setGcmSenderId(BuildConfig.FIREBASE_GCM_SENDER_ID)
             .build()
-        Firebase.initialize(this, options, "app")
+        Firebase.initialize(this, options)
     }
 
 }
