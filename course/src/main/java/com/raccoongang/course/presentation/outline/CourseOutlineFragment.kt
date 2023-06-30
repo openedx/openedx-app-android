@@ -204,11 +204,11 @@ internal fun CourseOutlineScreen(
             )
         }
 
-        val imageHeight by remember(key1 = windowSize) {
+        val listBottomPadding by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = 300.dp,
-                    compact = 250.dp
+                    expanded = PaddingValues(bottom = 24.dp),
+                    compact = PaddingValues(bottom = 24.dp)
                 )
             )
         }
@@ -216,16 +216,8 @@ internal fun CourseOutlineScreen(
         val listPadding by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = PaddingValues(
-                        start = 6.dp,
-                        end = 6.dp,
-                        bottom = 24.dp
-                    ),
-                    compact = PaddingValues(
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 24.dp
-                    )
+                    expanded = Modifier.padding(horizontal = 6.dp),
+                    compact = Modifier.padding(horizontal = 24.dp)
                 )
             )
         }
@@ -277,26 +269,26 @@ internal fun CourseOutlineScreen(
                                     CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
+
                             is CourseOutlineUIState.CourseData -> {
-                                Column(
-                                    Modifier
-                                        .fillMaxSize()
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = listBottomPadding
                                 ) {
-                                    CourseImageHeader(
-                                        modifier = Modifier
-                                            .aspectRatio(1.86f)
-                                            .padding(6.dp),
-                                        courseImage = uiState.courseStructure.media?.image?.large
-                                            ?: "",
-                                        courseCertificate = uiState.courseStructure.certificate
-                                    )
-                                    LazyColumn(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentPadding = listPadding
-                                    ) {
-                                        if (uiState.resumeBlock != null) {
-                                            item {
-                                                Spacer(Modifier.height(28.dp))
+                                    item {
+                                        CourseImageHeader(
+                                            modifier = Modifier
+                                                .aspectRatio(1.86f)
+                                                .padding(6.dp),
+                                            courseImage = uiState.courseStructure.media?.image?.large
+                                                ?: "",
+                                            courseCertificate = uiState.courseStructure.certificate
+                                        )
+                                    }
+                                    if (uiState.resumeBlock != null) {
+                                        item {
+                                            Spacer(Modifier.height(28.dp))
+                                            Box(listPadding) {
                                                 if (windowSize.isTablet) {
                                                     ResumeCourseTablet(
                                                         block = uiState.resumeBlock,
@@ -310,7 +302,9 @@ internal fun CourseOutlineScreen(
                                                 }
                                             }
                                         }
-                                        items(uiState.courseStructure.blockData) { block ->
+                                    }
+                                    items(uiState.courseStructure.blockData) { block ->
+                                        Column(listPadding) {
                                             if (block.type == BlockType.CHAPTER) {
                                                 Text(
                                                     modifier = Modifier.padding(
@@ -423,7 +417,11 @@ private fun ResumeCourseTablet(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(Modifier.weight(1f).padding(end = 35.dp)) {
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(end = 35.dp)
+        ) {
             Text(
                 text = stringResource(id = com.raccoongang.course.R.string.course_continue_with),
                 style = MaterialTheme.appTypography.labelMedium,
