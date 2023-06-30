@@ -10,6 +10,7 @@ import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
 import com.raccoongang.core.Validator
+import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.EdxError
 import com.raccoongang.core.system.ResourceManager
@@ -19,6 +20,7 @@ import com.raccoongang.core.R as CoreRes
 class SignInViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
+    private val preferencesManager: PreferencesManager,
     private val validator: Validator,
     private val analytics: AuthAnalytics
 ) : BaseViewModel() {
@@ -52,6 +54,7 @@ class SignInViewModel(
             try {
                 interactor.login(username, password)
                 _loginSuccess.value = true
+                setUserId()
                 analytics.userLoginEvent(LoginMethod.PASSWORD.methodName)
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
@@ -75,6 +78,12 @@ class SignInViewModel(
 
     fun forgotPasswordClickedEvent() {
         analytics.forgotPasswordClickedEvent()
+    }
+
+    private fun setUserId() {
+        preferencesManager.user?.let {
+            analytics.setUserIdForSession(it.id)
+        }
     }
 }
 

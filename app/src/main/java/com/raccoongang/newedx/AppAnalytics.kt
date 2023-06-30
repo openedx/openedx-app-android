@@ -6,4 +6,5 @@ interface AppAnalytics {
     fun dashboardTabClickedEvent()
     fun programsTabClickedEvent()
     fun profileTabClickedEvent()
+    fun setUserIdForSession(userId: Long)
 }

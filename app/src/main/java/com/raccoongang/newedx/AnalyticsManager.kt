@@ -20,6 +20,10 @@ class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, Ap
         analytics.logEvent(event.eventName, params)
     }
 
+    private fun setUserId(userId: Long) {
+        analytics.setUserId(userId.toString())
+    }
+
     override fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
         logEvent(
             Event.DASHBOARD_COURSE_CLICKED,
@@ -91,6 +95,10 @@ class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, Ap
 
     override fun profileTabClickedEvent() {
         logEvent(Event.PROFILE_TAB_CLICKED)
+    }
+
+    override fun setUserIdForSession(userId: Long) {
+        setUserId(userId)
     }
 
     override fun discoverySearchBarClickedEvent() {

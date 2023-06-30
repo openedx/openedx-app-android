@@ -29,6 +29,7 @@ class AppViewModel(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        setUserId()
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
@@ -41,6 +42,12 @@ class AppViewModel(
                     _logoutUser.value = Unit
                 }
             }
+        }
+    }
+
+    private fun setUserId() {
+        preferencesManager.user?.let {
+            analytics.setUserIdForSession(it.id)
         }
     }
 

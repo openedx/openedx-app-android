@@ -7,4 +7,5 @@ interface AuthAnalytics {
     fun registrationSuccessEvent(provider: String)
     fun forgotPasswordClickedEvent()
     fun resetPasswordClickedEvent(success: Boolean)
+    fun setUserIdForSession(userId: Long)
 }

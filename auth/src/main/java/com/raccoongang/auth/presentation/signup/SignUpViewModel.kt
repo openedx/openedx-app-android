@@ -10,6 +10,7 @@ import com.raccoongang.core.BaseViewModel
 import com.raccoongang.core.R
 import com.raccoongang.core.SingleEventLiveData
 import com.raccoongang.core.UIMessage
+import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.RegistrationField
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 class SignUpViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
-    private val analytics: AuthAnalytics
+    private val analytics: AuthAnalytics,
+    private val preferencesManager: PreferencesManager
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<SignUpUIState>(SignUpUIState.Loading)
@@ -91,6 +93,7 @@ class SignUpViewModel(
                         resultMap.getValue(ApiConstants.EMAIL),
                         resultMap.getValue(ApiConstants.PASSWORD)
                     )
+                    setUserId()
                     analytics.registrationSuccessEvent("")
                     _successLogin.value = true
                 }
@@ -123,6 +126,13 @@ class SignUpViewModel(
             updatedFields.filter { it.required },
             updatedFields.filter { !it.required }
         )
+    }
+
+
+    private fun setUserId() {
+        preferencesManager.user?.let {
+            analytics.setUserIdForSession(it.id)
+        }
     }
 
 }
