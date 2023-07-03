@@ -22,7 +22,8 @@ class DashboardViewModel(
     private val networkConnection: NetworkConnection,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier
+    private val notifier: CourseNotifier,
+    private val analytics: DashboardAnalytics
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
@@ -152,6 +153,10 @@ class DashboardViewModel(
         if (!isLoading && page != -1) {
             internalLoadingCourses()
         }
+    }
+
+    fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
+        analytics.dashboardCourseClickedEvent(courseId, courseName)
     }
 
 }

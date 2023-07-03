@@ -183,6 +183,7 @@ class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, Ap
             Event.RESUME_COURSE_TAPPED, bundleOf(
                 Key.COURSE_ID.keyName to courseId,
                 Key.COURSE_NAME.keyName to courseName,
+                Key.BLOCK_ID.keyName to blockId
             )
         )
     }

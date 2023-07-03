@@ -111,7 +111,7 @@ class CourseSearchViewModel(
                     _canLoadMore.value = false
                     nextPage = null
                 }
-                discoveryCourseSearchEvent(query, coursesList.size)
+                discoveryCourseSearchEvent(query, response.results.size)
                 coursesList.addAll(response.results)
                 _uiState.value = CourseSearchUIState.Courses(coursesList, response.pagination.count)
             } catch (e: Exception) {
