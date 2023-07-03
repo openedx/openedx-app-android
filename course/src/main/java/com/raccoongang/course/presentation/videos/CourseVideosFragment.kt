@@ -179,11 +179,11 @@ private fun CourseVideosScreen(
             )
         }
 
-        val imageHeight by remember(key1 = windowSize) {
+        val listBottomPadding by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = 260.dp,
-                    compact = 200.dp
+                    expanded = PaddingValues(bottom = 24.dp),
+                    compact = PaddingValues(bottom = 24.dp)
                 )
             )
         }
@@ -191,16 +191,8 @@ private fun CourseVideosScreen(
         val listPadding by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
-                    expanded = PaddingValues(
-                        start = 6.dp,
-                        end = 6.dp,
-                        bottom = 24.dp
-                    ),
-                    compact = PaddingValues(
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 24.dp
-                    )
+                    expanded = Modifier.padding(horizontal = 6.dp),
+                    compact = Modifier.padding(horizontal = 24.dp)
                 )
             )
         }
@@ -261,6 +253,7 @@ private fun CourseVideosScreen(
                                         )
                                     }
                                 }
+
                                 is CourseVideosUIState.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
@@ -269,40 +262,45 @@ private fun CourseVideosScreen(
                                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }
                                 }
+
                                 is CourseVideosUIState.CourseData -> {
-                                    CourseImageHeader(
-                                        modifier = Modifier
-                                            .aspectRatio(1.86f)
-                                            .padding(6.dp),
-                                        courseImage = uiState.courseStructure.media?.image?.large
-                                            ?: "",
-                                        courseCertificate = uiState.courseStructure.certificate
-                                    )
                                     LazyColumn(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentPadding = listPadding
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentPadding = listBottomPadding
                                     ) {
+                                        item {
+                                            CourseImageHeader(
+                                                modifier = Modifier
+                                                    .aspectRatio(1.86f)
+                                                    .padding(6.dp),
+                                                courseImage = uiState.courseStructure.media?.image?.large
+                                                    ?: "",
+                                                courseCertificate = uiState.courseStructure.certificate
+                                            )
+                                        }
                                         items(uiState.courseStructure.blockData) { block ->
-                                            if (block.type == BlockType.CHAPTER) {
-                                                Text(
-                                                    modifier = Modifier.padding(
-                                                        top = 36.dp,
-                                                        bottom = 8.dp
-                                                    ),
-                                                    text = block.displayName,
-                                                    style = MaterialTheme.appTypography.titleMedium,
-                                                    color = MaterialTheme.appColors.textPrimaryVariant
-                                                )
-                                            } else {
-                                                CourseSectionCard(
-                                                    block = block,
-                                                    downloadedState = uiState.downloadedState[block.id],
-                                                    onItemClick = { blockSelected ->
-                                                        onItemClick(blockSelected)
-                                                    },
-                                                    onDownloadClick = onDownloadClick
-                                                )
-                                                Divider()
+                                            Column(listPadding) {
+                                                if (block.type == BlockType.CHAPTER) {
+                                                    Text(
+                                                        modifier = Modifier.padding(
+                                                            top = 36.dp,
+                                                            bottom = 8.dp
+                                                        ),
+                                                        text = block.displayName,
+                                                        style = MaterialTheme.appTypography.titleMedium,
+                                                        color = MaterialTheme.appColors.textPrimaryVariant
+                                                    )
+                                                } else {
+                                                    CourseSectionCard(
+                                                        block = block,
+                                                        downloadedState = uiState.downloadedState[block.id],
+                                                        onItemClick = { blockSelected ->
+                                                            onItemClick(blockSelected)
+                                                        },
+                                                        onDownloadClick = onDownloadClick
+                                                    )
+                                                    Divider()
+                                                }
                                             }
                                         }
                                     }
