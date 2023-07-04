@@ -24,10 +24,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -125,6 +127,7 @@ private fun DiscussionAddThreadScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
@@ -150,6 +153,15 @@ private fun DiscussionAddThreadScreen(
     }
     val expandedList by rememberSaveable {
         mutableStateOf(topics)
+    }
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue()
+        }
     }
     Scaffold(
         scaffoldState = scaffoldState,
@@ -214,12 +226,17 @@ private fun DiscussionAddThreadScreen(
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    title = stringResource(id = discussionR.string.discussion_topic),
+                    searchValue = searchValue,
                     expandedList = expandedList,
                     onItemClick = { item ->
                         postToTopic = item
                         coroutine.launch {
                             bottomSheetScaffoldState.hide()
                         }
+                    },
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
                     }
                 )
             }

@@ -26,9 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -184,6 +186,7 @@ private fun DiscussionThreadsScreen(
         initialValue = ModalBottomSheetValue.Hidden
     )
     val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
     val coroutine = rememberCoroutineScope()
@@ -215,6 +218,10 @@ private fun DiscussionThreadsScreen(
         mutableStateOf("")
     }
 
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+
     val scaffoldModifier = if (viewType == FragmentViewType.FULL_CONTENT) {
         Modifier
             .fillMaxSize()
@@ -230,6 +237,13 @@ private fun DiscussionThreadsScreen(
     } else {
         Modifier
             .fillMaxSize()
+    }
+
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue()
+        }
     }
 
     Scaffold(
@@ -300,6 +314,7 @@ private fun DiscussionThreadsScreen(
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    searchValue = searchValue,
                     expandedList = expandedList,
                     onItemClick = { item ->
                         when (currentSelectedList) {
@@ -316,6 +331,9 @@ private fun DiscussionThreadsScreen(
                         coroutine.launch {
                             bottomSheetScaffoldState.hide()
                         }
+                    },
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
                     }
                 )
             }

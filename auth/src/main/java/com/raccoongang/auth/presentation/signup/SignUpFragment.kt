@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -111,6 +112,7 @@ internal fun RegistrationScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     )
@@ -140,12 +142,27 @@ internal fun RegistrationScreen(
 
     val listState = rememberLazyListState()
 
+    var bottomDialogTitle by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+
     LaunchedEffect(validationError) {
         if (validationError) {
             coroutine.launch {
                 scrollState.animateScrollTo(0, tween(300))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
+        }
+    }
+
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue("")
         }
     }
 
@@ -221,7 +238,10 @@ internal fun RegistrationScreen(
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    title = bottomDialogTitle,
+                    searchValue = searchValue,
                     expandedList = expandedList,
+                    listState = listState,
                     onItemClick = { item ->
                         mapFields[serverFieldName.value] = item.value
                         selectableNamesMap[serverFieldName.value] = item.name
@@ -229,7 +249,9 @@ internal fun RegistrationScreen(
                             bottomSheetScaffoldState.hide()
                         }
                     },
-                    listState = listState
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
+                    }
                 )
             }
         ) {
@@ -337,6 +359,7 @@ internal fun RegistrationScreen(
                                                 if (bottomSheetScaffoldState.isVisible) {
                                                     bottomSheetScaffoldState.hide()
                                                 } else {
+                                                    bottomDialogTitle = field.label
                                                     showErrorMap[field.name] = false
                                                     bottomSheetScaffoldState.show()
                                                 }
@@ -363,6 +386,7 @@ internal fun RegistrationScreen(
                                                             if (bottomSheetScaffoldState.isVisible) {
                                                                 bottomSheetScaffoldState.hide()
                                                             } else {
+                                                                bottomDialogTitle = field.label
                                                                 showErrorMap[field.name] = false
                                                                 bottomSheetScaffoldState.show()
                                                             }

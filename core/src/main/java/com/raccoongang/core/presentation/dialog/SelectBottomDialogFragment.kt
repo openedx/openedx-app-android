@@ -12,9 +12,13 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -56,6 +60,7 @@ class SelectBottomDialogFragment() : BottomSheetDialogFragment() {
         setContent {
             NewEdxTheme {
                 val windowSize = rememberWindowSize()
+                val focusManager = LocalFocusManager.current
                 val configuration = LocalConfiguration.current
                 val listState = rememberLazyListState()
                 val bottomSheetWeight by remember(key1 = windowSize) {
@@ -67,6 +72,10 @@ class SelectBottomDialogFragment() : BottomSheetDialogFragment() {
                     )
                 }
 
+                var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                    mutableStateOf(TextFieldValue())
+                }
+
                 Surface(
                     shape = BottomSheetShape(
                         width = configuration.screenWidthDp.px,
@@ -76,12 +85,16 @@ class SelectBottomDialogFragment() : BottomSheetDialogFragment() {
                     color = MaterialTheme.appColors.background
                 ) {
                     SheetContent(
+                        searchValue = searchValue,
                         expandedList = viewModel.values,
                         onItemClick = { item ->
                             viewModel.sendCourseEventChanged(item.value)
                             dismiss()
                         },
-                        listState = listState
+                        listState = listState,
+                        searchValueChanged = {
+                            searchValue = TextFieldValue(it)
+                        }
                     )
                 }
             }
