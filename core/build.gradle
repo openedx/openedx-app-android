@@ -39,7 +39,7 @@ android {
             def envMap = config.environments.find { it.key == "PROD" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap, "prod")
+            def firebase = getFirebaseConfig(envMap)
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
@@ -58,7 +58,7 @@ android {
             def envMap = config.environments.find { it.key == "DEV" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap, "develop")
+            def firebase = getFirebaseConfig(envMap)
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
@@ -77,7 +77,7 @@ android {
             def envMap = config.environments.find { it.key == "STAGE" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap, "stage")
+            def firebase = getFirebaseConfig(envMap)
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
@@ -184,16 +184,14 @@ dependencies {
 }
 
 class FirebaseConfig {
-    public String flavorName
     public String projectId = ""
     public String appId = ""
     public String apiKey = ""
     public String gcmSenderId = ""
 }
 
-def getFirebaseConfig(envMap, flavName) {
+def getFirebaseConfig(envMap) {
     FirebaseConfig config = new FirebaseConfig()
-    config.flavorName = flavName
     if (envMap.value["FIREBASE"] != null) {
         config.projectId = setValue(envMap.value["FIREBASE"]["PROJECT_ID"])
         config.appId = setValue(envMap.value["FIREBASE"]["APPLICATION_ID"])
