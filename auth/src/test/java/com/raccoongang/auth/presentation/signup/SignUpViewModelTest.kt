@@ -7,8 +7,10 @@ import com.raccoongang.auth.presentation.AuthAnalytics
 import com.raccoongang.core.ApiConstants
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
+import com.raccoongang.core.data.storage.PreferencesManager
 import com.raccoongang.core.domain.model.RegistrationField
 import com.raccoongang.core.domain.model.RegistrationFieldType
+import com.raccoongang.core.domain.model.User
 import com.raccoongang.core.system.ResourceManager
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -39,6 +41,7 @@ class SignUpViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     private val resourceManager = mockk<ResourceManager>()
+    private val preferencesManager = mockk<PreferencesManager>()
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
 
@@ -75,6 +78,8 @@ class SignUpViewModelTest {
         )
     )
 
+    private val user = User(0, "", "", "")
+
     //endregion
 
     private val noInternet = "Slow or no internet connection"
@@ -96,19 +101,22 @@ class SignUpViewModelTest {
 
     @Test
     fun `register has validation errors`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             parametersMap
         )
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
+        every { preferencesManager.user } returns user
+        every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register(parametersMap)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
+        verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
         assertEquals(true, viewModel.validationError.value)
         assert(viewModel.successLogin.value != true)
@@ -118,7 +126,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `register no internet error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws UnknownHostException()
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
@@ -128,9 +136,12 @@ class SignUpViewModelTest {
             )
         } returns Unit
         every { analytics.createAccountClickedEvent(any()) } returns Unit
+        every { preferencesManager.user } returns user
+        every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register(parametersMap)
         advanceUntilIdle()
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
+        verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -145,13 +156,16 @@ class SignUpViewModelTest {
 
     @Test
     fun `something went wrong error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws Exception()
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { analytics.createAccountClickedEvent(any()) } returns Unit
+        every { preferencesManager.user } returns user
+        every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register(parametersMap)
         advanceUntilIdle()
+        verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
@@ -168,7 +182,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `success register`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             emptyMap()
         )
@@ -181,8 +195,11 @@ class SignUpViewModelTest {
                 parametersMap.getValue(ApiConstants.PASSWORD)
             )
         } returns Unit
+        every { preferencesManager.user } returns user
+        every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register(parametersMap)
         advanceUntilIdle()
+        verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 1) { interactor.register(any()) }
         coVerify(exactly = 1) { interactor.login(any(), any()) }
@@ -197,7 +214,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `getRegistrationFields no internet error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.getRegistrationFields() } throws UnknownHostException()
         viewModel.getRegistrationFields()
         advanceUntilIdle()
@@ -211,7 +228,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `getRegistrationFields unknown error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.getRegistrationFields() } throws Exception()
         viewModel.getRegistrationFields()
         advanceUntilIdle()
@@ -225,7 +242,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `getRegistrationFields success`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
         coEvery { interactor.getRegistrationFields() } returns listOfFields
         viewModel.getRegistrationFields()
         advanceUntilIdle()

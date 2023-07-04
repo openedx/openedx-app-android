@@ -64,11 +64,11 @@ class RestorePasswordViewModelTest {
     fun `passwordReset empty email validation error`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(emptyEmail) } returns true
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(false) } returns Unit
         viewModel.passwordReset(emptyEmail)
         advanceUntilIdle()
         coVerify(exactly = 0) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -80,11 +80,11 @@ class RestorePasswordViewModelTest {
     fun `passwordReset invalid email validation error`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(invalidEmail) } returns true
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(false) } returns Unit
         viewModel.passwordReset(invalidEmail)
         advanceUntilIdle()
         coVerify(exactly = 0) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -96,11 +96,11 @@ class RestorePasswordViewModelTest {
     fun `passwordReset validation error`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(correctEmail) } throws EdxError.ValidationException("error")
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(false) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -112,11 +112,11 @@ class RestorePasswordViewModelTest {
     fun `passwordReset no internet error`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(correctEmail) } throws UnknownHostException()
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(false) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -128,11 +128,11 @@ class RestorePasswordViewModelTest {
     fun `passwordReset unknown error`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(correctEmail) } throws Exception()
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(false) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -144,11 +144,11 @@ class RestorePasswordViewModelTest {
     fun `unSuccess restore password`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(correctEmail) } returns false
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(false) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -161,11 +161,11 @@ class RestorePasswordViewModelTest {
     fun `success restore password`() = runTest {
         val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics)
         coEvery { interactor.passwordReset(correctEmail) } returns true
-        every { analytics.resetPasswordClickedEvent(any()) } returns Unit
+        every { analytics.resetPasswordClickedEvent(true) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(any()) }
+        verify(exactly = 1) { analytics.resetPasswordClickedEvent(true) }
 
         val state = viewModel.uiState.value as? RestorePasswordUIState.Success
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage

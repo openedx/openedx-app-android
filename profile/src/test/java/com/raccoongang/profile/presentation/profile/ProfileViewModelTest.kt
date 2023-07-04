@@ -199,7 +199,7 @@ class ProfileViewModelTest {
             analytics
         )
         coEvery { interactor.getAccount() } returns mockk()
-        every { analytics.logoutEvent(any()) } returns Unit
+        every { analytics.logoutEvent(false) } returns Unit
         every { preferencesManager.profile = any() } returns Unit
         coEvery { interactor.logout() } returns Unit
         coEvery { workerController.cancelWork() } returns Unit
@@ -207,7 +207,7 @@ class ProfileViewModelTest {
         viewModel.logout()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.logout() }
-        verify { analytics.logoutEvent(any()) }
+        verify { analytics.logoutEvent(false) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.successLogout.value == true)

@@ -39,15 +39,14 @@ android {
             def envMap = config.environments.find { it.key == "PROD" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
-            def firebase = envMap.value.FIREBASE
+            def firebase = getFirebaseConfig(envMap, "prod")
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
-            buildConfigField "String", "FIREBASE_APPLICATION_ID", "\"${firebase.APPLICATION_ID}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.GCM_SENDER_ID}\""
-            resValue "string", "google_app_id", firebase.APPLICATION_ID
+            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
+            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
+            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
+            resValue "string", "google_app_id", firebase.appId
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
@@ -59,14 +58,14 @@ android {
             def envMap = config.environments.find { it.key == "DEV" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
-            def firebase = envMap.value.FIREBASE
+            def firebase = getFirebaseConfig(envMap, "develop")
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.GCM_SENDER_ID}\""
-            resValue "string", "google_app_id", firebase.APPLICATION_ID
+            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
+            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
+            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
+            resValue "string", "google_app_id", firebase.appId
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
@@ -78,15 +77,14 @@ android {
             def envMap = config.environments.find { it.key == "STAGE" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
-            def firebase = envMap.value.FIREBASE
+            def firebase = getFirebaseConfig(envMap, "stage")
 
             buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
             buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.PROJECT_ID}\""
-            buildConfigField "String", "FIREBASE_APPLICATION_ID", "\"${firebase.APPLICATION_ID}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.API_KEY}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.GCM_SENDER_ID}\""
-            resValue "string", "google_app_id", firebase.APPLICATION_ID
+            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
+            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
+            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
+            resValue "string", "google_app_id", firebase.appId
             resValue "string", "platform_name", config.platformName
             resValue "string", "platform_full_name", config.platformFullName
             resValue "string", "privacy_policy_link", envUrls.privacyPolicy
@@ -183,4 +181,34 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
+
+class FirebaseConfig {
+    public String flavorName
+    public String projectId = ""
+    public String appId = ""
+    public String apiKey = ""
+    public String gcmSenderId = ""
+}
+
+def getFirebaseConfig(envMap, flavName) {
+    FirebaseConfig config = new FirebaseConfig()
+    config.flavorName = flavName
+    if (envMap.value["FIREBASE"] != null) {
+        config.projectId = setValue(envMap.value["FIREBASE"]["PROJECT_ID"])
+        config.appId = setValue(envMap.value["FIREBASE"]["APPLICATION_ID"])
+        config.apiKey = setValue(envMap.value["FIREBASE"]["API_KEY"])
+        config.gcmSenderId = setValue(envMap.value["FIREBASE"]["GCM_SENDER_ID"])
+    }
+    return config
+}
+
+def setValue(value) {
+    def result
+    if (value == null) {
+        result = ""
+    } else {
+        result = value
+    }
+    return result
 }

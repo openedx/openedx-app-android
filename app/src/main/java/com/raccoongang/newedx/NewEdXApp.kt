@@ -24,13 +24,15 @@ class NewEdXApp : Application() {
             )
         }
 
-        val options = FirebaseOptions.Builder()
-            .setProjectId(BuildConfig.FIREBASE_PROJECT_ID)
-            .setApplicationId(getString(com.raccoongang.core.R.string.google_app_id))
-            .setApiKey(BuildConfig.FIREBASE_API_KEY)
-            .setGcmSenderId(BuildConfig.FIREBASE_GCM_SENDER_ID)
-            .build()
-        Firebase.initialize(this, options)
+        if (BuildConfig.FIREBASE_PROJECT_ID.isNotEmpty()) {
+            val options = FirebaseOptions.Builder()
+                .setProjectId(BuildConfig.FIREBASE_PROJECT_ID)
+                .setApplicationId(getString(com.raccoongang.core.R.string.google_app_id))
+                .setApiKey(BuildConfig.FIREBASE_API_KEY)
+                .setGcmSenderId(BuildConfig.FIREBASE_GCM_SENDER_ID)
+                .build()
+            Firebase.initialize(this, options)
+        }
     }
 
 }
