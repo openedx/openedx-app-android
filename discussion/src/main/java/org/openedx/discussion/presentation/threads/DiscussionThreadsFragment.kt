@@ -26,9 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -181,9 +183,10 @@ private fun DiscussionThreadsScreen(
 
     val scaffoldState = rememberScaffoldState()
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
-    val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
     val coroutine = rememberCoroutineScope()
@@ -215,6 +218,12 @@ private fun DiscussionThreadsScreen(
         mutableStateOf("")
     }
 
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+
+    val isImeVisible by isImeVisibleState()
+
     val scaffoldModifier = if (viewType == FragmentViewType.FULL_CONTENT) {
         Modifier
             .fillMaxSize()
@@ -230,6 +239,13 @@ private fun DiscussionThreadsScreen(
     } else {
         Modifier
             .fillMaxSize()
+    }
+
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue()
+        }
     }
 
     Scaffold(
@@ -270,19 +286,11 @@ private fun DiscussionThreadsScreen(
             )
         }
 
-        val bottomSheetWeight by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 0.6f,
-                    compact = 1f
-                )
-            )
-        }
-
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {
@@ -290,16 +298,13 @@ private fun DiscussionThreadsScreen(
                         }
                     }
                 },
-            sheetShape = BottomSheetShape(
-                width = configuration.screenWidthDp.px,
-                height = configuration.screenHeightDp.px,
-                weight = bottomSheetWeight
-            ),
+            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    searchValue = searchValue,
                     expandedList = expandedList,
                     onItemClick = { item ->
                         when (currentSelectedList) {
@@ -316,6 +321,9 @@ private fun DiscussionThreadsScreen(
                         coroutine.launch {
                             bottomSheetScaffoldState.hide()
                         }
+                    },
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
                     }
                 )
             }

@@ -190,6 +190,91 @@ fun SearchBar(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun SearchBarStateless(
+    modifier: Modifier,
+    searchValue: String,
+    requestFocus: Boolean = false,
+    label: String = stringResource(id = R.string.core_search),
+    keyboardActions: () -> Unit,
+    onValueChanged: (String) -> Unit = {},
+    onClearValue: () -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(key1 = Unit) {
+        if (requestFocus) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+    var isFocused by rememberSaveable {
+        mutableStateOf(false)
+    }
+    OutlinedTextField(
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .onFocusChanged {
+                isFocused = it.hasFocus
+            }
+            .clip(MaterialTheme.appShapes.textFieldShape)
+            .then(modifier),
+        shape = MaterialTheme.appShapes.textFieldShape,
+        value = searchValue,
+        onValueChange = {
+            if (it != searchValue) {
+                onValueChanged(it)
+            }
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.appColors.textPrimary,
+            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.primary,
+            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.primary,
+            leadingIconColor = MaterialTheme.appColors.textPrimary
+        ),
+        placeholder = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = label,
+                color = MaterialTheme.appColors.textSecondary,
+                style = MaterialTheme.appTypography.bodyMedium
+            )
+        },
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.padding(start = 16.dp),
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+            )
+        },
+        trailingIcon = {
+            if (searchValue.isNotEmpty()) {
+                IconButton(onClick = {
+                    onClearValue()
+                }) {
+                    Icon(
+                        modifier = Modifier.padding(end = 16.dp),
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.onSurface
+                    )
+                }
+            }
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions {
+            keyboardController?.hide()
+            keyboardActions()
+        },
+        textStyle = MaterialTheme.appTypography.bodyMedium,
+        maxLines = 1
+    )
+}
+
 @Composable
 @NonRestartableComposable
 fun HandleUIMessage(
@@ -205,10 +290,12 @@ fun HandleUIMessage(
                     duration = uiMessage.duration
                 )
             }
+
             is UIMessage.ToastMessage -> {
                 val message = uiMessage.message
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
+
             else -> {}
         }
     }
@@ -296,7 +383,7 @@ fun HyperlinkImageText(
     val fullText = imageText.text
     val hyperLinks = imageText.links
     val annotatedString = buildAnnotatedString {
-        if(title.isNotEmpty()) {
+        if (title.isNotEmpty()) {
             append(title)
             append("\n\n")
         }
@@ -408,13 +495,17 @@ fun HyperlinkImageText(
 
 @Composable
 fun SheetContent(
+    searchValue: TextFieldValue,
+    title: String = stringResource(id = R.string.core_select_value),
     expandedList: List<RegistrationField.Option>,
     onItemClick: (RegistrationField.Option) -> Unit,
     listState: LazyListState,
+    searchValueChanged: (String) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     Column(
         Modifier
-            .height(300.dp)
+            .height(400.dp)
             .padding(top = 16.dp)
             .background(MaterialTheme.appColors.background)
     ) {
@@ -424,10 +515,28 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = stringResource(id = R.string.core_select_value)
+            text = title
         )
-        LazyColumn(Modifier.fillMaxWidth(), listState) {
-            items(expandedList) { item ->
+        SearchBarStateless(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(horizontal = 16.dp),
+            searchValue = searchValue.text,
+            keyboardActions = {
+                focusManager.clearFocus()
+            },
+            onValueChanged = { textField ->
+                searchValueChanged(textField)
+            }, onClearValue = {
+                searchValueChanged("")
+            }
+        )
+        Spacer(Modifier.height(10.dp))
+        LazyColumn(Modifier.fillMaxSize(), listState) {
+            items(expandedList.filter {
+                it.name.startsWith(searchValue.text, true)
+            }) { item ->
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -448,12 +557,16 @@ fun SheetContent(
 
 @Composable
 fun SheetContent(
+    searchValue: TextFieldValue,
+    title: String = stringResource(id = R.string.core_select_value),
     expandedList: List<Pair<String, String>>,
     onItemClick: (Pair<String, String>) -> Unit,
+    searchValueChanged: (String) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     Column(
         Modifier
-            .height(300.dp)
+            .height(400.dp)
             .padding(top = 16.dp)
             .background(MaterialTheme.appColors.background)
     ) {
@@ -463,10 +576,28 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = stringResource(id = R.string.core_select_value)
+            text = title
         )
+        SearchBarStateless(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(horizontal = 16.dp),
+            searchValue = searchValue.text,
+            keyboardActions = {
+                focusManager.clearFocus()
+            },
+            onValueChanged = { textField ->
+                searchValueChanged(textField)
+            }, onClearValue = {
+                searchValueChanged("")
+            }
+        )
+        Spacer(Modifier.height(10.dp))
         LazyColumn(Modifier.fillMaxWidth()) {
-            items(expandedList) { item ->
+            items(expandedList.filter {
+                it.first.startsWith(searchValue.text, true)
+            }) { item ->
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()

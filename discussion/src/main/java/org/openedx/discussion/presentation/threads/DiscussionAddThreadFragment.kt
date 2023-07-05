@@ -24,10 +24,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -124,10 +126,11 @@ private fun DiscussionAddThreadScreen(
     onBackClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val coroutine = rememberCoroutineScope()
     var currentPage by rememberSaveable {
@@ -150,6 +153,17 @@ private fun DiscussionAddThreadScreen(
     }
     val expandedList by rememberSaveable {
         mutableStateOf(topics)
+    }
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+    val isImeVisible by isImeVisibleState()
+
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue()
+        }
     }
     Scaffold(
         scaffoldState = scaffoldState,
@@ -186,17 +200,9 @@ private fun DiscussionAddThreadScreen(
             )
         }
 
-        val bottomSheetWeight by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 0.6f,
-                    compact = 1f
-                )
-            )
-        }
-
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {
@@ -205,21 +211,22 @@ private fun DiscussionAddThreadScreen(
                     }
                 },
             sheetState = bottomSheetScaffoldState,
-            sheetShape = BottomSheetShape(
-                width = configuration.screenWidthDp.px,
-                height = configuration.screenHeightDp.px,
-                weight = bottomSheetWeight
-            ),
+            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             scrimColor = Color.Black.copy(alpha = 0.4f),
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    title = stringResource(id = discussionR.string.discussion_topic),
+                    searchValue = searchValue,
                     expandedList = expandedList,
                     onItemClick = { item ->
                         postToTopic = item
                         coroutine.launch {
                             bottomSheetScaffoldState.hide()
                         }
+                    },
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
                     }
                 )
             }
