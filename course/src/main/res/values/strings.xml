@@ -14,7 +14,7 @@
     <string name="course_view_certificate">View the certificate</string>
     <string name="course_you_can_get_certificate">You can get a certificate after completing the course (earn required grade)</string>
     <string name="course_get_certificate">Get the certificate</string>
-    <string name="course_navigation_prev">Previous</string>
+    <string name="course_navigation_prev">Prev</string>
     <string name="course_navigation_prev_unit">Previous Unit</string>
     <string name="course_navigation_next">Next</string>
     <string name="course_navigation_next_unit">Next Unit</string>
@@ -31,6 +31,7 @@
     <string name="course_good_work">Good work!</string>
     <string name="course_section_finished">Section \"%s\" is finished.</string>
     <string name="course_back_to_outline">Back to outline</string>
+    <string name="course_next_section">Next section</string>
     <string name="course_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_access_expired">Your access to this course has expired.</string>
@@ -46,4 +47,5 @@
     <string name="course_subtitles">Subtitles</string>
     <string name="course_continue_with">Continue with:</string>
     <string name="course_continue">Continue</string>
+    <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
 </resources>

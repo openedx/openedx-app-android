@@ -7,6 +7,11 @@ environments:
       contactUs: "https://dev-example.com/contact"
       FEEDBACK_EMAIL_ADDRESS: "support@example.com"
     OAUTH_CLIENT_ID: "DEV_OAUTH_CLIENT_ID"
+    FIREBASE:
+      PROJECT_ID: ""
+      APPLICATION_ID: ""
+      API_KEY: ""
+      GCM_SENDER_ID: ""
   STAGE:
     URLS:
       API_HOST_URL: "http://stage-example.com/"
@@ -15,6 +20,11 @@ environments:
       contactUs: "http://stage-example.com/contact"
       FEEDBACK_EMAIL_ADDRESS: "support@example.com"
     OAUTH_CLIENT_ID: "STAGE_OAUTH_CLIENT_ID"
+    FIREBASE:
+      PROJECT_ID: ""
+      APPLICATION_ID: ""
+      API_KEY: ""
+      GCM_SENDER_ID: ""
   PROD:
     URLS:
       API_HOST_URL: "https://example.com/"
@@ -23,5 +33,10 @@ environments:
       contactUs: "https://example.com/contact"
       FEEDBACK_EMAIL_ADDRESS: "support@example.com"
     OAUTH_CLIENT_ID: "PROD_OAUTH_CLIENT_ID"
-platformName: "New Open edX"
-platformFullName: "New Open edX"
+    FIREBASE:
+      PROJECT_ID: ""
+      APPLICATION_ID: ""
+      API_KEY: ""
+      GCM_SENDER_ID: ""
+platformName: "OpenEdX"
+platformFullName: "OpenEdX"

@@ -14,6 +14,6 @@
 
         <!-- Set the theme of the Activity that directly follows your splash screen. -->
         <!-- Required -->
-        <item name="postSplashScreenTheme">@style/Theme.NewEdX.NoActionBar</item>
+        <item name="postSplashScreenTheme">@style/Theme.OpenEdX.NoActionBar</item>
     </style>
 </resources>

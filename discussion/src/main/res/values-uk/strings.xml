@@ -9,7 +9,7 @@
     <string name="discussion_recent_activity">Остання активність</string>
     <string name="discussion_most_activity">Найбільша активність</string>
     <string name="discussion_most_votes">Найбільше голосів</string>
-    <string name="discussion_create_post">Створити нову публікацію</string>
+    <string name="discussion_create_post">Створити дискусію</string>
     <string name="discussion_add_response">Додати відповідь</string>
     <string name="discussion_last_post">Останнє повідомлення: %1$s</string>
     <string name="discussion_follow">Стежити</string>
@@ -33,6 +33,8 @@
     <string name="discussion_search_results">Результати пошуку</string>
     <string name="discussion_start_typing_to_find">Почніть вводити, щоб знайти тему</string>
     <string name="discussion_anonymous">anonymous</string>
+    <string name="discussion_no_yet">Ще немає обговорень</string>
+    <string name="discussion_click_button_create_discussion">Натисніть кнопку нижче, щоб створити перше обговорення.</string>
 
     <plurals name="discussion_votes">
         <item quantity="one">%1$d голос</item>

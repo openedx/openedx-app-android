@@ -14,7 +14,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'com.raccoongang.dashboard'
+    namespace 'org.openedx.dashboard'
 
     buildTypes {
         release {
