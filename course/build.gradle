@@ -15,7 +15,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'com.raccoongang.course'
+    namespace 'org.openedx.course'
 
     buildTypes {
         release {

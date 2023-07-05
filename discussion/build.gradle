@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'com.raccoongang.discussion'
+    namespace 'org.openedx.discussion'
     compileSdk 33
 
     defaultConfig {

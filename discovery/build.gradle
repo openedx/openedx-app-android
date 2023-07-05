@@ -16,7 +16,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'com.raccoongang.discovery'
+    namespace 'org.openedx.discovery'
 
     buildTypes {
         release {
