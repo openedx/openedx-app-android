@@ -186,7 +186,6 @@ private fun DiscussionThreadsScreen(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
-    val configuration = LocalConfiguration.current
     val focusManager = LocalFocusManager.current
     val pullRefreshState =
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
@@ -287,15 +286,6 @@ private fun DiscussionThreadsScreen(
             )
         }
 
-        val bottomSheetWeight by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 0.6f,
-                    compact = 1f
-                )
-            )
-        }
-
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         ModalBottomSheetLayout(
@@ -308,11 +298,7 @@ private fun DiscussionThreadsScreen(
                         }
                     }
                 },
-            sheetShape = BottomSheetShape(
-                width = configuration.screenWidthDp.px,
-                height = configuration.screenHeightDp.px,
-                weight = bottomSheetWeight
-            ),
+            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
             sheetBackgroundColor = MaterialTheme.appColors.background,

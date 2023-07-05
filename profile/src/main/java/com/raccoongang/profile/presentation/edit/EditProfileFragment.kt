@@ -284,7 +284,6 @@ private fun EditProfileScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val coroutine = rememberCoroutineScope()
-    val configuration = LocalConfiguration.current
     val focusManager = LocalFocusManager.current
 
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
@@ -396,15 +395,6 @@ private fun EditProfileScreen(
             )
         }
 
-        val bottomSheetWeight by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 0.6f,
-                    compact = 1f
-                )
-            )
-        }
-
         ModalBottomSheetLayout(
             modifier = Modifier
                 .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
@@ -415,11 +405,7 @@ private fun EditProfileScreen(
                         }
                     }
                 },
-            sheetShape = BottomSheetShape(
-                width = configuration.screenWidthDp.px,
-                height = configuration.screenHeightDp.px,
-                weight = bottomSheetWeight
-            ),
+            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
             sheetBackgroundColor = MaterialTheme.appColors.background,
@@ -843,7 +829,7 @@ private fun ProfileFields(
                 name = stringResource(id = profileR.string.profile_spoken_language),
                 initialValue = lang,
                 onClick = {
-                    onFieldClick(COUNTRY, context.getString(profileR.string.profile_spoken_language))
+                    onFieldClick(LANGUAGE, context.getString(profileR.string.profile_spoken_language))
                 }
             )
             InputEditField(
