@@ -17,7 +17,8 @@ class AppViewModel(
     private val notifier: AppNotifier,
     private val room: RoomDatabase,
     private val preferencesManager: PreferencesManager,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val analytics: AppAnalytics
 ) : BaseViewModel() {
 
     val logoutUser: LiveData<Unit>
@@ -28,6 +29,7 @@ class AppViewModel(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        setUserId()
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
@@ -36,9 +38,16 @@ class AppViewModel(
                     withContext(dispatcher) {
                         room.clearAllTables()
                     }
+                    analytics.logoutEvent(true)
                     _logoutUser.value = Unit
                 }
             }
+        }
+    }
+
+    private fun setUserId() {
+        preferencesManager.user?.let {
+            analytics.setUserIdForSession(it.id)
         }
     }
 

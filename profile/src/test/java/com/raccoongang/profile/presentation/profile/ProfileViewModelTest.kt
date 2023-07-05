@@ -12,12 +12,14 @@ import com.raccoongang.core.module.DownloadWorkerController
 import com.raccoongang.core.system.AppCookieManager
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.profile.domain.interactor.ProfileInteractor
+import com.raccoongang.profile.presentation.ProfileAnalytics
 import com.raccoongang.profile.system.notifier.AccountUpdated
 import com.raccoongang.profile.system.notifier.ProfileNotifier
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -45,6 +47,7 @@ class ProfileViewModelTest {
     private val notifier = mockk<ProfileNotifier>()
     private val cookieManager = mockk<AppCookieManager>()
     private val workerController = mockk<DownloadWorkerController>()
+    private val analytics = mockk<ProfileAnalytics>()
 
     private val account = mockk<Account>()
 
@@ -73,7 +76,8 @@ class ProfileViewModelTest {
                 notifier,
                 dispatcher,
                 cookieManager,
-                workerController
+                workerController,
+                analytics
             )
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
@@ -95,7 +99,8 @@ class ProfileViewModelTest {
                 notifier,
                 dispatcher,
                 cookieManager,
-                workerController
+                workerController,
+                analytics
             )
         coEvery { interactor.getAccount() } throws Exception()
         advanceUntilIdle()
@@ -117,7 +122,8 @@ class ProfileViewModelTest {
                 notifier,
                 dispatcher,
                 cookieManager,
-                workerController
+                workerController,
+                analytics
             )
         coEvery { interactor.getAccount() } returns account
         every { preferencesManager.profile = any() } returns Unit
@@ -139,7 +145,8 @@ class ProfileViewModelTest {
                 notifier,
                 dispatcher,
                 cookieManager,
-                workerController
+                workerController,
+                analytics
             )
         coEvery { interactor.logout() } throws UnknownHostException()
         coEvery { workerController.cancelWork() } returns Unit
@@ -164,7 +171,8 @@ class ProfileViewModelTest {
                 notifier,
                 dispatcher,
                 cookieManager,
-                workerController
+                workerController,
+                analytics
             )
         coEvery { interactor.logout() } throws Exception()
         coEvery { workerController.cancelWork() } returns Unit
@@ -185,11 +193,13 @@ class ProfileViewModelTest {
             preferencesManager,
             resourceManager,
             notifier,
-            dispatcherIO,
+            dispatcher,
             cookieManager,
-            workerController
+            workerController,
+            analytics
         )
         coEvery { interactor.getAccount() } returns mockk()
+        every { analytics.logoutEvent(false) } returns Unit
         every { preferencesManager.profile = any() } returns Unit
         coEvery { interactor.logout() } returns Unit
         coEvery { workerController.cancelWork() } returns Unit
@@ -197,6 +207,7 @@ class ProfileViewModelTest {
         viewModel.logout()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.logout() }
+        verify { analytics.logoutEvent(false) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.successLogout.value == true)
@@ -210,9 +221,10 @@ class ProfileViewModelTest {
             preferencesManager,
             resourceManager,
             notifier,
-            dispatcherIO,
+            dispatcher,
             cookieManager,
-            workerController
+            workerController,
+            analytics
         )
         every { notifier.notifier } returns flow { emit(AccountUpdated()) }
         val mockLifeCycleOwner: LifecycleOwner = mockk()

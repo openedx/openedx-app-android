@@ -4,10 +4,13 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.R
 import com.raccoongang.core.UIMessage
+import com.raccoongang.core.domain.model.Course
+import com.raccoongang.core.domain.model.Media
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.core.system.notifier.CourseDashboardUpdate
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,9 +36,34 @@ class CourseDetailsViewModelTest {
     private val interactor = mockk<CourseInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
     private val notifier = spyk<CourseNotifier>()
+    private val analytics = mockk<CourseAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
+
+    private val mockCourse = Course(
+        id = "id",
+        blocksUrl = "blocksUrl",
+        courseId = "courseId",
+        effort = "effort",
+        enrollmentStart = null,
+        enrollmentEnd = null,
+        hidden = false,
+        invitationOnly = false,
+        media = Media(),
+        mobileAvailable = true,
+        name = "Test course",
+        number = "number",
+        org = "EdX",
+        pacing = "pacing",
+        shortDescription = "shortDescription",
+        start = "start",
+        end = "end",
+        startDisplay = "startDisplay",
+        startType = "startType",
+        overview = "",
+        isEnrolled = false
+    )
 
     @Before
     fun setUp() {
@@ -52,7 +80,7 @@ class CourseDetailsViewModelTest {
     @Test
     fun `getCourseDetails no internet connection exception`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } throws UnknownHostException()
         advanceUntilIdle()
@@ -68,7 +96,7 @@ class CourseDetailsViewModelTest {
     @Test
     fun `getCourseDetails unknown exception`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } throws Exception()
         advanceUntilIdle()
@@ -84,7 +112,7 @@ class CourseDetailsViewModelTest {
     @Test
     fun `getCourseDetails success with internet`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockk()
 
@@ -99,7 +127,7 @@ class CourseDetailsViewModelTest {
     @Test
     fun `getCourseDetails success without internet`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getCourseDetailsFromCache(any()) } returns mockk()
 
@@ -115,17 +143,20 @@ class CourseDetailsViewModelTest {
     @Test
     fun `enrollInACourse internet connection error`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         coEvery { interactor.enrollInACourse(any()) } throws UnknownHostException()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDetails(any()) } returns mockk()
-
+        coEvery { interactor.getCourseDetails(any()) } returns mockCourse
+        every { analytics.courseEnrollClickedEvent(any(), any()) } returns Unit
+        every { analytics.courseEnrollSuccessEvent(any(), any()) } returns Unit
 
         viewModel.enrollInACourse("")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
+        verify(exactly = 1) { analytics.courseEnrollClickedEvent(any(), any()) }
+        verify(exactly = 0) { analytics.courseEnrollSuccessEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -135,17 +166,21 @@ class CourseDetailsViewModelTest {
     @Test
     fun `enrollInACourse unknown exception`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         coEvery { interactor.enrollInACourse(any()) } throws Exception()
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDetails(any()) } returns mockk()
+        coEvery { interactor.getCourseDetails(any()) } returns mockCourse
+        every { analytics.courseEnrollClickedEvent(any(), any()) } returns Unit
+        every { analytics.courseEnrollSuccessEvent(any(), any()) } returns Unit
 
 
         viewModel.enrollInACourse("")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
+        verify(exactly = 1) { analytics.courseEnrollClickedEvent(any(), any()) }
+        verify(exactly = 0) { analytics.courseEnrollSuccessEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -155,11 +190,13 @@ class CourseDetailsViewModelTest {
     @Test
     fun `enrollInACourse success`() = runTest {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
+        every { analytics.courseEnrollClickedEvent(any(), any()) } returns Unit
+        every { analytics.courseEnrollSuccessEvent(any(), any()) } returns Unit
         coEvery { interactor.enrollInACourse(any()) } returns Unit
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDetails(any()) } returns mockk()
+        coEvery { interactor.getCourseDetails(any()) } returns mockCourse
 
 
         delay(200)
@@ -167,6 +204,8 @@ class CourseDetailsViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
+        verify(exactly = 1) { analytics.courseEnrollClickedEvent(any(), any()) }
+        verify(exactly = 1) { analytics.courseEnrollSuccessEvent(any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
@@ -175,8 +214,7 @@ class CourseDetailsViewModelTest {
     @Test
     fun `getCourseAboutBody contains black`() {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
-
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         val overview = viewModel.getCourseAboutBody(ULong.MAX_VALUE, ULong.MIN_VALUE)
         val count = overview.contains("black")
         assert(count)
@@ -185,8 +223,7 @@ class CourseDetailsViewModelTest {
     @Test
     fun `getCourseAboutBody don't contains black`() {
         val viewModel =
-            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier)
-
+            CourseDetailsViewModel("", networkConnection, interactor, resourceManager, notifier, analytics)
         val overview = viewModel.getCourseAboutBody(ULong.MAX_VALUE, ULong.MAX_VALUE)
         val count = overview.contains("black")
         assert(!count)

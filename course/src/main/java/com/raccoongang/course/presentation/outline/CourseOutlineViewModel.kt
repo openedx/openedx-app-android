@@ -20,6 +20,7 @@ import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.core.system.notifier.CourseStructureUpdated
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
 import com.raccoongang.course.R as courseR
 
@@ -30,6 +31,7 @@ class CourseOutlineViewModel(
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: PreferencesManager,
+    private val analytics: CourseAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
@@ -177,6 +179,25 @@ class CourseOutlineViewModel(
             it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
         }
         return resumeVerticalBlock
+    }
+
+    fun resumeCourseTappedEvent(blockId: String) {
+        val currentState = uiState.value
+        if (currentState is CourseOutlineUIState.CourseData) {
+            analytics.resumeCourseTappedEvent(courseId, currentState.courseStructure.name, blockId)
+        }
+    }
+
+    fun sequentialClickedEvent(blockId: String, blockName: String) {
+        val currentState = uiState.value
+        if (currentState is CourseOutlineUIState.CourseData) {
+            analytics.sequentialClickedEvent(
+                courseId,
+                currentState.courseStructure.name,
+                blockId,
+                blockName
+            )
+        }
     }
 
 }

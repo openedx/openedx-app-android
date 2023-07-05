@@ -60,6 +60,7 @@ class ChapterEndFragmentDialog : DialogFragment() {
                     nextSectionName = requireArguments().getString(ARG_NEXT_SECTION_NAME) ?: "",
                     onBackButtonClick = {
                         dismiss()
+                        listener?.onDismiss()
                         requireActivity().supportFragmentManager.popBackStack(
                             CourseSectionFragment::class.java.simpleName,
                             0
@@ -93,6 +94,7 @@ class ChapterEndFragmentDialog : DialogFragment() {
 
 interface DialogListener {
     fun <T> onClick(value: T)
+    fun onDismiss()
 }
 
 @Composable

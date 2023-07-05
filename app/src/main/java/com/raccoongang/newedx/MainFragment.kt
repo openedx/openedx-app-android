@@ -10,10 +10,12 @@ import com.raccoongang.discovery.presentation.DiscoveryFragment
 import com.raccoongang.newedx.adapter.MainNavigationFragmentAdapter
 import com.raccoongang.newedx.databinding.FragmentMainBinding
 import com.raccoongang.profile.presentation.profile.ProfileFragment
+import org.koin.android.ext.android.inject
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val binding by viewBinding(FragmentMainBinding::bind)
+    private val analytics by inject<AppAnalytics>()
 
     private lateinit var adapter: MainNavigationFragmentAdapter
 
@@ -24,10 +26,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         binding.bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.fragmentHome -> binding.viewPager.setCurrentItem(0, false)
-                R.id.fragmentDashboard -> binding.viewPager.setCurrentItem(1, false)
-                R.id.fragmentPrograms -> binding.viewPager.setCurrentItem(2, false)
-                R.id.fragmentProfile -> binding.viewPager.setCurrentItem(3, false)
+                R.id.fragmentHome -> {
+                    analytics.discoveryTabClickedEvent()
+                    binding.viewPager.setCurrentItem(0, false)
+                }
+                R.id.fragmentDashboard -> {
+                    analytics.dashboardTabClickedEvent()
+                    binding.viewPager.setCurrentItem(1, false)
+                }
+                R.id.fragmentPrograms -> {
+                    analytics.programsTabClickedEvent()
+                    binding.viewPager.setCurrentItem(2, false)
+                }
+                R.id.fragmentProfile -> {
+                    analytics.profileTabClickedEvent()
+                    binding.viewPager.setCurrentItem(3, false)
+                }
             }
             true
         }

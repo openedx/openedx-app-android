@@ -14,6 +14,7 @@ import com.raccoongang.core.system.connection.NetworkConnection
 import com.raccoongang.core.system.notifier.CourseDashboardUpdate
 import com.raccoongang.core.system.notifier.CourseNotifier
 import com.raccoongang.course.domain.interactor.CourseInteractor
+import com.raccoongang.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
 
 class CourseDetailsViewModel(
@@ -21,7 +22,8 @@ class CourseDetailsViewModel(
     private val networkConnection: NetworkConnection,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier
+    private val notifier: CourseNotifier,
+    private val analytics: CourseAnalytics
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<CourseDetailsUIState>(CourseDetailsUIState.Loading)
@@ -65,11 +67,15 @@ class CourseDetailsViewModel(
     fun enrollInACourse(id: String) {
         viewModelScope.launch {
             try {
-                interactor.enrollInACourse(id)
-                val course = interactor.getCourseDetails(id)
                 val courseData = _uiState.value
                 if (courseData is CourseDetailsUIState.CourseData) {
+                    courseEnrollClickedEvent(id, courseData.course.name)
+                }
+                interactor.enrollInACourse(id)
+                val course = interactor.getCourseDetails(id)
+                if (courseData is CourseDetailsUIState.CourseData) {
                     _uiState.value = courseData.copy(course = course)
+                    courseEnrollSuccessEvent(id, course.name)
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
@@ -105,5 +111,17 @@ class CourseDetailsViewModel(
     private fun getColorFromULong(color: ULong): String {
         if (color == ULong.MIN_VALUE) return "black"
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
+    }
+
+    private fun courseEnrollClickedEvent(courseId: String, courseName: String) {
+        analytics.courseEnrollClickedEvent(courseId, courseName)
+    }
+
+    private fun courseEnrollSuccessEvent(courseId: String, courseName: String) {
+        analytics.courseEnrollSuccessEvent(courseId, courseName)
+    }
+
+    fun viewCourseClickedEvent(courseId: String, courseName: String) {
+        analytics.viewCourseClickedEvent(courseId, courseName)
     }
 }

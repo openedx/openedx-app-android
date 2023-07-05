@@ -70,9 +70,11 @@ class SignInFragment : Fragment() {
                         viewModel.login(login, password)
                     },
                     onRegisterClick = {
+                        viewModel.signUpClickedEvent()
                         router.navigateToSignUp(parentFragmentManager)
                     },
                     onForgotPasswordClick = {
+                        viewModel.forgotPasswordClickedEvent()
                         router.navigateToRestorePassword(parentFragmentManager)
                     }
                 )

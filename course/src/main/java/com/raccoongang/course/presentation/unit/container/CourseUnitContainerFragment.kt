@@ -116,6 +116,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         if (!restrictDoubleClick()) {
                             val block = viewModel.moveToPrevBlock()
                             if (block != null) {
+                                viewModel.prevBlockClickedEvent(block.blockId, block.displayName)
                                 if (!block.type.isContainer()) {
                                     binding.viewPager.setCurrentItem(
                                         binding.viewPager.currentItem - 1,
@@ -134,6 +135,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         if (!restrictDoubleClick()) {
                             val block = viewModel.moveToNextBlock()
                             if (block != null) {
+                                viewModel.nextBlockClickedEvent(block.blockId, block.displayName)
                                 if (!block.type.isContainer()) {
                                     binding.viewPager.setCurrentItem(
                                         binding.viewPager.currentItem + 1,
@@ -152,11 +154,21 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                     currentVerticalBlock?.displayName ?: "",
                                     nextVerticalBlock?.displayName ?: ""
                                 )
+                                currentVerticalBlock?.let {
+                                    viewModel.finishVerticalClickedEvent(
+                                        it.blockId,
+                                        it.displayName
+                                    )
+                                }
                                 dialog.listener = object : DialogListener {
                                     override fun <T> onClick(value: T) {
                                         viewModel.proceedToNext()
                                         val nextBlock = viewModel.getCurrentVerticalBlock()
                                         nextBlock?.let {
+                                            viewModel.finishVerticalNextClickedEvent(
+                                                it.blockId,
+                                                it.displayName
+                                            )
                                             if (it.type.isContainer()) {
                                                 router.replaceCourseContainer(
                                                     requireActivity().supportFragmentManager,
@@ -170,6 +182,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                                 )
                                             }
                                         }
+                                    }
+
+                                    override fun onDismiss() {
+                                        viewModel.finishVerticalBackClickedEvent()
                                     }
                                 }
                                 dialog.show(

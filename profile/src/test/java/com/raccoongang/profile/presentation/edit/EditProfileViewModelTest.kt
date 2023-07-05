@@ -7,6 +7,7 @@ import com.raccoongang.core.domain.model.Account
 import com.raccoongang.core.domain.model.ProfileImage
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.profile.domain.interactor.ProfileInteractor
+import com.raccoongang.profile.presentation.ProfileAnalytics
 import com.raccoongang.profile.system.notifier.AccountUpdated
 import com.raccoongang.profile.system.notifier.ProfileNotifier
 import io.mockk.*
@@ -33,6 +34,7 @@ class EditProfileViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<ProfileInteractor>()
     private val notifier = mockk<ProfileNotifier>()
+    private val analytics = mockk<ProfileAnalytics>()
 
     private val account = Account(
         username = "thom84",
@@ -71,7 +73,8 @@ class EditProfileViewModelTest {
 
     @Test
     fun `updateAccount no internet connection`() = runTest {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.updateAccount(any()) } throws UnknownHostException()
         viewModel.updateAccount(emptyMap())
         advanceUntilIdle()
@@ -85,9 +88,10 @@ class EditProfileViewModelTest {
 
     @Test
     fun `updateAccount unknown exception`() = runTest {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.updateAccount(any()) } throws Exception()
-        
+
         viewModel.updateAccount(emptyMap())
         advanceUntilIdle()
 
@@ -100,7 +104,8 @@ class EditProfileViewModelTest {
 
     @Test
     fun `updateAccount success`() = runTest {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(any<AccountUpdated>()) } returns Unit
         viewModel.updateAccount(emptyMap())
@@ -114,11 +119,12 @@ class EditProfileViewModelTest {
 
     @Test
     fun `updateAccountAndImage no internet connection`() = runTest {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.setProfileImage(any(), any()) } throws UnknownHostException()
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(AccountUpdated()) } returns Unit
-        
+
         viewModel.updateAccountAndImage(emptyMap(), file, "")
         advanceUntilIdle()
 
@@ -133,11 +139,12 @@ class EditProfileViewModelTest {
 
     @Test
     fun `updateAccountAndImage unknown exception`() = runTest {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.setProfileImage(any(), any()) } throws Exception()
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(AccountUpdated()) } returns Unit
-        
+
         viewModel.updateAccountAndImage(emptyMap(), file, "")
         advanceUntilIdle()
 
@@ -152,11 +159,12 @@ class EditProfileViewModelTest {
 
     @Test
     fun `updateAccountAndImage success`() = runTest {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.setProfileImage(any(), any()) } returns Unit
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(any<AccountUpdated>()) } returns Unit
-        
+
         viewModel.updateAccountAndImage(emptyMap(), file, "")
         advanceUntilIdle()
 
@@ -170,7 +178,8 @@ class EditProfileViewModelTest {
 
     @Test
     fun `setImageUri set new value`() {
-        val viewModel = EditProfileViewModel(interactor, resourceManager, notifier, account)
+        val viewModel =
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         viewModel.setImageUri(mockk())
 
         assert(viewModel.selectedImageUri.value != null)

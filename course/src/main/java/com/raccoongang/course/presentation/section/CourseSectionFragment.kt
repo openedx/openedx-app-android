@@ -118,6 +118,7 @@ class CourseSectionFragment : Fragment() {
                     },
                     onItemClick = { block ->
                         if (block.descendants.isNotEmpty()) {
+                            viewModel.verticalClickedEvent(block.blockId, block.displayName)
                             router.navigateToCourseContainer(
                                 requireActivity().supportFragmentManager,
                                 block.id,
@@ -391,7 +392,8 @@ private fun CourseSectionScreenPreview() {
                     mockBlock,
                     mockBlock
                 ),
-                mapOf()
+                mapOf(),
+                ""
             ),
             "Course default",
             uiMessage = null,
@@ -416,7 +418,8 @@ private fun CourseSectionScreenTabletPreview() {
                     mockBlock,
                     mockBlock
                 ),
-                mapOf()
+                mapOf(),
+                ""
             ),
             "Course default",
             uiMessage = null,

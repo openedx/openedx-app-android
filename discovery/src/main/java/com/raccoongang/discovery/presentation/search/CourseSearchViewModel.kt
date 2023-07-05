@@ -11,6 +11,7 @@ import com.raccoongang.core.domain.model.Course
 import com.raccoongang.core.extension.isInternetError
 import com.raccoongang.core.system.ResourceManager
 import com.raccoongang.discovery.domain.interactor.DiscoveryInteractor
+import com.raccoongang.discovery.presentation.DiscoveryAnalytics
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 
 class CourseSearchViewModel(
     private val interactor: DiscoveryInteractor,
-    private val resourceManager: ResourceManager
+    private val resourceManager: ResourceManager,
+    private val analytics: DiscoveryAnalytics
 ) : BaseViewModel() {
 
     private val _uiState =
@@ -109,6 +111,7 @@ class CourseSearchViewModel(
                     _canLoadMore.value = false
                     nextPage = null
                 }
+                discoveryCourseSearchEvent(query, response.pagination.count)
                 coursesList.addAll(response.results)
                 _uiState.value = CourseSearchUIState.Courses(coursesList, response.pagination.count)
             } catch (e: Exception) {
@@ -123,6 +126,12 @@ class CourseSearchViewModel(
                 isLoading = false
                 _isUpdating.value = false
             }
+        }
+    }
+
+    private fun discoveryCourseSearchEvent(query: String, coursesCount: Int) {
+        if (query.isNotEmpty()) {
+            analytics.discoveryCourseSearchEvent(query, coursesCount)
         }
     }
 
