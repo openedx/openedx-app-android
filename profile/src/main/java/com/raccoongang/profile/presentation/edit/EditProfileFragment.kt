@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalComposeUiApi::class)
+@file:OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
 
 package com.raccoongang.profile.presentation.edit
 
@@ -45,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -285,10 +286,11 @@ private fun EditProfileScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val coroutine = rememberCoroutineScope()
-    val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
 
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -297,6 +299,14 @@ private fun EditProfileScreen(
     }
     var openWarningMessageDialog by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    var bottomDialogTitle by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
     }
 
     val mapFields = rememberSaveableMap {
@@ -334,6 +344,15 @@ private fun EditProfileScreen(
     val modalListState = rememberLazyListState()
     var isOpenChangeImageDialogState by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    val isImeVisible by isImeVisibleState()
+
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue()
+        }
     }
 
     Scaffold(
@@ -378,17 +397,9 @@ private fun EditProfileScreen(
             )
         }
 
-        val bottomSheetWeight by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 0.8f else 0.6f,
-                    compact = 1f
-                )
-            )
-        }
-
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {
@@ -396,16 +407,14 @@ private fun EditProfileScreen(
                         }
                     }
                 },
-            sheetShape = BottomSheetShape(
-                width = configuration.screenWidthDp.px,
-                height = configuration.screenHeightDp.px,
-                weight = bottomSheetWeight
-            ),
+            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    title = bottomDialogTitle,
+                    searchValue = searchValue,
                     expandedList = expandedList,
                     listState = modalListState,
                     onItemClick = { item ->
@@ -419,7 +428,11 @@ private fun EditProfileScreen(
                             bottomSheetScaffoldState.hide()
                             modalListState.scrollToItem(0)
                         }
-                    })
+                    },
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
+                    }
+                )
             }) {
 
             HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
@@ -585,7 +598,7 @@ private fun EditProfileScreen(
                             Spacer(modifier = Modifier.height(20.dp))
                             ProfileFields(
                                 disabled = uiState.isLimited,
-                                onFieldClick = { it ->
+                                onFieldClick = { it, title ->
                                     if (it == YEAR_OF_BIRTH) {
                                         serverFieldName.value = YEAR_OF_BIRTH
                                         expandedList =
@@ -598,6 +611,7 @@ private fun EditProfileScreen(
                                         serverFieldName.value = LANGUAGE
                                         expandedList = LocaleUtils.getLanguages()
                                     }
+                                    bottomDialogTitle = title
                                     keyboardController?.hide()
                                     coroutine.launch {
                                         val index = expandedList.indexOfFirst { option ->
@@ -788,10 +802,11 @@ private fun ChangeImageDialog(
 private fun ProfileFields(
     disabled: Boolean,
     mapFields: MutableMap<String, Any?>,
-    onFieldClick: (String) -> Unit,
+    onFieldClick: (String, String) -> Unit,
     onValueChanged: (String) -> Unit,
     onDoneClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val languageProficiency = (mapFields[LANGUAGE] as List<LanguageProficiency>)
     val lang = if (languageProficiency.isNotEmpty()) {
         LocaleUtils.getLanguageByLanguageCode(languageProficiency[0].code)
@@ -801,7 +816,7 @@ private fun ProfileFields(
             name = stringResource(id = profileR.string.profile_year),
             initialValue = mapFields[YEAR_OF_BIRTH].toString(),
             onClick = {
-                onFieldClick(YEAR_OF_BIRTH)
+                onFieldClick(YEAR_OF_BIRTH, context.getString(profileR.string.profile_year))
             }
         )
         if (!disabled) {
@@ -809,14 +824,14 @@ private fun ProfileFields(
                 name = stringResource(id = profileR.string.profile_location),
                 initialValue = LocaleUtils.getCountryByCountryCode(mapFields[COUNTRY].toString()),
                 onClick = {
-                    onFieldClick(COUNTRY)
+                    onFieldClick(COUNTRY, context.getString(profileR.string.profile_location))
                 }
             )
             SelectableField(
                 name = stringResource(id = profileR.string.profile_spoken_language),
                 initialValue = lang,
                 onClick = {
-                    onFieldClick(LANGUAGE)
+                    onFieldClick(LANGUAGE, context.getString(profileR.string.profile_spoken_language))
                 }
             )
             InputEditField(

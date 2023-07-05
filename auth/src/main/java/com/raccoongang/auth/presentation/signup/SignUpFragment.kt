@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -111,8 +112,10 @@ internal fun RegistrationScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
+    val focusManager = LocalFocusManager.current
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val coroutine = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -140,12 +143,29 @@ internal fun RegistrationScreen(
 
     val listState = rememberLazyListState()
 
+    var bottomDialogTitle by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+
+    val isImeVisible by isImeVisibleState()
+
     LaunchedEffect(validationError) {
         if (validationError) {
             coroutine.launch {
                 scrollState.animateScrollTo(0, tween(300))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
+        }
+    }
+
+    LaunchedEffect(bottomSheetScaffoldState.isVisible) {
+        if (!bottomSheetScaffoldState.isVisible) {
+            focusManager.clearFocus()
+            searchValue = TextFieldValue("")
         }
     }
 
@@ -193,17 +213,9 @@ internal fun RegistrationScreen(
             )
         }
 
-        val bottomSheetWeight by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = if (configuration.orientation == ORIENTATION_PORTRAIT) 0.8f else 0.6f,
-                    compact = 1f
-                )
-            )
-        }
-
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {
@@ -212,16 +224,15 @@ internal fun RegistrationScreen(
                     }
                 },
             sheetState = bottomSheetScaffoldState,
-            sheetShape = BottomSheetShape(
-                width = configuration.screenWidthDp.px,
-                height = configuration.screenHeightDp.px,
-                weight = bottomSheetWeight
-            ),
+            sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             scrimColor = Color.Black.copy(alpha = 0.4f),
             sheetBackgroundColor = MaterialTheme.appColors.background,
             sheetContent = {
                 SheetContent(
+                    title = bottomDialogTitle,
+                    searchValue = searchValue,
                     expandedList = expandedList,
+                    listState = listState,
                     onItemClick = { item ->
                         mapFields[serverFieldName.value] = item.value
                         selectableNamesMap[serverFieldName.value] = item.name
@@ -229,7 +240,9 @@ internal fun RegistrationScreen(
                             bottomSheetScaffoldState.hide()
                         }
                     },
-                    listState = listState
+                    searchValueChanged = {
+                        searchValue = TextFieldValue(it)
+                    }
                 )
             }
         ) {
@@ -337,6 +350,7 @@ internal fun RegistrationScreen(
                                                 if (bottomSheetScaffoldState.isVisible) {
                                                     bottomSheetScaffoldState.hide()
                                                 } else {
+                                                    bottomDialogTitle = field.label
                                                     showErrorMap[field.name] = false
                                                     bottomSheetScaffoldState.show()
                                                 }
@@ -363,6 +377,7 @@ internal fun RegistrationScreen(
                                                             if (bottomSheetScaffoldState.isVisible) {
                                                                 bottomSheetScaffoldState.hide()
                                                             } else {
+                                                                bottomDialogTitle = field.label
                                                                 showErrorMap[field.name] = false
                                                                 bottomSheetScaffoldState.show()
                                                             }
