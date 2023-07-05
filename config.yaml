@@ -38,5 +38,5 @@ environments:
       APPLICATION_ID: ""
       API_KEY: ""
       GCM_SENDER_ID: ""
-platformName: "New Open edX"
-platformFullName: "New Open edX"
+platformName: "OpenEdX"
+platformFullName: "OpenEdX"

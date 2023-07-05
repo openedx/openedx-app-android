@@ -15,7 +15,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'com.raccoongang.auth'
+    namespace 'org.openedx.auth'
 
     flavorDimensions "tier"
     productFlavors {

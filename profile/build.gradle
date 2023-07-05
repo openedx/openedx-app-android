@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    namespace 'org.openedx.profile'
     compileSdk 33
 
     defaultConfig {

@@ -31,7 +31,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
-    namespace 'com.raccoongang.core'
+    namespace 'org.openedx.core'
 
     flavorDimensions "tier"
     productFlavors {
