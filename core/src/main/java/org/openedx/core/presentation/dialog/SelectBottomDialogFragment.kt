@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
@@ -31,13 +33,13 @@ import org.openedx.core.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.parcelableArrayList
 import org.openedx.core.ui.SheetContent
-import org.openedx.core.ui.px
 import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.theme.BottomSheetShape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.windowSizeValue
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.ui.isImeVisibleState
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.theme.appShapes
 
 class SelectBottomDialogFragment : BottomSheetDialogFragment() {
 
@@ -58,23 +60,31 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
             dialog!!.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             (dialog as? BottomSheetDialog)?.behavior?.apply {
                 state = BottomSheetBehavior.STATE_EXPANDED
+                skipCollapsed = true
             }
         }
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val windowSize = rememberWindowSize()
-                val configuration = LocalConfiguration.current
                 val listState = rememberLazyListState()
 
                 var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
                     mutableStateOf(TextFieldValue())
                 }
 
-                Surface(color = androidx.compose.ui.graphics.Color.Transparent) {
+                val isImeVisible by isImeVisibleState()
+
+                Surface(
+                    modifier = Modifier,
+                    color = androidx.compose.ui.graphics.Color.Transparent
+                ) {
                     Box(
-                        modifier = Modifier,
-                        contentAlignment = Alignment.TopCenter
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .noRippleClickable {
+                                dismiss()
+                            },
+                        contentAlignment = Alignment.BottomCenter
                     ) {
                         Box(
                             modifier = Modifier
@@ -85,6 +95,8 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
                                     shape = MaterialTheme.appShapes.screenBackgroundShape
                                 )
                                 .clip(MaterialTheme.appShapes.screenBackgroundShape)
+                                .padding(bottom = if (isImeVisible) 120.dp else 0.dp)
+                                .noRippleClickable {  }
                         ) {
                             SheetContent(
                                 searchValue = searchValue,

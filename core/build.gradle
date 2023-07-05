@@ -172,9 +172,9 @@ dependencies {
 
     api "androidx.work:work-runtime-ktx:$work_version"
 
-    api 'com.google.firebase:firebase-common-ktx:20.3.3'
-    api platform('com.google.firebase:firebase-bom:32.1.0')
-    api 'com.google.android.gms:play-services-measurement-api:21.3.0'
+
+    api platform("com.google.firebase:firebase-bom:$firebase_version")
+    api 'com.google.firebase:firebase-common-ktx'
     api "com.google.firebase:firebase-crashlytics-ktx"
     api "com.google.firebase:firebase-analytics-ktx"
 

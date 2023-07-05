@@ -49,7 +49,6 @@ import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
-import org.openedx.core.BuildConfig
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
