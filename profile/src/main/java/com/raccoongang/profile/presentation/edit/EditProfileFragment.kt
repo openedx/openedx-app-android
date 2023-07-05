@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalComposeUiApi::class)
+@file:OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
 
 package com.raccoongang.profile.presentation.edit
 
@@ -288,7 +288,8 @@ private fun EditProfileScreen(
     val focusManager = LocalFocusManager.current
 
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -343,6 +344,8 @@ private fun EditProfileScreen(
     var isOpenChangeImageDialogState by rememberSaveable {
         mutableStateOf(false)
     }
+
+    val isImeVisible by isImeVisibleState()
 
     LaunchedEffect(bottomSheetScaffoldState.isVisible) {
         if (!bottomSheetScaffoldState.isVisible) {
@@ -404,6 +407,7 @@ private fun EditProfileScreen(
 
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {

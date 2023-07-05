@@ -183,7 +183,8 @@ private fun DiscussionThreadsScreen(
 
     val scaffoldState = rememberScaffoldState()
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val configuration = LocalConfiguration.current
     val focusManager = LocalFocusManager.current
@@ -221,6 +222,8 @@ private fun DiscussionThreadsScreen(
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
+
+    val isImeVisible by isImeVisibleState()
 
     val scaffoldModifier = if (viewType == FragmentViewType.FULL_CONTENT) {
         Modifier
@@ -297,6 +300,7 @@ private fun DiscussionThreadsScreen(
 
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {

@@ -114,7 +114,8 @@ internal fun RegistrationScreen(
     val configuration = LocalConfiguration.current
     val focusManager = LocalFocusManager.current
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
     val coroutine = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -149,6 +150,8 @@ internal fun RegistrationScreen(
     var searchValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
+
+    val isImeVisible by isImeVisibleState()
 
     LaunchedEffect(validationError) {
         if (validationError) {
@@ -221,6 +224,7 @@ internal fun RegistrationScreen(
 
         ModalBottomSheetLayout(
             modifier = Modifier
+                .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
                         coroutine.launch {
