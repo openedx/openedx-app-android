@@ -27,6 +27,8 @@ You can find the plugin with the API and installation guide [here](https://githu
 Please feel welcome to develop any of the suggested features below and submit a pull request.
 
 - ✅ ~~Migrate to the new APIs~~
+- ✅ ~~New Navigation~~
+- ✅ ~~Analytics and Crashlytics~~
 - Recent searches
 - Migrate to the Olive and JWT token
 - UnAuth User mode
