@@ -22,6 +22,7 @@ Content:
   + [Useful links](#useful-links)
 * [Project structure and Modularity](#project-structure-and-modularity)
     - [Main rule](#main-rule)
+    - [Structure](#structure)
     - [Responsibility](#responsibility)
     - [Benefits](#benefits)
     - [How to create a module for your new feature?](#how-to-create-a-module-for-your-new-feature)
@@ -73,7 +74,7 @@ For instance, here we can find the next structure:
 `CourseInteractor` as a representation of the Domain Layer.  
 And `CourseRepository` as a representation of the Data Layer.
 
-The best way to determine **what a module does** is to open its interactor.  
+The best way to determine **what a module does** is to open its Interactor.  
 Here you can find all the business cases covered by the module.
 
 But if you want to know **how it does it**, you must delve into its Presentation and Data layers.
@@ -136,6 +137,7 @@ It helps avoid conflicts with circular dependencies.
 If you need to pass some logic from one independent module to another, it is not a good idea to link modules to each other, this will eventually lead to circular dependencies and the broken project.  
 The better way is an abstraction in the core, implementation in the module, and dependency injection.
 
+## Structure
 [<img src="Resources/Modules.jpg" width="600"/>](Resources/Modules.jpg)
 
 ## Responsibility
