@@ -2,7 +2,6 @@
 
 package org.openedx.discussion.presentation.threads
 
-import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
@@ -23,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -38,13 +36,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.*
 import org.openedx.discussion.domain.model.DiscussionType
-import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import org.openedx.discussion.R as discussionR
 
 class DiscussionAddThreadFragment : Fragment() {
@@ -391,7 +389,7 @@ private fun DiscussionAddThreadScreen(
                                         onClick = {
                                             onPostDiscussionClick(
                                                 discussionType,
-                                                topicData.second,
+                                                postToTopic.second,
                                                 titleValue,
                                                 discussionValue,
                                                 followPost
