@@ -1,7 +1,8 @@
-
 # EducationX Android
 
 Modern vision of the mobile application for the Open EdX platform from Raccoon Gang.
+
+[Documentation](Documentation/Documentation.md)
 
 ## Building
 1. Check out the source code:
@@ -12,7 +13,7 @@ Modern vision of the mobile application for the Open EdX platform from Raccoon G
 
 3. Choose ``educationx-app-android``.
 
-4. Configure the [``config.yaml`` file](https://github.com/raccoongang/educationx-app-android/blob/main/config.yaml) with URLs and OAuth credentials for your Open edX instance.
+4. Configure the [config.yaml](config.yaml) with URLs and OAuth credentials for your Open edX instance.
 
 5. Select the build variant ``develop``, ``stage``, or ``prod``.
 
