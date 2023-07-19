@@ -102,7 +102,6 @@ class ProfileViewModel(
                 analytics.logoutEvent(false)
                 _successLogout.value = true
             } catch (e: Exception) {
-                e.printStackTrace()
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))

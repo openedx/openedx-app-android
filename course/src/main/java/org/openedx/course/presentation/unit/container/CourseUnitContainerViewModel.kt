@@ -69,7 +69,7 @@ class CourseUnitContainerViewModel(
             courseName = courseStructure.name
             this.blocks.clearAndAddAll(blocks)
         } catch (e: Exception) {
-            e.printStackTrace()
+            //ignore e.printStackTrace()
         }
     }
 

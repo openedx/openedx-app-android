@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.*
 import org.junit.*
 import org.junit.rules.TestRule
+import org.openedx.discussion.domain.model.Thread
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -286,17 +287,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
-        coEvery { interactor.setThreadRead(any()) } throws UnknownHostException()
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
 
         coEvery { interactor.getThreadQuestionComments(any(), any(), any()) } returns CommentsData(
@@ -323,16 +323,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.getThreadComments(any(), eq(2)) } returns CommentsData(
             comments,
@@ -357,16 +357,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
 
         coEvery { interactor.setThreadVoted(any(), any()) } throws UnknownHostException()
@@ -387,6 +387,7 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
         val viewModel =
@@ -416,6 +417,7 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
         val viewModel =
@@ -444,6 +446,7 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
         val viewModel =
@@ -474,6 +477,7 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
         val viewModel =
@@ -504,16 +508,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setCommentFlagged(any(), any()) } returns mockComment.copy(id = "0")
 
@@ -533,16 +537,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setCommentVoted(any(), any()) } throws UnknownHostException()
 
@@ -562,16 +566,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setCommentVoted(any(), any()) } throws Exception()
 
@@ -591,16 +595,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setCommentVoted(any(), any()) } returns mockComment.copy(id = "0")
 
@@ -619,16 +623,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setThreadFlagged(any(), any()) } throws UnknownHostException()
 
@@ -648,16 +652,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setThreadFlagged(any(), any()) } throws Exception()
 
@@ -677,16 +681,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setThreadFlagged(any(), any()) } returns mockThread
 
@@ -708,16 +712,16 @@ class DiscussionCommentsViewModelTest {
         )
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
-
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         coEvery { interactor.setThreadFollowed(any(), any()) } throws UnknownHostException()
+
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         viewModel.setThreadFollowed(true)
         advanceUntilIdle()
@@ -735,16 +739,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
 
         coEvery { interactor.setThreadFollowed(any(), any()) } throws Exception()
@@ -765,16 +769,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { interactor.setThreadFollowed(any(), any()) } returns mockThread
 
@@ -793,16 +797,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { notifier.notifier } returns flow {
             delay(100)
@@ -829,16 +833,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { notifier.notifier } returns flow {
             delay(100)
@@ -865,16 +869,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
 
         coEvery { notifier.notifier } returns flow {
             delay(100)
@@ -899,16 +903,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
         coEvery { interactor.createComment(any(), any(), any()) } throws UnknownHostException()
 
         viewModel.createComment("")
@@ -927,16 +931,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
         coEvery { interactor.createComment(any(), any(), any()) } throws Exception()
 
         viewModel.createComment("")
@@ -983,16 +987,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
         every { preferencesManager.profile?.username } returns ""
 
@@ -1007,16 +1011,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "2", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
         every { preferencesManager.profile?.username } returns ""
 
@@ -1032,16 +1036,16 @@ class DiscussionCommentsViewModelTest {
             comments,
             Pagination(10, "", 4, "1")
         )
+        coEvery { interactor.setThreadRead(any()) } returns mockThread
         every { resourceManager.getString(eq(mockThread.type.resId)) } returns ""
 
-        val viewModel =
-            DiscussionCommentsViewModel(
-                interactor,
-                resourceManager,
-                preferencesManager,
-                notifier,
-                mockThread
-            )
+        val viewModel = DiscussionCommentsViewModel(
+            interactor,
+            resourceManager,
+            preferencesManager,
+            notifier,
+            mockThread
+        )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
         every { preferencesManager.profile?.username } returns ""
 
