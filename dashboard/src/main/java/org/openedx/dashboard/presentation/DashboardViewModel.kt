@@ -91,7 +91,6 @@ class DashboardViewModel(
                     _uiState.value = DashboardUIState.Courses(ArrayList(coursesList))
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
@@ -135,7 +134,6 @@ class DashboardViewModel(
                     _uiState.value = DashboardUIState.Courses(ArrayList(coursesList))
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
