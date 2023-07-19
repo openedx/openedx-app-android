@@ -37,7 +37,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Account
@@ -51,8 +54,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.presentation.ProfileRouter
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ProfileFragment : Fragment() {
 
@@ -253,12 +254,17 @@ private fun ProfileScreen(
                                         .verticalScroll(rememberScrollState()),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Image(
-                                        painter = rememberAsyncImagePainter(
-                                            model = uiState.account.profileImage.imageUrlFull,
-                                            placeholder = painterResource(id = R.drawable.core_ic_default_profile_picture),
-                                            error = painterResource(id = R.drawable.core_ic_default_profile_picture)
-                                        ),
+                                    val profileImage = if (uiState.account.profileImage.hasImage) {
+                                        uiState.account.profileImage.imageUrlFull
+                                    } else {
+                                        R.drawable.core_ic_default_profile_picture
+                                    }
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(profileImage)
+                                            .error(R.drawable.core_ic_default_profile_picture)
+                                            .placeholder(R.drawable.core_ic_default_profile_picture)
+                                            .build(),
                                         contentDescription = null,
                                         modifier = Modifier
                                             .border(
