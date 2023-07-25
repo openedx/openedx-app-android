@@ -38,7 +38,7 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
 
       - name: Run unit tests
-        run: ./gradlew testProdReleaseUnitTest $CI_GRADLE_ARG_PROPERTIES
+        run: ./gradlew testProdReleaseUnitTest #$CI_GRADLE_ARG_PROPERTIES
 
       - name: Upload reports
         uses: actions/upload-artifact@v3
