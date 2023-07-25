@@ -17,6 +17,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -34,12 +35,11 @@ class AppViewModelTest {
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
 
-    private val dispatcher = UnconfinedTestDispatcher()
+    private val dispatcher = StandardTestDispatcher()//UnconfinedTestDispatcher()
 
     private val notifier = mockk<AppNotifier>()
     private val room = mockk<AppDatabase>()
     private val preferencesManager = mockk<PreferencesManager>()
-    private val dispatcher2 = Dispatchers.IO
     private val analytics = mockk<AppAnalytics>()
 
     private val user = User(0, "", "", "")
@@ -59,7 +59,7 @@ class AppViewModelTest {
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { notifier.notifier } returns flow { }
-        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher2, analytics)
+        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher, analytics)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -80,7 +80,7 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
-        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher2, analytics)
+        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher, analytics)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -103,7 +103,7 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
-        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher2, analytics)
+        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher, analytics)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
