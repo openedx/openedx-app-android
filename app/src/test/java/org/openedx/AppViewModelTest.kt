@@ -88,8 +88,8 @@ class AppViewModelTest {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         advanceUntilIdle()
 
-        // verify(exactly = 1) { analytics.logoutEvent(true) }
-        // assert(viewModel.logoutUser.value != null)
+         verify(exactly = 1) { analytics.logoutEvent(true) }
+         assert(viewModel.logoutUser.value != null)
     }
 
     @Test
@@ -111,12 +111,12 @@ class AppViewModelTest {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         advanceUntilIdle()
 
-        // verify(exactly = 1) { analytics.logoutEvent(true) }
-        // verify(exactly = 1) { preferencesManager.clear() }
-        // verify(exactly = 1) { analytics.setUserIdForSession(any()) }
-        // verify(exactly = 1) { preferencesManager.user }
-        // verify(exactly = 1) { room.clearAllTables() }
-        // verify(exactly = 1) { analytics.logoutEvent(true) }
+         verify(exactly = 1) { analytics.logoutEvent(true) }
+         verify(exactly = 1) { preferencesManager.clear() }
+         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
+         verify(exactly = 1) { preferencesManager.user }
+         verify(exactly = 1) { room.clearAllTables() }
+         verify(exactly = 1) { analytics.logoutEvent(true) }
     }
 
 }
