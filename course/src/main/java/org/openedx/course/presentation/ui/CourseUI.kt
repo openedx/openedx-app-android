@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.openedx.core.BlockType
-import org.openedx.core.BuildConfig
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.Certificate
@@ -176,10 +175,15 @@ fun CourseSectionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val icon =
+                if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
+            val iconColor =
+                if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+
             Icon(
-                painter = painterResource(id = R.drawable.ic_course_chapter_icon),
+                painter = icon,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textPrimary
+                tint = iconColor
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
