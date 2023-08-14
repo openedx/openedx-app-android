@@ -9,6 +9,7 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.junit.Rule
 import org.junit.Test
+import java.util.Date
 
 class MyCoursesScreenTest {
 
@@ -17,7 +18,7 @@ class MyCoursesScreenTest {
 
     //region mockEnrolledCourse
     private val mockCourseEnrolled = EnrolledCourse(
-        auditAccessExpires = "",
+        auditAccessExpires = null,
         created = "created",
         certificate = Certificate(""),
         mode = "mode",
@@ -27,10 +28,10 @@ class MyCoursesScreenTest {
             name = "name",
             number = "",
             org = "Org",
-            start = "",
+            start = Date(),
             startDisplay = "",
             startType = "",
-            end = "Ending in 22 November",
+            end = null,
             dynamicUpgradeDeadline = "",
             subscriptionId = "",
             coursewareAccess = CoursewareAccess(
@@ -62,8 +63,12 @@ class MyCoursesScreenTest {
                 DashboardUIState.Loading,
                 null,
                 refreshing = false,
-                onItemClick = {},
-                onSwipeRefresh = {}
+                canLoadMore = false,
+                hasInternetConnection = true,
+                onReloadClick = {},
+                onSwipeRefresh = {},
+                paginationCallback = {},
+                onItemClick = {}
             )
         }
 
@@ -88,8 +93,12 @@ class MyCoursesScreenTest {
                 DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
                 null,
                 refreshing = false,
-                onItemClick = {},
-                onSwipeRefresh = {}
+                canLoadMore = false,
+                hasInternetConnection = true,
+                onReloadClick = {},
+                onSwipeRefresh = {},
+                paginationCallback = {},
+                onItemClick = {}
             )
         }
 
@@ -107,8 +116,12 @@ class MyCoursesScreenTest {
                 DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
                 null,
                 refreshing = true,
-                onItemClick = {},
-                onSwipeRefresh = {}
+                canLoadMore = false,
+                hasInternetConnection = true,
+                onReloadClick = {},
+                onSwipeRefresh = {},
+                paginationCallback = {},
+                onItemClick = {}
             )
         }
 
