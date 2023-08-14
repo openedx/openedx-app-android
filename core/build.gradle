@@ -36,6 +36,8 @@ android {
     flavorDimensions += "env"
     productFlavors {
         prod {
+            dimension 'env'
+
             def envMap = config.environments.find { it.key == "PROD" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
@@ -55,6 +57,8 @@ android {
             resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
         develop {
+            dimension 'env'
+
             def envMap = config.environments.find { it.key == "DEV" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
@@ -74,6 +78,8 @@ android {
             resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
         stage {
+            dimension 'env'
+
             def envMap = config.environments.find { it.key == "STAGE" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS

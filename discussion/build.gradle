@@ -41,10 +41,13 @@ android {
     flavorDimensions += "env"
     productFlavors {
         prod {
+            dimension 'env'
         }
         develop {
+            dimension 'env'
         }
         stage {
+            dimension 'env'
         }
     }
 }
