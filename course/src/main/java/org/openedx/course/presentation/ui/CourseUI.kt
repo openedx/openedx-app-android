@@ -219,10 +219,13 @@ fun CourseSectionCard(
                         if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(34.dp),
+                                backgroundColor = Color.LightGray,
+                                strokeWidth = 2.dp,
                                 color = MaterialTheme.appColors.primary
                             )
                         }
-                        IconButton(modifier = iconModifier,
+                        IconButton(
+                            modifier = iconModifier.padding(top = 2.dp),
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
