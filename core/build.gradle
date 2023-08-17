@@ -100,6 +100,27 @@ android {
         }
     }
 
+    sourceSets {
+        prod {
+            def envMap = config.environments.find { it.key == "PROD" }
+            if (envMap.value.RES_DIR) {
+                res.srcDirs = [envMap.value.RES_DIR]
+            }
+        }
+        develop {
+            def envMap = config.environments.find { it.key == "DEV" }
+            if (envMap.value.RES_DIR) {
+                res.srcDirs = [envMap.value.RES_DIR]
+            }
+        }
+        stage {
+            def envMap = config.environments.find { it.key == "STAGE" }
+            if (envMap.value.RES_DIR) {
+                res.srcDirs = [envMap.value.RES_DIR]
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
