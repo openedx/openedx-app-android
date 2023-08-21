@@ -15,7 +15,8 @@ plugins {
     id "com.google.firebase.crashlytics"
 }
 
-def config = new Yaml().load(new File("config.yaml").newInputStream())
+def config_file = System.getenv("OPENEDX_ANDROID_CFG_FILE") ?: "config.yaml"
+def config = new Yaml().load(new File(config_file).newInputStream())
 
 android {
     compileSdk 34
