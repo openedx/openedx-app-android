@@ -14,10 +14,17 @@ Modern vision of the mobile application for the Open EdX platform from Raccoon G
 3. Choose ``educationx-app-android``.
 
 4. Configure the [config.yaml](config.yaml) with URLs and OAuth credentials for your Open edX instance.
+   You can customise the location of this file using the `OPENEDX_ANDROID_CFG_FILE` environment variable.
 
 5. Select the build variant ``develop``, ``stage``, or ``prod``.
 
 6. Click the **Run** button.
+
+## Customising
+
+To customise assets used in the Android app, you can specify a resource override directory in
+`RES_DIR` in the `config.yaml` file. Any assets in this directory will override assets of the
+same name in this repository.
 
 ## API plugin
 This project uses custom APIs to improve performance and reduce the number of requests to the server.

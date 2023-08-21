@@ -1,5 +1,6 @@
 environments:
   DEV:
+    # RES_DIR: /path/to/custom/resources
     URLS:
       API_HOST_URL: "https://dev-example.com/"
       privacyPolicy: "https://dev-example.com/privacy"
@@ -13,6 +14,7 @@ environments:
       API_KEY: ""
       GCM_SENDER_ID: ""
   STAGE:
+    # RES_DIR: /path/to/custom/resources
     URLS:
       API_HOST_URL: "http://stage-example.com/"
       privacyPolicy: "http://stage-example.com/privacy"
@@ -26,6 +28,7 @@ environments:
       API_KEY: ""
       GCM_SENDER_ID: ""
   PROD:
+    # RES_DIR: /path/to/custom/resources
     URLS:
       API_HOST_URL: "https://example.com/"
       privacyPolicy: "https://example.com/privacy"
