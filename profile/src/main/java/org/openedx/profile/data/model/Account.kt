@@ -2,8 +2,9 @@ package org.openedx.profile.data.model
 
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.data.model.ProfileImage
+import org.openedx.profile.domain.model.Account
 import java.util.*
-import org.openedx.core.domain.model.Account as DomainAccount
+import org.openedx.profile.domain.model.Account as DomainAccount
 
 data class Account(
     @SerializedName("username")
@@ -47,8 +48,8 @@ data class Account(
         ALL_USERS
     }
 
-    fun mapToDomain(): org.openedx.core.domain.model.Account {
-        return org.openedx.core.domain.model.Account(
+    fun mapToDomain(): Account {
+        return Account(
             username = username ?: "",
             bio = bio?:"",
             requiresParentalConsent = requiresParentalConsent ?: false,

@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.ProfilePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
@@ -20,6 +19,7 @@ import org.openedx.profile.system.notifier.ProfileNotifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openedx.profile.data.storage.ProfilePreferences
 
 class ProfileViewModel(
     private val interactor: ProfileInteractor,

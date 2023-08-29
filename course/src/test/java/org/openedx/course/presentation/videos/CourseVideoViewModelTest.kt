@@ -5,7 +5,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import org.openedx.core.BlockType
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -30,6 +29,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,7 +42,7 @@ class CourseVideoViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val notifier = spyk<CourseNotifier>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
     private val downloadDao = mockk<DownloadDao>()
     private val workerController = mockk<DownloadWorkerController>()

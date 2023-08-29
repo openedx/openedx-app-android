@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.AuthResponse
 import org.openedx.core.ApiConstants
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import kotlinx.coroutines.runBlocking
@@ -14,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
 import org.openedx.core.BuildConfig
+import org.openedx.core.data.storage.CorePreferences
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException

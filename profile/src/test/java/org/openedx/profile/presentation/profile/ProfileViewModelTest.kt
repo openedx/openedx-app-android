@@ -6,8 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
@@ -30,6 +29,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.profile.data.storage.ProfilePreferences
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -42,7 +43,7 @@ class ProfileViewModelTest {
     private val dispatcherIO = UnconfinedTestDispatcher()
 
     private val resourceManager = mockk<ResourceManager>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<ProfilePreferences>()
     private val interactor = mockk<ProfileInteractor>()
     private val notifier = mockk<ProfileNotifier>()
     private val cookieManager = mockk<AppCookieManager>()

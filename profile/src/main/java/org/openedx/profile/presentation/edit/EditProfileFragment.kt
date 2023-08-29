@@ -107,7 +107,7 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField

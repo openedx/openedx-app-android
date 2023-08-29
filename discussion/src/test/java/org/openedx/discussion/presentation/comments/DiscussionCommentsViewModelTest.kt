@@ -6,7 +6,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.extension.TextConverter
 import org.openedx.core.system.ResourceManager
@@ -23,6 +22,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.*
 import org.junit.*
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,7 +35,7 @@ class DiscussionCommentsViewModelTest {
 
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscussionInteractor>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<CorePreferences>()
     private val notifier = mockk<DiscussionNotifier>(relaxed = true)
 
     private val noInternet = "Slow or no internet connection"
@@ -968,7 +968,7 @@ class DiscussionCommentsViewModelTest {
             mockThread
         )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
-        every { preferencesManager.profile?.username } returns ""
+        every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
         advanceUntilIdle()
@@ -991,7 +991,7 @@ class DiscussionCommentsViewModelTest {
             mockThread
         )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
-        every { preferencesManager.profile?.username } returns ""
+        every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
         advanceUntilIdle()
@@ -1015,7 +1015,7 @@ class DiscussionCommentsViewModelTest {
             mockThread
         )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
-        every { preferencesManager.profile?.username } returns ""
+        every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
         advanceUntilIdle()

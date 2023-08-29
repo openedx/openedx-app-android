@@ -3,7 +3,6 @@ package org.openedx.discussion.presentation.threads
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.extension.TextConverter
 import org.openedx.core.system.ResourceManager
@@ -23,6 +22,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,7 +35,7 @@ class DiscussionAddThreadViewModelTest {
 
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscussionInteractor>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<CorePreferences>()
     private val notifier = mockk<DiscussionNotifier>(relaxed = true)
 
     private val noInternet = "Slow or no internet connection"

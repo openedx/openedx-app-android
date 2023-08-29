@@ -1,10 +1,12 @@
-package org.openedx.core.data.storage
+package org.openedx.app.data.storage
 
 import android.content.Context
 import com.google.gson.Gson
-import org.openedx.core.domain.model.Account
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.User
 import org.openedx.core.domain.model.VideoSettings
+import org.openedx.profile.data.storage.ProfilePreferences
 
 class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences {
 

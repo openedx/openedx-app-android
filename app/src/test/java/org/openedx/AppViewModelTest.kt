@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.core.domain.model.User
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.system.notifier.AppNotifier

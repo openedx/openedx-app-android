@@ -13,7 +13,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.window.layout.WindowMetricsCalculator
 import org.openedx.auth.presentation.signin.SignInFragment
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.AppDataHolder
@@ -25,6 +24,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.core.data.storage.CorePreferences
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataHolder {
 

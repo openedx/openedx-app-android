@@ -6,7 +6,7 @@ import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.presentation.dialog.SelectDialogViewModel
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
