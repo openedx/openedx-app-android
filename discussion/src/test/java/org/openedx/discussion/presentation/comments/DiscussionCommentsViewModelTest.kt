@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.*
 import org.junit.*
 import org.junit.rules.TestRule
-import org.openedx.discussion.domain.model.Thread
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -139,7 +138,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -163,7 +161,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread.copy(type = DiscussionType.QUESTION)
             )
@@ -194,7 +191,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread.copy(type = DiscussionType.QUESTION)
             )
@@ -224,7 +220,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -258,7 +253,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -293,7 +287,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -329,7 +322,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -363,7 +355,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -394,7 +385,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -424,7 +414,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -453,7 +442,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -484,7 +472,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -514,7 +501,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -543,7 +529,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -572,7 +557,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -601,7 +585,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -629,7 +612,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -658,7 +640,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -687,7 +668,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -718,7 +698,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -745,7 +724,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -775,7 +753,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -803,7 +780,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -839,7 +815,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -875,7 +850,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -909,7 +883,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -937,7 +910,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -966,7 +938,6 @@ class DiscussionCommentsViewModelTest {
             DiscussionCommentsViewModel(
                 interactor,
                 resourceManager,
-                preferencesManager,
                 notifier,
                 mockThread
             )
@@ -993,7 +964,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -1017,7 +987,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -1042,7 +1011,6 @@ class DiscussionCommentsViewModelTest {
         val viewModel = DiscussionCommentsViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockThread
         )
@@ -1053,7 +1021,6 @@ class DiscussionCommentsViewModelTest {
         advanceUntilIdle()
 
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
-
     }
 
 }

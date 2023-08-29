@@ -67,7 +67,7 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `getAccount no internetConnection`() = runTest {
+    fun `getAccount no internetConnection and cache is null`() = runTest {
         val viewModel =
             ProfileViewModel(
                 interactor,
@@ -79,6 +79,7 @@ class ProfileViewModelTest {
                 workerController,
                 analytics
             )
+        coEvery { preferencesManager.profile } returns null
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
@@ -86,6 +87,30 @@ class ProfileViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assert(viewModel.uiState.value is ProfileUIState.Loading)
+        assertEquals(noInternet, message?.message)
+    }
+
+    @Test
+    fun `getAccount no internetConnection and cache is not null`() = runTest {
+        val viewModel =
+            ProfileViewModel(
+                interactor,
+                preferencesManager,
+                resourceManager,
+                notifier,
+                dispatcher,
+                cookieManager,
+                workerController,
+                analytics
+            )
+        coEvery { preferencesManager.profile } returns account
+        coEvery { interactor.getAccount() } throws UnknownHostException()
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { interactor.getAccount() }
+
+        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        assert(viewModel.uiState.value is ProfileUIState.Data)
         assertEquals(noInternet, message?.message)
     }
 
@@ -102,6 +127,7 @@ class ProfileViewModelTest {
                 workerController,
                 analytics
             )
+        coEvery { preferencesManager.profile } returns null
         coEvery { interactor.getAccount() } throws Exception()
         advanceUntilIdle()
 
@@ -125,6 +151,7 @@ class ProfileViewModelTest {
                 workerController,
                 analytics
             )
+        coEvery { preferencesManager.profile } returns null
         coEvery { interactor.getAccount() } returns account
         every { preferencesManager.profile = any() } returns Unit
         advanceUntilIdle()
@@ -198,6 +225,7 @@ class ProfileViewModelTest {
             workerController,
             analytics
         )
+        coEvery { preferencesManager.profile } returns mockk()
         coEvery { interactor.getAccount() } returns mockk()
         every { analytics.logoutEvent(false) } returns Unit
         every { preferencesManager.profile = any() } returns Unit
@@ -211,7 +239,6 @@ class ProfileViewModelTest {
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.successLogout.value == true)
-
     }
 
     @Test
@@ -226,6 +253,7 @@ class ProfileViewModelTest {
             workerController,
             analytics
         )
+        coEvery { preferencesManager.profile } returns null
         every { notifier.notifier } returns flow { emit(AccountUpdated()) }
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
