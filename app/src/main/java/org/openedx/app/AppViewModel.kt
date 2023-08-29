@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.RoomDatabase
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 class AppViewModel(
     private val notifier: AppNotifier,
     private val room: RoomDatabase,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
     private val analytics: AppAnalytics
 ) : BaseViewModel() {

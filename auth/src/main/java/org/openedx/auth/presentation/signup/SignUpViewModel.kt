@@ -10,7 +10,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -20,7 +20,7 @@ class SignUpViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: CorePreferences
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<SignUpUIState>(SignUpUIState.Loading)

@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.window.layout.WindowMetricsCalculator
 import org.openedx.auth.presentation.signin.SignInFragment
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.AppDataHolder
@@ -40,7 +40,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         get() = AppData(BuildConfig.VERSION_NAME)
 
     private lateinit var binding: ActivityAppBinding
-    private val preferencesManager by inject<PreferencesManager>()
+    private val preferencesManager by inject<CorePreferences>()
     private val viewModel by viewModel<AppViewModel>()
     private val profileRouter by inject<ProfileRouter>()
 
@@ -57,7 +57,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         binding = ActivityAppBinding.inflate(layoutInflater)
         lifecycle.addObserver(viewModel)
         setContentView(binding.root)

@@ -1,7 +1,7 @@
 package org.openedx.dashboard.data.repository
 
 import org.openedx.core.data.api.CourseApi
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.dashboard.data.DashboardDao
@@ -9,7 +9,7 @@ import org.openedx.dashboard.data.DashboardDao
 class DashboardRepository(
     private val api: CourseApi,
     private val dao: DashboardDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: CorePreferences
 ) {
 
     suspend fun getEnrolledCourses(page: Int): DashboardCourseList {

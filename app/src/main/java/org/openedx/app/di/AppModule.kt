@@ -36,10 +36,13 @@ import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.data.storage.ProfilePreferences
 
 val appModule = module {
 
-    single { PreferencesManager(get()) }
+    single<CorePreferences> { PreferencesManager(get()) }
+    single<ProfilePreferences> { PreferencesManager(get()) }
 
     single { ResourceManager(get()) }
 

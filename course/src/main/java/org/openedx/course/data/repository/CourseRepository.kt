@@ -4,7 +4,7 @@ import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.EnrollBody
 import org.openedx.core.data.model.room.CourseEntity
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.*
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.module.db.DownloadDao
@@ -16,7 +16,7 @@ class CourseRepository(
     private val api: CourseApi,
     private val courseDao: CourseDao,
     private val downloadDao: DownloadDao,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
 ) {
     private var courseStructure: CourseStructure? = null
 

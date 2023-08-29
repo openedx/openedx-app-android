@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.ProfilePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
@@ -23,7 +23,7 @@ import kotlinx.coroutines.withContext
 
 class ProfileViewModel(
     private val interactor: ProfileInteractor,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: ProfilePreferences,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val dispatcher: CoroutineDispatcher,
@@ -69,6 +69,12 @@ class ProfileViewModel(
         _uiState.value = ProfileUIState.Loading
         viewModelScope.launch {
             try {
+                val cachedAccount = preferencesManager.profile
+                if (cachedAccount == null) {
+                    _uiState.value = ProfileUIState.Loading
+                } else {
+                    _uiState.value = ProfileUIState.Data(cachedAccount)
+                }
                 val account = interactor.getAccount()
                 _uiState.value = ProfileUIState.Data(account)
                 preferencesManager.profile = account

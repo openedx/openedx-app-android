@@ -1,7 +1,7 @@
 package org.openedx.discussion.data.repository
 
 import org.openedx.core.data.model.BlocksCompletionBody
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.discussion.data.model.request.*
 import org.openedx.discussion.domain.model.CommentsData
@@ -10,7 +10,7 @@ import org.openedx.discussion.domain.model.Topic
 
 class DiscussionRepository(
     private val api: DiscussionApi,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: CorePreferences
     ) {
 
     private val topics = mutableListOf<Topic>()
