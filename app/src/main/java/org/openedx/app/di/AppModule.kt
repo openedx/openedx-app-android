@@ -41,8 +41,9 @@ import org.openedx.profile.data.storage.ProfilePreferences
 
 val appModule = module {
 
-    single<CorePreferences> { PreferencesManager(get()) }
-    single<ProfilePreferences> { PreferencesManager(get()) }
+    single { PreferencesManager(get()) }
+    single<CorePreferences> { get<PreferencesManager>() }
+    single<ProfilePreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
 
