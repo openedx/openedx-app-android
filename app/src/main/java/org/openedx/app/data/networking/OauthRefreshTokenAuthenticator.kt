@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.AuthResponse
 import org.openedx.core.ApiConstants
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import kotlinx.coroutines.runBlocking
@@ -14,13 +13,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
 import org.openedx.core.BuildConfig
+import org.openedx.core.data.storage.CorePreferences
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class OauthRefreshTokenAuthenticator(
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
     private val appNotifier: AppNotifier,
 ) : Authenticator {
 
@@ -35,7 +35,7 @@ class OauthRefreshTokenAuthenticator(
             }
         }.build()
         authApi = Retrofit.Builder()
-            .baseUrl(org.openedx.core.BuildConfig.BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(Gson()))
             .build()
@@ -113,7 +113,7 @@ class OauthRefreshTokenAuthenticator(
     private fun refreshAccessToken(refreshToken: String): AuthResponse? {
         val response = authApi.refreshAccessToken(
             ApiConstants.TOKEN_TYPE_REFRESH,
-            org.openedx.core.BuildConfig.CLIENT_ID,
+            BuildConfig.CLIENT_ID,
             refreshToken
         ).execute()
         val authResponse = response.body()

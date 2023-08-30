@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
@@ -27,8 +26,6 @@ class VideoViewModelTest {
 
     private val courseRepository = mockk<CourseRepository>()
     private val notifier = mockk<CourseNotifier>()
-    private val preferencesManager = mockk<PreferencesManager>()
-
 
     @Before
     fun setUp() {
@@ -42,7 +39,7 @@ class VideoViewModelTest {
 
     @Test
     fun `sendTime test`() = runTest {
-        val viewModel = VideoViewModel("", courseRepository, preferencesManager, notifier)
+        val viewModel = VideoViewModel("", courseRepository, notifier)
         coEvery { notifier.send(CourseVideoPositionChanged("", 0)) } returns Unit
         viewModel.sendTime()
         advanceUntilIdle()
@@ -52,7 +49,7 @@ class VideoViewModelTest {
 
     @Test
     fun `markBlockCompleted exception`() = runTest {
-        val viewModel = VideoViewModel("", courseRepository, preferencesManager, notifier)
+        val viewModel = VideoViewModel("", courseRepository, notifier)
         coEvery {
             courseRepository.markBlocksCompletion(
                 any(),
@@ -72,7 +69,7 @@ class VideoViewModelTest {
 
     @Test
     fun `markBlockCompleted success`() = runTest {
-        val viewModel = VideoViewModel("", courseRepository, preferencesManager, notifier)
+        val viewModel = VideoViewModel("", courseRepository, notifier)
         coEvery {
             courseRepository.markBlocksCompletion(
                 any(),

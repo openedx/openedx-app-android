@@ -1,7 +1,7 @@
 package org.openedx.profile.presentation
 
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 
 interface ProfileRouter {
 

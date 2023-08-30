@@ -43,7 +43,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.AppDataHolder

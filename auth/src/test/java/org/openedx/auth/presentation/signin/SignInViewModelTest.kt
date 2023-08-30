@@ -6,7 +6,6 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.User
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
@@ -28,6 +27,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import java.net.UnknownHostException
 import org.openedx.core.R as CoreRes
 
@@ -41,7 +41,7 @@ class SignInViewModelTest {
 
     private val validator = mockk<Validator>()
     private val resourceManager = mockk<ResourceManager>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<CorePreferences>()
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
 

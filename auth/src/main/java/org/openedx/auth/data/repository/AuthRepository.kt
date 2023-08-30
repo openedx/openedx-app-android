@@ -3,14 +3,13 @@ package org.openedx.auth.data.repository
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.core.ApiConstants
-import org.openedx.core.BuildConfig
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
 
 class AuthRepository(
     private val api: AuthApi,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
 ) {
 
     suspend fun login(
