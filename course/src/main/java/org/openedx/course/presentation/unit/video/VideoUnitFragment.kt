@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.video
 
-import android.graphics.Point
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,7 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
+import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -173,12 +172,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             }
         }
 
-        binding.connectionError.isVisible =
-            !viewModel.hasInternetConnection && !viewModel.isDownloaded
-        val display = requireActivity().windowManager.defaultDisplay
-        val size = Point()
-        display.getSize(size)
-        val width = size.x - requireContext().dpToPixel(32)
+        binding.connectionError.isVisible = !viewModel.hasInternetConnection && !viewModel.isDownloaded
+
+        val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
+        val currentBounds = windowMetrics.bounds
+        val width = currentBounds.width()- requireContext().dpToPixel(32)
         val minHeight = requireContext().dpToPixel(194).roundToInt()
         val height = (width / 16f * 9f).roundToInt()
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
