@@ -1,7 +1,7 @@
 package org.openedx.course.presentation.unit.video
 
 import androidx.lifecycle.viewModelScope
-import com.google.android.exoplayer2.C
+import androidx.media3.common.C
 import org.openedx.core.BaseViewModel
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.core.system.notifier.CourseNotifier

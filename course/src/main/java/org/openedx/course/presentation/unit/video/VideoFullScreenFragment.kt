@@ -8,17 +8,17 @@ import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
@@ -67,6 +67,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         initPlayer()
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun initPlayer() {
         with(binding) {
             if (exoPlayer == null) {
@@ -77,7 +78,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             playerView.setShowNextButton(false)
             playerView.setShowPreviousButton(false)
             val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
-            exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime.toLong())
+            exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime)
             exoPlayer?.prepare()
             exoPlayer?.playWhenReady = false
 
