@@ -176,7 +176,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
         val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
         val currentBounds = windowMetrics.bounds
-        val width = currentBounds.width()- requireContext().dpToPixel(32)
+        val width = currentBounds.width() - requireContext().dpToPixel(32)
         val minHeight = requireContext().dpToPixel(194).roundToInt()
         val height = (width / 16f * 9f).roundToInt()
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams

@@ -62,7 +62,6 @@ dependencies {
     implementation project(path: ':discussion')
     implementation "com.pierfrancescosoffritti.androidyoutubeplayer:core:$youtubeplayer_version"
     implementation "androidx.media3:media3-exoplayer:$media3"
-    implementation "androidx.media3:media3-exoplayer-dash:$media3"
     implementation "androidx.media3:media3-ui:$media3"
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
