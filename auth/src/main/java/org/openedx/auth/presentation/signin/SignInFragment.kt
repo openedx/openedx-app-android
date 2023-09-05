@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -99,6 +101,7 @@ private fun LoginScreen(
     onForgotPasswordClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
+    val scrollState = rememberScrollState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -167,12 +170,14 @@ private fun LoginScreen(
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
                 Box(contentAlignment = Alignment.TopCenter) {
                     Column(
                         modifier = Modifier
                             .background(MaterialTheme.appColors.background)
+                            .verticalScroll(scrollState)
                             .then(contentPaddings),
                     ) {
                         Text(
