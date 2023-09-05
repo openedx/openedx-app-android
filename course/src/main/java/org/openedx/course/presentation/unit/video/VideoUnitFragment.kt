@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.video
 
-import android.graphics.Point
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,9 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.window.layout.WindowMetricsCalculator
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.computeWindowSizeClasses
 import org.openedx.core.extension.dpToPixel
 import org.openedx.core.extension.objectToString
@@ -38,9 +41,6 @@ import org.openedx.course.presentation.ui.ConnectionErrorView
 import org.openedx.course.presentation.ui.VideoRotateView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
@@ -172,12 +172,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             }
         }
 
-        binding.connectionError.isVisible =
-            !viewModel.hasInternetConnection && !viewModel.isDownloaded
-        val display = requireActivity().windowManager.defaultDisplay
-        val size = Point()
-        display.getSize(size)
-        val width = size.x - requireContext().dpToPixel(32)
+        binding.connectionError.isVisible = !viewModel.hasInternetConnection && !viewModel.isDownloaded
+
+        val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
+        val currentBounds = windowMetrics.bounds
+        val width = currentBounds.width() - requireContext().dpToPixel(32)
         val minHeight = requireContext().dpToPixel(194).roundToInt()
         val height = (width / 16f * 9f).roundToInt()
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
@@ -203,7 +202,8 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
-    private fun initPlayer() {
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private fun  initPlayer() {
         with(binding) {
             if (exoPlayer == null) {
                 exoPlayer = ExoPlayer.Builder(requireContext())
