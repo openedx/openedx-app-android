@@ -11,6 +11,7 @@ object ApiConstants {
     const val URL_PASSWORD_RESET = "/password_reset/"
 
     const val GRANT_TYPE_PASSWORD = "password"
+    const val GRANT_TYPE_CODE = "authorization_code"
 
     const val TOKEN_TYPE_REFRESH = "refresh_token"
 

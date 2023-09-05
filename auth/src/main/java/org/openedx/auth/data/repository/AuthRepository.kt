@@ -1,6 +1,7 @@
 package org.openedx.auth.data.repository
 
 import org.openedx.auth.data.api.AuthApi
+import org.openedx.auth.data.model.AuthResponse
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
@@ -12,6 +13,16 @@ class AuthRepository(
     private val preferencesManager: CorePreferences,
 ) {
 
+    private suspend fun processAuthResponse(authResponse: AuthResponse) {
+        if (authResponse.error != null) {
+            throw EdxError.UnknownException(authResponse.error!!)
+        }
+        preferencesManager.accessToken = authResponse.accessToken ?: ""
+        preferencesManager.refreshToken = authResponse.refreshToken ?: ""
+        val user = api.getProfile().mapToDomain()
+        preferencesManager.user = user
+    }
+
     suspend fun login(
         username: String,
         password: String,
@@ -22,13 +33,16 @@ class AuthRepository(
             username,
             password
         )
-        if (authResponse.error != null) {
-            throw EdxError.UnknownException(authResponse.error!!)
-        }
-        preferencesManager.accessToken = authResponse.accessToken ?: ""
-        preferencesManager.refreshToken = authResponse.refreshToken ?: ""
-        val user = api.getProfile().mapToDomain()
-        preferencesManager.user = user
+        processAuthResponse(authResponse)
+    }
+
+    suspend fun login(code: String) {
+        val authResponse = api.getAccessToken(
+            ApiConstants.GRANT_TYPE_CODE,
+            org.openedx.core.BuildConfig.CLIENT_ID,
+            code,
+        )
+        processAuthResponse(authResponse)
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {

@@ -42,9 +42,11 @@ android {
         }
         develop {
             dimension 'env'
+            applicationIdSuffix '.dev'
         }
         stage {
             dimension 'env'
+            applicationIdSuffix '.stage'
         }
     }
     sourceSets {

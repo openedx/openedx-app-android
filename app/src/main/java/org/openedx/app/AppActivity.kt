@@ -3,6 +3,7 @@ package org.openedx.app
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -48,6 +49,15 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
     private var _insetBottom = 0
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+
+    private val authCode: String?
+        get() {
+            val data = intent?.data
+            if (data is Uri && data.scheme == BuildConfig.APPLICATION_ID && data.host == "oauth2Callback") {
+                return data.getQueryParameter("code")
+            }
+            return null
+        }
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(TOP_INSET, topInset)
@@ -103,8 +113,12 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
                     .add(R.id.container, MainFragment())
                     .commit()
             } else {
+                val fragment = SignInFragment()
+                val bundle = Bundle()
+                bundle.putString("auth_code", authCode)
+                fragment.arguments = bundle
                 supportFragmentManager.beginTransaction()
-                    .add(R.id.container, SignInFragment())
+                    .add(R.id.container, fragment)
                     .commit()
             }
         }

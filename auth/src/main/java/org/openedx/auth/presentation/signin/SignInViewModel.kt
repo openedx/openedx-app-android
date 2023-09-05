@@ -72,6 +72,30 @@ class SignInViewModel(
         }
     }
 
+    fun login(code: String) {
+        viewModelScope.launch {
+            try {
+                interactor.login(code)
+                _loginSuccess.value = true
+                setUserId()
+                analytics.userLoginEvent(LoginMethod.BROWSER.methodName)
+            } catch (e: Exception) {
+                if (e is EdxError.InvalidGrantException) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_invalid_grant))
+                } else if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                }
+            }
+            _showProgress.value = false
+        }
+
+    }
+
     fun signUpClickedEvent() {
         analytics.signUpClickedEvent()
     }
@@ -91,6 +115,7 @@ private enum class LoginMethod(val methodName: String) {
     PASSWORD("Password"),
     FACEBOOK("Facebook"),
     GOOGLE("Google"),
-    MICROSOFT("Microsoft")
+    MICROSOFT("Microsoft"),
+    BROWSER("Browser"),
 }
 

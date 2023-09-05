@@ -2,9 +2,12 @@ package org.openedx.auth.presentation.signin
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -42,6 +45,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.BuildConfig
 
 class SignInFragment : Fragment() {
 
@@ -53,6 +57,10 @@ class SignInFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
+        val authCode = arguments?.getString("auth_code")
+        if (authCode is String) {
+            viewModel.login(authCode)
+        }
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
@@ -62,10 +70,12 @@ class SignInFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
 
+                Log.d("TEST111", context.packageName)
                 LoginScreen(
                     windowSize = windowSize,
                     showProgress = showProgress,
                     uiMessage = uiMessage,
+                    browserLogin = BuildConfig.BROWSER_LOGIN,
                     onLoginClick = { login, password ->
                         viewModel.login(login, password)
                     },
@@ -76,6 +86,20 @@ class SignInFragment : Fragment() {
                     onForgotPasswordClick = {
                         viewModel.forgotPasswordClickedEvent()
                         router.navigateToRestorePassword(parentFragmentManager)
+                    },
+                    onLoginClickOauth = {
+                        val uri = Uri.parse("${BuildConfig.BASE_URL}oauth2/authorize")
+                            .buildUpon()
+                            .appendQueryParameter("client_id", BuildConfig.CLIENT_ID)
+                            .appendQueryParameter("redirect_uri", "${context.packageName}://oauth2Callback")
+                            .appendQueryParameter("response_type", "code")
+                            .build()
+                        val intent = CustomTabsIntent.Builder()
+                            .setUrlBarHidingEnabled(true)
+                            .setShowTitle(true)
+                            .build()
+                        intent.launchUrl(context, uri)
+
                     }
                 )
 
@@ -94,7 +118,9 @@ private fun LoginScreen(
     windowSize: WindowSize,
     showProgress: Boolean,
     uiMessage: UIMessage?,
+    browserLogin: Boolean,
     onLoginClick: (login: String, password: String) -> Unit,
+    onLoginClickOauth: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
@@ -187,13 +213,27 @@ private fun LoginScreen(
                             style = MaterialTheme.appTypography.titleSmall
                         )
                         Spacer(modifier = Modifier.height(24.dp))
-                        AuthForm(
-                            buttonWidth,
-                            showProgress,
-                            onLoginClick,
-                            onRegisterClick,
-                            onForgotPasswordClick
-                        )
+                        if (browserLogin) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.SpaceAround,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                OpenEdXButton(
+                                    width = buttonWidth,
+                                    text = stringResource(id = R.string.auth_sign_in),
+                                    onClick = onLoginClickOauth,
+                                )
+                            }
+                        } else {
+                            AuthForm(
+                                buttonWidth,
+                                showProgress,
+                                onLoginClick,
+                                onRegisterClick,
+                                onForgotPasswordClick,
+                            )
+                        }
                     }
                 }
             }
@@ -334,9 +374,11 @@ private fun SignInScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             showProgress = false,
             uiMessage = null,
+            browserLogin = true,
             onLoginClick = { _, _ ->
 
             },
+            onLoginClickOauth = {},
             onRegisterClick = {},
             onForgotPasswordClick = {}
         )
@@ -353,9 +395,11 @@ private fun SignInScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Expanded, WindowType.Expanded),
             showProgress = false,
             uiMessage = null,
+            browserLogin = true,
             onLoginClick = { _, _ ->
 
             },
+            onLoginClickOauth = {},
             onRegisterClick = {},
             onForgotPasswordClick = {}
         )

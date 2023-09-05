@@ -13,6 +13,10 @@ class AuthInteractor(private val repository: AuthRepository) {
         repository.login(username, password)
     }
 
+    suspend fun login(code: String) {
+        repository.login(code)
+    }
+
     suspend fun getRegistrationFields(): List<RegistrationField> {
         return repository.getRegistrationFields()
     }
