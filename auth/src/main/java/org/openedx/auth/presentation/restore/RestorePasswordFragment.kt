@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -77,9 +79,11 @@ private fun RestorePasswordScreen(
     onRestoreButtonClick: (String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
+    val scrollState = rememberScrollState()
     var email by rememberSaveable {
         mutableStateOf("")
     }
+
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
@@ -170,13 +174,15 @@ private fun RestorePasswordScreen(
             }
 
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
+                        .verticalScroll(scrollState)
                         .background(MaterialTheme.appColors.background),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
