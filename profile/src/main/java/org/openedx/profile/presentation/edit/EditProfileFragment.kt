@@ -95,11 +95,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -148,12 +153,30 @@ class EditProfileFragment : Fragment() {
 
     private val router by inject<ProfileRouter>()
 
-    private val registerForActivityResult =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                viewModel.setImageUri(cropImage(it))
+    private val imageCropLauncher = registerForActivityResult(CropImageContract()) { result ->
+        if (result.isSuccessful) {
+            result.uriContent?.let {
+                viewModel.setImageUri(it)
             }
         }
+    }
+
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        val backgroundColor = ContextCompat.getColor(requireContext(), android.R.color.black)
+        val textColor = ContextCompat.getColor(requireContext(), R.color.primary)
+        val options = CropImageContractOptions(
+            uri = uri,
+            cropImageOptions = CropImageOptions(
+                fixAspectRatio = true,
+                toolbarBackButtonColor = textColor,
+                activityMenuIconColor = textColor,
+                activityMenuTextColor = textColor,
+                activityBackgroundColor = backgroundColor,
+                cropMenuCropButtonTitle = getString(org.openedx.profile.R.string.profile_done),
+            )
+        )
+        imageCropLauncher.launch(options)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -239,7 +262,7 @@ class EditProfileFragment : Fragment() {
                         )
                     },
                     onSelectImageClick = {
-                        registerForActivityResult.launch("image/*")
+                        imagePickerLauncher.launch("image/*")
                     },
                     onDeleteImageClick = {
                         viewModel.deleteImage()
