@@ -33,7 +33,7 @@ ext {
     firebase_version = "32.1.0"
 
     retrofit_version = '2.9.0'
-    logginginterceptor_version = '4.9.1'
+    logginginterceptor_version = '4.11.0'
 
     koin_version = '3.2.0'
 
