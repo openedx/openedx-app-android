@@ -6,15 +6,15 @@ import retrofit2.http.*
 
 interface CourseApi {
 
-    @GET("/mobile_api_extensions/v1/users/{username}/course_enrollments")
+    @GET("/api/mobile/v3/users/{username}/course_enrollments/")
     suspend fun getEnrolledCourses(
         @Header("Cache-Control") cacheControlHeaderParam: String? = null,
         @Path("username") username: String,
         @Query("org") org: String? = null,
         @Query("page") page: Int
-    ): DashboardCourseList
+    ): CourseEnrollments
 
-    @GET("/mobile_api_extensions/courses/v1/courses/")
+    @GET("/api/courses/v1/courses/")
     suspend fun getCourseList(
         @Query("search_term") searchQuery: String? = null,
         @Query("page") page: Int,
@@ -28,7 +28,7 @@ interface CourseApi {
         )
     ): CourseList
 
-    @GET("/mobile_api_extensions/v1/courses/{course_id}")
+    @GET("/api/mobile/v3/course_info/{course_id}/info")
     suspend fun getCourseDetail(
         @Path("course_id") courseId: String?,
         @Query("username") username: String? = null,
@@ -36,7 +36,7 @@ interface CourseApi {
     ): CourseDetails
 
     @GET(
-        "/mobile_api_extensions/{api_version}/blocks/?" +
+        "/api/mobile/{api_version}/course_info/blocks/?" +
                 "depth=all&" +
                 "requested_fields=contains_gated_content,show_gated_sections,special_exam_info,graded,format,student_view_multi_device,due,completion&" +
                 "student_view_data=video,discussion&" +

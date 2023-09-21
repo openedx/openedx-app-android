@@ -51,7 +51,7 @@ data class CourseStructureModel(
             startDisplay = startDisplay ?: "",
             startType = startType ?: "",
             end = TimeUtils.iso8601ToDate(end ?: ""),
-            coursewareAccess = coursewareAccess?.mapToDomain()!!,
+            coursewareAccess = coursewareAccess?.mapToDomain(),
             media = media?.mapToDomain(),
             certificate = certificate?.mapToDomain(),
             isSelfPaced = isSelfPaced ?: false
@@ -70,7 +70,7 @@ data class CourseStructureModel(
             startDisplay = startDisplay ?: "",
             startType = startType ?: "",
             end = end ?: "",
-            coursewareAccess = coursewareAccess?.mapToRoomEntity()!!,
+            coursewareAccess = coursewareAccess?.mapToRoomEntity(),
             media = MediaDb.createFrom(media),
             certificate = certificate?.mapToRoomEntity(),
             isSelfPaced = isSelfPaced ?: false

@@ -1,5 +1,7 @@
 package org.openedx.course.data.repository
 
+import kotlinx.coroutines.flow.map
+import okhttp3.ResponseBody
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.EnrollBody
@@ -9,8 +11,6 @@ import org.openedx.core.domain.model.*
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.course.data.storage.CourseDao
-import kotlinx.coroutines.flow.map
-import okhttp3.ResponseBody
 
 class CourseRepository(
     private val api: CourseApi,
@@ -51,7 +51,7 @@ class CourseRepository(
     suspend fun preloadCourseStructure(courseId: String) {
         val response = api.getCourseStructure(
             "stale-if-error=0",
-            "v1",
+            "v3",
             preferencesManager.user?.username,
             courseId
         )

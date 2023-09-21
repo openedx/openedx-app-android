@@ -61,7 +61,7 @@ data class EnrolledCourseDataDb(
     @ColumnInfo("subscriptionId")
     val subscriptionId: String,
     @Embedded
-    val coursewareAccess: CoursewareAccessDb,
+    val coursewareAccess: CoursewareAccessDb?,
     @Embedded
     val media: MediaDb?,
     @ColumnInfo(name = "course_image_link")
@@ -93,7 +93,7 @@ data class EnrolledCourseDataDb(
             TimeUtils.iso8601ToDate(end),
             dynamicUpgradeDeadline,
             subscriptionId,
-            coursewareAccess.mapToDomain(),
+            coursewareAccess?.mapToDomain(),
             media?.mapToDomain(),
             courseImage,
             courseAbout,

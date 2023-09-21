@@ -3,6 +3,7 @@ package org.openedx.course.presentation.container
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -15,7 +16,6 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.launch
 
 class CourseContainerViewModel(
     val courseId: String,
@@ -26,8 +26,8 @@ class CourseContainerViewModel(
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
 
-    private val _dataReady = MutableLiveData<CoursewareAccess>()
-    val dataReady: LiveData<CoursewareAccess>
+    private val _dataReady = MutableLiveData<CoursewareAccess?>()
+    val dataReady: LiveData<CoursewareAccess?>
         get() = _dataReady
 
     private val _errorMessage = SingleEventLiveData<String>()

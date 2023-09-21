@@ -7,6 +7,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
@@ -15,9 +18,6 @@ import org.openedx.course.presentation.handouts.HandoutsFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -80,20 +80,20 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private fun observe() {
         viewModel.dataReady.observe(viewLifecycleOwner) { coursewareAccess ->
-            if (coursewareAccess != null) {
-                if (coursewareAccess.hasAccess) {
+//            if (coursewareAccess != null) {
+//                if (coursewareAccess.hasAccess) {
                     binding.viewPager.isVisible = true
                     binding.bottomNavView.isVisible = true
                     initViewPager()
-                } else {
-                    router.navigateToNoAccess(
-                        requireActivity().supportFragmentManager,
-                        courseTitle,
-                        coursewareAccess,
-                        null
-                    )
-                }
-            }
+//                } else {
+//                    router.navigateToNoAccess(
+//                        requireActivity().supportFragmentManager,
+//                        courseTitle,
+//                        coursewareAccess,
+//                        null
+//                    )
+//                }
+//            }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) {
             snackBar = Snackbar.make(binding.root, it, Snackbar.LENGTH_INDEFINITE)
