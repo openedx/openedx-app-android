@@ -119,7 +119,6 @@ class VideoUnitViewModel(
                     )
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false
-                    e.printStackTrace()
                 }
             }
         }

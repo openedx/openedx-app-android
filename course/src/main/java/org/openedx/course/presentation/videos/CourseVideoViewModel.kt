@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import org.openedx.core.BlockType
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
@@ -25,7 +25,7 @@ class CourseVideoViewModel(
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
     private val notifier: CourseNotifier,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController

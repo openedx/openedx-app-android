@@ -10,17 +10,17 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import kotlinx.coroutines.launch
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.R as CoreRes
 
 class SignInViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
     private val validator: Validator,
     private val analytics: AuthAnalytics
 ) : BaseViewModel() {

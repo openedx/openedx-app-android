@@ -6,7 +6,7 @@ import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.presentation.dialog.SelectDialogViewModel
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -82,7 +82,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
+    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get(), get()) }
@@ -92,8 +92,8 @@ val screenModule = module {
     factory { DiscussionInteractor(get()) }
     viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String, topicId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, topicId, threadType) }
-    viewModel { (thread: org.openedx.discussion.domain.model.Thread) -> DiscussionCommentsViewModel(get(), get(), get(), get(), thread) }
-    viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), get(), comment) }
+    viewModel { (thread: org.openedx.discussion.domain.model.Thread) -> DiscussionCommentsViewModel(get(), get(), get(), thread) }
+    viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), comment) }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> DiscussionSearchThreadViewModel(get(), get(), get(), courseId) }
 }

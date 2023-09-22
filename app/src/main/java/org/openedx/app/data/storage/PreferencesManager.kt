@@ -1,16 +1,16 @@
-package org.openedx.core.data.storage
+package org.openedx.app.data.storage
 
 import android.content.Context
 import com.google.gson.Gson
-import org.openedx.core.domain.model.Account
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.User
 import org.openedx.core.domain.model.VideoSettings
+import org.openedx.profile.data.storage.ProfilePreferences
 
+class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences {
 
-class PreferencesManager(private val context: Context) {
-
-    private val sharedPreferences =
-        context.getSharedPreferences("org.openedx.app", Context.MODE_PRIVATE)
+    private val sharedPreferences = context.getSharedPreferences("org.openedx.app", Context.MODE_PRIVATE)
 
     private fun saveString(key: String, value: String) {
         sharedPreferences.edit().apply {
@@ -20,7 +20,7 @@ class PreferencesManager(private val context: Context) {
 
     private fun getString(key: String): String = sharedPreferences.getString(key, "") ?: ""
 
-    fun clear() {
+    override fun clear() {
         sharedPreferences.edit().apply {
             remove(ACCESS_TOKEN)
             remove(REFRESH_TOKEN)
@@ -28,20 +28,19 @@ class PreferencesManager(private val context: Context) {
         }.apply()
     }
 
-
-    var accessToken: String
+    override var accessToken: String
         set(value) {
             saveString(ACCESS_TOKEN, value)
         }
         get() = getString(ACCESS_TOKEN)
 
-    var refreshToken: String
+    override var refreshToken: String
         set(value) {
             saveString(REFRESH_TOKEN, value)
         }
         get() = getString(REFRESH_TOKEN)
 
-    var user: User?
+    override var user: User?
         set(value) {
             val userJson = Gson().toJson(value)
             saveString(USER, userJson)
@@ -51,7 +50,7 @@ class PreferencesManager(private val context: Context) {
             return Gson().fromJson(userString, User::class.java)
         }
 
-    var profile: Account?
+    override var profile: Account?
         set(value) {
             val accountJson = Gson().toJson(value)
             saveString(ACCOUNT, accountJson)
@@ -61,7 +60,7 @@ class PreferencesManager(private val context: Context) {
             return Gson().fromJson(accountString, Account::class.java)
         }
 
-    var videoSettings: VideoSettings
+    override var videoSettings: VideoSettings
         set(value) {
             val videoSettingsJson = Gson().toJson(value)
             saveString(VIDEO_SETTINGS, videoSettingsJson)
@@ -71,7 +70,6 @@ class PreferencesManager(private val context: Context) {
             return Gson().fromJson(videoSettingsString, VideoSettings::class.java)
                 ?: VideoSettings.default
         }
-
 
     companion object {
         private const val ACCESS_TOKEN = "access_token"

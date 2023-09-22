@@ -1,0 +1,56 @@
+name: Bug report for the EducationX Android app
+description: Report any issues that you have found with the EducationX Android app. Please [check open issues](https://github.com/raccoongang/educationx-app-android/issues) first, in case it has already been reported.
+labels: [Bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+        Please report security issues by email to security@raccoongang.com
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to reproduce
+      description: Please attach screenshots, videos or logs if you can.
+      placeholder: Tell us what you see!
+      value: |
+        1. Where are you starting? What can you see?
+        2. What do you click?
+        3. More steps…
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Outcome
+      placeholder: Tell us what went wrong
+      value: |
+        #### What did you expect?
+
+        #### What happened instead?
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Your phone model
+      placeholder: e.g. Samsung Galaxy S10
+    validations:
+      required: false
+  - type: input
+    id: os
+    attributes:
+      label: Operating system version
+      placeholder: e.g. Tiramisu (OS 13), under "software version"
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Application version
+      description: You can find the version information in the Settings of EducationX IOS. 
+      placeholder: |
+        e.g. Version: v1.2.2
+    validations:
+      required: false

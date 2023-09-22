@@ -10,21 +10,21 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.junit.Rule
 import org.junit.Test
+import java.util.Date
 
 class DiscoveryScreenTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    //region course
-
+    //region mockCourse
     private val course = Course(
         id = "id",
         blocksUrl = "blocksUrl",
         courseId = "courseId",
         effort = "effort",
-        enrollmentStart = "enrollmentStart",
-        enrollmentEnd = "enrollmentEnd",
+        enrollmentStart = Date(),
+        enrollmentEnd = null,
         hidden = false,
         invitationOnly = false,
         media = Media(),
@@ -38,9 +38,9 @@ class DiscoveryScreenTest {
         end = "end",
         startDisplay = "startDisplay",
         startType = "startType",
-        overview = ""
+        overview = "",
+        isEnrolled = false
     )
-
     //endregion
 
     @Test
@@ -52,9 +52,12 @@ class DiscoveryScreenTest {
                 uiMessage = null,
                 canLoadMore = false,
                 refreshing = false,
+                hasInternetConnection = true,
+                onSearchClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
-                onItemClick = {}
+                onItemClick = {},
+                onReloadClick = {}
             )
         }
 
@@ -81,9 +84,12 @@ class DiscoveryScreenTest {
                 uiMessage = null,
                 canLoadMore = false,
                 refreshing = false,
+                hasInternetConnection = true,
+                onSearchClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
-                onItemClick = {}
+                onItemClick = {},
+                onReloadClick = {}
             )
         }
 
@@ -101,9 +107,12 @@ class DiscoveryScreenTest {
                 uiMessage = null,
                 canLoadMore = true,
                 refreshing = false,
+                hasInternetConnection = true,
+                onSearchClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
-                onItemClick = {}
+                onItemClick = {},
+                onReloadClick = {}
             )
         }
 
@@ -125,5 +134,4 @@ class DiscoveryScreenTest {
         }
 
     }
-
 }

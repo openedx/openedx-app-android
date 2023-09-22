@@ -30,7 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.AutoSizeText
@@ -53,7 +54,11 @@ fun ThreadMainItem(
     thread: org.openedx.discussion.domain.model.Thread,
     onClick: (String, Boolean) -> Unit,
 ) {
-    val profileImageUrl = thread.users?.get(thread.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = if (thread.users?.get(thread.author)?.image?.hasImage == true) {
+        thread.users[thread.author]?.image?.imageUrlFull
+    } else {
+        org.openedx.core.R.drawable.core_ic_default_profile_picture
+    }
 
     val votePainter = if (thread.voted) {
         painterResource(id = R.drawable.discussion_ic_like_success)
@@ -82,11 +87,12 @@ fun ThreadMainItem(
         modifier = modifier
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = profileImageUrl,
-                    error = painterResource(id = org.openedx.core.R.drawable.core_ic_default_profile_picture)
-                ),
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(profileImageUrl)
+                    .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                    .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier
                     .size(48.dp)
@@ -167,8 +173,13 @@ fun CommentItem(
     onClick: (String, String, Boolean) -> Unit,
     onAddCommentClick: () -> Unit = {},
 ) {
-    val profileImageUrl = comment.profileImage?.imageUrlFull
-        ?: comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = if (comment.profileImage?.hasImage == true) {
+        comment.profileImage.imageUrlFull
+    } else if (comment.users?.get(comment.author)?.image?.hasImage == true) {
+        comment.users[comment.author]?.image?.imageUrlFull
+    } else {
+        org.openedx.core.R.drawable.core_ic_default_profile_picture
+    }
 
     val reportText = if (comment.abuseFlagged) {
         stringResource(id = R.string.discussion_unreport)
@@ -215,11 +226,12 @@ fun CommentItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = profileImageUrl,
-                        error = painterResource(id = org.openedx.core.R.drawable.core_ic_default_profile_picture)
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(profileImageUrl)
+                        .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                        .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                        .build(),
                     contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)
@@ -312,8 +324,13 @@ fun CommentMainItem(
     comment: DiscussionComment,
     onClick: (String, String, Boolean) -> Unit,
 ) {
-    val profileImageUrl = comment.profileImage?.imageUrlFull
-        ?: comment.users?.get(comment.author)?.image?.imageUrlFull ?: ""
+    val profileImageUrl = if (comment.profileImage?.hasImage == true) {
+        comment.profileImage.imageUrlFull
+    } else if (comment.users?.get(comment.author)?.image?.hasImage == true) {
+        comment.users[comment.author]?.image?.imageUrlFull
+    } else {
+        org.openedx.core.R.drawable.core_ic_default_profile_picture
+    }
 
     val reportText = if (comment.abuseFlagged) {
         stringResource(id = R.string.discussion_unreport)
@@ -352,11 +369,12 @@ fun CommentMainItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = profileImageUrl,
-                        error = painterResource(id = org.openedx.core.R.drawable.core_ic_default_profile_picture)
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(profileImageUrl)
+                        .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                        .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                        .build(),
                     contentDescription = null,
                     modifier = Modifier
                         .size(32.dp)

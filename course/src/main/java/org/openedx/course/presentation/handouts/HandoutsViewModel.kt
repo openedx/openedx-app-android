@@ -34,7 +34,7 @@ class HandoutsViewModel(
                     _htmlContent.value = announcementsToHtml(announcements)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                //ignore e.printStackTrace()
             }
         }
     }

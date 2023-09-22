@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
@@ -20,10 +19,11 @@ import org.openedx.profile.system.notifier.ProfileNotifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openedx.profile.data.storage.ProfilePreferences
 
 class ProfileViewModel(
     private val interactor: ProfileInteractor,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: ProfilePreferences,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val dispatcher: CoroutineDispatcher,
@@ -69,6 +69,12 @@ class ProfileViewModel(
         _uiState.value = ProfileUIState.Loading
         viewModelScope.launch {
             try {
+                val cachedAccount = preferencesManager.profile
+                if (cachedAccount == null) {
+                    _uiState.value = ProfileUIState.Loading
+                } else {
+                    _uiState.value = ProfileUIState.Data(cachedAccount)
+                }
                 val account = interactor.getAccount()
                 _uiState.value = ProfileUIState.Data(account)
                 preferencesManager.profile = account
@@ -102,7 +108,6 @@ class ProfileViewModel(
                 analytics.logoutEvent(false)
                 _successLogout.value = true
             } catch (e: Exception) {
-                e.printStackTrace()
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))

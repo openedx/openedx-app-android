@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
@@ -36,10 +36,14 @@ import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.profile.data.storage.ProfilePreferences
 
 val appModule = module {
 
     single { PreferencesManager(get()) }
+    single<CorePreferences> { get<PreferencesManager>() }
+    single<ProfilePreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
 

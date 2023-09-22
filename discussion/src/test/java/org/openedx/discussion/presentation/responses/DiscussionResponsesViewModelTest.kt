@@ -3,7 +3,6 @@ package org.openedx.discussion.presentation.responses
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.extension.LinkedImageText
 import org.openedx.core.system.ResourceManager
@@ -19,6 +18,7 @@ import kotlinx.coroutines.test.*
 import org.junit.*
 import org.junit.Assert.*
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -31,7 +31,7 @@ class DiscussionResponsesViewModelTest {
 
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscussionInteractor>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<CorePreferences>()
     private val notifier = mockk<DiscussionNotifier>(relaxed = true)
 
     private val noInternet = "Slow or no internet connection"
@@ -133,7 +133,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -154,7 +153,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -178,7 +176,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -202,7 +199,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -225,7 +221,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -249,7 +244,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -277,7 +271,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -300,7 +293,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -323,7 +315,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -347,7 +338,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -371,7 +361,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -394,7 +383,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -417,7 +405,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -440,7 +427,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -465,7 +451,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -490,7 +475,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -515,7 +499,6 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
@@ -540,12 +523,11 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
-        every { preferencesManager.profile?.username } returns ""
+        every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
         advanceUntilIdle()
@@ -562,12 +544,11 @@ class DiscussionResponsesViewModelTest {
         val viewModel = DiscussionResponsesViewModel(
             interactor,
             resourceManager,
-            preferencesManager,
             notifier,
             mockComment.copy(id = "0")
         )
         coEvery { interactor.createComment(any(), any(), any()) } returns mockComment
-        every { preferencesManager.profile?.username } returns ""
+        every { preferencesManager.user?.username } returns ""
 
         viewModel.createComment("")
         advanceUntilIdle()

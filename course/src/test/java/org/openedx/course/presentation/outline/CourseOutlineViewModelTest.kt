@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleRegistry
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.*
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.*
@@ -29,6 +28,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import java.net.UnknownHostException
 import java.util.*
 
@@ -42,7 +42,7 @@ class CourseOutlineViewModelTest {
 
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
-    private val preferencesManager = mockk<PreferencesManager>()
+    private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
     private val notifier = spyk<CourseNotifier>()
     private val downloadDao = mockk<DownloadDao>()

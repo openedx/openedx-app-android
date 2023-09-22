@@ -3,7 +3,7 @@ package org.openedx.profile.presentation.edit
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Account
+import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor

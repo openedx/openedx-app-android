@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.core.domain.model.User
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.system.notifier.AppNotifier
@@ -17,7 +17,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -34,12 +34,11 @@ class AppViewModelTest {
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
 
-    private val dispatcher = UnconfinedTestDispatcher()
+    private val dispatcher = StandardTestDispatcher()//UnconfinedTestDispatcher()
 
     private val notifier = mockk<AppNotifier>()
     private val room = mockk<AppDatabase>()
     private val preferencesManager = mockk<PreferencesManager>()
-    private val dispatcher2 = Dispatchers.IO
     private val analytics = mockk<AppAnalytics>()
 
     private val user = User(0, "", "", "")
@@ -59,7 +58,7 @@ class AppViewModelTest {
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { notifier.notifier } returns flow { }
-        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher2, analytics)
+        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher, analytics)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -80,7 +79,7 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
-        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher2, analytics)
+        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher, analytics)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -88,8 +87,8 @@ class AppViewModelTest {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         advanceUntilIdle()
 
-        verify(exactly = 1) { analytics.logoutEvent(true) }
-        assert(viewModel.logoutUser.value != null)
+         verify(exactly = 1) { analytics.logoutEvent(true) }
+         assert(viewModel.logoutUser.value != null)
     }
 
     @Test
@@ -103,7 +102,7 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
-        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher2, analytics)
+        val viewModel = AppViewModel(notifier, room, preferencesManager, dispatcher, analytics)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -111,12 +110,12 @@ class AppViewModelTest {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         advanceUntilIdle()
 
-        verify(exactly = 1) { analytics.logoutEvent(true) }
-        verify(exactly = 1) { preferencesManager.clear() }
-        verify(exactly = 1) { analytics.setUserIdForSession(any()) }
-        verify(exactly = 1) { preferencesManager.user }
-        verify(exactly = 1) { room.clearAllTables() }
-        verify(exactly = 1) { analytics.logoutEvent(true) }
+         verify(exactly = 1) { analytics.logoutEvent(true) }
+         verify(exactly = 1) { preferencesManager.clear() }
+         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
+         verify(exactly = 1) { preferencesManager.user }
+         verify(exactly = 1) { room.clearAllTables() }
+         verify(exactly = 1) { analytics.logoutEvent(true) }
     }
 
 }

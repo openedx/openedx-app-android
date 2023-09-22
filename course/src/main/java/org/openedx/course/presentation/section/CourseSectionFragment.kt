@@ -40,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -347,10 +348,13 @@ private fun CourseSubsectionItem(
                         if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(34.dp),
+                                backgroundColor = Color.LightGray,
+                                strokeWidth = 2.dp,
                                 color = MaterialTheme.appColors.primary
                             )
                         }
-                        IconButton(modifier = iconModifier,
+                        IconButton(
+                            modifier = iconModifier.padding(top = 2.dp),
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,

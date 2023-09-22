@@ -1,9 +1,11 @@
-package org.openedx.core.domain.model
+package org.openedx.profile.domain.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.AppDataConstants.USER_MIN_YEAR
 import kotlinx.parcelize.Parcelize
+import org.openedx.core.domain.model.LanguageProficiency
+import org.openedx.core.domain.model.ProfileImage
 import java.util.*
 
 @Parcelize

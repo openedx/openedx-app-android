@@ -2,24 +2,24 @@ package org.openedx.profile.data.repository
 
 import androidx.room.RoomDatabase
 import org.openedx.core.ApiConstants
-import org.openedx.core.BuildConfig
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.profile.data.api.ProfileApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.profile.domain.model.Account
 import java.io.File
 
 class ProfileRepository(
     private val api: ProfileApi,
     private val room: RoomDatabase,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: CorePreferences
 ) {
 
-    suspend fun getAccount(): org.openedx.core.domain.model.Account {
+    suspend fun getAccount(): Account {
         return api.getAccount(preferencesManager.user?.username!!).mapToDomain()
     }
 
-    suspend fun updateAccount(fields: Map<String, Any?>): org.openedx.core.domain.model.Account {
+    suspend fun updateAccount(fields: Map<String, Any?>): Account {
         return api.updateAccount(preferencesManager.user?.username!!, fields).mapToDomain()
     }
 

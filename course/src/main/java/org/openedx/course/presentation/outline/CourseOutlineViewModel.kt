@@ -8,7 +8,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.extension.isInternetError
@@ -30,7 +30,7 @@ class CourseOutlineViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController

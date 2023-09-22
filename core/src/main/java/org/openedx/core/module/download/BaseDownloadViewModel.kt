@@ -4,7 +4,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.core.domain.model.Block
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
@@ -16,11 +15,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.openedx.core.data.storage.CorePreferences
 import java.io.File
 
 abstract class BaseDownloadViewModel(
     private val downloadDao: DownloadDao,
-    private val preferencesManager: PreferencesManager,
+    private val preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController
 ) : BaseViewModel() {
 

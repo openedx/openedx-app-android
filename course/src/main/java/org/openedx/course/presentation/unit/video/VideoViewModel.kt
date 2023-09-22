@@ -1,9 +1,8 @@
 package org.openedx.course.presentation.unit.video
 
 import androidx.lifecycle.viewModelScope
-import com.google.android.exoplayer2.C
+import androidx.media3.common.C
 import org.openedx.core.BaseViewModel
-import org.openedx.core.data.storage.PreferencesManager
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
@@ -12,7 +11,6 @@ import kotlinx.coroutines.launch
 class VideoViewModel(
     private val courseId: String,
     private val courseRepository: CourseRepository,
-    private val preferencesManager: PreferencesManager,
     private val notifier: CourseNotifier
 ) : BaseViewModel() {
 
@@ -41,7 +39,6 @@ class VideoViewModel(
                     )
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false
-                    e.printStackTrace()
                 }
             }
         }

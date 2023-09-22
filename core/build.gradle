@@ -21,11 +21,11 @@ plugins {
 def config = new Yaml().load(new File("config.yaml").newInputStream())
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdk 24
-        targetSdk 33
+        targetSdk 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -33,9 +33,11 @@ android {
 
     namespace 'org.openedx.core'
 
-    flavorDimensions "tier"
+    flavorDimensions += "env"
     productFlavors {
         prod {
+            dimension 'env'
+
             def envMap = config.environments.find { it.key == "PROD" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
@@ -55,6 +57,8 @@ android {
             resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
         develop {
+            dimension 'env'
+
             def envMap = config.environments.find { it.key == "DEV" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
@@ -74,6 +78,8 @@ android {
             resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
         }
         stage {
+            dimension 'env'
+
             def envMap = config.environments.find { it.key == "STAGE" }
             def clientId = envMap.value.OAUTH_CLIENT_ID
             def envUrls = envMap.value.URLS
@@ -101,11 +107,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -176,8 +182,8 @@ dependencies {
     api "com.google.firebase:firebase-analytics-ktx"
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
 class FirebaseConfig {
