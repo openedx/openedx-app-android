@@ -79,21 +79,18 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun observe() {
-        viewModel.dataReady.observe(viewLifecycleOwner) { coursewareAccess ->
-//            if (coursewareAccess != null) {
-//                if (coursewareAccess.hasAccess) {
-                    binding.viewPager.isVisible = true
-                    binding.bottomNavView.isVisible = true
-                    initViewPager()
-//                } else {
-//                    router.navigateToNoAccess(
-//                        requireActivity().supportFragmentManager,
-//                        courseTitle,
-//                        coursewareAccess,
-//                        null
-//                    )
-//                }
-//            }
+        viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
+            if (isReady == true) {
+                binding.viewPager.isVisible = true
+                binding.bottomNavView.isVisible = true
+                initViewPager()
+            } else {
+                router.navigateToNoAccess(
+                    requireActivity().supportFragmentManager,
+                    courseTitle,
+                    null
+                )
+            }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) {
             snackBar = Snackbar.make(binding.root, it, Snackbar.LENGTH_INDEFINITE)
