@@ -7,7 +7,6 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -16,6 +15,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import java.util.Date
 
 class CourseContainerViewModel(
     val courseId: String,
@@ -26,8 +26,8 @@ class CourseContainerViewModel(
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
 
-    private val _dataReady = MutableLiveData<CoursewareAccess?>()
-    val dataReady: LiveData<CoursewareAccess?>
+    private val _dataReady = MutableLiveData<Boolean?>()
+    val dataReady: LiveData<Boolean?>
         get() = _dataReady
 
     private val _errorMessage = SingleEventLiveData<String>()
@@ -55,7 +55,9 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
-                _dataReady.value = courseStructure.coursewareAccess
+                _dataReady.value = courseStructure.start?.let { start ->
+                    start < Date()
+                }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
                     _errorMessage.value =
