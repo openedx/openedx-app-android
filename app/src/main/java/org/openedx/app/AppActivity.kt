@@ -134,14 +134,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
             else -> WindowType.Expanded
         }
         _windowSize = WindowSize(widthWindowSize, heightWindowSize)
-        requestedOrientation =
-            if (widthWindowSize != WindowType.Compact && heightWindowSize != WindowType.Compact) {
-                ActivityInfo.SCREEN_ORIENTATION_SENSOR
-            } else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
-                ActivityInfo.SCREEN_ORIENTATION_SENSOR
-            } else {
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            }
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
     }
 
     private fun isUsingNightModeResources(): Boolean {

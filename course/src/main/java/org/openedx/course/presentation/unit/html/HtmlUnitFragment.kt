@@ -2,6 +2,7 @@ package org.openedx.course.presentation.unit.html
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Dp
@@ -67,6 +69,15 @@ class HtmlUnitFragment : Fragment() {
                 var hasInternetConnection by remember {
                     mutableStateOf(networkConnection.isOnline())
                 }
+
+                val configuration = LocalConfiguration.current
+
+                val bottomPadding = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    72.dp
+                } else {
+                    0.dp
+                }
+
                 Surface(
                     color = Color.White
                 ) {
@@ -74,7 +85,7 @@ class HtmlUnitFragment : Fragment() {
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.White)
-                            .padding(bottom = 72.dp),
+                            .padding(bottom = bottomPadding),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (hasInternetConnection) {

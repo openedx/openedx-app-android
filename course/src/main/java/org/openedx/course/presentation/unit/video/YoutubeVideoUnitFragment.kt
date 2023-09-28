@@ -71,26 +71,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             blockId = getString(ARG_BLOCK_ID, "")
         }
         viewModel.downloadSubtitles()
-        orientationListener = object : OrientationEventListener(requireActivity()) {
-            override fun onOrientationChanged(orientation: Int) {
-                if (windowSize?.isTablet != true) {
-                    if (orientation in 75..300) {
-                        if (!viewModel.fullscreenHandled) {
-                            router.navigateToFullScreenYoutubeVideo(
-                                requireActivity().supportFragmentManager,
-                                viewModel.videoUrl,
-                                viewModel.getCurrentVideoTime(),
-                                blockId,
-                                viewModel.courseId
-                            )
-                            viewModel.fullscreenHandled = true
-                        }
-                    } else {
-                        viewModel.fullscreenHandled = false
-                    }
-                }
-            }
-        }
     }
 
     override fun onCreateView(

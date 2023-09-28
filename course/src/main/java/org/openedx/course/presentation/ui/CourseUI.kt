@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -83,6 +85,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.jsoup.Jsoup
+import org.openedx.core.ui.rememberWindowSize
 import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.course.R as courseR
@@ -93,6 +96,13 @@ fun CourseImageHeader(
     courseImage: String?,
     courseCertificate: Certificate?,
 ) {
+    val configuration = LocalConfiguration.current
+    val windowSize = rememberWindowSize()
+    val contentScale = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        ContentScale.Fit
+    } else {
+        ContentScale.Crop
+    }
     val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
@@ -107,7 +117,7 @@ fun CourseImageHeader(
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.appShapes.cardShape)
@@ -299,25 +309,30 @@ fun SequentialItem(
 
 @Composable
 fun VideoRotateView() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.appShapes.buttonShape)
-            .background(MaterialTheme.appColors.info)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.course_ic_screen_rotation),
-            contentDescription = null,
-            tint = Color.White
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = stringResource(id = R.string.course_video_rotate_for_fullscreen),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = Color.White
-        )
+    val configuration = LocalConfiguration.current
+    when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.appShapes.buttonShape)
+                    .background(MaterialTheme.appColors.info)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.course_ic_screen_rotation),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = stringResource(id = R.string.course_video_rotate_for_fullscreen),
+                    style = MaterialTheme.appTypography.titleMedium,
+                    color = Color.White
+                )
+            }
+        }
     }
 }
 
@@ -353,6 +368,8 @@ fun NavigationUnitsButtons(
 
     Row(
         modifier = Modifier
+            .navigationBarsPadding()
+            .height(72.dp)
             .fillMaxWidth()
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -391,7 +408,92 @@ fun NavigationUnitsButtons(
         }
         Button(
             modifier = Modifier
-                .height(42.dp).then(nextButtonModifier),
+                .height(42.dp)
+                .then(nextButtonModifier),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.appColors.buttonBackground
+            ),
+            elevation = null,
+            shape = MaterialTheme.appShapes.navigationButtonShape,
+            onClick = onNextClick
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = nextButtonText,
+                    color = MaterialTheme.appColors.buttonText,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    painter = nextButtonIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.buttonText
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NavigationUnitsButtonsLandscape(
+    windowSize: WindowSize,
+    nextButtonText: String,
+    hasPrevBlock: Boolean,
+    hasNextBlock: Boolean,
+    onPrevClick: () -> Unit,
+    onNextClick: () -> Unit
+) {
+    val nextButtonIcon = if (hasNextBlock) {
+        painterResource(id = org.openedx.core.R.drawable.core_ic_down)
+    } else {
+        painterResource(id = org.openedx.core.R.drawable.core_ic_check)
+    }
+
+    Column(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (hasPrevBlock) {
+            OutlinedButton(
+                modifier = Modifier
+                    .height(42.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    backgroundColor = MaterialTheme.appColors.background
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
+                elevation = null,
+                shape = MaterialTheme.appShapes.navigationButtonShape,
+                onClick = onPrevClick,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.course_navigation_prev),
+                        color = MaterialTheme.appColors.primary,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_up),
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.primary
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+        Button(
+            modifier = Modifier
+                .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
             ),

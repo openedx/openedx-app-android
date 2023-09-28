@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -97,26 +98,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             blockId = getString(ARG_BLOCK_ID, "")
         }
         viewModel.downloadSubtitles()
-        orientationListener = object : OrientationEventListener(requireActivity()) {
-            override fun onOrientationChanged(orientation: Int) {
-                if (windowSize?.isTablet != true) {
-                    if (orientation in 75..300) {
-                        if (!viewModel.fullscreenHandled) {
-                            router.navigateToFullScreenVideo(
-                                requireActivity().supportFragmentManager,
-                                viewModel.videoUrl,
-                                exoPlayer?.currentPosition ?: viewModel.getCurrentVideoTime(),
-                                blockId,
-                                viewModel.courseId
-                            )
-                            viewModel.fullscreenHandled = true
-                        }
-                    } else {
-                        viewModel.fullscreenHandled = false
-                    }
-                }
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -174,6 +155,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
         binding.connectionError.isVisible = !viewModel.hasInternetConnection && !viewModel.isDownloaded
 
+        val orientation = resources.configuration.orientation
         val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
         val currentBounds = windowMetrics.bounds
         val width = currentBounds.width() - requireContext().dpToPixel(32)
@@ -182,7 +164,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
         layoutParams.height = if (windowSize?.isTablet == true) {
             requireContext().dpToPixel(320).roundToInt()
-        } else if (height < minHeight) {
+        } else if (height < minHeight || orientation == Configuration.ORIENTATION_LANDSCAPE) {
             minHeight
         } else {
             height
