@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.profile.domain.model.Account
+import org.openedx.profile.data.model.Account
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
@@ -29,7 +29,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.profile.data.storage.ProfilePreferences
 import java.net.UnknownHostException
 
