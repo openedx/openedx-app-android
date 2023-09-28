@@ -6,7 +6,6 @@ import org.openedx.profile.data.api.ProfileApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.profile.domain.model.Account
 import java.io.File
 
 class ProfileRepository(
@@ -15,11 +14,11 @@ class ProfileRepository(
     private val preferencesManager: CorePreferences
 ) {
 
-    suspend fun getAccount(): Account {
-        return api.getAccount(preferencesManager.user?.username!!).mapToDomain()
+    suspend fun getAccount(): org.openedx.profile.data.model.Account {
+        return api.getAccount(preferencesManager.user?.username!!)
     }
 
-    suspend fun updateAccount(fields: Map<String, Any?>): Account {
+    suspend fun updateAccount(fields: Map<String, Any?>): org.openedx.profile.domain.model.Account {
         return api.updateAccount(preferencesManager.user?.username!!, fields).mapToDomain()
     }
 

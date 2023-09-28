@@ -69,14 +69,14 @@ class ProfileViewModel(
         _uiState.value = ProfileUIState.Loading
         viewModelScope.launch {
             try {
-                val cachedAccount = preferencesManager.profile
+                val cachedAccount = preferencesManager.profile?.mapToDomain()
                 if (cachedAccount == null) {
                     _uiState.value = ProfileUIState.Loading
                 } else {
                     _uiState.value = ProfileUIState.Data(cachedAccount)
                 }
                 val account = interactor.getAccount()
-                _uiState.value = ProfileUIState.Data(account)
+                _uiState.value = ProfileUIState.Data(account.mapToDomain())
                 preferencesManager.profile = account
             } catch (e: Exception) {
                 if (e.isInternetError()) {
