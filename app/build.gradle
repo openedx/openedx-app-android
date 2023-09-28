@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
-    id "com.google.firebase.crashlytics"
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -40,6 +40,10 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
     compileOptions {
