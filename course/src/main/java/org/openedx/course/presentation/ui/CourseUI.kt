@@ -83,6 +83,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.jsoup.Jsoup
+import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.course.R as courseR
@@ -515,6 +516,7 @@ fun VideoSubtitles(
     subtitleLanguage: String,
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
+    onTranscriptClick: (Caption) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     timedTextObject?.let {
@@ -552,7 +554,7 @@ fun VideoSubtitles(
                 Spacer(Modifier.height(24.dp))
                 LazyColumn(
                     state = listState,
-                    userScrollEnabled = false
+                    userScrollEnabled = true
                 ) {
                     itemsIndexed(subtitles) { index, item ->
                         val textColor =
@@ -562,7 +564,11 @@ fun VideoSubtitles(
                                 MaterialTheme.appColors.textFieldBorder
                             }
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onTranscriptClick(item)
+                                },
                             text = Jsoup.parse(item.content).text(),
                             color = textColor,
                             style = MaterialTheme.appTypography.bodyMedium
