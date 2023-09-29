@@ -9,7 +9,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
-import org.openedx.core.domain.model.User
+import org.openedx.core.data.model.User
 import org.openedx.core.system.ResourceManager
 import io.mockk.coEvery
 import io.mockk.coVerify

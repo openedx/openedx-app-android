@@ -2,15 +2,16 @@ package org.openedx.app.data.storage
 
 import android.content.Context
 import com.google.gson.Gson
+import org.openedx.app.BuildConfig
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.profile.domain.model.Account
-import org.openedx.core.domain.model.User
+import org.openedx.profile.data.model.Account
+import org.openedx.core.data.model.User
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.profile.data.storage.ProfilePreferences
 
 class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences {
 
-    private val sharedPreferences = context.getSharedPreferences("org.openedx.app", Context.MODE_PRIVATE)
+    private val sharedPreferences = context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
 
     private fun saveString(key: String, value: String) {
         sharedPreferences.edit().apply {

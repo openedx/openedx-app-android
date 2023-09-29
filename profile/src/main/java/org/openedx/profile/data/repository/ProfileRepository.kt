@@ -6,26 +6,34 @@ import org.openedx.profile.data.api.ProfileApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.profile.domain.model.Account
+import org.openedx.profile.data.storage.ProfilePreferences
 import java.io.File
+import org.openedx.profile.domain.model.Account
 
 class ProfileRepository(
     private val api: ProfileApi,
     private val room: RoomDatabase,
-    private val preferencesManager: CorePreferences
+    private val profilePreferences: ProfilePreferences,
+    private val corePreferences: CorePreferences,
 ) {
 
     suspend fun getAccount(): Account {
-        return api.getAccount(preferencesManager.user?.username!!).mapToDomain()
+        val account = api.getAccount(corePreferences.user?.username!!)
+        profilePreferences.profile = account
+        return account.mapToDomain()
+    }
+
+    fun getCachedAccount() : Account? {
+        return profilePreferences.profile?.mapToDomain()
     }
 
     suspend fun updateAccount(fields: Map<String, Any?>): Account {
-        return api.updateAccount(preferencesManager.user?.username!!, fields).mapToDomain()
+        return api.updateAccount(corePreferences.user?.username!!, fields).mapToDomain()
     }
 
     suspend fun setProfileImage(file: File, mimeType: String) {
         api.setProfileImage(
-            preferencesManager.user?.username!!,
+            corePreferences.user?.username!!,
             "attachment;filename=filename.${file.extension}",
             true,
             file.asRequestBody(mimeType.toMediaType())
@@ -33,7 +41,7 @@ class ProfileRepository(
     }
 
     suspend fun deleteProfileImage() {
-        api.deleteProfileImage(preferencesManager.user?.username!!)
+        api.deleteProfileImage(corePreferences.user?.username!!)
     }
 
     suspend fun deactivateAccount(password: String) = api.deactivateAccount(password)
@@ -41,10 +49,10 @@ class ProfileRepository(
     suspend fun logout() {
         api.revokeAccessToken(
             org.openedx.core.BuildConfig.CLIENT_ID,
-            preferencesManager.refreshToken,
+            corePreferences.refreshToken,
             ApiConstants.TOKEN_TYPE_REFRESH
         )
-        preferencesManager.clear()
+        corePreferences.clear()
         room.clearAllTables()
     }
 }

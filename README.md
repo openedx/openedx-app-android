@@ -24,23 +24,7 @@ This project uses custom APIs to improve performance and reduce the number of re
 
 You can find the plugin with the API and installation guide [here](https://github.com/raccoongang/mobile-api-extensions).
 
-## Roadmap
-Please feel welcome to develop any of the suggested features below and submit a pull request.
-
-- ✅ ~~Migrate to the new APIs~~
-- ✅ ~~New Navigation~~
-- ✅ ~~Analytics and Crashlytics~~
-- Recent searches
-- Migrate to the Olive and JWT token
-- UnAuth User mode
-- Prerequisite course
-- Prerequisite sections
-- Scorm XBlocks
-- Native Programs
-- New discovery (catalog)
-- E-Commerce
-
 ## License
-The code in this repository is licensed under the AGPL v3 license unless otherwise noted.
+The code in this repository is licensed under the Apache-2.0 license unless otherwise noted.
 
 Please see [LICENSE](https://github.com/raccoongang/educationx-app-android/blob/main/LICENSE) file for details.
