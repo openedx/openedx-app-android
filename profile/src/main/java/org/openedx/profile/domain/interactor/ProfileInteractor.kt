@@ -7,6 +7,8 @@ class ProfileInteractor(private val repository: ProfileRepository) {
 
     suspend fun getAccount() = repository.getAccount()
 
+    fun getCachedAccount() = repository.getCachedAccount()
+
     suspend fun updateAccount(fields: Map<String, Any?>) = repository.updateAccount(fields)
 
     suspend fun setProfileImage(file: File, mimeType: String) = repository.setProfileImage(file, mimeType)

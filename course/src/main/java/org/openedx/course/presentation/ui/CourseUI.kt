@@ -566,7 +566,7 @@ fun VideoSubtitles(
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
+                                .noRippleClickable {
                                     onTranscriptClick(item)
                                 },
                             text = Jsoup.parse(item.content).text(),
