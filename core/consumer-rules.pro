@@ -1,0 +1,2 @@
+-dontwarn java.lang.invoke.StringConcatFactory
+-dontwarn org.openedx.core.R$string
