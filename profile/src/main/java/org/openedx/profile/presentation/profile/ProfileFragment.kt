@@ -530,6 +530,7 @@ private fun LogoutDialog(
         content = {
             Column(
                 Modifier
+                    .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
                     .background(
                         MaterialTheme.appColors.background,
@@ -542,7 +543,7 @@ private fun LogoutDialog(
                         MaterialTheme.appShapes.cardShape
                     )
                     .padding(horizontal = 40.dp)
-                    .padding(top = 48.dp, bottom = 36.dp),
+                    .padding(vertical = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -553,14 +554,14 @@ private fun LogoutDialog(
                     contentDescription = null,
                     tint = MaterialTheme.appColors.onBackground
                 )
-                Spacer(Modifier.size(40.dp))
+                Spacer(Modifier.size(36.dp))
                 Text(
                     text = stringResource(id = org.openedx.profile.R.string.profile_logout_dialog_body),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleLarge,
                     textAlign = TextAlign.Center
                 )
-                Spacer(Modifier.size(44.dp))
+                Spacer(Modifier.size(36.dp))
                 OpenEdXButton(
                     text = stringResource(id = org.openedx.profile.R.string.profile_logout),
                     backgroundColor = MaterialTheme.appColors.warning,

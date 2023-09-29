@@ -517,73 +517,68 @@ private fun DiscussionThreadsScreen(
                                                 }
                                             } else {
                                                 val noDiscussionsScrollState = rememberScrollState()
-                                                Box(
+                                                Column(
                                                     modifier = Modifier
-                                                        .fillMaxSize(),
-                                                    contentAlignment = Alignment.TopStart
+                                                        .align(Alignment.CenterHorizontally)
+                                                        .verticalScroll(noDiscussionsScrollState)
+                                                        .padding(24.dp),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.Center
                                                 ) {
                                                     Text(
                                                         modifier = Modifier
-                                                            .padding(start = 24.dp, top = 32.dp),
+                                                            .fillMaxWidth(),
                                                         text = title,
                                                         color = MaterialTheme.appColors.textPrimary,
                                                         style = MaterialTheme.appTypography.titleLarge
                                                     )
-                                                    Column(
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Icon(
+                                                        modifier = Modifier.size(100.dp),
+                                                        painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.appColors.textPrimary
+                                                    )
+                                                    Spacer(Modifier.height(36.dp))
+                                                    Text(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        text = stringResource(discussionR.string.discussion_no_yet),
+                                                        style = MaterialTheme.appTypography.titleLarge,
+                                                        color = MaterialTheme.appColors.textPrimary,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Spacer(Modifier.height(12.dp))
+                                                    Text(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        text = stringResource(discussionR.string.discussion_click_button_create_discussion),
+                                                        style = MaterialTheme.appTypography.bodyLarge,
+                                                        color = MaterialTheme.appColors.textPrimary,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Spacer(Modifier.height(40.dp))
+                                                    OpenEdXOutlinedButton(
                                                         modifier = Modifier
-                                                            .align(Alignment.Center)
-                                                            .verticalScroll(noDiscussionsScrollState)
-                                                            .padding(vertical = 20.dp),
-                                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                                        verticalArrangement = Arrangement.Center
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.size(100.dp),
-                                                            painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
-                                                            contentDescription = null,
-                                                            tint = MaterialTheme.appColors.textPrimary
-                                                        )
-                                                        Spacer(Modifier.height(36.dp))
-                                                        Text(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            text = stringResource(discussionR.string.discussion_no_yet),
-                                                            style = MaterialTheme.appTypography.titleLarge,
-                                                            color = MaterialTheme.appColors.textPrimary,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                        Spacer(Modifier.height(12.dp))
-                                                        Text(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            text = stringResource(discussionR.string.discussion_click_button_create_discussion),
-                                                            style = MaterialTheme.appTypography.bodyLarge,
-                                                            color = MaterialTheme.appColors.textPrimary,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                        Spacer(Modifier.height(40.dp))
-                                                        OpenEdXOutlinedButton(
-                                                            modifier = Modifier
-                                                                .widthIn(184.dp, Dp.Unspecified),
-                                                            text = stringResource(id = discussionR.string.discussion_create_post),
-                                                            onClick = {
-                                                                onCreatePostClick()
-                                                            },
-                                                            content = {
-                                                                Icon(
-                                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
-                                                                    contentDescription = null,
-                                                                    tint = MaterialTheme.appColors.primary
-                                                                )
-                                                                Spacer(modifier = Modifier.width(6.dp))
-                                                                Text(
-                                                                    text = stringResource(id = discussionR.string.discussion_create_post),
-                                                                    color = MaterialTheme.appColors.primary,
-                                                                    style = MaterialTheme.appTypography.labelLarge
-                                                                )
-                                                            },
-                                                            borderColor = MaterialTheme.appColors.primary,
-                                                            textColor = MaterialTheme.appColors.primary
-                                                        )
-                                                    }
+                                                            .widthIn(184.dp, Dp.Unspecified),
+                                                        text = stringResource(id = discussionR.string.discussion_create_post),
+                                                        onClick = {
+                                                            onCreatePostClick()
+                                                        },
+                                                        content = {
+                                                            Icon(
+                                                                painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
+                                                                contentDescription = null,
+                                                                tint = MaterialTheme.appColors.primary
+                                                            )
+                                                            Spacer(modifier = Modifier.width(6.dp))
+                                                            Text(
+                                                                text = stringResource(id = discussionR.string.discussion_create_post),
+                                                                color = MaterialTheme.appColors.primary,
+                                                                style = MaterialTheme.appTypography.labelLarge
+                                                            )
+                                                        },
+                                                        borderColor = MaterialTheme.appColors.primary,
+                                                        textColor = MaterialTheme.appColors.primary
+                                                    )
                                                 }
                                             }
                                         }

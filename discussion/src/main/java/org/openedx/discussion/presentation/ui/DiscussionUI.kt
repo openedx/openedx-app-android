@@ -478,8 +478,7 @@ fun ThreadItem(
                 text = textType,
                 painter = icon,
                 color = MaterialTheme.appColors.textPrimaryVariant,
-                textStyle = MaterialTheme.appTypography.labelSmall,
-                onClick = {})
+                textStyle = MaterialTheme.appTypography.labelSmall)
             if (thread.unreadCommentCount > 0 && !thread.read) {
                 Row(
                     modifier = Modifier,
@@ -537,8 +536,7 @@ fun ThreadItem(
             ),
             painter = painterResource(id = R.drawable.discussion_ic_responses),
             color = MaterialTheme.appColors.textAccent,
-            textStyle = MaterialTheme.appTypography.labelLarge,
-            onClick = {})
+            textStyle = MaterialTheme.appTypography.labelLarge)
     }
 
 }

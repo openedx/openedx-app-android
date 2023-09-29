@@ -31,8 +31,6 @@ class VideoUnitViewModel(
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
 
-    var fullscreenHandled = false
-
     var isDownloaded = false
 
     private val _currentVideoTime = MutableLiveData<Long>(0)

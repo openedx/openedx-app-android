@@ -3,7 +3,6 @@
 package org.openedx.auth.presentation.signup
 
 import android.content.res.Configuration
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -111,7 +110,6 @@ internal fun RegistrationScreen(
     onRegisterClick: (Map<String, String?>) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
-    val configuration = LocalConfiguration.current
     val focusManager = LocalFocusManager.current
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,

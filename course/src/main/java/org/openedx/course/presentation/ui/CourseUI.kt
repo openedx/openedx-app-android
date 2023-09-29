@@ -308,35 +308,6 @@ fun SequentialItem(
 }
 
 @Composable
-fun VideoRotateView() {
-    val configuration = LocalConfiguration.current
-    when (configuration.orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.appShapes.buttonShape)
-                    .background(MaterialTheme.appColors.info)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.course_ic_screen_rotation),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(id = R.string.course_video_rotate_for_fullscreen),
-                    style = MaterialTheme.appTypography.titleMedium,
-                    color = Color.White
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun VideoTitle(text: String) {
     Text(
         text = text,
@@ -730,15 +701,6 @@ private fun NavigationUnitsButtonsWithNextPreview() {
             hasNextBlock = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun VideoRotateViewPreview() {
-    OpenEdXTheme {
-        VideoRotateView()
     }
 }
 

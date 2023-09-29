@@ -120,9 +120,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onDestroy() {
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
         releasePlayer()
         super.onDestroy()
     }

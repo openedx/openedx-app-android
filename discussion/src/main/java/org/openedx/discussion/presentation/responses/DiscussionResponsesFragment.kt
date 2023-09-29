@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -27,10 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -159,6 +164,9 @@ private fun DiscussionResponsesScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
     val firstVisibleIndex = remember {
         mutableStateOf(scrollState.firstVisibleItemIndex)
     }
@@ -399,6 +407,8 @@ private fun DiscussionResponsesScreen(
                                                 .clip(CircleShape)
                                                 .background(sendButtonColor)
                                                 .clickable {
+                                                    keyboardController?.hide()
+                                                    focusManager.clearFocus()
                                                     if (commentValue.isNotEmpty()) {
                                                         addCommentClick(commentValue.trim())
                                                         commentValue = ""

@@ -114,7 +114,8 @@ private fun WebContentScreen(
     val scaffoldState = rememberScaffoldState()
     Scaffold(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(bottom = 16.dp),
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {

@@ -1,6 +1,5 @@
 package org.openedx.app
 
-import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -134,7 +133,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
             else -> WindowType.Expanded
         }
         _windowSize = WindowSize(widthWindowSize, heightWindowSize)
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
     }
 
     private fun isUsingNightModeResources(): Boolean {

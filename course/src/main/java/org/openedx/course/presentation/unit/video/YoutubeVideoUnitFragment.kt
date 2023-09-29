@@ -33,7 +33,6 @@ import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoUnitBinding
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
-import org.openedx.course.presentation.ui.VideoRotateView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
 import org.koin.android.ext.android.inject
@@ -84,12 +83,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.cvRotateHelper.setContent {
-            OpenEdXTheme {
-                VideoRotateView()
-            }
-        }
 
         binding.cvVideoTitle.setContent {
             OpenEdXTheme {
@@ -163,7 +156,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                         youTubePlayer
                     )
                     defPlayerUiController.setFullScreenButtonClickListener {
-                        viewModel.fullscreenHandled = true
                         router.navigateToFullScreenYoutubeVideo(
                             requireActivity().supportFragmentManager,
                             viewModel.videoUrl,
@@ -184,12 +176,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         if (!isPlayerInitialized) {
             binding.youtubePlayerView.initialize(listener, options)
             isPlayerInitialized = true
-        }
-
-        viewModel.isPopUpViewShow.observe(viewLifecycleOwner) {
-            if (windowSize?.isTablet != true) {
-                binding.cvRotateHelper.isVisible = it
-            }
         }
     }
 

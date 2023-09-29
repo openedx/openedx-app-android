@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -200,6 +202,8 @@ private fun DiscussionCommentsScreen(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val focusManager = LocalFocusManager.current
 
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -385,6 +389,8 @@ private fun DiscussionCommentsScreen(
                                                 .clip(CircleShape)
                                                 .background(sendButtonColor)
                                                 .clickable {
+                                                    keyboardController?.hide()
+                                                    focusManager.clearFocus()
                                                     if (responseValue.isNotEmpty()) {
                                                         onAddResponseClick(responseValue.trim())
                                                         responseValue = ""

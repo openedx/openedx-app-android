@@ -39,7 +39,6 @@ import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
-import org.openedx.course.presentation.ui.VideoRotateView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
 import kotlin.math.roundToInt
@@ -102,12 +101,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.cvRotateHelper.setContent {
-            OpenEdXTheme {
-                VideoRotateView()
-            }
-        }
 
         binding.cvVideoTitle.setContent {
             OpenEdXTheme {
@@ -176,12 +169,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 initPlayer()
             }
         }
-
-        viewModel.isPopUpViewShow.observe(viewLifecycleOwner) {
-            if (windowSize?.isTablet != true) {
-                binding.cvRotateHelper.isVisible = it
-            }
-        }
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -208,7 +195,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     blockId,
                     viewModel.courseId
                 )
-                viewModel.fullscreenHandled = true
             }
         }
     }

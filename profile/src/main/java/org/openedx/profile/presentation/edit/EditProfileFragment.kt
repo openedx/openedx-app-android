@@ -1035,12 +1035,14 @@ private fun LeaveProfile(
     onDismissRequest: () -> Unit,
     onLeaveClick: () -> Unit,
 ) {
+    val scrollState = rememberScrollState()
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
         content = {
             Column(
                 Modifier
+                    .verticalScroll(scrollState)
                     .fillMaxWidth()
                     .background(
                         MaterialTheme.appColors.background,

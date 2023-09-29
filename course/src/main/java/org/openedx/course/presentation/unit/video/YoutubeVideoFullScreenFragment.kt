@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.video
 
-import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
@@ -124,14 +123,6 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
     override fun onDestroyView() {
         viewModel.sendTime()
         super.onDestroyView()
-    }
-
-    @SuppressLint("SourceLockedOrientationActivity")
-    override fun onDestroy() {
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-        super.onDestroy()
     }
 
     companion object {
