@@ -4,6 +4,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -16,14 +19,9 @@ import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.openedx.profile.data.storage.ProfilePreferences
 
 class ProfileViewModel(
     private val interactor: ProfileInteractor,
-    private val preferencesManager: ProfilePreferences,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val dispatcher: CoroutineDispatcher,
@@ -69,7 +67,7 @@ class ProfileViewModel(
         _uiState.value = ProfileUIState.Loading
         viewModelScope.launch {
             try {
-                val cachedAccount = preferencesManager.profile
+                val cachedAccount = interactor.getCachedAccount()
                 if (cachedAccount == null) {
                     _uiState.value = ProfileUIState.Loading
                 } else {
@@ -77,7 +75,6 @@ class ProfileViewModel(
                 }
                 val account = interactor.getAccount()
                 _uiState.value = ProfileUIState.Data(account)
-                preferencesManager.profile = account
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

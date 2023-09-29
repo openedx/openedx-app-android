@@ -27,7 +27,7 @@ class AuthRepository(
         }
         preferencesManager.accessToken = authResponse.accessToken ?: ""
         preferencesManager.refreshToken = authResponse.refreshToken ?: ""
-        val user = api.getProfile().mapToDomain()
+        val user = api.getProfile()
         preferencesManager.user = user
     }
 

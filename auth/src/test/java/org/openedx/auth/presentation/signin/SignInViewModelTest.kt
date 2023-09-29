@@ -6,7 +6,7 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
-import org.openedx.core.domain.model.User
+import org.openedx.core.data.model.User
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import io.mockk.coEvery
