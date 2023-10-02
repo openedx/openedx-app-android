@@ -61,6 +61,14 @@
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 
 #===============/////GSON RULES \\\\\\\============
+
+# Keep Data models from being obfuscated/minimized
+-keep class org.openedx.auth.data.model.** { *; }
+-keep class org.openedx.core.data.model.** { *; }
+-keep class org.openedx.profile.data.model.** { *; }
+-keep class org.openedx.profile.domain.model.** { *; }
+-keep class org.openedx.discussion.data.model.** { *; }
+
 ##---------------Begin: proguard configuration for Gson  ----------
 # Gson uses generic type information stored in a class file when working with fields. Proguard
 # removes such information by default, so configure it to keep all of it.

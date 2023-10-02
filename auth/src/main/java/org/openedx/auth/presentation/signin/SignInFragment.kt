@@ -1,10 +1,10 @@
 package org.openedx.auth.presentation.signin
 
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.browser.customtabs.CustomTabsIntent
@@ -70,7 +70,6 @@ class SignInFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
 
-                Log.d("TEST111", context.packageName)
                 LoginScreen(
                     windowSize = windowSize,
                     showProgress = showProgress,
@@ -98,8 +97,8 @@ class SignInFragment : Fragment() {
                             .setUrlBarHidingEnabled(true)
                             .setShowTitle(true)
                             .build()
+                        intent.intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                         intent.launchUrl(context, uri)
-
                     }
                 )
 
