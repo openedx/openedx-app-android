@@ -734,5 +734,6 @@ private val mockChapterBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
     completion = 0.0
 )
