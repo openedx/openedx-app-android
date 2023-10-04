@@ -26,8 +26,23 @@ enum class BlockType {
             return try {
                 BlockType.valueOf(actualType.uppercase())
             } catch (e : Exception){
-                BlockType.OTHERS
+                OTHERS
             }
+        }
+
+        fun sortByPriority(blockTypes: List<BlockType>): List<BlockType> {
+            val priorityMap = mapOf(
+                PROBLEM to 1,
+                VIDEO to 2,
+                DISCUSSION to 3,
+                HTML to 4
+            )
+            val comparator = Comparator<BlockType> { blockType1, blockType2 ->
+                val priority1 = priorityMap[blockType1] ?: Int.MAX_VALUE
+                val priority2 = priorityMap[blockType2] ?: Int.MAX_VALUE
+                priority1 - priority2
+            }
+            return blockTypes.sortedWith(comparator)
         }
     }
 }
