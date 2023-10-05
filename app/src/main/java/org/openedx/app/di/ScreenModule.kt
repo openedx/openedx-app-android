@@ -46,6 +46,8 @@ import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.openedx.profile.domain.interactor.AnothersProfileInteractor
+import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 
 val screenModule = module {
 
@@ -73,6 +75,8 @@ val screenModule = module {
     viewModel { VideoSettingsViewModel(get(), get()) }
     viewModel { VideoQualityViewModel(get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get()) }
+    factory { AnothersProfileInteractor(get()) }
+    viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
 
     single { CourseRepository(get(), get(), get(),get()) }
     factory { CourseInteractor(get()) }

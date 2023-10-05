@@ -9,5 +9,4 @@ interface AuthRouter {
     fun navigateToSignUp(fm: FragmentManager)
 
     fun navigateToRestorePassword(fm: FragmentManager)
-
 }

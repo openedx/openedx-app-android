@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
@@ -28,8 +27,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,13 +34,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.AppDataHolder
@@ -53,7 +47,10 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
+import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.profile.presentation.ui.ProfileInfoSection
+import org.openedx.profile.presentation.ui.ProfileTopic
 
 class ProfileFragment : Fragment() {
 
@@ -254,67 +251,29 @@ private fun ProfileScreen(
                                         .verticalScroll(rememberScrollState()),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    val profileImage = if (uiState.account.profileImage.hasImage) {
-                                        uiState.account.profileImage.imageUrlFull
-                                    } else {
-                                        R.drawable.core_ic_default_profile_picture
-                                    }
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(profileImage)
-                                            .error(R.drawable.core_ic_default_profile_picture)
-                                            .placeholder(R.drawable.core_ic_default_profile_picture)
-                                            .build(),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .border(
-                                                2.dp,
-                                                MaterialTheme.appColors.onSurface,
-                                                CircleShape
-                                            )
-                                            .padding(2.dp)
-                                            .size(100.dp)
-                                            .clip(CircleShape)
-                                    )
-                                    Spacer(modifier = Modifier.height(20.dp))
-                                    Text(
-                                        text = uiState.account.name,
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.headlineSmall
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "@${uiState.account.username}",
-                                        color = MaterialTheme.appColors.textPrimaryVariant,
-                                        style = MaterialTheme.appTypography.labelLarge
-                                    )
+                                    ProfileTopic(uiState.account)
+
                                     Spacer(modifier = Modifier.height(36.dp))
 
-                                    Column(
-                                        Modifier
-                                            .fillMaxWidth()
-                                    ) {
-                                        ProfileInfoSection(uiState.account)
+                                    ProfileInfoSection(uiState.account)
 
-                                        Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(24.dp))
 
-                                        SettingsSection(onVideoSettingsClick = {
-                                            onVideoSettingsClick()
-                                        })
+                                    SettingsSection(onVideoSettingsClick = {
+                                        onVideoSettingsClick()
+                                    })
 
-                                        Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(24.dp))
 
-                                        SupportInfoSection(appData, onClick = onSupportClick)
+                                    SupportInfoSection(appData, onClick = onSupportClick)
 
-                                        Spacer(modifier = Modifier.height(24.dp))
+                                    Spacer(modifier = Modifier.height(24.dp))
 
-                                        LogoutButton(
-                                            onClick = { showLogoutDialog = true }
-                                        )
+                                    LogoutButton(
+                                        onClick = { showLogoutDialog = true }
+                                    )
 
-                                        Spacer(Modifier.height(30.dp))
-                                    }
-
+                                    Spacer(Modifier.height(30.dp))
                                 }
                             }
                         }
@@ -324,78 +283,6 @@ private fun ProfileScreen(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProfileInfoSection(account: Account) {
-
-    if (account.yearOfBirth != null || account.bio.isNotEmpty()) {
-        Column {
-            Text(
-                text = stringResource(id = org.openedx.profile.R.string.profile_prof_info),
-                style = MaterialTheme.appTypography.labelLarge,
-                color = MaterialTheme.appColors.textSecondary
-            )
-            Spacer(modifier = Modifier.height(14.dp))
-            Card(
-                modifier = Modifier,
-                shape = MaterialTheme.appShapes.cardShape,
-                elevation = 0.dp,
-                backgroundColor = MaterialTheme.appColors.cardViewBackground
-            ) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (account.yearOfBirth != null) {
-                        Text(
-                            text = buildAnnotatedString {
-                                val value = if (account.yearOfBirth != null) {
-                                    account.yearOfBirth.toString()
-                                } else ""
-                                val text = stringResource(
-                                    id = org.openedx.profile.R.string.profile_year_of_birth,
-                                    value
-                                )
-                                append(text)
-                                addStyle(
-                                    style = SpanStyle(
-                                        color = MaterialTheme.appColors.textPrimaryVariant
-                                    ),
-                                    start = 0,
-                                    end = text.length - value.length
-                                )
-                            },
-                            style = MaterialTheme.appTypography.titleMedium,
-                            color = MaterialTheme.appColors.textPrimary
-                        )
-                    }
-                    if (account.bio.isNotEmpty()) {
-                        Text(
-                            text = buildAnnotatedString {
-                                val text = stringResource(
-                                    id = org.openedx.profile.R.string.profile_bio,
-                                    account.bio
-                                )
-                                append(text)
-                                addStyle(
-                                    style = SpanStyle(
-                                        color = MaterialTheme.appColors.textPrimaryVariant
-                                    ),
-                                    start = 0,
-                                    end = text.length - account.bio.length
-                                )
-                            },
-                            style = MaterialTheme.appTypography.titleMedium,
-                            color = MaterialTheme.appColors.textPrimary
-                        )
-                    }
                 }
             }
         }
