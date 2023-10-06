@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
 import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -15,7 +14,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
-import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
@@ -29,7 +27,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
     private var exoPlayer: ExoPlayer? = null
     private var blockId = ""
-    private var isTabletDevice = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,15 +34,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         if (viewModel.currentVideoTime == 0L) {
             viewModel.currentVideoTime = requireArguments().getLong(ARG_VIDEO_TIME, 0)
-        }
-        setOrientationBasedOnDeviceType()
-    }
-
-    private fun setOrientationBasedOnDeviceType() {
-        val windowSize = (requireActivity() as WindowSizeHolder).windowSize
-        isTabletDevice = windowSize.isTablet
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
         }
     }
 

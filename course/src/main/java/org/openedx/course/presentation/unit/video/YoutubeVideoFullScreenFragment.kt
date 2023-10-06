@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.video
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -14,14 +13,12 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
-import org.openedx.core.extension.requestApplyInsetsWhenAttached
-import org.openedx.core.presentation.global.WindowSizeHolder
-import org.openedx.core.presentation.global.viewBinding
-import org.openedx.core.ui.WindowType
-import org.openedx.course.R
-import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.extension.requestApplyInsetsWhenAttached
+import org.openedx.core.presentation.global.viewBinding
+import org.openedx.course.R
+import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
 
 class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_full_screen) {
 
@@ -32,7 +29,6 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
     }
 
     private var blockId = ""
-    private var isTabletDevice = false
 
     private val youtubeTrackerListener = YouTubePlayerTracker()
 
@@ -43,16 +39,6 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         if (viewModel.currentVideoTime == 0L) {
             viewModel.currentVideoTime = requireArguments().getLong(ARG_VIDEO_TIME, 0)
-        }
-        setOrientationBasedOnDeviceType()
-    }
-
-    private fun setOrientationBasedOnDeviceType() {
-        val windowSize = requireActivity() as WindowSizeHolder
-        isTabletDevice = windowSize.windowSize.width != WindowType.Compact &&
-                windowSize.windowSize.height != WindowType.Compact
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
         }
     }
 

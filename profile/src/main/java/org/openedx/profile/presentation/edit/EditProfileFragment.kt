@@ -524,7 +524,7 @@ private fun EditProfileScreen(
 
             if (leaveDialog) {
                 val configuration = LocalConfiguration.current
-                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT || windowSize.isTablet) {
                     LeaveProfile(
                         onDismissRequest = {
                             onKeepEdit()

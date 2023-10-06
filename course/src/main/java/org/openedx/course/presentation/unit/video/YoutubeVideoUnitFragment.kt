@@ -2,7 +2,6 @@ package org.openedx.course.presentation.unit.video
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.OrientationEventListener
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.background
@@ -21,6 +20,9 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.computeWindowSizeClasses
 import org.openedx.core.extension.objectToString
 import org.openedx.core.extension.stringToObject
@@ -35,9 +37,6 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) {
 
@@ -49,7 +48,6 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     private val binding get() = _binding!!
 
     private var windowSize: WindowSize? = null
-    private var orientationListener: OrientationEventListener? = null
     private var _youTubePlayer: YouTubePlayer? = null
 
     private var blockId = ""
@@ -179,17 +177,9 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (orientationListener?.canDetectOrientation() == true) {
-            orientationListener?.enable()
-        }
-    }
-
     override fun onPause() {
         super.onPause()
         _youTubePlayer?.pause()
-        orientationListener?.disable()
     }
 
     override fun onDestroyView() {

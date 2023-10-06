@@ -333,10 +333,6 @@ fun NavigationUnitsButtons(
         painterResource(id = org.openedx.core.R.drawable.core_ic_check)
     }
 
-    val nextButtonModifier = if (hasPrevBlock) {
-        Modifier
-    } else Modifier.fillMaxWidth(0.6f)
-
     Row(
         modifier = Modifier
             .navigationBarsPadding()
@@ -379,8 +375,7 @@ fun NavigationUnitsButtons(
         }
         Button(
             modifier = Modifier
-                .height(42.dp)
-                .then(nextButtonModifier),
+                .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
             ),
@@ -477,9 +472,12 @@ fun NavigationUnitsButtonsLandscape(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
+                    modifier = Modifier.width(40.dp),
                     text = nextButtonText,
                     color = MaterialTheme.appColors.buttonText,
-                    style = MaterialTheme.appTypography.labelLarge
+                    style = MaterialTheme.appTypography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.width(8.dp))
                 Icon(

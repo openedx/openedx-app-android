@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.OrientationEventListener
 import android.view.View
 import android.widget.FrameLayout
 import androidx.compose.foundation.background
@@ -54,7 +53,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     private var exoPlayer: ExoPlayer? = null
     private var windowSize: WindowSize? = null
 
-    private var orientationListener: OrientationEventListener? = null
     private var blockId = ""
 
     private val handler = Handler(Looper.getMainLooper())
@@ -201,9 +199,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     override fun onResume() {
         super.onResume()
-        if (orientationListener?.canDetectOrientation() == true) {
-            orientationListener?.enable()
-        }
         exoPlayer?.addListener(exoPlayerListener)
     }
 
@@ -211,7 +206,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         super.onPause()
         exoPlayer?.removeListener(exoPlayerListener)
         exoPlayer?.pause()
-        orientationListener?.disable()
     }
 
     override fun onDestroyView() {
