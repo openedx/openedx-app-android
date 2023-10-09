@@ -20,7 +20,8 @@ class AuthRepository(
             ApiConstants.GRANT_TYPE_PASSWORD,
             org.openedx.core.BuildConfig.CLIENT_ID,
             username,
-            password
+            password,
+            org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
         )
         if (authResponse.error != null) {
             throw EdxError.UnknownException(authResponse.error!!)
