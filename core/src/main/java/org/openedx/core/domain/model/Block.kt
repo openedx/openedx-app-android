@@ -72,6 +72,13 @@ data class EncodedVideos(
                 isPreferredVideoInfo(mobileHigh) ||
                 isPreferredVideoInfo(mobileLow)
 
+    val hasNonYoutubeVideo: Boolean
+        get() = mobileHigh?.url != null
+                || mobileLow?.url != null
+                || desktopMp4?.url != null
+                || hls?.url != null
+                || fallback?.url != null
+
     fun getPreferredVideoInfoForDownloading(preferredVideoQuality: VideoQuality): VideoInfo? {
         var preferredVideoInfo = when (preferredVideoQuality) {
             VideoQuality.OPTION_360P -> mobileLow
@@ -125,9 +132,9 @@ data class EncodedVideos(
 
 data class VideoInfo(
     val url: String,
-    val fileSize: Int
+    val fileSize: Int,
 )
 
 data class BlockCounts(
-    val video: Int
+    val video: Int,
 )

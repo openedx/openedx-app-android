@@ -17,10 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.media3.cast.CastPlayer
+import androidx.media3.cast.SessionAvailabilityListener
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.window.layout.WindowMetricsCalculator
+import com.google.android.gms.cast.framework.CastContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -41,6 +46,7 @@ import org.openedx.course.presentation.ui.ConnectionErrorView
 import org.openedx.course.presentation.ui.VideoRotateView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
+import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
@@ -52,7 +58,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     private val router by inject<CourseRouter>()
 
     private var exoPlayer: ExoPlayer? = null
+    private var castPlayer: CastPlayer? = null
     private var windowSize: WindowSize? = null
+
+    private var castContext: CastContext? = null
 
     private var orientationListener: OrientationEventListener? = null
     private var blockId = ""
@@ -89,14 +98,17 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         handler.post(videoTimeRunnable)
         requireArguments().apply {
             viewModel.videoUrl = getString(ARG_VIDEO_URL, "")
-            viewModel.transcripts =
-                stringToObject<Map<String, String>>(
-                    getString(ARG_TRANSCRIPT_URL, "")
-                ) ?: emptyMap()
+            viewModel.transcripts = stringToObject<Map<String, String>>(
+                getString(ARG_TRANSCRIPT_URL, "")
+            ) ?: emptyMap()
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
             blockId = getString(ARG_BLOCK_ID, "")
         }
         viewModel.downloadSubtitles()
+
+        val executor = Executors.newSingleThreadExecutor()
+        castContext = CastContext.getSharedInstance(requireContext(), executor).result
+
         orientationListener = object : OrientationEventListener(requireActivity()) {
             override fun onOrientationChanged(orientation: Int) {
                 if (windowSize?.isTablet != true) {
@@ -172,9 +184,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             }
         }
 
-        binding.connectionError.isVisible = !viewModel.hasInternetConnection && !viewModel.isDownloaded
+        binding.connectionError.isVisible =
+            !viewModel.hasInternetConnection && !viewModel.isDownloaded
 
-        val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
+        val windowMetrics =
+            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
         val currentBounds = windowMetrics.bounds
         val width = currentBounds.width() - requireContext().dpToPixel(32)
         val minHeight = requireContext().dpToPixel(194).roundToInt()
@@ -202,21 +216,47 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun  initPlayer() {
+    @androidx.annotation.OptIn(UnstableApi::class)
+    private fun initPlayer() {
         with(binding) {
             if (exoPlayer == null) {
                 exoPlayer = ExoPlayer.Builder(requireContext())
                     .build()
+
+                if (castContext != null) {
+                    castPlayer = CastPlayer(castContext!!)
+                }
             }
             playerView.player = exoPlayer
             playerView.setShowNextButton(false)
             playerView.setShowPreviousButton(false)
-            playerView.controllerAutoShow = true
-            playerView.controllerShowTimeoutMs = 2000
-            val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
+            showVideoControllerIndefinitely(false)
+            val movieMetadata = MediaMetadata.Builder()
+                .setMediaType(MediaMetadata.MEDIA_TYPE_MOVIE)
+                .build()
+            val mediaItem = MediaItem.Builder().setMediaMetadata(movieMetadata)
+                .setUri(viewModel.videoUrl)
+                .setMimeType("video/*")
+                .build()
             exoPlayer?.setMediaItem(mediaItem, viewModel.getCurrentVideoTime())
             exoPlayer?.prepare()
+
+            castPlayer?.setSessionAvailabilityListener(object : SessionAvailabilityListener {
+                override fun onCastSessionAvailable() {
+                    exoPlayer?.pause()
+                    playerView.player = castPlayer
+                    castPlayer?.setMediaItem(mediaItem, exoPlayer?.currentPosition ?: 0L)
+                    showVideoControllerIndefinitely(true)
+                }
+
+                override fun onCastSessionUnavailable() {
+                    playerView.player = exoPlayer
+                    exoPlayer?.seekTo(castPlayer?.currentPosition ?: 0L)
+                    castPlayer?.stop()
+                    exoPlayer?.play()
+                    showVideoControllerIndefinitely(false)
+                }
+            })
 
             playerView.setFullscreenButtonClickListener { isFullScreen ->
                 router.navigateToFullScreenVideo(
@@ -246,15 +286,30 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         orientationListener?.disable()
     }
 
+    @UnstableApi
     override fun onDestroyView() {
         exoPlayer?.release()
+        castPlayer?.release()
         exoPlayer = null
+        castPlayer = null
         super.onDestroyView()
     }
 
     override fun onDestroy() {
         handler.removeCallbacks(videoTimeRunnable)
         super.onDestroy()
+    }
+
+    @UnstableApi
+    private fun showVideoControllerIndefinitely(show: Boolean) {
+        if (show) {
+            binding.playerView.controllerAutoShow = false
+            binding.playerView.controllerShowTimeoutMs = 0
+            binding.playerView.showController()
+        } else {
+            binding.playerView.controllerAutoShow = true
+            binding.playerView.controllerShowTimeoutMs = 2000
+        }
     }
 
     companion object {
@@ -264,13 +319,14 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
         private const val ARG_DOWNLOADED = "isDownloaded"
+
         fun newInstance(
             blockId: String,
             courseId: String,
             videoUrl: String,
             transcriptsUrl: Map<String, String>,
             title: String,
-            isDownloaded: Boolean
+            isDownloaded: Boolean,
         ): VideoUnitFragment {
             val fragment = VideoUnitFragment()
             fragment.arguments = bundleOf(
