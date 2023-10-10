@@ -110,7 +110,8 @@ private fun VideoQualityScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .statusBarsInset(),
+                    .statusBarsInset()
+                    .displayCutoutForLandscape(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(

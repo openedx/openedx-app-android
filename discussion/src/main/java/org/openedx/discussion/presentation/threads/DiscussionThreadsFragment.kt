@@ -332,6 +332,7 @@ private fun DiscussionThreadsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
+                    .displayCutoutForLandscape()
                     .then(statusBarInsets),
                 contentAlignment = Alignment.TopCenter
             ) {

@@ -192,7 +192,8 @@ private fun DiscussionTopicsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {

@@ -240,7 +240,8 @@ private fun DiscussionCommentsScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .displayCutoutForLandscape(),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     BackBtn {
@@ -275,6 +276,7 @@ private fun DiscussionCommentsScreen(
                                     Modifier
                                         .then(screenWidth)
                                         .weight(1f)
+                                        .displayCutoutForLandscape()
                                         .background(MaterialTheme.appColors.background),
                                     verticalArrangement = Arrangement.spacedBy(16.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -361,6 +363,7 @@ private fun DiscussionCommentsScreen(
                                         OutlinedTextField(
                                             modifier = Modifier
                                                 .weight(1f)
+                                                .displayCutoutForLandscape()
                                                 .heightIn(36.dp, 80.dp),
                                             value = responseValue,
                                             onValueChange = { str ->

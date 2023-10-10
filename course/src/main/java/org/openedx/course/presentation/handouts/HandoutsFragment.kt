@@ -116,7 +116,8 @@ private fun HandoutsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(it)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {

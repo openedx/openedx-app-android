@@ -123,6 +123,7 @@ import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberSaveableMap
@@ -549,7 +550,8 @@ private fun EditProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(paddingValues)
-                    .statusBarsInset(),
+                    .statusBarsInset()
+                    .displayCutoutForLandscape(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(

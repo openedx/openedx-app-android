@@ -191,6 +191,7 @@ private fun RestorePasswordScreen(
                             Column(
                                 Modifier
                                     .then(contentPaddings)
+                                    .displayCutoutForLandscape()
                                     .fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
@@ -247,6 +248,7 @@ private fun RestorePasswordScreen(
                             Column(
                                 Modifier
                                     .then(contentPaddings)
+                                    .displayCutoutForLandscape()
                                     .fillMaxSize(),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally

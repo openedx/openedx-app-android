@@ -1,25 +1,35 @@
 package org.openedx.core.ui
 
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
-import org.openedx.core.presentation.global.InsetHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
+import org.openedx.core.presentation.global.InsetHolder
 
 inline val isPreview: Boolean
     @ReadOnlyComposable
@@ -57,6 +67,14 @@ fun Modifier.statusBarsInset(): Modifier = composed {
     val topInset = (LocalContext.current as? InsetHolder)?.topInset ?: 0
     return@composed this
         .padding(top = with(LocalDensity.current) { topInset.toDp() })
+}
+
+fun Modifier.displayCutoutForLandscape(): Modifier = composed {
+    return@composed if(LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        this.displayCutoutPadding()
+    } else {
+        this
+    }
 }
 
 inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier = composed {

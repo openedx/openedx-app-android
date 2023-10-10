@@ -14,8 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -35,7 +33,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -44,6 +41,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.extension.TextConverter
@@ -56,8 +55,6 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment
 import org.openedx.discussion.presentation.ui.CommentMainItem
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import org.openedx.discussion.R as discussionR
 
 class DiscussionResponsesFragment : Fragment() {
@@ -240,7 +237,8 @@ private fun DiscussionResponsesScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .displayCutoutForLandscape(),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     BackBtn {
@@ -274,7 +272,8 @@ private fun DiscussionResponsesScreen(
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
-                                        .weight(1f),
+                                        .weight(1f)
+                                        .displayCutoutForLandscape(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     LazyColumn(
@@ -379,6 +378,7 @@ private fun DiscussionResponsesScreen(
                                         OutlinedTextField(
                                             modifier = Modifier
                                                 .weight(1f)
+                                                .displayCutoutForLandscape()
                                                 .heightIn(36.dp, 80.dp),
                                             value = commentValue,
                                             onValueChange = { str ->

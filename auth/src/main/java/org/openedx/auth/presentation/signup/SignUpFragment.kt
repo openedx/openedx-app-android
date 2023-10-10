@@ -315,6 +315,7 @@ internal fun RegistrationScreen(
                                     Modifier
                                         .fillMaxHeight()
                                         .verticalScroll(scrollState)
+                                        .displayCutoutForLandscape()
                                         .then(contentPaddings),
                                     verticalArrangement = Arrangement.spacedBy(24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
