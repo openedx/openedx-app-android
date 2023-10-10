@@ -72,6 +72,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     }
 
     private val exoPlayerListener = object : Player.Listener {
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            super.onPlayWhenReadyChanged(playWhenReady, reason)
+            viewModel.isPlaying = playWhenReady
+        }
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
@@ -184,6 +188,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
             exoPlayer?.setMediaItem(mediaItem, viewModel.getCurrentVideoTime())
             exoPlayer?.prepare()
+            exoPlayer?.playWhenReady = viewModel.isPlaying
 
             playerView.setFullscreenButtonClickListener { isFullScreen ->
                 router.navigateToFullScreenVideo(
@@ -191,7 +196,8 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     viewModel.videoUrl,
                     exoPlayer?.currentPosition ?: 0L,
                     blockId,
-                    viewModel.courseId
+                    viewModel.courseId,
+                    viewModel.isPlaying
                 )
             }
         }

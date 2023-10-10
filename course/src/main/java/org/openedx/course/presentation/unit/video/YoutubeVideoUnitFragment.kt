@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
@@ -145,6 +146,15 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 }
             }
 
+            override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+                super.onStateChange(youTubePlayer, state)
+                viewModel.isPlaying = when(state) {
+                    PlayerConstants.PlayerState.PLAYING -> true
+                    PlayerConstants.PlayerState.PAUSED -> false
+                    else -> return
+                }
+            }
+
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
                 _youTubePlayer = youTubePlayer
@@ -159,14 +169,19 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                             viewModel.videoUrl,
                             viewModel.getCurrentVideoTime(),
                             blockId,
-                            viewModel.courseId
+                            viewModel.courseId,
+                            viewModel.isPlaying
                         )
                     }
                     binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
                 }
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
+                if (viewModel.isPlaying) {
+                    youTubePlayer.loadVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
+                } else {
+                    youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
+                }
                 youTubePlayer.addListener(youtubeTrackerListener)
             }
         }

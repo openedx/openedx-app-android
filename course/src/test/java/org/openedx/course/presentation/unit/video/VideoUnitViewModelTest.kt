@@ -107,7 +107,7 @@ class VideoUnitViewModelTest {
             networkConnection,
             transcriptManager
         )
-        coEvery { notifier.notifier } returns flow { emit(CourseVideoPositionChanged("", 10)) }
+        coEvery { notifier.notifier } returns flow { emit(CourseVideoPositionChanged("", 10, false)) }
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)

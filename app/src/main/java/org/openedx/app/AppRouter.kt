@@ -139,11 +139,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     ) {
         replaceFragmentWithBackStack(
             fm,
-            VideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId)
+            VideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId, isPlaying)
         )
     }
 
@@ -152,11 +153,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     ) {
         replaceFragmentWithBackStack(
             fm,
-            YoutubeVideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId)
+            YoutubeVideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId, isPlaying)
         )
     }
 
