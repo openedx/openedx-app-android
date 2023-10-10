@@ -47,7 +47,7 @@ fun ProfileTopic(account: Account) {
                 .error(R.drawable.core_ic_default_profile_picture)
                 .placeholder(R.drawable.core_ic_default_profile_picture)
                 .build(),
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.core_accessibility_user_profile_image, account.username),
             modifier = Modifier
                 .border(
                     2.dp,

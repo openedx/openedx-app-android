@@ -9,10 +9,10 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
-import org.openedx.profile.domain.interactor.AnothersProfileInteractor
+import org.openedx.profile.domain.interactor.ProfileInteractor
 
 class AnothersProfileViewModel(
-    private val interactor: AnothersProfileInteractor,
+    private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
     val username: String
 ) : BaseViewModel() {

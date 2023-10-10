@@ -94,7 +94,7 @@ fun ThreadMainItem(
                     .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                     .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                     .build(),
-                contentDescription = null,
+                contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, thread.author),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(MaterialTheme.appShapes.material.medium)
@@ -245,7 +245,7 @@ fun CommentItem(
                         .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .build(),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, comment.author),
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
@@ -395,7 +395,7 @@ fun CommentMainItem(
                         .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .build(),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, comment.author),
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)

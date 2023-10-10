@@ -18,7 +18,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.system.ResourceManager
-import org.openedx.profile.domain.interactor.AnothersProfileInteractor
+import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.anothers_account.AnothersProfileUIState
 import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 import java.net.UnknownHostException
@@ -32,7 +32,7 @@ class AnothersProfileViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     private val resourceManager = mockk<ResourceManager>()
-    private val interactor = mockk<AnothersProfileInteractor>()
+    private val interactor = mockk<ProfileInteractor>()
     private val username = "username"
 
     private val account = org.openedx.profile.domain.model.Account(
