@@ -356,14 +356,14 @@ private fun DiscussionCommentsScreen(
                                             .then(screenWidth)
                                             .heightIn(84.dp, Dp.Unspecified)
                                             .padding(top = 16.dp, bottom = 24.dp)
-                                            .padding(horizontal = 24.dp),
+                                            .padding(horizontal = 24.dp)
+                                            .displayCutoutForLandscape(),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         OutlinedTextField(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .displayCutoutForLandscape()
                                                 .heightIn(36.dp, 80.dp),
                                             value = responseValue,
                                             onValueChange = { str ->
