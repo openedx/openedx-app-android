@@ -6,7 +6,6 @@ import android.view.ViewTreeObserver
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -70,8 +69,10 @@ fun Modifier.statusBarsInset(): Modifier = composed {
 }
 
 fun Modifier.displayCutoutForLandscape(): Modifier = composed {
-    return@composed if(LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        this.displayCutoutPadding()
+    val cutoutInset = (LocalContext.current as? InsetHolder)?.cutoutInset ?: 0
+    val cutoutInsetDp = with(LocalDensity.current) { cutoutInset.toDp() }
+    return@composed if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        this.padding(horizontal = cutoutInsetDp)
     } else {
         this
     }
