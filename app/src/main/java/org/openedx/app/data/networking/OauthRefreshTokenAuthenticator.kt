@@ -61,7 +61,7 @@ class OauthRefreshTokenAuthenticator(
                         if (newAuth != null) {
                             return response.request.newBuilder()
                                 .header(
-                                    "Authorization",
+                                    HEADER_AUTHORIZATION,
                                     ACCESS_TOKEN_TYPE + " " + newAuth.accessToken
                                 )
                                 .build()
@@ -70,14 +70,13 @@ class OauthRefreshTokenAuthenticator(
                             if (actualToken != accessToken) {
                                 return response.request.newBuilder()
                                     .header(
-                                        "Authorization",
+                                        HEADER_AUTHORIZATION,
                                         "$ACCESS_TOKEN_TYPE $actualToken"
                                     )
                                     .build()
                             }
                             return null
                         }
-
                     } catch (e: Exception) {
                         return null
                     }
@@ -88,12 +87,12 @@ class OauthRefreshTokenAuthenticator(
                     // request does not match the current access_token. This case can occur when
                     // asynchronous calls are made and are attempting to refresh the access_token where
                     // one call succeeds but the other fails. https://github.com/edx/edx-app-android/pull/834
-                    val authHeaders =
-                        response.request.headers["Authorization"]?.split(" ".toRegex())
+                    val authHeaders = response.request.headers[HEADER_AUTHORIZATION]
+                        ?.split(" ".toRegex())
                     if (authHeaders?.toTypedArray()?.getOrNull(1) != accessToken) {
                         return response.request.newBuilder()
                             .header(
-                                "Authorization",
+                                HEADER_AUTHORIZATION,
                                 "$ACCESS_TOKEN_TYPE $accessToken"
                             ).build()
                     }
@@ -141,16 +140,16 @@ class OauthRefreshTokenAuthenticator(
     private fun getErrorCode(responseBody: String): String? {
         try {
             val jsonObj = JSONObject(responseBody)
-            if (jsonObj.has("error_code")) {
-                return jsonObj.getString("error_code")
+            if (jsonObj.has(FIELD_ERROR_CODE)) {
+                return jsonObj.getString(FIELD_ERROR_CODE)
             } else {
                 return if (TOKEN_TYPE_JWT.equals(ACCESS_TOKEN_TYPE, ignoreCase = true)) {
-                    val errorType = if (jsonObj.has("detail")) "detail" else "developer_message"
+                    val errorType = if (jsonObj.has(FIELD_DETAIL)) FIELD_DETAIL else FIELD_DEVELOPER_MESSAGE
                     jsonObj.getString(errorType)
                 } else {
                     val errorCode = jsonObj
-                        .optJSONObject("developer_message")
-                        ?.optString("error_code", "") ?: ""
+                        .optJSONObject(FIELD_DEVELOPER_MESSAGE)
+                        ?.optString(FIELD_ERROR_CODE, "") ?: ""
                     if (errorCode != "") {
                         errorCode
                     } else {
@@ -165,6 +164,8 @@ class OauthRefreshTokenAuthenticator(
     }
 
     companion object {
+        private const val HEADER_AUTHORIZATION = "Authorization"
+
         private const val TOKEN_EXPIRED_ERROR_MESSAGE = "token_expired"
         private const val TOKEN_NONEXISTENT_ERROR_MESSAGE = "token_nonexistent"
         private const val TOKEN_INVALID_GRANT_ERROR_MESSAGE = "invalid_grant"
@@ -172,5 +173,9 @@ class OauthRefreshTokenAuthenticator(
         private const val JWT_TOKEN_EXPIRED = "Token has expired."
         private const val JWT_INVALID_TOKEN = "Invalid token."
         private const val JWT_DISABLED_USER_ERROR_MESSAGE = "User account is disabled."
+
+        private const val FIELD_ERROR_CODE = "error_code"
+        private const val FIELD_DETAIL = "detail"
+        private const val FIELD_DEVELOPER_MESSAGE = "developer_message"
     }
 }
