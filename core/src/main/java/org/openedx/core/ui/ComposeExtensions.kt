@@ -20,11 +20,17 @@ import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
@@ -85,6 +91,35 @@ inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier
         onClick()
     }
 }
+
+fun Modifier.roundBorderWithoutBottom(borderWidth: Dp, cornerRadius: Dp): Modifier = composed(
+    factory = {
+        var path: Path
+        this.then(
+            Modifier.drawWithCache {
+                val height = this.size.height
+                val width = this.size.width
+                onDrawWithContent {
+                    drawContent()
+                    path = Path().apply {
+                        moveTo(width.times(0f), height.times(1f))
+                        lineTo(width.times(0f), height.times(0f))
+                        lineTo(width.times(1f), height.times(0f))
+                        lineTo(width.times(1f), height.times(1f))
+                    }
+                    drawPath(
+                        path = path,
+                        color = Color.LightGray,
+                        style = Stroke(
+                            width = borderWidth.toPx(),
+                            pathEffect = PathEffect.cornerPathEffect(cornerRadius.toPx())
+                        )
+                    )
+                }
+            }
+        )
+    }
+)
 
 @Composable
 fun <T : Any> rememberSaveableMap(init: () -> MutableMap<String, T?>): MutableMap<String, T?> {

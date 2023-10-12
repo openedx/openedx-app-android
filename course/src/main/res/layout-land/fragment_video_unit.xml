@@ -12,7 +12,6 @@
         app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
         app:layout_constraintDimensionRatio="H,16:9"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/subtitles"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

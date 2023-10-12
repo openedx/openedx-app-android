@@ -313,7 +313,7 @@ fun VideoTitle(text: String) {
         text = text,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.titleLarge,
-        maxLines = 3,
+        maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
 }

@@ -3,7 +3,6 @@ package org.openedx.course.presentation.unit.container
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
-import android.widget.FrameLayout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
@@ -70,7 +69,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         val statusBarParams = binding.statusBarInset.layoutParams as ConstraintLayout.LayoutParams
         statusBarParams.topMargin = insetHolder.topInset
         binding.statusBarInset.layoutParams = statusBarParams
-        val containerParams = binding.viewPager.layoutParams as FrameLayout.LayoutParams
+        val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
 
@@ -137,7 +136,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
         binding.cvCount.setContent {
             OpenEdXTheme {
-
                 val index by viewModel.indexInContainer.observeAsState(1)
                 val units by viewModel.verticalBlockCounts.observeAsState(1)
 

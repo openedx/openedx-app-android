@@ -11,7 +11,6 @@
         android:layout_height="0dp"
         app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="W,9:16"
         app:layout_constraintEnd_toStartOf="@id/subtitles"
         app:layout_constraintStart_toStartOf="parent"
