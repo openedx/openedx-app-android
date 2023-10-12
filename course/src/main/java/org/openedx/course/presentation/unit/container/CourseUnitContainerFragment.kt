@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.unit.container
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
@@ -14,12 +13,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import org.openedx.core.BlockType
 import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
@@ -35,10 +37,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
 import org.openedx.course.presentation.ui.NavigationUnitsButtons
 import org.openedx.course.presentation.ui.VerticalPageIndicator
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
-import org.openedx.course.presentation.ui.NavigationUnitsButtonsLandscape
+import org.openedx.course.presentation.ui.VideoTitle
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
 
@@ -71,12 +70,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         val statusBarParams = binding.statusBarInset.layoutParams as ConstraintLayout.LayoutParams
         statusBarParams.topMargin = insetHolder.topInset
         binding.statusBarInset.layoutParams = statusBarParams
-        val bottomNavigationParams =
-            binding.cvNavigationBar.layoutParams as ConstraintLayout.LayoutParams
-        bottomNavigationParams.bottomMargin = insetHolder.bottomInset
-        binding.cvNavigationBar.layoutParams = bottomNavigationParams
-        val containerParams =
-            binding.viewPager.layoutParams as FrameLayout.LayoutParams
+        val containerParams = binding.viewPager.layoutParams as FrameLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
 
@@ -87,6 +81,15 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
             if (currentBlockIndex != -1) {
                 binding.viewPager.currentItem = currentBlockIndex
+            }
+        }
+
+        binding.cvVideoTitle?.setContent {
+            OpenEdXTheme {
+                val block by viewModel.currentBlock.observeAsState()
+                if (block?.type == BlockType.VIDEO) {
+                    VideoTitle(text = block?.displayName ?: "")
+                }
             }
         }
 
@@ -102,7 +105,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     mutableStateOf(viewModel.hasNextBlock)
                 }
 
-                val configuration = LocalConfiguration.current
                 val windowSize = rememberWindowSize()
 
                 updateNavigationButtons { next, hasPrev, hasNext ->
@@ -110,50 +112,26 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     hasPrevBlock = hasPrev
                     hasNextBlock = hasNext
                 }
-
-                if (windowSize.isTablet || configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    NavigationUnitsButtons(
-                        windowSize = windowSize,
-                        hasPrevBlock = hasPrevBlock,
-                        nextButtonText = nextButtonText,
-                        hasNextBlock = hasNextBlock,
-                        onPrevClick = {
-                            handlePrevClick { next, hasPrev, hasNext ->
-                                nextButtonText = next
-                                hasPrevBlock = hasPrev
-                                hasNextBlock = hasNext
-                            }
-                        },
-                        onNextClick = {
-                            handleNextClick { next, hasPrev, hasNext ->
-                                nextButtonText = next
-                                hasPrevBlock = hasPrev
-                                hasNextBlock = hasNext
-                            }
+                NavigationUnitsButtons(
+                    windowSize = windowSize,
+                    hasPrevBlock = hasPrevBlock,
+                    nextButtonText = nextButtonText,
+                    hasNextBlock = hasNextBlock,
+                    onPrevClick = {
+                        handlePrevClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
                         }
-                    )
-                } else {
-                    NavigationUnitsButtonsLandscape(
-                        windowSize = windowSize,
-                        hasPrevBlock = hasPrevBlock,
-                        nextButtonText = nextButtonText,
-                        hasNextBlock = hasNextBlock,
-                        onPrevClick = {
-                            handlePrevClick { next, hasPrev, hasNext ->
-                                nextButtonText = next
-                                hasPrevBlock = hasPrev
-                                hasNextBlock = hasNext
-                            }
-                        },
-                        onNextClick = {
-                            handleNextClick { next, hasPrev, hasNext ->
-                                nextButtonText = next
-                                hasPrevBlock = hasPrev
-                                hasNextBlock = hasNext
-                            }
+                    },
+                    onNextClick = {
+                        handleNextClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
                         }
-                    )
-                }
+                    }
+                )
             }
         }
 

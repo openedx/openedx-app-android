@@ -53,6 +53,10 @@ class CourseUnitContainerViewModel(
     val indexInContainer: LiveData<Int>
         get() = _indexInContainer
 
+    private val _currentBlock = MutableLiveData<Block?>()
+    val currentBlock: LiveData<Block?>
+        get() = _currentBlock
+
     var nextButtonText = ""
     var hasNextBlock = false
     private var courseName = ""
@@ -91,6 +95,9 @@ class CourseUnitContainerViewModel(
                 }
                 if (currentVerticalIndex != -1) {
                     _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
+                }
+                if (block.descendants.isNotEmpty()) {
+                    _currentBlock.value = blocks.first { it.id == block.descendants.first() }
                 }
                 return
             }
@@ -136,6 +143,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null
@@ -148,6 +156,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null

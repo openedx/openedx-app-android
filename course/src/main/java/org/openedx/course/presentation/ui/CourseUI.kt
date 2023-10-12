@@ -333,11 +333,20 @@ fun NavigationUnitsButtons(
         painterResource(id = org.openedx.core.R.drawable.core_ic_check)
     }
 
+    val subModifier = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        Modifier
+            .height(72.dp)
+            .fillMaxWidth()
+    } else {
+        Modifier
+            .padding(end = 32.dp)
+            .padding(top = 2.dp)
+    }
+
     Row(
         modifier = Modifier
             .navigationBarsPadding()
-            .height(72.dp)
-            .fillMaxWidth()
+            .then(subModifier)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -391,93 +400,6 @@ fun NavigationUnitsButtons(
                     text = nextButtonText,
                     color = MaterialTheme.appColors.buttonText,
                     style = MaterialTheme.appTypography.labelLarge
-                )
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    painter = nextButtonIcon,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.buttonText
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun NavigationUnitsButtonsLandscape(
-    windowSize: WindowSize,
-    nextButtonText: String,
-    hasPrevBlock: Boolean,
-    hasNextBlock: Boolean,
-    onPrevClick: () -> Unit,
-    onNextClick: () -> Unit
-) {
-    val nextButtonIcon = if (hasNextBlock) {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_down)
-    } else {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_check)
-    }
-
-    Column(
-        modifier = Modifier
-            .navigationBarsPadding()
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (hasPrevBlock) {
-            OutlinedButton(
-                modifier = Modifier
-                    .height(42.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    backgroundColor = MaterialTheme.appColors.background
-                ),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
-                elevation = null,
-                shape = MaterialTheme.appShapes.navigationButtonShape,
-                onClick = onPrevClick,
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.course_navigation_prev),
-                        color = MaterialTheme.appColors.primary,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Icon(
-                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_up),
-                        contentDescription = null,
-                        tint = MaterialTheme.appColors.primary
-                    )
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-        }
-        Button(
-            modifier = Modifier
-                .height(42.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.buttonBackground
-            ),
-            elevation = null,
-            shape = MaterialTheme.appShapes.navigationButtonShape,
-            onClick = onNextClick
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    modifier = Modifier.width(40.dp),
-                    text = nextButtonText,
-                    color = MaterialTheme.appColors.buttonText,
-                    style = MaterialTheme.appTypography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.width(8.dp))
                 Icon(

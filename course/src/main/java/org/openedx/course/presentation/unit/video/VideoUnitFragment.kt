@@ -104,7 +104,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.cvVideoTitle.setContent {
+        binding.cvVideoTitle?.setContent {
             OpenEdXTheme {
                 VideoTitle(text = requireArguments().getString(ARG_TITLE) ?: "")
             }
@@ -153,17 +153,20 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         val orientation = resources.configuration.orientation
         val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
         val currentBounds = windowMetrics.bounds
-        val width = currentBounds.width() - requireContext().dpToPixel(32)
-        val minHeight = requireContext().dpToPixel(194).roundToInt()
-        val height = (width / 16f * 9f).roundToInt()
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
-        layoutParams.height = if (windowSize?.isTablet == true) {
-            requireContext().dpToPixel(320).roundToInt()
-        } else if (height < minHeight || orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            minHeight
-        } else {
-            height
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
+            val width = currentBounds.width() - requireContext().dpToPixel(32)
+            val minHeight = requireContext().dpToPixel(194).roundToInt()
+            val height = (width / 16f * 9f).roundToInt()
+            layoutParams.height = if (windowSize?.isTablet == true) {
+                requireContext().dpToPixel(320).roundToInt()
+            } else if (height < minHeight) {
+                minHeight
+            } else {
+                height
+            }
         }
+
         binding.playerView.layoutParams = layoutParams
 
         viewModel.isUpdated.observe(viewLifecycleOwner) { isUpdated ->

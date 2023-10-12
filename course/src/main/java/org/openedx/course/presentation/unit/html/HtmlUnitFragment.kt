@@ -78,6 +78,12 @@ class HtmlUnitFragment : Fragment() {
                     0.dp
                 }
 
+                val topPadding = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    16.dp
+                } else {
+                    0.dp
+                }
+
                 Surface(
                     color = Color.White
                 ) {
@@ -85,7 +91,8 @@ class HtmlUnitFragment : Fragment() {
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.White)
-                            .padding(bottom = bottomPadding),
+                            .padding(bottom = bottomPadding)
+                            .padding(top = topPadding),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (hasInternetConnection) {

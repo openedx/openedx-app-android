@@ -83,7 +83,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.cvVideoTitle.setContent {
+        binding.cvVideoTitle?.setContent {
             OpenEdXTheme {
                 VideoTitle(text = requireArguments().getString(ARG_TITLE) ?: "")
             }
