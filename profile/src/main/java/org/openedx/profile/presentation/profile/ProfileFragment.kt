@@ -2,9 +2,11 @@ package org.openedx.profile.presentation.profile
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -41,6 +43,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.BuildConfig
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.profile.domain.model.Account
@@ -87,6 +90,16 @@ class ProfileFragment : Fragment() {
                     appData = (requireActivity() as AppDataHolder).appData,
                     refreshing = refreshing,
                     logout = {
+                        if (BuildConfig.BROWSER_LOGIN) {
+                            val uri = Uri.parse("${BuildConfig.BASE_URL}logout")
+                                .buildUpon()
+                                .appendQueryParameter("next", "/custom-logout-page").build()
+                            val intent = CustomTabsIntent.Builder()
+                                .setUrlBarHidingEnabled(true)
+                                .setShowTitle(true)
+                                .build()
+                            intent.launchUrl(context, uri)
+                        }
                         viewModel.logout()
                     },
                     editAccountClicked = {
