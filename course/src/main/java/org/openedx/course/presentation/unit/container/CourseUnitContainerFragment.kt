@@ -1,9 +1,9 @@
 package org.openedx.course.presentation.unit.container
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -72,6 +72,12 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
+        val configuration = requireActivity().resources.configuration
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val countParams = binding.cvCount.layoutParams as ConstraintLayout.LayoutParams
+            countParams.rightMargin = insetHolder.cutoutInset
+            binding.cvCount.layoutParams = countParams
+        }
 
         initViewPager()
         if (savedInstanceState == null) {
@@ -148,7 +154,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     selectedLength = 5.dp,
                     modifier = Modifier
                         .width(24.dp)
-                        .padding(end = 6.dp)
                 )
             }
         }

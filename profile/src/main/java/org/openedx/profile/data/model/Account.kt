@@ -60,7 +60,9 @@ data class Account(
             yearOfBirth = yearOfBirth,
             levelOfEducation = levelOfEducation ?: "",
             goals = goals ?: "",
-            languageProficiencies = languageProficiencies!!.map { it.mapToDomain() },
+            languageProficiencies = languageProficiencies?.let { languageProficiencyList ->
+                languageProficiencyList.map { it.mapToDomain() }
+            } ?: emptyList(),
             gender = gender ?: "",
             mailingAddress = mailingAddress ?: "",
             email = email,

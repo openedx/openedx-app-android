@@ -112,6 +112,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
                     showSubtitleLanguage = viewModel.transcripts.size > 1,
                     currentIndex = currentIndex,
+                    onTranscriptClick = {
+                        _youTubePlayer?.apply {
+                            seekTo(it.start.mseconds / 1000f)
+                            play()
+                        }
+                    },
                     onSettingsClick = {
                         _youTubePlayer?.pause()
                         val dialog =

@@ -134,6 +134,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
                     showSubtitleLanguage = viewModel.transcripts.size > 1,
                     currentIndex = currentIndex,
+                    onTranscriptClick = {
+                        exoPlayer?.apply {
+                            seekTo(it.start.mseconds.toLong())
+                            play()
+                        }
+                    },
                     onSettingsClick = {
                         exoPlayer?.pause()
                         val dialog = SelectBottomDialogFragment.newInstance(

@@ -53,6 +53,7 @@ fun ThreadMainItem(
     modifier: Modifier,
     thread: org.openedx.discussion.domain.model.Thread,
     onClick: (String, Boolean) -> Unit,
+    onUserPhotoClick: (String) -> Unit
 ) {
     val profileImageUrl = if (thread.users?.get(thread.author)?.image?.hasImage == true) {
         thread.users[thread.author]?.image?.imageUrlFull
@@ -93,14 +94,25 @@ fun ThreadMainItem(
                     .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                     .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                     .build(),
-                contentDescription = null,
+                contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, thread.author),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(MaterialTheme.appShapes.material.medium)
+                    .clickable {
+                        if (thread.author.isNotEmpty()) {
+                            onUserPhotoClick(thread.author)
+                        }
+                    }
             )
             Spacer(Modifier.width(16.dp))
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable {
+                        if (thread.author.isNotEmpty()) {
+                            onUserPhotoClick(thread.author)
+                        }
+                    },
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
@@ -172,6 +184,7 @@ fun CommentItem(
     shape: Shape = MaterialTheme.appShapes.cardShape,
     onClick: (String, String, Boolean) -> Unit,
     onAddCommentClick: () -> Unit = {},
+    onUserPhotoClick: (String) -> Unit
 ) {
     val profileImageUrl = if (comment.profileImage?.hasImage == true) {
         comment.profileImage.imageUrlFull
@@ -232,15 +245,21 @@ fun CommentItem(
                         .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .build(),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, comment.author),
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-
+                        .clickable {
+                            onUserPhotoClick(comment.author)
+                        }
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            onUserPhotoClick(comment.author)
+                        },
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
@@ -323,6 +342,7 @@ fun CommentMainItem(
     internalPadding: Dp = 16.dp,
     comment: DiscussionComment,
     onClick: (String, String, Boolean) -> Unit,
+    onUserPhotoClick: (String) -> Unit
 ) {
     val profileImageUrl = if (comment.profileImage?.hasImage == true) {
         comment.profileImage.imageUrlFull
@@ -375,15 +395,21 @@ fun CommentMainItem(
                         .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .build(),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, comment.author),
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-
+                        .clickable {
+                            onUserPhotoClick(comment.author)
+                        }
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            onUserPhotoClick(comment.author)
+                        },
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
@@ -640,9 +666,9 @@ private fun CommentItemPreview() {
         CommentItem(
             modifier = Modifier.fillMaxWidth(),
             comment = mockComment,
-            onClick = { _, _, _ ->
-
-            })
+            onClick = { _, _, _ -> },
+            onUserPhotoClick = {}
+        )
     }
 }
 
@@ -651,9 +677,10 @@ private fun CommentItemPreview() {
 private fun ThreadMainItemPreview() {
     ThreadMainItem(
         modifier = Modifier.fillMaxWidth(),
-        thread = mockThread, onClick = { _, _ ->
-
-        })
+        thread = mockThread,
+        onClick = { _, _ -> },
+        onUserPhotoClick = {}
+    )
 }
 
 private val mockComment = DiscussionComment(

@@ -23,6 +23,11 @@ class ProfileRepository(
         return account.mapToDomain()
     }
 
+    suspend fun getAccount(username: String): Account {
+        val account = api.getAccount(username)
+        return account.mapToDomain()
+    }
+
     fun getCachedAccount() : Account? {
         return profilePreferences.profile?.mapToDomain()
     }

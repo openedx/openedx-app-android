@@ -45,6 +45,9 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,6 +89,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.jsoup.Jsoup
 import org.openedx.core.ui.rememberWindowSize
+import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.course.R as courseR
@@ -508,11 +512,20 @@ fun VideoSubtitles(
     subtitleLanguage: String,
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
+    onTranscriptClick: (Caption) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     timedTextObject?.let {
+        val autoScrollDelay = 3000L
+        var lastScrollTime by remember {
+            mutableLongStateOf(0L)
+        }
+        if (listState.isScrollInProgress) {
+            lastScrollTime = Date().time
+        }
+
         LaunchedEffect(key1 = currentIndex) {
-            if (currentIndex > 1) {
+            if (currentIndex > 1 && lastScrollTime + autoScrollDelay < Date().time) {
                 listState.animateScrollToItem(currentIndex - 1)
             }
         }
@@ -544,8 +557,7 @@ fun VideoSubtitles(
                 }
                 Spacer(Modifier.height(24.dp))
                 LazyColumn(
-                    state = listState,
-                    userScrollEnabled = false
+                    state = listState
                 ) {
                     itemsIndexed(subtitles) { index, item ->
                         val textColor =
@@ -555,7 +567,11 @@ fun VideoSubtitles(
                                 MaterialTheme.appColors.textFieldBorder
                             }
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .noRippleClickable {
+                                    onTranscriptClick(item)
+                                },
                             text = Jsoup.parse(item.content).text(),
                             color = textColor,
                             style = MaterialTheme.appTypography.bodyMedium
@@ -718,5 +734,6 @@ private val mockChapterBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
     completion = 0.0
 )

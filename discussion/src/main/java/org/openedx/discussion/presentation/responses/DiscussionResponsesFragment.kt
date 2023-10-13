@@ -43,6 +43,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.koin.android.ext.android.inject
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.extension.TextConverter
@@ -55,6 +56,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment
 import org.openedx.discussion.presentation.ui.CommentMainItem
+import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.R as discussionR
 
 class DiscussionResponsesFragment : Fragment() {
@@ -62,6 +64,8 @@ class DiscussionResponsesFragment : Fragment() {
     private val viewModel by viewModel<DiscussionResponsesViewModel> {
         parametersOf(requireArguments().parcelable(ARG_COMMENT))
     }
+
+    private val router by inject<DiscussionRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,6 +124,11 @@ class DiscussionResponsesFragment : Fragment() {
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
+                    },
+                    onUserPhotoClick = { username ->
+                        router.navigateToAnothersProfile(
+                            requireActivity().supportFragmentManager, username
+                        )
                     }
                 )
             }
@@ -158,6 +167,7 @@ private fun DiscussionResponsesScreen(
     onItemClick: (String, String, Boolean) -> Unit,
     addCommentClick: (String) -> Unit,
     onBackClick: () -> Unit,
+    onUserPhotoClick: (String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -297,7 +307,11 @@ private fun DiscussionResponsesScreen(
                                                         uiState.mainComment.id,
                                                         bool
                                                     )
-                                                })
+                                                },
+                                                onUserPhotoClick = {username ->
+                                                    onUserPhotoClick(username)
+                                                }
+                                            )
                                         }
                                         if (uiState.mainComment.childCount > 0) {
                                             item {
@@ -339,7 +353,11 @@ private fun DiscussionResponsesScreen(
                                                     comment = comment,
                                                     onClick = { action, commentId, bool ->
                                                         onItemClick(action, commentId, bool)
-                                                    })
+                                                    },
+                                                    onUserPhotoClick = {username ->
+                                                        onUserPhotoClick(username)
+                                                    }
+                                                )
                                             }
                                         }
                                         item {
@@ -474,7 +492,8 @@ private fun DiscussionResponsesScreenPreview() {
 
             },
             onBackClick = {},
-            isClosed = false
+            isClosed = false,
+            onUserPhotoClick = {}
         )
     }
 }
@@ -504,7 +523,8 @@ private fun DiscussionResponsesScreenTabletPreview() {
 
             },
             onBackClick = {},
-            isClosed = false
+            isClosed = false,
+            onUserPhotoClick = {}
         )
     }
 }

@@ -29,10 +29,8 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    var currentIndex = 0
-        private set
-    var currentVerticalIndex = 0
-        private set
+    private var currentIndex = 0
+    private var currentVerticalIndex = 0
     private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
@@ -82,6 +80,9 @@ class CourseUnitContainerViewModel(
     }
 
     fun setupCurrentIndex(blockId: String) {
+        if (currentSectionIndex != -1) {
+            return
+        }
         blocks.forEachIndexed { index, block ->
             if (block.id == blockId) {
                 currentVerticalIndex = index

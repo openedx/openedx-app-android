@@ -123,6 +123,11 @@ class DiscussionCommentsFragment : Fragment() {
                             requireActivity().supportFragmentManager, it, viewModel.thread.closed
                         )
                     },
+                    onUserPhotoClick = { username ->
+                        router.navigateToAnothersProfile(
+                            requireActivity().supportFragmentManager, username
+                        )
+                    },
                     onAddResponseClick = {
                         viewModel.createComment(it)
                     },
@@ -169,7 +174,8 @@ private fun DiscussionCommentsScreen(
     onItemClick: (String, String, Boolean) -> Unit,
     onCommentClick: (DiscussionComment) -> Unit,
     onAddResponseClick: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onUserPhotoClick: (String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -293,7 +299,11 @@ private fun DiscussionCommentsScreen(
                                             thread = uiState.thread,
                                             onClick = { action, bool ->
                                                 onItemClick(action, uiState.thread.id, bool)
-                                            })
+                                            },
+                                            onUserPhotoClick = { username ->
+                                                onUserPhotoClick(username)
+                                            }
+                                        )
                                     }
                                     if (uiState.commentsData.isNotEmpty()) {
                                         item {
@@ -326,6 +336,9 @@ private fun DiscussionCommentsScreen(
                                             },
                                             onAddCommentClick = {
                                                 onCommentClick(comment)
+                                            },
+                                            onUserPhotoClick = {
+                                                onUserPhotoClick(comment.author)
                                             })
                                     }
                                     item {
@@ -412,6 +425,7 @@ private fun DiscussionCommentsScreen(
                                 }
                             }
                         }
+
                         is DiscussionCommentsUIState.Loading -> {
                             Box(
                                 Modifier
@@ -459,7 +473,8 @@ private fun DiscussionCommentsScreenPreview() {
             onBackClick = {},
             scrollToBottom = false,
             refreshing = false,
-            onSwipeRefresh = {}
+            onSwipeRefresh = {},
+            onUserPhotoClick = {}
         )
     }
 }
@@ -489,7 +504,8 @@ private fun DiscussionCommentsScreenTabletPreview() {
             onBackClick = {},
             scrollToBottom = false,
             refreshing = false,
-            onSwipeRefresh = {}
+            onSwipeRefresh = {},
+            onUserPhotoClick = {}
         )
     }
 }

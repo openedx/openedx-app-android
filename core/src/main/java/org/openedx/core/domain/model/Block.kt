@@ -22,6 +22,7 @@ data class Block(
     val studentViewMultiDevice: Boolean,
     val blockCounts: BlockCounts,
     val descendants: List<String>,
+    val descendantsType: BlockType,
     val completion: Double,
     val downloadModel: DownloadModel? = null
 ) {
