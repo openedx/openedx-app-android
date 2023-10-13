@@ -605,7 +605,7 @@ private fun EditProfileScreen(
                                         .placeholder(R.drawable.core_ic_default_profile_picture)
                                         .build(),
                                     contentScale = ContentScale.Crop,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(id = R.string.core_accessibility_user_profile_image, uiState.account.username),
                                     modifier = Modifier
                                         .border(
                                             2.dp,

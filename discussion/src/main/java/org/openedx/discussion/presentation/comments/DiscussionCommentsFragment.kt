@@ -56,6 +56,7 @@ import org.openedx.discussion.presentation.ui.ThreadMainItem
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.discussion.R
 
 
 class DiscussionCommentsFragment : Fragment() {
@@ -380,7 +381,7 @@ private fun DiscussionCommentsScreen(
                                             maxLines = 3,
                                             placeholder = {
                                                 Text(
-                                                    text = stringResource(id = org.openedx.discussion.R.string.discussion_add_response),
+                                                    text = stringResource(id = R.string.discussion_add_response),
                                                     color = MaterialTheme.appColors.textFieldHint,
                                                     style = MaterialTheme.appTypography.labelLarge,
                                                 )
@@ -407,8 +408,8 @@ private fun DiscussionCommentsScreen(
                                         ) {
                                             Icon(
                                                 modifier = Modifier.padding(7.dp),
-                                                painter = painterResource(id = org.openedx.discussion.R.drawable.discussion_ic_send),
-                                                contentDescription = null,
+                                                painter = painterResource(id = R.drawable.discussion_ic_send),
+                                                contentDescription = stringResource(id = R.string.discussion_add_response),
                                                 tint = iconButtonColor
                                             )
                                         }

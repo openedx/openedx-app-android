@@ -36,7 +36,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.openedx.core.BuildConfig
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
@@ -50,9 +52,6 @@ import org.openedx.core.utils.EmailUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseImageHeader
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.nio.charset.StandardCharsets
 import java.util.*
 import org.openedx.course.R as courseR
@@ -337,7 +336,8 @@ private fun CourseDetailNativeContent(
                     .aspectRatio(1.86f)
                     .padding(6.dp),
                 courseImage = course.media.image?.large,
-                courseCertificate = null
+                courseCertificate = null,
+                courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
@@ -348,7 +348,7 @@ private fun CourseDetailNativeContent(
                     Icon(
                         modifier = Modifier.size(40.dp),
                         painter = painterResource(courseR.drawable.course_ic_play),
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.course_play_video),
                         tint = Color.LightGray
                     )
                 }
@@ -466,7 +466,8 @@ private fun CourseDetailNativeContentLandscape(
                     .width(263.dp)
                     .height(200.dp),
                 courseImage = course.media.image?.large,
-                courseCertificate = null
+                courseCertificate = null,
+                courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
