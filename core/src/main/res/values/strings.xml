@@ -38,7 +38,9 @@
     <string name="core_android_device_model">Device Model: </string>
     <string name="core_insert_feedback">Feedback: </string>
     <string name="core_email_subject">Customer Feedback</string>
-
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
+
+    <!--    Accessibility-->
+    <string name="core_accessibility_user_profile_image">%1$s profile image</string>
 </resources>
