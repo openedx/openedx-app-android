@@ -16,6 +16,7 @@ class VideoViewModel(
 
     var videoUrl = ""
     var currentVideoTime = 0L
+    var isPlaying: Boolean? = null
 
     private var isBlockAlreadyCompleted = false
 
@@ -23,7 +24,7 @@ class VideoViewModel(
     fun sendTime() {
         if (currentVideoTime != C.TIME_UNSET) {
             viewModelScope.launch {
-                notifier.send(CourseVideoPositionChanged(videoUrl, currentVideoTime))
+                notifier.send(CourseVideoPositionChanged(videoUrl, currentVideoTime, isPlaying ?: false))
             }
         }
     }

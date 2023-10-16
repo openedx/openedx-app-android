@@ -1,5 +1,6 @@
 package org.openedx.core.ui
 
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.MutatePriority
@@ -7,19 +8,33 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
-import org.openedx.core.presentation.global.InsetHolder
+import androidx.compose.ui.unit.Dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
+import org.openedx.core.presentation.global.InsetHolder
 
 inline val isPreview: Boolean
     @ReadOnlyComposable
@@ -59,6 +74,16 @@ fun Modifier.statusBarsInset(): Modifier = composed {
         .padding(top = with(LocalDensity.current) { topInset.toDp() })
 }
 
+fun Modifier.displayCutoutForLandscape(): Modifier = composed {
+    val cutoutInset = (LocalContext.current as? InsetHolder)?.cutoutInset ?: 0
+    val cutoutInsetDp = with(LocalDensity.current) { cutoutInset.toDp() }
+    return@composed if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        this.padding(horizontal = cutoutInsetDp)
+    } else {
+        this
+    }
+}
+
 inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier = composed {
     clickable(
         indication = null,
@@ -66,6 +91,35 @@ inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier
         onClick()
     }
 }
+
+fun Modifier.roundBorderWithoutBottom(borderWidth: Dp, cornerRadius: Dp): Modifier = composed(
+    factory = {
+        var path: Path
+        this.then(
+            Modifier.drawWithCache {
+                val height = this.size.height
+                val width = this.size.width
+                onDrawWithContent {
+                    drawContent()
+                    path = Path().apply {
+                        moveTo(width.times(0f), height.times(1f))
+                        lineTo(width.times(0f), height.times(0f))
+                        lineTo(width.times(1f), height.times(0f))
+                        lineTo(width.times(1f), height.times(1f))
+                    }
+                    drawPath(
+                        path = path,
+                        color = Color.LightGray,
+                        style = Stroke(
+                            width = borderWidth.toPx(),
+                            pathEffect = PathEffect.cornerPathEffect(cornerRadius.toPx())
+                        )
+                    )
+                }
+            }
+        )
+    }
+)
 
 @Composable
 fun <T : Any> rememberSaveableMap(init: () -> MutableMap<String, T?>): MutableMap<String, T?> {

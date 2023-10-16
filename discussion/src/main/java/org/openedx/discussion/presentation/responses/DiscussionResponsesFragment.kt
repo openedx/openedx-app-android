@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -39,6 +41,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.android.ext.android.inject
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
@@ -52,8 +56,6 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment
 import org.openedx.discussion.presentation.ui.CommentMainItem
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.R as discussionR
 
@@ -169,6 +171,9 @@ private fun DiscussionResponsesScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
     val firstVisibleIndex = remember {
         mutableStateOf(scrollState.firstVisibleItemIndex)
     }
@@ -242,7 +247,8 @@ private fun DiscussionResponsesScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .displayCutoutForLandscape(),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     BackBtn {
@@ -276,7 +282,8 @@ private fun DiscussionResponsesScreen(
                                 Column(
                                     Modifier
                                         .fillMaxWidth()
-                                        .weight(1f),
+                                        .weight(1f)
+                                        .displayCutoutForLandscape(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     LazyColumn(
@@ -382,7 +389,8 @@ private fun DiscussionResponsesScreen(
                                             .then(screenWidth)
                                             .heightIn(84.dp, Dp.Unspecified)
                                             .padding(top = 16.dp, bottom = 24.dp)
-                                            .padding(horizontal = 24.dp),
+                                            .padding(horizontal = 24.dp)
+                                            .displayCutoutForLandscape(),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
@@ -417,6 +425,8 @@ private fun DiscussionResponsesScreen(
                                                 .clip(CircleShape)
                                                 .background(sendButtonColor)
                                                 .clickable {
+                                                    keyboardController?.hide()
+                                                    focusManager.clearFocus()
                                                     if (commentValue.isNotEmpty()) {
                                                         addCommentClick(commentValue.trim())
                                                         commentValue = ""

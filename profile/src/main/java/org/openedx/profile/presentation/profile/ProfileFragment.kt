@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -190,7 +191,8 @@ private fun ProfileScreen(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -417,6 +419,7 @@ private fun LogoutDialog(
         content = {
             Column(
                 Modifier
+                    .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
                     .background(
                         MaterialTheme.appColors.background,
@@ -428,10 +431,24 @@ private fun LogoutDialog(
                         MaterialTheme.appColors.cardViewBorder,
                         MaterialTheme.appShapes.cardShape
                     )
-                    .padding(horizontal = 40.dp)
-                    .padding(top = 48.dp, bottom = 36.dp),
+                    .padding(horizontal = 40.dp, vertical = 36.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = onDismissRequest
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = stringResource(id = R.string.core_cancel),
+                            tint = MaterialTheme.appColors.primary
+                        )
+                    }
+                }
                 Icon(
                     modifier = Modifier
                         .width(88.dp)
@@ -440,14 +457,14 @@ private fun LogoutDialog(
                     contentDescription = null,
                     tint = MaterialTheme.appColors.onBackground
                 )
-                Spacer(Modifier.size(40.dp))
+                Spacer(Modifier.size(36.dp))
                 Text(
                     text = stringResource(id = org.openedx.profile.R.string.profile_logout_dialog_body),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleLarge,
                     textAlign = TextAlign.Center
                 )
-                Spacer(Modifier.size(44.dp))
+                Spacer(Modifier.size(36.dp))
                 OpenEdXButton(
                     text = stringResource(id = org.openedx.profile.R.string.profile_logout),
                     backgroundColor = MaterialTheme.appColors.warning,
@@ -498,6 +515,12 @@ private fun ProfileInfoItem(text: String, onClick: () -> Unit) {
             contentDescription = null
         )
     }
+}
+
+@Preview
+@Composable
+fun LogoutDialogPreview() {
+    LogoutDialog({}, {})
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_NO)

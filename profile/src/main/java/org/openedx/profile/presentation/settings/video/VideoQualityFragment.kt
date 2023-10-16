@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -108,7 +110,8 @@ private fun VideoQualityScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .statusBarsInset(),
+                    .statusBarsInset()
+                    .displayCutoutForLandscape(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -129,7 +132,9 @@ private fun VideoQualityScreen(
                 }
 
                 Column(
-                    modifier = Modifier.then(contentWidth),
+                    modifier = Modifier
+                        .then(contentWidth)
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     val autoQuality =

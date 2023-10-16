@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -64,7 +66,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import org.jsoup.Jsoup
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -86,6 +87,8 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
+import org.jsoup.Jsoup
+import org.openedx.core.ui.rememberWindowSize
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
@@ -97,6 +100,13 @@ fun CourseImageHeader(
     courseImage: String?,
     courseCertificate: Certificate?,
 ) {
+    val configuration = LocalConfiguration.current
+    val windowSize = rememberWindowSize()
+    val contentScale = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        ContentScale.Fit
+    } else {
+        ContentScale.Crop
+    }
     val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
@@ -111,7 +121,7 @@ fun CourseImageHeader(
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.appShapes.cardShape)
@@ -302,36 +312,12 @@ fun SequentialItem(
 }
 
 @Composable
-fun VideoRotateView() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.appShapes.buttonShape)
-            .background(MaterialTheme.appColors.info)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.course_ic_screen_rotation),
-            contentDescription = null,
-            tint = Color.White
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = stringResource(id = R.string.course_video_rotate_for_fullscreen),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
 fun VideoTitle(text: String) {
     Text(
         text = text,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.titleLarge,
-        maxLines = 3,
+        maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
 }
@@ -351,13 +337,20 @@ fun NavigationUnitsButtons(
         painterResource(id = org.openedx.core.R.drawable.core_ic_check)
     }
 
-    val nextButtonModifier = if (hasPrevBlock) {
+    val subModifier = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Modifier
-    } else Modifier.fillMaxWidth(0.6f)
+            .height(72.dp)
+            .fillMaxWidth()
+    } else {
+        Modifier
+            .padding(end = 32.dp)
+            .padding(top = 2.dp)
+    }
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .navigationBarsPadding()
+            .then(subModifier)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -395,7 +388,7 @@ fun NavigationUnitsButtons(
         }
         Button(
             modifier = Modifier
-                .height(42.dp).then(nextButtonModifier),
+                .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
             ),
@@ -644,15 +637,6 @@ private fun NavigationUnitsButtonsWithNextPreview() {
             hasNextBlock = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun VideoRotateViewPreview() {
-    OpenEdXTheme {
-        VideoRotateView()
     }
 }
 

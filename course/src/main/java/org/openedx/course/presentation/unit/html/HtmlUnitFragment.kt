@@ -2,6 +2,7 @@ package org.openedx.course.presentation.unit.html
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -9,13 +10,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Dp
@@ -24,18 +29,19 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.roundBorderWithoutBottom
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
 import org.openedx.course.presentation.ui.ConnectionErrorView
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 
 class HtmlUnitFragment : Fragment() {
 
@@ -67,14 +73,35 @@ class HtmlUnitFragment : Fragment() {
                 var hasInternetConnection by remember {
                     mutableStateOf(networkConnection.isOnline())
                 }
+
+                val configuration = LocalConfiguration.current
+
+                val bottomPadding = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    72.dp
+                } else {
+                    0.dp
+                }
+
+                val border = if (!isSystemInDarkTheme()) {
+                    Modifier.roundBorderWithoutBottom(
+                        borderWidth = 2.dp,
+                        cornerRadius = 30.dp
+                    )
+                } else {
+                    Modifier
+                }
+
                 Surface(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                     color = Color.White
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(bottom = bottomPadding)
                             .background(Color.White)
-                            .padding(bottom = 72.dp),
+                            .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (hasInternetConnection) {

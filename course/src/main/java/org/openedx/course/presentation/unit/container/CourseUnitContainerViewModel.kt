@@ -29,10 +29,8 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    var currentIndex = 0
-        private set
-    var currentVerticalIndex = 0
-        private set
+    private var currentIndex = 0
+    private var currentVerticalIndex = 0
     private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
@@ -52,6 +50,10 @@ class CourseUnitContainerViewModel(
     private val _indexInContainer = MutableLiveData<Int>()
     val indexInContainer: LiveData<Int>
         get() = _indexInContainer
+
+    private val _currentBlock = MutableLiveData<Block?>()
+    val currentBlock: LiveData<Block?>
+        get() = _currentBlock
 
     var nextButtonText = ""
     var hasNextBlock = false
@@ -78,6 +80,9 @@ class CourseUnitContainerViewModel(
     }
 
     fun setupCurrentIndex(blockId: String) {
+        if (currentSectionIndex != -1) {
+            return
+        }
         blocks.forEachIndexed { index, block ->
             if (block.id == blockId) {
                 currentVerticalIndex = index
@@ -91,6 +96,9 @@ class CourseUnitContainerViewModel(
                 }
                 if (currentVerticalIndex != -1) {
                     _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
+                }
+                if (block.descendants.isNotEmpty()) {
+                    _currentBlock.value = blocks.first { it.id == block.descendants.first() }
                 }
                 return
             }
@@ -136,6 +144,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null
@@ -148,6 +157,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null
