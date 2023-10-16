@@ -199,6 +199,8 @@ private fun AnothersProfileScreen(
                         Spacer(modifier = Modifier.height(36.dp))
 
                         ProfileInfoSection(uiState.account)
+
+                        Spacer(modifier = Modifier.height(36.dp))
                     }
                 }
             }
