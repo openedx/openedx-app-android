@@ -33,7 +33,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.openedx.core.BuildConfig
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.replaceLinkTags
 import org.openedx.core.ui.*
@@ -41,8 +42,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.nio.charset.StandardCharsets
 
 class WebViewFragment : Fragment() {
@@ -114,7 +113,8 @@ private fun WebContentScreen(
     val scaffoldState = rememberScaffoldState()
     Scaffold(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(bottom = 16.dp),
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
@@ -132,7 +132,8 @@ private fun WebContentScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(it)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {

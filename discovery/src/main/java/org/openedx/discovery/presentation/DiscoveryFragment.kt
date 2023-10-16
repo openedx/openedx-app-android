@@ -160,7 +160,8 @@ internal fun DiscoveryScreen(
             Modifier
                 .fillMaxSize()
                 .padding(it)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(

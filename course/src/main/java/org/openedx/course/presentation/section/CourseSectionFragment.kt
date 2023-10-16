@@ -78,6 +78,7 @@ import org.openedx.course.presentation.ui.CardArrow
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.ui.displayCutoutForLandscape
 import java.io.File
 
 class CourseSectionFragment : Fragment() {
@@ -223,6 +224,7 @@ private fun CourseSectionScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .displayCutoutForLandscape()
                         .zIndex(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {

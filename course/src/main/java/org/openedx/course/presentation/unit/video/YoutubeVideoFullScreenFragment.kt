@@ -1,7 +1,5 @@
 package org.openedx.course.presentation.unit.video
 
-import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -15,14 +13,12 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
-import org.openedx.core.extension.requestApplyInsetsWhenAttached
-import org.openedx.core.presentation.global.WindowSizeHolder
-import org.openedx.core.presentation.global.viewBinding
-import org.openedx.core.ui.WindowType
-import org.openedx.course.R
-import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.extension.requestApplyInsetsWhenAttached
+import org.openedx.core.presentation.global.viewBinding
+import org.openedx.course.R
+import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
 
 class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_full_screen) {
 
@@ -33,10 +29,8 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
     }
 
     private var blockId = ""
-    private var isTabletDevice = false
 
     private val youtubeTrackerListener = YouTubePlayerTracker()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,15 +39,8 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
         if (viewModel.currentVideoTime == 0L) {
             viewModel.currentVideoTime = requireArguments().getLong(ARG_VIDEO_TIME, 0)
         }
-        setOrientationBasedOnDeviceType()
-    }
-
-    private fun setOrientationBasedOnDeviceType() {
-        val windowSize = requireActivity() as WindowSizeHolder
-        isTabletDevice = windowSize.windowSize.width != WindowType.Compact &&
-                windowSize.windowSize.height != WindowType.Compact
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+        if (viewModel.isPlaying == null) {
+            viewModel.isPlaying = requireArguments().getBoolean(ARG_IS_PLAYING)
         }
     }
 
@@ -90,6 +77,11 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 if (state == PlayerConstants.PlayerState.ENDED) {
                     viewModel.markBlockCompleted(blockId)
                 }
+                viewModel.isPlaying = when(state) {
+                    PlayerConstants.PlayerState.PLAYING -> true
+                    PlayerConstants.PlayerState.PAUSED -> false
+                    else -> return
+                }
             }
 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
@@ -104,8 +96,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
                 binding.youtubePlayerView.isVisible = true
-                val defPlayerUiController =
-                    DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
+                val defPlayerUiController = DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
                 defPlayerUiController.setFullScreenButtonClickListener {
                     parentFragmentManager.popBackStack()
                 }
@@ -113,7 +104,11 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
 
                 val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                if (viewModel.isPlaying == true) {
+                    youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                } else {
+                    youTubePlayer.cueVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                }
                 youTubePlayer.addListener(youtubeTrackerListener)
 
             }
@@ -126,33 +121,27 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
         super.onDestroyView()
     }
 
-    @SuppressLint("SourceLockedOrientationActivity")
-    override fun onDestroy() {
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-        super.onDestroy()
-    }
-
     companion object {
         private const val ARG_BLOCK_VIDEO_URL = "blockVideoUrl"
         private const val ARG_VIDEO_TIME = "videoTime"
         private const val ARG_BLOCK_ID = "blockID"
         private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_IS_PLAYING = "isPlaying"
 
         fun newInstance(
             videoUrl: String,
             videoTime: Long,
             blockId: String,
             courseId: String,
+            isPlaying: Boolean
         ): YoutubeVideoFullScreenFragment {
             val fragment = YoutubeVideoFullScreenFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_VIDEO_URL to videoUrl,
                 ARG_VIDEO_TIME to videoTime,
                 ARG_BLOCK_ID to blockId,
-                ARG_COURSE_ID to courseId
-
+                ARG_COURSE_ID to courseId,
+                ARG_IS_PLAYING to isPlaying
             )
             return fragment
         }

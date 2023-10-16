@@ -20,6 +20,7 @@
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:screenOrientation="sensor"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting"
         tools:targetApi="tiramisu">
@@ -27,7 +28,6 @@
             android:name=".AppActivity"
             android:exported="true"
             android:fitsSystemWindows="true"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.App.Starting"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -47,10 +47,11 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-        <provider android:authorities="${applicationId}.firebaseinitprovider"
+        <provider
             android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider"
             android:exported="false"
-            tools:node="remove"/>
+            tools:node="remove" />
     </application>
 
 </manifest>

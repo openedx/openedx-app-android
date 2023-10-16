@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -80,6 +82,7 @@ private fun NotSupportedUnitScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val uriHandler = LocalUriHandler.current
+    val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState
@@ -102,6 +105,7 @@ private fun NotSupportedUnitScreen(
         ) {
             Column(
                 modifier = Modifier
+                    .verticalScroll(scrollState)
                     .padding(it)
                     .then(contentWidth),
                 verticalArrangement = Arrangement.Center,
@@ -146,6 +150,7 @@ private fun NotSupportedUnitScreen(
                         style = MaterialTheme.appTypography.labelLarge
                     )
                 }
+                Spacer(Modifier.height(20.dp))
             }
         }
     }

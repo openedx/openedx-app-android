@@ -40,11 +40,11 @@ class VideoViewModelTest {
     @Test
     fun `sendTime test`() = runTest {
         val viewModel = VideoViewModel("", courseRepository, notifier)
-        coEvery { notifier.send(CourseVideoPositionChanged("", 0)) } returns Unit
+        coEvery { notifier.send(CourseVideoPositionChanged("", 0, false)) } returns Unit
         viewModel.sendTime()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { notifier.send(CourseVideoPositionChanged("", 0)) }
+        coVerify(exactly = 1) { notifier.send(CourseVideoPositionChanged("", 0, false)) }
     }
 
     @Test

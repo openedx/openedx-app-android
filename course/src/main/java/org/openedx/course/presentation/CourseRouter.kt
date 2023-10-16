@@ -50,7 +50,8 @@ interface CourseRouter {
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     )
 
     fun navigateToFullScreenYoutubeVideo(
@@ -58,7 +59,8 @@ interface CourseRouter {
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     )
 
     fun navigateToHandoutsWebView(

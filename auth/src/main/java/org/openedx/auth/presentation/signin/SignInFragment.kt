@@ -178,6 +178,7 @@ private fun LoginScreen(
                         modifier = Modifier
                             .background(MaterialTheme.appColors.background)
                             .verticalScroll(scrollState)
+                            .displayCutoutForLandscape()
                             .then(contentPaddings),
                     ) {
                         Text(
