@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.View
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -66,9 +67,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         super.onViewCreated(view, savedInstanceState)
 
         val insetHolder = requireActivity() as InsetHolder
-        val statusBarParams = binding.statusBarInset.layoutParams as ConstraintLayout.LayoutParams
-        statusBarParams.topMargin = insetHolder.topInset
-        binding.statusBarInset.layoutParams = statusBarParams
         val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
@@ -93,7 +91,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             OpenEdXTheme {
                 val block by viewModel.currentBlock.observeAsState()
                 if (block?.type == BlockType.VIDEO) {
-                    VideoTitle(text = block?.displayName ?: "")
+                    VideoTitle(
+                        text = block?.displayName ?: "",
+                        modifier = Modifier.statusBarsPadding()
+                    )
                 }
             }
         }
@@ -160,7 +161,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
         binding.btnBack.setContent {
             OpenEdXTheme {
-                BackBtn {
+                BackBtn(modifier = Modifier.statusBarsPadding()) {
                     requireActivity().supportFragmentManager.popBackStack()
                 }
             }
