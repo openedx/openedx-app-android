@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -312,9 +313,13 @@ fun SequentialItem(
 }
 
 @Composable
-fun VideoTitle(text: String) {
+fun VideoTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = text,
+        modifier = modifier,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.titleLarge,
         maxLines = 1,
@@ -343,6 +348,7 @@ fun NavigationUnitsButtons(
             .fillMaxWidth()
     } else {
         Modifier
+            .statusBarsPadding()
             .padding(end = 32.dp)
             .padding(top = 2.dp)
     }
