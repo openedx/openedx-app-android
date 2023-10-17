@@ -83,7 +83,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentCourseUnitContainerBinding.inflate(inflater, container, false)
         return binding.root
