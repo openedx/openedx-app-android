@@ -63,6 +63,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -78,6 +79,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -93,6 +95,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         )
     )

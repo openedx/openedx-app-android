@@ -10,9 +10,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -24,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -39,6 +39,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.FragmentViewType
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.TextConverter
@@ -47,10 +51,6 @@ import org.openedx.core.ui.theme.*
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.ui.ThreadItem
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import org.openedx.discussion.R as discussionR
 
 class DiscussionThreadsFragment : Fragment() {
@@ -332,6 +332,7 @@ private fun DiscussionThreadsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
+                    .displayCutoutForLandscape()
                     .then(statusBarInsets),
                 contentAlignment = Alignment.TopCenter
             ) {
@@ -516,69 +517,69 @@ private fun DiscussionThreadsScreen(
                                                     }
                                                 }
                                             } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.TopStart
+                                                val noDiscussionsScrollState = rememberScrollState()
+                                                Column(
+                                                    modifier = Modifier
+                                                        .align(Alignment.CenterHorizontally)
+                                                        .verticalScroll(noDiscussionsScrollState)
+                                                        .padding(24.dp),
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.Center
                                                 ) {
                                                     Text(
                                                         modifier = Modifier
-                                                            .padding(start = 24.dp, top = 32.dp),
+                                                            .fillMaxWidth(),
                                                         text = title,
                                                         color = MaterialTheme.appColors.textPrimary,
                                                         style = MaterialTheme.appTypography.titleLarge
                                                     )
-                                                    Column(
-                                                        modifier = Modifier.align(Alignment.Center),
-                                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                                        verticalArrangement = Arrangement.Center
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.size(100.dp),
-                                                            painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
-                                                            contentDescription = null,
-                                                            tint = MaterialTheme.appColors.textPrimary
-                                                        )
-                                                        Spacer(Modifier.height(36.dp))
-                                                        Text(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            text = stringResource(discussionR.string.discussion_no_yet),
-                                                            style = MaterialTheme.appTypography.titleLarge,
-                                                            color = MaterialTheme.appColors.textPrimary,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                        Spacer(Modifier.height(12.dp))
-                                                        Text(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            text = stringResource(discussionR.string.discussion_click_button_create_discussion),
-                                                            style = MaterialTheme.appTypography.bodyLarge,
-                                                            color = MaterialTheme.appColors.textPrimary,
-                                                            textAlign = TextAlign.Center
-                                                        )
-                                                        Spacer(Modifier.height(40.dp))
-                                                        OpenEdXOutlinedButton(
-                                                            modifier = Modifier
-                                                                .widthIn(184.dp, Dp.Unspecified),
-                                                            text = stringResource(id = discussionR.string.discussion_create_post),
-                                                            onClick = {
-                                                                onCreatePostClick()
-                                                            },
-                                                            content = {
-                                                                Icon(
-                                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
-                                                                    contentDescription = null,
-                                                                    tint = MaterialTheme.appColors.primary
-                                                                )
-                                                                Spacer(modifier = Modifier.width(6.dp))
-                                                                Text(
-                                                                    text = stringResource(id = discussionR.string.discussion_create_post),
-                                                                    color = MaterialTheme.appColors.primary,
-                                                                    style = MaterialTheme.appTypography.labelLarge
-                                                                )
-                                                            },
-                                                            borderColor = MaterialTheme.appColors.primary,
-                                                            textColor = MaterialTheme.appColors.primary
-                                                        )
-                                                    }
+                                                    Spacer(modifier = Modifier.height(20.dp))
+                                                    Icon(
+                                                        modifier = Modifier.size(100.dp),
+                                                        painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.appColors.textPrimary
+                                                    )
+                                                    Spacer(Modifier.height(36.dp))
+                                                    Text(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        text = stringResource(discussionR.string.discussion_no_yet),
+                                                        style = MaterialTheme.appTypography.titleLarge,
+                                                        color = MaterialTheme.appColors.textPrimary,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Spacer(Modifier.height(12.dp))
+                                                    Text(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        text = stringResource(discussionR.string.discussion_click_button_create_discussion),
+                                                        style = MaterialTheme.appTypography.bodyLarge,
+                                                        color = MaterialTheme.appColors.textPrimary,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Spacer(Modifier.height(40.dp))
+                                                    OpenEdXOutlinedButton(
+                                                        modifier = Modifier
+                                                            .widthIn(184.dp, Dp.Unspecified),
+                                                        text = stringResource(id = discussionR.string.discussion_create_post),
+                                                        onClick = {
+                                                            onCreatePostClick()
+                                                        },
+                                                        content = {
+                                                            Icon(
+                                                                painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
+                                                                contentDescription = null,
+                                                                tint = MaterialTheme.appColors.primary
+                                                            )
+                                                            Spacer(modifier = Modifier.width(6.dp))
+                                                            Text(
+                                                                text = stringResource(id = discussionR.string.discussion_create_post),
+                                                                color = MaterialTheme.appColors.primary,
+                                                                style = MaterialTheme.appTypography.labelLarge
+                                                            )
+                                                        },
+                                                        borderColor = MaterialTheme.appColors.primary,
+                                                        textColor = MaterialTheme.appColors.primary
+                                                    )
                                                 }
                                             }
                                         }

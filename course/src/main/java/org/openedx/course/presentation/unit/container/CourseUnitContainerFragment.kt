@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.unit.container
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
@@ -40,6 +41,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
 import org.openedx.course.presentation.ui.NavigationUnitsButtons
 import org.openedx.course.presentation.ui.VerticalPageIndicator
+import org.openedx.course.presentation.ui.VideoTitle
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
 
@@ -94,14 +96,15 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         val statusBarParams = binding.statusBarInset.layoutParams as ConstraintLayout.LayoutParams
         statusBarParams.topMargin = insetHolder.topInset
         binding.statusBarInset.layoutParams = statusBarParams
-        val bottomNavigationParams =
-            binding.cvNavigationBar.layoutParams as ConstraintLayout.LayoutParams
-        bottomNavigationParams.bottomMargin = insetHolder.bottomInset
-        binding.cvNavigationBar.layoutParams = bottomNavigationParams
-        val containerParams =
-            binding.viewPager.layoutParams as FrameLayout.LayoutParams
+        val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
+        val configuration = requireActivity().resources.configuration
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val countParams = binding.cvCount.layoutParams as ConstraintLayout.LayoutParams
+            countParams.rightMargin = insetHolder.cutoutInset
+            binding.cvCount.layoutParams = countParams
+        }
 
         binding.mediaRouteButton.setAlwaysVisible(true)
         CastButtonFactory.setUpMediaRouteButton(requireContext(), binding.mediaRouteButton)
@@ -113,6 +116,15 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
             if (currentBlockIndex != -1) {
                 binding.viewPager.currentItem = currentBlockIndex
+            }
+        }
+
+        binding.cvVideoTitle?.setContent {
+            OpenEdXTheme {
+                val block by viewModel.currentBlock.observeAsState()
+                if (block?.type == BlockType.VIDEO) {
+                    VideoTitle(text = block?.displayName ?: "")
+                }
             }
         }
 
@@ -135,93 +147,23 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     hasPrevBlock = hasPrev
                     hasNextBlock = hasNext
                 }
-
                 NavigationUnitsButtons(
                     windowSize = windowSize,
                     hasPrevBlock = hasPrevBlock,
                     nextButtonText = nextButtonText,
                     hasNextBlock = hasNextBlock,
                     onPrevClick = {
-                        if (!restrictDoubleClick()) {
-                            val block = viewModel.moveToPrevBlock()
-                            if (block != null) {
-                                viewModel.prevBlockClickedEvent(block.blockId, block.displayName)
-                                if (!block.type.isContainer()) {
-                                    binding.viewPager.setCurrentItem(
-                                        binding.viewPager.currentItem - 1,
-                                        true
-                                    )
-                                    updateNavigationButtons { next, hasPrev, hasNext ->
-                                        nextButtonText = next
-                                        hasPrevBlock = hasPrev
-                                        hasNextBlock = hasNext
-                                    }
-                                }
-                            }
+                        handlePrevClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
                         }
                     },
                     onNextClick = {
-                        if (!restrictDoubleClick()) {
-                            val block = viewModel.moveToNextBlock()
-                            if (block != null) {
-                                viewModel.nextBlockClickedEvent(block.blockId, block.displayName)
-                                if (!block.type.isContainer()) {
-                                    binding.viewPager.setCurrentItem(
-                                        binding.viewPager.currentItem + 1,
-                                        true
-                                    )
-                                    updateNavigationButtons { next, hasPrev, hasNext ->
-                                        nextButtonText = next
-                                        hasPrevBlock = hasPrev
-                                        hasNextBlock = hasNext
-                                    }
-                                }
-                            } else {
-                                val currentVerticalBlock = viewModel.getCurrentVerticalBlock()
-                                val nextVerticalBlock = viewModel.getNextVerticalBlock()
-                                val dialog = ChapterEndFragmentDialog.newInstance(
-                                    currentVerticalBlock?.displayName ?: "",
-                                    nextVerticalBlock?.displayName ?: ""
-                                )
-                                currentVerticalBlock?.let {
-                                    viewModel.finishVerticalClickedEvent(
-                                        it.blockId,
-                                        it.displayName
-                                    )
-                                }
-                                dialog.listener = object : DialogListener {
-                                    override fun <T> onClick(value: T) {
-                                        viewModel.proceedToNext()
-                                        val nextBlock = viewModel.getCurrentVerticalBlock()
-                                        nextBlock?.let {
-                                            viewModel.finishVerticalNextClickedEvent(
-                                                it.blockId,
-                                                it.displayName
-                                            )
-                                            if (it.type.isContainer()) {
-                                                router.replaceCourseContainer(
-                                                    requireActivity().supportFragmentManager,
-                                                    it.id,
-                                                    viewModel.courseId,
-                                                    requireArguments().getString(
-                                                        ARG_COURSE_NAME,
-                                                        ""
-                                                    ),
-                                                    requireArguments().serializable(ARG_MODE)!!
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    override fun onDismiss() {
-                                        viewModel.finishVerticalBackClickedEvent()
-                                    }
-                                }
-                                dialog.show(
-                                    requireActivity().supportFragmentManager,
-                                    ChapterEndFragmentDialog::class.simpleName
-                                )
-                            }
+                        handleNextClick { next, hasPrev, hasNext ->
+                            nextButtonText = next
+                            hasPrevBlock = hasPrev
+                            hasNextBlock = hasNext
                         }
                     }
                 )
@@ -230,7 +172,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
         binding.cvCount.setContent {
             OpenEdXTheme {
-
                 val index by viewModel.indexInContainer.observeAsState(1)
                 val units by viewModel.verticalBlockCounts.observeAsState(1)
 
@@ -243,7 +184,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     selectedLength = 5.dp,
                     modifier = Modifier
                         .width(24.dp)
-                        .padding(end = 6.dp)
                 )
             }
         }
@@ -291,6 +231,87 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
         binding.viewPager.registerOnPageChangeCallback(onPageChangeCallback)
+    }
+
+    private fun handlePrevClick(buttonChanged: (String, Boolean, Boolean) -> Unit) {
+        if (!restrictDoubleClick()) {
+            val block = viewModel.moveToPrevBlock()
+            if (block != null) {
+                viewModel.prevBlockClickedEvent(block.blockId, block.displayName)
+                if (!block.type.isContainer()) {
+                    binding.viewPager.setCurrentItem(
+                        binding.viewPager.currentItem - 1,
+                        true
+                    )
+                    updateNavigationButtons { next, hasPrev, hasNext ->
+                        buttonChanged(next, hasPrev, hasNext)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleNextClick(buttonChanged: (String, Boolean, Boolean) -> Unit) {
+        if (!restrictDoubleClick()) {
+            val block = viewModel.moveToNextBlock()
+            if (block != null) {
+                viewModel.nextBlockClickedEvent(block.blockId, block.displayName)
+                if (!block.type.isContainer()) {
+                    binding.viewPager.setCurrentItem(
+                        binding.viewPager.currentItem + 1,
+                        true
+                    )
+                    updateNavigationButtons { next, hasPrev, hasNext ->
+                        buttonChanged(next, hasPrev, hasNext)
+                    }
+                }
+            } else {
+                val currentVerticalBlock = viewModel.getCurrentVerticalBlock()
+                val nextVerticalBlock = viewModel.getNextVerticalBlock()
+                val dialog = ChapterEndFragmentDialog.newInstance(
+                    currentVerticalBlock?.displayName ?: "",
+                    nextVerticalBlock?.displayName ?: ""
+                )
+                currentVerticalBlock?.let {
+                    viewModel.finishVerticalClickedEvent(
+                        it.blockId,
+                        it.displayName
+                    )
+                }
+                dialog.listener = object : DialogListener {
+                    override fun <T> onClick(value: T) {
+                        viewModel.proceedToNext()
+                        val nextBlock = viewModel.getCurrentVerticalBlock()
+                        nextBlock?.let {
+                            viewModel.finishVerticalNextClickedEvent(
+                                it.blockId,
+                                it.displayName
+                            )
+                            if (it.type.isContainer()) {
+                                router.replaceCourseContainer(
+                                    requireActivity().supportFragmentManager,
+                                    it.id,
+                                    viewModel.courseId,
+                                    requireArguments().getString(
+                                        ARG_COURSE_NAME,
+                                        ""
+                                    ),
+                                    requireArguments().serializable(ARG_MODE)!!
+                                )
+                            }
+                        }
+                    }
+
+                    override fun onDismiss() {
+                        viewModel.finishVerticalBackClickedEvent()
+                    }
+                }
+                dialog.show(
+                    requireActivity().supportFragmentManager,
+                    ChapterEndFragmentDialog::class.simpleName
+                )
+            }
+        }
     }
 
     companion object {

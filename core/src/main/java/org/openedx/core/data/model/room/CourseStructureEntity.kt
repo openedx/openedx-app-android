@@ -45,7 +45,7 @@ data class CourseStructureEntity(
     fun mapToDomain(): CourseStructure {
         return CourseStructure(
             root,
-            blocks.map { it.mapToDomain() },
+            blocks.map { it.mapToDomain(blocks) },
             id,
             name,
             number,

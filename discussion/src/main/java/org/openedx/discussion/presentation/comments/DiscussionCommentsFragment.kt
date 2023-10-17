@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -121,6 +123,11 @@ class DiscussionCommentsFragment : Fragment() {
                             requireActivity().supportFragmentManager, it, viewModel.thread.closed
                         )
                     },
+                    onUserPhotoClick = { username ->
+                        router.navigateToAnothersProfile(
+                            requireActivity().supportFragmentManager, username
+                        )
+                    },
                     onAddResponseClick = {
                         viewModel.createComment(it)
                     },
@@ -167,7 +174,8 @@ private fun DiscussionCommentsScreen(
     onItemClick: (String, String, Boolean) -> Unit,
     onCommentClick: (DiscussionComment) -> Unit,
     onAddResponseClick: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onUserPhotoClick: (String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -200,6 +208,8 @@ private fun DiscussionCommentsScreen(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val focusManager = LocalFocusManager.current
 
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -236,7 +246,8 @@ private fun DiscussionCommentsScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .displayCutoutForLandscape(),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     BackBtn {
@@ -271,6 +282,7 @@ private fun DiscussionCommentsScreen(
                                     Modifier
                                         .then(screenWidth)
                                         .weight(1f)
+                                        .displayCutoutForLandscape()
                                         .background(MaterialTheme.appColors.background),
                                     verticalArrangement = Arrangement.spacedBy(16.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -287,7 +299,11 @@ private fun DiscussionCommentsScreen(
                                             thread = uiState.thread,
                                             onClick = { action, bool ->
                                                 onItemClick(action, uiState.thread.id, bool)
-                                            })
+                                            },
+                                            onUserPhotoClick = { username ->
+                                                onUserPhotoClick(username)
+                                            }
+                                        )
                                     }
                                     if (uiState.commentsData.isNotEmpty()) {
                                         item {
@@ -320,6 +336,9 @@ private fun DiscussionCommentsScreen(
                                             },
                                             onAddCommentClick = {
                                                 onCommentClick(comment)
+                                            },
+                                            onUserPhotoClick = {
+                                                onUserPhotoClick(comment.author)
                                             })
                                     }
                                     item {
@@ -350,7 +369,8 @@ private fun DiscussionCommentsScreen(
                                             .then(screenWidth)
                                             .heightIn(84.dp, Dp.Unspecified)
                                             .padding(top = 16.dp, bottom = 24.dp)
-                                            .padding(horizontal = 24.dp),
+                                            .padding(horizontal = 24.dp)
+                                            .displayCutoutForLandscape(),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
@@ -385,6 +405,8 @@ private fun DiscussionCommentsScreen(
                                                 .clip(CircleShape)
                                                 .background(sendButtonColor)
                                                 .clickable {
+                                                    keyboardController?.hide()
+                                                    focusManager.clearFocus()
                                                     if (responseValue.isNotEmpty()) {
                                                         onAddResponseClick(responseValue.trim())
                                                         responseValue = ""
@@ -403,6 +425,7 @@ private fun DiscussionCommentsScreen(
                                 }
                             }
                         }
+
                         is DiscussionCommentsUIState.Loading -> {
                             Box(
                                 Modifier
@@ -450,7 +473,8 @@ private fun DiscussionCommentsScreenPreview() {
             onBackClick = {},
             scrollToBottom = false,
             refreshing = false,
-            onSwipeRefresh = {}
+            onSwipeRefresh = {},
+            onUserPhotoClick = {}
         )
     }
 }
@@ -480,7 +504,8 @@ private fun DiscussionCommentsScreenTabletPreview() {
             onBackClick = {},
             scrollToBottom = false,
             refreshing = false,
-            onSwipeRefresh = {}
+            onSwipeRefresh = {},
+            onUserPhotoClick = {}
         )
     }
 }

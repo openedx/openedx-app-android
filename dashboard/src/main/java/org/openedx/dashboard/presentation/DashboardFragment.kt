@@ -39,7 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import org.openedx.core.BuildConfig
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
 import org.openedx.core.ui.*
@@ -49,8 +50,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
 class DashboardFragment : Fragment() {
@@ -177,7 +176,8 @@ internal fun MyCoursesScreen(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

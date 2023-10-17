@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
 import android.annotation.SuppressLint
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
@@ -15,7 +14,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
-import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
@@ -29,7 +27,18 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
     private var exoPlayer: ExoPlayer? = null
     private var blockId = ""
-    private var isTabletDevice = false
+    private val exoPlayerListener = object : Player.Listener {
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            super.onPlayWhenReadyChanged(playWhenReady, reason)
+            viewModel.isPlaying = playWhenReady
+        }
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            if (playbackState == Player.STATE_ENDED) {
+                viewModel.markBlockCompleted(blockId)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,14 +47,8 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         if (viewModel.currentVideoTime == 0L) {
             viewModel.currentVideoTime = requireArguments().getLong(ARG_VIDEO_TIME, 0)
         }
-        setOrientationBasedOnDeviceType()
-    }
-
-    private fun setOrientationBasedOnDeviceType() {
-        val windowSize = (requireActivity() as WindowSizeHolder).windowSize
-        isTabletDevice = windowSize.isTablet
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+        if (viewModel.isPlaying == null) {
+            viewModel.isPlaying = requireArguments().getBoolean(ARG_IS_PLAYING)
         }
     }
 
@@ -80,7 +83,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
             exoPlayer?.setMediaItem(mediaItem, viewModel.currentVideoTime)
             exoPlayer?.prepare()
-            exoPlayer?.playWhenReady = false
+            exoPlayer?.playWhenReady = viewModel.isPlaying ?: false
 
             playerView.setFullscreenButtonClickListener { isFullScreen ->
                 requireActivity().supportFragmentManager.popBackStackImmediate()
@@ -103,13 +106,10 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         exoPlayer = null
     }
 
-
     override fun onPause() {
         super.onPause()
-        if (exoPlayer?.isPlaying == true) {
-            exoPlayer?.pause()
-            exoPlayer?.playWhenReady = false
-        }
+        exoPlayer?.removeListener(exoPlayerListener)
+        exoPlayer?.pause()
     }
 
     override fun onDestroyView() {
@@ -118,13 +118,16 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         super.onDestroyView()
     }
 
+
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onDestroy() {
-        if (!isTabletDevice) {
-            requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
         releasePlayer()
         super.onDestroy()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        exoPlayer?.addListener(exoPlayerListener)
     }
 
     companion object {
@@ -132,19 +135,22 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         private const val ARG_VIDEO_TIME = "videoTime"
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_IS_PLAYING = "isPlaying"
 
         fun newInstance(
             videoUrl: String,
             videoTime: Long,
             blockId: String,
-            courseId: String
+            courseId: String,
+            isPlaying: Boolean
         ): VideoFullScreenFragment {
             val fragment = VideoFullScreenFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_VIDEO_URL to videoUrl,
                 ARG_VIDEO_TIME to videoTime,
                 ARG_BLOCK_ID to blockId,
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_IS_PLAYING to isPlaying
             )
             return fragment
         }

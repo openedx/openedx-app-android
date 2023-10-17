@@ -236,7 +236,8 @@ private fun DiscussionAddThreadScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
-                    .statusBarsInset(),
+                    .statusBarsInset()
+                    .displayCutoutForLandscape(),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Column(

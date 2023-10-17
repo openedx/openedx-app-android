@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,12 +45,16 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -83,6 +88,8 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.jsoup.Jsoup
+import org.openedx.core.ui.rememberWindowSize
+import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.course.R as courseR
@@ -93,6 +100,13 @@ fun CourseImageHeader(
     courseImage: String?,
     courseCertificate: Certificate?,
 ) {
+    val configuration = LocalConfiguration.current
+    val windowSize = rememberWindowSize()
+    val contentScale = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        ContentScale.Fit
+    } else {
+        ContentScale.Crop
+    }
     val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
@@ -107,7 +121,7 @@ fun CourseImageHeader(
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.appShapes.cardShape)
@@ -298,36 +312,12 @@ fun SequentialItem(
 }
 
 @Composable
-fun VideoRotateView() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.appShapes.buttonShape)
-            .background(MaterialTheme.appColors.info)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.course_ic_screen_rotation),
-            contentDescription = null,
-            tint = Color.White
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = stringResource(id = R.string.course_video_rotate_for_fullscreen),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
 fun VideoTitle(text: String) {
     Text(
         text = text,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.titleLarge,
-        maxLines = 3,
+        maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
 }
@@ -347,13 +337,20 @@ fun NavigationUnitsButtons(
         painterResource(id = org.openedx.core.R.drawable.core_ic_check)
     }
 
-    val nextButtonModifier = if (hasPrevBlock) {
+    val subModifier = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
         Modifier
-    } else Modifier.fillMaxWidth(0.6f)
+            .height(72.dp)
+            .fillMaxWidth()
+    } else {
+        Modifier
+            .padding(end = 32.dp)
+            .padding(top = 2.dp)
+    }
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .navigationBarsPadding()
+            .then(subModifier)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -391,7 +388,7 @@ fun NavigationUnitsButtons(
         }
         Button(
             modifier = Modifier
-                .height(42.dp).then(nextButtonModifier),
+                .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
             ),
@@ -515,11 +512,20 @@ fun VideoSubtitles(
     subtitleLanguage: String,
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
+    onTranscriptClick: (Caption) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     timedTextObject?.let {
+        val autoScrollDelay = 3000L
+        var lastScrollTime by remember {
+            mutableLongStateOf(0L)
+        }
+        if (listState.isScrollInProgress) {
+            lastScrollTime = Date().time
+        }
+
         LaunchedEffect(key1 = currentIndex) {
-            if (currentIndex > 1) {
+            if (currentIndex > 1 && lastScrollTime + autoScrollDelay < Date().time) {
                 listState.animateScrollToItem(currentIndex - 1)
             }
         }
@@ -551,8 +557,7 @@ fun VideoSubtitles(
                 }
                 Spacer(Modifier.height(24.dp))
                 LazyColumn(
-                    state = listState,
-                    userScrollEnabled = false
+                    state = listState
                 ) {
                     itemsIndexed(subtitles) { index, item ->
                         val textColor =
@@ -562,7 +567,11 @@ fun VideoSubtitles(
                                 MaterialTheme.appColors.textFieldBorder
                             }
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .noRippleClickable {
+                                    onTranscriptClick(item)
+                                },
                             text = Jsoup.parse(item.content).text(),
                             color = textColor,
                             style = MaterialTheme.appTypography.bodyMedium
@@ -628,15 +637,6 @@ private fun NavigationUnitsButtonsWithNextPreview() {
             hasNextBlock = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun VideoRotateViewPreview() {
-    OpenEdXTheme {
-        VideoRotateView()
     }
 }
 
@@ -734,5 +734,6 @@ private val mockChapterBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
     completion = 0.0
 )

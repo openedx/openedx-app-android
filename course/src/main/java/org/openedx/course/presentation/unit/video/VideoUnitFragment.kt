@@ -1,9 +1,9 @@
 package org.openedx.course.presentation.unit.video
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.OrientationEventListener
 import android.view.View
 import android.widget.FrameLayout
 import androidx.compose.foundation.background
@@ -43,7 +43,6 @@ import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
-import org.openedx.course.presentation.ui.VideoRotateView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
 import java.util.concurrent.Executors
@@ -63,7 +62,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     private var castContext: CastContext? = null
 
-    private var orientationListener: OrientationEventListener? = null
     private var blockId = ""
 
     private val handler = Handler(Looper.getMainLooper())
@@ -83,6 +81,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     }
 
     private val exoPlayerListener = object : Player.Listener {
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            super.onPlayWhenReadyChanged(playWhenReady, reason)
+            viewModel.isPlaying = playWhenReady
+        }
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
@@ -108,39 +110,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
         val executor = Executors.newSingleThreadExecutor()
         castContext = CastContext.getSharedInstance(requireContext(), executor).result
-
-        orientationListener = object : OrientationEventListener(requireActivity()) {
-            override fun onOrientationChanged(orientation: Int) {
-                if (windowSize?.isTablet != true) {
-                    if (orientation in 75..300) {
-                        if (!viewModel.fullscreenHandled) {
-                            router.navigateToFullScreenVideo(
-                                requireActivity().supportFragmentManager,
-                                viewModel.videoUrl,
-                                exoPlayer?.currentPosition ?: viewModel.getCurrentVideoTime(),
-                                blockId,
-                                viewModel.courseId
-                            )
-                            viewModel.fullscreenHandled = true
-                        }
-                    } else {
-                        viewModel.fullscreenHandled = false
-                    }
-                }
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.cvRotateHelper.setContent {
-            OpenEdXTheme {
-                VideoRotateView()
-            }
-        }
-
-        binding.cvVideoTitle.setContent {
+        binding.cvVideoTitle?.setContent {
             OpenEdXTheme {
                 VideoTitle(text = requireArguments().getString(ARG_TITLE) ?: "")
             }
@@ -170,6 +145,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     subtitleLanguage = LocaleUtils.getDisplayLanguage(viewModel.transcriptLanguage),
                     showSubtitleLanguage = viewModel.transcripts.size > 1,
                     currentIndex = currentIndex,
+                    onTranscriptClick = {
+                        exoPlayer?.apply {
+                            seekTo(it.start.mseconds.toLong())
+                            play()
+                        }
+                    },
                     onSettingsClick = {
                         exoPlayer?.pause()
                         val dialog = SelectBottomDialogFragment.newInstance(
@@ -184,34 +165,30 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             }
         }
 
-        binding.connectionError.isVisible =
-            !viewModel.hasInternetConnection && !viewModel.isDownloaded
+        binding.connectionError.isVisible = !viewModel.hasInternetConnection && !viewModel.isDownloaded
 
-        val windowMetrics =
-            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
+        val orientation = resources.configuration.orientation
+        val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
         val currentBounds = windowMetrics.bounds
-        val width = currentBounds.width() - requireContext().dpToPixel(32)
-        val minHeight = requireContext().dpToPixel(194).roundToInt()
-        val height = (width / 16f * 9f).roundToInt()
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
-        layoutParams.height = if (windowSize?.isTablet == true) {
-            requireContext().dpToPixel(320).roundToInt()
-        } else if (height < minHeight) {
-            minHeight
-        } else {
-            height
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
+            val width = currentBounds.width() - requireContext().dpToPixel(32)
+            val minHeight = requireContext().dpToPixel(194).roundToInt()
+            val height = (width / 16f * 9f).roundToInt()
+            layoutParams.height = if (windowSize?.isTablet == true) {
+                requireContext().dpToPixel(320).roundToInt()
+            } else if (height < minHeight) {
+                minHeight
+            } else {
+                height
+            }
         }
+
         binding.playerView.layoutParams = layoutParams
 
         viewModel.isUpdated.observe(viewLifecycleOwner) { isUpdated ->
             if (isUpdated) {
                 initPlayer()
-            }
-        }
-
-        viewModel.isPopUpViewShow.observe(viewLifecycleOwner) {
-            if (windowSize?.isTablet != true) {
-                binding.cvRotateHelper.isVisible = it
             }
         }
     }
@@ -240,6 +217,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 .build()
             exoPlayer?.setMediaItem(mediaItem, viewModel.getCurrentVideoTime())
             exoPlayer?.prepare()
+            exoPlayer?.playWhenReady = viewModel.isPlaying
 
             castPlayer?.setSessionAvailabilityListener(object : SessionAvailabilityListener {
                 override fun onCastSessionAvailable() {
@@ -264,18 +242,15 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     viewModel.videoUrl,
                     exoPlayer?.currentPosition ?: 0L,
                     blockId,
-                    viewModel.courseId
+                    viewModel.courseId,
+                    viewModel.isPlaying
                 )
-                viewModel.fullscreenHandled = true
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (orientationListener?.canDetectOrientation() == true) {
-            orientationListener?.enable()
-        }
         exoPlayer?.addListener(exoPlayerListener)
     }
 
@@ -283,7 +258,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         super.onPause()
         exoPlayer?.removeListener(exoPlayerListener)
         exoPlayer?.pause()
-        orientationListener?.disable()
     }
 
     @UnstableApi

@@ -77,6 +77,7 @@ import org.openedx.course.presentation.ui.CardArrow
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.ui.displayCutoutForLandscape
 import java.io.File
 
 class CourseSectionFragment : Fragment() {
@@ -222,6 +223,7 @@ private fun CourseSectionScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .displayCutoutForLandscape()
                         .zIndex(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -373,7 +375,7 @@ private fun CourseSubsectionItem(
 }
 
 private fun getUnitBlockIcon(block: Block): Int {
-    return when (block.type) {
+    return when (block.descendantsType) {
         BlockType.VIDEO -> R.drawable.ic_course_video
         BlockType.PROBLEM -> R.drawable.ic_course_pen
         BlockType.DISCUSSION -> R.drawable.ic_course_discussion
@@ -447,5 +449,6 @@ private val mockBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(0),
     descendants = emptyList(),
+    descendantsType = BlockType.HTML,
     completion = 0.0
 )

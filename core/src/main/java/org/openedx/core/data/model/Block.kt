@@ -32,16 +32,28 @@ data class Block(
     @SerializedName("completion")
     val completion: Double?
 ) {
-    fun mapToDomain(): Block {
+    fun mapToDomain(blockData: Map<String, org.openedx.core.data.model.Block>): Block {
+        val blockType = BlockType.getBlockType(type ?: "")
+        val descendantsType = if (blockType == BlockType.VERTICAL) {
+            val types = descendants?.map { descendant ->
+                BlockType.getBlockType(blockData[descendant]?.type ?: "")
+            } ?: emptyList()
+            val sortedBlockTypes = BlockType.sortByPriority(types)
+            sortedBlockTypes.firstOrNull() ?: blockType
+        } else {
+            blockType
+        }
+
         return org.openedx.core.domain.model.Block(
             id = id ?: "",
             blockId = blockId ?: "",
             lmsWebUrl = lmsWebUrl ?: "",
             legacyWebUrl = legacyWebUrl ?: "",
             studentViewUrl = studentViewUrl ?: "",
-            type = BlockType.getBlockType(type ?: ""),
+            type = blockType,
             displayName = displayName ?: "",
             descendants = descendants ?: emptyList(),
+            descendantsType = descendantsType,
             graded = graded ?: false,
             studentViewData = studentViewData?.mapToDomain(),
             studentViewMultiDevice = studentViewMultiDevice ?: false,

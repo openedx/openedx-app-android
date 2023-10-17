@@ -33,6 +33,7 @@ import org.openedx.discussion.presentation.search.DiscussionSearchThreadFragment
 import org.openedx.discussion.presentation.threads.DiscussionAddThreadFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.settings.video.VideoQualityFragment
@@ -139,11 +140,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     ) {
         replaceFragmentWithBackStack(
             fm,
-            VideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId)
+            VideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId, isPlaying)
         )
     }
 
@@ -152,11 +154,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     ) {
         replaceFragmentWithBackStack(
             fm,
-            YoutubeVideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId)
+            YoutubeVideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId, isPlaying)
         )
     }
 
@@ -221,6 +224,16 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(
             fm,
             DiscussionSearchThreadFragment.newInstance(courseId)
+        )
+    }
+
+    override fun navigateToAnothersProfile(
+        fm: FragmentManager,
+        username: String
+    ) {
+        replaceFragmentWithBackStack(
+            fm,
+            AnothersProfileFragment.newInstance(username)
         )
     }
     //endregion
