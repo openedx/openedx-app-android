@@ -27,8 +27,8 @@
             android:id="@+id/mediaRouteButton"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="12dp"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="24dp"
             android:layout_marginTop="12dp"
             android:mediaRouteTypes="user" />
 

@@ -51,45 +51,29 @@ import kotlin.math.roundToInt
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
     private val binding by viewBinding(FragmentVideoUnitBinding::bind)
-    private val viewModel by viewModel<VideoUnitViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+    private val viewModel by viewModel<EncodedVideoUnitViewModel> {
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_BLOCK_ID, ""),
+        )
     }
     private val router by inject<CourseRouter>()
 
-    private var exoPlayer: ExoPlayer? = null
-    private var castPlayer: CastPlayer? = null
     private var windowSize: WindowSize? = null
-
-    private var castContext: CastContext? = null
-
-    private var blockId = ""
 
     private val handler = Handler(Looper.getMainLooper())
     private var videoTimeRunnable: Runnable = object : Runnable {
         override fun run() {
-            exoPlayer?.let {
+            viewModel.getActivePlayer()?.let {
                 if (it.isPlaying) {
                     viewModel.setCurrentVideoTime(it.currentPosition)
                 }
                 val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
                 if (completePercentage >= 0.8f) {
-                    viewModel.markBlockCompleted(blockId)
+                    viewModel.markBlockCompleted(viewModel.blockId)
                 }
             }
             handler.postDelayed(this, 200)
-        }
-    }
-
-    private val exoPlayerListener = object : Player.Listener {
-        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-            super.onPlayWhenReadyChanged(playWhenReady, reason)
-            viewModel.isPlaying = playWhenReady
-        }
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            super.onPlaybackStateChanged(playbackState)
-            if (playbackState == Player.STATE_ENDED) {
-                viewModel.markBlockCompleted(blockId)
-            }
         }
     }
 
@@ -104,12 +88,8 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 getString(ARG_TRANSCRIPT_URL, "")
             ) ?: emptyMap()
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
-            blockId = getString(ARG_BLOCK_ID, "")
         }
         viewModel.downloadSubtitles()
-
-        val executor = Executors.newSingleThreadExecutor()
-        castContext = CastContext.getSharedInstance(requireContext(), executor).result
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -146,13 +126,13 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     showSubtitleLanguage = viewModel.transcripts.size > 1,
                     currentIndex = currentIndex,
                     onTranscriptClick = {
-                        exoPlayer?.apply {
+                        viewModel.getActivePlayer()?.apply {
                             seekTo(it.start.mseconds.toLong())
                             play()
                         }
                     },
                     onSettingsClick = {
-                        exoPlayer?.pause()
+                        viewModel.getActivePlayer()?.pause()
                         val dialog = SelectBottomDialogFragment.newInstance(
                             LocaleUtils.getLanguages(viewModel.transcripts.keys.toList())
                         )
@@ -165,10 +145,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             }
         }
 
-        binding.connectionError.isVisible = !viewModel.hasInternetConnection && !viewModel.isDownloaded
+        binding.connectionError.isVisible =
+            !viewModel.hasInternetConnection && !viewModel.isDownloaded
 
         val orientation = resources.configuration.orientation
-        val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
+        val windowMetrics =
+            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
         val currentBounds = windowMetrics.bounds
         val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
         if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
@@ -196,18 +178,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     @androidx.annotation.OptIn(UnstableApi::class)
     private fun initPlayer() {
         with(binding) {
-            if (exoPlayer == null) {
-                exoPlayer = ExoPlayer.Builder(requireContext())
-                    .build()
-
-                if (castContext != null) {
-                    castPlayer = CastPlayer(castContext!!)
-                }
-            }
-            playerView.player = exoPlayer
+            playerView.player = viewModel.getActivePlayer()
             playerView.setShowNextButton(false)
             playerView.setShowPreviousButton(false)
             showVideoControllerIndefinitely(false)
+
             val movieMetadata = MediaMetadata.Builder()
                 .setMediaType(MediaMetadata.MEDIA_TYPE_MOVIE)
                 .build()
@@ -215,33 +190,52 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 .setUri(viewModel.videoUrl)
                 .setMimeType("video/*")
                 .build()
-            exoPlayer?.setMediaItem(mediaItem, viewModel.getCurrentVideoTime())
-            exoPlayer?.prepare()
-            exoPlayer?.playWhenReady = viewModel.isPlaying
 
-            castPlayer?.setSessionAvailabilityListener(object : SessionAvailabilityListener {
-                override fun onCastSessionAvailable() {
-                    exoPlayer?.pause()
-                    playerView.player = castPlayer
-                    castPlayer?.setMediaItem(mediaItem, exoPlayer?.currentPosition ?: 0L)
-                    showVideoControllerIndefinitely(true)
+            if (!viewModel.isPlayerSetUp) {
+                viewModel.getActivePlayer()?.setMediaItem(
+                    mediaItem,
+                    viewModel.getCurrentVideoTime()
+                )
+                viewModel.getActivePlayer()?.prepare()
+                viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying
+
+                viewModel.isPlayerSetUp = true
+            }
+
+            viewModel.castPlayer?.setSessionAvailabilityListener(
+                object : SessionAvailabilityListener {
+                    override fun onCastSessionAvailable() {
+                        viewModel.isCastActive = true
+                        viewModel.exoPlayer?.pause()
+                        playerView.player = viewModel.castPlayer
+                        viewModel.castPlayer?.setMediaItem(
+                            mediaItem,
+                            viewModel.exoPlayer?.currentPosition ?: 0L
+                        )
+                        viewModel.castPlayer?.playWhenReady = false
+                        showVideoControllerIndefinitely(true)
+                    }
+
+                    override fun onCastSessionUnavailable() {
+                        viewModel.isCastActive = false
+                        playerView.player = viewModel.exoPlayer
+                        viewModel.exoPlayer?.seekTo(viewModel.castPlayer?.currentPosition ?: 0L)
+                        viewModel.castPlayer?.stop()
+                        viewModel.exoPlayer?.play()
+                        showVideoControllerIndefinitely(false)
+                    }
                 }
+            )
 
-                override fun onCastSessionUnavailable() {
-                    playerView.player = exoPlayer
-                    exoPlayer?.seekTo(castPlayer?.currentPosition ?: 0L)
-                    castPlayer?.stop()
-                    exoPlayer?.play()
-                    showVideoControllerIndefinitely(false)
-                }
-            })
+            playerView.setFullscreenButtonClickListener {
+                if (viewModel.isCastActive)
+                    return@setFullscreenButtonClickListener
 
-            playerView.setFullscreenButtonClickListener { isFullScreen ->
                 router.navigateToFullScreenVideo(
                     requireActivity().supportFragmentManager,
                     viewModel.videoUrl,
-                    exoPlayer?.currentPosition ?: 0L,
-                    blockId,
+                    viewModel.exoPlayer?.currentPosition ?: 0L,
+                    viewModel.blockId,
                     viewModel.courseId,
                     viewModel.isPlaying
                 )
@@ -249,24 +243,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        exoPlayer?.addListener(exoPlayerListener)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        exoPlayer?.removeListener(exoPlayerListener)
-        exoPlayer?.pause()
-    }
-
     @UnstableApi
     override fun onDestroyView() {
-        exoPlayer?.release()
-        castPlayer?.release()
-        exoPlayer = null
-        castPlayer = null
         super.onDestroyView()
+        if (!requireActivity().isChangingConfigurations) {
+            viewModel.releasePlayers()
+        }
     }
 
     override fun onDestroy() {

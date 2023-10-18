@@ -17,7 +17,7 @@ import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
 import subtitleFile.TimedTextObject
 
-class VideoUnitViewModel(
+open class VideoUnitViewModel(
     val courseId: String,
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
