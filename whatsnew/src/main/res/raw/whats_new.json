@@ -1,0 +1,32 @@
+[
+  {
+    "version": "1.1",
+    "messages": [
+      {
+        "image": "screen_1",
+        "title": "Video download quality",
+        "message": "Customize your video download settings in your Profile or Video tab in your course."
+      },
+      {
+        "image": "screen_2",
+        "title": "Improved language support",
+        "message": "We have added more translations throughout the app so you can learn on edX your way!"
+      },
+      {
+        "image": "screen_3",
+        "title": "Title",
+        "message": "Description description description description description description description description description description description description"
+      }
+    ]
+  },
+  {
+    "version": "1.0",
+    "messages": [
+      {
+        "image": "screen_1",
+        "title": "Sync to calendar",
+        "message": "Never miss a deadline again—sync course dates to your phone's calendar to receive reminders!"
+      }
+    ]
+  }
+]

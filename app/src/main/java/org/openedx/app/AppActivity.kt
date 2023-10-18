@@ -14,7 +14,6 @@ import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
-import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.AppData
@@ -24,6 +23,7 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataHolder {
 
@@ -41,7 +41,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         get() = AppData(BuildConfig.VERSION_NAME)
 
     private lateinit var binding: ActivityAppBinding
-    private val preferencesManager by inject<CorePreferences>()
     private val viewModel by viewModel<AppViewModel>()
     private val profileRouter by inject<ProfileRouter>()
 
@@ -110,15 +109,18 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         binding.root.requestApplyInsetsWhenAttached()
 
         if (savedInstanceState == null) {
-            if (preferencesManager.user != null) {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.container, MainFragment())
-                    .commit()
-            } else {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.container, SignInFragment())
-                    .commit()
-            }
+//            if (preferencesManager.user != null) {
+//                supportFragmentManager.beginTransaction()
+//                    .add(R.id.container, MainFragment())
+//                    .commit()
+//            } else {
+//                supportFragmentManager.beginTransaction()
+//                    .add(R.id.container, SignInFragment())
+//                    .commit()
+//            }
+            supportFragmentManager.beginTransaction()
+                .add(R.id.container, WhatsNewFragment())
+                .commit()
         }
 
         viewModel.logoutUser.observe(this) {

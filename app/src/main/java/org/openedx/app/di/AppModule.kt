@@ -38,6 +38,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.profile.data.storage.ProfilePreferences
+import org.openedx.whatsnew.WhatsNewFileManager
+import org.openedx.whatsnew.WhatsNewRouter
 
 val appModule = module {
 
@@ -63,6 +65,7 @@ val appModule = module {
     single<CourseRouter> { get<AppRouter>() }
     single<DiscussionRouter> { get<AppRouter>() }
     single<ProfileRouter> { get<AppRouter>() }
+    single<WhatsNewRouter> { get<AppRouter>() }
 
 
     single { NetworkConnection(get()) }
@@ -114,6 +117,7 @@ val appModule = module {
     }
 
     single { TranscriptManager(get()) }
+    single { WhatsNewFileManager(get()) }
 
     single { AnalyticsManager(get()) }
     single<DashboardAnalytics> { get<AnalyticsManager>() }

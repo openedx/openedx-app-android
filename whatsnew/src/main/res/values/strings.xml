@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_title">What\'s new</string>
+    <string name="whats_new_navigation_previous">Previous</string>
+    <string name="whats_new_navigation_next">Next</string>
+    <string name="whats_new_navigation_done">Done</string>
+</resources>
