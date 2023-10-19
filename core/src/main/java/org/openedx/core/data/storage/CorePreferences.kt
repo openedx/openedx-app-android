@@ -8,6 +8,7 @@ interface CorePreferences {
     var refreshToken: String
     var user: User?
     var videoSettings: VideoSettings
+    var lastWhatsNewVersion: String
 
     fun clear()
 }

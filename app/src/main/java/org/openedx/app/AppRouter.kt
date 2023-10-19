@@ -39,6 +39,7 @@ import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.settings.video.VideoQualityFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 import java.util.Date
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
@@ -58,6 +59,13 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToRestorePassword(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, RestorePasswordFragment())
+    }
+
+    override fun navigateToWhatsNew(fm: FragmentManager) {
+        fm.popBackStack()
+        fm.beginTransaction()
+            .replace(R.id.container, WhatsNewFragment())
+            .commit()
     }
     //endregion
 

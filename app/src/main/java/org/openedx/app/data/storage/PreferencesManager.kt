@@ -72,11 +72,18 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
                 ?: VideoSettings.default
         }
 
+    override var lastWhatsNewVersion: String
+        set(value) {
+            saveString(LAST_WHATS_NEW_VERSION, value)
+        }
+        get() = getString(LAST_WHATS_NEW_VERSION)
+
     companion object {
         private const val ACCESS_TOKEN = "access_token"
         private const val REFRESH_TOKEN = "refresh_token"
         private const val USER = "user"
         private const val ACCOUNT = "account"
         private const val VIDEO_SETTINGS = "video_settings"
+        private const val LAST_WHATS_NEW_VERSION = "last_whats_new_version"
     }
 }

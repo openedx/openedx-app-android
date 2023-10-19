@@ -51,6 +51,8 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.calculateCurrentOffsetForPage
 import org.openedx.core.ui.rememberWindowSize
@@ -68,6 +70,7 @@ import org.openedx.whatsnew.presentation.ui.PageIndicator
 class WhatsNewFragment : Fragment() {
 
     private val viewModel: WhatsNewViewModel by viewModel()
+    private val preferencesManager by inject<CorePreferences>()
     private val router by inject<WhatsNewRouter>()
 
     override fun onCreateView(
@@ -84,6 +87,8 @@ class WhatsNewFragment : Fragment() {
                     windowSize = windowSize,
                     whatsNewItem = whatsNewItem.value,
                     onCloseClick = {
+                        val versionName = (requireActivity() as AppDataHolder).appData.versionName
+                        preferencesManager.lastWhatsNewVersion = versionName
                         router.navigateToMain(parentFragmentManager)
                     }
                 )

@@ -14,6 +14,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.AppData
@@ -23,6 +24,7 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.whatsnew.WhatsNewFileManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataHolder {
@@ -42,6 +44,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
 
     private lateinit var binding: ActivityAppBinding
     private val viewModel by viewModel<AppViewModel>()
+    private val whatsNewFileManager by inject<WhatsNewFileManager>()
+    private val preferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
 
     private var _insetTop = 0
@@ -109,18 +113,23 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         binding.root.requestApplyInsetsWhenAttached()
 
         if (savedInstanceState == null) {
-//            if (preferencesManager.user != null) {
-//                supportFragmentManager.beginTransaction()
-//                    .add(R.id.container, MainFragment())
-//                    .commit()
-//            } else {
-//                supportFragmentManager.beginTransaction()
-//                    .add(R.id.container, SignInFragment())
-//                    .commit()
-//            }
-            supportFragmentManager.beginTransaction()
-                .add(R.id.container, WhatsNewFragment())
-                .commit()
+            when {
+                preferencesManager.user == null -> {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.container, SignInFragment())
+                        .commit()
+                }
+                checkWhatsNew() -> {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.container, WhatsNewFragment())
+                        .commit()
+                }
+                preferencesManager.user != null -> {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.container, MainFragment())
+                        .commit()
+                }
+            }
         }
 
         viewModel.logoutUser.observe(this) {
@@ -132,16 +141,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         val metrics = WindowMetricsCalculator.getOrCreate()
             .computeCurrentWindowMetrics(this)
 
-        val widthDp = metrics.bounds.width() /
-                resources.displayMetrics.density
+        val widthDp = metrics.bounds.width() / resources.displayMetrics.density
         val widthWindowSize = when {
             widthDp < 600f -> WindowType.Compact
             widthDp < 840f -> WindowType.Medium
             else -> WindowType.Expanded
         }
 
-        val heightDp = metrics.bounds.height() /
-                resources.displayMetrics.density
+        val heightDp = metrics.bounds.height() / resources.displayMetrics.density
         val heightWindowSize = when {
             heightDp < 480f -> WindowType.Compact
             heightDp < 900f -> WindowType.Medium
@@ -151,13 +158,17 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
     }
 
     private fun isUsingNightModeResources(): Boolean {
-        return when (resources.configuration.uiMode and
-                Configuration.UI_MODE_NIGHT_MASK) {
+        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
             Configuration.UI_MODE_NIGHT_YES -> true
             Configuration.UI_MODE_NIGHT_NO -> false
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
         }
+    }
+
+    override fun checkWhatsNew(): Boolean {
+        val dataVersion = whatsNewFileManager.getNewestData().version
+        return BuildConfig.VERSION_NAME == dataVersion && preferencesManager.lastWhatsNewVersion != dataVersion
     }
 
     companion object {
