@@ -11,12 +11,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -33,12 +36,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -47,6 +52,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.calculateCurrentOffsetForPage
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -86,6 +92,7 @@ class WhatsNewFragment : Fragment() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WhatsNewScreen(
     windowSize: WindowSize,
@@ -95,6 +102,9 @@ fun WhatsNewScreen(
     whatsNewItem?.let { item ->
         OpenEdXTheme {
             val scaffoldState = rememberScaffoldState()
+            val pagerState = rememberPagerState {
+                whatsNewItem.messages.size
+            }
 
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -112,6 +122,7 @@ fun WhatsNewScreen(
                             WhatsNewScreenLandscape(
                                 modifier = Modifier.padding(paddingValues),
                                 whatsNewItem = item,
+                                pagerState = pagerState,
                                 onCloseClick = onCloseClick
                             )
 
@@ -119,6 +130,7 @@ fun WhatsNewScreen(
                             WhatsNewScreenPortrait(
                                 modifier = Modifier.padding(paddingValues),
                                 whatsNewItem = item,
+                                pagerState = pagerState,
                                 onCloseClick = onCloseClick
                             )
                     }
@@ -182,14 +194,12 @@ private fun WhatsNewTopBar(
 private fun WhatsNewScreenPortrait(
     modifier: Modifier = Modifier,
     whatsNewItem: WhatsNewItem,
+    pagerState: PagerState,
     onCloseClick: () -> Unit
 ) {
     OpenEdXTheme {
         val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState(pageCount = {
-            whatsNewItem.messages.size
-        })
-        val whatsNewMessage = whatsNewItem.messages[pagerState.currentPage]
+        val message = whatsNewItem.messages[pagerState.currentPage]
 
         Box(
             modifier = modifier
@@ -231,7 +241,7 @@ private fun WhatsNewScreenPortrait(
                     )
 
                     Crossfade(
-                        targetState = whatsNewMessage,
+                        targetState = message,
                         modifier = Modifier.fillMaxWidth(),
                         label = ""
                     ) { targetText ->
@@ -261,18 +271,22 @@ private fun WhatsNewScreenPortrait(
                     NavigationUnitsButtons(
                         hasPrevPage = pagerState.canScrollBackward,
                         hasNextPage = pagerState.canScrollForward,
-                        onPrevClick = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        onPrevClick = remember {
+                            {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                }
                             }
                         },
-                        onNextClick = {
-                            if (pagerState.canScrollForward) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        onNextClick = remember {
+                            {
+                                if (pagerState.canScrollForward) {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                } else {
+                                    onCloseClick()
                                 }
-                            } else {
-                                onCloseClick()
                             }
                         }
                     )
@@ -282,14 +296,119 @@ private fun WhatsNewScreenPortrait(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WhatsNewScreenLandscape(
     modifier: Modifier = Modifier,
     whatsNewItem: WhatsNewItem,
+    pagerState: PagerState,
     onCloseClick: () -> Unit
 ) {
     OpenEdXTheme {
+        val coroutineScope = rememberCoroutineScope()
+        val message = whatsNewItem.messages[pagerState.currentPage]
 
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.appColors.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                HorizontalPager(
+                    verticalAlignment = Alignment.CenterVertically,
+                    state = pagerState
+                ) { page ->
+                    val image = whatsNewItem.messages[page].image
+                    val alpha = (0.2f + pagerState.calculateCurrentOffsetForPage(page))*10
+                    Image(
+                        modifier = Modifier
+                            .alpha(alpha)
+                            .fillMaxHeight()
+                            .padding(vertical = 24.dp)
+                            .padding(start = 72.dp),
+                        painter = painterResource(id = image),
+                        contentDescription = null
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(400.dp)
+                        .padding(end = 72.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                    ) {
+                        Crossfade(
+                            targetState = message,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = ""
+                        ) { targetText ->
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    text = targetText.title,
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.appTypography.titleMedium
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(80.dp),
+                                    text = targetText.message,
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.appTypography.bodyMedium
+                                )
+                            }
+                        }
+
+                        NavigationUnitsButtons(
+                            hasPrevPage = pagerState.canScrollBackward,
+                            hasNextPage = pagerState.canScrollForward,
+                            onPrevClick = remember {
+                                {
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                    }
+                                }
+                            },
+                            onNextClick = remember {
+                                {
+                                    if (pagerState.canScrollForward) {
+                                        coroutineScope.launch {
+                                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                        }
+                                    } else {
+                                        onCloseClick()
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            PageIndicator(
+                modifier = Modifier.weight(0.25f),
+                numberOfPages = pagerState.pageCount,
+                selectedPage = pagerState.currentPage,
+                defaultRadius = 12.dp,
+                selectedLength = 24.dp,
+                space = 4.dp,
+                animationDurationInMillis = 500,
+            )
+        }
     }
 }
 
@@ -303,25 +422,30 @@ val whatsNewItemPreview = WhatsNewItem(
     messages = listOf(whatsNewMessagePreview, whatsNewMessagePreview, whatsNewMessagePreview)
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview
 @Composable
 private fun WhatsNewPortraitPreview() {
     OpenEdXTheme {
         WhatsNewScreenPortrait(
             whatsNewItem = whatsNewItemPreview,
-            onCloseClick = {}
+            onCloseClick = {},
+            pagerState = rememberPagerState { 4 }
         )
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview
+@OptIn(ExperimentalFoundationApi::class)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
 @Composable
 private fun WhatsNewLandscapePreview() {
     OpenEdXTheme {
-//        WhatsNewScreenLandscape()
+        WhatsNewScreenLandscape(
+            whatsNewItem = whatsNewItemPreview,
+            onCloseClick = {},
+            pagerState = rememberPagerState { 4 }
+        )
     }
 }
