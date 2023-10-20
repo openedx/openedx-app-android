@@ -17,15 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.media3.cast.CastPlayer
 import androidx.media3.cast.SessionAvailabilityListener
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.window.layout.WindowMetricsCalculator
-import com.google.android.gms.cast.framework.CastContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -45,7 +43,6 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
-import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
@@ -192,13 +189,9 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 .build()
 
             if (!viewModel.isPlayerSetUp) {
-                viewModel.getActivePlayer()?.setMediaItem(
-                    mediaItem,
-                    viewModel.getCurrentVideoTime()
-                )
+                setPlayerMedia(mediaItem)
                 viewModel.getActivePlayer()?.prepare()
                 viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying
-
                 viewModel.isPlayerSetUp = true
             }
 
@@ -244,14 +237,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     }
 
     @UnstableApi
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
         if (!requireActivity().isChangingConfigurations) {
             viewModel.releasePlayers()
+            viewModel.isPlayerSetUp = false
         }
-    }
-
-    override fun onDestroy() {
         handler.removeCallbacks(videoTimeRunnable)
         super.onDestroy()
     }
@@ -265,6 +255,20 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         } else {
             binding.playerView.controllerAutoShow = true
             binding.playerView.controllerShowTimeoutMs = 2000
+        }
+    }
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private fun setPlayerMedia(mediaItem: MediaItem) {
+        if (viewModel.videoUrl.endsWith(".m3u8")) {
+            val factory = DefaultDataSource.Factory(requireContext())
+            val mediaSource: HlsMediaSource = HlsMediaSource.Factory(factory).createMediaSource(mediaItem)
+            viewModel.exoPlayer?.setMediaSource(mediaSource, viewModel.getCurrentVideoTime())
+        } else {
+            viewModel.getActivePlayer()?.setMediaItem(
+                mediaItem,
+                viewModel.getCurrentVideoTime()
+            )
         }
     }
 
