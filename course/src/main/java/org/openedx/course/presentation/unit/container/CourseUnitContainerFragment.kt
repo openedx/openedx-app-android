@@ -7,8 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.statusBarsPadding
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -67,8 +65,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             super.onPageSelected(position)
             val blocks = viewModel.getUnitBlocks()
             blocks.getOrNull(position)?.let { currentBlock ->
+                val encodedVideo = currentBlock.studentViewData?.encodedVideos
                 binding.mediaRouteButton.isVisible = currentBlock.type == BlockType.VIDEO
-                        && currentBlock.studentViewData?.encodedVideos?.hasNonYoutubeVideo == true
+                        && encodedVideo?.hasNonYoutubeVideo == true
+                        && !encodedVideo.videoUrl.endsWith(".m3u8")
             }
         }
     }
