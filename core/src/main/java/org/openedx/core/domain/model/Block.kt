@@ -24,7 +24,7 @@ data class Block(
     val descendants: List<String>,
     val descendantsType: BlockType,
     val completion: Double,
-    val downloadModel: DownloadModel? = null
+    val downloadModel: DownloadModel? = null,
 ) {
     val isDownloadable: Boolean
         get() {
@@ -36,6 +36,7 @@ data class Block(
             BlockType.VIDEO -> {
                 FileType.VIDEO
             }
+
             else -> {
                 FileType.UNKNOWN
             }
@@ -55,7 +56,7 @@ data class StudentViewData(
     val duration: Any,
     val transcripts: HashMap<String, String>?,
     val encodedVideos: EncodedVideos?,
-    val topicId: String
+    val topicId: String,
 )
 
 data class EncodedVideos(
@@ -64,7 +65,7 @@ data class EncodedVideos(
     var fallback: VideoInfo?,
     var desktopMp4: VideoInfo?,
     var mobileHigh: VideoInfo?,
-    var mobileLow: VideoInfo?
+    var mobileLow: VideoInfo?,
 ) {
     val hasDownloadableVideo: Boolean
         get() = isPreferredVideoInfo(hls) ||
@@ -79,6 +80,14 @@ data class EncodedVideos(
                 || desktopMp4?.url != null
                 || hls?.url != null
                 || fallback?.url != null
+
+    val videoUrl: String
+        get() = mobileHigh?.url
+            ?: mobileLow?.url
+            ?: desktopMp4?.url
+            ?: hls?.url
+            ?: fallback?.url
+            ?: ""
 
     fun getPreferredVideoInfoForDownloading(preferredVideoQuality: VideoQuality): VideoInfo? {
         var preferredVideoInfo = when (preferredVideoQuality) {
