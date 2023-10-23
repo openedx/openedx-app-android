@@ -1,9 +1,9 @@
 package org.openedx.app.data.networking
 
-import org.openedx.core.ApiConstants
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
 
 class HeadersInterceptor(private val preferencesManager: CorePreferences) : Interceptor {
 
@@ -14,7 +14,7 @@ class HeadersInterceptor(private val preferencesManager: CorePreferences) : Inte
                     val token = preferencesManager.accessToken
 
                     if (token.isNotEmpty()) {
-                        addHeader("Authorization", "${ApiConstants.TOKEN_TYPE_BEARER} $token")
+                        addHeader("Authorization", "$ACCESS_TOKEN_TYPE $token")
                     }
 
                     addHeader("Accept", "application/json")

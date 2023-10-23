@@ -12,9 +12,9 @@ object ApiConstants {
 
     const val GRANT_TYPE_PASSWORD = "password"
 
-    const val TOKEN_TYPE_REFRESH = "refresh_token"
-
     const val TOKEN_TYPE_BEARER = "Bearer"
+    const val TOKEN_TYPE_JWT = "jwt"
+    const val TOKEN_TYPE_REFRESH = "refresh_token"
 
     const val EMAIL = "email"
     const val PASSWORD = "password"
