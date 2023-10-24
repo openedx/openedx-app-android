@@ -11,6 +11,7 @@ import org.openedx.profile.data.api.ProfileApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
+import org.openedx.app.data.networking.AppUpgradeInterceptor
 import org.openedx.core.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -29,13 +30,14 @@ val networkingModule = module {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }
             addInterceptor(HandleErrorInterceptor(get()))
+            addInterceptor(AppUpgradeInterceptor(get()))
             authenticator(get<OauthRefreshTokenAuthenticator>())
         }.build()
     }
 
     single<Retrofit> {
         Retrofit.Builder()
-            .baseUrl(org.openedx.core.BuildConfig.BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .client(get())
             .addConverterFactory(GsonConverterFactory.create(get()))
             .build()

@@ -3,6 +3,7 @@ package org.openedx.app.data.networking
 import org.openedx.core.ApiConstants
 import okhttp3.Interceptor
 import okhttp3.Response
+import org.openedx.app.BuildConfig
 import org.openedx.core.data.storage.CorePreferences
 
 class HeadersInterceptor(private val preferencesManager: CorePreferences) : Interceptor {
@@ -18,6 +19,14 @@ class HeadersInterceptor(private val preferencesManager: CorePreferences) : Inte
                     }
 
                     addHeader("Accept", "application/json")
+                    //TODO
+                    addHeader(
+                     "User-Agent", System.getProperty("http.agent") + " " +
+//                            context.getString(org.openedx.core.R.string.app_name) + "/" +
+                                "edX" + "/" +
+                                "org.edx.mobile" + "/" +
+                                BuildConfig.VERSION_NAME
+                    )
                 }.build()
         )
     }
