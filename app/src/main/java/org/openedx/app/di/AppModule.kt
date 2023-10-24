@@ -37,6 +37,7 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.AppUpdateNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
 
 val appModule = module {
@@ -55,6 +56,7 @@ val appModule = module {
     single { CourseNotifier() }
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
+    single { AppUpdateNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }

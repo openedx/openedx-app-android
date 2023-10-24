@@ -12,7 +12,7 @@ import java.util.*
 object TimeUtils {
 
     private const val FORMAT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-    private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "YYYY-MM-DDTHH:MM:SS+00:00"
+    private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "yyyy-MM-dd'T'HH:mm:ssXXX"
     private const val FORMAT_APPLICATION = "dd.MM.yyyy HH:mm"
     private const val FORMAT_DATE = "dd MMM, yyyy"
 

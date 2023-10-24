@@ -10,6 +10,6 @@ class AppNotifier {
 
     val notifier: Flow<AppEvent> = channel.asSharedFlow()
 
-    suspend fun send(event: AppEvent) = channel.emit(event)
+    suspend fun send(event: LogoutEvent) = channel.emit(event)
 
 }

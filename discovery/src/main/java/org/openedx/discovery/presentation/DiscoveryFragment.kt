@@ -35,11 +35,40 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.discovery.R
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.dialog.app_upgrade.AppUpgradeDialogFragment
+import org.openedx.core.system.notifier.AppUpgradeEvent
 
 class DiscoveryFragment : Fragment() {
 
     private val viewModel by viewModel<DiscoveryViewModel>()
+    private val preferencesManager by inject<CorePreferences>()
     private val router: DiscoveryRouter by inject()
+    private var shouldShowDialog = true
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel.appUpgradeEvent.observe(this) { appUpgradeEvent ->
+            when (appUpgradeEvent) {
+                is AppUpgradeEvent.UpgradeRequiredEvent -> {
+
+                }
+
+                is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                    if (!preferencesManager.wasUpdateDialogDisplayed && shouldShowDialog) {
+                        shouldShowDialog = false
+                        val dialog = AppUpgradeDialogFragment.newInstance()
+                        dialog.show(
+                            requireActivity().supportFragmentManager,
+                            AppUpgradeDialogFragment::class.simpleName
+                        )
+                    } else {
+
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

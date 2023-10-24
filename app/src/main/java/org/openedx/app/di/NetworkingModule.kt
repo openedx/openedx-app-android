@@ -30,7 +30,7 @@ val networkingModule = module {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }
             addInterceptor(HandleErrorInterceptor(get()))
-            addInterceptor(AppUpgradeInterceptor(get()))
+            addInterceptor(AppUpgradeInterceptor(get(), get()))
             authenticator(get<OauthRefreshTokenAuthenticator>())
         }.build()
     }

@@ -1,17 +1,18 @@
 package org.openedx.app.data.networking
 
-import android.util.Log
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.openedx.app.BuildConfig
-import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.system.notifier.AppUpgradeEvent
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.AppUpdateNotifier
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.utils.TimeUtils
 import java.util.Date
 
 class AppUpgradeInterceptor(
-    private val appNotifier: AppNotifier
+    private val preferencesManager: CorePreferences,
+    private val appUpdateNotifier: AppUpdateNotifier
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val response = chain.proceed(chain.request())
@@ -20,18 +21,21 @@ class AppUpgradeInterceptor(
             val latestAppVersion = response.header(HEADER_APP_LATEST_VERSION)
             val lastSupportedDateString = response.header(HEADER_APP_VERSION_LAST_SUPPORTED_DATE) ?: ""
             val lastSupportedDateTime = TimeUtils.iso8601WithTimeZoneToDate(lastSupportedDateString)?.time ?: 0L
-            Log.e("___", "lastSupportedDateTime: $lastSupportedDateTime")
             when {
                 responseCode == 426 -> {
-                    appNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                    appUpdateNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime > Date().time -> {
-                    appNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent)
+                    appUpdateNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent)
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {
-                    appNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                    appUpdateNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                }
+
+                BuildConfig.VERSION_NAME == latestAppVersion -> {
+                    preferencesManager.wasUpdateDialogDisplayed = false
                 }
             }
         }

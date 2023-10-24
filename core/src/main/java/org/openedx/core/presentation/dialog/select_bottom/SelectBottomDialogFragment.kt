@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.dialog
+package org.openedx.core.presentation.dialog.select_bottom
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -29,16 +29,15 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.parcelableArrayList
 import org.openedx.core.ui.SheetContent
-import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.ui.theme.appColors
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 
 class SelectBottomDialogFragment : BottomSheetDialogFragment() {

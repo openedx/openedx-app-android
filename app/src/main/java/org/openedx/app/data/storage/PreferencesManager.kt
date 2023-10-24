@@ -18,8 +18,14 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             putString(key, value)
         }.apply()
     }
-
     private fun getString(key: String): String = sharedPreferences.getString(key, "") ?: ""
+
+    private fun saveBoolean(key: String, value: Boolean) {
+        sharedPreferences.edit().apply {
+            putBoolean(key, value)
+        }.apply()
+    }
+    private fun getBoolean(key: String): Boolean = sharedPreferences.getBoolean(key, false)
 
     override fun clear() {
         sharedPreferences.edit().apply {
@@ -72,11 +78,18 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
                 ?: VideoSettings.default
         }
 
+    override var wasUpdateDialogDisplayed: Boolean
+        set(value) {
+            saveBoolean(WAS_UPD_DIALOG_DISPLAYED, value)
+        }
+        get() = getBoolean(WAS_UPD_DIALOG_DISPLAYED)
+
     companion object {
         private const val ACCESS_TOKEN = "access_token"
         private const val REFRESH_TOKEN = "refresh_token"
         private const val USER = "user"
         private const val ACCOUNT = "account"
         private const val VIDEO_SETTINGS = "video_settings"
+        private const val WAS_UPD_DIALOG_DISPLAYED = "was_update_dialog_displayed"
     }
 }

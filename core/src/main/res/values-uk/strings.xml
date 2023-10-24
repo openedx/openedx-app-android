@@ -38,6 +38,10 @@
     <string name="core_email_subject">Відгук клієнта</string>
     <string name="core_date_format_MMMM_dd">dd MMMM</string>
     <string name="core_full_date_with_time">dd MMM yyyy HH:mm</string>
+    <string name="core_app_upgrade_title">Оновлення додатку</string>
+    <string name="core_app_upgrade_description">Ми рекомендуємо вам оновити до останньої версії. Оновіться зараз, щоб отримати останні функції та виправлення.</string>
+    <string name="core_not_now">Не зараз</string>
+    <string name="core_update">Оновити</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s зображення профілю</string>

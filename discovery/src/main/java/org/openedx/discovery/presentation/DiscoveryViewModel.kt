@@ -3,19 +3,25 @@ package org.openedx.discovery.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import org.openedx.core.*
+import kotlinx.coroutines.launch
+import org.openedx.core.BaseViewModel
+import org.openedx.core.R
+import org.openedx.core.SingleEventLiveData
+import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.AppUpdateNotifier
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
-import kotlinx.coroutines.launch
 
 class DiscoveryViewModel(
     private val networkConnection: NetworkConnection,
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
-    private val analytics: DiscoveryAnalytics
+    private val analytics: DiscoveryAnalytics,
+    private val appUpdateNotifier: AppUpdateNotifier
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
@@ -34,6 +40,10 @@ class DiscoveryViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
+    val appUpgradeEvent: LiveData<AppUpgradeEvent>
+        get() = _appUpgradeEvent
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -43,6 +53,7 @@ class DiscoveryViewModel(
 
     init {
         getCoursesList()
+        collectAppUpgradeEvent()
     }
 
     private fun loadCoursesInternal(
@@ -133,6 +144,14 @@ class DiscoveryViewModel(
     fun fetchMore() {
         if (!isLoading && page != -1) {
             loadCoursesInternal()
+        }
+    }
+
+    private fun collectAppUpgradeEvent() {
+        viewModelScope.launch {
+            appUpdateNotifier.notifier.collect { event ->
+                _appUpgradeEvent.value = event
+            }
         }
     }
 

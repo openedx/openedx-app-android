@@ -1,18 +1,16 @@
 package org.openedx.app
 
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.room.RoomDatabase
-import org.openedx.core.BaseViewModel
-import org.openedx.core.SingleEventLiveData
-import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.system.notifier.LogoutEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openedx.app.system.notifier.AppUpgradeEvent
+import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.app.system.notifier.LogoutEvent
+import org.openedx.core.BaseViewModel
+import org.openedx.core.SingleEventLiveData
 import org.openedx.core.data.storage.CorePreferences
 
 class AppViewModel(
@@ -23,9 +21,9 @@ class AppViewModel(
     private val analytics: AppAnalytics
 ) : BaseViewModel() {
 
+    private val _logoutUser = SingleEventLiveData<Unit>()
     val logoutUser: LiveData<Unit>
         get() = _logoutUser
-    private val _logoutUser = SingleEventLiveData<Unit>()
 
     private var logoutHandledAt: Long = 0
 
@@ -34,24 +32,14 @@ class AppViewModel(
         setUserId()
         viewModelScope.launch {
             notifier.notifier.collect { event ->
-                when(event) {
-                    is LogoutEvent -> {
-                        if (System.currentTimeMillis() - logoutHandledAt > 5000) {
-                            logoutHandledAt = System.currentTimeMillis()
-                            preferencesManager.clear()
-                            withContext(dispatcher) {
-                                room.clearAllTables()
-                            }
-                            analytics.logoutEvent(true)
-                            _logoutUser.value = Unit
-                        }
+                if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
+                    logoutHandledAt = System.currentTimeMillis()
+                    preferencesManager.clear()
+                    withContext(dispatcher) {
+                        room.clearAllTables()
                     }
-                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                        Log.e("___", "UpgradeRequiredEvent")
-                    }
-                    is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                        Log.e("___", "UpgradeRecommendedEvent")
-                    }
+                    analytics.logoutEvent(true)
+                    _logoutUser.value = Unit
                 }
             }
         }

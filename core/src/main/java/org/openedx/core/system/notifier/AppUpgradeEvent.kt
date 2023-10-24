@@ -1,6 +1,6 @@
-package org.openedx.app.system.notifier
+package org.openedx.core.system.notifier
 
-sealed class AppUpgradeEvent: AppEvent {
+sealed class AppUpgradeEvent {
     object UpgradeRequiredEvent : AppUpgradeEvent()
     object UpgradeRecommendedEvent : AppUpgradeEvent()
 }

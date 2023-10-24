@@ -28,7 +28,7 @@ import org.openedx.core.extension.computeWindowSizeClasses
 import org.openedx.core.extension.dpToPixel
 import org.openedx.core.extension.objectToString
 import org.openedx.core.extension.stringToObject
-import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
+import org.openedx.core.presentation.dialog.select_bottom.SelectBottomDialogFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme

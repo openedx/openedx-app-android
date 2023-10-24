@@ -40,6 +40,10 @@
     <string name="core_email_subject">Customer Feedback</string>
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
+    <string name="core_app_upgrade_title">App Update</string>
+    <string name="core_app_upgrade_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>
+    <string name="core_not_now">Not Now</string>
+    <string name="core_update">Update</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
