@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-class AppUpdateNotifier {
+class AppUpgradeNotifier {
 
     private val channel = MutableSharedFlow<AppUpgradeEvent>(replay = 0, extraBufferCapacity = 0)
 

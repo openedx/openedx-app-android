@@ -1,6 +1,9 @@
 package org.openedx.discovery.presentation
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -25,50 +28,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
+import org.openedx.core.presentation.dialog.app_upgrade.AppUpgradeDialogFragment
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.discovery.R
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.presentation.dialog.app_upgrade.AppUpgradeDialogFragment
-import org.openedx.core.system.notifier.AppUpgradeEvent
 
 class DiscoveryFragment : Fragment() {
 
     private val viewModel by viewModel<DiscoveryViewModel>()
-    private val preferencesManager by inject<CorePreferences>()
     private val router: DiscoveryRouter by inject()
-    private var shouldShowDialog = true
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.appUpgradeEvent.observe(this) { appUpgradeEvent ->
-            when (appUpgradeEvent) {
-                is AppUpgradeEvent.UpgradeRequiredEvent -> {
-
-                }
-
-                is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                    if (!preferencesManager.wasUpdateDialogDisplayed && shouldShowDialog) {
-                        shouldShowDialog = false
-                        val dialog = AppUpgradeDialogFragment.newInstance()
-                        dialog.show(
-                            requireActivity().supportFragmentManager,
-                            AppUpgradeDialogFragment::class.simpleName
-                        )
-                    } else {
-
-                    }
-                }
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,6 +61,7 @@ class DiscoveryFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState()
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -92,6 +70,36 @@ class DiscoveryFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
+                    appUpgradeEvent = appUpgradeEvent,
+                    appUpgradeRecommendedDialog = {
+                        val dialog = AppUpgradeDialogFragment.newInstance()
+                        dialog.show(
+                            requireActivity().supportFragmentManager,
+                            AppUpgradeDialogFragment::class.simpleName
+                        )
+                    },
+                    onAppUpgradeRecommendedBoxClick = {
+                        try {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("market://details?id=${requireContext().packageName}")
+                                )
+                            )
+                        } catch (e: ActivityNotFoundException) {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=${requireContext().packageName}")
+                                )
+                            )
+                        }
+                    },
+                    onAppUpgradeRequired = {
+                        router.navigateToUpgradeRequired(
+                            requireActivity().supportFragmentManager
+                        )
+                    },
                     onSearchClick = {
                         viewModel.discoverySearchBarClickedEvent()
                         router.navigateToCourseSearch(
@@ -129,6 +137,10 @@ internal fun DiscoveryScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
+    appUpgradeEvent: AppUpgradeEventUIState?,
+    appUpgradeRecommendedDialog: () -> Unit,
+    onAppUpgradeRecommendedBoxClick: () -> Unit,
+    onAppUpgradeRequired: () -> Unit,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onReloadClick: () -> Unit,
@@ -296,19 +308,44 @@ internal fun DiscoveryScreen(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                    ) {
+                        when (appUpgradeEvent) {
+                            is AppUpgradeEventUIState.UpgradeRecommendedBox -> {
+                                AppUpgradeRecommendedBox(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = onAppUpgradeRecommendedBoxClick
+                                )
                             }
-                        )
+
+                            is AppUpgradeEventUIState.UpgradeRecommendedDialog -> {
+                                appUpgradeRecommendedDialog()
+                            }
+
+                            is AppUpgradeEventUIState.UpgradeRequiredScreen -> {
+                                onAppUpgradeRequired()
+                            }
+
+                            else -> {}
+                        }
+
+                        if (!isInternetConnectionShown && !hasInternetConnection) {
+                            OfflineModeDialog(
+                                Modifier
+                                    .fillMaxWidth(),
+                                onDismissCLick = {
+                                    isInternetConnectionShown = true
+                                },
+                                onReloadClick = {
+                                    isInternetConnectionShown = true
+                                    onReloadClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -356,7 +393,11 @@ private fun DiscoveryScreenPreview() {
             onReloadClick = {},
             canLoadMore = false,
             refreshing = false,
-            hasInternetConnection = true
+            hasInternetConnection = true,
+            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
+            appUpgradeRecommendedDialog = {},
+            onAppUpgradeRecommendedBoxClick = {},
+            onAppUpgradeRequired = {}
         )
     }
 }
@@ -389,7 +430,11 @@ private fun DiscoveryScreenTabletPreview() {
             onReloadClick = {},
             canLoadMore = false,
             refreshing = false,
-            hasInternetConnection = true
+            hasInternetConnection = true,
+            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
+            appUpgradeRecommendedDialog = {},
+            onAppUpgradeRecommendedBoxClick = {},
+            onAppUpgradeRequired = {}
         )
     }
 }

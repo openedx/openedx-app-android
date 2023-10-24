@@ -41,9 +41,15 @@
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
     <string name="core_app_upgrade_title">App Update</string>
-    <string name="core_app_upgrade_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>
+    <string name="core_app_upgrade_dialog_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>
+    <string name="core_app_upgrade_box_description">New update available! Upgrade now to receive the latest features and fixes</string>
     <string name="core_not_now">Not Now</string>
     <string name="core_update">Update</string>
+    <string name="core_deprecated_app_version">Deprecated App Version</string>
+    <string name="core_account_settings">Account Settings</string>
+    <string name="core_app_update_required_title">App Update Required</string>
+    <string name="core_app_update_required_description">This version of the OpenEdX app is out-of-date. To continue learning and get the latest features and fixes, please upgrade to the latest version.</string>
+    <string name="core_why_do_you_need_update">Why do I need to update?</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>

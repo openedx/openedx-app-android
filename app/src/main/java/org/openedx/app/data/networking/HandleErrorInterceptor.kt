@@ -32,7 +32,7 @@ class HandleErrorInterceptor(
                             return response
                         }
                     }
-                } else if (errorResponse.errorDescription != null) {
+                } else if (errorResponse?.errorDescription != null) {
                     throw EdxError.ValidationException(errorResponse.errorDescription ?: "")
                 }
             } catch (e: JsonSyntaxException) {

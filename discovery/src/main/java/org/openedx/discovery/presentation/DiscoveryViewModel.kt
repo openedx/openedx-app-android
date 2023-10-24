@@ -8,12 +8,14 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpdateNotifier
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 
 class DiscoveryViewModel(
@@ -21,7 +23,8 @@ class DiscoveryViewModel(
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
-    private val appUpdateNotifier: AppUpdateNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val preferencesManager: CorePreferences
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
@@ -40,9 +43,9 @@ class DiscoveryViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
-    val appUpgradeEvent: LiveData<AppUpgradeEvent>
-        get() = _appUpgradeEvent
+    private val _appUpgradeEventUIState = MutableLiveData<AppUpgradeEventUIState>()
+    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
+        get() = _appUpgradeEventUIState
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -149,8 +152,22 @@ class DiscoveryViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpdateNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
+            var shouldShowDialog = true
+            appUpgradeNotifier.notifier.collect { event ->
+                when (event) {
+                    is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                        if (!preferencesManager.wasUpdateDialogDisplayed && shouldShowDialog) {
+                            shouldShowDialog = false
+                            _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedDialog
+                        } else {
+                            _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedBox
+                        }
+                    }
+
+                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
+                        _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRequiredScreen
+                    }
+                }
             }
         }
     }

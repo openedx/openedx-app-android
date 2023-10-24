@@ -39,9 +39,15 @@
     <string name="core_date_format_MMMM_dd">dd MMMM</string>
     <string name="core_full_date_with_time">dd MMM yyyy HH:mm</string>
     <string name="core_app_upgrade_title">Оновлення додатку</string>
-    <string name="core_app_upgrade_description">Ми рекомендуємо вам оновити до останньої версії. Оновіться зараз, щоб отримати останні функції та виправлення.</string>
+    <string name="core_app_upgrade_dialog_description">Ми рекомендуємо вам оновитись до останньої версії. Оновіться зараз, щоб отримати останні функції та виправлення.</string>
+    <string name="core_app_upgrade_box_description">Доступне нове оновлення! Оновіть зараз, щоб отримати останні можливості та виправлення</string>
     <string name="core_not_now">Не зараз</string>
     <string name="core_update">Оновити</string>
+    <string name="core_deprecated_app_version">Застаріла версія додатку</string>
+    <string name="core_account_settings">Налаштування аккаунту</string>
+    <string name="core_app_update_required_title">Необхідне оновлення додатку</string>
+    <string name="core_app_update_required_description">Ця версія додатка %1$s застаріла. Щоб продовжити навчання та отримати останні можливості та виправлення, будь ласка, оновіть до останньої версії.</string>
+    <string name="core_why_do_you_need_update">Чому мені потрібно оновити?</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s зображення профілю</string>

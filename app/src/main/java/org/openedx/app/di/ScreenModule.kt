@@ -61,11 +61,11 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(),get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get()) }
+    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }

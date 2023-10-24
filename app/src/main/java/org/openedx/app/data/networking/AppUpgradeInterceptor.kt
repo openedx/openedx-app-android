@@ -5,14 +5,14 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import org.openedx.app.BuildConfig
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.system.notifier.AppUpdateNotifier
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.utils.TimeUtils
 import java.util.Date
 
 class AppUpgradeInterceptor(
     private val preferencesManager: CorePreferences,
-    private val appUpdateNotifier: AppUpdateNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val response = chain.proceed(chain.request())
@@ -23,15 +23,15 @@ class AppUpgradeInterceptor(
             val lastSupportedDateTime = TimeUtils.iso8601WithTimeZoneToDate(lastSupportedDateString)?.time ?: 0L
             when {
                 responseCode == 426 -> {
-                    appUpdateNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime > Date().time -> {
-                    appUpdateNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent)
+                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent)
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {
-                    appUpdateNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
 
                 BuildConfig.VERSION_NAME == latestAppVersion -> {

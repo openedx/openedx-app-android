@@ -1,7 +1,10 @@
 package org.openedx.dashboard.presentation
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -43,6 +46,8 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -75,6 +80,7 @@ class DashboardFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState()
 
                 MyCoursesScreen(
                     windowSize = windowSize,
@@ -99,7 +105,25 @@ class DashboardFragment : Fragment() {
                     },
                     paginationCallback = {
                         viewModel.fetchMore()
-                    }
+                    },
+                    appUpgradeEvent = appUpgradeEvent,
+                    onAppUpgradeRecommendedBoxClick = {
+                        try {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("market://details?id=${requireContext().packageName}")
+                                )
+                            )
+                        } catch (e: ActivityNotFoundException) {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=${requireContext().packageName}")
+                                )
+                            )
+                        }
+                    },
                 )
             }
         }
@@ -119,6 +143,8 @@ internal fun MyCoursesScreen(
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
+    appUpgradeEvent: AppUpgradeEventUIState?,
+    onAppUpgradeRecommendedBoxClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -294,19 +320,34 @@ internal fun MyCoursesScreen(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                    ) {
+                        when (appUpgradeEvent) {
+                            is AppUpgradeEventUIState.UpgradeRecommendedBox -> {
+                                AppUpgradeRecommendedBox(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = onAppUpgradeRecommendedBoxClick
+                                )
                             }
-                        )
+                            else -> {}
+                        }
+
+                        if (!isInternetConnectionShown && !hasInternetConnection) {
+                            OfflineModeDialog(
+                                Modifier
+                                    .fillMaxWidth(),
+                                onDismissCLick = {
+                                    isInternetConnectionShown = true
+                                },
+                                onReloadClick = {
+                                    isInternetConnectionShown = true
+                                    onReloadClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -494,7 +535,9 @@ private fun MyCoursesScreenDay() {
             hasInternetConnection = true,
             refreshing = false,
             canLoadMore = false,
-            paginationCallback = {}
+            paginationCallback = {},
+            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
+            onAppUpgradeRecommendedBoxClick = {}
         )
     }
 }
@@ -523,7 +566,9 @@ private fun MyCoursesScreenTabletPreview() {
             hasInternetConnection = true,
             refreshing = false,
             canLoadMore = false,
-            paginationCallback = {}
+            paginationCallback = {},
+            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
+            onAppUpgradeRecommendedBoxClick = {}
         )
     }
 }
