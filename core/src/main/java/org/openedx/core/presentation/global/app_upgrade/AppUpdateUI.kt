@@ -43,6 +43,20 @@ import org.openedx.core.ui.theme.appTypography
 @Composable
 fun AppUpgradeRequiredScreen(
     modifier: Modifier = Modifier,
+    onUpdateClick: () -> Unit
+) {
+    AppUpgradeRequiredScreen(
+        modifier = modifier,
+        showAccountSettingsButton = false,
+        onAccountSettingsClick = {},
+        onUpdateClick = onUpdateClick
+    )
+}
+
+@Composable
+fun AppUpgradeRequiredScreen(
+    modifier: Modifier = Modifier,
+    showAccountSettingsButton: Boolean,
     onAccountSettingsClick: () -> Unit,
     onUpdateClick: () -> Unit
 ) {
@@ -68,6 +82,7 @@ fun AppUpgradeRequiredScreen(
         ) {
             AppUpgradeRequiredContent(
                 modifier = Modifier.padding(horizontal = 32.dp),
+                showAccountSettingsButton = showAccountSettingsButton,
                 onAccountSettingsClick = onAccountSettingsClick,
                 onUpdateClick = onUpdateClick
             )
@@ -139,6 +154,7 @@ fun AppUpgradeRecommendDialog(
 @Composable
 fun AppUpgradeRequiredContent(
     modifier: Modifier = Modifier,
+    showAccountSettingsButton: Boolean,
     onAccountSettingsClick: () -> Unit,
     onUpdateClick: () -> Unit
 ) {
@@ -175,6 +191,7 @@ fun AppUpgradeRequiredContent(
 //            )
         }
         AppUpgradeRequiredButtons(
+            showAccountSettingsButton = showAccountSettingsButton,
             onAccountSettingsClick = onAccountSettingsClick,
             onUpdateClick = onUpdateClick
         )
@@ -183,16 +200,19 @@ fun AppUpgradeRequiredContent(
 
 @Composable
 fun AppUpgradeRequiredButtons(
+    showAccountSettingsButton: Boolean,
     onAccountSettingsClick: () -> Unit,
     onUpdateClick: () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        AppUpgradeTransparentTextButton(
-            text = stringResource(id = R.string.core_account_settings),
-            onNotNowClick = onAccountSettingsClick
-        )
+        if (showAccountSettingsButton) {
+            AppUpgradeTransparentTextButton(
+                text = stringResource(id = R.string.core_account_settings),
+                onNotNowClick = onAccountSettingsClick
+            )
+        }
         UpdateButton(
             onUpdateClick = onUpdateClick
         )
@@ -315,6 +335,7 @@ fun AppUpgradeRecommendedBox(
 private fun AppUpgradeRequiredScreenPreview() {
     OpenEdXTheme {
         AppUpgradeRequiredScreen(
+            showAccountSettingsButton = true,
             onAccountSettingsClick = {},
             onUpdateClick = {}
         )

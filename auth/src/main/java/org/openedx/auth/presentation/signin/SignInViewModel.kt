@@ -3,6 +3,7 @@ package org.openedx.auth.presentation.signin
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
@@ -10,11 +11,13 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
-import kotlinx.coroutines.launch
-import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.AppUpgradeEventUIState
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.R as CoreRes
 
 class SignInViewModel(
@@ -22,7 +25,8 @@ class SignInViewModel(
     private val resourceManager: ResourceManager,
     private val preferencesManager: CorePreferences,
     private val validator: Validator,
-    private val analytics: AuthAnalytics
+    private val analytics: AuthAnalytics,
+    private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
     private val _showProgress = MutableLiveData<Boolean>()
@@ -36,6 +40,14 @@ class SignInViewModel(
     private val _loginSuccess = SingleEventLiveData<Boolean>()
     val loginSuccess: LiveData<Boolean>
         get() = _loginSuccess
+
+    private val _appUpgradeEventUIState = SingleEventLiveData<AppUpgradeEventUIState>()
+    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
+        get() = _appUpgradeEventUIState
+
+    init {
+        collectAppUpgradeEvent()
+    }
 
     fun login(username: String, password: String) {
         if (!validator.isEmailValid(username)) {
@@ -69,6 +81,20 @@ class SignInViewModel(
                 }
             }
             _showProgress.value = false
+        }
+    }
+
+    private fun collectAppUpgradeEvent() {
+        viewModelScope.launch {
+            appUpgradeNotifier.notifier.collect { event ->
+                when (event) {
+                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
+                        _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRequiredScreen
+                    }
+
+                    else -> {}
+                }
+            }
         }
     }
 

@@ -36,6 +36,8 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
+import org.openedx.core.utils.AppUpdateState
 import org.openedx.auth.R as authR
 
 class RestorePasswordFragment : Fragment() {
@@ -54,17 +56,27 @@ class RestorePasswordFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(RestorePasswordUIState.Initial)
                 val uiMessage by viewModel.uiMessage.observeAsState()
-                RestorePasswordScreen(
-                    windowSize = windowSize,
-                    uiState = uiState,
-                    uiMessage = uiMessage,
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStackImmediate()
-                    },
-                    onRestoreButtonClick = {
-                        viewModel.passwordReset(it)
-                    }
-                )
+                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState(null)
+
+                if (appUpgradeEvent == null) {
+                    RestorePasswordScreen(
+                        windowSize = windowSize,
+                        uiState = uiState,
+                        uiMessage = uiMessage,
+                        onBackClick = {
+                            requireActivity().supportFragmentManager.popBackStackImmediate()
+                        },
+                        onRestoreButtonClick = {
+                            viewModel.passwordReset(it)
+                        }
+                    )
+                } else {
+                    AppUpgradeRequiredScreen(
+                        onUpdateClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        }
+                    )
+                }
             }
         }
     }
@@ -244,6 +256,7 @@ private fun RestorePasswordScreen(
                                 }
                             }
                         }
+
                         is RestorePasswordUIState.Success -> {
                             Column(
                                 Modifier

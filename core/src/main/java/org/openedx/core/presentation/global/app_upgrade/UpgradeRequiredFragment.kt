@@ -22,6 +22,7 @@ class UpgradeRequiredFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 AppUpgradeRequiredScreen(
+                    showAccountSettingsButton = true,
                     onAccountSettingsClick = {
                         setFragmentResult(REQUEST_KEY, bundleOf(OPEN_ACCOUNT_SETTINGS_KEY to ""))
                         parentFragmentManager.popBackStack()

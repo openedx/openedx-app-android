@@ -14,11 +14,15 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import kotlinx.coroutines.launch
+import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.AppUpgradeEventUIState
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 
 class RestorePasswordViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
-    private val analytics: AuthAnalytics
+    private val analytics: AuthAnalytics,
+    private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<RestorePasswordUIState>()
@@ -28,6 +32,14 @@ class RestorePasswordViewModel(
     private val _uiMessage = SingleEventLiveData<UIMessage>()
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
+
+    private val _appUpgradeEventUIState = SingleEventLiveData<AppUpgradeEventUIState>()
+    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
+        get() = _appUpgradeEventUIState
+
+    init {
+        collectAppUpgradeEvent()
+    }
 
     fun passwordReset(email: String) {
         _uiState.value = RestorePasswordUIState.Loading
@@ -64,4 +76,19 @@ class RestorePasswordViewModel(
             }
         }
     }
+
+    private fun collectAppUpgradeEvent() {
+        viewModelScope.launch {
+            appUpgradeNotifier.notifier.collect { event ->
+                when (event) {
+                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
+                        _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRequiredScreen
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+
 }

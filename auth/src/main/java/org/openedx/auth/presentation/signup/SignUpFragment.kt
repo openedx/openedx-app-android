@@ -34,6 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.ui.ExpandableText
 import org.openedx.auth.presentation.ui.OptionalFields
@@ -42,11 +45,10 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.*
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.utils.AppUpdateState
 
 class SignUpFragment : Fragment() {
 
@@ -73,25 +75,34 @@ class SignUpFragment : Fragment() {
                 val isButtonClicked by viewModel.isButtonLoading.observeAsState(false)
                 val successLogin by viewModel.successLogin.observeAsState()
                 val validationError by viewModel.validationError.observeAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState(null)
 
-                RegistrationScreen(
-                    windowSize = windowSize,
-                    uiState = uiState!!,
-                    uiMessage = uiMessage,
-                    isButtonClicked = isButtonClicked,
-                    validationError,
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStackImmediate()
-                    },
-                    onRegisterClick = { map ->
-                        viewModel.register(map.mapValues { it.value ?: "" })
-                    }
-                )
+                if (appUpgradeEvent == null) {
+                    RegistrationScreen(
+                        windowSize = windowSize,
+                        uiState = uiState!!,
+                        uiMessage = uiMessage,
+                        isButtonClicked = isButtonClicked,
+                        validationError,
+                        onBackClick = {
+                            requireActivity().supportFragmentManager.popBackStackImmediate()
+                        },
+                        onRegisterClick = { map ->
+                            viewModel.register(map.mapValues { it.value ?: "" })
+                        }
+                    )
 
-                LaunchedEffect(successLogin) {
-                    if (successLogin == true) {
-                        router.navigateToMain(parentFragmentManager)
+                    LaunchedEffect(successLogin) {
+                        if (successLogin == true) {
+                            router.navigateToMain(parentFragmentManager)
+                        }
                     }
+                } else {
+                    AppUpgradeRequiredScreen(
+                        onUpdateClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        }
+                    )
                 }
             }
         }
@@ -304,6 +315,7 @@ internal fun RegistrationScreen(
                                     CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
+
                             is SignUpUIState.Fields -> {
                                 mapFields.let {
                                     if (it.isEmpty()) {
