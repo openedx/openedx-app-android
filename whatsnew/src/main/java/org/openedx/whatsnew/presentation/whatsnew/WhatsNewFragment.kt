@@ -221,7 +221,7 @@ private fun WhatsNewScreenPortrait(
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 48.dp),
+                        .padding(horizontal = 36.dp, vertical = 48.dp),
                     painter = painterResource(id = image),
                     contentDescription = null
                 )
@@ -334,7 +334,7 @@ private fun WhatsNewScreenLandscape(
                             .alpha(alpha)
                             .fillMaxHeight()
                             .padding(vertical = 24.dp)
-                            .padding(start = 72.dp),
+                            .padding(start = 140.dp),
                         painter = painterResource(id = image),
                         contentDescription = null
                     )
@@ -343,7 +343,7 @@ private fun WhatsNewScreenLandscape(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(400.dp)
-                        .padding(end = 72.dp),
+                        .padding(end = 140.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Column(

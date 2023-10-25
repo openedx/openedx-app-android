@@ -170,7 +170,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
 
     override fun shouldShowWhatsNew(): Boolean {
         val dataVersion = whatsNewFileManager.getNewestData().version
-        return BuildConfig.VERSION_NAME == dataVersion && whatsNewPreferencesManager.lastWhatsNewVersion != dataVersion
+        return BuildConfig.VERSION_NAME == dataVersion
+                && whatsNewPreferencesManager.lastWhatsNewVersion != dataVersion
+                && org.openedx.core.BuildConfig.SHOW_WHATS_NEW
     }
 
     companion object {

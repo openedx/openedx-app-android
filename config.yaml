@@ -1,3 +1,4 @@
+#Set of environments
 environments:
   DEV:
     URLS:
@@ -38,5 +39,8 @@ environments:
       APPLICATION_ID: ""
       API_KEY: ""
       GCM_SENDER_ID: ""
+#Platform names
 platformName: "OpenEdX"
 platformFullName: "OpenEdX"
+#tokenType enum accepts JWT and BEARER only
+tokenType: "JWT"
