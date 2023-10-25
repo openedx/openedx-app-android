@@ -274,7 +274,7 @@ private fun WhatsNewScreenPortrait(
                     }
 
                     NavigationUnitsButtons(
-                        hasPrevPage = pagerState.canScrollBackward,
+                        hasPrevPage = pagerState.canScrollBackward && pagerState.currentPage != 0,
                         hasNextPage = pagerState.canScrollForward,
                         onPrevClick = remember {
                             {
@@ -379,7 +379,7 @@ private fun WhatsNewScreenLandscape(
                         }
 
                         NavigationUnitsButtons(
-                            hasPrevPage = pagerState.canScrollBackward,
+                            hasPrevPage = pagerState.canScrollBackward && pagerState.currentPage != 0,
                             hasNextPage = pagerState.canScrollForward,
                             onPrevClick = remember {
                                 {

@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -183,9 +182,7 @@ fun PrevButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            val rotate = prevButtonAnimationFactor * -90f + 90f
             Icon(
-                modifier = Modifier.rotate(rotate),
                 painter = painterResource(id = org.openedx.core.R.drawable.core_ic_back),
                 contentDescription = null,
                 tint = MaterialTheme.appColors.primary
