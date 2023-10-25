@@ -42,7 +42,7 @@ class DiscoveryViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _appUpgradeEventUIState = MutableLiveData<AppUpgradeEventUIState>()
+    private val _appUpgradeEventUIState = SingleEventLiveData<AppUpgradeEventUIState>()
     val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
         get() = _appUpgradeEventUIState
 

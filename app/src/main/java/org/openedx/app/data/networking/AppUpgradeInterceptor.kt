@@ -15,7 +15,7 @@ class AppUpgradeInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val response = chain.proceed(chain.request())
         val responseCode = response.code
-        val latestAppVersion = response.header(HEADER_APP_LATEST_VERSION)
+        val latestAppVersion = response.header(HEADER_APP_LATEST_VERSION) ?: ""
         val lastSupportedDateString = response.header(HEADER_APP_VERSION_LAST_SUPPORTED_DATE) ?: ""
         val lastSupportedDateTime = TimeUtils.iso8601WithTimeZoneToDate(lastSupportedDateString)?.time ?: 0L
         runBlocking {
@@ -25,7 +25,7 @@ class AppUpgradeInterceptor(
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime > Date().time -> {
-                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent)
+                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent(latestAppVersion))
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {

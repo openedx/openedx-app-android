@@ -50,7 +50,9 @@ private val DarkColorPalette = AppColors(
     bottomSheetToggle = Color(0xFF4E5A70),
 
     warning = Color(0xFFFFC248),
-    info = Color(0xFF0095FF)
+    info = Color(0xFF0095FF),
+
+    accessGreen = Color(0xFF23BCA0)
 )
 
 private val LightColorPalette = AppColors(
@@ -92,7 +94,9 @@ private val LightColorPalette = AppColors(
     bottomSheetToggle = Color(0xFF4E5A70),
 
     warning = Color(0xFFFFC94D),
-    info = Color(0xFF42AAFF)
+    info = Color(0xFF42AAFF),
+
+    accessGreen = Color(0xFF23BCA0)
 )
 
 val MaterialTheme.appColors: AppColors

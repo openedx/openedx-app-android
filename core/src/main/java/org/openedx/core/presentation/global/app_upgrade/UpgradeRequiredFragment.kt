@@ -5,14 +5,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
+import androidx.fragment.app.setFragmentResult
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.utils.AppUpdateState
 
 class UpgradeRequiredFragment : Fragment() {
-
-    private val router: AppUpgradeRouter by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -24,7 +23,8 @@ class UpgradeRequiredFragment : Fragment() {
             OpenEdXTheme {
                 AppUpgradeRequiredScreen(
                     onAccountSettingsClick = {
-                        router.navigateToUserProfile(parentFragmentManager)
+                        setFragmentResult(REQUEST_KEY, bundleOf(OPEN_ACCOUNT_SETTINGS_KEY to ""))
+                        parentFragmentManager.popBackStack()
                     },
                     onUpdateClick = {
                         AppUpdateState.openPlayMarket(requireContext())
@@ -32,5 +32,10 @@ class UpgradeRequiredFragment : Fragment() {
                 )
             }
         }
+    }
+
+    companion object {
+        const val REQUEST_KEY = "UpgradeRequiredFragmentRequestKey"
+        const val OPEN_ACCOUNT_SETTINGS_KEY = "openAccountSettings"
     }
 }

@@ -33,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
-import org.openedx.core.ui.IconText
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -167,15 +166,13 @@ fun AppUpgradeRequiredContent(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.appTypography.bodyMedium
             )
-            IconText(
-                text = stringResource(R.string.core_why_do_you_need_update),
-                painter = painterResource(id = R.drawable.core_ic_question),
-                textStyle = MaterialTheme.appTypography.labelLarge,
-                color = MaterialTheme.appColors.primary,
-                onClick = {
-                    //TODO
-                }
-            )
+//            IconText(
+//                text = stringResource(R.string.core_why_do_you_need_update),
+//                painter = painterResource(id = R.drawable.core_ic_question),
+//                textStyle = MaterialTheme.appTypography.labelLarge,
+//                color = MaterialTheme.appColors.primary,
+//                onClick = {}
+//            )
         }
         AppUpgradeRequiredButtons(
             onAccountSettingsClick = onAccountSettingsClick,

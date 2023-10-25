@@ -69,7 +69,7 @@ val screenModule = module {
 
     factory { ProfileRepository(get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
-    viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get()) }
+    viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get(), get()) }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get()) }
     viewModel { VideoQualityViewModel(get(), get()) }

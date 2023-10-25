@@ -73,10 +73,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     override fun navigateToUpgradeRequired(fm: FragmentManager) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, UpgradeRequiredFragment())
-            .commit()
+        replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
     }
     //endregion
 

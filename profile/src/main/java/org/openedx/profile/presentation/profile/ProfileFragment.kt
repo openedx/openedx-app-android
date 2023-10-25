@@ -42,11 +42,13 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.AppDataHolder
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.AppUpdateState
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
@@ -77,6 +79,7 @@ class ProfileFragment : Fragment() {
                 val logoutSuccess by viewModel.successLogout.observeAsState(false)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.isUpdating.observeAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 ProfileScreen(
                     windowSize = windowSize,
@@ -84,6 +87,7 @@ class ProfileFragment : Fragment() {
                     uiMessage = uiMessage,
                     appData = (requireActivity() as AppDataHolder).appData,
                     refreshing = refreshing,
+                    appUpgradeEvent = appUpgradeEvent,
                     logout = {
                         viewModel.logout()
                     },
@@ -109,6 +113,9 @@ class ProfileFragment : Fragment() {
                             SupportClickAction.COOKIE_POLICY -> viewModel.cookiePolicyClickedEvent()
                             SupportClickAction.PRIVACY_POLICY -> viewModel.privacyPolicyClickedEvent()
                         }
+                    },
+                    onAppVersionClick = {
+                        AppUpdateState.openPlayMarket(requireContext())
                     }
                 )
 
@@ -135,11 +142,13 @@ private fun ProfileScreen(
     appData: AppData,
     uiMessage: UIMessage?,
     refreshing: Boolean,
+    appUpgradeEvent: AppUpgradeEvent?,
     onVideoSettingsClick: () -> Unit,
     logout: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onSupportClick: (SupportClickAction) -> Unit,
-    editAccountClicked: (Account) -> Unit
+    editAccountClicked: (Account) -> Unit,
+    onAppVersionClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
@@ -267,7 +276,12 @@ private fun ProfileScreen(
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
-                                    SupportInfoSection(appData, onClick = onSupportClick)
+                                    SupportInfoSection(
+                                        appData = appData,
+                                        onClick = onSupportClick,
+                                        appUpgradeEvent = appUpgradeEvent,
+                                        onAppVersionClick = onAppVersionClick
+                                    )
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -324,6 +338,8 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 @Composable
 private fun SupportInfoSection(
     appData: AppData,
+    appUpgradeEvent: AppUpgradeEvent?,
+    onAppVersionClick: () -> Unit,
     onClick: (SupportClickAction) -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -373,6 +389,12 @@ private fun SupportInfoSection(
                         onClick(SupportClickAction.PRIVACY_POLICY)
                         uriHandler.openUri(context.getString(R.string.privacy_policy_link))
                     }
+                )
+                Divider(color = MaterialTheme.appColors.divider)
+                AppVersionItem(
+                    appData = appData,
+                    appUpgradeEvent = appUpgradeEvent,
+                    onClick = onAppVersionClick
                 )
             }
         }
@@ -517,6 +539,186 @@ private fun ProfileInfoItem(text: String, onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun AppVersionItem(
+    appData: AppData,
+    appUpgradeEvent: AppUpgradeEvent?,
+    onClick: () -> Unit
+) {
+    when (appUpgradeEvent) {
+        is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+            AppVersionItemUpgradeRecommended(
+                versionName = appData.versionName,
+                appUpgradeEvent = appUpgradeEvent,
+                onClick = onClick
+            )
+        }
+
+        is AppUpgradeEvent.UpgradeRequiredEvent -> {
+            AppVersionItemUpgradeRequired(
+                versionName = appData.versionName,
+                onClick = onClick
+            )
+        }
+
+        else -> {
+            AppVersionItemAppToDate(
+                versionName = appData.versionName
+            )
+        }
+    }
+}
+
+@Composable
+private fun AppVersionItemAppToDate(versionName: String) {
+    Column(
+        Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = stringResource(id = R.string.core_version, versionName),
+            style = MaterialTheme.appTypography.titleMedium,
+            color = MaterialTheme.appColors.textPrimary
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                modifier = Modifier.size((MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp),
+                painter = painterResource(id = R.drawable.core_ic_check),
+                contentDescription = null,
+                tint = MaterialTheme.appColors.accessGreen
+            )
+            Text(
+                text = stringResource(id = R.string.core_up_to_date),
+                color = MaterialTheme.appColors.textSecondary,
+                style = MaterialTheme.appTypography.labelLarge
+            )
+        }
+    }
+}
+
+@Composable
+fun AppVersionItemUpgradeRecommended(
+    versionName: String,
+    appUpgradeEvent: AppUpgradeEvent.UpgradeRecommendedEvent,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.core_version, versionName),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textPrimary
+            )
+            Text(
+                text = stringResource(id = R.string.core_tap_to_update_to_version, appUpgradeEvent.newVersionName),
+                color = MaterialTheme.appColors.textAccent,
+                style = MaterialTheme.appTypography.labelLarge
+            )
+        }
+        Image(
+            modifier = Modifier.size(28.dp),
+            painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+fun AppVersionItemUpgradeRequired(
+    versionName: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size((MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
+                    painter = painterResource(id = R.drawable.core_ic_warning),
+                    contentDescription = null
+                )
+                Text(
+                    text = stringResource(id = R.string.core_version, versionName),
+                    style = MaterialTheme.appTypography.titleMedium,
+                    color = MaterialTheme.appColors.textPrimary
+                )
+            }
+            Text(
+                text = stringResource(id = R.string.core_tap_to_install_required_app_update),
+                color = MaterialTheme.appColors.textAccent,
+                style = MaterialTheme.appTypography.labelLarge
+            )
+        }
+        Image(
+            modifier = Modifier.size(28.dp),
+            painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
+            contentDescription = null
+        )
+    }
+}
+
+@Preview
+@Composable
+fun AppVersionItemAppToDatePreview() {
+    OpenEdXTheme {
+        AppVersionItem(
+            appData = AppData("1.0.0"),
+            appUpgradeEvent = null,
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun AppVersionItemUpgradeRecommendedPreview() {
+    OpenEdXTheme {
+        AppVersionItem(
+            appData = AppData("1.0.0"),
+            appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun AppVersionItemUpgradeRequiredPreview() {
+    OpenEdXTheme {
+        AppVersionItem(
+            appData = AppData("1.0.0"),
+            appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
+            onClick = {}
+        )
+    }
+}
+
 @Preview
 @Composable
 fun LogoutDialogPreview() {
@@ -540,7 +742,9 @@ private fun ProfileScreenPreview() {
             editAccountClicked = {},
             onVideoSettingsClick = {},
             onSupportClick = {},
-            appData = AppData("1")
+            appData = AppData("1"),
+            appUpgradeEvent = null,
+            onAppVersionClick = {}
         )
     }
 }
@@ -561,7 +765,9 @@ private fun ProfileScreenTabletPreview() {
             editAccountClicked = {},
             onVideoSettingsClick = {},
             onSupportClick = {},
-            appData = AppData("1")
+            appData = AppData("1"),
+            appUpgradeEvent = null,
+            onAppVersionClick = {}
         )
     }
 }

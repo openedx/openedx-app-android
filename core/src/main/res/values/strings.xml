@@ -50,6 +50,10 @@
     <string name="core_app_update_required_title">App Update Required</string>
     <string name="core_app_update_required_description">This version of the OpenEdX app is out-of-date. To continue learning and get the latest features and fixes, please upgrade to the latest version.</string>
     <string name="core_why_do_you_need_update">Why do I need to update?</string>
+    <string name="core_version">Version: %1$s</string>
+    <string name="core_up_to_date">Up-to-date</string>
+    <string name="core_tap_to_update_to_version">Tap to update to version %1$s</string>
+    <string name="core_tap_to_install_required_app_update">Tap to install required app update</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>

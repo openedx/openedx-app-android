@@ -14,6 +14,8 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.system.notifier.AccountDeactivated
@@ -27,7 +29,8 @@ class ProfileViewModel(
     private val dispatcher: CoroutineDispatcher,
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
-    private val analytics: ProfileAnalytics
+    private val analytics: ProfileAnalytics,
+    private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<ProfileUIState>(ProfileUIState.Loading)
@@ -46,8 +49,13 @@ class ProfileViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent?>()
+    val appUpgradeEvent: LiveData<AppUpgradeEvent?>
+        get() = _appUpgradeEvent
+
     init {
         getAccount()
+        collectAppUpgradeEvent()
     }
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -112,6 +120,14 @@ class ProfileViewModel(
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
+            }
+        }
+    }
+
+    private fun collectAppUpgradeEvent() {
+        viewModelScope.launch {
+            appUpgradeNotifier.notifier.collect { event ->
+                _appUpgradeEvent.value = event
             }
         }
     }
