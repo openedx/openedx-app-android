@@ -8,14 +8,14 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeEventUIState
+import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.utils.AppUpdateState
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 
 class DiscoveryViewModel(
@@ -23,8 +23,7 @@ class DiscoveryViewModel(
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
-    private val preferencesManager: CorePreferences
+    private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
@@ -152,12 +151,11 @@ class DiscoveryViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            var shouldShowDialog = true
             appUpgradeNotifier.notifier.collect { event ->
                 when (event) {
                     is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                        if (!preferencesManager.wasUpdateDialogDisplayed && shouldShowDialog) {
-                            shouldShowDialog = false
+                        if (!AppUpdateState.wasUpdateDialogDisplayed) {
+                            AppUpdateState.wasUpdateDialogDisplayed = true
                             _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedDialog
                         } else {
                             _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedBox

@@ -1,10 +1,7 @@
 package org.openedx.dashboard.presentation
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -53,6 +50,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.AppUpdateState
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.*
@@ -108,21 +106,7 @@ class DashboardFragment : Fragment() {
                     },
                     appUpgradeEvent = appUpgradeEvent,
                     onAppUpgradeRecommendedBoxClick = {
-                        try {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("market://details?id=${requireContext().packageName}")
-                                )
-                            )
-                        } catch (e: ActivityNotFoundException) {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("https://play.google.com/store/apps/details?id=${requireContext().packageName}")
-                                )
-                            )
-                        }
+                        AppUpdateState.openPlayMarket(requireContext())
                     },
                 )
             }
@@ -332,6 +316,7 @@ internal fun MyCoursesScreen(
                                     onClick = onAppUpgradeRecommendedBoxClick
                                 )
                             }
+
                             else -> {}
                         }
 

@@ -1,9 +1,6 @@
 package org.openedx.discovery.presentation
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -40,6 +37,7 @@ import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.AppUpdateState
 import org.openedx.discovery.R
 
 class DiscoveryFragment : Fragment() {
@@ -79,21 +77,7 @@ class DiscoveryFragment : Fragment() {
                         )
                     },
                     onAppUpgradeRecommendedBoxClick = {
-                        try {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("market://details?id=${requireContext().packageName}")
-                                )
-                            )
-                        } catch (e: ActivityNotFoundException) {
-                            startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("https://play.google.com/store/apps/details?id=${requireContext().packageName}")
-                                )
-                            )
-                        }
+                        AppUpdateState.openPlayMarket(requireContext())
                     },
                     onAppUpgradeRequired = {
                         router.navigateToUpgradeRequired(

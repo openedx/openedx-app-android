@@ -65,7 +65,7 @@ val screenModule = module {
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
