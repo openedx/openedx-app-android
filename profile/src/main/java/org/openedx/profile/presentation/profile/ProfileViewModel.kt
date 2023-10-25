@@ -109,9 +109,6 @@ class ProfileViewModel(
                 withContext(dispatcher) {
                     interactor.logout()
                 }
-                cookieManager.clearWebViewCookie()
-                analytics.logoutEvent(false)
-                _successLogout.value = true
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -120,6 +117,10 @@ class ProfileViewModel(
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
+            } finally {
+                cookieManager.clearWebViewCookie()
+                analytics.logoutEvent(false)
+                _successLogout.value = true
             }
         }
     }
