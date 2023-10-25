@@ -2,7 +2,7 @@ package org.openedx.core.presentation.global
 
 interface AppDataHolder {
     val appData: AppData
-    fun checkWhatsNew(): Boolean
+    fun shouldShowWhatsNew(): Boolean
 }
 
 data class AppData(

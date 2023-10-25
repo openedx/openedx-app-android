@@ -8,8 +8,9 @@ import org.openedx.profile.data.model.Account
 import org.openedx.core.data.model.User
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.profile.data.storage.ProfilePreferences
+import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences {
+class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences, WhatsNewPreferences {
 
     private val sharedPreferences = context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
 

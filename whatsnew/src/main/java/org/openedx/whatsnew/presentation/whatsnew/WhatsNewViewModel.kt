@@ -17,6 +17,7 @@ class WhatsNewViewModel(
     init {
         getNewestData()
     }
+
     private fun getNewestData() {
         _whatsNewItem.value = whatsNewFileManager.getNewestData()
     }

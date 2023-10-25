@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -262,41 +263,49 @@ fun NextFinishButton(
 
 @Preview
 @Composable
-fun NavigationUnitsButtonsPrevInTheMiddle() {
-    NavigationUnitsButtons(
-        hasPrevPage = true,
-        hasNextPage = true,
-        onPrevClick = {},
-        onNextClick = {}
-    )
+private fun NavigationUnitsButtonsPrevInTheMiddle() {
+    OpenEdXTheme {
+        NavigationUnitsButtons(
+            hasPrevPage = true,
+            hasNextPage = true,
+            onPrevClick = {},
+            onNextClick = {}
+        )
+    }
 }
 
 @Preview
 @Composable
-fun NavigationUnitsButtonsPrevInTheStart() {
-    NavigationUnitsButtons(
-        hasPrevPage = false,
-        hasNextPage = true,
-        onPrevClick = {},
-        onNextClick = {}
-    )
+private fun NavigationUnitsButtonsPrevInTheStart() {
+    OpenEdXTheme {
+        NavigationUnitsButtons(
+            hasPrevPage = false,
+            hasNextPage = true,
+            onPrevClick = {},
+            onNextClick = {}
+        )
+    }
 }
 
 @Preview
 @Composable
-fun NavigationUnitsButtonsPrevInTheEnd() {
-    NavigationUnitsButtons(
-        hasPrevPage = true,
-        hasNextPage = false,
-        onPrevClick = {},
-        onNextClick = {}
-    )
+private fun NavigationUnitsButtonsPrevInTheEnd() {
+    OpenEdXTheme {
+        NavigationUnitsButtons(
+            hasPrevPage = true,
+            hasNextPage = false,
+            onPrevClick = {},
+            onNextClick = {}
+        )
+    }
 }
 
 @Preview
 @Composable
-fun PageIndicatorViewPreview() {
-    PageIndicator(
-        numberOfPages = 4, selectedPage = 2
-    )
+private fun PageIndicatorViewPreview() {
+    OpenEdXTheme {
+        PageIndicator(
+            numberOfPages = 4, selectedPage = 2
+        )
+    }
 }

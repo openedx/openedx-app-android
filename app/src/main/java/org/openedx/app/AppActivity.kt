@@ -25,6 +25,7 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewFileManager
+import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataHolder {
@@ -45,7 +46,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
     private lateinit var binding: ActivityAppBinding
     private val viewModel by viewModel<AppViewModel>()
     private val whatsNewFileManager by inject<WhatsNewFileManager>()
-    private val preferencesManager by inject<CorePreferences>()
+    private val whatsNewPreferencesManager by inject<WhatsNewPreferences>()
+    private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
 
     private var _insetTop = 0
@@ -114,17 +116,17 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
 
         if (savedInstanceState == null) {
             when {
-                preferencesManager.user == null -> {
+                corePreferencesManager.user == null -> {
                     supportFragmentManager.beginTransaction()
                         .add(R.id.container, SignInFragment())
                         .commit()
                 }
-                checkWhatsNew() -> {
+                shouldShowWhatsNew() -> {
                     supportFragmentManager.beginTransaction()
                         .add(R.id.container, WhatsNewFragment())
                         .commit()
                 }
-                preferencesManager.user != null -> {
+                corePreferencesManager.user != null -> {
                     supportFragmentManager.beginTransaction()
                         .add(R.id.container, MainFragment())
                         .commit()
@@ -166,9 +168,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         }
     }
 
-    override fun checkWhatsNew(): Boolean {
+    override fun shouldShowWhatsNew(): Boolean {
         val dataVersion = whatsNewFileManager.getNewestData().version
-        return BuildConfig.VERSION_NAME == dataVersion && preferencesManager.lastWhatsNewVersion != dataVersion
+        return BuildConfig.VERSION_NAME == dataVersion && whatsNewPreferencesManager.lastWhatsNewVersion != dataVersion
     }
 
     companion object {

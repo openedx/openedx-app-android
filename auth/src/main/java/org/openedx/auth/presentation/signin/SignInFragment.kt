@@ -83,7 +83,7 @@ class SignInFragment : Fragment() {
                 )
 
                 LaunchedEffect(loginSuccess) {
-                    val isNeedToShowWhatsNew = (requireActivity() as AppDataHolder).checkWhatsNew()
+                    val isNeedToShowWhatsNew = (requireActivity() as AppDataHolder).shouldShowWhatsNew()
                     if (loginSuccess) {
                         if (isNeedToShowWhatsNew) {
                             router.navigateToWhatsNew(parentFragmentManager)
