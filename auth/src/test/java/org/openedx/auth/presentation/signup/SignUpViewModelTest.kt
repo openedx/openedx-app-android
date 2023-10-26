@@ -18,6 +18,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -30,6 +31,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import java.net.UnknownHostException
 
 
@@ -44,6 +46,7 @@ class SignUpViewModelTest {
     private val preferencesManager = mockk<CorePreferences>()
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
+    private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
 
     //region parameters
 
@@ -91,7 +94,7 @@ class SignUpViewModelTest {
         every { resourceManager.getString(R.string.core_error_invalid_grant) } returns "Invalid credentials"
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-
+        every { appUpgradeNotifier.notifier } returns emptyFlow()
     }
 
     @After
@@ -101,7 +104,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `register has validation errors`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             parametersMap
         )
@@ -117,6 +120,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         assertEquals(true, viewModel.validationError.value)
         assert(viewModel.successLogin.value != true)
@@ -126,7 +130,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `register no internet error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws UnknownHostException()
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
@@ -145,6 +149,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -156,7 +161,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `something went wrong error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws Exception()
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
@@ -170,6 +175,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -182,7 +188,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `success register`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             emptyMap()
         )
@@ -205,6 +211,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
         verify(exactly = 1) { analytics.registrationSuccessEvent(any()) }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         assertEquals(false, viewModel.validationError.value)
         assertEquals(false, viewModel.isButtonLoading.value)
@@ -214,11 +221,12 @@ class SignUpViewModelTest {
 
     @Test
     fun `getRegistrationFields no internet error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.getRegistrationFields() } throws UnknownHostException()
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -228,11 +236,12 @@ class SignUpViewModelTest {
 
     @Test
     fun `getRegistrationFields unknown error`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.getRegistrationFields() } throws Exception()
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
 
@@ -242,11 +251,12 @@ class SignUpViewModelTest {
 
     @Test
     fun `getRegistrationFields success`() = runTest {
-        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager)
+        val viewModel = SignUpViewModel(interactor, resourceManager, analytics, preferencesManager, appUpgradeNotifier)
         coEvery { interactor.getRegistrationFields() } returns listOfFields
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         //val fields = viewModel.uiState.value as? SignUpUIState.Fields
 
