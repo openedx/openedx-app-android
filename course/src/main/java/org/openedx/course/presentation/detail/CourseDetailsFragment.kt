@@ -349,7 +349,7 @@ private fun CourseDetailNativeContent(
                     Icon(
                         modifier = Modifier.size(40.dp),
                         painter = painterResource(courseR.drawable.course_ic_play),
-                        contentDescription = stringResource(id = R.string.course_play_video),
+                        contentDescription = stringResource(id = R.string.course_accessibility_play_video),
                         tint = Color.LightGray
                     )
                 }

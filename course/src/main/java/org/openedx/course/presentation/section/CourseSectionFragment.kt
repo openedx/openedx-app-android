@@ -296,9 +296,9 @@ private fun CourseSubsectionItem(
     val completedIconColor =
         if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
     val completedIconDescription = if (block.completion == 1.0) {
-        stringResource(id = R.string.course_section_completed)
+        stringResource(id = R.string.course_accessibility_section_completed)
     } else {
-        stringResource(id = R.string.course_section_uncompleted)
+        stringResource(id = R.string.course_accessibility_section_uncompleted)
     }
 
     val iconModifier = Modifier.size(24.dp)
@@ -342,9 +342,9 @@ private fun CourseSubsectionItem(
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
                     val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_remove_course_section)
+                        stringResource(id = R.string.course_accessibility_remove_course_section)
                     } else {
-                        stringResource(id = R.string.course_download_course_section)
+                        stringResource(id = R.string.course_accessibility_download_course_section)
                     }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
@@ -369,7 +369,7 @@ private fun CourseSubsectionItem(
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_stop_downloading_course_section),
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }

@@ -49,12 +49,12 @@
     <string name="course_to_proceed">Щоб перейти до \"%s\", натисніть \"Наступний розділ\".</string>
 
     <!-- Accessibility -->
-    <string name="course_header_image_for">Заглавне зображення для курсу %1$s</string>
-    <string name="course_play_video">Відтворити відео</string>
-    <string name="course_video_player">Відеоплеєр</string>
-    <string name="course_remove_course_section">Видалити секцію курсу</string>
-    <string name="course_download_course_section">Завантажити секцію курсу</string>
-    <string name="course_stop_downloading_course_section">Зупинити завантаження секції курсу</string>
-    <string name="course_section_completed">Секція завершена</string>
-    <string name="course_section_uncompleted">Секція не завершена</string>
+    <string name="course_accessibility_header_image_for">Заглавне зображення для курсу %1$s</string>
+    <string name="course_accessibility_play_video">Відтворити відео</string>
+    <string name="course_accessibility_video_player">Відеоплеєр</string>
+    <string name="course_accessibility_remove_course_section">Видалити секцію курсу</string>
+    <string name="course_accessibility_download_course_section">Завантажити секцію курсу</string>
+    <string name="course_accessibility_stop_downloading_course_section">Зупинити завантаження секції курсу</string>
+    <string name="course_accessibility_section_completed">Секція завершена</string>
+    <string name="course_accessibility_section_uncompleted">Секція не завершена</string>
 </resources>

@@ -122,7 +122,7 @@ fun CourseImageHeader(
                 .error(org.openedx.core.R.drawable.core_no_image_course)
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
-            contentDescription = stringResource(id = R.string.course_header_image_for, courseName),
+            contentDescription = stringResource(id = R.string.course_accessibility_header_image_for, courseName),
             contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
@@ -196,9 +196,9 @@ fun CourseSectionCard(
             val completedIconColor =
                 if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
             val completedIconDescription = if (block.completion == 1.0) {
-                stringResource(id = R.string.course_section_completed)
+                stringResource(id = R.string.course_accessibility_section_completed)
             } else {
-                stringResource(id = R.string.course_section_uncompleted)
+                stringResource(id = R.string.course_accessibility_section_uncompleted)
             }
             Icon(
                 painter = completedIconPainter,
@@ -227,9 +227,9 @@ fun CourseSectionCard(
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
                     val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_remove_course_section)
+                        stringResource(id = R.string.course_accessibility_remove_course_section)
                     } else {
-                        stringResource(id = R.string.course_download_course_section)
+                        stringResource(id = R.string.course_accessibility_download_course_section)
                     }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
@@ -254,7 +254,7 @@ fun CourseSectionCard(
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_stop_downloading_course_section),
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }

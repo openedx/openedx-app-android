@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:contentDescription="@string/course_video_player"
+            android:contentDescription="@string/course_accessibility_video_player"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
             app:layout_constraintDimensionRatio="W,9:16"

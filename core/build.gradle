@@ -29,6 +29,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${config.tokenType}\""
     }
 
     namespace 'org.openedx.core'
