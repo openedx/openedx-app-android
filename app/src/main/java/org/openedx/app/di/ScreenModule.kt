@@ -19,7 +19,6 @@ import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
-import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
@@ -47,6 +46,8 @@ import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.video.VideoQualityViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
+import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
+import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 
 val screenModule = module {
 
@@ -86,6 +87,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
+    viewModel { (courseId: String, blockId: String) -> EncodedVideoUnitViewModel(courseId, blockId, get(), get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }

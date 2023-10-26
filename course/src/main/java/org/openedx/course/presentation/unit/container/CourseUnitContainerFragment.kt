@@ -3,8 +3,10 @@ package org.openedx.course.presentation.unit.container
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.statusBarsPadding
+import android.view.ViewGroup
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -16,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.gms.cast.framework.CastButtonFactory
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -25,7 +29,6 @@ import org.openedx.core.BlockType
 import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
-import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -41,7 +44,9 @@ import org.openedx.course.presentation.ui.VideoTitle
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
 
-    private val binding by viewBinding(FragmentCourseUnitContainerBinding::bind)
+    private val binding: FragmentCourseUnitContainerBinding
+        get() = _binding!!
+    private var _binding: FragmentCourseUnitContainerBinding? = null
 
     private val viewModel by viewModel<CourseUnitContainerViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
@@ -55,12 +60,34 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private var lastClickTime = 0L
 
+    private val onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
+        override fun onPageSelected(position: Int) {
+            super.onPageSelected(position)
+            val blocks = viewModel.getUnitBlocks()
+            blocks.getOrNull(position)?.let { currentBlock ->
+                val encodedVideo = currentBlock.studentViewData?.encodedVideos
+                binding.mediaRouteButton.isVisible = currentBlock.type == BlockType.VIDEO
+                        && encodedVideo?.hasNonYoutubeVideo == true
+                        && !encodedVideo.videoUrl.endsWith(".m3u8")
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
         viewModel.setupCurrentIndex(blockId)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        _binding = FragmentCourseUnitContainerBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,6 +103,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             countParams.rightMargin = insetHolder.cutoutInset
             binding.cvCount.layoutParams = countParams
         }
+
+        binding.mediaRouteButton.setAlwaysVisible(true)
+        CastButtonFactory.setUpMediaRouteButton(requireContext(), binding.mediaRouteButton)
 
         initViewPager()
         if (savedInstanceState == null) {
@@ -166,7 +196,12 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 }
             }
         }
+    }
 
+    override fun onDestroyView() {
+        binding.viewPager.unregisterOnPageChangeCallback(onPageChangeCallback)
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun updateNavigationButtons(updatedData: (String, Boolean, Boolean) -> Unit) {
@@ -193,9 +228,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
         binding.viewPager.offscreenPageLimit = 1
-        adapter = CourseUnitContainerAdapter(this, viewModel, viewModel.getUnitBlocks())
+        adapter = CourseUnitContainerAdapter(this, viewModel.getUnitBlocks(), viewModel)
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
+        binding.viewPager.registerOnPageChangeCallback(onPageChangeCallback)
     }
 
     private fun handlePrevClick(buttonChanged: (String, Boolean, Boolean) -> Unit) {

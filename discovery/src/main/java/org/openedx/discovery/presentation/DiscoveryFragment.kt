@@ -311,7 +311,10 @@ internal fun DiscoveryScreen(
                             }
 
                             is AppUpgradeEventUIState.UpgradeRequiredScreen -> {
-                                onAppUpgradeRequired()
+                                if (!AppUpdateState.wasUpdateDialogDisplayed) {
+                                    AppUpdateState.wasUpdateDialogDisplayed = true
+                                    onAppUpgradeRequired()
+                                }
                             }
 
                             else -> {}

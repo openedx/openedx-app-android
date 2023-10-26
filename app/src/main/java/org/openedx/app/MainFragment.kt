@@ -20,13 +20,19 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val analytics by inject<AppAnalytics>()
 
     private lateinit var adapter: MainNavigationFragmentAdapter
+    private var isBottomBarEnabled = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(UpgradeRequiredFragment.REQUEST_KEY) { _, _ ->
             binding.bottomNavView.selectedItemId = R.id.fragmentProfile
-            enableBottomBar(false)
+            isBottomBarEnabled = false
         }
+    }
+
+    override fun onResume() {
+        enableBottomBar(isBottomBarEnabled)
+        super.onResume()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

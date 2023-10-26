@@ -28,7 +28,7 @@ class AppUpgradeInterceptor(
                     appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent(latestAppVersion))
                 }
 
-                BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {
+                latestAppVersion.isNotEmpty() && BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {
                     appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
             }

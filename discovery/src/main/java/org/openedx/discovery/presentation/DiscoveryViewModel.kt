@@ -3,6 +3,7 @@ package org.openedx.discovery.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
@@ -42,7 +43,7 @@ class DiscoveryViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _appUpgradeEventUIState = SingleEventLiveData<AppUpgradeEventUIState>()
+    private val _appUpgradeEventUIState = MutableLiveData<AppUpgradeEventUIState>()
     val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
         get() = _appUpgradeEventUIState
 
@@ -152,6 +153,7 @@ class DiscoveryViewModel(
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
             appUpgradeNotifier.notifier.collect { event ->
+                delay(500L)
                 when (event) {
                     is AppUpgradeEvent.UpgradeRecommendedEvent -> {
                         if (!AppUpdateState.wasUpdateDialogDisplayed) {
