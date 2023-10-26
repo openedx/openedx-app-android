@@ -17,7 +17,6 @@ import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.discovery.presentation.search.CourseSearchViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
-import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
@@ -46,6 +45,8 @@ import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
+import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
@@ -87,6 +88,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
+    viewModel { (courseId: String, blockId: String) -> EncodedVideoUnitViewModel(courseId, blockId, get(), get(), get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }

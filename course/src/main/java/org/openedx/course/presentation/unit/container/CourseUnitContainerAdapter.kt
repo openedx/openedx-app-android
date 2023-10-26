@@ -14,8 +14,8 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
 
 class CourseUnitContainerAdapter(
     fragment: Fragment,
+    val blocks: List<Block>,
     private val viewModel: CourseUnitContainerViewModel,
-    private var blocks: List<Block>
 ) : FragmentStateAdapter(fragment) {
 
     override fun getItemCount(): Int = blocks.size
