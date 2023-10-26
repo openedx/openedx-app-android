@@ -50,7 +50,11 @@ private val DarkColorPalette = AppColors(
     bottomSheetToggle = Color(0xFF4E5A70),
 
     warning = Color(0xFFFFC248),
-    info = Color(0xFF0095FF)
+    info = Color(0xFF0095FF),
+
+    rateStars = Color(0xFFFFC94D),
+    inactiveButtonBackground = Color(0xFFCCD4E0),
+    inactiveButtonText = Color(0xFF3D4964)
 )
 
 private val LightColorPalette = AppColors(
@@ -92,7 +96,11 @@ private val LightColorPalette = AppColors(
     bottomSheetToggle = Color(0xFF4E5A70),
 
     warning = Color(0xFFFFC94D),
-    info = Color(0xFF42AAFF)
+    info = Color(0xFF42AAFF),
+
+    rateStars = Color(0xFFFFC94D),
+    inactiveButtonBackground = Color(0xFFCCD4E0),
+    inactiveButtonText = Color(0xFF3D4964)
 )
 
 val MaterialTheme.appColors: AppColors

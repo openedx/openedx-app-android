@@ -29,7 +29,11 @@ data class AppColors(
     val certificateForeground: Color,
     val bottomSheetToggle: Color,
     val warning: Color,
-    val info: Color
+    val info: Color,
+
+    val rateStars: Color,
+    val inactiveButtonBackground: Color,
+    val inactiveButtonText: Color
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant

@@ -40,6 +40,31 @@
     <string name="core_email_subject">Customer Feedback</string>
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
+    <string name="core_app_upgrade_title">App Update</string>
+    <string name="core_app_upgrade_dialog_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>
+    <string name="core_app_upgrade_box_description">New update available! Upgrade now to receive the latest features and fixes</string>
+    <string name="core_not_now">Not Now</string>
+    <string name="core_update">Update</string>
+    <string name="core_deprecated_app_version">Deprecated App Version</string>
+    <string name="core_account_settings">Account Settings</string>
+    <string name="core_app_update_required_title">App Update Required</string>
+    <string name="core_app_update_required_description">This version of the OpenEdX app is out-of-date. To continue learning and get the latest features and fixes, please upgrade to the latest version.</string>
+    <string name="core_why_do_you_need_update">Why do I need to update?</string>
+    <string name="core_version">Version: %1$s</string>
+    <string name="core_up_to_date">Up-to-date</string>
+    <string name="core_tap_to_update_to_version">Tap to update to version %1$s</string>
+    <string name="core_tap_to_install_required_app_update">Tap to install required app update</string>
+    <string name="core_submit">Submit</string>
+    <string name="core_rate_dialog_title">Enjoying %1$s?</string>
+    <string name="core_rate_dialog_description">Your feedback matters to us. Would you take a moment to rate the app by tapping a star below? Thanks for your support!</string>
+    <string name="core_feedback_dialog_title">Leave Us Feedback</string>
+    <string name="core_feedback_dialog_description">We’re sorry to hear your learning experience has had some issues. We appreciate all feedback.</string>
+    <string name="core_feedback_dialog_textfield_hint">What could have been better?</string>
+    <string name="core_share_feedback">Share Feedback</string>
+    <string name="core_thank_you">Thank You</string>
+    <string name="core_rate_us">Rate Us</string>
+    <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
+    <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
