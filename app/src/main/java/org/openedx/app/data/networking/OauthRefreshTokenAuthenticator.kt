@@ -2,17 +2,19 @@ package org.openedx.app.data.networking
 
 import android.util.Log
 import com.google.gson.Gson
-import org.openedx.auth.data.api.AuthApi
-import org.openedx.auth.data.model.AuthResponse
-import org.openedx.core.ApiConstants
-import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.system.notifier.LogoutEvent
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
+import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.app.system.notifier.LogoutEvent
+import org.openedx.auth.data.api.AuthApi
+import org.openedx.auth.data.model.AuthResponse
+import org.openedx.core.ApiConstants
+import org.openedx.core.ApiConstants.TOKEN_TYPE_JWT
 import org.openedx.core.BuildConfig
+import org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
 import org.openedx.core.data.storage.CorePreferences
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -53,14 +55,14 @@ class OauthRefreshTokenAuthenticator(
         val errorCode = getErrorCode(response.peekBody(200).string())
         if (errorCode != null) {
             when (errorCode) {
-                TOKEN_EXPIRED_ERROR_MESSAGE -> {
+                TOKEN_EXPIRED_ERROR_MESSAGE, JWT_TOKEN_EXPIRED -> {
                     try {
                         val newAuth = refreshAccessToken(refreshToken)
                         if (newAuth != null) {
                             return response.request.newBuilder()
                                 .header(
-                                    "Authorization",
-                                    ApiConstants.TOKEN_TYPE_BEARER + " " + newAuth.accessToken
+                                    HEADER_AUTHORIZATION,
+                                    ACCESS_TOKEN_TYPE + " " + newAuth.accessToken
                                 )
                                 .build()
                         } else {
@@ -68,30 +70,30 @@ class OauthRefreshTokenAuthenticator(
                             if (actualToken != accessToken) {
                                 return response.request.newBuilder()
                                     .header(
-                                        "Authorization",
-                                        ApiConstants.TOKEN_TYPE_BEARER + " " + actualToken
+                                        HEADER_AUTHORIZATION,
+                                        "$ACCESS_TOKEN_TYPE $actualToken"
                                     )
                                     .build()
                             }
                             return null
                         }
-
                     } catch (e: Exception) {
                         return null
                     }
                 }
-                TOKEN_NONEXISTENT_ERROR_MESSAGE, TOKEN_INVALID_GRANT_ERROR_MESSAGE -> {
+
+                TOKEN_NONEXISTENT_ERROR_MESSAGE, TOKEN_INVALID_GRANT_ERROR_MESSAGE, JWT_INVALID_TOKEN -> {
                     // Retry request with the current access_token if the original access_token used in
                     // request does not match the current access_token. This case can occur when
                     // asynchronous calls are made and are attempting to refresh the access_token where
                     // one call succeeds but the other fails. https://github.com/edx/edx-app-android/pull/834
-                    val authHeaders =
-                        response.request.headers["Authorization"]?.split(" ".toRegex())
+                    val authHeaders = response.request.headers[HEADER_AUTHORIZATION]
+                        ?.split(" ".toRegex())
                     if (authHeaders?.toTypedArray()?.getOrNull(1) != accessToken) {
                         return response.request.newBuilder()
                             .header(
-                                "Authorization",
-                                ApiConstants.TOKEN_TYPE_BEARER + " " + accessToken
+                                HEADER_AUTHORIZATION,
+                                "$ACCESS_TOKEN_TYPE $accessToken"
                             ).build()
                     }
 
@@ -99,7 +101,8 @@ class OauthRefreshTokenAuthenticator(
                         appNotifier.send(LogoutEvent())
                     }
                 }
-                DISABLED_USER_ERROR_MESSAGE -> {
+
+                DISABLED_USER_ERROR_MESSAGE, JWT_DISABLED_USER_ERROR_MESSAGE -> {
                     runBlocking {
                         appNotifier.send(LogoutEvent())
                     }
@@ -114,7 +117,8 @@ class OauthRefreshTokenAuthenticator(
         val response = authApi.refreshAccessToken(
             ApiConstants.TOKEN_TYPE_REFRESH,
             BuildConfig.CLIENT_ID,
-            refreshToken
+            refreshToken,
+            ACCESS_TOKEN_TYPE
         ).execute()
         val authResponse = response.body()
         if (response.isSuccessful && authResponse != null) {
@@ -136,17 +140,21 @@ class OauthRefreshTokenAuthenticator(
     private fun getErrorCode(responseBody: String): String? {
         try {
             val jsonObj = JSONObject(responseBody)
-            var errorCode = jsonObj.optString("error_code", "")
-            return if (errorCode != "") {
-                errorCode
+            if (jsonObj.has(FIELD_ERROR_CODE)) {
+                return jsonObj.getString(FIELD_ERROR_CODE)
             } else {
-                errorCode = jsonObj
-                    .optJSONObject("developer_message")
-                    ?.optString("error_code", "") ?: ""
-                if (errorCode != "") {
-                    errorCode
+                return if (TOKEN_TYPE_JWT.equals(ACCESS_TOKEN_TYPE, ignoreCase = true)) {
+                    val errorType = if (jsonObj.has(FIELD_DETAIL)) FIELD_DETAIL else FIELD_DEVELOPER_MESSAGE
+                    jsonObj.getString(errorType)
                 } else {
-                    null
+                    val errorCode = jsonObj
+                        .optJSONObject(FIELD_DEVELOPER_MESSAGE)
+                        ?.optString(FIELD_ERROR_CODE, "") ?: ""
+                    if (errorCode != "") {
+                        errorCode
+                    } else {
+                        null
+                    }
                 }
             }
         } catch (ex: JSONException) {
@@ -156,9 +164,18 @@ class OauthRefreshTokenAuthenticator(
     }
 
     companion object {
+        private const val HEADER_AUTHORIZATION = "Authorization"
+
         private const val TOKEN_EXPIRED_ERROR_MESSAGE = "token_expired"
         private const val TOKEN_NONEXISTENT_ERROR_MESSAGE = "token_nonexistent"
         private const val TOKEN_INVALID_GRANT_ERROR_MESSAGE = "invalid_grant"
         private const val DISABLED_USER_ERROR_MESSAGE = "user_is_disabled"
+        private const val JWT_TOKEN_EXPIRED = "Token has expired."
+        private const val JWT_INVALID_TOKEN = "Invalid token."
+        private const val JWT_DISABLED_USER_ERROR_MESSAGE = "User account is disabled."
+
+        private const val FIELD_ERROR_CODE = "error_code"
+        private const val FIELD_DETAIL = "detail"
+        private const val FIELD_DEVELOPER_MESSAGE = "developer_message"
     }
 }

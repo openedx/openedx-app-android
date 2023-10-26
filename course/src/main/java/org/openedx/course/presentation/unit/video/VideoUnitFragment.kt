@@ -24,6 +24,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.window.layout.WindowMetricsCalculator
+import com.google.android.gms.cast.framework.CastContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -43,6 +44,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
+import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
