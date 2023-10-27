@@ -11,13 +11,15 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.google.android.play.core.review.ReviewException
+import com.google.android.play.core.review.ReviewManager
+import org.koin.android.ext.android.inject
 import org.openedx.core.R
 import org.openedx.core.ui.theme.OpenEdXTheme
 
 class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
 
-    private val viewModel: ThankYouViewModel by viewModel()
+    private val reviewManager: ReviewManager by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,14 +45,25 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                     description = description,
                     showButtons = isFeedbackPositive.value,
                     onNotNowClick = this@ThankYouDialogFragment::notNowClick,
-                    onRateUsClick = this@ThankYouDialogFragment::onRateUsClick
+                    onRateUsClick = this@ThankYouDialogFragment::openInAppReview
                 )
             }
         }
     }
 
-    private fun onRateUsClick() {
-        viewModel.openInAppReview(requireActivity())
+    private fun openInAppReview() {
+        val request = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            try {
+                val reviewInfo = task.result
+                val flow = reviewManager.launchReviewFlow(requireActivity(), reviewInfo)
+                flow.addOnCompleteListener { _ ->
+                    dismiss()
+                }
+            } catch (e: ReviewException) {
+                e.printStackTrace()
+            }
+        }
     }
 
     companion object {

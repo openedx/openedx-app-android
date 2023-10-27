@@ -5,9 +5,20 @@ import androidx.room.RoomDatabase
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.Dispatchers
+import org.koin.android.ext.koin.androidApplication
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+import org.openedx.app.AnalyticsManager
+import org.openedx.app.AppAnalytics
+import org.openedx.app.AppRouter
+import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.room.AppDatabase
+import org.openedx.app.room.DATABASE_NAME
+import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
@@ -24,21 +35,10 @@ import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.system.notifier.DiscussionNotifier
-import org.openedx.app.AnalyticsManager
-import org.openedx.app.AppAnalytics
-import org.openedx.app.AppRouter
-import org.openedx.app.room.AppDatabase
-import org.openedx.app.room.DATABASE_NAME
-import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
-import kotlinx.coroutines.Dispatchers
-import org.koin.android.ext.koin.androidApplication
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
-import org.openedx.core.data.storage.CorePreferences
-import org.openedx.profile.data.storage.ProfilePreferences
 
 val appModule = module {
 
