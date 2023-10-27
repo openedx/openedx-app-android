@@ -48,7 +48,7 @@ import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.*
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 
 class SignUpFragment : Fragment() {
 
@@ -75,7 +75,7 @@ class SignUpFragment : Fragment() {
                 val isButtonClicked by viewModel.isButtonLoading.observeAsState(false)
                 val successLogin by viewModel.successLogin.observeAsState()
                 val validationError by viewModel.validationError.observeAsState(false)
-                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState(null)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {
                     RegistrationScreen(

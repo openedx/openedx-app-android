@@ -9,7 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 
 class UpgradeRequiredFragment : Fragment() {
 

@@ -210,12 +210,12 @@ fun AppUpgradeRequiredButtons(
         if (showAccountSettingsButton) {
             TransparentTextButton(
                 text = stringResource(id = R.string.core_account_settings),
-                onNotNowClick = onAccountSettingsClick
+                onClick = onAccountSettingsClick
             )
         }
         DefaultTextButton(
             text = stringResource(id = R.string.core_update),
-            onUpdateClick = onUpdateClick
+            onClick = onUpdateClick
         )
     }
 }
@@ -230,11 +230,11 @@ fun AppUpgradeDialogButtons(
     ) {
         TransparentTextButton(
             text = stringResource(id = R.string.core_not_now),
-            onNotNowClick = onNotNowClick
+            onClick = onNotNowClick
         )
         DefaultTextButton(
             text = stringResource(id = R.string.core_update),
-            onUpdateClick = onUpdateClick
+            onClick = onUpdateClick
         )
     }
 }
@@ -242,7 +242,7 @@ fun AppUpgradeDialogButtons(
 @Composable
 fun TransparentTextButton(
     text: String,
-    onNotNowClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Button(
         modifier = Modifier
@@ -252,7 +252,7 @@ fun TransparentTextButton(
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
-        onClick = onNotNowClick
+        onClick = onClick
     ) {
         Text(
             color = MaterialTheme.appColors.textAccent,
@@ -265,7 +265,7 @@ fun TransparentTextButton(
 @Composable
 fun DefaultTextButton(
     text: String,
-    onUpdateClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Button(
         modifier = Modifier
@@ -275,7 +275,7 @@ fun DefaultTextButton(
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
-        onClick = onUpdateClick
+        onClick = onClick
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

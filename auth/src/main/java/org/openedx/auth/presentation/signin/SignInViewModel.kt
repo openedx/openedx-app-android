@@ -16,7 +16,6 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.R as CoreRes
 
@@ -41,9 +40,9 @@ class SignInViewModel(
     val loginSuccess: LiveData<Boolean>
         get() = _loginSuccess
 
-    private val _appUpgradeEventUIState = SingleEventLiveData<AppUpgradeEventUIState>()
-    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
-        get() = _appUpgradeEventUIState
+    private val _appUpgradeEvent = SingleEventLiveData<AppUpgradeEvent>()
+    val appUpgradeEvent: LiveData<AppUpgradeEvent>
+        get() = _appUpgradeEvent
 
     init {
         collectAppUpgradeEvent()
@@ -87,13 +86,7 @@ class SignInViewModel(
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
             appUpgradeNotifier.notifier.collect { event ->
-                when (event) {
-                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                        _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRequiredScreen
-                    }
-
-                    else -> {}
-                }
+                _appUpgradeEvent.value = event
             }
         }
     }

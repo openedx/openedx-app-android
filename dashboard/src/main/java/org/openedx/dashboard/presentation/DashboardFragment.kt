@@ -44,13 +44,13 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
-import org.openedx.core.system.notifier.AppUpgradeEventUIState
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.*
@@ -78,7 +78,7 @@ class DashboardFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
-                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState()
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
 
                 MyCoursesScreen(
                     windowSize = windowSize,
@@ -104,10 +104,12 @@ class DashboardFragment : Fragment() {
                     paginationCallback = {
                         viewModel.fetchMore()
                     },
-                    appUpgradeEvent = appUpgradeEvent,
-                    onAppUpgradeRecommendedBoxClick = {
-                        AppUpdateState.openPlayMarket(requireContext())
-                    },
+                    appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
+                        appUpgradeEvent = appUpgradeEvent,
+                        onAppUpgradeRecommendedBoxClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        },
+                    ),
                 )
             }
         }
@@ -127,8 +129,7 @@ internal fun MyCoursesScreen(
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
-    appUpgradeEvent: AppUpgradeEventUIState?,
-    onAppUpgradeRecommendedBoxClick: () -> Unit,
+    appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -309,11 +310,11 @@ internal fun MyCoursesScreen(
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
                     ) {
-                        when (appUpgradeEvent) {
-                            is AppUpgradeEventUIState.UpgradeRecommendedBox -> {
+                        when (appUpgradeParameters.appUpgradeEvent) {
+                            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
                                 AppUpgradeRecommendedBox(
                                     modifier = Modifier.fillMaxWidth(),
-                                    onClick = onAppUpgradeRecommendedBoxClick
+                                    onClick = appUpgradeParameters.onAppUpgradeRecommendedBoxClick
                                 )
                             }
 
@@ -521,8 +522,7 @@ private fun MyCoursesScreenDay() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
-            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
-            onAppUpgradeRecommendedBoxClick = {}
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }
@@ -552,8 +552,7 @@ private fun MyCoursesScreenTabletPreview() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
-            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
-            onAppUpgradeRecommendedBoxClick = {}
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }

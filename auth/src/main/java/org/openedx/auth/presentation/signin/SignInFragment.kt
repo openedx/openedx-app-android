@@ -75,7 +75,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 
 class SignInFragment : Fragment() {
 
@@ -95,7 +95,7 @@ class SignInFragment : Fragment() {
                 val showProgress by viewModel.showProgress.observeAsState(initial = false)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
-                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState(null)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {
                     LoginScreen(

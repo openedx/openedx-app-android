@@ -48,7 +48,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
@@ -629,9 +629,10 @@ fun AppVersionItemUpgradeRecommended(
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
-        Image(
+        Icon(
             modifier = Modifier.size(28.dp),
             painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
+            tint = MaterialTheme.appColors.primary,
             contentDescription = null
         )
     }
@@ -675,9 +676,10 @@ fun AppVersionItemUpgradeRequired(
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
-        Image(
+        Icon(
             modifier = Modifier.size(28.dp),
             painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
+            tint = MaterialTheme.appColors.primary,
             contentDescription = null
         )
     }

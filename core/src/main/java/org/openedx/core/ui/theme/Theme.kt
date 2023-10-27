@@ -30,7 +30,7 @@ private val DarkColorPalette = AppColors(
     textPrimaryVariant = Color(0xFF79889F),
     textSecondary = Color(0xFFB3B3B3),
     textDark = Color(0xFF19212F),
-    textAccent = Color(0xFF5478F9),
+    textAccent = Color(0xFF879FF5),
 
     textFieldBackground = Color(0xFF273346),
     textFieldBackgroundVariant = Color(0xFF273346),

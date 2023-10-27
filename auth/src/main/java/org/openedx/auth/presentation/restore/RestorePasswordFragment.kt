@@ -37,7 +37,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 import org.openedx.auth.R as authR
 
 class RestorePasswordFragment : Fragment() {

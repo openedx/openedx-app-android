@@ -3,6 +3,7 @@ package org.openedx.auth.presentation.restore
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.BaseViewModel
@@ -13,9 +14,7 @@ import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
-import kotlinx.coroutines.launch
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 
 class RestorePasswordViewModel(
@@ -33,9 +32,9 @@ class RestorePasswordViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
-    private val _appUpgradeEventUIState = SingleEventLiveData<AppUpgradeEventUIState>()
-    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
-        get() = _appUpgradeEventUIState
+    private val _appUpgradeEvent = SingleEventLiveData<AppUpgradeEvent>()
+    val appUpgradeEventUIState: LiveData<AppUpgradeEvent>
+        get() = _appUpgradeEvent
 
     init {
         collectAppUpgradeEvent()
@@ -80,13 +79,7 @@ class RestorePasswordViewModel(
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
             appUpgradeNotifier.notifier.collect { event ->
-                when (event) {
-                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                        _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRequiredScreen
-                    }
-
-                    else -> {}
-                }
+                _appUpgradeEvent.value = event
             }
         }
     }

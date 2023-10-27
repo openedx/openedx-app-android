@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendDialog
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
 
 class AppUpgradeDialogFragment : DialogFragment() {
 
@@ -33,12 +33,14 @@ class AppUpgradeDialogFragment : DialogFragment() {
     }
 
     private fun onNotNowClick() {
+        AppUpdateState.wasUpdateDialogClosed.value = true
         dismiss()
     }
 
     private fun onUpdateClick() {
-        AppUpdateState.openPlayMarket(requireContext())
+        AppUpdateState.wasUpdateDialogClosed.value = true
         dismiss()
+        AppUpdateState.openPlayMarket(requireContext())
     }
 
     companion object {

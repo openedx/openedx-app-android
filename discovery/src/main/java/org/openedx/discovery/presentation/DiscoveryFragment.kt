@@ -32,12 +32,13 @@ import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.app_upgrade.AppUpgradeDialogFragment
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
-import org.openedx.core.system.notifier.AppUpgradeEventUIState
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.utils.AppUpdateState
+import org.openedx.core.AppUpdateState
+import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.discovery.R
 
 class DiscoveryFragment : Fragment() {
@@ -59,7 +60,8 @@ class DiscoveryFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
-                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState()
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
+                val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -68,22 +70,25 @@ class DiscoveryFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
-                    appUpgradeEvent = appUpgradeEvent,
-                    appUpgradeRecommendedDialog = {
-                        val dialog = AppUpgradeDialogFragment.newInstance()
-                        dialog.show(
-                            requireActivity().supportFragmentManager,
-                            AppUpgradeDialogFragment::class.simpleName
-                        )
-                    },
-                    onAppUpgradeRecommendedBoxClick = {
-                        AppUpdateState.openPlayMarket(requireContext())
-                    },
-                    onAppUpgradeRequired = {
-                        router.navigateToUpgradeRequired(
-                            requireActivity().supportFragmentManager
-                        )
-                    },
+                    appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
+                        appUpgradeEvent = appUpgradeEvent,
+                        wasUpdateDialogClosed = wasUpdateDialogClosed,
+                        appUpgradeRecommendedDialog = {
+                            val dialog = AppUpgradeDialogFragment.newInstance()
+                            dialog.show(
+                                requireActivity().supportFragmentManager,
+                                AppUpgradeDialogFragment::class.simpleName
+                            )
+                        },
+                        onAppUpgradeRecommendedBoxClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        },
+                        onAppUpgradeRequired = {
+                            router.navigateToUpgradeRequired(
+                                requireActivity().supportFragmentManager
+                            )
+                        }
+                    ),
                     onSearchClick = {
                         viewModel.discoverySearchBarClickedEvent()
                         router.navigateToCourseSearch(
@@ -121,10 +126,7 @@ internal fun DiscoveryScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
-    appUpgradeEvent: AppUpgradeEventUIState?,
-    appUpgradeRecommendedDialog: () -> Unit,
-    onAppUpgradeRecommendedBoxClick: () -> Unit,
-    onAppUpgradeRequired: () -> Unit,
+    appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onReloadClick: () -> Unit,
@@ -298,22 +300,25 @@ internal fun DiscoveryScreen(
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
                     ) {
-                        when (appUpgradeEvent) {
-                            is AppUpgradeEventUIState.UpgradeRecommendedBox -> {
-                                AppUpgradeRecommendedBox(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = onAppUpgradeRecommendedBoxClick
-                                )
+                        when (appUpgradeParameters.appUpgradeEvent) {
+                            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                                if (appUpgradeParameters.wasUpdateDialogClosed) {
+                                    AppUpgradeRecommendedBox(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = appUpgradeParameters.onAppUpgradeRecommendedBoxClick
+                                    )
+                                } else {
+                                    if (!AppUpdateState.wasUpdateDialogDisplayed) {
+                                        AppUpdateState.wasUpdateDialogDisplayed = true
+                                        appUpgradeParameters.appUpgradeRecommendedDialog()
+                                    }
+                                }
                             }
 
-                            is AppUpgradeEventUIState.UpgradeRecommendedDialog -> {
-                                appUpgradeRecommendedDialog()
-                            }
-
-                            is AppUpgradeEventUIState.UpgradeRequiredScreen -> {
+                            is AppUpgradeEvent.UpgradeRequiredEvent -> {
                                 if (!AppUpdateState.wasUpdateDialogDisplayed) {
                                     AppUpdateState.wasUpdateDialogDisplayed = true
-                                    onAppUpgradeRequired()
+                                    appUpgradeParameters.onAppUpgradeRequired()
                                 }
                             }
 
@@ -381,10 +386,7 @@ private fun DiscoveryScreenPreview() {
             canLoadMore = false,
             refreshing = false,
             hasInternetConnection = true,
-            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
-            appUpgradeRecommendedDialog = {},
-            onAppUpgradeRecommendedBoxClick = {},
-            onAppUpgradeRequired = {}
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }
@@ -418,10 +420,7 @@ private fun DiscoveryScreenTabletPreview() {
             canLoadMore = false,
             refreshing = false,
             hasInternetConnection = true,
-            appUpgradeEvent = AppUpgradeEventUIState.UpgradeRecommendedBox,
-            appUpgradeRecommendedDialog = {},
-            onAppUpgradeRecommendedBoxClick = {},
-            onAppUpgradeRequired = {}
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }

@@ -3,7 +3,8 @@ package org.openedx.discovery.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
@@ -14,9 +15,7 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.core.system.notifier.AppUpgradeNotifier
-import org.openedx.core.utils.AppUpdateState
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 
 class DiscoveryViewModel(
@@ -43,9 +42,9 @@ class DiscoveryViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _appUpgradeEventUIState = MutableLiveData<AppUpgradeEventUIState>()
-    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
-        get() = _appUpgradeEventUIState
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
+    val appUpgradeEvent: LiveData<AppUpgradeEvent>
+        get() = _appUpgradeEvent
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -150,25 +149,22 @@ class DiscoveryViewModel(
         }
     }
 
+    @OptIn(FlowPreview::class)
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                delay(500L)
-                when (event) {
-                    is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                        if (!AppUpdateState.wasUpdateDialogDisplayed) {
-                            AppUpdateState.wasUpdateDialogDisplayed = true
-                            _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedDialog
-                        } else {
-                            _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedBox
+            appUpgradeNotifier.notifier
+                .debounce(100)
+                .collect { event ->
+                    when (event) {
+                        is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                                _appUpgradeEvent.value = event
+                        }
+
+                        is AppUpgradeEvent.UpgradeRequiredEvent -> {
+                            _appUpgradeEvent.value = AppUpgradeEvent.UpgradeRequiredEvent
                         }
                     }
-
-                    is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                        _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRequiredScreen
-                    }
                 }
-            }
         }
     }
 

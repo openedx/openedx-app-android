@@ -14,7 +14,6 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeEventUIState
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
@@ -52,9 +51,9 @@ class DashboardViewModel(
     val canLoadMore: LiveData<Boolean>
         get() = _canLoadMore
 
-    private val _appUpgradeEventUIState = MutableLiveData<AppUpgradeEventUIState>()
-    val appUpgradeEventUIState: LiveData<AppUpgradeEventUIState>
-        get() = _appUpgradeEventUIState
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
+    val appUpgradeEvent: LiveData<AppUpgradeEvent>
+        get() = _appUpgradeEvent
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -165,12 +164,7 @@ class DashboardViewModel(
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
             appUpgradeNotifier.notifier.collect { event ->
-                when (event) {
-                    is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                            _appUpgradeEventUIState.value = AppUpgradeEventUIState.UpgradeRecommendedBox
-                    }
-                    else -> {}
-                }
+                _appUpgradeEvent.value = event
             }
         }
     }
