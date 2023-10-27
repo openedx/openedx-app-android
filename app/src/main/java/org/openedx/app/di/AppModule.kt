@@ -40,12 +40,16 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
+import org.openedx.whatsnew.WhatsNewFileManager
+import org.openedx.whatsnew.WhatsNewRouter
+import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 val appModule = module {
 
     single { PreferencesManager(get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
+    single<WhatsNewPreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
 
@@ -66,6 +70,7 @@ val appModule = module {
     single<CourseRouter> { get<AppRouter>() }
     single<DiscussionRouter> { get<AppRouter>() }
     single<ProfileRouter> { get<AppRouter>() }
+    single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
 
 
@@ -118,6 +123,7 @@ val appModule = module {
     }
 
     single { TranscriptManager(get()) }
+    single { WhatsNewFileManager(get()) }
 
     single { AnalyticsManager(get()) }
     single<DashboardAnalytics> { get<AnalyticsManager>() }

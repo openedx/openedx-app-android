@@ -24,6 +24,9 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.whatsnew.WhatsNewFileManager
+import org.openedx.whatsnew.data.storage.WhatsNewPreferences
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataHolder {
 
@@ -41,8 +44,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         get() = AppData(BuildConfig.VERSION_NAME)
 
     private lateinit var binding: ActivityAppBinding
-    private val preferencesManager by inject<CorePreferences>()
     private val viewModel by viewModel<AppViewModel>()
+    private val whatsNewFileManager by inject<WhatsNewFileManager>()
+    private val whatsNewPreferencesManager by inject<WhatsNewPreferences>()
+    private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
 
     private var _insetTop = 0
@@ -110,14 +115,22 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         binding.root.requestApplyInsetsWhenAttached()
 
         if (savedInstanceState == null) {
-            if (preferencesManager.user != null) {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.container, MainFragment())
-                    .commit()
-            } else {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.container, SignInFragment())
-                    .commit()
+            when {
+                corePreferencesManager.user == null -> {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.container, SignInFragment())
+                        .commit()
+                }
+                shouldShowWhatsNew() -> {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.container, WhatsNewFragment())
+                        .commit()
+                }
+                corePreferencesManager.user != null -> {
+                    supportFragmentManager.beginTransaction()
+                        .add(R.id.container, MainFragment())
+                        .commit()
+                }
             }
         }
 
@@ -130,16 +143,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         val metrics = WindowMetricsCalculator.getOrCreate()
             .computeCurrentWindowMetrics(this)
 
-        val widthDp = metrics.bounds.width() /
-                resources.displayMetrics.density
+        val widthDp = metrics.bounds.width() / resources.displayMetrics.density
         val widthWindowSize = when {
             widthDp < 600f -> WindowType.Compact
             widthDp < 840f -> WindowType.Medium
             else -> WindowType.Expanded
         }
 
-        val heightDp = metrics.bounds.height() /
-                resources.displayMetrics.density
+        val heightDp = metrics.bounds.height() / resources.displayMetrics.density
         val heightWindowSize = when {
             heightDp < 480f -> WindowType.Compact
             heightDp < 900f -> WindowType.Medium
@@ -155,6 +166,13 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
         }
+    }
+
+    override fun shouldShowWhatsNew(): Boolean {
+        val dataVersion = whatsNewFileManager.getNewestData().version
+        return BuildConfig.VERSION_NAME == dataVersion
+                && whatsNewPreferencesManager.lastWhatsNewVersion != dataVersion
+                && org.openedx.core.BuildConfig.SHOW_WHATS_NEW
     }
 
     companion object {

@@ -8,7 +8,6 @@ import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.FragmentViewType
-import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
@@ -19,13 +18,13 @@ import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
 import org.openedx.course.presentation.detail.CourseDetailsFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.WebViewFragment
-import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread
 import org.openedx.discussion.presentation.DiscussionRouter
@@ -34,6 +33,7 @@ import org.openedx.discussion.presentation.responses.DiscussionResponsesFragment
 import org.openedx.discussion.presentation.search.DiscussionSearchThreadFragment
 import org.openedx.discussion.presentation.threads.DiscussionAddThreadFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
+import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
@@ -41,10 +41,12 @@ import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 import org.openedx.profile.presentation.settings.video.VideoQualityFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
-import java.util.*
+import org.openedx.whatsnew.WhatsNewRouter
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
+import java.util.Date
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, AppUpgradeRouter {
+    ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
     override fun navigateToMain(fm: FragmentManager) {
@@ -60,6 +62,13 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToRestorePassword(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, RestorePasswordFragment())
+    }
+
+    override fun navigateToWhatsNew(fm: FragmentManager) {
+        fm.popBackStack()
+        fm.beginTransaction()
+            .replace(R.id.container, WhatsNewFragment())
+            .commit()
     }
     //endregion
 

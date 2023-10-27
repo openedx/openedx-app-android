@@ -40,7 +40,6 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
@@ -48,6 +47,8 @@ import org.openedx.profile.presentation.settings.video.VideoQualityViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
+import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
 
@@ -100,4 +101,6 @@ val screenModule = module {
     viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), comment) }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> DiscussionSearchThreadViewModel(get(), get(), get(), courseId) }
+
+    viewModel { WhatsNewViewModel(get()) }
 }

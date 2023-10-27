@@ -76,6 +76,9 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.AppUpdateState
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.presentation.global.AppDataHolder
 
 class SignInFragment : Fragment() {
 
@@ -116,10 +119,16 @@ class SignInFragment : Fragment() {
                     )
 
                     LaunchedEffect(loginSuccess) {
+                        val isNeedToShowWhatsNew = (requireActivity() as AppDataHolder).shouldShowWhatsNew()
                         if (loginSuccess) {
-                            router.navigateToMain(parentFragmentManager)
+                            if (isNeedToShowWhatsNew) {
+                                router.navigateToWhatsNew(parentFragmentManager)
+                            } else {
+                                router.navigateToMain(parentFragmentManager)
+                            }
                         }
                     }
+
                 } else {
                     AppUpgradeRequiredScreen(
                         onUpdateClick = {

@@ -44,3 +44,5 @@ platformName: "OpenEdX"
 platformFullName: "OpenEdX"
 #tokenType enum accepts JWT and BEARER only
 tokenType: "JWT"
+#feature flag for activating What’s New feature
+showWhatsNew: false

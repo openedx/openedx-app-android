@@ -84,6 +84,7 @@ dependencies {
     implementation project(path: ':discovery')
     implementation project(path: ':profile')
     implementation project(path: ':discussion')
+    implementation project(path: ':whatsnew')
 
     kapt "androidx.room:room-compiler:$room_version"
 
