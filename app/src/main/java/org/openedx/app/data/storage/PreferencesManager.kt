@@ -8,8 +8,9 @@ import org.openedx.profile.data.model.Account
 import org.openedx.core.data.model.User
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.profile.data.storage.ProfilePreferences
+import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences {
+class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences, WhatsNewPreferences {
 
     private val sharedPreferences = context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
 
@@ -72,11 +73,18 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
                 ?: VideoSettings.default
         }
 
+    override var lastWhatsNewVersion: String
+        set(value) {
+            saveString(LAST_WHATS_NEW_VERSION, value)
+        }
+        get() = getString(LAST_WHATS_NEW_VERSION)
+
     companion object {
         private const val ACCESS_TOKEN = "access_token"
         private const val REFRESH_TOKEN = "refresh_token"
         private const val USER = "user"
         private const val ACCOUNT = "account"
         private const val VIDEO_SETTINGS = "video_settings"
+        private const val LAST_WHATS_NEW_VERSION = "last_whats_new_version"
     }
 }

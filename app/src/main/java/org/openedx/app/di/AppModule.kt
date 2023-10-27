@@ -39,12 +39,16 @@ import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.whatsnew.WhatsNewFileManager
+import org.openedx.whatsnew.WhatsNewRouter
+import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 val appModule = module {
 
     single { PreferencesManager(get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
+    single<WhatsNewPreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
     single { AppCookieManager(get()) }
@@ -64,6 +68,7 @@ val appModule = module {
     single<CourseRouter> { get<AppRouter>() }
     single<DiscussionRouter> { get<AppRouter>() }
     single<ProfileRouter> { get<AppRouter>() }
+    single<WhatsNewRouter> { get<AppRouter>() }
 
     single { NetworkConnection(get()) }
 
@@ -114,6 +119,7 @@ val appModule = module {
     }
 
     single { TranscriptManager(get()) }
+    single { WhatsNewFileManager(get()) }
 
     single { AnalyticsManager(get()) }
     single<DashboardAnalytics> { get<AnalyticsManager>() }

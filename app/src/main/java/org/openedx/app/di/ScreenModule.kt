@@ -48,6 +48,7 @@ import org.koin.dsl.module
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
 
@@ -100,4 +101,6 @@ val screenModule = module {
     viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), comment) }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> DiscussionSearchThreadViewModel(get(), get(), get(), courseId) }
+
+    viewModel { WhatsNewViewModel(get()) }
 }

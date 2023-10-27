@@ -158,9 +158,7 @@ private fun AnothersProfileScreen(
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.appTypography.titleMedium
                     )
-                    BackBtn(
-                        modifier = Modifier.padding(end = 16.dp)
-                    ) {
+                    BackBtn {
                         onBackClick()
                     }
                 }
