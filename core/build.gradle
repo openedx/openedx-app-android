@@ -31,6 +31,7 @@ android {
         consumerProguardFiles "consumer-rules.pro"
 
         buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${config.tokenType}\""
+        buildConfigField "Boolean", "SHOW_WHATS_NEW", "${config.showWhatsNew}"
     }
 
     namespace 'org.openedx.core'

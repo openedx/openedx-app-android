@@ -21,7 +21,7 @@
     <string name="core_password">Пароль</string>
     <string name="core_assessment_soon">незабаром</string>
     <string name="auto_recommended_text">Авто (Рекомендовано)</string>
-    <string name="video_quality_p360">360p (Найменший розмір)</string>
+    <string name="video_quality_p360">360p (Менше використання трафіку)</string>
     <string name="video_quality_p540">540p</string>
     <string name="video_quality_p720">720p (Найкраща якість)</string>
     <string name="core_offline">Офлайн</string>
