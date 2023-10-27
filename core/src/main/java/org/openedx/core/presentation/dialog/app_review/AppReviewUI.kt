@@ -2,11 +2,13 @@ package org.openedx.core.presentation.dialog.app_review
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,31 +17,38 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,21 +62,196 @@ import org.openedx.core.ui.theme.appTypography
 import kotlin.math.round
 
 @Composable
+fun ThankYouDialog(
+    modifier: Modifier = Modifier,
+    description: String,
+    showButtons: Boolean,
+    onNotNowClick: () -> Unit,
+    onRateUsClick: () -> Unit
+) {
+    DefaultDialogBox(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        onDismissClock = onNotNowClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp, vertical = 46.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(28.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.core_ic_heart),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null
+            )
+            Text(
+                text = stringResource(R.string.core_thank_you),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium
+            )
+            Text(
+                text = description,
+                color = MaterialTheme.appColors.textPrimary,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.appTypography.bodyMedium
+            )
+
+            if (showButtons) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    TransparentTextButton(
+                        text = stringResource(id = R.string.core_not_now),
+                        onClick = onNotNowClick
+                    )
+                    DefaultTextButton(
+                        text = stringResource(id = R.string.core_rate_us),
+                        onClick = onRateUsClick
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FeedbackDialog(
+    modifier: Modifier = Modifier,
+    feedback: MutableState<String>,
+    onNotNowClick: () -> Unit,
+    onShareClick: () -> Unit
+) {
+    DefaultDialogBox(
+        modifier = modifier,
+        onDismissClock = onNotNowClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.core_feedback_dialog_title),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium
+            )
+            Text(
+                text = stringResource(id = R.string.core_feedback_dialog_description),
+                color = MaterialTheme.appColors.textPrimary,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.appTypography.bodyMedium
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(162.dp),
+                value = feedback.value,
+                onValueChange = { str ->
+                    feedback.value = str
+                },
+                textStyle = MaterialTheme.appTypography.labelLarge,
+                shape = MaterialTheme.appShapes.buttonShape,
+                placeholder = {
+                    Text(
+                        text = stringResource(id = R.string.core_feedback_dialog_textfield_hint),
+                        color = MaterialTheme.appColors.textFieldHint,
+                        style = MaterialTheme.appTypography.labelLarge,
+                    )
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = MaterialTheme.appColors.cardViewBackground,
+                    unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                    textColor = MaterialTheme.appColors.textFieldText
+                ),
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                TransparentTextButton(
+                    text = stringResource(id = R.string.core_not_now),
+                    onClick = onNotNowClick
+                )
+                DefaultTextButton(
+                    isEnabled = feedback.value.isNotEmpty(),
+                    text = stringResource(id = R.string.core_share_feedback),
+                    onClick = onShareClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun RateDialog(
     modifier: Modifier = Modifier,
+    rating: MutableIntState,
     onNotNowClick: () -> Unit,
     onSubmitClick: () -> Unit
 ) {
-    val rating = rememberSaveable { mutableFloatStateOf(0f) }
+    DefaultDialogBox(
+        modifier = modifier,
+        onDismissClock = onNotNowClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.core_rate_dialog_title, stringResource(R.string.app_name)),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium
+            )
+            Text(
+                text = stringResource(id = R.string.core_rate_dialog_description),
+                color = MaterialTheme.appColors.textPrimary,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.appTypography.bodyMedium
+            )
+            RatingBar(
+                modifier = Modifier
+                    .padding(vertical = 12.dp),
+                rating = rating
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                TransparentTextButton(
+                    text = stringResource(id = R.string.core_not_now),
+                    onClick = onNotNowClick
+                )
+                DefaultTextButton(
+                    isEnabled = rating.intValue > 0,
+                    text = stringResource(id = R.string.core_submit),
+                    onClick = onSubmitClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DefaultDialogBox(
+    modifier: Modifier = Modifier,
+    onDismissClock: () -> Unit,
+    content: @Composable (BoxScope.() -> Unit)
+) {
     Surface(
         modifier = modifier,
         color = Color.Transparent
     ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .noRippleClickable {
-                    onNotNowClick()
+                    onDismissClock()
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -82,43 +266,7 @@ fun RateDialog(
                         shape = MaterialTheme.appShapes.cardShape
                     )
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.core_rate_dialog_title, stringResource(R.string.app_name)),
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium
-                    )
-                    Text(
-                        text = stringResource(id = R.string.core_rate_dialog_description),
-                        color = MaterialTheme.appColors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.appTypography.bodyMedium
-                    )
-                    RatingBar(
-                        modifier = Modifier
-                            .padding(vertical = 12.dp),
-                        rating = rating
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        TransparentTextButton(
-                            text = stringResource(id = R.string.core_not_now),
-                            onClick = onNotNowClick
-                        )
-                        DefaultTextButton(
-                            isEnabled = rating.floatValue > 0f,
-                            text = stringResource(id = R.string.core_submit),
-                            onClick = onSubmitClick
-                        )
-                    }
-                }
+                content.invoke(this)
             }
         }
     }
@@ -190,7 +338,7 @@ fun DefaultTextButton(
 @Composable
 fun RatingBar(
     modifier: Modifier = Modifier,
-    rating: MutableState<Float> = mutableFloatStateOf(0f),
+    rating: MutableIntState,
     stars: Int = 5,
     starsColor: Color = MaterialTheme.appColors.rateStars,
 ) {
@@ -198,8 +346,8 @@ fun RatingBar(
     var componentWight by remember { mutableStateOf(0.dp) }
     var maxXValue by remember { mutableFloatStateOf(0f) }
     val startSize = componentWight / stars
-    val filledStars = round(rating.value).toInt()
-    val unfilledStars = (stars - round(rating.value)).toInt()
+    val filledStars = rating.intValue
+    val unfilledStars = stars - rating.intValue
 
     Row(
         modifier = modifier
@@ -212,7 +360,7 @@ fun RatingBar(
             }
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
-                    rating.value = offset.x / maxXValue * stars + 0.8f
+                    rating.intValue = round(offset.x / maxXValue * stars + 0.8f).toInt()
                 }
             },
         horizontalArrangement = Arrangement.Center
@@ -242,9 +390,7 @@ fun RatingBar(
 fun RatingBarPreview() {
     OpenEdXTheme {
         RatingBar(
-            rating = remember {
-                mutableFloatStateOf(3.75f)
-            }
+            rating = remember { mutableIntStateOf(2) }
         )
     }
 }
@@ -252,11 +398,51 @@ fun RatingBarPreview() {
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun RateDialog() {
+private fun RateDialogPreview() {
     OpenEdXTheme {
         RateDialog(
+            rating = remember { mutableIntStateOf(2) },
             onNotNowClick = {},
             onSubmitClick = {}
+        )
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun FeedbackDialogPreview() {
+    OpenEdXTheme {
+        FeedbackDialog(
+            feedback = remember { mutableStateOf("Feedback") },
+            onNotNowClick = {},
+            onShareClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ThankYouDialogWithButtonsPreview() {
+    OpenEdXTheme {
+        ThankYouDialog(
+            description = "Description",
+            showButtons = true,
+            onNotNowClick = {},
+            onRateUsClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ThankYouDialogWithoutButtonsPreview() {
+    OpenEdXTheme {
+        ThankYouDialog(
+            description = "Description",
+            showButtons = false,
+            onNotNowClick = {},
+            onRateUsClick = {}
         )
     }
 }

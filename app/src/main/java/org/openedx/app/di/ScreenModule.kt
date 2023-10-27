@@ -45,6 +45,7 @@ import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.openedx.core.presentation.dialog.app_review.ThankYouViewModel
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
@@ -100,4 +101,6 @@ val screenModule = module {
     viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), comment) }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> DiscussionSearchThreadViewModel(get(), get(), get(), courseId) }
+
+    viewModel { ThankYouViewModel(get()) }
 }

@@ -2,6 +2,7 @@ package org.openedx.app.di
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.openedx.auth.presentation.AuthAnalytics
@@ -46,8 +47,8 @@ val appModule = module {
     single<ProfilePreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
-
     single { AppCookieManager(get()) }
+    single { ReviewManagerFactory.create(get()) }
 
     single<Gson> { GsonBuilder().create() }
 
@@ -63,7 +64,6 @@ val appModule = module {
     single<CourseRouter> { get<AppRouter>() }
     single<DiscussionRouter> { get<AppRouter>() }
     single<ProfileRouter> { get<AppRouter>() }
-
 
     single { NetworkConnection(get()) }
 

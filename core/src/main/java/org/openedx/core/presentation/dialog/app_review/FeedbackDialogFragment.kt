@@ -5,14 +5,18 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
+import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.utils.EmailUtil
 
-class RateDialogFragment: BaseAppReviewDialogFragment() {
+class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
+
+    private var wasShareClicked = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -24,38 +28,42 @@ class RateDialogFragment: BaseAppReviewDialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val rating = rememberSaveable { mutableIntStateOf(0) }
-                RateDialog(
-                    rating = rating,
-                    onNotNowClick = this@RateDialogFragment::notNowClick,
-                    onSubmitClick = {
-                        onSubmitClick(rating.intValue)
+                val feedback = rememberSaveable { mutableStateOf("") }
+                FeedbackDialog(
+                    feedback = feedback,
+                    onNotNowClick = this@FeedbackDialogFragment::notNowClick,
+                    onShareClick = {
+                        onShareClick(feedback.value)
                     }
                 )
             }
         }
     }
 
-    private fun onSubmitClick(rating: Int) {
-        dismiss()
-        if (rating > 3) {
+    override fun onResume() {
+        super.onResume()
+        if (wasShareClicked) {
             openThankYouDialog()
-        } else {
-            openFeedbackDialog()
+            dismiss()
         }
     }
 
-    private fun openFeedbackDialog() {
-        val dialog = FeedbackDialogFragment.newInstance()
-        dialog.show(
-            requireActivity().supportFragmentManager,
-            SelectBottomDialogFragment::class.simpleName
+    private fun onShareClick(feedback: String) {
+        wasShareClicked = true
+        sendEmail(feedback)
+    }
+
+    private fun sendEmail(feedback: String) {
+        EmailUtil.showFeedbackScreen(
+            context = requireContext(),
+            subject = feedback,
+            appVersion = (requireActivity() as AppDataHolder).appData.versionName
         )
     }
 
     private fun openThankYouDialog() {
         val dialog = ThankYouDialogFragment.newInstance(
-            isFeedbackPositive = true
+            isFeedbackPositive = false
         )
         dialog.show(
             requireActivity().supportFragmentManager,
@@ -64,8 +72,8 @@ class RateDialogFragment: BaseAppReviewDialogFragment() {
     }
 
     companion object {
-        fun newInstance(): RateDialogFragment {
-            return RateDialogFragment()
+        fun newInstance(): FeedbackDialogFragment {
+            return FeedbackDialogFragment()
         }
     }
 }
