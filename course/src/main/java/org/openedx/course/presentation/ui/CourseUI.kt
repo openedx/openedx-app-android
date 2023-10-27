@@ -349,7 +349,7 @@ fun NavigationUnitsButtons(
     val nextButtonIcon = if (hasNextBlock) {
         painterResource(id = org.openedx.core.R.drawable.core_ic_down)
     } else {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_check)
+        painterResource(id = org.openedx.core.R.drawable.core_ic_check_in_box)
     }
 
     val subModifier = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {

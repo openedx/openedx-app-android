@@ -63,7 +63,7 @@ class DownloadWorker(
         return ForegroundInfo(
             NOTIFICATION_ID,
             notificationBuilder
-                .setSmallIcon(R.drawable.core_ic_check)
+                .setSmallIcon(R.drawable.core_ic_check_in_box)
                 .setProgress(100, 0, false)
                 .setPriority(NotificationManager.IMPORTANCE_LOW)
                 .setContentText(context.getString(R.string.core_downloading_in_progress))
@@ -80,7 +80,7 @@ class DownloadWorker(
                         notificationManager.notify(
                             NOTIFICATION_ID,
                             notificationBuilder
-                                .setSmallIcon(R.drawable.core_ic_check)
+                                .setSmallIcon(R.drawable.core_ic_check_in_box)
                                 .setProgress(100, value.toInt(), false)
                                 .setPriority(NotificationManager.IMPORTANCE_LOW)
                                 .setContentText(context.getString(R.string.core_downloading_in_progress))
