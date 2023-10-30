@@ -1,5 +1,6 @@
 package org.openedx.core.presentation.dialog.appreview
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
@@ -17,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -47,6 +46,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -69,8 +69,15 @@ fun ThankYouDialog(
     onNotNowClick: () -> Unit,
     onRateUsClick: () -> Unit
 ) {
+    val orientation = LocalConfiguration.current.orientation
+    val imageModifier = if (orientation == ORIENTATION_LANDSCAPE) {
+        Modifier.size(40.dp)
+    } else {
+        Modifier
+    }
+
     DefaultDialogBox(
-        modifier = modifier.verticalScroll(rememberScrollState()),
+        modifier = modifier,
         onDismissClock = onNotNowClick
     ) {
         Column(
@@ -81,6 +88,7 @@ fun ThankYouDialog(
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             Image(
+                modifier = imageModifier,
                 painter = painterResource(id = R.drawable.core_ic_heart),
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
@@ -122,6 +130,13 @@ fun FeedbackDialog(
     onNotNowClick: () -> Unit,
     onShareClick: () -> Unit
 ) {
+    val orientation = LocalConfiguration.current.orientation
+    val textFieldModifier = if (orientation == ORIENTATION_LANDSCAPE) {
+        Modifier.height(80.dp)
+    } else {
+        Modifier.height(162.dp)
+    }
+
     DefaultDialogBox(
         modifier = modifier,
         onDismissClock = onNotNowClick
@@ -148,7 +163,7 @@ fun FeedbackDialog(
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(162.dp),
+                    .then(textFieldModifier),
                 value = feedback.value,
                 onValueChange = { str ->
                     feedback.value = str
