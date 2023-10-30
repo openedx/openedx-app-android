@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.dialog.app_review
+package org.openedx.core.presentation.dialog.appreview
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable

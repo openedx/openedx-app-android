@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.dialog.app_review
+package org.openedx.core.presentation.dialog.appreview
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES

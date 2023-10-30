@@ -1,5 +1,6 @@
 package org.openedx.app.di
 
+import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -12,6 +13,7 @@ import org.koin.dsl.module
 import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
 import org.openedx.app.AppRouter
+import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
@@ -23,6 +25,8 @@ import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -119,6 +123,9 @@ val appModule = module {
     single {
         DownloadWorkerController(get(), get(), get())
     }
+
+    single { AppData(BuildConfig.VERSION_NAME) }
+    single { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }
     single { WhatsNewFileManager(get()) }

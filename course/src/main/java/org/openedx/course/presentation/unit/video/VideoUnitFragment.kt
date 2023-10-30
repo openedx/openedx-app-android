@@ -17,15 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.media3.cast.CastPlayer
 import androidx.media3.cast.SessionAvailabilityListener
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.window.layout.WindowMetricsCalculator
-import com.google.android.gms.cast.framework.CastContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -34,6 +30,7 @@ import org.openedx.core.extension.dpToPixel
 import org.openedx.core.extension.objectToString
 import org.openedx.core.extension.stringToObject
 import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -45,7 +42,6 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.ConnectionErrorView
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
-import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
@@ -58,6 +54,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         )
     }
     private val router by inject<CourseRouter>()
+    private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
 
     private var windowSize: WindowSize? = null
 
@@ -171,6 +168,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         viewModel.isUpdated.observe(viewLifecycleOwner) { isUpdated ->
             if (isUpdated) {
                 initPlayer()
+            }
+        }
+
+        viewModel.isVideoEnded.observe(viewLifecycleOwner) { isVideoEnded ->
+            if (isVideoEnded && !appReviewManager.isDialogShowed) {
+                appReviewManager.tryToOpenRateDialog()
             }
         }
     }

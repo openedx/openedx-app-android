@@ -1,17 +1,17 @@
-package org.openedx.core.presentation.dialog.app_review
+package org.openedx.core.presentation.dialog.appreview
 
 import androidx.fragment.app.DialogFragment
 import org.koin.android.ext.android.inject
 import org.openedx.core.data.storage.InAppReviewPreferences
-import org.openedx.core.presentation.global.AppDataHolder
+import org.openedx.core.presentation.global.AppData
 
 open class BaseAppReviewDialogFragment : DialogFragment() {
 
     private val reviewPreferences: InAppReviewPreferences by inject()
+    private val appData: AppData by inject()
 
     fun saveVersionName() {
-        //TODO Don't get the version name from the activity
-        val versionName = (requireActivity() as AppDataHolder).appData.versionName
+        val versionName = appData.versionName
         reviewPreferences.setVersion(versionName)
     }
 

@@ -13,9 +13,11 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.utils.YouTubePlayerTracker
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiController
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
@@ -23,10 +25,10 @@ import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
 class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_full_screen) {
 
     private val binding by viewBinding(FragmentYoutubeVideoFullScreenBinding::bind)
-
     private val viewModel by viewModel<VideoViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
+    private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
 
     private var blockId = ""
 
@@ -67,8 +69,9 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             .build()
 
 
-        binding.youtubePlayerView.initialize(object :
-            AbstractYouTubePlayerListener() {
+        binding.youtubePlayerView.initialize(object : AbstractYouTubePlayerListener() {
+            var isMarkBlockCompletedCalled = false
+
             override fun onStateChange(
                 youTubePlayer: YouTubePlayer,
                 state: PlayerConstants.PlayerState
@@ -88,8 +91,14 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.currentVideoTime = (second * 1000f).toLong()
                 val completePercentage = second / youtubeTrackerListener.videoDuration
-                if (completePercentage >= 0.8f) {
+                if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
                     viewModel.markBlockCompleted(blockId)
+                    isMarkBlockCompletedCalled = true
+                }
+                if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
+                    if (!appReviewManager.isDialogShowed) {
+                        appReviewManager.tryToOpenRateDialog()
+                    }
                 }
             }
 

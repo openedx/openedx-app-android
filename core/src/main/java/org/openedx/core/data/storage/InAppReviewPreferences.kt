@@ -1,16 +1,28 @@
 package org.openedx.core.data.storage
 
 interface InAppReviewPreferences {
-    var lastReviewMajorVersion: Int
-    var lastReviewMinorVersion: Int
+    var lastReviewVersion: VersionName
     var wasPositiveRated: Boolean
 
     fun setVersion(version: String) {
-        version
+        lastReviewVersion = formatVersionName(version)
+    }
+
+    fun formatVersionName(version: String) = version
             .split(".")
-            .also {
-                lastReviewMajorVersion = it[0].toInt()
-                lastReviewMinorVersion = it[1].toInt()
+            .let {
+                VersionName(
+                    majorVersion = it[0].toInt(),
+                    minorVersion = it[1].toInt()
+                )
             }
+
+    data class VersionName(
+        var majorVersion: Int,
+        var minorVersion: Int
+    ) {
+        companion object {
+            val default = VersionName(Int.MIN_VALUE, Int.MIN_VALUE)
+        }
     }
 }

@@ -16,10 +16,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
-import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
-import org.openedx.core.presentation.dialog.app_review.RateDialogFragment
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.presentation.global.InsetHolder
@@ -73,29 +70,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder, AppDataH
         lifecycle.addObserver(viewModel)
         setContentView(binding.root)
         val container = binding.rootLayout
-
-        //TODO Transfer to video logic
-        val reviewPreferences: InAppReviewPreferences by inject()
-        val majorVersion: Int
-        val minorVersion: Int
-        appData.versionName
-            .split(".")
-            .also {
-                majorVersion = it[0].toInt()
-                minorVersion = it[1].toInt()
-            }
-        if (
-            !reviewPreferences.wasPositiveRated
-            && minorVersion - 2 >= reviewPreferences.lastReviewMinorVersion
-            || majorVersion - 1 >= reviewPreferences.lastReviewMajorVersion
-        ) {
-            val dialog = RateDialogFragment.newInstance()
-            dialog.show(
-                supportFragmentManager,
-                SelectBottomDialogFragment::class.simpleName
-            )
-        }
-        //
 
         container.addView(object : View(this) {
             override fun onConfigurationChanged(newConfig: Configuration?) {

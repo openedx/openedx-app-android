@@ -11,9 +11,11 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
@@ -24,6 +26,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
     private val viewModel by viewModel<VideoViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
+    private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
 
     private var exoPlayer: ExoPlayer? = null
     private var blockId = ""
@@ -35,6 +38,9 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
+                if (!appReviewManager.isDialogShowed) {
+                    appReviewManager.tryToOpenRateDialog()
+                }
                 viewModel.markBlockCompleted(blockId)
             }
         }

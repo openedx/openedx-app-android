@@ -24,14 +24,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
 
     private fun getString(key: String): String = sharedPreferences.getString(key, "") ?: ""
 
-    private fun saveInt(key: String, value: Int) {
-        sharedPreferences.edit().apply {
-            putInt(key, value)
-        }.apply()
-    }
-
-    private fun getInt(key: String): Int = sharedPreferences.getInt(key, Int.MIN_VALUE)
-
     private fun saveBoolean(key: String, value: Boolean) {
         sharedPreferences.edit().apply {
             putBoolean(key, value)
@@ -97,17 +89,17 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getString(LAST_WHATS_NEW_VERSION)
 
-    override var lastReviewMajorVersion: Int
+    override var lastReviewVersion: InAppReviewPreferences.VersionName
         set(value) {
-            saveInt(LAST_REVIEW_MAJOR_VERSION, value)
+            val versionNameJson = Gson().toJson(value)
+            saveString(LAST_REVIEW_VERSION, versionNameJson)
         }
-        get() = getInt(LAST_REVIEW_MAJOR_VERSION)
+        get() {
+            val versionNameString = getString(LAST_REVIEW_VERSION)
+            return Gson().fromJson(versionNameString, InAppReviewPreferences.VersionName::class.java)
+                ?: InAppReviewPreferences.VersionName.default
+        }
 
-    override var lastReviewMinorVersion: Int
-        set(value) {
-            saveInt(LAST_REVIEW_MINOR_VERSION, value)
-        }
-        get() = getInt(LAST_REVIEW_MINOR_VERSION)
 
     override var wasPositiveRated: Boolean
         set(value) {
@@ -122,8 +114,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val ACCOUNT = "account"
         private const val VIDEO_SETTINGS = "video_settings"
         private const val LAST_WHATS_NEW_VERSION = "last_whats_new_version"
-        private const val LAST_REVIEW_MAJOR_VERSION = "last_review_major_version"
-        private const val LAST_REVIEW_MINOR_VERSION = "last_review_minor_version"
+        private const val LAST_REVIEW_VERSION = "last_review_version"
         private const val APP_WAS_POSITIVE_RATED = "app_was_positive_rated"
     }
 }
