@@ -46,7 +46,7 @@ class SignUpViewModel(
     val validationError: LiveData<Boolean>
         get() = _validationError
 
-    private val _appUpgradeEvent = SingleEventLiveData<AppUpgradeEvent>()
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 

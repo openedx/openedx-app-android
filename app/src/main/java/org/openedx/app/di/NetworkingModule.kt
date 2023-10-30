@@ -1,18 +1,18 @@
 package org.openedx.app.di
 
-import org.openedx.auth.data.api.AuthApi
-import org.openedx.core.data.api.CookiesApi
-import org.openedx.core.data.api.CourseApi
-import org.openedx.discussion.data.api.DiscussionApi
-import org.openedx.app.data.networking.HandleErrorInterceptor
-import org.openedx.app.data.networking.HeadersInterceptor
-import org.openedx.app.data.networking.OauthRefreshTokenAuthenticator
-import org.openedx.profile.data.api.ProfileApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import org.openedx.app.data.networking.AppUpgradeInterceptor
+import org.openedx.app.data.networking.HandleErrorInterceptor
+import org.openedx.app.data.networking.HeadersInterceptor
+import org.openedx.app.data.networking.OauthRefreshTokenAuthenticator
+import org.openedx.auth.data.api.AuthApi
 import org.openedx.core.BuildConfig
+import org.openedx.core.data.api.CookiesApi
+import org.openedx.core.data.api.CourseApi
+import org.openedx.discussion.data.api.DiscussionApi
+import org.openedx.profile.data.api.ProfileApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -25,7 +25,7 @@ val networkingModule = module {
         OkHttpClient.Builder().apply {
             writeTimeout(60, TimeUnit.SECONDS)
             readTimeout(60, TimeUnit.SECONDS)
-            addInterceptor(HeadersInterceptor(get()))
+            addInterceptor(HeadersInterceptor(get(), get()))
             if (BuildConfig.DEBUG) {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }

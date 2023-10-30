@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.dialog.app_upgrade
+package org.openedx.core.presentation.dialog.appupgrade
 
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle

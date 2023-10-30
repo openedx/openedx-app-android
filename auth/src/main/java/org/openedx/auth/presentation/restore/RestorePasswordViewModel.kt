@@ -32,7 +32,7 @@ class RestorePasswordViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
-    private val _appUpgradeEvent = SingleEventLiveData<AppUpgradeEvent>()
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
     val appUpgradeEventUIState: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 

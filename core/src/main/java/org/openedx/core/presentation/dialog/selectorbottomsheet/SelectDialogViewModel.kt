@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.dialog.select_bottom
+package org.openedx.core.presentation.dialog.selectorbottomsheet
 
 import androidx.lifecycle.viewModelScope
 import org.openedx.core.BaseViewModel

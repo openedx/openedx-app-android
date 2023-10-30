@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.dialog.select_bottom
+package org.openedx.core.presentation.dialog.selectorbottomsheet
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable

@@ -1,5 +1,6 @@
 package org.openedx.core.presentation.global.app_upgrade
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -96,6 +98,13 @@ fun AppUpgradeRecommendDialog(
     onNotNowClick: () -> Unit,
     onUpdateClick: () -> Unit
 ) {
+    val orientation = LocalConfiguration.current.orientation
+    val imageModifier = if (orientation == ORIENTATION_LANDSCAPE) {
+        Modifier.size(60.dp)
+    } else {
+        Modifier
+    }
+
     Surface(
         modifier = modifier,
         color = Color.Transparent
@@ -103,6 +112,7 @@ fun AppUpgradeRecommendDialog(
         Box(
             modifier = modifier
                 .fillMaxSize()
+                .padding(horizontal = 12.dp)
                 .noRippleClickable {
                     onNotNowClick()
                 },
@@ -127,6 +137,7 @@ fun AppUpgradeRecommendDialog(
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     Image(
+                        modifier = imageModifier,
                         painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
                         contentDescription = null
                     )
@@ -182,13 +193,6 @@ fun AppUpgradeRequiredContent(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.appTypography.bodyMedium
             )
-//            IconText(
-//                text = stringResource(R.string.core_why_do_you_need_update),
-//                painter = painterResource(id = R.drawable.core_ic_question),
-//                textStyle = MaterialTheme.appTypography.labelLarge,
-//                color = MaterialTheme.appColors.primary,
-//                onClick = {}
-//            )
         }
         AppUpgradeRequiredButtons(
             showAccountSettingsButton = showAccountSettingsButton,

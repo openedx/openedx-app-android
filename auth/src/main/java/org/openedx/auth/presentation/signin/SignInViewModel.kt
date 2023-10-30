@@ -40,7 +40,7 @@ class SignInViewModel(
     val loginSuccess: LiveData<Boolean>
         get() = _loginSuccess
 
-    private val _appUpgradeEvent = SingleEventLiveData<AppUpgradeEvent>()
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
