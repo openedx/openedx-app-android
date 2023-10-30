@@ -15,11 +15,14 @@ import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogView
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
+import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.detail.CourseDetailsViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
+import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
+import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
@@ -41,14 +44,12 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
+import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.video.VideoQualityViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
-import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
-import org.openedx.course.presentation.unit.video.VideoUnitViewModel
-import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
@@ -91,6 +92,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String, blockId: String) -> EncodedVideoUnitViewModel(courseId, blockId, get(), get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseDatesViewModel(courseId, get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
