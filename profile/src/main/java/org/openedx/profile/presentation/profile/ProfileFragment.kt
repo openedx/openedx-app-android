@@ -352,9 +352,8 @@ private fun SupportInfoSection(
                     onClick = {
                         onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
-                            context,
-                            context.getString(R.string.core_email_subject),
-                            appData.versionName
+                            context = context,
+                            appVersion = appData.versionName
                         )
                     }
                 )

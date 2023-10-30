@@ -57,7 +57,7 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
     private fun sendEmail(feedback: String) {
         EmailUtil.showFeedbackScreen(
             context = requireContext(),
-            subject = feedback,
+            feedback = feedback,
             appVersion = (requireActivity() as AppDataHolder).appData.versionName
         )
     }

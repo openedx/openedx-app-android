@@ -11,8 +11,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
+import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.review.ReviewException
 import com.google.android.play.core.review.ReviewManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.openedx.core.R
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -47,6 +50,17 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                     onNotNowClick = this@ThankYouDialogFragment::notNowClick,
                     onRateUsClick = this@ThankYouDialogFragment::openInAppReview
                 )
+
+                closeDialogDelay(isFeedbackPositive.value)
+            }
+        }
+    }
+
+    private fun closeDialogDelay(isFeedbackPositive: Boolean) {
+        if (!isFeedbackPositive) {
+            lifecycleScope.launch {
+                delay(3000)
+                dismiss()
             }
         }
     }
