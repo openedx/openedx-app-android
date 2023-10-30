@@ -49,6 +49,7 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     private fun onShareClick(feedback: String) {
+        saveVersionName()
         wasShareClicked = true
         sendEmail(feedback)
     }
