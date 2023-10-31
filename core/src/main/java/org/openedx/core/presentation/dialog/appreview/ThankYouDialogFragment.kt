@@ -69,10 +69,12 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
         val request = reviewManager.requestReviewFlow()
         request.addOnCompleteListener { task ->
             try {
-                val reviewInfo = task.result
-                val flow = reviewManager.launchReviewFlow(requireActivity(), reviewInfo)
-                flow.addOnCompleteListener { _ ->
-                    onPositiveRate()
+                if (request.isSuccessful) {
+                    val reviewInfo = task.result
+                    val flow = reviewManager.launchReviewFlow(requireActivity(), reviewInfo)
+                    flow.addOnCompleteListener { _ ->
+                        onPositiveRate()
+                    }
                     dismiss()
                 }
             } catch (e: ReviewException) {
