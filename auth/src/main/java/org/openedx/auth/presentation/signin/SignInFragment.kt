@@ -7,15 +7,38 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -33,15 +56,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.core.UIMessage
-import org.openedx.core.ui.*
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.AppUpdateState
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.global.AppDataHolder
@@ -64,33 +98,43 @@ class SignInFragment : Fragment() {
                 val showProgress by viewModel.showProgress.observeAsState(initial = false)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
-                LoginScreen(
-                    windowSize = windowSize,
-                    showProgress = showProgress,
-                    uiMessage = uiMessage,
-                    onLoginClick = { login, password ->
-                        viewModel.login(login, password)
-                    },
-                    onRegisterClick = {
-                        viewModel.signUpClickedEvent()
-                        router.navigateToSignUp(parentFragmentManager)
-                    },
-                    onForgotPasswordClick = {
-                        viewModel.forgotPasswordClickedEvent()
-                        router.navigateToRestorePassword(parentFragmentManager)
-                    }
-                )
+                if (appUpgradeEvent == null) {
+                    LoginScreen(
+                        windowSize = windowSize,
+                        showProgress = showProgress,
+                        uiMessage = uiMessage,
+                        onLoginClick = { login, password ->
+                            viewModel.login(login, password)
+                        },
+                        onRegisterClick = {
+                            viewModel.signUpClickedEvent()
+                            router.navigateToSignUp(parentFragmentManager)
+                        },
+                        onForgotPasswordClick = {
+                            viewModel.forgotPasswordClickedEvent()
+                            router.navigateToRestorePassword(parentFragmentManager)
+                        }
+                    )
 
-                LaunchedEffect(loginSuccess) {
-                    val isNeedToShowWhatsNew = (requireActivity() as AppDataHolder).shouldShowWhatsNew()
-                    if (loginSuccess) {
-                        if (isNeedToShowWhatsNew) {
-                            router.navigateToWhatsNew(parentFragmentManager)
-                        } else {
-                            router.navigateToMain(parentFragmentManager)
+                    LaunchedEffect(loginSuccess) {
+                        val isNeedToShowWhatsNew = (requireActivity() as AppDataHolder).shouldShowWhatsNew()
+                        if (loginSuccess) {
+                            if (isNeedToShowWhatsNew) {
+                                router.navigateToWhatsNew(parentFragmentManager)
+                            } else {
+                                router.navigateToMain(parentFragmentManager)
+                            }
                         }
                     }
+
+                } else {
+                    AppUpgradeRequiredScreen(
+                        onUpdateClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        }
+                    )
                 }
             }
         }

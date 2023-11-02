@@ -25,16 +25,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
+import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.AppUpdateState
+import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.discovery.R
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DiscoveryFragment : Fragment() {
 
@@ -55,6 +60,8 @@ class DiscoveryFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
+                val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -63,6 +70,25 @@ class DiscoveryFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
+                    appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
+                        appUpgradeEvent = appUpgradeEvent,
+                        wasUpdateDialogClosed = wasUpdateDialogClosed,
+                        appUpgradeRecommendedDialog = {
+                            val dialog = AppUpgradeDialogFragment.newInstance()
+                            dialog.show(
+                                requireActivity().supportFragmentManager,
+                                AppUpgradeDialogFragment::class.simpleName
+                            )
+                        },
+                        onAppUpgradeRecommendedBoxClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        },
+                        onAppUpgradeRequired = {
+                            router.navigateToUpgradeRequired(
+                                requireActivity().supportFragmentManager
+                            )
+                        }
+                    ),
                     onSearchClick = {
                         viewModel.discoverySearchBarClickedEvent()
                         router.navigateToCourseSearch(
@@ -100,6 +126,7 @@ internal fun DiscoveryScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
+    appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onReloadClick: () -> Unit,
@@ -267,19 +294,50 @@ internal fun DiscoveryScreen(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                    ) {
+                        when (appUpgradeParameters.appUpgradeEvent) {
+                            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                                if (appUpgradeParameters.wasUpdateDialogClosed) {
+                                    AppUpgradeRecommendedBox(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = appUpgradeParameters.onAppUpgradeRecommendedBoxClick
+                                    )
+                                } else {
+                                    if (!AppUpdateState.wasUpdateDialogDisplayed) {
+                                        AppUpdateState.wasUpdateDialogDisplayed = true
+                                        appUpgradeParameters.appUpgradeRecommendedDialog()
+                                    }
+                                }
                             }
-                        )
+
+                            is AppUpgradeEvent.UpgradeRequiredEvent -> {
+                                if (!AppUpdateState.wasUpdateDialogDisplayed) {
+                                    AppUpdateState.wasUpdateDialogDisplayed = true
+                                    appUpgradeParameters.onAppUpgradeRequired()
+                                }
+                            }
+
+                            else -> {}
+                        }
+
+                        if (!isInternetConnectionShown && !hasInternetConnection) {
+                            OfflineModeDialog(
+                                Modifier
+                                    .fillMaxWidth(),
+                                onDismissCLick = {
+                                    isInternetConnectionShown = true
+                                },
+                                onReloadClick = {
+                                    isInternetConnectionShown = true
+                                    onReloadClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -327,7 +385,8 @@ private fun DiscoveryScreenPreview() {
             onReloadClick = {},
             canLoadMore = false,
             refreshing = false,
-            hasInternetConnection = true
+            hasInternetConnection = true,
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }
@@ -360,7 +419,8 @@ private fun DiscoveryScreenTabletPreview() {
             onReloadClick = {},
             canLoadMore = false,
             refreshing = false,
-            hasInternetConnection = true
+            hasInternetConnection = true,
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }
