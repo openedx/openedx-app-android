@@ -37,6 +37,8 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.WhatsNewFileManager
 import org.openedx.whatsnew.WhatsNewRouter
@@ -59,6 +61,7 @@ val appModule = module {
     single { CourseNotifier() }
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
+    single { AppUpgradeNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }
@@ -68,6 +71,7 @@ val appModule = module {
     single<DiscussionRouter> { get<AppRouter>() }
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
+    single<AppUpgradeRouter> { get<AppRouter>() }
 
 
     single { NetworkConnection(get()) }

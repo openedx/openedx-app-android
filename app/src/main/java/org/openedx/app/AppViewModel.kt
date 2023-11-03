@@ -21,9 +21,9 @@ class AppViewModel(
     private val analytics: AppAnalytics
 ) : BaseViewModel() {
 
+    private val _logoutUser = SingleEventLiveData<Unit>()
     val logoutUser: LiveData<Unit>
         get() = _logoutUser
-    private val _logoutUser = SingleEventLiveData<Unit>()
 
     private var logoutHandledAt: Long = 0
 

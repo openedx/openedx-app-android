@@ -3,6 +3,7 @@ package org.openedx.auth.presentation.signup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.ApiConstants
@@ -14,13 +15,15 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
-import kotlinx.coroutines.launch
+import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 
 class SignUpViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
-    private val preferencesManager: CorePreferences
+    private val preferencesManager: CorePreferences,
+    private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<SignUpUIState>(SignUpUIState.Loading)
@@ -43,8 +46,16 @@ class SignUpViewModel(
     val validationError: LiveData<Boolean>
         get() = _validationError
 
+    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
+    val appUpgradeEvent: LiveData<AppUpgradeEvent>
+        get() = _appUpgradeEvent
+
     private val optionalFields = mutableMapOf<String, String>()
     private val allFields = mutableListOf<RegistrationField>()
+
+    init {
+        collectAppUpgradeEvent()
+    }
 
     fun getRegistrationFields() {
         _uiState.value = SignUpUIState.Loading
@@ -126,6 +137,14 @@ class SignUpViewModel(
             updatedFields.filter { it.required },
             updatedFields.filter { !it.required }
         )
+    }
+
+    private fun collectAppUpgradeEvent() {
+        viewModelScope.launch {
+            appUpgradeNotifier.notifier.collect { event ->
+                _appUpgradeEvent.value = event
+            }
+        }
     }
 
 

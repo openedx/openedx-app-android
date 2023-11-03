@@ -27,7 +27,7 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.computeWindowSizeClasses
 import org.openedx.core.extension.objectToString
 import org.openedx.core.extension.stringToObject
-import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
+import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
