@@ -6,6 +6,7 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
+import org.openedx.core.utils.TimeUtils
 
 class AuthRepository(
     private val api: AuthApi,
@@ -28,6 +29,8 @@ class AuthRepository(
         }
         preferencesManager.accessToken = authResponse.accessToken ?: ""
         preferencesManager.refreshToken = authResponse.refreshToken ?: ""
+        preferencesManager.accessTokenExpiresAt =
+            (authResponse.expiresIn ?: 0L) + TimeUtils.getCurrentTimeInSeconds()
         val user = api.getProfile()
         preferencesManager.user = user
     }

@@ -3,25 +3,35 @@ package org.openedx.app.data.storage
 import android.content.Context
 import com.google.gson.Gson
 import org.openedx.app.BuildConfig
-import org.openedx.core.data.storage.CorePreferences
-import org.openedx.profile.data.model.Account
 import org.openedx.core.data.model.User
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.model.VideoSettings
+import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences, WhatsNewPreferences,
-    InAppReviewPreferences {
+class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,
+    WhatsNewPreferences, InAppReviewPreferences {
 
-    private val sharedPreferences = context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
+    private val sharedPreferences =
+        context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
 
     private fun saveString(key: String, value: String) {
         sharedPreferences.edit().apply {
             putString(key, value)
         }.apply()
     }
+
     private fun getString(key: String): String = sharedPreferences.getString(key, "") ?: ""
+
+    private fun saveLong(key: String, value: Long) {
+        sharedPreferences.edit().apply {
+            putLong(key, value)
+        }.apply()
+    }
+
+    private fun getLong(key: String): Long = sharedPreferences.getLong(key, 0L)
 
     private fun saveBoolean(key: String, value: Boolean) {
         sharedPreferences.edit().apply {
@@ -36,6 +46,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             remove(ACCESS_TOKEN)
             remove(REFRESH_TOKEN)
             remove(USER)
+            remove(EXPIRES_IN)
         }.apply()
     }
 
@@ -50,6 +61,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             saveString(REFRESH_TOKEN, value)
         }
         get() = getString(REFRESH_TOKEN)
+
+    override var accessTokenExpiresAt: Long
+        set(value) {
+            saveLong(EXPIRES_IN, value)
+        }
+        get() = getLong(EXPIRES_IN)
 
     override var user: User?
         set(value) {
@@ -95,7 +112,10 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() {
             val versionNameString = getString(LAST_REVIEW_VERSION)
-            return Gson().fromJson(versionNameString, InAppReviewPreferences.VersionName::class.java)
+            return Gson().fromJson(
+                versionNameString,
+                InAppReviewPreferences.VersionName::class.java
+            )
                 ?: InAppReviewPreferences.VersionName.default
         }
 
@@ -109,6 +129,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
     companion object {
         private const val ACCESS_TOKEN = "access_token"
         private const val REFRESH_TOKEN = "refresh_token"
+        private const val EXPIRES_IN = "expires_in"
         private const val USER = "user"
         private const val ACCOUNT = "account"
         private const val VIDEO_SETTINGS = "video_settings"

@@ -16,4 +16,3 @@ data class AuthResponse(
     @SerializedName("refresh_token")
     var refreshToken: String?,
 )
-

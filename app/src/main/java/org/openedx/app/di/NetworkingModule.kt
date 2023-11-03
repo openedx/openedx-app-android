@@ -31,6 +31,7 @@ val networkingModule = module {
             }
             addInterceptor(HandleErrorInterceptor(get()))
             addInterceptor(AppUpgradeInterceptor(get()))
+            addInterceptor(get<OauthRefreshTokenAuthenticator>())
             authenticator(get<OauthRefreshTokenAuthenticator>())
         }.build()
     }
