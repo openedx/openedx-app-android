@@ -265,6 +265,7 @@ fun DefaultDialogBox(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 4.dp)
                 .noRippleClickable {
                     onDismissClock()
                 },

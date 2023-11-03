@@ -10,7 +10,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 class WhatsNewViewModelTest {
 
-    private val whatsNewFileManager = mockk<WhatsNewFileManager>()
+    private val whatsNewManager = mockk<WhatsNewManagerManager>()
 
     private val whatsNewItem = WhatsNewItem(
         version = "1.0.0",
@@ -19,13 +19,13 @@ class WhatsNewViewModelTest {
 
     @Test
     fun `getNewestData success`() = runTest {
-        every { whatsNewFileManager.getNewestData() } returns whatsNewItem
+        every { whatsNewManager.getNewestData() } returns whatsNewItem
 
         val viewModel = WhatsNewViewModel(
-            whatsNewFileManager
+            whatsNewManager
         )
 
-        verify(exactly = 1) { whatsNewFileManager.getNewestData() }
+        verify(exactly = 1) { whatsNewManager.getNewestData() }
         assert(viewModel.whatsNewItem.value == whatsNewItem)
     }
 }

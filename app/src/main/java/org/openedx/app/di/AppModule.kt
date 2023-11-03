@@ -27,6 +27,7 @@ import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
+import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -46,7 +47,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.system.notifier.AppUpgradeNotifier
-import org.openedx.whatsnew.WhatsNewFileManager
+import org.openedx.whatsnew.WhatsNewManagerManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
@@ -132,7 +133,8 @@ val appModule = module {
     single { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }
-    single { WhatsNewFileManager(get()) }
+    single { WhatsNewManagerManager(get(), get(), get()) }
+    single<WhatsNewGlobalManager> { get<WhatsNewManagerManager>() }
 
     single { AnalyticsManager(get()) }
     single<DashboardAnalytics> { get<AnalyticsManager>() }

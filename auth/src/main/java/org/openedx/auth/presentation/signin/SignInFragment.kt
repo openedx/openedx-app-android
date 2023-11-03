@@ -76,14 +76,13 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.AppUpdateState
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.presentation.global.AppDataHolder
+import org.openedx.core.presentation.global.WhatsNewGlobalManager
 
 class SignInFragment : Fragment() {
 
     private val viewModel: SignInViewModel by viewModel()
     private val router: AuthRouter by inject()
+    private val whatsNewGlobalManager by inject<WhatsNewGlobalManager>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -119,7 +118,7 @@ class SignInFragment : Fragment() {
                     )
 
                     LaunchedEffect(loginSuccess) {
-                        val isNeedToShowWhatsNew = (requireActivity() as AppDataHolder).shouldShowWhatsNew()
+                        val isNeedToShowWhatsNew = whatsNewGlobalManager.shouldShowWhatsNew()
                         if (loginSuccess) {
                             if (isNeedToShowWhatsNew) {
                                 router.navigateToWhatsNew(parentFragmentManager)

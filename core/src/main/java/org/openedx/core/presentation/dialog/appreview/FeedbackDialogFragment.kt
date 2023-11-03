@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.utils.EmailUtil
 
@@ -58,7 +57,7 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
         EmailUtil.showFeedbackScreen(
             context = requireContext(),
             feedback = feedback,
-            appVersion = (requireActivity() as AppDataHolder).appData.versionName
+            appVersion = appData.versionName
         )
     }
 
