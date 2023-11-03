@@ -8,4 +8,6 @@ interface DiscoveryRouter {
 
     fun navigateToCourseSearch(fm: FragmentManager)
 
+    fun navigateToUpgradeRequired(fm: FragmentManager)
+
 }

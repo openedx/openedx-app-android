@@ -20,6 +20,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -29,6 +30,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.domain.model.ProfileImage
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -45,6 +47,7 @@ class ProfileViewModelTest {
     private val cookieManager = mockk<AppCookieManager>()
     private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<ProfileAnalytics>()
+    private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
 
     private val account = org.openedx.profile.domain.model.Account(
         username = "",
@@ -73,6 +76,7 @@ class ProfileViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { appUpgradeNotifier.notifier } returns emptyFlow()
     }
 
     @After
@@ -89,13 +93,15 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assert(viewModel.uiState.value is ProfileUIState.Loading)
@@ -111,13 +117,15 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns account
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assert(viewModel.uiState.value is ProfileUIState.Data)
@@ -133,13 +141,15 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
         coEvery { interactor.getAccount() } throws Exception()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assert(viewModel.uiState.value is ProfileUIState.Loading)
@@ -155,13 +165,15 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
         coEvery { interactor.getAccount() } returns account
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         assert(viewModel.uiState.value is ProfileUIState.Data)
         assert(viewModel.uiMessage.value == null)
@@ -176,19 +188,22 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.logout() } throws UnknownHostException()
         coEvery { workerController.cancelWork() } returns Unit
-
+        every { analytics.logoutEvent(false) } returns Unit
+        every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.logout() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
-        assert(viewModel.successLogout.value == null)
+        assert(viewModel.successLogout.value == true)
     }
 
     @Test
@@ -200,18 +215,24 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.logout() } throws Exception()
         coEvery { workerController.cancelWork() } returns Unit
+        every { analytics.logoutEvent(false) } returns Unit
+        every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.logout() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { cookieManager.clearWebViewCookie() }
+        verify { analytics.logoutEvent(false) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
-        assert(viewModel.successLogout.value == null)
+        assert(viewModel.successLogout.value == true)
     }
 
     @Test
@@ -223,7 +244,8 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns mockk()
         coEvery { interactor.getAccount() } returns mockk()
@@ -235,6 +257,8 @@ class ProfileViewModelTest {
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.logout() }
         verify { analytics.logoutEvent(false) }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { cookieManager.clearWebViewCookie() }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.successLogout.value == true)
@@ -249,7 +273,8 @@ class ProfileViewModelTest {
             dispatcher,
             cookieManager,
             workerController,
-            analytics
+            analytics,
+            appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
         every { notifier.notifier } returns flow { emit(AccountUpdated()) }
@@ -261,6 +286,7 @@ class ProfileViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 2) { interactor.getAccount() }
+        verify(exactly = 1) { appUpgradeNotifier.notifier }
     }
 
 }

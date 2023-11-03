@@ -19,7 +19,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             putString(key, value)
         }.apply()
     }
-
     private fun getString(key: String): String = sharedPreferences.getString(key, "") ?: ""
 
     override fun clear() {

@@ -1,20 +1,23 @@
 package org.openedx.app.di
 
+import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+import org.openedx.app.AppViewModel
+import org.openedx.app.MainViewModel
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
-import org.openedx.profile.domain.model.Account
-import org.openedx.core.presentation.dialog.SelectDialogViewModel
+import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.detail.CourseDetailsViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
-import org.openedx.discovery.presentation.search.CourseSearchViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
@@ -25,6 +28,7 @@ import org.openedx.dashboard.presentation.DashboardViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.DiscoveryViewModel
+import org.openedx.discovery.presentation.search.CourseSearchViewModel
 import org.openedx.discussion.data.repository.DiscussionRepository
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionComment
@@ -34,17 +38,14 @@ import org.openedx.discussion.presentation.search.DiscussionSearchThreadViewMode
 import org.openedx.discussion.presentation.threads.DiscussionAddThreadViewModel
 import org.openedx.discussion.presentation.threads.DiscussionThreadsViewModel
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
-import org.openedx.app.AppViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.video.VideoQualityViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
@@ -53,25 +54,26 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 val screenModule = module {
 
     viewModel { AppViewModel(get(), get(), get(), get(named("IODispatcher")), get()) }
+    viewModel { MainViewModel() }
 
     factory { AuthRepository(get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
-    viewModel { SignInViewModel(get(), get(), get(), get(), get()) }
-    viewModel { SignUpViewModel(get(), get(), get(), get()) }
-    viewModel { RestorePasswordViewModel(get(), get(), get()) }
+    viewModel { SignInViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { SignUpViewModel(get(), get(), get(), get(), get()) }
+    viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
     factory { DashboardRepository(get(), get(),get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get()) }
+    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
-    viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get()) }
+    viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get(), get()) }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get()) }
     viewModel { VideoQualityViewModel(get(), get()) }
