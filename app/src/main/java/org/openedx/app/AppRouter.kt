@@ -10,6 +10,8 @@ import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.FragmentViewType
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
+import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
@@ -36,6 +38,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
+import org.openedx.profile.presentation.profile.ProfileFragment
 import org.openedx.profile.presentation.settings.video.VideoQualityFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
@@ -43,7 +46,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 import java.util.Date
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, WhatsNewRouter {
+    ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
     override fun navigateToMain(fm: FragmentManager) {
@@ -76,6 +79,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToCourseSearch(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, CourseSearchFragment())
+    }
+
+    override fun navigateToUpgradeRequired(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
     }
     //endregion
 
@@ -287,6 +294,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm.beginTransaction()
             .setTransition(transaction)
             .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+            .commit()
+    }
+
+    //App upgrade
+    override fun navigateToUserProfile(fm: FragmentManager) {
+        fm.popBackStack()
+        fm.beginTransaction()
+            .replace(R.id.container, ProfileFragment())
             .commit()
     }
 }

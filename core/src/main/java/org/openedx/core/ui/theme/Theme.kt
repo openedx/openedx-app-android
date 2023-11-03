@@ -30,7 +30,7 @@ private val DarkColorPalette = AppColors(
     textPrimaryVariant = Color(0xFF79889F),
     textSecondary = Color(0xFFB3B3B3),
     textDark = Color(0xFF19212F),
-    textAccent = Color(0xFF5478F9),
+    textAccent = Color(0xFF879FF5),
 
     textFieldBackground = Color(0xFF273346),
     textFieldBackgroundVariant = Color(0xFF273346),
@@ -54,7 +54,9 @@ private val DarkColorPalette = AppColors(
 
     rateStars = Color(0xFFFFC94D),
     inactiveButtonBackground = Color(0xFFCCD4E0),
-    inactiveButtonText = Color(0xFF3D4964)
+    inactiveButtonText = Color(0xFF3D4964),
+
+    accessGreen = Color(0xFF23BCA0)
 )
 
 private val LightColorPalette = AppColors(
@@ -100,7 +102,9 @@ private val LightColorPalette = AppColors(
 
     rateStars = Color(0xFFFFC94D),
     inactiveButtonBackground = Color(0xFFCCD4E0),
-    inactiveButtonText = Color(0xFF3D4964)
+    inactiveButtonText = Color(0xFF3D4964),
+
+    accessGreen = Color(0xFF23BCA0)
 )
 
 val MaterialTheme.appColors: AppColors

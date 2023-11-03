@@ -44,6 +44,8 @@ import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.whatsnew.WhatsNewFileManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
@@ -66,6 +68,7 @@ val appModule = module {
     single { CourseNotifier() }
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
+    single { AppUpgradeNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }
@@ -75,6 +78,7 @@ val appModule = module {
     single<DiscussionRouter> { get<AppRouter>() }
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
+    single<AppUpgradeRouter> { get<AppRouter>() }
 
     single { NetworkConnection(get()) }
 

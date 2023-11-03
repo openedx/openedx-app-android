@@ -43,11 +43,14 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.AppUpdateState
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.*
@@ -75,6 +78,7 @@ class DashboardFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
 
                 MyCoursesScreen(
                     windowSize = windowSize,
@@ -99,7 +103,13 @@ class DashboardFragment : Fragment() {
                     },
                     paginationCallback = {
                         viewModel.fetchMore()
-                    }
+                    },
+                    appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
+                        appUpgradeEvent = appUpgradeEvent,
+                        onAppUpgradeRecommendedBoxClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        },
+                    ),
                 )
             }
         }
@@ -119,6 +129,7 @@ internal fun MyCoursesScreen(
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
+    appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -294,19 +305,35 @@ internal fun MyCoursesScreen(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                    ) {
+                        when (appUpgradeParameters.appUpgradeEvent) {
+                            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                                AppUpgradeRecommendedBox(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = appUpgradeParameters.onAppUpgradeRecommendedBoxClick
+                                )
                             }
-                        )
+
+                            else -> {}
+                        }
+
+                        if (!isInternetConnectionShown && !hasInternetConnection) {
+                            OfflineModeDialog(
+                                Modifier
+                                    .fillMaxWidth(),
+                                onDismissCLick = {
+                                    isInternetConnectionShown = true
+                                },
+                                onReloadClick = {
+                                    isInternetConnectionShown = true
+                                    onReloadClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -494,7 +521,8 @@ private fun MyCoursesScreenDay() {
             hasInternetConnection = true,
             refreshing = false,
             canLoadMore = false,
-            paginationCallback = {}
+            paginationCallback = {},
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }
@@ -523,7 +551,8 @@ private fun MyCoursesScreenTabletPreview() {
             hasInternetConnection = true,
             refreshing = false,
             canLoadMore = false,
-            paginationCallback = {}
+            paginationCallback = {},
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
 }

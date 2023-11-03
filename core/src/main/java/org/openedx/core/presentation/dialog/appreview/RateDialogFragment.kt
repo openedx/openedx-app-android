@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
 import org.openedx.core.ui.theme.OpenEdXTheme
 
 class RateDialogFragment: BaseAppReviewDialogFragment() {
@@ -49,7 +48,7 @@ class RateDialogFragment: BaseAppReviewDialogFragment() {
         val dialog = FeedbackDialogFragment.newInstance()
         dialog.show(
             requireActivity().supportFragmentManager,
-            SelectBottomDialogFragment::class.simpleName
+            FeedbackDialogFragment::class.simpleName
         )
     }
 

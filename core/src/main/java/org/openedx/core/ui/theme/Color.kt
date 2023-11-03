@@ -33,7 +33,9 @@ data class AppColors(
 
     val rateStars: Color,
     val inactiveButtonBackground: Color,
-    val inactiveButtonText: Color
+    val inactiveButtonText: Color,
+
+    val accessGreen:Color
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant

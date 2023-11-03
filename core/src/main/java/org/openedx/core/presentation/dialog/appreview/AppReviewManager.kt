@@ -2,7 +2,6 @@ package org.openedx.core.presentation.dialog.appreview
 
 import androidx.appcompat.app.AppCompatActivity
 import org.openedx.core.data.storage.InAppReviewPreferences
-import org.openedx.core.presentation.dialog.SelectBottomDialogFragment
 import org.openedx.core.presentation.global.AppData
 
 class AppReviewManager(
@@ -25,7 +24,7 @@ class AppReviewManager(
                 val dialog = RateDialogFragment.newInstance()
                 dialog.show(
                     supportFragmentManager,
-                    SelectBottomDialogFragment::class.simpleName
+                    RateDialogFragment::class.simpleName
                 )
             }
         }
