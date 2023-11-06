@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +42,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
@@ -61,8 +63,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.ui.LoginTextField
+import org.openedx.core.AppUpdateState
+import org.openedx.core.BuildConfig
 import org.openedx.core.UIMessage
+import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
+import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.WindowSize
@@ -75,7 +81,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.AppUpdateState
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 
 class SignInFragment : Fragment() {
@@ -114,11 +119,14 @@ class SignInFragment : Fragment() {
                         onForgotPasswordClick = {
                             viewModel.forgotPasswordClickedEvent()
                             router.navigateToRestorePassword(parentFragmentManager)
+                        },
+                        onBackClick = {
+                            requireActivity().supportFragmentManager.popBackStackImmediate()
                         }
                     )
-
                     LaunchedEffect(loginSuccess) {
-                        val isNeedToShowWhatsNew = whatsNewGlobalManager.shouldShowWhatsNew()
+                        val isNeedToShowWhatsNew =
+                            whatsNewGlobalManager.shouldShowWhatsNew()
                         if (loginSuccess) {
                             if (isNeedToShowWhatsNew) {
                                 router.navigateToWhatsNew(parentFragmentManager)
@@ -126,8 +134,8 @@ class SignInFragment : Fragment() {
                                 router.navigateToMain(parentFragmentManager)
                             }
                         }
-                    }
 
+                    }
                 } else {
                     AppUpgradeRequiredScreen(
                         onUpdateClick = {
@@ -147,7 +155,8 @@ private fun LoginScreen(
     uiMessage: UIMessage?,
     onLoginClick: (login: String, password: String) -> Unit,
     onRegisterClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+    onForgotPasswordClick: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
@@ -196,7 +205,21 @@ private fun LoginScreen(
             uiMessage = uiMessage,
             scaffoldState = scaffoldState
         )
-
+        if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
+            Box(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BackBtn(
+                    modifier = Modifier.padding(end = 16.dp),
+                    tint = Color.White
+                ) {
+                    onBackClick()
+                }
+            }
+        }
         Column(
             Modifier.padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -292,14 +315,16 @@ private fun AuthForm(
                 .fillMaxWidth()
                 .padding(top = 20.dp, bottom = 36.dp)
         ) {
-            Text(
-                modifier = Modifier.noRippleClickable {
-                    onRegisterClick()
-                },
-                text = stringResource(id = R.string.auth_register),
-                color = MaterialTheme.appColors.primary,
-                style = MaterialTheme.appTypography.labelLarge
-            )
+            if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED.not()) {
+                Text(
+                    modifier = Modifier.noRippleClickable {
+                        onRegisterClick()
+                    },
+                    text = stringResource(id = R.string.auth_register),
+                    color = MaterialTheme.appColors.primary,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 modifier = Modifier.noRippleClickable {
@@ -393,7 +418,8 @@ private fun SignInScreenPreview() {
 
             },
             onRegisterClick = {},
-            onForgotPasswordClick = {}
+            onForgotPasswordClick = {},
+            onBackClick = {},
         )
     }
 }
@@ -412,7 +438,8 @@ private fun SignInScreenTabletPreview() {
 
             },
             onRegisterClick = {},
-            onForgotPasswordClick = {}
+            onForgotPasswordClick = {},
+            onBackClick = {},
         )
     }
 }

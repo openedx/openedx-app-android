@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -62,6 +63,7 @@ class DiscoveryFragment : Fragment() {
                 val refreshing by viewModel.isUpdating.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
                 val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
+                val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -93,7 +95,7 @@ class DiscoveryFragment : Fragment() {
                     onSearchClick = {
                         viewModel.discoverySearchBarClickedEvent()
                         router.navigateToCourseSearch(
-                            requireActivity().supportFragmentManager
+                            requireActivity().supportFragmentManager, ""
                         )
                     },
                     paginationCallback = {
@@ -111,8 +113,32 @@ class DiscoveryFragment : Fragment() {
                             requireParentFragment().parentFragmentManager,
                             course.id
                         )
+                    },
+                    onBackClick = {
+                        requireActivity().supportFragmentManager.popBackStackImmediate()
                     })
+                LaunchedEffect(key1 = uiState) {
+                    if (querySearch.isNotEmpty()) {
+                        router.navigateToCourseSearch(
+                            requireActivity().supportFragmentManager, querySearch
+                        )
+                        arguments?.let {
+                            it.putString(ARG_SEARCH_QUERY, "")
+                        }
+                    }
+                }
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_SEARCH_QUERY = "query_search"
+        fun newInstance(querySearch: String): DiscoveryFragment {
+            val fragment = DiscoveryFragment()
+            fragment.arguments = bundleOf(
+                ARG_SEARCH_QUERY to querySearch
+            )
+            return fragment
         }
     }
 }
@@ -133,7 +159,8 @@ internal fun DiscoveryScreen(
     onSwipeRefresh: () -> Unit,
     onReloadClick: () -> Unit,
     paginationCallback: () -> Unit,
-    onItemClick: (Course) -> Unit
+    onItemClick: (Course) -> Unit,
+    onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -185,6 +212,21 @@ internal fun DiscoveryScreen(
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
+        if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
+            Box(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BackBtn(
+                    modifier = Modifier.padding(end = 16.dp),
+                    tint = MaterialTheme.appColors.primary
+                ) {
+                    onBackClick()
+                }
+            }
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -391,7 +433,8 @@ private fun DiscoveryScreenPreview() {
             canLoadMore = false,
             refreshing = false,
             hasInternetConnection = true,
-            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
+            onBackClick = {},
         )
     }
 }
@@ -426,7 +469,8 @@ private fun DiscoveryScreenTabletPreview() {
             canLoadMore = false,
             refreshing = false,
             hasInternetConnection = true,
-            appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
+            appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
+            onBackClick = {},
         )
     }
 }

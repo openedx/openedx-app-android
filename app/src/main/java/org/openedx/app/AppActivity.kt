@@ -10,6 +10,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -24,6 +25,7 @@ import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
+import org.openedx.core.BuildConfig as coreBuildConfig
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
@@ -110,21 +112,19 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (savedInstanceState == null) {
             when {
                 corePreferencesManager.user == null -> {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.container, SignInFragment())
-                        .commit()
+                    if (coreBuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
+                        addFragment(PreAuthFragment())
+                    } else {
+                        addFragment(SignInFragment())
+                    }
                 }
 
                 whatsNewManager.shouldShowWhatsNew() -> {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.container, WhatsNewFragment())
-                        .commit()
+                    addFragment(WhatsNewFragment())
                 }
 
                 corePreferencesManager.user != null -> {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.container, MainFragment())
-                        .commit()
+                    addFragment(MainFragment())
                 }
             }
         }
@@ -132,6 +132,12 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         viewModel.logoutUser.observe(this) {
             profileRouter.restartApp(supportFragmentManager)
         }
+    }
+
+    private fun addFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .add(R.id.container, fragment)
+            .commit()
     }
 
     private fun computeWindowSizeClasses() {
