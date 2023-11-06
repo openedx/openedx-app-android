@@ -331,7 +331,8 @@ fun DefaultTextButton(
         modifier = Modifier
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor
+            backgroundColor = backgroundColor,
+            contentColor = textColor
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -344,7 +345,6 @@ fun DefaultTextButton(
         ) {
             Text(
                 text = text,
-                color = textColor,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
