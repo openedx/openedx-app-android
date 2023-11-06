@@ -27,7 +27,7 @@
     <string name="core_reload">Reload</string>
     <string name="core_downloading_in_progress">Downloading in progress</string>
     <string name="auto_recommended_text">Auto (Recommended)</string>
-    <string name="video_quality_p360">360p (Smallest file size)</string>
+    <string name="video_quality_p360">360p (Lower data usage)</string>
     <string name="video_quality_p540">540p</string>
     <string name="video_quality_p720">720p (Best quality)</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>

@@ -121,7 +121,7 @@ private fun VideoQualityScreen(
                     Text(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        text = stringResource(id = profileR.string.profile_video_download_quality),
+                        text = stringResource(id = profileR.string.profile_video_streaming_quality),
                         color = MaterialTheme.appColors.textPrimary,
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.appTypography.titleMedium

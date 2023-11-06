@@ -198,7 +198,7 @@ private fun VideoSettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(id = profileR.string.profile_video_download_quality),
+                                text = stringResource(id = profileR.string.profile_video_streaming_quality),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
