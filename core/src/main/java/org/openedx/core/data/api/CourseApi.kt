@@ -1,7 +1,7 @@
 package org.openedx.core.data.api
 
-import org.openedx.core.data.model.*
 import okhttp3.ResponseBody
+import org.openedx.core.data.model.*
 import retrofit2.http.*
 
 interface CourseApi {
@@ -64,6 +64,9 @@ interface CourseApi {
         @Body
         blocksCompletionBody: BlocksCompletionBody
     )
+
+    @GET("/api/course_home/v1/dates/{course_id}")
+    suspend fun getCourseDates(@Path("course_id") courseId: String): CourseDates
 
     @GET("/api/mobile/v1/course_info/{course_id}/handouts")
     suspend fun getHandouts(@Path("course_id") courseId: String): HandoutsModel
