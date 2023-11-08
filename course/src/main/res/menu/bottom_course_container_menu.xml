@@ -20,6 +20,12 @@
         android:icon="@drawable/ic_course_navigation_discussions"/>
 
     <item
+        android:id="@+id/dates"
+        android:title="@string/course_navigation_dates"
+        android:enabled="true"
+        android:icon="@drawable/ic_calendar_month"/>
+
+    <item
         android:id="@+id/resources"
         android:title="@string/course_navigation_handouts"
         android:enabled="true"

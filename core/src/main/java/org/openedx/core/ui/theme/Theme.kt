@@ -56,7 +56,15 @@ private val DarkColorPalette = AppColors(
     inactiveButtonBackground = Color(0xFFCCD4E0),
     inactiveButtonText = Color(0xFF3D4964),
 
-    accessGreen = Color(0xFF23BCA0)
+    accessGreen = Color(0xFF23BCA0),
+
+    datesBadgeDefault = Color(0xFFF2F0EF),
+    datesBadgeTextDefault = Color(0xFF454545),
+    datesBadgePastDue = Color(0xFFD7D3D1),
+    datesBadgeToday = Color(0xFFD6B600),
+    datesBadgeTextToday = Color(0xFF000000),
+    datesBadgeDue = Color(0xFF707070),
+    datesBadgeTextDue = Color(0xFFFFFFFF)
 )
 
 private val LightColorPalette = AppColors(
@@ -104,7 +112,15 @@ private val LightColorPalette = AppColors(
     inactiveButtonBackground = Color(0xFFCCD4E0),
     inactiveButtonText = Color(0xFF3D4964),
 
-    accessGreen = Color(0xFF23BCA0)
+    accessGreen = Color(0xFF23BCA0),
+
+    datesBadgeDefault = Color(0xFFF2F0EF),
+    datesBadgeTextDefault = Color(0xFF454545),
+    datesBadgePastDue = Color(0xFFD7D3D1),
+    datesBadgeToday = Color(0xFFD6B600),
+    datesBadgeTextToday = Color(0xFF000000),
+    datesBadgeDue = Color(0xFF707070),
+    datesBadgeTextDue = Color(0xFFFFFFFF)
 )
 
 val MaterialTheme.appColors: AppColors

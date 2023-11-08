@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">@string/platform_name</string>
 
     <string name="core_results">Results</string>
@@ -27,17 +27,16 @@
     <string name="core_reload">Reload</string>
     <string name="core_downloading_in_progress">Downloading in progress</string>
     <string name="auto_recommended_text">Auto (Recommended)</string>
-    <string name="video_quality_p360">360p (Smallest file size)</string>
+    <string name="video_quality_p360">360p (Lower data usage)</string>
     <string name="video_quality_p540">540p</string>
     <string name="video_quality_p720">720p (Best quality)</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
     <string name="core_email_chooser_header">Send email using…</string>
     <string name="core_email_client_not_present">No e-mail clients installed</string>
-    <string name="core_app_version">App Version: </string>
-    <string name="core_android_os_version">Android OS: </string>
-    <string name="core_android_device_model">Device Model: </string>
-    <string name="core_insert_feedback">Feedback: </string>
-    <string name="core_email_subject">Customer Feedback</string>
+    <string name="core_app_version" translatable="false">App version: </string>
+    <string name="core_android_os_version" translatable="false">OS version: </string>
+    <string name="core_android_device_model" translatable="false">Device model: </string>
+    <string name="core_email_subject" translatable="false">Feedback</string>
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
     <string name="core_app_upgrade_title">App Update</string>
@@ -65,6 +64,21 @@
     <string name="core_rate_us">Rate Us</string>
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
+
+    <!-- region: Course Date types -->
+    <!-- Label used when the date is Today -->
+    <string name="core_date_type_today" tools:ignore="MissingTranslation">Today</string>
+    <!-- Label used when an assignment is for verified user only -->
+    <string name="core_date_type_verified_only" tools:ignore="MissingTranslation">Verified Only</string>
+    <!-- Label used when an assignment is completed -->
+    <string name="core_date_type_completed" tools:ignore="MissingTranslation">Completed</string>
+    <!-- Label used when an assignment is past due -->
+    <string name="core_date_type_past_due" tools:ignore="MissingTranslation">Past Due</string>
+    <!-- Label used when an assignment is due next -->
+    <string name="core_date_type_due_next" tools:ignore="MissingTranslation">Due Next</string>
+    <!-- Label used when an assignment is not yet released -->
+    <string name="core_date_type_not_yet_released" tools:ignore="MissingTranslation">Not Yet Released</string>
+    <!-- endregion -->
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>

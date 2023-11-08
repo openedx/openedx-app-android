@@ -40,66 +40,15 @@ android {
     productFlavors {
         prod {
             dimension 'env'
-
-            def envMap = config.environments.find { it.key == "PROD" }
-            def clientId = envMap.value.OAUTH_CLIENT_ID
-            def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap)
-
-            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-            resValue "string", "google_app_id", firebase.appId
-            resValue "string", "platform_name", config.platformName
-            resValue "string", "platform_full_name", config.platformFullName
-            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-            resValue "string", "terms_of_service_link", envUrls.termsOfService
-            resValue "string", "contact_us_link", envUrls.contactUs
-            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+            insertBuildConfigFields(config, it, "PROD")
         }
         develop {
             dimension 'env'
-
-            def envMap = config.environments.find { it.key == "DEV" }
-            def clientId = envMap.value.OAUTH_CLIENT_ID
-            def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap)
-
-            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-            resValue "string", "google_app_id", firebase.appId
-            resValue "string", "platform_name", config.platformName
-            resValue "string", "platform_full_name", config.platformFullName
-            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-            resValue "string", "terms_of_service_link", envUrls.termsOfService
-            resValue "string", "contact_us_link", envUrls.contactUs
-            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+            insertBuildConfigFields(config, it, "DEV")
         }
         stage {
             dimension 'env'
-
-            def envMap = config.environments.find { it.key == "STAGE" }
-            def clientId = envMap.value.OAUTH_CLIENT_ID
-            def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap)
-
-            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-            resValue "string", "google_app_id", firebase.appId
-            resValue "string", "platform_name", config.platformName
-            resValue "string", "platform_full_name", config.platformFullName
-            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-            resValue "string", "terms_of_service_link", envUrls.termsOfService
-            resValue "string", "contact_us_link", envUrls.contactUs
-            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+            insertBuildConfigFields(config, it, "STAGE")
         }
     }
 
@@ -218,4 +167,24 @@ def setValue(value) {
         result = value
     }
     return result
+}
+
+def insertBuildConfigFields(config, buildType, String keyName) {
+    def envMap = config.environments.find { it.key == keyName }
+    def clientId = envMap.value.OAUTH_CLIENT_ID
+    def envUrls = envMap.value.URLS
+    def firebase = getFirebaseConfig(envMap)
+
+    buildType.buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
+    buildType.buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+    buildType.buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
+    buildType.buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
+    buildType.buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
+    buildType.resValue "string", "google_app_id", firebase.appId
+    buildType.resValue "string", "platform_name", config.platformName
+    buildType.resValue "string", "platform_full_name", config.platformFullName
+    buildType.resValue "string", "privacy_policy_link", envUrls.privacyPolicy
+    buildType.resValue "string", "terms_of_service_link", envUrls.termsOfService
+    buildType.resValue "string", "contact_us_link", envUrls.contactUs
+    buildType.resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
 }

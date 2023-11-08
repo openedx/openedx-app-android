@@ -19,14 +19,14 @@ object EmailUtil {
         val to = context.getString(R.string.feedback_email_address)
         val body = StringBuilder()
         with(body) {
+            append(feedback)
+            append(NEW_LINE)
+            append(NEW_LINE)
             append("${context.getString(R.string.core_android_os_version)} ${Build.VERSION.RELEASE}")
             append(NEW_LINE)
             append("${context.getString(R.string.core_app_version)} $appVersion")
             append(NEW_LINE)
             append("${context.getString(R.string.core_android_device_model)} ${Build.MODEL}")
-            append(NEW_LINE)
-            append(NEW_LINE)
-            append("${context.getString(R.string.core_insert_feedback)} $feedback")
         }
         sendEmailIntent(context, to, subject, body.toString())
     }

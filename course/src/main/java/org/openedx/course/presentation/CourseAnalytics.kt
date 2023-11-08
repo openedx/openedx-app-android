@@ -15,5 +15,6 @@ interface CourseAnalytics {
     fun courseTabClickedEvent(courseId: String, courseName: String)
     fun videoTabClickedEvent(courseId: String, courseName: String)
     fun discussionTabClickedEvent(courseId: String, courseName: String)
+    fun datesTabClickedEvent(courseId: String, courseName: String)
     fun handoutsTabClickedEvent(courseId: String, courseName: String)
 }
