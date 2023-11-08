@@ -7,17 +7,18 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -64,9 +65,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     binding.viewPager.setCurrentItem(2, false)
                 }
 
+                R.id.dates -> {
+                    viewModel.datesTabClickedEvent()
+                    binding.viewPager.setCurrentItem(3, false)
+                }
+
                 R.id.resources -> {
                     viewModel.handoutsTabClickedEvent()
-                    binding.viewPager.setCurrentItem(3, false)
+                    binding.viewPager.setCurrentItem(4, false)
                 }
             }
             true
@@ -110,13 +116,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.viewPager.offscreenPageLimit = 4
         adapter = CourseContainerAdapter(this).apply {
             addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(CourseVideosFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, courseTitle))
+            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, courseTitle))
             addFragment(HandoutsFragment.newInstance(viewModel.courseId))
         }
+        binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
         binding.viewPager.adapter = adapter
         binding.viewPager.isUserInputEnabled = false
     }

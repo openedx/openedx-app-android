@@ -52,7 +52,15 @@ private val DarkColorPalette = AppColors(
     warning = Color(0xFFFFC248),
     info = Color(0xFF0095FF),
 
-    accessGreen = Color(0xFF23BCA0)
+    accessGreen = Color(0xFF23BCA0),
+
+    datesBadgeDefault = Color(0xFFF2F0EF),
+    datesBadgeTextDefault = Color(0xFF454545),
+    datesBadgePastDue = Color(0xFFD7D3D1),
+    datesBadgeToday = Color(0xFFD6B600),
+    datesBadgeTextToday = Color(0xFF000000),
+    datesBadgeDue = Color(0xFF707070),
+    datesBadgeTextDue = Color(0xFFFFFFFF)
 )
 
 private val LightColorPalette = AppColors(
@@ -96,7 +104,15 @@ private val LightColorPalette = AppColors(
     warning = Color(0xFFFFC94D),
     info = Color(0xFF42AAFF),
 
-    accessGreen = Color(0xFF23BCA0)
+    accessGreen = Color(0xFF23BCA0),
+
+    datesBadgeDefault = Color(0xFFF2F0EF),
+    datesBadgeTextDefault = Color(0xFF454545),
+    datesBadgePastDue = Color(0xFFD7D3D1),
+    datesBadgeToday = Color(0xFFD6B600),
+    datesBadgeTextToday = Color(0xFF000000),
+    datesBadgeDue = Color(0xFF707070),
+    datesBadgeTextDue = Color(0xFFFFFFFF)
 )
 
 val MaterialTheme.appColors: AppColors

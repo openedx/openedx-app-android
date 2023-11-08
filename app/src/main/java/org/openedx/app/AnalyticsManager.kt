@@ -320,6 +320,15 @@ class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, Ap
         )
     }
 
+    override fun datesTabClickedEvent(courseId: String, courseName: String) {
+        logEvent(
+            Event.DATES_TAB_CLICKED, bundleOf(
+                Key.COURSE_ID.keyName to courseId,
+                Key.COURSE_NAME.keyName to courseName
+            )
+        )
+    }
+
     override fun handoutsTabClickedEvent(courseId: String, courseName: String) {
         logEvent(
             Event.HANDOUTS_TAB_CLICKED, bundleOf(
@@ -402,6 +411,7 @@ private enum class Event(val eventName: String) {
     COURSE_TAB_CLICKED("Course_Outline_Course_tab_Clicked"),
     VIDEO_TAB_CLICKED("Course_Outline_Videos_tab_Clicked"),
     DISCUSSION_TAB_CLICKED("Course_Outline_Discussion_tab_Clicked"),
+    DATES_TAB_CLICKED("Course_Outline_Dates_tab_Clicked"),
     HANDOUTS_TAB_CLICKED("Course_Outline_Handouts_tab_Clicked"),
     DISCUSSION_ALL_POSTS_CLICKED("Discussion_All_Posts_Clicked"),
     DISCUSSION_FOLLOWING_CLICKED("Discussion_Following_Clicked"),
