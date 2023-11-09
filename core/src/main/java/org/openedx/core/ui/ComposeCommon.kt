@@ -992,7 +992,7 @@ fun OpenEdXOutlinedButton(
     backgroundColor: Color = Color.Transparent,
     borderColor: Color,
     textColor: Color,
-    text: String,
+    text: String = "",
     onClick: () -> Unit,
     content: (@Composable RowScope.() -> Unit)? = null
 ) {

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="auth_facebook_button">#0866FF</color>
+    <color name="auth_microsoft_button">#FA000000</color>
+</resources>

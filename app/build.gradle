@@ -1,3 +1,14 @@
+import org.yaml.snakeyaml.Yaml
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.yaml:snakeyaml:1.33'
+    }
+}
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -6,11 +17,13 @@ plugins {
     id 'com.google.firebase.crashlytics'
 }
 
+def config = new Yaml().load(new File("config.yaml").newInputStream())
+
 android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.openedx.app"
+        applicationId config.applicationId
         minSdk 24
         targetSdk 34
         versionCode 1

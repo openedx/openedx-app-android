@@ -55,6 +55,12 @@ android {
 dependencies {
     implementation project(path: ':core')
 
+    implementation "androidx.credentials:credentials:1.2.0"
+    implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
+    implementation "com.facebook.android:facebook-login:16.2.0"
+    implementation "com.google.android.gms:play-services-auth:20.7.0"
+    implementation "com.google.android.libraries.identity.googleid:googleid:1.1.0"
+    implementation 'com.microsoft.identity.client:msal:4.9.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
@@ -64,5 +70,4 @@ dependencies {
     testImplementation "io.mockk:mockk-android:$mockk_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"
-
 }

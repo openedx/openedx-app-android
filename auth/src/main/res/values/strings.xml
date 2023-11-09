@@ -24,4 +24,7 @@
     <string name="auth_example_email" translatable="false">username@domain.com</string>
     <string name="auth_enter_password">Enter password</string>
     <string name="auth_create_new_account">Create new account.</string>
+    <string name="auth_google">Sign in with Google</string>
+    <string name="auth_facebook">Sign in with Facebook</string>
+    <string name="auth_microsoft">Sign in with Microsoft</string>
 </resources>

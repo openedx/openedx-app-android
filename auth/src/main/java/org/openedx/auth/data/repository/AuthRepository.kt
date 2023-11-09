@@ -1,6 +1,7 @@
 package org.openedx.auth.data.repository
 
 import org.openedx.auth.data.api.AuthApi
+import org.openedx.auth.data.model.LoginType
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
@@ -26,6 +27,24 @@ class AuthRepository(
             password,
             config.getAccessTokenType(),
         ).mapToDomain()
+        if (authResponse.error != null) {
+            throw EdxError.UnknownException(authResponse.error!!)
+        }
+        preferencesManager.accessToken = authResponse.accessToken ?: ""
+        preferencesManager.refreshToken = authResponse.refreshToken ?: ""
+        preferencesManager.accessTokenExpiresAt = authResponse.getTokenExpiryTime()
+        val user = api.getProfile()
+        preferencesManager.user = user
+    }
+
+    suspend fun socialLogin(token: String?, loginType: LoginType) {
+        if (token.isNullOrBlank()) throw IllegalArgumentException("Token is null")
+        val authResponse = api.exchangeAccessToken(
+            accessToken = token,
+            clientId = config.getOAuthClientId(),
+            tokenType = BuildConfig.ACCESS_TOKEN_TYPE,
+            loginType = loginType.postfix
+        )
         if (authResponse.error != null) {
             throw EdxError.UnknownException(authResponse.error!!)
         }
