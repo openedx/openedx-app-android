@@ -80,3 +80,7 @@ def getCurrentFlavor() {
         return ""
     }
 }
+
+task generateMockedRawFile() {
+    doLast { configHelper.generateMicrosoftConfig() }
+}

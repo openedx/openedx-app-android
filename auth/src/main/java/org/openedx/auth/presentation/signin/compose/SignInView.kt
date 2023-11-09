@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signin.compose
 
-import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -55,6 +57,7 @@ import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.core.UIMessage
+import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -121,7 +124,21 @@ internal fun LoginScreen(
             uiMessage = uiMessage,
             scaffoldState = scaffoldState
         )
-
+        if (state.isLogistrationEnabled) {
+            Box(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BackBtn(
+                    modifier = Modifier.padding(end = 16.dp),
+                    tint = Color.White
+                ) {
+                    onEvent(AuthEvent.BackClick)
+                }
+            }
+        }
         Column(
             Modifier.padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -213,14 +230,16 @@ private fun AuthForm(
                 .fillMaxWidth()
                 .padding(top = 20.dp, bottom = 36.dp)
         ) {
-            Text(
-                modifier = Modifier.noRippleClickable {
-                    onEvent(AuthEvent.RegisterClick)
-                },
-                text = stringResource(id = R.string.auth_register),
-                color = MaterialTheme.appColors.primary,
-                style = MaterialTheme.appTypography.labelLarge
-            )
+            if (state.isLogistrationEnabled.not()) {
+                Text(
+                    modifier = Modifier.noRippleClickable {
+                        onEvent(AuthEvent.RegisterClick)
+                    },
+                    text = stringResource(id = R.string.auth_register),
+                    color = MaterialTheme.appColors.primary,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 modifier = Modifier.noRippleClickable {
@@ -371,10 +390,10 @@ private fun PasswordTextField(
     )
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun SignInScreenPreview() {
     OpenEdXTheme {
@@ -388,8 +407,8 @@ private fun SignInScreenPreview() {
 }
 
 
-@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun SignInScreenTabletPreview() {
     OpenEdXTheme {

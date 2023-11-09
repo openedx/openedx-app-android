@@ -75,6 +75,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
+        every { config.isSocialAuthEnabled() } returns false
     }
 
     @After
@@ -96,7 +97,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -123,7 +125,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -152,7 +155,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         viewModel.login("acc@test.org", "")
 
@@ -180,7 +184,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -210,7 +215,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -241,7 +247,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -273,7 +280,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -305,7 +313,8 @@ class SignInViewModelTest {
             appUpgradeNotifier = appUpgradeNotifier,
             facebookAuthHelper = facebookAuthHelper,
             googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")

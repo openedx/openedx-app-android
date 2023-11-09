@@ -9,6 +9,7 @@ package org.openedx.auth.presentation.signin
  */
 internal data class SignInUIState(
     val shouldShowSocialLogin: Boolean = false,
+    val isLogistrationEnabled: Boolean = false,
     val showProgress: Boolean = false,
     val loginSuccess: Boolean = false,
 )

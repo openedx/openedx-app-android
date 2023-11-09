@@ -69,10 +69,10 @@ class ConfigHelper {
         jsonWriter.withWriter {
             builder.writeTo(it)
         }
-        generateMicrosoftConfig(config)
     }
 
-    private def generateMicrosoftConfig(config) {
+    def generateMicrosoftConfig() {
+        def config = fetchConfig()
         def social = config.get("SOCIAL")
         def applicationId = config.getOrDefault("APPLICATION_ID", "")
         def clientId = social.getOrDefault("MICROSOFT_CLIENT_ID", "")

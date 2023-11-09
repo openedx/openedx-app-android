@@ -33,7 +33,6 @@ import org.openedx.core.utils.Logger
 import org.openedx.core.R as CoreRes
 
 class SignInViewModel(
-    private val config: Config,
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val preferencesManager: CorePreferences,
@@ -46,12 +45,13 @@ class SignInViewModel(
     config: Config,
 ) : BaseViewModel() {
 
-    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
-
     private val logger = Logger("SignInViewModel")
 
     private val _uiState = MutableStateFlow(
-        SignInUIState(shouldShowSocialLogin = config.isSocialAuthEnabled())
+        SignInUIState(
+            shouldShowSocialLogin = config.isSocialAuthEnabled(),
+            isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
+        )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
 

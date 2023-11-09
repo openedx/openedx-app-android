@@ -149,6 +149,7 @@ dependencies {
 def insertBuildConfigFields(currentFlavour, buildType) {
     if (currentFlavour == buildType.name) {
         configHelper.generateConfigJson()
+        configHelper.generateMicrosoftConfig()
     }
     def config = configHelper.fetchConfig()
     def platformName = config.getOrDefault("PLATFORM_NAME", "")
