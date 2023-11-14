@@ -132,9 +132,6 @@ class CourseSearchFragment : Fragment() {
                         )
                     }
                 )
-                LaunchedEffect(key1 = uiState) {
-                    viewModel.search(querySearch)
-                }
             }
         }
     }
@@ -381,6 +378,10 @@ private fun CourseSearchScreen(
                 }
             }
         }
+    }
+    var isPageLoaded = rememberSaveable { true }
+    LaunchedEffect(key1 = isPageLoaded) {
+        onSearchTextChanged(querySearch)
     }
 }
 

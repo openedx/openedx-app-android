@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -61,7 +63,7 @@ class PreAuthFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 PreLoginScreen(
-                    onLoginClick = {
+                    onSignInClick = {
                         router.navigateToSignIn(parentFragmentManager)
                     },
                     onRegisterClick = {
@@ -80,7 +82,7 @@ class PreAuthFragment : Fragment() {
 private fun PreLoginScreen(
     onSearchClick: (query: String) -> Unit,
     onRegisterClick: () -> Unit,
-    onLoginClick: () -> Unit,
+    onSignInClick: () -> Unit,
 ) {
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -114,21 +116,20 @@ private fun PreLoginScreen(
                     painter = painterResource(id = org.openedx.core.R.drawable.core_ic_logo),
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(top = 32.dp, bottom = 32.dp)
-                        .width(170.dp)
-                        .height(48.dp),
+                        .padding(top = 64.dp, bottom = 20.dp)
+                        .wrapContentWidth(),
                     colorFilter = ColorFilter.tint(MaterialTheme.appColors.primary)
                 )
                 Text(
                     text = stringResource(id = R.string.pre_auth_title),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.headlineSmall,
-                    modifier = Modifier.padding(bottom = 32.dp)
+                    modifier = Modifier.padding(bottom = 40.dp)
                 )
                 val focusManager = LocalFocusManager.current
                 Column(Modifier.padding(bottom = 8.dp)) {
                     Text(
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        modifier = Modifier.padding(bottom = 10.dp),
                         style = MaterialTheme.appTypography.titleMedium,
                         text = stringResource(id = R.string.pre_auth_search_title),
                     )
@@ -179,7 +180,7 @@ private fun PreLoginScreen(
                             .width(100.dp)
                             .padding(start = 16.dp),
                         text = stringResource(id = R.string.auth_sign_in),
-                        onClick = { onLoginClick() },
+                        onClick = { onSignInClick() },
                         borderColor = MaterialTheme.appColors.textFieldBorder,
                         textColor = MaterialTheme.appColors.primary
                     )
@@ -191,12 +192,14 @@ private fun PreLoginScreen(
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SignInScreenPreview() {
     OpenEdXTheme {
         PreLoginScreen(
             onSearchClick = {},
-            onLoginClick = {},
+            onSignInClick = {},
             onRegisterClick = {}
         )
     }

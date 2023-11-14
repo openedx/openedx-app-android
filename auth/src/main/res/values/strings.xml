@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="pre_auth_title" tools:ignore="ExtraTranslation">Courses and Programs from the world\'s best universities in your pocket.</string>
+    <string name="pre_auth_title" tools:ignore="ExtraTranslation">Courses and programs from the world\'s best universities in your pocket.</string>
     <string name="pre_auth_search_title" tools:ignore="ExtraTranslation">What do you want to learn?</string>
     <string name="pre_auth_search_hint" tools:ignore="ExtraTranslation">Search our 3000+ courses</string>
     <string name="pre_auth_explore_all_courses" tools:ignore="ExtraTranslation">Explore all courses</string>
