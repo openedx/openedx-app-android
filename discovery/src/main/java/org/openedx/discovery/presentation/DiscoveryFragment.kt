@@ -31,6 +31,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.core.UIMessage
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
@@ -46,6 +47,7 @@ class DiscoveryFragment : Fragment() {
 
     private val viewModel by viewModel<DiscoveryViewModel>()
     private val router: DiscoveryRouter by inject()
+    private val corePreferencesManager by inject<CorePreferences>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,6 +66,7 @@ class DiscoveryFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
                 val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
+                val isUserLoggedIn = corePreferencesManager.user != null
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -73,6 +76,7 @@ class DiscoveryFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
+                    isUserLoggedIn = isUserLoggedIn,
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
                         wasUpdateDialogClosed = wasUpdateDialogClosed,
@@ -117,7 +121,7 @@ class DiscoveryFragment : Fragment() {
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     })
-                LaunchedEffect(key1 = uiState) {
+                LaunchedEffect(uiState) {
                     if (querySearch.isNotEmpty()) {
                         router.navigateToCourseSearch(
                             requireActivity().supportFragmentManager, querySearch
@@ -154,6 +158,7 @@ internal fun DiscoveryScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
+    isUserLoggedIn: Boolean,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -212,7 +217,7 @@ internal fun DiscoveryScreen(
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-        if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
+        if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED && isUserLoggedIn.not()) {
             Box(
                 modifier = Modifier
                     .statusBarsPadding()
@@ -435,6 +440,7 @@ private fun DiscoveryScreenPreview() {
             hasInternetConnection = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onBackClick = {},
+            isUserLoggedIn = false
         )
     }
 }
@@ -471,6 +477,7 @@ private fun DiscoveryScreenTabletPreview() {
             hasInternetConnection = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onBackClick = {},
+            isUserLoggedIn = false
         )
     }
 }

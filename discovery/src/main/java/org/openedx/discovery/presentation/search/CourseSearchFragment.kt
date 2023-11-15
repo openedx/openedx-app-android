@@ -379,8 +379,7 @@ private fun CourseSearchScreen(
             }
         }
     }
-    var isPageLoaded = rememberSaveable { true }
-    LaunchedEffect(key1 = isPageLoaded) {
+    LaunchedEffect(rememberSaveable { true }) {
         onSearchTextChanged(querySearch)
     }
 }

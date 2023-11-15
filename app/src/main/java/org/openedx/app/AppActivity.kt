@@ -15,6 +15,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.auth.presentation.logistration.Logistration
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
@@ -113,7 +114,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             when {
                 corePreferencesManager.user == null -> {
                     if (coreBuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
-                        addFragment(PreAuthFragment())
+                        addFragment(Logistration())
                     } else {
                         addFragment(SignInFragment())
                     }

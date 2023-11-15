@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.preAuth.PreAuthFragment
+import org.openedx.auth.presentation.logistration.Logistration
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
@@ -297,7 +297,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             }
             popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
-                replaceFragment(fm, PreAuthFragment())
+                replaceFragment(fm, Logistration())
             } else {
                 replaceFragment(fm, SignInFragment())
             }

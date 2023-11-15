@@ -2,14 +2,20 @@ package org.openedx.discovery.presentation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertAny
+import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasProgressBarRangeInfo
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onChildren
+import org.junit.Rule
+import org.junit.Test
+import org.openedx.core.AppUpdateState
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
-import org.junit.Rule
-import org.junit.Test
 import java.util.Date
 
 class DiscoveryScreenTest {
@@ -53,11 +59,14 @@ class DiscoveryScreenTest {
                 canLoadMore = false,
                 refreshing = false,
                 hasInternetConnection = true,
+                isUserLoggedIn = false,
+                appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
                 onSearchClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
                 onItemClick = {},
-                onReloadClick = {}
+                onReloadClick = {},
+                onBackClick = {},
             )
         }
 
@@ -85,11 +94,14 @@ class DiscoveryScreenTest {
                 canLoadMore = false,
                 refreshing = false,
                 hasInternetConnection = true,
+                isUserLoggedIn = false,
+                appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
                 onSearchClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
                 onItemClick = {},
-                onReloadClick = {}
+                onReloadClick = {},
+                onBackClick = {},
             )
         }
 
@@ -108,11 +120,14 @@ class DiscoveryScreenTest {
                 canLoadMore = true,
                 refreshing = false,
                 hasInternetConnection = true,
+                isUserLoggedIn = false,
+                appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
                 onSearchClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
                 onItemClick = {},
-                onReloadClick = {}
+                onReloadClick = {},
+                onBackClick = {},
             )
         }
 

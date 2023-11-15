@@ -1,4 +1,4 @@
-package org.openedx.auth.presentation.preAuth
+package org.openedx.auth.presentation.logistration
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -41,6 +41,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.R as coreR
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SearchBar
@@ -50,7 +51,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
-class PreAuthFragment : Fragment() {
+class Logistration : Fragment() {
 
     private val router: AuthRouter by inject()
 
@@ -106,14 +107,12 @@ private fun PreLoginScreen(
         ) {
             Column(
                 modifier = Modifier.padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 32.dp,
-                    bottom = 32.dp
+                    horizontal = 16.dp,
+                    vertical = 32.dp,
                 )
             ) {
                 Image(
-                    painter = painterResource(id = org.openedx.core.R.drawable.core_ic_logo),
+                    painter = painterResource(id = coreR.drawable.core_ic_logo),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(top = 64.dp, bottom = 20.dp)
