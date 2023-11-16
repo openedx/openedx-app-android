@@ -18,6 +18,8 @@ import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
@@ -29,7 +31,6 @@ import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
