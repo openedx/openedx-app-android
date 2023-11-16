@@ -159,7 +159,7 @@ val appModule = module {
     single<CourseAnalytics> { get<AnalyticsManager>() }
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
 
-    single { FacebookAuthHelper() }
-    single { GoogleAuthHelper() }
-    single { MicrosoftAuthHelper() }
+    factory { FacebookAuthHelper() }
+    factory { GoogleAuthHelper() }
+    factory { MicrosoftAuthHelper() }
 }
