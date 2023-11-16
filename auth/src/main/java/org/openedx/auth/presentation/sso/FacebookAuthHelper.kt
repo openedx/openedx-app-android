@@ -44,7 +44,9 @@ class FacebookAuthHelper {
     }
 
     fun clear() {
-        LoginManager.getInstance().unregisterCallback(callbackManager)
+        runCatching {
+            LoginManager.getInstance().unregisterCallback(callbackManager)
+        }
     }
 
     private companion object {
