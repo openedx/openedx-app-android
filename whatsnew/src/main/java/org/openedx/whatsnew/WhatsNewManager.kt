@@ -7,7 +7,7 @@ import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.whatsnew.data.model.WhatsNewItem
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class WhatsNewManagerManager(
+class WhatsNewManager(
     private val context: Context,
     private val whatsNewPreferences: WhatsNewPreferences,
     private val appData: AppData

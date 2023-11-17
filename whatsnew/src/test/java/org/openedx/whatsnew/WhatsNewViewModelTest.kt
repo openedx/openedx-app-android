@@ -10,7 +10,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 class WhatsNewViewModelTest {
 
-    private val whatsNewManager = mockk<WhatsNewManagerManager>()
+    private val whatsNewManager = mockk<WhatsNewManager>()
 
     private val whatsNewItem = WhatsNewItem(
         version = "1.0.0",

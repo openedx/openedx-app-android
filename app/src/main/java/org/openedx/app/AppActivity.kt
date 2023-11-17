@@ -22,7 +22,7 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.whatsnew.WhatsNewManagerManager
+import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
@@ -39,7 +39,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     private lateinit var binding: ActivityAppBinding
     private val viewModel by viewModel<AppViewModel>()
-    private val whatsNewManager by inject<WhatsNewManagerManager>()
+    private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
 

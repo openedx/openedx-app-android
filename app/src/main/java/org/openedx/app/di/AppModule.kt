@@ -47,7 +47,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.system.notifier.AppUpgradeNotifier
-import org.openedx.whatsnew.WhatsNewManagerManager
+import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
@@ -130,11 +130,11 @@ val appModule = module {
     }
 
     single { AppData(BuildConfig.VERSION_NAME) }
-    single { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
+    factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }
-    single { WhatsNewManagerManager(get(), get(), get()) }
-    single<WhatsNewGlobalManager> { get<WhatsNewManagerManager>() }
+    single { WhatsNewManager(get(), get(), get()) }
+    single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
     single { AnalyticsManager(get()) }
     single<DashboardAnalytics> { get<AnalyticsManager>() }

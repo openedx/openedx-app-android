@@ -8,7 +8,7 @@ import org.openedx.core.presentation.global.AppData
 open class BaseAppReviewDialogFragment : DialogFragment() {
 
     private val reviewPreferences: InAppReviewPreferences by inject()
-    val appData: AppData by inject()
+    protected val appData: AppData by inject()
 
     fun saveVersionName() {
         val versionName = appData.versionName

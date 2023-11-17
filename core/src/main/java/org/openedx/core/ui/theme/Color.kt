@@ -35,7 +35,7 @@ data class AppColors(
     val inactiveButtonBackground: Color,
     val inactiveButtonText: Color,
 
-    val accessGreen:Color,
+    val accessGreen: Color,
 
     val datesBadgeDefault: Color,
     val datesBadgeTextDefault: Color,
