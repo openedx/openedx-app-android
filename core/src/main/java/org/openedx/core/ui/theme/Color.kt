@@ -31,6 +31,10 @@ data class AppColors(
     val warning: Color,
     val info: Color,
 
+    val rateStars: Color,
+    val inactiveButtonBackground: Color,
+    val inactiveButtonText: Color,
+
     val accessGreen: Color,
 
     val datesBadgeDefault: Color,

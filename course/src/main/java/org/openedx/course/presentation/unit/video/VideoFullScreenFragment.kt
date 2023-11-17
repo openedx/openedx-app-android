@@ -15,6 +15,7 @@ import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import org.koin.android.ext.android.inject
 import androidx.media3.exoplayer.analytics.DefaultAnalyticsCollector
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -26,6 +27,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
@@ -36,6 +38,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
     private val viewModel by viewModel<VideoViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
+    private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
 
     private var exoPlayer: ExoPlayer? = null
     private var blockId = ""
@@ -48,6 +51,9 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
+                if (!appReviewManager.isDialogShowed) {
+                    appReviewManager.tryToOpenRateDialog()
+                }
                 viewModel.markBlockCompleted(blockId)
             }
         }

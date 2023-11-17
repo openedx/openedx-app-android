@@ -37,18 +37,17 @@ import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.AppUpdateState
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
-import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.AppUpdateState
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
@@ -59,6 +58,7 @@ class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by viewModel()
     private val router by inject<ProfileRouter>()
+    private val appData: AppData by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +85,7 @@ class ProfileFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
-                    appData = (requireActivity() as AppDataHolder).appData,
+                    appData = appData,
                     refreshing = refreshing,
                     appUpgradeEvent = appUpgradeEvent,
                     logout = {
@@ -368,9 +368,8 @@ private fun SupportInfoSection(
                     onClick = {
                         onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
-                            context,
-                            context.getString(R.string.core_email_subject),
-                            appData.versionName
+                            context = context,
+                            appVersion = appData.versionName
                         )
                     }
                 )

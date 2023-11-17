@@ -52,6 +52,10 @@ private val DarkColorPalette = AppColors(
     warning = Color(0xFFFFC248),
     info = Color(0xFF0095FF),
 
+    rateStars = Color(0xFFFFC94D),
+    inactiveButtonBackground = Color(0xFFCCD4E0),
+    inactiveButtonText = Color(0xFF3D4964),
+
     accessGreen = Color(0xFF23BCA0),
 
     datesBadgeDefault = Color(0xFFF2F0EF),
@@ -103,6 +107,10 @@ private val LightColorPalette = AppColors(
 
     warning = Color(0xFFFFC94D),
     info = Color(0xFF42AAFF),
+
+    rateStars = Color(0xFFFFC94D),
+    inactiveButtonBackground = Color(0xFFCCD4E0),
+    inactiveButtonText = Color(0xFF3D4964),
 
     accessGreen = Color(0xFF23BCA0),
 

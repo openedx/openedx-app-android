@@ -27,6 +27,7 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.computeWindowSizeClasses
 import org.openedx.core.extension.objectToString
 import org.openedx.core.extension.stringToObject
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -45,6 +46,8 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
+    private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
+
     private var _binding: FragmentYoutubeVideoUnitBinding? = null
     private val binding get() = _binding!!
 
@@ -143,18 +146,24 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             .build()
 
         val listener = object : AbstractYouTubePlayerListener() {
+            var isMarkBlockCompletedCalled = false
+
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
                 val completePercentage = second / youtubeTrackerListener.videoDuration
-                if (completePercentage >= 0.8f) {
+                if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
                     viewModel.markBlockCompleted(blockId)
+                    isMarkBlockCompletedCalled = true
+                }
+                if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
+                    appReviewManager.tryToOpenRateDialog()
                 }
             }
 
             override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
                 super.onStateChange(youTubePlayer, state)
-                viewModel.isPlaying = when(state) {
+                viewModel.isPlaying = when (state) {
                     PlayerConstants.PlayerState.PLAYING -> true
                     PlayerConstants.PlayerState.PAUSED -> false
                     else -> return
