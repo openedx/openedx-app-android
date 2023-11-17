@@ -112,7 +112,7 @@ fun AppUpgradeRecommendDialog(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = 4.dp)
                 .noRippleClickable {
                     onNotNowClick()
                 },

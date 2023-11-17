@@ -2,6 +2,8 @@ package org.openedx.course.presentation.unit.video
 
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.media3.cast.CastPlayer
 import androidx.media3.common.Player
 import androidx.media3.common.util.Clock
@@ -40,6 +42,10 @@ class EncodedVideoUnitViewModel(
     transcriptManager
 ) {
 
+    private val _isVideoEnded = MutableLiveData(false)
+    val isVideoEnded: LiveData<Boolean>
+        get() = _isVideoEnded
+
     var exoPlayer: ExoPlayer? = null
         private set
     var castPlayer: CastPlayer? = null
@@ -59,6 +65,7 @@ class EncodedVideoUnitViewModel(
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
+                _isVideoEnded.value = true
                 markBlockCompleted(blockId)
             }
         }

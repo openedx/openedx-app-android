@@ -31,6 +31,7 @@ import org.openedx.core.extension.computeWindowSizeClasses
 import org.openedx.core.extension.dpToPixel
 import org.openedx.core.extension.objectToString
 import org.openedx.core.extension.stringToObject
+import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.WindowSize
@@ -55,6 +56,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         )
     }
     private val router by inject<CourseRouter>()
+    private val appReviewManager by inject<AppReviewManager> { parametersOf(requireActivity()) }
 
     private var windowSize: WindowSize? = null
 
@@ -168,6 +170,12 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         viewModel.isUpdated.observe(viewLifecycleOwner) { isUpdated ->
             if (isUpdated) {
                 initPlayer()
+            }
+        }
+
+        viewModel.isVideoEnded.observe(viewLifecycleOwner) { isVideoEnded ->
+            if (isVideoEnded && !appReviewManager.isDialogShowed) {
+                appReviewManager.tryToOpenRateDialog()
             }
         }
     }
