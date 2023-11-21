@@ -1,0 +1,5 @@
+config_directory: './default_config'
+config_mapping:
+  prod: 'prod'
+  stage: 'stage'
+  dev: 'dev'
