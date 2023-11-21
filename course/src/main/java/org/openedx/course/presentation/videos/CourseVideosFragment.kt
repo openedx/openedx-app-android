@@ -276,7 +276,8 @@ private fun CourseVideosScreen(
                                                     .padding(6.dp),
                                                 courseImage = uiState.courseStructure.media?.image?.large
                                                     ?: "",
-                                                courseCertificate = uiState.courseStructure.certificate
+                                                courseCertificate = uiState.courseStructure.certificate,
+                                                courseName = uiState.courseStructure.name
                                             )
                                         }
                                         items(uiState.courseStructure.blockData) { block ->

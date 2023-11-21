@@ -49,8 +49,16 @@
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
 
-    <!-- region: Course dates error -->
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
-    <!-- endregion -->
+
+    <!-- Accessibility -->
+    <string name="course_accessibility_header_image_for">Header image for %1$s</string>
+    <string name="course_accessibility_play_video">Play video</string>
+    <string name="course_accessibility_video_player">Video player</string>
+    <string name="course_accessibility_remove_course_section">Remove course section</string>
+    <string name="course_accessibility_download_course_section">Download course section</string>
+    <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
+    <string name="course_accessibility_section_completed">Section completed</string>
+    <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
 </resources>

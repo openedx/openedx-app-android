@@ -285,7 +285,8 @@ internal fun CourseOutlineScreen(
                                                 .padding(6.dp),
                                             courseImage = uiState.courseStructure.media?.image?.large
                                                 ?: "",
-                                            courseCertificate = uiState.courseStructure.certificate
+                                            courseCertificate = uiState.courseStructure.certificate,
+                                            courseName = uiState.courseStructure.name
                                         )
                                     }
                                     if (uiState.resumeBlock != null) {

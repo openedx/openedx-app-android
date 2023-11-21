@@ -484,7 +484,7 @@ private fun DiscussionThreadsScreen(
                                                                 Icon(
                                                                     modifier = Modifier.size(16.dp),
                                                                     painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
-                                                                    contentDescription = null,
+                                                                    contentDescription = stringResource(id = discussionR.string.discussion_add_comment),
                                                                     tint = MaterialTheme.appColors.buttonText
                                                                 )
                                                             }

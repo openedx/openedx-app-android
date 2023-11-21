@@ -100,6 +100,7 @@ fun CourseImageHeader(
     modifier: Modifier,
     courseImage: String?,
     courseCertificate: Certificate?,
+    courseName: String
 ) {
     val configuration = LocalConfiguration.current
     val windowSize = rememberWindowSize()
@@ -121,7 +122,7 @@ fun CourseImageHeader(
                 .error(org.openedx.core.R.drawable.core_no_image_course)
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.course_accessibility_header_image_for, courseName),
             contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
@@ -138,7 +139,7 @@ fun CourseImageHeader(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_course_completed_mark),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.course_congratulations),
                     tint = Color.White
                 )
                 Spacer(Modifier.height(6.dp))
@@ -190,15 +191,19 @@ fun CourseSectionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val icon =
+            val completedIconPainter =
                 if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
-            val iconColor =
+            val completedIconColor =
                 if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
-
+            val completedIconDescription = if (block.completion == 1.0) {
+                stringResource(id = R.string.course_accessibility_section_completed)
+            } else {
+                stringResource(id = R.string.course_accessibility_section_uncompleted)
+            }
             Icon(
-                painter = icon,
-                contentDescription = null,
-                tint = iconColor
+                painter = completedIconPainter,
+                contentDescription = completedIconDescription,
+                tint = completedIconColor
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
@@ -216,16 +221,21 @@ fun CourseSectionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val iconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
                         painterResource(id = R.drawable.course_ic_remove_download)
                     } else {
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
+                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
+                        stringResource(id = R.string.course_accessibility_remove_course_section)
+                    } else {
+                        stringResource(id = R.string.course_accessibility_download_course_section)
+                    }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
-                            painter = iconPainter,
-                            contentDescription = null,
+                            painter = downloadIconPainter,
+                            contentDescription = downloadIconDescription,
                             tint = MaterialTheme.appColors.textPrimary
                         )
                     }
@@ -244,7 +254,7 @@ fun CourseSectionCard(
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }
@@ -462,11 +472,13 @@ fun Indicator(
 ) {
     val size by animateDpAsState(
         targetValue = if (isSelected) selectedSize else defaultRadius,
-        animationSpec = tween(300)
+        animationSpec = tween(300),
+        label = ""
     )
     val color by animateColorAsState(
         targetValue = if (isSelected) selectedColor else defaultColor,
-        animationSpec = tween(300)
+        animationSpec = tween(300),
+        label = ""
     )
 
     Box(
@@ -685,7 +697,8 @@ private fun CourseHeaderPreview() {
                     .height(200.dp)
                     .padding(6.dp),
                 courseCertificate = Certificate(""),
-                courseImage = ""
+                courseImage = "",
+                courseName = ""
             )
         }
     }

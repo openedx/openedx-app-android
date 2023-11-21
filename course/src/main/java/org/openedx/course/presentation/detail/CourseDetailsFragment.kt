@@ -337,7 +337,8 @@ private fun CourseDetailNativeContent(
                     .aspectRatio(1.86f)
                     .padding(6.dp),
                 courseImage = course.media.image?.large,
-                courseCertificate = null
+                courseCertificate = null,
+                courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
@@ -348,7 +349,7 @@ private fun CourseDetailNativeContent(
                     Icon(
                         modifier = Modifier.size(40.dp),
                         painter = painterResource(courseR.drawable.course_ic_play),
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.course_accessibility_play_video),
                         tint = Color.LightGray
                     )
                 }
@@ -466,7 +467,8 @@ private fun CourseDetailNativeContentLandscape(
                     .width(263.dp)
                     .height(200.dp),
                 courseImage = course.media.image?.large,
-                courseCertificate = null
+                courseCertificate = null,
+                courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
