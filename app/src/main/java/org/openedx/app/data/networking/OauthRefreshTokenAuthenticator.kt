@@ -12,7 +12,7 @@ import org.json.JSONObject
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import org.openedx.auth.data.api.AuthApi
-import org.openedx.auth.data.model.AuthResponse
+import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
 import org.openedx.core.ApiConstants.TOKEN_TYPE_JWT
 import org.openedx.core.BuildConfig
@@ -128,12 +128,12 @@ class OauthRefreshTokenAuthenticator(
     }
 
     private fun isTokenExpired(): Boolean {
-        val timeInSeconds = TimeUtils.getCurrentTimeInSeconds() + REFRESH_TOKEN_EXPIRY_THRESHOLD
-        return timeInSeconds >= preferencesManager.accessTokenExpiresAt
+        val time = TimeUtils.getCurrentTime() + REFRESH_TOKEN_EXPIRY_THRESHOLD
+        return time >= preferencesManager.accessTokenExpiresAt
     }
 
     private fun canRequestTokenRefresh(): Boolean {
-        return TimeUtils.getCurrentTimeInSeconds() - lastTokenRefreshRequestTime >
+        return TimeUtils.getCurrentTime() - lastTokenRefreshRequestTime >
                 REFRESH_TOKEN_INTERVAL_MINIMUM
     }
 
@@ -147,18 +147,17 @@ class OauthRefreshTokenAuthenticator(
                 refreshToken,
                 ACCESS_TOKEN_TYPE
             ).execute()
-            authResponse = response.body()
+            authResponse = response.body()?.mapToDomain()
             if (response.isSuccessful && authResponse != null) {
                 val newAccessToken = authResponse.accessToken ?: ""
                 val newRefreshToken = authResponse.refreshToken ?: ""
-                val newExpireTime = authResponse.expiresIn ?: 0L
+                val newExpireTime = authResponse.getTokenExpiryTime()
 
-                if (newAccessToken.isNotEmpty() && newRefreshToken.isNotEmpty() && newExpireTime > 0L) {
+                if (newAccessToken.isNotEmpty() && newRefreshToken.isNotEmpty()) {
                     preferencesManager.accessToken = newAccessToken
                     preferencesManager.refreshToken = newRefreshToken
-                    preferencesManager.accessTokenExpiresAt =
-                        newExpireTime + TimeUtils.getCurrentTimeInSeconds()
-                    lastTokenRefreshRequestTime = TimeUtils.getCurrentTimeInSeconds()
+                    preferencesManager.accessTokenExpiresAt = newExpireTime
+                    lastTokenRefreshRequestTime = TimeUtils.getCurrentTime()
                 }
             } else if (response.code() == 400) {
                 //another refresh already in progress
@@ -251,13 +250,13 @@ class OauthRefreshTokenAuthenticator(
          * verification method of the access token to ensure that the token doesn't expire during
          * an active session.
          */
-        private const val REFRESH_TOKEN_EXPIRY_THRESHOLD = 60
+        private const val REFRESH_TOKEN_EXPIRY_THRESHOLD = 60 * 1000
 
         /**
          * [REFRESH_TOKEN_INTERVAL_MINIMUM] behave as a buffer time for refresh token network
          * requests. It prevents multiple calls to refresh network requests in case of an
          * unauthorized access token during async requests.
          */
-        private const val REFRESH_TOKEN_INTERVAL_MINIMUM = 60
+        private const val REFRESH_TOKEN_INTERVAL_MINIMUM = 60 * 1000
     }
 }

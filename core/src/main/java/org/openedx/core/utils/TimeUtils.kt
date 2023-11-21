@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 object TimeUtils {
 
@@ -24,8 +23,8 @@ object TimeUtils {
 
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
 
-    fun getCurrentTimeInSeconds(): Long {
-        return TimeUnit.MILLISECONDS.toSeconds(Calendar.getInstance().timeInMillis)
+    fun getCurrentTime(): Long {
+        return Calendar.getInstance().timeInMillis
     }
 
     fun iso8601ToDate(text: String): Date? {

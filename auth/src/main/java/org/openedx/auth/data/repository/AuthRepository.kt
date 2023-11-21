@@ -2,11 +2,11 @@ package org.openedx.auth.data.repository
 
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.ValidationFields
+import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
-import org.openedx.core.utils.TimeUtils
 
 class AuthRepository(
     private val api: AuthApi,
@@ -17,20 +17,19 @@ class AuthRepository(
         username: String,
         password: String,
     ) {
-        val authResponse = api.getAccessToken(
+        val authResponse: AuthResponse = api.getAccessToken(
             ApiConstants.GRANT_TYPE_PASSWORD,
             org.openedx.core.BuildConfig.CLIENT_ID,
             username,
             password,
             org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
-        )
+        ).mapToDomain()
         if (authResponse.error != null) {
             throw EdxError.UnknownException(authResponse.error!!)
         }
         preferencesManager.accessToken = authResponse.accessToken ?: ""
         preferencesManager.refreshToken = authResponse.refreshToken ?: ""
-        preferencesManager.accessTokenExpiresAt =
-            (authResponse.expiresIn ?: 0L) + TimeUtils.getCurrentTimeInSeconds()
+        preferencesManager.accessTokenExpiresAt = authResponse.getTokenExpiryTime()
         val user = api.getProfile()
         preferencesManager.user = user
     }
