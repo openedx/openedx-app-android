@@ -1,5 +1,6 @@
 package org.edx.builder
 
+import groovy.json.JsonBuilder
 import org.yaml.snakeyaml.Yaml
 
 class ConfigHelper {
@@ -12,8 +13,10 @@ class ConfigHelper {
     def FILES_CONFIG = "files"
 
     def configDir = ""
+    def projectDir = ""
 
-    ConfigHelper(environment) {
+    ConfigHelper(projectDir, environment) {
+        this.projectDir = projectDir
         def configFile = new File(CONFIG_SETTINGS_YAML_FILENAME)
         if (!configFile.exists()) {
             // parse default configurations if `config_settings.yaml` doesn't exist
@@ -48,27 +51,17 @@ class ConfigHelper {
                 androidConfigs.putAll(config)
             }
         }
+        generateConfigJson(androidConfigs)
         return androidConfigs
     }
 
-    FirebaseConfig getFirebaseConfig(config) {
-        FirebaseConfig firebaseConfig = new FirebaseConfig()
-        if (config["FIREBASE"] != null) {
-            firebaseConfig.projectId = setValue(config["FIREBASE"]["PROJECT_ID"])
-            firebaseConfig.appId = setValue(config["FIREBASE"]["APPLICATION_ID"])
-            firebaseConfig.apiKey = setValue(config["FIREBASE"]["API_KEY"])
-            firebaseConfig.gcmSenderId = setValue(config["FIREBASE"]["GCM_SENDER_ID"])
+    private def generateConfigJson(config) {
+        def configJsonDir = new File(projectDir.path + "/src/main/res/raw/")
+        configJsonDir.mkdirs()
+        def jsonWriter = new FileWriter(configJsonDir.path + "/config.json")
+        def builder = new JsonBuilder(config)
+        jsonWriter.withWriter {
+            builder.writeTo(it)
         }
-        return firebaseConfig
-    }
-
-    private String setValue(value) {
-        def result
-        if (value == null) {
-            result = ""
-        } else {
-            result = value
-        }
-        return result
     }
 }

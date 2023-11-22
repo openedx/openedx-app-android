@@ -15,6 +15,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.auth.presentation.signin.SignInFragment
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.InsetHolder
@@ -42,6 +43,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
+    private val config by inject<Config>()
 
     private var _insetTop = 0
     private var _insetBottom = 0

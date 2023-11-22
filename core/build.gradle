@@ -163,9 +163,9 @@ def getCurrentFlavor() {
     }
 }
 
-static def insertBuildConfigFields(currentFlavour, buildType, environment) {
+def insertBuildConfigFields(currentFlavour, buildType, environment) {
     if (currentFlavour == buildType.name) {
-        def helper = new ConfigHelper(environment)
+        def helper = new ConfigHelper(projectDir, environment)
         def config = helper.fetchConfig()
 
         def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
@@ -177,18 +177,11 @@ static def insertBuildConfigFields(currentFlavour, buildType, environment) {
         def contactUs = config.getOrDefault("CONTACT_US", "")
         def feedbackEmailAddress = config.getOrDefault("FEEDBACK_EMAIL_ADDRESS", "")
         def tokenType = config.getOrDefault("TOKEN_TYPE", "")
-        def showWhatsNew = config.getOrDefault("SHOW_WHATS_NEW", false)
-        def firebase = helper.getFirebaseConfig(config)
 
         buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
         buildType.buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-        buildType.buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-        buildType.buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-        buildType.buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
         buildType.buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${tokenType}\""
-        buildType.buildConfigField "Boolean", "SHOW_WHATS_NEW", "${showWhatsNew}"
 
-        buildType.resValue "string", "google_app_id", firebase.appId
         buildType.resValue "string", "platform_name", platformName
         buildType.resValue "string", "platform_full_name", platformFullName
         buildType.resValue "string", "privacy_policy_link", privacyPolicy
