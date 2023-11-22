@@ -96,7 +96,6 @@ class CourseVideosFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
                             blockId = block.id,
-                            title = block.displayName,
                             mode = CourseViewMode.VIDEOS
                         )
                     },

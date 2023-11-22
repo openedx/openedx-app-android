@@ -99,7 +99,6 @@ class CourseOutlineFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
                             blockId = block.id,
-                            title = block.displayName,
                             mode = CourseViewMode.FULL
                         )
                     },
@@ -110,7 +109,6 @@ class CourseOutlineFragment : Fragment() {
                                 requireActivity().supportFragmentManager,
                                 viewModel.courseId,
                                 sequential.id,
-                                sequential.displayName,
                                 CourseViewMode.FULL
                             )
                         }

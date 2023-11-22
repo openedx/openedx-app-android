@@ -88,14 +88,11 @@ class CourseSectionFragment : Fragment() {
     }
     private val router by inject<CourseRouter>()
 
-    private var title = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         val blockId = requireArguments().getString(ARG_BLOCK_ID, "")
-        viewModel.mode = requireArguments().serializable<CourseViewMode>(ARG_MODE)!!
-        title = requireArguments().getString(ARG_TITLE, "")
+        viewModel.mode = requireArguments().serializable(ARG_MODE)!!
         viewModel.getBlocks(blockId, viewModel.mode)
     }
 
@@ -114,7 +111,6 @@ class CourseSectionFragment : Fragment() {
                 CourseSectionScreen(
                     windowSize = windowSize,
                     uiState = uiState,
-                    title = title,
                     uiMessage = uiMessage,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
@@ -154,19 +150,16 @@ class CourseSectionFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_BLOCK_ID = "blockId"
-        private const val ARG_TITLE = "title"
         private const val ARG_MODE = "mode"
         fun newInstance(
             courseId: String,
             blockId: String,
-            title: String,
             mode: CourseViewMode,
         ): CourseSectionFragment {
             val fragment = CourseSectionFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
                 ARG_BLOCK_ID to blockId,
-                ARG_TITLE to title,
                 ARG_MODE to mode
             )
             return fragment
@@ -178,13 +171,17 @@ class CourseSectionFragment : Fragment() {
 private fun CourseSectionScreen(
     windowSize: WindowSize,
     uiState: CourseSectionUIState,
-    title: String,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
     onItemClick: (Block) -> Unit,
     onDownloadClick: (Block) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
+    val title = when (uiState) {
+        is CourseSectionUIState.Blocks -> uiState.sectionName
+        else -> ""
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -408,9 +405,9 @@ private fun CourseSectionScreenPreview() {
                     mockBlock
                 ),
                 mapOf(),
-                ""
+                "",
+                "Course default"
             ),
-            "Course default",
             uiMessage = null,
             onBackClick = {},
             onItemClick = {},
@@ -434,9 +431,9 @@ private fun CourseSectionScreenTabletPreview() {
                     mockBlock
                 ),
                 mapOf(),
-                ""
+                "",
+                "Course default",
             ),
-            "Course default",
             uiMessage = null,
             onBackClick = {},
             onItemClick = {},
