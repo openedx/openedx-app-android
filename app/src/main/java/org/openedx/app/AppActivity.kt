@@ -43,7 +43,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
-    private val config by inject<Config>()
 
     private var _insetTop = 0
     private var _insetBottom = 0

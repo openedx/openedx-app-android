@@ -372,6 +372,7 @@ private fun SupportInfoSection(
                         onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
                             context = context,
+                            feedbackEmailAddress = config.getFeedbackEmailAddress(),
                             appVersion = appData.versionName
                         )
                     }

@@ -23,12 +23,20 @@ class Config(context: Context) {
         }
     }
 
+    fun getApiHostURL(): String {
+        return getString(API_HOST_URL, "")
+    }
+
     fun getOAuthClientId(): String {
         return getString(OAUTH_CLIENT_ID, "")
     }
 
     fun getAccessTokenType(): String {
         return getString(TOKEN_TYPE, "")
+    }
+
+    fun getFeedbackEmailAddress(): String {
+        return getString(FEEDBACK_EMAIL_ADDRESS, "")
     }
 
     fun getAgreementUrlsConfig(): AgreementUrlsConfig {
@@ -78,8 +86,10 @@ class Config(context: Context) {
     }
 
     companion object {
+        private const val API_HOST_URL = "API_HOST_URL"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
+        private const val FEEDBACK_EMAIL_ADDRESS = "FEEDBACK_EMAIL_ADDRESS"
         private const val AGREEMENT_URLS = "AGREEMENT_URLS"
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
         private const val FIREBASE = "FIREBASE"

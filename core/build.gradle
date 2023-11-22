@@ -171,12 +171,9 @@ def insertBuildConfigFields(currentFlavour, buildType, environment) {
         def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
         def platformName = config.getOrDefault("PLATFORM_NAME", "")
         def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
-        def feedbackEmailAddress = config.getOrDefault("FEEDBACK_EMAIL_ADDRESS", "")
 
         buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
-
         buildType.resValue "string", "platform_name", platformName
         buildType.resValue "string", "platform_full_name", platformFullName
-        buildType.resValue "string", "feedback_email_address", feedbackEmailAddress
     }
 }
