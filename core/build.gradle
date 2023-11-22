@@ -52,6 +52,12 @@ android {
         }
     }
 
+    sourceSets {
+        develop {
+            res.srcDirs = ['src/openedx/res']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
