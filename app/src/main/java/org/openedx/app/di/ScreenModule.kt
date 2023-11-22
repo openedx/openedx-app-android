@@ -57,7 +57,7 @@ val screenModule = module {
     viewModel { AppViewModel(get(), get(), get(), get(named("IODispatcher")), get()) }
     viewModel { MainViewModel() }
 
-    factory { AuthRepository(get(), get()) }
+    factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
     viewModel { SignInViewModel(get(), get(), get(), get(), get(), get()) }
@@ -72,7 +72,7 @@ val screenModule = module {
     factory { DiscoveryInteractor(get()) }
     viewModel { DiscoveryViewModel(get(), get(), get(), get(), get()) }
 
-    factory { ProfileRepository(get(), get(), get(), get()) }
+    factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
     viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get(), get()) }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }

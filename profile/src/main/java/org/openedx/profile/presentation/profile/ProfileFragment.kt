@@ -37,9 +37,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.java.KoinJavaComponent.getKoin
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -344,6 +346,7 @@ private fun SupportInfoSection(
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val config = getKoin().get<Config>()
     Column {
         Text(
             text = stringResource(id = org.openedx.profile.R.string.profile_support_info),
@@ -378,7 +381,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_terms_of_use),
                     onClick = {
                         onClick(SupportClickAction.COOKIE_POLICY)
-                        uriHandler.openUri(context.getString(R.string.terms_of_service_link))
+                        uriHandler.openUri(config.getAgreementUrlsConfig().tosUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -386,7 +389,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_privacy_policy),
                     onClick = {
                         onClick(SupportClickAction.PRIVACY_POLICY)
-                        uriHandler.openUri(context.getString(R.string.privacy_policy_link))
+                        uriHandler.openUri(config.getAgreementUrlsConfig().privacyPolicyUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -623,7 +626,10 @@ fun AppVersionItemUpgradeRecommended(
                 color = MaterialTheme.appColors.textPrimary
             )
             Text(
-                text = stringResource(id = R.string.core_tap_to_update_to_version, appUpgradeEvent.newVersionName),
+                text = stringResource(
+                    id = R.string.core_tap_to_update_to_version,
+                    appUpgradeEvent.newVersionName
+                ),
                 color = MaterialTheme.appColors.textAccent,
                 style = MaterialTheme.appTypography.labelLarge
             )

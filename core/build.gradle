@@ -169,24 +169,14 @@ def insertBuildConfigFields(currentFlavour, buildType, environment) {
         def config = helper.fetchConfig()
 
         def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
-        def clientId = config.getOrDefault("OAUTH_CLIENT_ID", "")
         def platformName = config.getOrDefault("PLATFORM_NAME", "")
         def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
-        def privacyPolicy = config.getOrDefault("PRIVACY_POLICY", "")
-        def termsOfService = config.getOrDefault("TERMS_OF_SERVICE", "")
-        def contactUs = config.getOrDefault("CONTACT_US", "")
         def feedbackEmailAddress = config.getOrDefault("FEEDBACK_EMAIL_ADDRESS", "")
-        def tokenType = config.getOrDefault("TOKEN_TYPE", "")
 
         buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
-        buildType.buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-        buildType.buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${tokenType}\""
 
         buildType.resValue "string", "platform_name", platformName
         buildType.resValue "string", "platform_full_name", platformFullName
-        buildType.resValue "string", "privacy_policy_link", privacyPolicy
-        buildType.resValue "string", "terms_of_service_link", termsOfService
-        buildType.resValue "string", "contact_us_link", contactUs
         buildType.resValue "string", "feedback_email_address", feedbackEmailAddress
     }
 }

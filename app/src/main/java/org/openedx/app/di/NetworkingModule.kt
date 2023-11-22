@@ -19,13 +19,13 @@ import java.util.concurrent.TimeUnit
 
 val networkingModule = module {
 
-    single { OauthRefreshTokenAuthenticator(get(), get()) }
+    single { OauthRefreshTokenAuthenticator(get(), get(), get()) }
 
     single {
         OkHttpClient.Builder().apply {
             writeTimeout(60, TimeUnit.SECONDS)
             readTimeout(60, TimeUnit.SECONDS)
-            addInterceptor(HeadersInterceptor(get(), get()))
+            addInterceptor(HeadersInterceptor(get(), get(), get()))
             if (BuildConfig.DEBUG) {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }

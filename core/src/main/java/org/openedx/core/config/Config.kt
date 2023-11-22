@@ -23,12 +23,33 @@ class Config(context: Context) {
         }
     }
 
+    fun getOAuthClientId(): String {
+        return getString(OAUTH_CLIENT_ID, "")
+    }
+
+    fun getAccessTokenType(): String {
+        return getString(TOKEN_TYPE, "")
+    }
+
+    fun getAgreementUrlsConfig(): AgreementUrlsConfig {
+        return getObjectOrNewInstance(AGREEMENT_URLS, AgreementUrlsConfig::class.java)
+    }
+
     fun getFirebaseConfig(): FirebaseConfig {
         return getObjectOrNewInstance(FIREBASE, FirebaseConfig::class.java)
     }
 
     fun isWhatsNewEnabled(): Boolean {
         return getBoolean(WHATS_NEW_ENABLED, false)
+    }
+
+    private fun getString(key: String, defaultValue: String): String {
+        val element = getObject(key)
+        return if (element != null) {
+            element.asString
+        } else {
+            defaultValue
+        }
     }
 
     private fun getBoolean(key: String, defaultValue: Boolean): Boolean {
@@ -57,7 +78,10 @@ class Config(context: Context) {
     }
 
     companion object {
-        private const val FIREBASE = "FIREBASE"
+        private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
+        private const val TOKEN_TYPE = "TOKEN_TYPE"
+        private const val AGREEMENT_URLS = "AGREEMENT_URLS"
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
+        private const val FIREBASE = "FIREBASE"
     }
 }
