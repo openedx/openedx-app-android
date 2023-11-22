@@ -1,5 +1,8 @@
 import org.yaml.snakeyaml.Yaml
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 buildscript {
     repositories {
         mavenCentral()
@@ -17,8 +20,7 @@ plugins {
     id 'kotlin-kapt'
 }
 
-
-def config = new Yaml().load(new File("config.yaml").newInputStream())
+def currentFlavour = getCurrentFlavor()
 
 android {
     compileSdk 34
@@ -29,9 +31,6 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-
-        buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${config.tokenType}\""
-        buildConfigField "Boolean", "SHOW_WHATS_NEW", "${config.showWhatsNew}"
     }
 
     namespace 'org.openedx.core'
@@ -40,15 +39,15 @@ android {
     productFlavors {
         prod {
             dimension 'env'
-            insertBuildConfigFields(config, it, "PROD")
+            insertBuildConfigFields(currentFlavour, it, "prod")
         }
         develop {
             dimension 'env'
-            insertBuildConfigFields(config, it, "DEV")
+            insertBuildConfigFields(currentFlavour, it, "dev")
         }
         stage {
             dimension 'env'
-            insertBuildConfigFields(config, it, "STAGE")
+            insertBuildConfigFields(currentFlavour, it, "stage")
         }
     }
 
@@ -147,6 +146,58 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
+def getCurrentFlavor() {
+    String tskReqStr = getGradle().getStartParameter().getTaskRequests().toString()
+    Pattern pattern
+    if (tskReqStr.contains("assemble")) // to run ./gradlew assembleRelease to build APK
+        pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
+    else if (tskReqStr.contains("bundle")) // to run ./gradlew bundleRelease to build .aab
+        pattern = Pattern.compile("bundle(\\w+)(Release|Debug)")
+    else
+        pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
+    Matcher matcher = pattern.matcher(tskReqStr)
+    if (matcher.find()) {
+        return matcher.group(1).toLowerCase()
+    } else {
+        return ""
+    }
+}
+
+static def insertBuildConfigFields(currentFlavour, buildType, environment) {
+    if (currentFlavour == buildType.name) {
+        def helper = new ConfigHelper(environment)
+        def config = helper.fetchConfig()
+
+        def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
+        def clientId = config.getOrDefault("OAUTH_CLIENT_ID", "")
+        def platformName = config.getOrDefault("PLATFORM_NAME", "")
+        def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
+        def privacyPolicy = config.getOrDefault("PRIVACY_POLICY", "")
+        def termsOfService = config.getOrDefault("TERMS_OF_SERVICE", "")
+        def contactUs = config.getOrDefault("CONTACT_US", "")
+        def feedbackEmailAddress = config.getOrDefault("FEEDBACK_EMAIL_ADDRESS", "")
+        def tokenType = config.getOrDefault("TOKEN_TYPE", "")
+        def showWhatsNew = config.getOrDefault("SHOW_WHATS_NEW", false)
+        def firebase = helper.getFirebaseConfig(config)
+
+        buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
+        buildType.buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
+        buildType.buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
+        buildType.buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
+        buildType.buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
+        buildType.buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${tokenType}\""
+        buildType.buildConfigField "Boolean", "SHOW_WHATS_NEW", "${showWhatsNew}"
+
+        buildType.resValue "string", "google_app_id", firebase.appId
+        buildType.resValue "string", "platform_name", platformName
+        buildType.resValue "string", "platform_full_name", platformFullName
+        buildType.resValue "string", "privacy_policy_link", privacyPolicy
+        buildType.resValue "string", "terms_of_service_link", termsOfService
+        buildType.resValue "string", "contact_us_link", contactUs
+        buildType.resValue "string", "feedback_email_address", feedbackEmailAddress
+    }
+}
+
 class FirebaseConfig {
     public String projectId = ""
     public String appId = ""
@@ -154,43 +205,73 @@ class FirebaseConfig {
     public String gcmSenderId = ""
 }
 
-def getFirebaseConfig(envMap) {
-    FirebaseConfig config = new FirebaseConfig()
-    if (envMap.value["FIREBASE"] != null) {
-        config.projectId = setValue(envMap.value["FIREBASE"]["PROJECT_ID"])
-        config.appId = setValue(envMap.value["FIREBASE"]["APPLICATION_ID"])
-        config.apiKey = setValue(envMap.value["FIREBASE"]["API_KEY"])
-        config.gcmSenderId = setValue(envMap.value["FIREBASE"]["GCM_SENDER_ID"])
+class ConfigHelper {
+    def CONFIG_SETTINGS_YAML_FILENAME = 'config_settings.yaml'
+    def DEFAULT_CONFIG_PATH = './default_config/' + CONFIG_SETTINGS_YAML_FILENAME
+    def CONFIG_DIRECTORY = "config_directory"
+    def CONFIG_MAPPING = "config_mapping"
+    def MAPPINGS_FILENAME = 'file_mappings.yaml'
+    def ANDROID_CONFIG = "android"
+    def FILES_CONFIG = "files"
+
+    def configDir = ""
+
+    ConfigHelper(environment) {
+        def configFile = new File(CONFIG_SETTINGS_YAML_FILENAME)
+        if (!configFile.exists()) {
+            // parse default configurations if `config_settings.yaml` doesn't exist
+            println("Configurations are missing at " + configFile.path)
+            println("Parsing Default configurations from " + DEFAULT_CONFIG_PATH)
+            configFile = new File(DEFAULT_CONFIG_PATH)
+        }
+        if (!configFile.exists()) {
+            throw new Exception("Configurations are missing at " + configFile.path)
+        }
+
+        def config = new Yaml().load(configFile.newInputStream())
+        if (config[CONFIG_DIRECTORY] && config[CONFIG_MAPPING][environment]) {
+            configDir = config[CONFIG_DIRECTORY] + "/" + config[CONFIG_MAPPING][environment]
+        } else {
+            throw new Exception(environment + "key doesn't exist in " + configFile.path)
+        }
     }
-    return config
-}
 
-def setValue(value) {
-    def result
-    if (value == null) {
-        result = ""
-    } else {
-        result = value
+    def fetchConfig() {
+        def configFilesMapping = new File(configDir + "/" + MAPPINGS_FILENAME)
+        if (!configFilesMapping.exists()) {
+            throw new Exception("Inappropriate config directory format")
+        }
+        def configMappingFiles = new Yaml().load(configFilesMapping.newInputStream())
+        def androidFiles = configMappingFiles.getOrDefault(ANDROID_CONFIG, {}).getOrDefault(FILES_CONFIG, [])
+        def androidConfigs = new LinkedHashMap()
+        androidFiles.each { file ->
+            def configFile = new File(configDir + "/" + file)
+            if (configFile.exists()) {
+                def config = new Yaml().load(configFile.newInputStream())
+                androidConfigs.putAll(config)
+            }
+        }
+        return androidConfigs
     }
-    return result
-}
 
-def insertBuildConfigFields(config, buildType, String keyName) {
-    def envMap = config.environments.find { it.key == keyName }
-    def clientId = envMap.value.OAUTH_CLIENT_ID
-    def envUrls = envMap.value.URLS
-    def firebase = getFirebaseConfig(envMap)
+    FirebaseConfig getFirebaseConfig(config) {
+        FirebaseConfig firebaseConfig = new FirebaseConfig()
+        if (config["FIREBASE"] != null) {
+            firebaseConfig.projectId = setValue(config["FIREBASE"]["PROJECT_ID"])
+            firebaseConfig.appId = setValue(config["FIREBASE"]["APPLICATION_ID"])
+            firebaseConfig.apiKey = setValue(config["FIREBASE"]["API_KEY"])
+            firebaseConfig.gcmSenderId = setValue(config["FIREBASE"]["GCM_SENDER_ID"])
+        }
+        return firebaseConfig
+    }
 
-    buildType.buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-    buildType.buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-    buildType.buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-    buildType.buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-    buildType.buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-    buildType.resValue "string", "google_app_id", firebase.appId
-    buildType.resValue "string", "platform_name", config.platformName
-    buildType.resValue "string", "platform_full_name", config.platformFullName
-    buildType.resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-    buildType.resValue "string", "terms_of_service_link", envUrls.termsOfService
-    buildType.resValue "string", "contact_us_link", envUrls.contactUs
-    buildType.resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+    private String setValue(value) {
+        def result
+        if (value == null) {
+            result = ""
+        } else {
+            result = value
+        }
+        return result
+    }
 }

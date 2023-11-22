@@ -16,3 +16,4 @@ local.properties
 /.idea/
 *.log
 /default_config/
+**/config_settings.yaml
