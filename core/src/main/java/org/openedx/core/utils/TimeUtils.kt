@@ -9,6 +9,7 @@ import org.openedx.core.system.ResourceManager
 import java.text.ParseException
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -21,6 +22,10 @@ object TimeUtils {
     const val FORMAT_DATE_TAB = "EEE, MMM dd, yyyy"
 
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
+
+    fun getCurrentTime(): Long {
+        return Calendar.getInstance().timeInMillis
+    }
 
     fun iso8601ToDate(text: String): Date? {
         return try {
