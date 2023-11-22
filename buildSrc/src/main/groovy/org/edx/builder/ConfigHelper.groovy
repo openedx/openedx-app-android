@@ -51,11 +51,10 @@ class ConfigHelper {
                 androidConfigs.putAll(config)
             }
         }
-        generateConfigJson(androidConfigs)
         return androidConfigs
     }
 
-    private def generateConfigJson(config) {
+    def generateConfigJson(config) {
         def configJsonDir = new File(projectDir.path + "/src/main/res/raw/")
         configJsonDir.mkdirs()
         def jsonWriter = new FileWriter(configJsonDir.path + "/config.json")

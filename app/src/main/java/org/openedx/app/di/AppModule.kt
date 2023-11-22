@@ -135,7 +135,7 @@ val appModule = module {
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }
-    single { WhatsNewManager(get(), get(), get()) }
+    single { WhatsNewManager(get(), get(), get(), get()) }
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
     single { AnalyticsManager(get()) }

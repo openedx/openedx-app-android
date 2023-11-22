@@ -164,16 +164,16 @@ def getCurrentFlavor() {
 }
 
 def insertBuildConfigFields(currentFlavour, buildType, environment) {
+    def helper = new ConfigHelper(projectDir, environment)
+    def config = helper.fetchConfig()
     if (currentFlavour == buildType.name) {
-        def helper = new ConfigHelper(projectDir, environment)
-        def config = helper.fetchConfig()
-
-        def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
-        def platformName = config.getOrDefault("PLATFORM_NAME", "")
-        def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
-
-        buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
-        buildType.resValue "string", "platform_name", platformName
-        buildType.resValue "string", "platform_full_name", platformFullName
+        helper.generateConfigJson(config)
     }
+    def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
+    def platformName = config.getOrDefault("PLATFORM_NAME", "")
+    def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
+
+    buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
+    buildType.resValue "string", "platform_name", platformName
+    buildType.resValue "string", "platform_full_name", platformFullName
 }

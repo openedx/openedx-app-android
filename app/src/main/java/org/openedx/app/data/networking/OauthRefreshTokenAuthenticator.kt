@@ -144,7 +144,7 @@ class OauthRefreshTokenAuthenticator(
         if (canRequestTokenRefresh()) {
             val response = authApi.refreshAccessToken(
                 ApiConstants.TOKEN_TYPE_REFRESH,
-                BuildConfig.CLIENT_ID,
+                config.getOAuthClientId(),
                 refreshToken,
                 config.getAccessTokenType()
             ).execute()

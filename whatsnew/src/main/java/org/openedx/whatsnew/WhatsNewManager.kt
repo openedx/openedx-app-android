@@ -2,6 +2,7 @@ package org.openedx.whatsnew
 
 import android.content.Context
 import com.google.gson.Gson
+import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.whatsnew.data.model.WhatsNewItem
@@ -9,9 +10,10 @@ import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 class WhatsNewManager(
     private val context: Context,
+    private val config: Config,
     private val whatsNewPreferences: WhatsNewPreferences,
     private val appData: AppData
-): WhatsNewGlobalManager {
+) : WhatsNewGlobalManager {
     fun getNewestData(): org.openedx.whatsnew.domain.model.WhatsNewItem {
         val jsonString = context.resources.openRawResource(R.raw.whats_new)
             .bufferedReader()
@@ -24,6 +26,6 @@ class WhatsNewManager(
         val dataVersion = getNewestData().version
         return appData.versionName == dataVersion
                 && whatsNewPreferences.lastWhatsNewVersion != dataVersion
-                && org.openedx.core.BuildConfig.SHOW_WHATS_NEW
+                && config.isWhatsNewEnabled()
     }
 }
