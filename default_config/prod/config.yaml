@@ -2,3 +2,11 @@ API_HOST_URL: 'http://localhost:8000'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 OAUTH_CLIENT_ID: ''
+
+#Platform names
+PLATFORM_NAME: "OpenEdX"
+PLATFORM_FULL_NAME: "OpenEdX"
+#tokenType enum accepts JWT and BEARER only
+TOKEN_TYPE: "JWT"
+#feature flag for activating What’s New feature
+SHOW_WHATS_NEW: false
