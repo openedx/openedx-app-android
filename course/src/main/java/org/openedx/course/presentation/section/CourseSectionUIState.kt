@@ -7,6 +7,7 @@ sealed class CourseSectionUIState {
     data class Blocks(
         val blocks: List<Block>,
         val downloadedState: Map<String, DownloadedState>,
+        val sectionName: String,
         val courseName: String
     ) : CourseSectionUIState()
     object Loading : CourseSectionUIState()
