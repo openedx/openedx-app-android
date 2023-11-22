@@ -25,7 +25,6 @@ interface CourseRouter {
         fm: FragmentManager,
         courseId: String,
         blockId: String,
-        title: String,
         mode: CourseViewMode,
     )
 
