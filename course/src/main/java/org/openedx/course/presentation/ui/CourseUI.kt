@@ -67,7 +67,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.jsoup.Jsoup
+import org.koin.java.KoinJavaComponent.getKoin
 import org.openedx.core.BlockType
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.Certificate
@@ -83,13 +86,12 @@ import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
-import org.jsoup.Jsoup
-import org.openedx.core.ui.rememberWindowSize
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
@@ -102,6 +104,7 @@ fun CourseImageHeader(
     courseCertificate: Certificate?,
     courseName: String
 ) {
+    val config = getKoin().get<Config>()
     val configuration = LocalConfiguration.current
     val windowSize = rememberWindowSize()
     val contentScale = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -113,7 +116,7 @@ fun CourseImageHeader(
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
-        org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + courseImage
+        config.getApiHostURL().dropLast(1) + courseImage
     }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AsyncImage(

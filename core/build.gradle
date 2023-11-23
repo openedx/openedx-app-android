@@ -174,11 +174,8 @@ def insertBuildConfigFields(currentFlavour, buildType, environment) {
     if (currentFlavour == buildType.name) {
         helper.generateConfigJson(config)
     }
-    def apiHostUrl = config.getOrDefault("API_HOST_URL", "")
     def platformName = config.getOrDefault("PLATFORM_NAME", "")
     def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
-
-    buildType.buildConfigField "String", "BASE_URL", "\"${apiHostUrl}\""
     buildType.resValue "string", "platform_name", platformName
     buildType.resValue "string", "platform_full_name", platformFullName
 }

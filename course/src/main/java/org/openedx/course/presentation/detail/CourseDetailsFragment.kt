@@ -39,7 +39,9 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.koin.java.KoinJavaComponent.getKoin
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.extension.isEmailValid
@@ -98,7 +100,10 @@ class CourseDetailsFragment : Fragment() {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
                             if (currentState.course.isEnrolled) {
-                                viewModel.viewCourseClickedEvent(currentState.course.courseId, currentState.course.name)
+                                viewModel.viewCourseClickedEvent(
+                                    currentState.course.courseId,
+                                    currentState.course.name
+                                )
                                 router.navigateToCourseOutline(
                                     requireActivity().supportFragmentManager,
                                     currentState.course.courseId,
@@ -227,6 +232,7 @@ internal fun CourseDetailsScreen(
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
+
                         is CourseDetailsUIState.CourseData -> {
                             Column(Modifier.verticalScroll(rememberScrollState())) {
                                 if (configuration.orientation == ORIENTATION_LANDSCAPE && windowSize.isTablet) {
@@ -544,6 +550,7 @@ private fun CourseDescription(
     onWebPageLoaded: () -> Unit
 ) {
     val context = LocalContext.current
+    val config = getKoin().get<Config>()
     AndroidView(modifier = Modifier.then(paddingModifier), factory = {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
@@ -587,7 +594,11 @@ private fun CourseDescription(
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             loadDataWithBaseURL(
-                org.openedx.core.BuildConfig.BASE_URL, body, "text/html", StandardCharsets.UTF_8.name(), null
+                config.getApiHostURL(),
+                body,
+                "text/html",
+                StandardCharsets.UTF_8.name(),
+                null
             )
         }
     })

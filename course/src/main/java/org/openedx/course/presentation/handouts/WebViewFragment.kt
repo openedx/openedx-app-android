@@ -35,6 +35,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.koin.java.KoinJavaComponent.getKoin
+import org.openedx.core.config.Config
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.replaceLinkTags
 import org.openedx.core.ui.*
@@ -197,6 +199,7 @@ private fun WebContentScreen(
 @SuppressLint("SetJavaScriptEnabled")
 private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
     val context = LocalContext.current
+    val config = getKoin().get<Config>()
     val isDarkTheme = isSystemInDarkTheme()
     AndroidView(modifier = Modifier, factory = {
         WebView(context).apply {
@@ -241,7 +244,7 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             loadDataWithBaseURL(
-                org.openedx.core.BuildConfig.BASE_URL,
+                config.getApiHostURL(),
                 body.replaceLinkTags(isDarkTheme),
                 "text/html",
                 StandardCharsets.UTF_8.name(),
@@ -250,7 +253,7 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
         }
     }, update = {
         it.loadDataWithBaseURL(
-            org.openedx.core.BuildConfig.BASE_URL,
+            config.getApiHostURL(),
             body.replaceLinkTags(isDarkTheme),
             "text/html",
             StandardCharsets.UTF_8.name(),

@@ -62,7 +62,7 @@ val appModule = module {
     single<InAppReviewPreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
-    single { AppCookieManager(get()) }
+    single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
 
     single<Gson> { GsonBuilder().create() }

@@ -41,7 +41,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.java.KoinJavaComponent.getKoin
+import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.*
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -50,7 +53,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.AppUpdateState
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.*
@@ -347,6 +349,7 @@ private fun CourseItem(
     windowSize: WindowSize,
     onClick: (EnrolledCourse) -> Unit
 ) {
+    val config = getKoin().get<Config>()
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -355,7 +358,7 @@ private fun CourseItem(
             )
         )
     }
-    val imageUrl = org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + enrolledCourse.course.courseImage
+    val imageUrl = config.getApiHostURL().dropLast(1) + enrolledCourse.course.courseImage
     val context = LocalContext.current
     Surface(
         modifier = Modifier

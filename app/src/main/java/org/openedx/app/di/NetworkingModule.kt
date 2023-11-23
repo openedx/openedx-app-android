@@ -9,6 +9,7 @@ import org.openedx.app.data.networking.HeadersInterceptor
 import org.openedx.app.data.networking.OauthRefreshTokenAuthenticator
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.core.BuildConfig
+import org.openedx.core.config.Config
 import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
 import org.openedx.discussion.data.api.DiscussionApi
@@ -37,8 +38,9 @@ val networkingModule = module {
     }
 
     single<Retrofit> {
+        val config = this.get<Config>()
         Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(config.getApiHostURL())
             .client(get())
             .addConverterFactory(GsonConverterFactory.create(get()))
             .build()

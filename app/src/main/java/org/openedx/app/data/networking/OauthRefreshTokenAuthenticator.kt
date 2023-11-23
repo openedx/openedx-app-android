@@ -52,7 +52,7 @@ class OauthRefreshTokenAuthenticator(
             }
         }.build()
         authApi = Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(config.getApiHostURL())
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(Gson()))
             .build()

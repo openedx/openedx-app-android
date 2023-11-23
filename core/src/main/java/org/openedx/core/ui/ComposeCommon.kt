@@ -49,8 +49,10 @@ import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
+import org.koin.java.KoinJavaComponent.getKoin
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
@@ -731,6 +733,8 @@ fun AutoSizeText(
 
 @Composable
 fun DiscoveryCourseItem(course: Course, windowSize: WindowSize, onClick: (String) -> Unit) {
+    val config = getKoin().get<Config>()
+
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -740,7 +744,7 @@ fun DiscoveryCourseItem(course: Course, windowSize: WindowSize, onClick: (String
         )
     }
 
-    val imageUrl = org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + course.media.courseImage?.uri
+    val imageUrl = config.getApiHostURL().dropLast(1) + course.media.courseImage?.uri
     Surface(
         modifier = Modifier
             .fillMaxWidth()
