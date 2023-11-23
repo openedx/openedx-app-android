@@ -151,7 +151,6 @@ class CourseDatesFragment : Fragment() {
                                             requireActivity().supportFragmentManager,
                                             blockId = sequentialBlock.id,
                                             courseId = viewModel.courseId,
-                                            title = sequentialBlock.displayName,
                                             mode = CourseViewMode.FULL,
                                             descendantId = verticalBlock.id
                                         )
