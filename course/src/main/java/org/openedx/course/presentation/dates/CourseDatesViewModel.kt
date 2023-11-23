@@ -8,6 +8,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -67,5 +68,25 @@ class CourseDatesViewModel(
             }
             _updating.value = false
         }
+    }
+
+    fun getVerticalBlock(blockId: String): Block? {
+        try {
+            val courseStructure = interactor.getCourseStructureFromCache()
+            return courseStructure.getVerticalBlocks().find { it.descendants.contains(blockId) }
+        } catch (e: Exception) {
+        }
+        return null
+    }
+
+    fun getSequentialBlock(blockId: String): Block? {
+        try {
+            val courseStructure = interactor.getCourseStructureFromCache()
+            return courseStructure.getSequentialBlocks()
+                .find { it.descendants.contains(blockId) }
+
+        } catch (e: Exception) {
+        }
+        return null
     }
 }

@@ -116,10 +116,11 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         blockId: String,
         mode: CourseViewMode,
+        descendantId : String?
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseSectionFragment.newInstance(courseId, blockId, mode)
+            CourseSectionFragment.newInstance(courseId, blockId, mode, descendantId)
         )
     }
 

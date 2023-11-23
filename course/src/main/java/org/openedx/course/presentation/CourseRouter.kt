@@ -26,6 +26,7 @@ interface CourseRouter {
         courseId: String,
         blockId: String,
         mode: CourseViewMode,
+        descendantId: String? = null
     )
 
     fun navigateToCourseContainer(

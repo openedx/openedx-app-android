@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -61,6 +62,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
@@ -75,11 +77,13 @@ import androidx.fragment.app.Fragment
 import me.saket.extendedspans.ExtendedSpans
 import me.saket.extendedspans.RoundedCornerSpanPainter
 import me.saket.extendedspans.drawBehind
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.presentation.course.CourseDatesBadge
+import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -95,6 +99,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
+import org.openedx.course.presentation.CourseRouter
 import java.util.Date
 
 class CourseDatesFragment : Fragment() {
@@ -102,6 +107,7 @@ class CourseDatesFragment : Fragment() {
     private val viewModel by viewModel<CourseDatesViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
+    private val router by inject<CourseRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -136,6 +142,23 @@ class CourseDatesFragment : Fragment() {
                     onSwipeRefresh = {
                         viewModel.getCourseDates()
                     },
+                    onItemClick = { blockId ->
+                        if (blockId.isNotEmpty()) {
+                            viewModel.getVerticalBlock(blockId)?.let { verticalBlock ->
+                                viewModel.getSequentialBlock(verticalBlock.id)
+                                    ?.let { sequentialBlock ->
+                                        router.navigateToCourseSubsections(
+                                            requireActivity().supportFragmentManager,
+                                            blockId = sequentialBlock.id,
+                                            courseId = viewModel.courseId,
+                                            title = sequentialBlock.displayName,
+                                            mode = CourseViewMode.FULL,
+                                            descendantId = verticalBlock.id
+                                        )
+                                    }
+                            }
+                        }
+                    },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     })
@@ -165,6 +188,7 @@ internal fun CourseDatesScreen(
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
+    onItemClick: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -261,7 +285,8 @@ internal fun CourseDatesScreen(
                                         itemsIndexed(uiState.courseDates.keys.toList()) { dateIndex, _ ->
                                             CourseDateBlockSection(
                                                 courseDates = uiState.courseDates,
-                                                dateIndex = dateIndex
+                                                dateIndex = dateIndex,
+                                                onItemClick = onItemClick
                                             )
                                         }
                                     }
@@ -308,7 +333,9 @@ internal fun CourseDatesScreen(
 
 @Composable
 private fun CourseDateBlockSection(
-    courseDates: LinkedHashMap<String, ArrayList<CourseDateBlock>>, dateIndex: Int
+    courseDates: LinkedHashMap<String, ArrayList<CourseDateBlock>>,
+    dateIndex: Int,
+    onItemClick: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -326,7 +353,7 @@ private fun CourseDateBlockSection(
                     isLastIndex = dateIndex == courseDates.size - 1,
                     dateBlock = dateBlockItem
                 )
-                DateBlock(dateBlocks)
+                DateBlock(dateBlocks, onItemClick)
             }
         }
     }
@@ -408,7 +435,7 @@ private fun DateBullet(
 }
 
 @Composable
-private fun DateBlock(dateBlocks: ArrayList<CourseDateBlock>) {
+private fun DateBlock(dateBlocks: ArrayList<CourseDateBlock>, onItemClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .wrapContentHeight()
@@ -429,7 +456,7 @@ private fun DateBlock(dateBlocks: ArrayList<CourseDateBlock>) {
         ) {
             val parentBadgeAdded = hasSameDateTypes(dateBlocks)
             dateBlocks.forEach { courseDateItem ->
-                CourseDateItem(courseDateItem, parentBadgeAdded)
+                CourseDateItem(courseDateItem, parentBadgeAdded, onItemClick)
             }
         }
     }
@@ -544,7 +571,11 @@ private fun PlaceDateBadge(title: String, titleSize: TextUnit, blockBadge: Cours
 }
 
 @Composable
-private fun CourseDateItem(courseDateItem: CourseDateBlock, parentBadgeAdded: Boolean) {
+private fun CourseDateItem(
+    courseDateItem: CourseDateBlock,
+    parentBadgeAdded: Boolean,
+    onItemClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .wrapContentHeight()
@@ -556,10 +587,14 @@ private fun CourseDateItem(courseDateItem: CourseDateBlock, parentBadgeAdded: Bo
             PlaceDateBadge(courseDateItem.title, 16.sp, courseDateItem.dateBlockBadge)
         } else {
             Text(
+                modifier = Modifier.clickable {
+                    onItemClick(courseDateItem.blockId)
+                },
                 text = courseDateItem.title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                lineHeight = 20.sp
+                lineHeight = 20.sp,
+                textDecoration = if (courseDateItem.blockId.isNotEmpty()) TextDecoration.Underline else TextDecoration.None
             )
         }
         if (!TextUtils.isEmpty(courseDateItem.description)) {
@@ -603,6 +638,7 @@ private fun CourseDatesScreenPreview() {
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
+            onItemClick = {},
             onBackClick = {})
     }
 }
@@ -620,6 +656,7 @@ private fun CourseDatesScreenTabletPreview() {
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
+            onItemClick = {},
             onBackClick = {})
     }
 }
