@@ -14,7 +14,7 @@ class Config(context: Context) {
 
     init {
         configProperties = try {
-            val inputStream = context.resources.openRawResource(R.raw.config)
+            val inputStream = context.assets.open("config/config.json")
             val parser = JsonParser()
             val config = parser.parse(InputStreamReader(inputStream))
             config.asJsonObject

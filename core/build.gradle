@@ -55,6 +55,11 @@ android {
         develop {
             res.srcDirs = ['src/openedx/res']
         }
+        main {
+            assets {
+                srcDirs 'src/main/assets', 'assets'
+            }
+        }
     }
 
     buildTypes {

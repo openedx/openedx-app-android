@@ -55,7 +55,7 @@ class ConfigHelper {
     }
 
     def generateConfigJson(config) {
-        def configJsonDir = new File(projectDir.path + "/src/main/res/raw/")
+        def configJsonDir = new File(projectDir.path + "/assets/config")
         configJsonDir.mkdirs()
         def jsonWriter = new FileWriter(configJsonDir.path + "/config.json")
         def builder = new JsonBuilder(config)

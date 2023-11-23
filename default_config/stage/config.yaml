@@ -1,12 +1,12 @@
 API_HOST_URL: 'http://localhost:8000'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
-OAUTH_CLIENT_ID: ''
+OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
 
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: ''
-  TOS_URL: ''
-  CONTACT_US_URL: ''
+  PRIVACY_POLICY_URL: 'https://example.com/privacy'
+  TOS_URL: 'https://example.com/tos'
+  CONTACT_US_URL: 'https://example.com/contact'
 
 #Platform names
 PLATFORM_NAME: "OpenEdX"
