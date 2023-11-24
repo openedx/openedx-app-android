@@ -103,11 +103,13 @@ class SignInFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
+                val isLogistrationEnabled = BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED
 
                 if (appUpgradeEvent == null) {
                     LoginScreen(
                         windowSize = windowSize,
                         showProgress = showProgress,
+                        isLogistrationEnabled = isLogistrationEnabled,
                         uiMessage = uiMessage,
                         onLoginClick = { login, password ->
                             viewModel.login(login, password)
@@ -152,6 +154,7 @@ class SignInFragment : Fragment() {
 private fun LoginScreen(
     windowSize: WindowSize,
     showProgress: Boolean,
+    isLogistrationEnabled: Boolean,
     uiMessage: UIMessage?,
     onLoginClick: (login: String, password: String) -> Unit,
     onRegisterClick: () -> Unit,
@@ -205,7 +208,7 @@ private fun LoginScreen(
             uiMessage = uiMessage,
             scaffoldState = scaffoldState
         )
-        if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
+        if (isLogistrationEnabled) {
             Box(
                 modifier = Modifier
                     .statusBarsPadding()
@@ -268,6 +271,7 @@ private fun LoginScreen(
                         AuthForm(
                             buttonWidth,
                             showProgress,
+                            isLogistrationEnabled,
                             onLoginClick,
                             onRegisterClick,
                             onForgotPasswordClick
@@ -283,6 +287,7 @@ private fun LoginScreen(
 private fun AuthForm(
     buttonWidth: Modifier,
     isLoading: Boolean = false,
+    isLogistrationEnabled: Boolean,
     onLoginClick: (login: String, password: String) -> Unit,
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit
@@ -315,7 +320,7 @@ private fun AuthForm(
                 .fillMaxWidth()
                 .padding(top = 20.dp, bottom = 36.dp)
         ) {
-            if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED.not()) {
+            if (isLogistrationEnabled.not()) {
                 Text(
                     modifier = Modifier.noRippleClickable {
                         onRegisterClick()
@@ -413,6 +418,7 @@ private fun SignInScreenPreview() {
         LoginScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             showProgress = false,
+            isLogistrationEnabled = false,
             uiMessage = null,
             onLoginClick = { _, _ ->
 
@@ -433,6 +439,7 @@ private fun SignInScreenTabletPreview() {
         LoginScreen(
             windowSize = WindowSize(WindowType.Expanded, WindowType.Expanded),
             showProgress = false,
+            isLogistrationEnabled = false,
             uiMessage = null,
             onLoginClick = { _, _ ->
 

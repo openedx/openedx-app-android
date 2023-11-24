@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -81,7 +82,7 @@ class Logistration : Fragment() {
 
 @Composable
 private fun PreLoginScreen(
-    onSearchClick: (query: String) -> Unit,
+    onSearchClick: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
 ) {
@@ -94,7 +95,8 @@ private fun PreLoginScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
         Surface(
