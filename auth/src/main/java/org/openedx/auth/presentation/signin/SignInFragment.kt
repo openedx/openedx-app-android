@@ -66,7 +66,6 @@ import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.core.AppUpdateState
 import org.openedx.core.BuildConfig
 import org.openedx.core.UIMessage
-import org.openedx.core.presentation.global.AppDataHolder
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
