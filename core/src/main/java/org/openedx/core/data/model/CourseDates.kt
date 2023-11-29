@@ -56,7 +56,8 @@ data class CourseDates(
                 complete = item.complete,
                 learnerHasAccess = item.learnerHasAccess,
                 dateType = item.dateType,
-                dateBlockBadge = CourseDatesBadge.BLANK
+                dateBlockBadge = CourseDatesBadge.BLANK,
+                assignmentType = item.assignmentType
             )
             if (courseDates.containsKey(key)) {
                 (courseDates[key] as ArrayList).add(dateBlock)
