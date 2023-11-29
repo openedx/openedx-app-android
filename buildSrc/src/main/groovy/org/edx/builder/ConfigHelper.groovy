@@ -9,8 +9,8 @@ class ConfigHelper {
     def CONFIG_DIRECTORY = "config_directory"
     def CONFIG_MAPPING = "config_mapping"
     def MAPPINGS_FILENAME = 'file_mappings.yaml'
-    def ANDROID_CONFIG = "android"
-    def FILES_CONFIG = "files"
+    def ANDROID_CONFIG_KEY = "android"
+    def FILES_CONFIG_KEY = "files"
 
     def configDir = ""
     def projectDir = ""
@@ -42,9 +42,9 @@ class ConfigHelper {
             throw new Exception("Inappropriate config directory format")
         }
         def configMappingFiles = new Yaml().load(configFilesMapping.newInputStream())
-        def androidFiles = configMappingFiles.getOrDefault(ANDROID_CONFIG, {}).getOrDefault(FILES_CONFIG, [])
+        def androidConfigFiles = configMappingFiles.getOrDefault(ANDROID_CONFIG_KEY, {}).getOrDefault(FILES_CONFIG_KEY, [])
         def androidConfigs = new LinkedHashMap()
-        androidFiles.each { file ->
+        androidConfigFiles.each { file ->
             def configFile = new File(configDir + "/" + file)
             if (configFile.exists()) {
                 def config = new Yaml().load(configFile.newInputStream())
