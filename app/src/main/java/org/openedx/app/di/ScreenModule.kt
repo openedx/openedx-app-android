@@ -70,7 +70,7 @@ val screenModule = module {
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get()) }
+    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
@@ -85,16 +85,16 @@ val screenModule = module {
     factory { CourseInteractor(get()) }
     viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), courseId) }
     viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), get(), courseId) }
-    viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String, blockId: String) -> EncodedVideoUnitViewModel(courseId, blockId, get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseDatesViewModel(courseId, get(), get(), get()) }
     viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, get(), handoutsType, get()) }
-    viewModel { CourseSearchViewModel(get(), get(), get()) }
+    viewModel { CourseSearchViewModel(get(), get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
     single { DiscussionRepository(get(), get()) }

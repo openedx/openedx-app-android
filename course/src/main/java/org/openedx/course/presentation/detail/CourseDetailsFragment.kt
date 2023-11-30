@@ -239,6 +239,7 @@ internal fun CourseDetailsScreen(
                                 if (configuration.orientation == ORIENTATION_LANDSCAPE && windowSize.isTablet) {
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
+                                        apiHostUrl = apiHostUrl,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -247,6 +248,7 @@ internal fun CourseDetailsScreen(
                                 } else {
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
+                                        apiHostUrl = apiHostUrl,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -310,6 +312,7 @@ internal fun CourseDetailsScreen(
 @Composable
 private fun CourseDetailNativeContent(
     windowSize: WindowSize,
+    apiHostUrl: String,
     course: Course,
     onButtonClick: () -> Unit,
 ) {
@@ -344,6 +347,7 @@ private fun CourseDetailNativeContent(
                 modifier = Modifier
                     .aspectRatio(1.86f)
                     .padding(6.dp),
+                apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
                 courseCertificate = null,
                 courseName = course.name
@@ -407,6 +411,7 @@ private fun CourseDetailNativeContent(
 @Composable
 private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
+    apiHostUrl: String,
     course: Course,
     onButtonClick: () -> Unit,
 ) {
@@ -474,6 +479,7 @@ private fun CourseDetailNativeContentLandscape(
                 modifier = Modifier
                     .width(263.dp)
                     .height(200.dp),
+                apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
                 courseCertificate = null,
                 courseName = course.name

@@ -4,10 +4,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
@@ -21,11 +23,11 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.launch
 import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
@@ -35,6 +37,10 @@ class CourseOutlineViewModel(
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+
+    private val _apiHostUrl = MutableLiveData<String>()
+    val apiHostUrl: LiveData<String>
+        get() = _apiHostUrl
 
     private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: LiveData<CourseOutlineUIState>
@@ -85,6 +91,7 @@ class CourseOutlineViewModel(
     }
 
     init {
+        _apiHostUrl.value = config.getApiHostURL()
         getCourseData()
     }
 
