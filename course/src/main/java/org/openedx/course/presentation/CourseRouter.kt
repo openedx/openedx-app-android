@@ -26,14 +26,13 @@ interface CourseRouter {
         courseId: String,
         blockId: String,
         mode: CourseViewMode,
-        descendantId: String? = null
+        descendantId: String? = ""
     )
 
     fun navigateToCourseContainer(
         fm: FragmentManager,
         blockId: String,
         courseId: String,
-        courseName: String,
         mode: CourseViewMode
     )
 
@@ -41,7 +40,6 @@ interface CourseRouter {
         fm: FragmentManager,
         blockId: String,
         courseId: String,
-        courseName: String,
         mode: CourseViewMode
     )
 

@@ -124,7 +124,6 @@ class CourseSectionFragment : Fragment() {
                                 requireActivity().supportFragmentManager,
                                 block.id,
                                 courseId = viewModel.courseId,
-                                courseName = block.displayName,
                                 mode = viewModel.mode
                             )
                         }
@@ -147,13 +146,12 @@ class CourseSectionFragment : Fragment() {
                 )
 
                 LaunchedEffect(rememberSaveable { true }) {
-                    val descendantId = requireArguments().getString(ARG_DESCENDANT_ID, null)
-                    if(descendantId.isNotEmpty()) {
+                    val descendantId = requireArguments().getString(ARG_DESCENDANT_ID, "")
+                    if (descendantId.isNotEmpty()) {
                         router.navigateToCourseContainer(
                             requireActivity().supportFragmentManager,
                             descendantId,
                             courseId = viewModel.courseId,
-                            courseName = "",
                             mode = viewModel.mode
                         )
                         requireArguments().putString(ARG_DESCENDANT_ID, "")
@@ -308,7 +306,9 @@ private fun CourseSubsectionItem(
     onDownloadClick: (Block) -> Unit
 ) {
     val completedIconPainter =
-        if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
+        if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+            R.drawable.ic_course_chapter_icon
+        )
     val completedIconColor =
         if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
     val completedIconDescription = if (block.completion == 1.0) {
@@ -357,11 +357,12 @@ private fun CourseSubsectionItem(
                     } else {
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
-                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_accessibility_remove_course_section)
-                    } else {
-                        stringResource(id = R.string.course_accessibility_download_course_section)
-                    }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(

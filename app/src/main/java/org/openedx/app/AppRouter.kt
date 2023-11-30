@@ -105,7 +105,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         coursewareAccess: CoursewareAccess,
         auditAccessExpires: Date?
     ) {
-        replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title,coursewareAccess, auditAccessExpires))
+        replaceFragment(
+            fm,
+            NoAccessCourseContainerFragment.newInstance(title, coursewareAccess, auditAccessExpires)
+        )
     }
     //endregion
 
@@ -116,7 +119,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         blockId: String,
         mode: CourseViewMode,
-        descendantId : String?
+        descendantId: String?
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -128,12 +131,11 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         blockId: String,
         courseId: String,
-        courseName: String,
         mode: CourseViewMode
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseUnitContainerFragment.newInstance(blockId, courseId, courseName, mode)
+            CourseUnitContainerFragment.newInstance(blockId, courseId, mode)
         )
     }
 
@@ -141,12 +143,11 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         blockId: String,
         courseId: String,
-        courseName: String,
         mode: CourseViewMode
     ) {
         replaceFragment(
             fm,
-            CourseUnitContainerFragment.newInstance(blockId, courseId, courseName, mode),
+            CourseUnitContainerFragment.newInstance(blockId, courseId, mode),
             FragmentTransaction.TRANSIT_FRAGMENT_FADE
         )
     }
@@ -175,7 +176,13 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ) {
         replaceFragmentWithBackStack(
             fm,
-            YoutubeVideoFullScreenFragment.newInstance(videoUrl, videoTime, blockId, courseId, isPlaying)
+            YoutubeVideoFullScreenFragment.newInstance(
+                videoUrl,
+                videoTime,
+                blockId,
+                courseId,
+                isPlaying
+            )
         )
     }
 
@@ -290,7 +297,11 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             .commit()
     }
 
-    private fun replaceFragment(fm: FragmentManager, fragment: Fragment, transaction: Int = FragmentTransaction.TRANSIT_NONE) {
+    private fun replaceFragment(
+        fm: FragmentManager,
+        fragment: Fragment,
+        transaction: Int = FragmentTransaction.TRANSIT_NONE
+    ) {
         fm.beginTransaction()
             .setTransition(transaction)
             .replace(R.id.container, fragment, fragment.javaClass.simpleName)

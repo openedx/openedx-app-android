@@ -71,22 +71,20 @@ class CourseDatesViewModel(
     }
 
     fun getVerticalBlock(blockId: String): Block? {
-        try {
+        return try {
             val courseStructure = interactor.getCourseStructureFromCache()
-            return courseStructure.getVerticalBlocks().find { it.descendants.contains(blockId) }
+            courseStructure.getVerticalBlocks().find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
+            null
         }
-        return null
     }
 
     fun getSequentialBlock(blockId: String): Block? {
-        try {
+        return try {
             val courseStructure = interactor.getCourseStructureFromCache()
-            return courseStructure.getSequentialBlocks()
-                .find { it.descendants.contains(blockId) }
-
+            courseStructure.getSequentialBlocks().find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
+            null
         }
-        return null
     }
 }
