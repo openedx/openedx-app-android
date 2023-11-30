@@ -3,8 +3,10 @@ package org.openedx.app
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.google.firebase.analytics.FirebaseAnalytics
+import org.openedx.app.analytics.Analytics
+import org.openedx.app.analytics.FirebaseAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.core.BuildConfig
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
@@ -14,14 +16,29 @@ import org.openedx.profile.presentation.ProfileAnalytics
 class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, AppAnalytics,
     DiscoveryAnalytics, ProfileAnalytics, CourseAnalytics, DiscussionAnalytics {
 
-    private val analytics = FirebaseAnalytics.getInstance(context)
+    private val services: ArrayList<Analytics> = arrayListOf()
+
+    init {
+        // Initialise all the analytics libraries here
+        if (BuildConfig.FIREBASE_PROJECT_ID.isNotEmpty()) {
+            addAnalyticsTracker(FirebaseAnalytics(context = context))
+        }
+    }
+
+    private fun addAnalyticsTracker(analytic: Analytics) {
+        services.add(analytic)
+    }
 
     private fun logEvent(event: Event, params: Bundle = bundleOf()) {
-        analytics.logEvent(event.eventName, params)
+        services.forEach { analytics ->
+            analytics.logEvent(event.eventName, params)
+        }
     }
 
     private fun setUserId(userId: Long) {
-        analytics.setUserId(userId.toString())
+        services.forEach { analytics ->
+            analytics.logUserId(userId)
+        }
     }
 
     override fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
