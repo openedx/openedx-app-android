@@ -9,6 +9,13 @@ AGREEMENT_URLS:
   TOS_URL: 'https://example.com/tos'
   CONTACT_US_URL: 'https://example.com/contact'
 
+DISCOVERY:
+  TYPE: 'native'
+  WEBVIEW:
+    BASE_URL: ''
+    COURSE_DETAIL_TEMPLATE: ''
+    PROGRAM_DETAIL_TEMPLATE: ''
+
 GOOGLE:
   ENABLED: false
   CLIENT_ID: ''
