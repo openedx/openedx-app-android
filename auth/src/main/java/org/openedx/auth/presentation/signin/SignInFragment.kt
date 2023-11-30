@@ -64,8 +64,8 @@ import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.core.AppUpdateState
-import org.openedx.core.BuildConfig
 import org.openedx.core.UIMessage
+import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -80,7 +80,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.presentation.global.WhatsNewGlobalManager
 
 class SignInFragment : Fragment() {
 
@@ -102,7 +101,7 @@ class SignInFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
-                val isLogistrationEnabled = BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED
+                val isLogistrationEnabled by viewModel.isLogistrationEnabled.observeAsState(initial = false)
 
                 if (appUpgradeEvent == null) {
                     LoginScreen(

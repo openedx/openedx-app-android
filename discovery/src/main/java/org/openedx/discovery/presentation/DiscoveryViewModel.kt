@@ -7,6 +7,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
+import org.openedx.core.BuildConfig
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
@@ -50,6 +51,9 @@ class DiscoveryViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
+    private val _isLogistrationEnabled = MutableLiveData<Boolean>()
+    val isLogistrationEnabled: LiveData<Boolean> = _isLogistrationEnabled
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -58,6 +62,7 @@ class DiscoveryViewModel(
     private var isLoading = false
 
     init {
+        _isLogistrationEnabled.value = BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED
         getCoursesList()
         collectAppUpgradeEvent()
     }

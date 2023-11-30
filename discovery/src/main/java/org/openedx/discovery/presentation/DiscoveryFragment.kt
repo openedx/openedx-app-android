@@ -66,7 +66,8 @@ class DiscoveryFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
                 val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
-                val isUserLoggedIn = corePreferencesManager.user != null
+                val isLogistrationEnabled by viewModel.isLogistrationEnabled.observeAsState(false)
+                val canShowBackButton = isLogistrationEnabled && corePreferencesManager.user == null
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -76,7 +77,7 @@ class DiscoveryFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
-                    isUserLoggedIn = isUserLoggedIn,
+                    canShowBackButton = canShowBackButton,
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
                         wasUpdateDialogClosed = wasUpdateDialogClosed,
@@ -158,7 +159,7 @@ internal fun DiscoveryScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
-    isUserLoggedIn: Boolean,
+    canShowBackButton: Boolean,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -217,7 +218,7 @@ internal fun DiscoveryScreen(
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-        if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED && isUserLoggedIn.not()) {
+        if (canShowBackButton) {
             Box(
                 modifier = Modifier
                     .statusBarsPadding()
@@ -440,7 +441,7 @@ private fun DiscoveryScreenPreview() {
             hasInternetConnection = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onBackClick = {},
-            isUserLoggedIn = false
+            canShowBackButton = false
         )
     }
 }
@@ -477,7 +478,7 @@ private fun DiscoveryScreenTabletPreview() {
             hasInternetConnection = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onBackClick = {},
-            isUserLoggedIn = false
+            canShowBackButton = false
         )
     }
 }

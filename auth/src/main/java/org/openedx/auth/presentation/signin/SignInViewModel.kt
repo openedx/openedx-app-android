@@ -8,6 +8,7 @@ import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.BaseViewModel
+import org.openedx.core.BuildConfig
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
@@ -44,7 +45,11 @@ class SignInViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
+    private val _isLogistrationEnabled = MutableLiveData<Boolean>()
+    val isLogistrationEnabled: LiveData<Boolean> = _isLogistrationEnabled
+
     init {
+        _isLogistrationEnabled.value = BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED
         collectAppUpgradeEvent()
     }
 
