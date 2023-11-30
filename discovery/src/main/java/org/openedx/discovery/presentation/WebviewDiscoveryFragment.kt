@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import org.koin.android.ext.android.inject
 import org.openedx.core.WebViewLink
 import org.openedx.core.WebViewLink.Authority.COURSE_INFO
@@ -150,6 +157,62 @@ private fun WebViewDiscoverScreen(
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
 
+    val webView = remember {
+        WebView(context).apply {
+            webViewClient = object : DefaultWebViewClient(
+                context = context,
+                webView = this@apply,
+                coroutineScope = coroutineScope,
+                cookieManager = cookieManager
+            ) {
+                override fun onPageCommitVisible(view: WebView?, url: String?) {
+                    super.onPageCommitVisible(view, url)
+                    onWebPageLoaded()
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    val clickUrl = request?.url?.toString() ?: ""
+                    if (handleRecognizedLink(clickUrl)) {
+                        return true
+                    }
+
+                    return super.shouldOverrideUrlLoading(view, request)
+                }
+
+                private fun handleRecognizedLink(clickUrl: String): Boolean {
+                    val link = WebViewLink.parse(clickUrl) ?: return false
+
+                    return when (link.authority) {
+                        COURSE_INFO,
+                        PROGRAM_INFO -> {
+                            val pathId = link.params[Param.PATH_ID] ?: ""
+                            onInfoCardClicked(pathId, link.authority.name)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+            }
+
+            with(settings) {
+                javaScriptEnabled = true
+                loadWithOverviewMode = true
+                builtInZoomControls = false
+                setSupportZoom(true)
+                loadsImagesAutomatically = true
+                domStorageEnabled = true
+            }
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
+
+            loadUrl(url)
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -206,62 +269,55 @@ private fun WebViewDiscoverScreen(
                         .then(modifierScreenWidth)
                         .background(MaterialTheme.appColors.background),
                     factory = {
-                        WebView(context).apply {
-                            webViewClient = object : DefaultWebViewClient(
-                                context = context,
-                                webView = this@apply,
-                                coroutineScope = coroutineScope,
-                                cookieManager = cookieManager
-                            ) {
-                                override fun onPageCommitVisible(view: WebView?, url: String?) {
-                                    super.onPageCommitVisible(view, url)
-                                    onWebPageLoaded()
-                                }
-
-                                override fun shouldOverrideUrlLoading(
-                                    view: WebView?,
-                                    request: WebResourceRequest?
-                                ): Boolean {
-                                    val clickUrl = request?.url?.toString() ?: ""
-                                    if (handleRecognizedLink(clickUrl)) {
-                                        return true
-                                    }
-
-                                    return super.shouldOverrideUrlLoading(view, request)
-                                }
-
-                                private fun handleRecognizedLink(clickUrl: String): Boolean {
-                                    val link = WebViewLink.parse(clickUrl) ?: return false
-
-                                    return when (link.authority) {
-                                        COURSE_INFO,
-                                        PROGRAM_INFO -> {
-                                            val pathId = link.params[Param.PATH_ID] ?: ""
-                                            onInfoCardClicked(pathId, link.authority.name)
-                                            true
-                                        }
-
-                                        else -> false
-                                    }
-                                }
-                            }
-
-                            with(settings) {
-                                javaScriptEnabled = true
-                                loadWithOverviewMode = true
-                                builtInZoomControls = false
-                                setSupportZoom(true)
-                                loadsImagesAutomatically = true
-                                domStorageEnabled = true
-                            }
-                            isVerticalScrollBarEnabled = false
-                            isHorizontalScrollBarEnabled = false
-
-                            loadUrl(url)
-                        }
+                        webView
                     }
                 )
             }
+        }
+    }
+
+    HandleWebViewBackNavigation(webView = webView)
+}
+
+@Composable
+fun HandleWebViewBackNavigation(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    webView: WebView?
+) {
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    val onBackPressedCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView?.canGoBack() == true) {
+                    webView.goBack()
+                } else {
+                    this.isEnabled = false
+                    backDispatcher?.onBackPressed()
+                }
+            }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                onBackPressedCallback.isEnabled = true
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                onBackPressedCallback.isEnabled = false
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    DisposableEffect(backDispatcher) {
+        backDispatcher?.addCallback(onBackPressedCallback)
+        onDispose {
+            onBackPressedCallback.remove()
         }
     }
 }
