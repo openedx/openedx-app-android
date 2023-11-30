@@ -37,11 +37,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.java.KoinJavaComponent.getKoin
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
+import org.openedx.core.config.AgreementUrlsConfig
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -52,6 +51,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.model.Account
+import org.openedx.profile.domain.model.AppConfig
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
@@ -279,6 +279,7 @@ private fun ProfileScreen(
                                     Spacer(modifier = Modifier.height(24.dp))
 
                                     SupportInfoSection(
+                                        appConfig = uiState.appConfig,
                                         appData = appData,
                                         onClick = onSupportClick,
                                         appUpgradeEvent = appUpgradeEvent,
@@ -339,6 +340,7 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 
 @Composable
 private fun SupportInfoSection(
+    appConfig: AppConfig,
     appData: AppData,
     appUpgradeEvent: AppUpgradeEvent?,
     onAppVersionClick: () -> Unit,
@@ -346,7 +348,6 @@ private fun SupportInfoSection(
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
-    val config = getKoin().get<Config>()
     Column {
         Text(
             text = stringResource(id = org.openedx.profile.R.string.profile_support_info),
@@ -372,7 +373,7 @@ private fun SupportInfoSection(
                         onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
                             context = context,
-                            feedbackEmailAddress = config.getFeedbackEmailAddress(),
+                            feedbackEmailAddress = appConfig.feedbackEmailAddress,
                             appVersion = appData.versionName
                         )
                     }
@@ -382,7 +383,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_terms_of_use),
                     onClick = {
                         onClick(SupportClickAction.COOKIE_POLICY)
-                        uriHandler.openUri(config.getAgreementUrlsConfig().tosUrl)
+                        uriHandler.openUri(appConfig.agreementUrlsConfig.tosUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -390,7 +391,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_privacy_policy),
                     onClick = {
                         onClick(SupportClickAction.PRIVACY_POLICY)
-                        uriHandler.openUri(config.getAgreementUrlsConfig().privacyPolicyUrl)
+                        uriHandler.openUri(appConfig.agreementUrlsConfig.privacyPolicyUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -742,7 +743,7 @@ private fun ProfileScreenPreview() {
     OpenEdXTheme {
         ProfileScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = ProfileUIState.Data(mockAccount),
+            uiState = ProfileUIState.Data(mockAppConfig, mockAccount),
             uiMessage = null,
             refreshing = false,
             logout = {},
@@ -765,7 +766,7 @@ private fun ProfileScreenTabletPreview() {
     OpenEdXTheme {
         ProfileScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = ProfileUIState.Data(mockAccount),
+            uiState = ProfileUIState.Data(mockAppConfig, mockAccount),
             uiMessage = null,
             refreshing = false,
             logout = {},
@@ -779,6 +780,14 @@ private fun ProfileScreenTabletPreview() {
         )
     }
 }
+
+private val mockAppConfig = AppConfig(
+    feedbackEmailAddress = "support@example.com", AgreementUrlsConfig(
+        privacyPolicyUrl = "https://example.com/privacy",
+        tosUrl = "https://example.com/tos",
+        contactUsUrl = "https://example.com/contact"
+    )
+)
 
 private val mockAccount = Account(
     username = "thom84",

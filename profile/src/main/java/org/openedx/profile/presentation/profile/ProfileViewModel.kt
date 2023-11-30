@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
@@ -17,12 +18,14 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.AppConfig
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
 class ProfileViewModel(
+    private val config: Config,
     private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
@@ -76,13 +79,15 @@ class ProfileViewModel(
         viewModelScope.launch {
             try {
                 val cachedAccount = interactor.getCachedAccount()
+                val appConfig =
+                    AppConfig(config.getFeedbackEmailAddress(), config.getAgreementUrlsConfig())
                 if (cachedAccount == null) {
                     _uiState.value = ProfileUIState.Loading
                 } else {
-                    _uiState.value = ProfileUIState.Data(cachedAccount)
+                    _uiState.value = ProfileUIState.Data(appConfig, cachedAccount)
                 }
                 val account = interactor.getAccount()
-                _uiState.value = ProfileUIState.Data(account)
+                _uiState.value = ProfileUIState.Data(appConfig, account)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

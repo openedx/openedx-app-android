@@ -66,7 +66,7 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(),get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -74,7 +74,7 @@ val screenModule = module {
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
-    viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get(), get()) }
+    viewModel { ProfileViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get(), get(), get(), get()) }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get()) }
     viewModel { VideoQualityViewModel(get(), get()) }
@@ -83,7 +83,7 @@ val screenModule = module {
 
     single { CourseRepository(get(), get(), get(),get()) }
     factory { CourseInteractor(get()) }
-    viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), courseId) }
@@ -93,7 +93,7 @@ val screenModule = module {
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
     viewModel { (courseId: String, blockId: String) -> EncodedVideoUnitViewModel(courseId, blockId, get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) -> CourseDatesViewModel(courseId, get(), get(), get()) }
-    viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, handoutsType, get()) }
+    viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, get(), handoutsType, get()) }
     viewModel { CourseSearchViewModel(get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 

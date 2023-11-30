@@ -39,9 +39,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent.getKoin
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.extension.isEmailValid
@@ -77,6 +75,7 @@ class CourseDetailsFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
+                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
 
                 val colorBackgroundValue = MaterialTheme.appColors.background.value
                 val colorTextValue = MaterialTheme.appColors.textPrimary.value
@@ -85,6 +84,7 @@ class CourseDetailsFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
+                    apiHostUrl = apiHostUrl,
                     htmlBody = viewModel.getCourseAboutBody(
                         colorBackgroundValue,
                         colorTextValue
@@ -136,6 +136,7 @@ internal fun CourseDetailsScreen(
     windowSize: WindowSize,
     uiState: CourseDetailsUIState,
     uiMessage: UIMessage?,
+    apiHostUrl: String,
     htmlBody: String,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
@@ -275,6 +276,7 @@ internal fun CourseDetailsScreen(
                                     ) {
                                         CourseDescription(
                                             paddingModifier = webViewPadding,
+                                            apiHostUrl = apiHostUrl,
                                             body = htmlBody,
                                             onWebPageLoaded = {
                                                 webViewAlpha = 1f
@@ -546,11 +548,11 @@ private fun EnrollOverLabel() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun CourseDescription(
     paddingModifier: Modifier,
+    apiHostUrl: String,
     body: String,
     onWebPageLoaded: () -> Unit
 ) {
     val context = LocalContext.current
-    val config = getKoin().get<Config>()
     AndroidView(modifier = Modifier.then(paddingModifier), factory = {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
@@ -594,7 +596,7 @@ private fun CourseDescription(
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             loadDataWithBaseURL(
-                config.getApiHostURL(),
+                apiHostUrl,
                 body,
                 "text/html",
                 StandardCharsets.UTF_8.name(),
@@ -613,6 +615,7 @@ private fun CourseDetailNativeContentPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
+            apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
@@ -631,6 +634,7 @@ private fun CourseDetailNativeContentTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
+            apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class FirebaseConfig(
     @SerializedName("ENABLED")
-    var enabled: Boolean = false,
+    val enabled: Boolean = false,
 
     @SerializedName("PROJECT_ID")
     val projectId: String = "",

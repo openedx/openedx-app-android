@@ -3,23 +3,31 @@ package org.openedx.course.presentation.handouts
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
+import org.openedx.core.SingleEventLiveData
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AnnouncementModel
 import org.openedx.core.domain.model.HandoutsModel
 import org.openedx.course.domain.interactor.CourseInteractor
-import kotlinx.coroutines.launch
 
 class HandoutsViewModel(
     private val courseId: String,
+    private val config: Config,
     private val handoutsType: String,
     private val interactor: CourseInteractor
 ) : BaseViewModel() {
+
+    private val _apiHostUrl = MutableLiveData<String>()
+    val apiHostUrl: LiveData<String>
+        get() = _apiHostUrl
 
     private val _htmlContent = MutableLiveData<String>()
     val htmlContent: LiveData<String>
         get() = _htmlContent
 
     init {
+        _apiHostUrl.value = config.getApiHostURL()
         getEnrolledCourse()
     }
 
