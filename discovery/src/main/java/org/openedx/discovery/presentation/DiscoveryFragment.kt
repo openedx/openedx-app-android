@@ -115,7 +115,7 @@ class DiscoveryFragment : Fragment() {
                     onItemClick = { course ->
                         viewModel.discoveryCourseClicked(course.id, course.name)
                         router.navigateToCourseDetail(
-                            requireParentFragment().parentFragmentManager,
+                            requireActivity().supportFragmentManager,
                             course.id
                         )
                     },
