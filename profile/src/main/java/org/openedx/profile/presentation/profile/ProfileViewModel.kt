@@ -18,7 +18,6 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.profile.domain.model.AppConfig
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
@@ -79,15 +78,13 @@ class ProfileViewModel(
         viewModelScope.launch {
             try {
                 val cachedAccount = interactor.getCachedAccount()
-                val appConfig =
-                    AppConfig(config.getFeedbackEmailAddress(), config.getAgreementUrlsConfig())
                 if (cachedAccount == null) {
                     _uiState.value = ProfileUIState.Loading
                 } else {
-                    _uiState.value = ProfileUIState.Data(appConfig, cachedAccount)
+                    _uiState.value = ProfileUIState.Data(cachedAccount)
                 }
                 val account = interactor.getAccount()
-                _uiState.value = ProfileUIState.Data(appConfig, account)
+                _uiState.value = ProfileUIState.Data(account)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

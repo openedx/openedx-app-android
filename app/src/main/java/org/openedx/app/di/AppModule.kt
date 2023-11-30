@@ -131,7 +131,15 @@ val appModule = module {
         DownloadWorkerController(get(), get(), get())
     }
 
-    single { AppData(BuildConfig.VERSION_NAME) }
+    single {
+        val config = get<Config>()
+        AppData(
+            BuildConfig.VERSION_NAME,
+            config.getFeedbackEmailAddress(),
+            config.getAgreementUrlsConfig().tosUrl,
+            config.getAgreementUrlsConfig().privacyPolicyUrl
+        )
+    }
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }

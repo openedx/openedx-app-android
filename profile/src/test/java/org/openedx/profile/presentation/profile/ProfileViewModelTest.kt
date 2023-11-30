@@ -4,15 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.module.DownloadWorkerController
-import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.ResourceManager
-import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.profile.presentation.ProfileAnalytics
-import org.openedx.profile.system.notifier.AccountUpdated
-import org.openedx.profile.system.notifier.ProfileNotifier
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -29,8 +20,18 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.R
+import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.ProfileImage
+import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.system.AppCookieManager
+import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.system.notifier.AccountUpdated
+import org.openedx.profile.system.notifier.ProfileNotifier
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -41,6 +42,7 @@ class ProfileViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<ProfileInteractor>()
     private val notifier = mockk<ProfileNotifier>()
@@ -87,6 +89,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection and cache is null`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -111,6 +114,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection and cache is not null`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -135,6 +139,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount unknown exception`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -159,6 +164,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount success`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -182,6 +188,7 @@ class ProfileViewModelTest {
     @Test
     fun `logout no internet connection`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -209,6 +216,7 @@ class ProfileViewModelTest {
     @Test
     fun `logout unknown exception`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -238,6 +246,7 @@ class ProfileViewModelTest {
     @Test
     fun `logout success`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -267,6 +276,7 @@ class ProfileViewModelTest {
     @Test
     fun `AccountUpdated notifier test`() = runTest {
         val viewModel = ProfileViewModel(
+            config,
             interactor,
             resourceManager,
             notifier,

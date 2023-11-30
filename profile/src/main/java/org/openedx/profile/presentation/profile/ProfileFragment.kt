@@ -40,7 +40,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.config.AgreementUrlsConfig
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -51,7 +50,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.domain.model.AppConfig
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
@@ -279,7 +277,6 @@ private fun ProfileScreen(
                                     Spacer(modifier = Modifier.height(24.dp))
 
                                     SupportInfoSection(
-                                        appConfig = uiState.appConfig,
                                         appData = appData,
                                         onClick = onSupportClick,
                                         appUpgradeEvent = appUpgradeEvent,
@@ -340,7 +337,6 @@ fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 
 @Composable
 private fun SupportInfoSection(
-    appConfig: AppConfig,
     appData: AppData,
     appUpgradeEvent: AppUpgradeEvent?,
     onAppVersionClick: () -> Unit,
@@ -373,7 +369,7 @@ private fun SupportInfoSection(
                         onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
                             context = context,
-                            feedbackEmailAddress = appConfig.feedbackEmailAddress,
+                            feedbackEmailAddress = appData.feedbackEmailAddress,
                             appVersion = appData.versionName
                         )
                     }
@@ -383,7 +379,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_terms_of_use),
                     onClick = {
                         onClick(SupportClickAction.COOKIE_POLICY)
-                        uriHandler.openUri(appConfig.agreementUrlsConfig.tosUrl)
+                        uriHandler.openUri(appData.tosUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -391,7 +387,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_privacy_policy),
                     onClick = {
                         onClick(SupportClickAction.PRIVACY_POLICY)
-                        uriHandler.openUri(appConfig.agreementUrlsConfig.privacyPolicyUrl)
+                        uriHandler.openUri(appData.privacyPolicyUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -697,7 +693,7 @@ fun AppVersionItemUpgradeRequired(
 fun AppVersionItemAppToDatePreview() {
     OpenEdXTheme {
         AppVersionItem(
-            appData = AppData("1.0.0"),
+            appData = mockAppData,
             appUpgradeEvent = null,
             onClick = {}
         )
@@ -709,7 +705,7 @@ fun AppVersionItemAppToDatePreview() {
 fun AppVersionItemUpgradeRecommendedPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            appData = AppData("1.0.0"),
+            appData = mockAppData,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
             onClick = {}
         )
@@ -721,7 +717,7 @@ fun AppVersionItemUpgradeRecommendedPreview() {
 fun AppVersionItemUpgradeRequiredPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            appData = AppData("1.0.0"),
+            appData = mockAppData,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
             onClick = {}
         )
@@ -743,7 +739,7 @@ private fun ProfileScreenPreview() {
     OpenEdXTheme {
         ProfileScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = ProfileUIState.Data(mockAppConfig, mockAccount),
+            uiState = ProfileUIState.Data(mockAccount),
             uiMessage = null,
             refreshing = false,
             logout = {},
@@ -751,7 +747,7 @@ private fun ProfileScreenPreview() {
             editAccountClicked = {},
             onVideoSettingsClick = {},
             onSupportClick = {},
-            appData = AppData("1"),
+            appData = mockAppData,
             appUpgradeEvent = null,
             onAppVersionClick = {}
         )
@@ -766,7 +762,7 @@ private fun ProfileScreenTabletPreview() {
     OpenEdXTheme {
         ProfileScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = ProfileUIState.Data(mockAppConfig, mockAccount),
+            uiState = ProfileUIState.Data(mockAccount),
             uiMessage = null,
             refreshing = false,
             logout = {},
@@ -774,19 +770,18 @@ private fun ProfileScreenTabletPreview() {
             editAccountClicked = {},
             onVideoSettingsClick = {},
             onSupportClick = {},
-            appData = AppData("1"),
+            appData = mockAppData,
             appUpgradeEvent = null,
             onAppVersionClick = {}
         )
     }
 }
 
-private val mockAppConfig = AppConfig(
-    feedbackEmailAddress = "support@example.com", AgreementUrlsConfig(
-        privacyPolicyUrl = "https://example.com/privacy",
-        tosUrl = "https://example.com/tos",
-        contactUsUrl = "https://example.com/contact"
-    )
+private val mockAppData = AppData(
+    versionName = "1.0.0",
+    feedbackEmailAddress = "support@example.com",
+    tosUrl = "https://example.com/tos",
+    privacyPolicyUrl = "https://example.com/privacy",
 )
 
 private val mockAccount = Account(
