@@ -31,7 +31,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
@@ -47,7 +46,6 @@ class DiscoveryFragment : Fragment() {
 
     private val viewModel by viewModel<DiscoveryViewModel>()
     private val router: DiscoveryRouter by inject()
-    private val corePreferencesManager by inject<CorePreferences>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,8 +64,7 @@ class DiscoveryFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
                 val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
-                val isLogistrationEnabled by viewModel.isLogistrationEnabled.observeAsState(false)
-                val canShowBackButton = isLogistrationEnabled && corePreferencesManager.user == null
+                val canShowBackButton by viewModel.canShowBackButton.observeAsState(false)
 
                 DiscoveryScreen(
                     windowSize = windowSize,

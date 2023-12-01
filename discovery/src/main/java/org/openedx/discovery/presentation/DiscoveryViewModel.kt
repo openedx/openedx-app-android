@@ -11,6 +11,7 @@ import org.openedx.core.BuildConfig
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
@@ -26,7 +27,8 @@ class DiscoveryViewModel(
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val corePreferences: CorePreferences
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -51,8 +53,8 @@ class DiscoveryViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
-    private val _isLogistrationEnabled = MutableLiveData<Boolean>()
-    val isLogistrationEnabled: LiveData<Boolean> = _isLogistrationEnabled
+    private val _canShowBackButton = MutableLiveData<Boolean>()
+    val canShowBackButton: LiveData<Boolean> = _canShowBackButton
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -62,7 +64,8 @@ class DiscoveryViewModel(
     private var isLoading = false
 
     init {
-        _isLogistrationEnabled.value = BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED
+        _canShowBackButton.value =
+            BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED && corePreferences.user == null
         getCoursesList()
         collectAppUpgradeEvent()
     }
