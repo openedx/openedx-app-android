@@ -76,13 +76,12 @@ class CourseVideosFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState(CourseVideosUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val isUpdating by viewModel.isUpdating.observeAsState(false)
-                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
 
                 CourseVideosScreen(
                     windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
-                    apiHostUrl = apiHostUrl,
+                    apiHostUrl = viewModel.apiHostUrl,
                     courseTitle = viewModel.courseTitle,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     isUpdating = isUpdating,

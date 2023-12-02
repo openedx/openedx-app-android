@@ -33,9 +33,7 @@ class CourseVideoViewModel(
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
 
-    private val _apiHostUrl = MutableLiveData<String>()
-    val apiHostUrl: LiveData<String>
-        get() = _apiHostUrl
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<CourseVideosUIState>()
     val uiState: LiveData<CourseVideosUIState>
@@ -80,7 +78,6 @@ class CourseVideoViewModel(
     }
 
     init {
-        _apiHostUrl.value = config.getApiHostURL()
         getVideos()
     }
 

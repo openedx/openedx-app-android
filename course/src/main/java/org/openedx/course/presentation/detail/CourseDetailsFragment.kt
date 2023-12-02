@@ -75,7 +75,6 @@ class CourseDetailsFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
-                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
 
                 val colorBackgroundValue = MaterialTheme.appColors.background.value
                 val colorTextValue = MaterialTheme.appColors.textPrimary.value
@@ -84,7 +83,7 @@ class CourseDetailsFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
-                    apiHostUrl = apiHostUrl,
+                    apiHostUrl = viewModel.apiHostUrl,
                     htmlBody = viewModel.getCourseAboutBody(
                         colorBackgroundValue,
                         colorTextValue

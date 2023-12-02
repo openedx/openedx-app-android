@@ -78,12 +78,11 @@ class CourseOutlineFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.isUpdating.observeAsState(false)
-                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
 
                 CourseOutlineScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
-                    apiHostUrl = apiHostUrl,
+                    apiHostUrl = viewModel.apiHostUrl,
                     courseTitle = viewModel.courseTitle,
                     uiMessage = uiMessage,
                     refreshing = refreshing,

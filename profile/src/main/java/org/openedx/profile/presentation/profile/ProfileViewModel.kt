@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
@@ -24,7 +23,6 @@ import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
 class ProfileViewModel(
-    private val config: Config,
     private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,

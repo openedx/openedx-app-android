@@ -63,14 +63,13 @@ class WebViewFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
 
-                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
                 val htmlBody by viewModel.htmlContent.observeAsState("")
                 val colorBackgroundValue = MaterialTheme.appColors.background.value
                 val colorTextValue = MaterialTheme.appColors.textPrimary.value
 
                 WebContentScreen(
                     windowSize = windowSize,
-                    apiHostUrl = apiHostUrl,
+                    apiHostUrl = viewModel.apiHostUrl,
                     title = requireArguments().getString(ARG_TITLE, ""),
                     htmlBody = viewModel.injectDarkMode(
                         htmlBody,

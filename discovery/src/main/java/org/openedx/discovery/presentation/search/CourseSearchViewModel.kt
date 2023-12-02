@@ -26,9 +26,7 @@ class CourseSearchViewModel(
     private val analytics: DiscoveryAnalytics
 ) : BaseViewModel() {
 
-    private val _apiHostUrl = MutableLiveData<String>()
-    val apiHostUrl: LiveData<String>
-        get() = _apiHostUrl
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState =
         MutableLiveData<CourseSearchUIState>(CourseSearchUIState.Courses(emptyList(), 0))
@@ -55,7 +53,6 @@ class CourseSearchViewModel(
     private val queryChannel = MutableSharedFlow<String>(replay = 0, extraBufferCapacity = 0)
 
     init {
-        _apiHostUrl.value = config.getApiHostURL()
         observeQuery()
     }
 

@@ -35,9 +35,7 @@ class DashboardViewModel(
     private var page = 1
     private var isLoading = false
 
-    private val _apiHostUrl = MutableLiveData<String>()
-    val apiHostUrl: LiveData<String>
-        get() = _apiHostUrl
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<DashboardUIState>(DashboardUIState.Loading)
     val uiState: LiveData<DashboardUIState>
@@ -74,7 +72,6 @@ class DashboardViewModel(
     }
 
     init {
-        _apiHostUrl.value = config.getApiHostURL()
         getCourses()
         collectAppUpgradeEvent()
     }

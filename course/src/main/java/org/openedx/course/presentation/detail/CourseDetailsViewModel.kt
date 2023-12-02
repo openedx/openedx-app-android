@@ -27,10 +27,7 @@ class CourseDetailsViewModel(
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
-
-    private val _apiHostUrl = MutableLiveData<String>()
-    val apiHostUrl: LiveData<String>
-        get() = _apiHostUrl
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<CourseDetailsUIState>(CourseDetailsUIState.Loading)
     val uiState: LiveData<CourseDetailsUIState>
@@ -45,7 +42,6 @@ class CourseDetailsViewModel(
         get() = networkConnection.isOnline()
 
     init {
-        _apiHostUrl.value = config.getApiHostURL()
         getCourseDetail()
     }
 

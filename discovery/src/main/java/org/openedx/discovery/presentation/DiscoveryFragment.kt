@@ -61,14 +61,13 @@ class DiscoveryFragment : Fragment() {
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
-                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
                 val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
 
                 DiscoveryScreen(
                     windowSize = windowSize,
                     state = uiState!!,
                     uiMessage = uiMessage,
-                    apiHostUrl = apiHostUrl,
+                    apiHostUrl = viewModel.apiHostUrl,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,

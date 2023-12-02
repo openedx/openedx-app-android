@@ -38,9 +38,7 @@ class CourseOutlineViewModel(
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
 
-    private val _apiHostUrl = MutableLiveData<String>()
-    val apiHostUrl: LiveData<String>
-        get() = _apiHostUrl
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: LiveData<CourseOutlineUIState>
@@ -91,7 +89,6 @@ class CourseOutlineViewModel(
     }
 
     init {
-        _apiHostUrl.value = config.getApiHostURL()
         getCourseData()
     }
 

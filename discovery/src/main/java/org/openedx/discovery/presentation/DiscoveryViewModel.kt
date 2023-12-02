@@ -28,9 +28,7 @@ class DiscoveryViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
-    private val _apiHostUrl = MutableLiveData<String>()
-    val apiHostUrl: LiveData<String>
-        get() = _apiHostUrl
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
     val uiState: LiveData<DiscoveryUIState>
@@ -60,7 +58,6 @@ class DiscoveryViewModel(
     private var isLoading = false
 
     init {
-        _apiHostUrl.value = config.getApiHostURL()
         getCoursesList()
         collectAppUpgradeEvent()
     }

@@ -79,11 +79,10 @@ class DashboardFragment : Fragment() {
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
-                val apiHostUrl by viewModel.apiHostUrl.observeAsState("")
 
                 MyCoursesScreen(
                     windowSize = windowSize,
-                    apiHostUrl,
+                    viewModel.apiHostUrl,
                     uiState!!,
                     uiMessage,
                     canLoadMore = canLoadMore,
