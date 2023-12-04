@@ -16,6 +16,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
@@ -42,6 +43,7 @@ class DiscoveryViewModelTest {
     private val networkConnection = mockk<NetworkConnection>()
     private val analytics = mockk<DiscoveryAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val corePreferences = mockk<CorePreferences>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -52,7 +54,9 @@ class DiscoveryViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { corePreferences.user } returns null
         every { config.getApiHostURL() } returns "http://localhost:8000"
+        every { config.isPreLoginExperienceEnabled() } returns false
     }
 
     @After
@@ -62,7 +66,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList no internet connection`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws UnknownHostException()
         advanceUntilIdle()
@@ -79,7 +83,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList unknown exception`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws Exception()
         advanceUntilIdle()
@@ -95,7 +99,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList from cache`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getCoursesListFromCache() } returns emptyList()
         advanceUntilIdle()
@@ -110,7 +114,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList from network with next page`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
             Pagination(
@@ -132,7 +136,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `getCoursesList from network without next page`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
             Pagination(
@@ -155,7 +159,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData no internet connection`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws UnknownHostException()
         viewModel.updateData()
@@ -172,7 +176,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData unknown exception`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } throws Exception()
         viewModel.updateData()
@@ -189,7 +193,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData success with next page`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
             Pagination(
@@ -212,7 +216,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `updateData success without next page`() = runTest {
-        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel = DiscoveryViewModel(config, networkConnection, interactor, resourceManager, analytics, appUpgradeNotifier, corePreferences)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCoursesList(any(), any(), any()) } returns CourseList(
             Pagination(

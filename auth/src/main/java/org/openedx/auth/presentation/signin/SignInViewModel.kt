@@ -11,6 +11,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
@@ -20,6 +21,7 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.R as CoreRes
 
 class SignInViewModel(
+    private val config: Config,
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val preferencesManager: CorePreferences,
@@ -27,6 +29,8 @@ class SignInViewModel(
     private val analytics: AuthAnalytics,
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
+
+    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
     private val _showProgress = MutableLiveData<Boolean>()
     val showProgress: LiveData<Boolean>

@@ -10,10 +10,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
@@ -110,28 +112,32 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (savedInstanceState == null) {
             when {
                 corePreferencesManager.user == null -> {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.container, SignInFragment())
-                        .commit()
+                    if (viewModel.isLogistrationEnabled) {
+                        addFragment(LogistrationFragment())
+                    } else {
+                        addFragment(SignInFragment())
+                    }
                 }
 
                 whatsNewManager.shouldShowWhatsNew() -> {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.container, WhatsNewFragment())
-                        .commit()
+                    addFragment(WhatsNewFragment())
                 }
 
                 corePreferencesManager.user != null -> {
-                    supportFragmentManager.beginTransaction()
-                        .add(R.id.container, MainFragment())
-                        .commit()
+                    addFragment(MainFragment())
                 }
             }
         }
 
         viewModel.logoutUser.observe(this) {
-            profileRouter.restartApp(supportFragmentManager)
+            profileRouter.restartApp(supportFragmentManager, viewModel.isLogistrationEnabled)
         }
+    }
+
+    private fun addFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .add(R.id.container, fragment)
+            .commit()
     }
 
     private fun computeWindowSizeClasses() {

@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -101,6 +103,7 @@ class CourseSearchFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
+                val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
 
                 CourseSearchScreen(
                     windowSize = windowSize,
@@ -109,6 +112,7 @@ class CourseSearchFragment : Fragment() {
                     apiHostUrl = viewModel.apiHostUrl,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
+                    querySearch = querySearch,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
@@ -132,6 +136,16 @@ class CourseSearchFragment : Fragment() {
         }
     }
 
+    companion object {
+        private const val ARG_SEARCH_QUERY = "query_search"
+        fun newInstance(querySearch: String): CourseSearchFragment {
+            val fragment = CourseSearchFragment()
+            fragment.arguments = bundleOf(
+                ARG_SEARCH_QUERY to querySearch
+            )
+            return fragment
+        }
+    }
 }
 
 
@@ -144,6 +158,7 @@ private fun CourseSearchScreen(
     apiHostUrl: String,
     canLoadMore: Boolean,
     refreshing: Boolean,
+    querySearch: String,
     onBackClick: () -> Unit,
     onSearchTextChanged: (String) -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -159,7 +174,12 @@ private fun CourseSearchScreen(
         rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(""))
+        mutableStateOf(
+            TextFieldValue(
+                text = querySearch,
+                selection = TextRange(querySearch.length)
+            )
+        )
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -359,6 +379,9 @@ private fun CourseSearchScreen(
             }
         }
     }
+    LaunchedEffect(rememberSaveable { true }) {
+        onSearchTextChanged(querySearch)
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
@@ -373,6 +396,7 @@ fun CourseSearchScreenPreview() {
             apiHostUrl = "",
             canLoadMore = false,
             refreshing = false,
+            querySearch = "",
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
@@ -394,6 +418,7 @@ fun CourseSearchScreenTabletPreview() {
             apiHostUrl = "",
             canLoadMore = false,
             refreshing = false,
+            querySearch = "",
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},

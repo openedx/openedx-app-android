@@ -14,7 +14,7 @@ Modern vision of the mobile application for the Open EdX platform from Raccoon G
 
 3. Choose ``openedx-app-android``.
 
-4. Configure the [config.yaml](config.yaml) with URLs and OAuth credentials for your Open edX instance.
+4. Configure the [config.yaml](default_config/dev/config.yaml) with URLs and OAuth credentials for your Open edX instance.
 
 5. Select the build variant ``develop``, ``stage``, or ``prod``.
 

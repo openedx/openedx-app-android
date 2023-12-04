@@ -121,7 +121,7 @@ class ProfileFragment : Fragment() {
 
                 LaunchedEffect(logoutSuccess) {
                     if (logoutSuccess) {
-                        router.restartApp(requireParentFragment().parentFragmentManager)
+                        router.restartApp(requireParentFragment().parentFragmentManager, viewModel.isLogistrationEnabled)
                     }
                 }
             }

@@ -11,9 +11,11 @@ import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 
 class AppViewModel(
+    private val config: Config,
     private val notifier: AppNotifier,
     private val room: RoomDatabase,
     private val preferencesManager: CorePreferences,
@@ -24,6 +26,8 @@ class AppViewModel(
     private val _logoutUser = SingleEventLiveData<Unit>()
     val logoutUser: LiveData<Unit>
         get() = _logoutUser
+
+    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
     private var logoutHandledAt: Long = 0
 

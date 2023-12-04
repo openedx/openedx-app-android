@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
@@ -23,6 +24,7 @@ import org.openedx.course.presentation.unit.container.CourseUnitContainerFragmen
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.discovery.presentation.DiscoveryFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
@@ -56,12 +58,20 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             .commit()
     }
 
+    override fun navigateToSignIn(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, SignInFragment())
+    }
+
     override fun navigateToSignUp(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, SignUpFragment())
     }
 
     override fun navigateToRestorePassword(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, RestorePasswordFragment())
+    }
+
+    override fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String) {
+        replaceFragmentWithBackStack(fm, DiscoveryFragment.newInstance(querySearch))
     }
 
     override fun navigateToWhatsNew(fm: FragmentManager) {
@@ -77,8 +87,8 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, CourseDetailsFragment.newInstance(courseId))
     }
 
-    override fun navigateToCourseSearch(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, CourseSearchFragment())
+    override fun navigateToCourseSearch(fm: FragmentManager, querySearch: String) {
+        replaceFragmentWithBackStack(fm, CourseSearchFragment.newInstance(querySearch))
     }
 
     override fun navigateToUpgradeRequired(fm: FragmentManager) {
@@ -278,14 +288,17 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, DeleteProfileFragment())
     }
 
-    override fun restartApp(fm: FragmentManager) {
+    override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
             for (fragment in fragments) {
                 beginTransaction().remove(fragment).commit()
             }
             popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            beginTransaction().replace(R.id.container, SignInFragment())
-                .commit()
+            if (isLogistrationEnabled) {
+                replaceFragment(fm, LogistrationFragment())
+            } else {
+                replaceFragment(fm, SignInFragment())
+            }
         }
     }
     //endregion

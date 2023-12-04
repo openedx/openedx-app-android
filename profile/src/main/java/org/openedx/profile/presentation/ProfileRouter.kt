@@ -13,6 +13,5 @@ interface ProfileRouter {
 
     fun navigateToDeleteAccount(fm: FragmentManager)
 
-    fun restartApp(fm: FragmentManager)
-
+    fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
 }
