@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -44,9 +47,6 @@ import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.util.*
 
@@ -82,6 +82,7 @@ class CourseOutlineFragment : Fragment() {
                 CourseOutlineScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
+                    apiHostUrl = viewModel.apiHostUrl,
                     courseTitle = viewModel.courseTitle,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
@@ -169,6 +170,7 @@ class CourseOutlineFragment : Fragment() {
 internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
+    apiHostUrl: String,
     courseTitle: String,
     uiMessage: UIMessage?,
     refreshing: Boolean,
@@ -281,6 +283,7 @@ internal fun CourseOutlineScreen(
                                             modifier = Modifier
                                                 .aspectRatio(1.86f)
                                                 .padding(6.dp),
+                                            apiHostUrl = apiHostUrl,
                                             courseImage = uiState.courseStructure.media?.image?.large
                                                 ?: "",
                                             courseCertificate = uiState.courseStructure.certificate,
@@ -479,6 +482,7 @@ private fun CourseOutlineScreenPreview() {
                 mapOf(),
                 mockChapterBlock
             ),
+            apiHostUrl = "",
             courseTitle = "",
             uiMessage = null,
             refreshing = false,
@@ -505,6 +509,7 @@ private fun CourseOutlineScreenTabletPreview() {
                 mapOf(),
                 mockChapterBlock
             ),
+            apiHostUrl = "",
             courseTitle = "",
             uiMessage = null,
             refreshing = false,

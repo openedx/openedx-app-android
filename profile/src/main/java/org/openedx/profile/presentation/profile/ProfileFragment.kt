@@ -369,6 +369,7 @@ private fun SupportInfoSection(
                         onClick(SupportClickAction.SUPPORT)
                         EmailUtil.showFeedbackScreen(
                             context = context,
+                            feedbackEmailAddress = appData.feedbackEmailAddress,
                             appVersion = appData.versionName
                         )
                     }
@@ -378,7 +379,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_terms_of_use),
                     onClick = {
                         onClick(SupportClickAction.COOKIE_POLICY)
-                        uriHandler.openUri(context.getString(R.string.terms_of_service_link))
+                        uriHandler.openUri(appData.tosUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -386,7 +387,7 @@ private fun SupportInfoSection(
                     text = stringResource(id = R.string.core_privacy_policy),
                     onClick = {
                         onClick(SupportClickAction.PRIVACY_POLICY)
-                        uriHandler.openUri(context.getString(R.string.privacy_policy_link))
+                        uriHandler.openUri(appData.privacyPolicyUrl)
                     }
                 )
                 Divider(color = MaterialTheme.appColors.divider)
@@ -623,7 +624,10 @@ fun AppVersionItemUpgradeRecommended(
                 color = MaterialTheme.appColors.textPrimary
             )
             Text(
-                text = stringResource(id = R.string.core_tap_to_update_to_version, appUpgradeEvent.newVersionName),
+                text = stringResource(
+                    id = R.string.core_tap_to_update_to_version,
+                    appUpgradeEvent.newVersionName
+                ),
                 color = MaterialTheme.appColors.textAccent,
                 style = MaterialTheme.appTypography.labelLarge
             )
@@ -689,7 +693,7 @@ fun AppVersionItemUpgradeRequired(
 fun AppVersionItemAppToDatePreview() {
     OpenEdXTheme {
         AppVersionItem(
-            appData = AppData("1.0.0"),
+            appData = mockAppData,
             appUpgradeEvent = null,
             onClick = {}
         )
@@ -701,7 +705,7 @@ fun AppVersionItemAppToDatePreview() {
 fun AppVersionItemUpgradeRecommendedPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            appData = AppData("1.0.0"),
+            appData = mockAppData,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
             onClick = {}
         )
@@ -713,7 +717,7 @@ fun AppVersionItemUpgradeRecommendedPreview() {
 fun AppVersionItemUpgradeRequiredPreview() {
     OpenEdXTheme {
         AppVersionItem(
-            appData = AppData("1.0.0"),
+            appData = mockAppData,
             appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
             onClick = {}
         )
@@ -743,7 +747,7 @@ private fun ProfileScreenPreview() {
             editAccountClicked = {},
             onVideoSettingsClick = {},
             onSupportClick = {},
-            appData = AppData("1"),
+            appData = mockAppData,
             appUpgradeEvent = null,
             onAppVersionClick = {}
         )
@@ -766,12 +770,19 @@ private fun ProfileScreenTabletPreview() {
             editAccountClicked = {},
             onVideoSettingsClick = {},
             onSupportClick = {},
-            appData = AppData("1"),
+            appData = mockAppData,
             appUpgradeEvent = null,
             onAppVersionClick = {}
         )
     }
 }
+
+private val mockAppData = AppData(
+    versionName = "1.0.0",
+    feedbackEmailAddress = "support@example.com",
+    tosUrl = "https://example.com/tos",
+    privacyPolicyUrl = "https://example.com/privacy",
+)
 
 private val mockAccount = Account(
     username = "thom84",

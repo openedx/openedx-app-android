@@ -4,11 +4,13 @@ import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
 
 class AuthRepository(
+    private val config: Config,
     private val api: AuthApi,
     private val preferencesManager: CorePreferences,
 ) {
@@ -19,10 +21,10 @@ class AuthRepository(
     ) {
         val authResponse: AuthResponse = api.getAccessToken(
             ApiConstants.GRANT_TYPE_PASSWORD,
-            org.openedx.core.BuildConfig.CLIENT_ID,
+            config.getOAuthClientId(),
             username,
             password,
-            org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
+            config.getAccessTokenType(),
         ).mapToDomain()
         if (authResponse.error != null) {
             throw EdxError.UnknownException(authResponse.error!!)

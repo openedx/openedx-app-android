@@ -1,4 +1,7 @@
-import org.yaml.snakeyaml.Yaml
+import org.edx.builder.ConfigHelper
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 buildscript {
     repositories {
@@ -17,8 +20,7 @@ plugins {
     id 'kotlin-kapt'
 }
 
-
-def config = new Yaml().load(new File("config.yaml").newInputStream())
+def currentFlavour = getCurrentFlavor()
 
 android {
     compileSdk 34
@@ -29,9 +31,6 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-
-        buildConfigField "String", "ACCESS_TOKEN_TYPE", "\"${config.tokenType}\""
-        buildConfigField "Boolean", "SHOW_WHATS_NEW", "${config.showWhatsNew}"
     }
 
     namespace 'org.openedx.core'
@@ -40,21 +39,26 @@ android {
     productFlavors {
         prod {
             dimension 'env'
-            insertBuildConfigFields(config, it, "PROD")
+            insertBuildConfigFields(currentFlavour, it, "prod")
         }
         develop {
             dimension 'env'
-            insertBuildConfigFields(config, it, "DEV")
+            insertBuildConfigFields(currentFlavour, it, "dev")
         }
         stage {
             dimension 'env'
-            insertBuildConfigFields(config, it, "STAGE")
+            insertBuildConfigFields(currentFlavour, it, "stage")
         }
     }
 
     sourceSets {
         develop {
             res.srcDirs = ['src/openedx/res']
+        }
+        main {
+            assets {
+                srcDirs 'src/main/assets', 'assets'
+            }
         }
     }
 
@@ -147,50 +151,31 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
-class FirebaseConfig {
-    public String projectId = ""
-    public String appId = ""
-    public String apiKey = ""
-    public String gcmSenderId = ""
-}
-
-def getFirebaseConfig(envMap) {
-    FirebaseConfig config = new FirebaseConfig()
-    if (envMap.value["FIREBASE"] != null) {
-        config.projectId = setValue(envMap.value["FIREBASE"]["PROJECT_ID"])
-        config.appId = setValue(envMap.value["FIREBASE"]["APPLICATION_ID"])
-        config.apiKey = setValue(envMap.value["FIREBASE"]["API_KEY"])
-        config.gcmSenderId = setValue(envMap.value["FIREBASE"]["GCM_SENDER_ID"])
-    }
-    return config
-}
-
-def setValue(value) {
-    def result
-    if (value == null) {
-        result = ""
+def getCurrentFlavor() {
+    String tskReqStr = getGradle().getStartParameter().getTaskRequests().toString()
+    Pattern pattern
+    if (tskReqStr.contains("assemble")) // to run ./gradlew assembleRelease to build APK
+        pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
+    else if (tskReqStr.contains("bundle")) // to run ./gradlew bundleRelease to build .aab
+        pattern = Pattern.compile("bundle(\\w+)(Release|Debug)")
+    else
+        pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
+    Matcher matcher = pattern.matcher(tskReqStr)
+    if (matcher.find()) {
+        return matcher.group(1).toLowerCase()
     } else {
-        result = value
+        return ""
     }
-    return result
 }
 
-def insertBuildConfigFields(config, buildType, String keyName) {
-    def envMap = config.environments.find { it.key == keyName }
-    def clientId = envMap.value.OAUTH_CLIENT_ID
-    def envUrls = envMap.value.URLS
-    def firebase = getFirebaseConfig(envMap)
-
-    buildType.buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-    buildType.buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-    buildType.buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-    buildType.buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-    buildType.buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-    buildType.resValue "string", "google_app_id", firebase.appId
-    buildType.resValue "string", "platform_name", config.platformName
-    buildType.resValue "string", "platform_full_name", config.platformFullName
-    buildType.resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-    buildType.resValue "string", "terms_of_service_link", envUrls.termsOfService
-    buildType.resValue "string", "contact_us_link", envUrls.contactUs
-    buildType.resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+def insertBuildConfigFields(currentFlavour, buildType, environment) {
+    def helper = new ConfigHelper(projectDir, environment)
+    def config = helper.fetchConfig()
+    if (currentFlavour == buildType.name) {
+        helper.generateConfigJson(config)
+    }
+    def platformName = config.getOrDefault("PLATFORM_NAME", "")
+    def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
+    buildType.resValue "string", "platform_name", platformName
+    buildType.resValue "string", "platform_full_name", platformFullName
 }

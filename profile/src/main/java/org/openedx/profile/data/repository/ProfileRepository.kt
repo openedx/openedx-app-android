@@ -4,6 +4,7 @@ import androidx.room.RoomDatabase
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.ApiConstants
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.profile.data.api.ProfileApi
 import org.openedx.profile.data.storage.ProfilePreferences
@@ -11,6 +12,7 @@ import org.openedx.profile.domain.model.Account
 import java.io.File
 
 class ProfileRepository(
+    private val config: Config,
     private val api: ProfileApi,
     private val room: RoomDatabase,
     private val profilePreferences: ProfilePreferences,
@@ -54,7 +56,7 @@ class ProfileRepository(
     suspend fun logout() {
         try {
             api.revokeAccessToken(
-                org.openedx.core.BuildConfig.CLIENT_ID,
+                config.getOAuthClientId(),
                 corePreferences.refreshToken,
                 ApiConstants.TOKEN_TYPE_REFRESH
             )

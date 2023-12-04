@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -42,9 +45,6 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.util.*
 
@@ -81,6 +81,7 @@ class CourseVideosFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
+                    apiHostUrl = viewModel.apiHostUrl,
                     courseTitle = viewModel.courseTitle,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     isUpdating = isUpdating,
@@ -145,6 +146,7 @@ private fun CourseVideosScreen(
     windowSize: WindowSize,
     uiState: CourseVideosUIState,
     uiMessage: UIMessage?,
+    apiHostUrl: String,
     isUpdating: Boolean,
     hasInternetConnection: Boolean,
     onSwipeRefresh: () -> Unit,
@@ -273,6 +275,7 @@ private fun CourseVideosScreen(
                                                 modifier = Modifier
                                                     .aspectRatio(1.86f)
                                                     .padding(6.dp),
+                                                apiHostUrl = apiHostUrl,
                                                 courseImage = uiState.courseStructure.media?.image?.large
                                                     ?: "",
                                                 courseCertificate = uiState.courseStructure.certificate,
@@ -346,6 +349,7 @@ private fun CourseVideosScreenPreview() {
                 mockCourseStructure,
                 emptyMap()
             ),
+            apiHostUrl = "",
             courseTitle = "Course",
             onItemClick = { },
             onBackClick = {},
@@ -369,6 +373,7 @@ private fun CourseVideosScreenEmptyPreview() {
             uiState = CourseVideosUIState.Empty(
                 "This course does not include any videos."
             ),
+            apiHostUrl = "",
             courseTitle = "Course",
             onItemClick = { },
             onBackClick = {},
@@ -393,6 +398,7 @@ private fun CourseVideosScreenTabletPreview() {
                 mockCourseStructure,
                 emptyMap()
             ),
+            apiHostUrl = "",
             courseTitle = "Course",
             onItemClick = { },
             onBackClick = {},

@@ -69,6 +69,7 @@ class WebViewFragment : Fragment() {
 
                 WebContentScreen(
                     windowSize = windowSize,
+                    apiHostUrl = viewModel.apiHostUrl,
                     title = requireArguments().getString(ARG_TITLE, ""),
                     htmlBody = viewModel.injectDarkMode(
                         htmlBody,
@@ -106,6 +107,7 @@ class WebViewFragment : Fragment() {
 @Composable
 private fun WebContentScreen(
     windowSize: WindowSize,
+    apiHostUrl: String,
     title: String,
     onBackClick: () -> Unit,
     htmlBody: String
@@ -172,9 +174,12 @@ private fun WebContentScreen(
                                 .alpha(webViewAlpha),
                             color = MaterialTheme.appColors.background
                         ) {
-                            HandoutsContent(body = htmlBody, onWebPageLoaded = {
-                                webViewAlpha = 1f
-                            })
+                            HandoutsContent(
+                                apiHostUrl = apiHostUrl,
+                                body = htmlBody,
+                                onWebPageLoaded = {
+                                    webViewAlpha = 1f
+                                })
                         }
                     } else {
                         Box(
@@ -195,7 +200,7 @@ private fun WebContentScreen(
 
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
-private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
+private fun HandoutsContent(apiHostUrl: String, body: String, onWebPageLoaded: () -> Unit) {
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
     AndroidView(modifier = Modifier, factory = {
@@ -241,7 +246,7 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             loadDataWithBaseURL(
-                org.openedx.core.BuildConfig.BASE_URL,
+                apiHostUrl,
                 body.replaceLinkTags(isDarkTheme),
                 "text/html",
                 StandardCharsets.UTF_8.name(),
@@ -250,7 +255,7 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
         }
     }, update = {
         it.loadDataWithBaseURL(
-            org.openedx.core.BuildConfig.BASE_URL,
+            apiHostUrl,
             body.replaceLinkTags(isDarkTheme),
             "text/html",
             StandardCharsets.UTF_8.name(),
@@ -265,6 +270,7 @@ private fun HandoutsContent(body: String, onWebPageLoaded: () -> Unit) {
 fun WebContentScreenPreview() {
     WebContentScreen(
         windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+        apiHostUrl = "http://localhost:8000",
         title = "Handouts", onBackClick = { }, htmlBody = ""
     )
 }
@@ -275,6 +281,7 @@ fun WebContentScreenPreview() {
 fun WebContentScreenTabletPreview() {
     WebContentScreen(
         windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+        apiHostUrl = "http://localhost:8000",
         title = "Handouts", onBackClick = { }, htmlBody = ""
     )
 }

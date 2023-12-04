@@ -16,7 +16,7 @@ import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
 import org.openedx.core.ApiConstants.TOKEN_TYPE_JWT
 import org.openedx.core.BuildConfig
-import org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.utils.TimeUtils
 import retrofit2.Retrofit
@@ -25,6 +25,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class OauthRefreshTokenAuthenticator(
+    private val config: Config,
     private val preferencesManager: CorePreferences,
     private val appNotifier: AppNotifier,
 ) : Authenticator, Interceptor {
@@ -51,7 +52,7 @@ class OauthRefreshTokenAuthenticator(
             }
         }.build()
         authApi = Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(config.getApiHostURL())
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(Gson()))
             .build()
@@ -77,7 +78,7 @@ class OauthRefreshTokenAuthenticator(
                             return response.request.newBuilder()
                                 .header(
                                     HEADER_AUTHORIZATION,
-                                    ACCESS_TOKEN_TYPE + " " + newAuth.accessToken
+                                    config.getAccessTokenType() + " " + newAuth.accessToken
                                 )
                                 .build()
                         } else {
@@ -86,7 +87,7 @@ class OauthRefreshTokenAuthenticator(
                                 return response.request.newBuilder()
                                     .header(
                                         HEADER_AUTHORIZATION,
-                                        "$ACCESS_TOKEN_TYPE $actualToken"
+                                        "${config.getAccessTokenType()} $actualToken"
                                     )
                                     .build()
                             }
@@ -108,7 +109,7 @@ class OauthRefreshTokenAuthenticator(
                         return response.request.newBuilder()
                             .header(
                                 HEADER_AUTHORIZATION,
-                                "$ACCESS_TOKEN_TYPE $accessToken"
+                                "${config.getAccessTokenType()} $accessToken"
                             ).build()
                     }
 
@@ -143,9 +144,9 @@ class OauthRefreshTokenAuthenticator(
         if (canRequestTokenRefresh()) {
             val response = authApi.refreshAccessToken(
                 ApiConstants.TOKEN_TYPE_REFRESH,
-                BuildConfig.CLIENT_ID,
+                config.getOAuthClientId(),
                 refreshToken,
-                ACCESS_TOKEN_TYPE
+                config.getAccessTokenType()
             ).execute()
             authResponse = response.body()?.mapToDomain()
             if (response.isSuccessful && authResponse != null) {
@@ -174,7 +175,7 @@ class OauthRefreshTokenAuthenticator(
             if (jsonObj.has(FIELD_ERROR_CODE)) {
                 return jsonObj.getString(FIELD_ERROR_CODE)
             } else {
-                return if (TOKEN_TYPE_JWT.equals(ACCESS_TOKEN_TYPE, ignoreCase = true)) {
+                return if (TOKEN_TYPE_JWT.equals(config.getAccessTokenType(), ignoreCase = true)) {
                     val errorType =
                         if (jsonObj.has(FIELD_DETAIL)) FIELD_DETAIL else FIELD_DEVELOPER_MESSAGE
                     jsonObj.getString(errorType)
@@ -220,7 +221,7 @@ class OauthRefreshTokenAuthenticator(
      * @return ResponseBody based on access token type
      */
     private fun getResponseBody(): ResponseBody {
-        val tokenType = ACCESS_TOKEN_TYPE
+        val tokenType = config.getAccessTokenType()
         val jsonObject = if (TOKEN_TYPE_JWT.equals(tokenType, ignoreCase = true)) {
             JSONObject().put("detail", JWT_TOKEN_EXPIRED)
         } else {

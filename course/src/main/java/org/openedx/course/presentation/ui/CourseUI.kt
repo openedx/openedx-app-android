@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.jsoup.Jsoup
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -83,13 +84,12 @@ import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
-import org.jsoup.Jsoup
-import org.openedx.core.ui.rememberWindowSize
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
@@ -98,22 +98,24 @@ import org.openedx.course.R as courseR
 @Composable
 fun CourseImageHeader(
     modifier: Modifier,
+    apiHostUrl: String,
     courseImage: String?,
     courseCertificate: Certificate?,
     courseName: String
 ) {
     val configuration = LocalConfiguration.current
     val windowSize = rememberWindowSize()
-    val contentScale = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        ContentScale.Fit
-    } else {
-        ContentScale.Crop
-    }
+    val contentScale =
+        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            ContentScale.Fit
+        } else {
+            ContentScale.Crop
+        }
     val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
-        org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + courseImage
+        apiHostUrl.dropLast(1) + courseImage
     }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AsyncImage(
@@ -122,7 +124,10 @@ fun CourseImageHeader(
                 .error(org.openedx.core.R.drawable.core_no_image_course)
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
-            contentDescription = stringResource(id = R.string.course_accessibility_header_image_for, courseName),
+            contentDescription = stringResource(
+                id = R.string.course_accessibility_header_image_for,
+                courseName
+            ),
             contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
@@ -192,7 +197,9 @@ fun CourseSectionCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             val completedIconPainter =
-                if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
+                if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+                    R.drawable.ic_course_chapter_icon
+                )
             val completedIconColor =
                 if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
             val completedIconDescription = if (block.completion == 1.0) {
@@ -226,11 +233,12 @@ fun CourseSectionCard(
                     } else {
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
-                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_accessibility_remove_course_section)
-                    } else {
-                        stringResource(id = R.string.course_accessibility_download_course_section)
-                    }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
@@ -352,16 +360,17 @@ fun NavigationUnitsButtons(
         painterResource(id = org.openedx.core.R.drawable.core_ic_check_in_box)
     }
 
-    val subModifier = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-        Modifier
-            .height(72.dp)
-            .fillMaxWidth()
-    } else {
-        Modifier
-            .statusBarsPadding()
-            .padding(end = 32.dp)
-            .padding(top = 2.dp)
-    }
+    val subModifier =
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Modifier
+                .height(72.dp)
+                .fillMaxWidth()
+        } else {
+            Modifier
+                .statusBarsPadding()
+                .padding(end = 32.dp)
+                .padding(top = 2.dp)
+        }
 
     Row(
         modifier = Modifier
@@ -696,6 +705,7 @@ private fun CourseHeaderPreview() {
                     .fillMaxWidth()
                     .height(200.dp)
                     .padding(6.dp),
+                apiHostUrl = "",
                 courseCertificate = Certificate(""),
                 courseImage = "",
                 courseName = ""

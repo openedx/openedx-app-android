@@ -9,6 +9,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -21,6 +22,7 @@ import org.openedx.dashboard.domain.interactor.DashboardInteractor
 
 
 class DashboardViewModel(
+    private val config: Config,
     private val networkConnection: NetworkConnection,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
@@ -32,6 +34,9 @@ class DashboardViewModel(
     private val coursesList = mutableListOf<EnrolledCourse>()
     private var page = 1
     private var isLoading = false
+
+    val apiHostUrl get() = config.getApiHostURL()
+
     private val _uiState = MutableLiveData<DashboardUIState>(DashboardUIState.Loading)
     val uiState: LiveData<DashboardUIState>
         get() = _uiState
@@ -121,7 +126,7 @@ class DashboardViewModel(
                 } else {
                     null
                 }
-                if (response !=null) {
+                if (response != null) {
                     if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
                         _canLoadMore.value = true
                         page++

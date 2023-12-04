@@ -10,6 +10,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -19,12 +20,15 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 
 class DiscoveryViewModel(
+    private val config: Config,
     private val networkConnection: NetworkConnection,
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
+
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
     val uiState: LiveData<DiscoveryUIState>
@@ -157,7 +161,7 @@ class DiscoveryViewModel(
                 .collect { event ->
                     when (event) {
                         is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                                _appUpgradeEvent.value = event
+                            _appUpgradeEvent.value = event
                         }
 
                         is AppUpgradeEvent.UpgradeRequiredEvent -> {

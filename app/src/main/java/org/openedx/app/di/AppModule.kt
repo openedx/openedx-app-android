@@ -20,6 +20,7 @@ import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
@@ -28,9 +29,11 @@ import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
@@ -45,14 +48,13 @@ import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
-import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 val appModule = module {
 
+    single { Config(get()) }
     single { PreferencesManager(get()) }
     single<CorePreferences> { get<PreferencesManager>() }
     single<ProfilePreferences> { get<PreferencesManager>() }
@@ -60,7 +62,7 @@ val appModule = module {
     single<InAppReviewPreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
-    single { AppCookieManager(get()) }
+    single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
 
     single<Gson> { GsonBuilder().create() }
@@ -129,11 +131,19 @@ val appModule = module {
         DownloadWorkerController(get(), get(), get())
     }
 
-    single { AppData(BuildConfig.VERSION_NAME) }
+    single {
+        val config = get<Config>()
+        AppData(
+            BuildConfig.VERSION_NAME,
+            config.getFeedbackEmailAddress(),
+            config.getAgreementUrlsConfig().tosUrl,
+            config.getAgreementUrlsConfig().privacyPolicyUrl
+        )
+    }
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }
-    single { WhatsNewManager(get(), get(), get()) }
+    single { WhatsNewManager(get(), get(), get(), get()) }
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
     single { AnalyticsManager(get()) }

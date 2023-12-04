@@ -4,10 +4,14 @@ import android.content.Context
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.openedx.app.BuildConfig
-import org.openedx.core.BuildConfig.ACCESS_TOKEN_TYPE
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 
-class HeadersInterceptor(private val context: Context, private val preferencesManager: CorePreferences) : Interceptor {
+class HeadersInterceptor(
+    private val context: Context,
+    private val config: Config,
+    private val preferencesManager: CorePreferences,
+) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response = chain.run {
         proceed(
@@ -16,7 +20,7 @@ class HeadersInterceptor(private val context: Context, private val preferencesMa
                     val token = preferencesManager.accessToken
 
                     if (token.isNotEmpty()) {
-                        addHeader("Authorization", "$ACCESS_TOKEN_TYPE $token")
+                        addHeader("Authorization", "${config.getAccessTokenType()} $token")
                     }
 
                     addHeader("Accept", "application/json")

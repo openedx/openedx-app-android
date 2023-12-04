@@ -11,12 +11,12 @@ object EmailUtil {
 
     fun showFeedbackScreen(
         context: Context,
+        feedbackEmailAddress: String,
         subject: String = context.getString(R.string.core_email_subject),
         feedback: String = "",
         appVersion: String
     ) {
         val NEW_LINE = "\n"
-        val to = context.getString(R.string.feedback_email_address)
         val body = StringBuilder()
         with(body) {
             append(feedback)
@@ -28,7 +28,7 @@ object EmailUtil {
             append(NEW_LINE)
             append("${context.getString(R.string.core_android_device_model)} ${Build.MODEL}")
         }
-        sendEmailIntent(context, to, subject, body.toString())
+        sendEmailIntent(context, feedbackEmailAddress, subject, body.toString())
     }
 
     fun sendEmailIntent(

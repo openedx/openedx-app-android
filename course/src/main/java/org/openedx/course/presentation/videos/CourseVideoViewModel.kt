@@ -4,9 +4,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.module.DownloadWorkerController
@@ -18,10 +20,10 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
-import kotlinx.coroutines.launch
 
 class CourseVideoViewModel(
     val courseId: String,
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
@@ -30,6 +32,8 @@ class CourseVideoViewModel(
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+
+    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableLiveData<CourseVideosUIState>()
     val uiState: LiveData<CourseVideosUIState>

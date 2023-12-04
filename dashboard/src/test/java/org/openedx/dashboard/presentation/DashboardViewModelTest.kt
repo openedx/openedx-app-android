@@ -4,15 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.DashboardCourseList
-import org.openedx.core.domain.model.Pagination
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -29,7 +20,17 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.R
+import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
+import org.openedx.core.domain.model.DashboardCourseList
+import org.openedx.core.domain.model.Pagination
+import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -40,6 +41,7 @@ class DashboardViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DashboardInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
@@ -61,6 +63,7 @@ class DashboardViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { config.getApiHostURL() } returns "http://localhost:8000"
     }
 
     @After
@@ -70,7 +73,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses no internet connection`() = runTest {
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
         advanceUntilIdle()
@@ -86,7 +89,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses unknown error`() = runTest {
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
         advanceUntilIdle()
@@ -102,7 +105,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses from network`() = runTest {
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
@@ -118,7 +121,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses from network with next page`() = runTest {
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(
             Pagination(
@@ -144,7 +147,7 @@ class DashboardViewModelTest {
     fun `getCourses from cache`() = runTest {
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
 
         advanceUntilIdle()
 
@@ -160,7 +163,7 @@ class DashboardViewModelTest {
     fun `updateCourses no internet error`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
 
         coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
         viewModel.updateCourses()
@@ -180,7 +183,7 @@ class DashboardViewModelTest {
     fun `updateCourses unknown exception`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
 
         coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
         viewModel.updateCourses()
@@ -200,7 +203,7 @@ class DashboardViewModelTest {
     fun `updateCourses success`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
 
         viewModel.updateCourses()
         advanceUntilIdle()
@@ -218,7 +221,7 @@ class DashboardViewModelTest {
     fun `updateCourses success with next page`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(Pagination(10,"2",2,""))
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
 
         viewModel.updateCourses()
         advanceUntilIdle()
@@ -235,7 +238,7 @@ class DashboardViewModelTest {
     @Test
     fun `CourseDashboardUpdate notifier test`() = runTest {
         coEvery { notifier.notifier } returns flow { emit(CourseDashboardUpdate()) }
-        val viewModel = DashboardViewModel(networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, notifier, analytics, appUpgradeNotifier)
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

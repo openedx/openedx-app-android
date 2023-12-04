@@ -9,6 +9,7 @@ import org.openedx.app.data.networking.HeadersInterceptor
 import org.openedx.app.data.networking.OauthRefreshTokenAuthenticator
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.core.BuildConfig
+import org.openedx.core.config.Config
 import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
 import org.openedx.discussion.data.api.DiscussionApi
@@ -19,13 +20,13 @@ import java.util.concurrent.TimeUnit
 
 val networkingModule = module {
 
-    single { OauthRefreshTokenAuthenticator(get(), get()) }
+    single { OauthRefreshTokenAuthenticator(get(), get(), get()) }
 
     single {
         OkHttpClient.Builder().apply {
             writeTimeout(60, TimeUnit.SECONDS)
             readTimeout(60, TimeUnit.SECONDS)
-            addInterceptor(HeadersInterceptor(get(), get()))
+            addInterceptor(HeadersInterceptor(get(), get(), get()))
             if (BuildConfig.DEBUG) {
                 addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             }
@@ -37,8 +38,9 @@ val networkingModule = module {
     }
 
     single<Retrofit> {
+        val config = this.get<Config>()
         Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(config.getApiHostURL())
             .client(get())
             .addConverterFactory(GsonConverterFactory.create(get()))
             .build()

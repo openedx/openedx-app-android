@@ -3,18 +3,23 @@ package org.openedx.core.module.download
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.openedx.core.config.Config
 import retrofit2.Retrofit
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
-abstract class AbstractDownloader {
+abstract class AbstractDownloader : KoinComponent {
+
+    private val config by inject<Config>()
 
     protected abstract val client: OkHttpClient
 
     private val downloadApi: DownloadApi by lazy {
         Retrofit.Builder()
-            .baseUrl(org.openedx.core.BuildConfig.BASE_URL)
+            .baseUrl(config.getApiHostURL())
             .client(client)
             .build()
             .create(DownloadApi::class.java)

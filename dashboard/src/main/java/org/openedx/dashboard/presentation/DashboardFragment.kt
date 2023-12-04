@@ -41,6 +41,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
@@ -50,7 +51,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.AppUpdateState
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.*
@@ -82,6 +82,7 @@ class DashboardFragment : Fragment() {
 
                 MyCoursesScreen(
                     windowSize = windowSize,
+                    viewModel.apiHostUrl,
                     uiState!!,
                     uiMessage,
                     canLoadMore = canLoadMore,
@@ -120,6 +121,7 @@ class DashboardFragment : Fragment() {
 @Composable
 internal fun MyCoursesScreen(
     windowSize: WindowSize,
+    apiHostUrl: String,
     state: DashboardUIState,
     uiMessage: UIMessage?,
     canLoadMore: Boolean,
@@ -249,9 +251,11 @@ internal fun MyCoursesScreen(
                                             }
                                         }
                                         items(state.courses) { course ->
-                                            CourseItem(course, windowSize, onClick = {
-                                                onItemClick(it)
-                                            })
+                                            CourseItem(
+                                                apiHostUrl,
+                                                course,
+                                                windowSize,
+                                                onClick = { onItemClick(it) })
                                             Divider()
                                         }
                                         item {
@@ -343,6 +347,7 @@ internal fun MyCoursesScreen(
 
 @Composable
 private fun CourseItem(
+    apiHostUrl: String,
     enrolledCourse: EnrolledCourse,
     windowSize: WindowSize,
     onClick: (EnrolledCourse) -> Unit
@@ -355,7 +360,7 @@ private fun CourseItem(
             )
         )
     }
-    val imageUrl = org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + enrolledCourse.course.courseImage
+    val imageUrl = apiHostUrl.dropLast(1) + enrolledCourse.course.courseImage
     val context = LocalContext.current
     Surface(
         modifier = Modifier
@@ -491,6 +496,7 @@ private fun EmptyState() {
 private fun CourseItemPreview() {
     OpenEdXTheme() {
         CourseItem(
+            "http://localhost:8000",
             mockCourseEnrolled,
             WindowSize(WindowType.Compact, WindowType.Compact),
             onClick = {})
@@ -504,6 +510,7 @@ private fun MyCoursesScreenDay() {
     OpenEdXTheme {
         MyCoursesScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
                 listOf(
                     mockCourseEnrolled,
@@ -534,6 +541,7 @@ private fun MyCoursesScreenTabletPreview() {
     OpenEdXTheme {
         MyCoursesScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+            apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
                 listOf(
                     mockCourseEnrolled,

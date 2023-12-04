@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.AppUpdateState
+import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
@@ -37,8 +39,6 @@ import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.AppUpdateState
-import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.discovery.R
 
 class DiscoveryFragment : Fragment() {
@@ -67,6 +67,7 @@ class DiscoveryFragment : Fragment() {
                     windowSize = windowSize,
                     state = uiState!!,
                     uiMessage = uiMessage,
+                    apiHostUrl = viewModel.apiHostUrl,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
@@ -123,6 +124,7 @@ internal fun DiscoveryScreen(
     windowSize: WindowSize,
     state: DiscoveryUIState,
     uiMessage: UIMessage?,
+    apiHostUrl: String,
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
@@ -263,7 +265,8 @@ internal fun DiscoveryScreen(
                                     }
                                     items(state.courses) { course ->
                                         DiscoveryCourseItem(
-                                            course,
+                                            apiHostUrl = apiHostUrl,
+                                            course = course,
                                             windowSize = windowSize,
                                             onClick = { courseId ->
                                                 onItemClick(course)
@@ -351,6 +354,7 @@ internal fun DiscoveryScreen(
 private fun CourseItemPreview() {
     OpenEdXTheme {
         DiscoveryCourseItem(
+            apiHostUrl = "",
             course = mockCourse,
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             onClick = {})
@@ -378,6 +382,7 @@ private fun DiscoveryScreenPreview() {
                 )
             ),
             uiMessage = null,
+            apiHostUrl = "",
             onSearchClick = {},
             paginationCallback = {},
             onSwipeRefresh = {},
@@ -412,6 +417,7 @@ private fun DiscoveryScreenTabletPreview() {
                 )
             ),
             uiMessage = null,
+            apiHostUrl = "",
             onSearchClick = {},
             paginationCallback = {},
             onSwipeRefresh = {},
