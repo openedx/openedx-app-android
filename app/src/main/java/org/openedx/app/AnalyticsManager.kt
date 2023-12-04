@@ -6,21 +6,24 @@ import androidx.core.os.bundleOf
 import org.openedx.app.analytics.Analytics
 import org.openedx.app.analytics.FirebaseAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.core.BuildConfig
+import org.openedx.core.config.Config
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.profile.presentation.ProfileAnalytics
 
-class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, AppAnalytics,
+class AnalyticsManager(
+    context: Context,
+    config: Config,
+) : DashboardAnalytics, AuthAnalytics, AppAnalytics,
     DiscoveryAnalytics, ProfileAnalytics, CourseAnalytics, DiscussionAnalytics {
 
     private val services: ArrayList<Analytics> = arrayListOf()
 
     init {
         // Initialise all the analytics libraries here
-        if (BuildConfig.FIREBASE_PROJECT_ID.isNotEmpty()) {
+        if (config.getFirebaseConfig().projectId.isNotEmpty()) {
             addAnalyticsTracker(FirebaseAnalytics(context = context))
         }
     }
