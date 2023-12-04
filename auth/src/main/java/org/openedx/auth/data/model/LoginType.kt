@@ -10,7 +10,7 @@ import org.openedx.core.ApiConstants
  */
 enum class LoginType(val postfix: String, val methodName: String) {
     PASSWORD("", "Password"),
-    GOOGLE(ApiConstants.LOGIN_TYPE_GOOGLE, "Google"),
-    FACEBOOK(ApiConstants.LOGIN_TYPE_FB, "Facebook"),
-    MICROSOFT(ApiConstants.LOGIN_TYPE_MICROSOFT, "Microsoft"),
+    GOOGLE(ApiConstants.AUTH_TYPE_GOOGLE, "Google"),
+    FACEBOOK(ApiConstants.AUTH_TYPE_FB, "Facebook"),
+    MICROSOFT(ApiConstants.AUTH_TYPE_MICROSOFT, "Microsoft"),
 }

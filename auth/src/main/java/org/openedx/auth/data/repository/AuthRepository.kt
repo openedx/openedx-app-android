@@ -42,9 +42,9 @@ class AuthRepository(
         val authResponse = api.exchangeAccessToken(
             accessToken = token,
             clientId = config.getOAuthClientId(),
-            tokenType = BuildConfig.ACCESS_TOKEN_TYPE,
-            loginType = loginType.postfix
-        )
+            tokenType = config.getAccessTokenType(),
+            authType = loginType.postfix
+        ).mapToDomain()
         if (authResponse.error != null) {
             throw EdxError.UnknownException(authResponse.error!!)
         }

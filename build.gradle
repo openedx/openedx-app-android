@@ -1,3 +1,8 @@
+import org.edx.builder.ConfigHelper
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 buildscript {
     ext {
         kotlin_version = '1.8.21'
@@ -51,8 +56,27 @@ ext {
 
     extented_spans_version = "1.3.0"
 
+    configHelper = new ConfigHelper(projectDir, getCurrentFlavor())
+
     //testing
     mockk_version = '1.13.3'
     android_arch_version = '2.2.0'
     junit_version = '4.13.2'
+}
+
+def getCurrentFlavor() {
+    String tskReqStr = getGradle().getStartParameter().getTaskRequests().toString()
+    Pattern pattern
+    if (tskReqStr.contains("assemble")) // to run ./gradlew assembleRelease to build APK
+        pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
+    else if (tskReqStr.contains("bundle")) // to run ./gradlew bundleRelease to build .aab
+        pattern = Pattern.compile("bundle(\\w+)(Release|Debug)")
+    else
+        pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
+    Matcher matcher = pattern.matcher(tskReqStr)
+    if (matcher.find()) {
+        return matcher.group(1).toLowerCase()
+    } else {
+        return ""
+    }
 }

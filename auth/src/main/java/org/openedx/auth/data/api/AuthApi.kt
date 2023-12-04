@@ -18,7 +18,7 @@ interface AuthApi {
         @Field("client_id") clientId: String,
         @Field("token_type") tokenType: String,
         @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
-        @Path("login_type") loginType: String,
+        @Path("auth_type") authType: String,
     ): AuthResponse
 
     @FormUrlEncoded

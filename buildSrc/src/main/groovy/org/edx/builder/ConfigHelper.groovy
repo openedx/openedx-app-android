@@ -15,7 +15,13 @@ class ConfigHelper {
     def configDir = ""
     def projectDir = ""
 
-    ConfigHelper(projectDir, environment) {
+    ConfigHelper(projectDir, buildType) {
+        def environment
+        if (buildType == 'develop' || buildType == '') {
+            environment = 'dev'
+        } else {
+            environment = buildType
+        }
         this.projectDir = projectDir
         def configFile = new File(CONFIG_SETTINGS_YAML_FILENAME)
         if (!configFile.exists()) {
@@ -39,7 +45,7 @@ class ConfigHelper {
     def fetchConfig() {
         def configFilesMapping = new File(configDir + "/" + MAPPINGS_FILENAME)
         if (!configFilesMapping.exists()) {
-            throw new Exception("Inappropriate config directory format")
+            throw new Exception("Inappropriate config directory format: $configFilesMapping")
         }
         def configMappingFiles = new Yaml().load(configFilesMapping.newInputStream())
         def androidConfigFiles = configMappingFiles.getOrDefault(ANDROID_CONFIG_KEY, {}).getOrDefault(FILES_CONFIG_KEY, [])
@@ -54,13 +60,34 @@ class ConfigHelper {
         return androidConfigs
     }
 
-    def generateConfigJson(config) {
-        def configJsonDir = new File(projectDir.path + "/assets/config")
+    def generateConfigJson() {
+        def config = fetchConfig()
+        def configJsonDir = new File(projectDir.path + "/core/assets/config")
         configJsonDir.mkdirs()
         def jsonWriter = new FileWriter(configJsonDir.path + "/config.json")
         def builder = new JsonBuilder(config)
         jsonWriter.withWriter {
             builder.writeTo(it)
+        }
+        generateMicrosoftConfig(config)
+    }
+
+    private def generateMicrosoftConfig(config) {
+        def social = config.get("SOCIAL")
+        def applicationId = config.getOrDefault("APPLICATION_ID", "")
+        def clientId = social.getOrDefault("MICROSOFT_CLIENT_ID", "")
+        def packageSign = social.getOrDefault("MICROSOFT_PACKAGE_SIGNATURE", "")
+        def microsoftConfigsJsonPath = projectDir.path + "/core/src/main/res/raw/"
+        new File(microsoftConfigsJsonPath).mkdirs()
+        def sign = URLEncoder.encode(packageSign, "UTF-8")
+        def configJson = [
+                client_id                     : clientId,
+                redirect_uri                  : "msauth://$applicationId/$sign",
+                account_mode                  : "SINGLE",
+                broker_redirect_uri_registered: true
+        ]
+        new FileWriter(microsoftConfigsJsonPath + "/microsoft_auth_config.json").withWriter {
+            it.write(new JsonBuilder(configJson).toPrettyString())
         }
     }
 }

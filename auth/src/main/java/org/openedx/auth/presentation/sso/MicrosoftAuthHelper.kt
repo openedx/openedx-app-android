@@ -22,7 +22,7 @@ class MicrosoftAuthHelper {
             val clientApplication =
                 PublicClientApplication.createSingleAccountPublicClientApplication(
                     activityContext,
-                    R.raw.auth_config
+                    R.raw.microsoft_auth_config
                 )
             val params = AcquireTokenParameters.Builder()
                 .startAuthorizationFromActivity(activityContext)

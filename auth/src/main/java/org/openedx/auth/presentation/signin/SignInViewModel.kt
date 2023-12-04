@@ -19,7 +19,6 @@ import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.core.BaseViewModel
-import org.openedx.core.BuildConfig
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
@@ -44,6 +43,7 @@ class SignInViewModel(
     private val facebookAuthHelper: FacebookAuthHelper,
     private val googleAuthHelper: GoogleAuthHelper,
     private val microsoftAuthHelper: MicrosoftAuthHelper,
+    config: Config,
 ) : BaseViewModel() {
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
@@ -51,7 +51,7 @@ class SignInViewModel(
     private val logger = Logger("SignInViewModel")
 
     private val _uiState = MutableStateFlow(
-        SignInUIState(shouldShowSocialLogin = BuildConfig.FF_SHOW_SOCIAL_LOGIN)
+        SignInUIState(shouldShowSocialLogin = config.isSocialAuthEnabled())
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
 

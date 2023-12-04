@@ -10,10 +10,10 @@ import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import org.openedx.core.BuildConfig
+import org.openedx.core.config.Config
 import org.openedx.core.utils.Logger
 
-class GoogleAuthHelper {
+class GoogleAuthHelper(private val config: Config) {
 
     private val logger = Logger(TAG)
 
@@ -31,7 +31,7 @@ class GoogleAuthHelper {
         return runCatching {
             val credentialManager = CredentialManager.create(activityContext)
             val googleIdOption =
-                GetSignInWithGoogleOption.Builder(BuildConfig.GOOGLE_CLIENT_ID).build()
+                GetSignInWithGoogleOption.Builder(config.getSocialConfig().googleClientId).build()
             val request: GetCredentialRequest = GetCredentialRequest.Builder()
                 .addCredentialOption(googleIdOption)
                 .build()
