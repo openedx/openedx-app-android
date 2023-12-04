@@ -146,7 +146,7 @@ val appModule = module {
     single { WhatsNewManager(get(), get(), get(), get()) }
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
-    single { AnalyticsManager(get()) }
+    single { AnalyticsManager(get(), get()) }
     single<DashboardAnalytics> { get<AnalyticsManager>() }
     single<AuthAnalytics> { get<AnalyticsManager>() }
     single<AppAnalytics> { get<AnalyticsManager>() }
