@@ -34,10 +34,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
@@ -65,6 +70,7 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -75,10 +81,6 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
-import org.openedx.core.ui.displayCutoutForLandscape
 import java.io.File
 
 class CourseSectionFragment : Fragment() {
@@ -122,7 +124,6 @@ class CourseSectionFragment : Fragment() {
                                 requireActivity().supportFragmentManager,
                                 block.id,
                                 courseId = viewModel.courseId,
-                                courseName = block.displayName,
                                 mode = viewModel.mode
                             )
                         }
@@ -143,6 +144,19 @@ class CourseSectionFragment : Fragment() {
                         }
                     }
                 )
+
+                LaunchedEffect(rememberSaveable { true }) {
+                    val descendantId = requireArguments().getString(ARG_DESCENDANT_ID, "")
+                    if (descendantId.isNotEmpty()) {
+                        router.navigateToCourseContainer(
+                            requireActivity().supportFragmentManager,
+                            descendantId,
+                            courseId = viewModel.courseId,
+                            mode = viewModel.mode
+                        )
+                        requireArguments().putString(ARG_DESCENDANT_ID, "")
+                    }
+                }
             }
         }
     }
@@ -150,16 +164,19 @@ class CourseSectionFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_BLOCK_ID = "blockId"
+        private const val ARG_DESCENDANT_ID = "descendantId"
         private const val ARG_MODE = "mode"
         fun newInstance(
             courseId: String,
             blockId: String,
             mode: CourseViewMode,
+            descendantId: String?,
         ): CourseSectionFragment {
             val fragment = CourseSectionFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
                 ARG_BLOCK_ID to blockId,
+                ARG_DESCENDANT_ID to descendantId,
                 ARG_MODE to mode
             )
             return fragment
@@ -289,7 +306,9 @@ private fun CourseSubsectionItem(
     onDownloadClick: (Block) -> Unit
 ) {
     val completedIconPainter =
-        if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
+        if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+            R.drawable.ic_course_chapter_icon
+        )
     val completedIconColor =
         if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
     val completedIconDescription = if (block.completion == 1.0) {
@@ -338,11 +357,12 @@ private fun CourseSubsectionItem(
                     } else {
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
-                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_accessibility_remove_course_section)
-                    } else {
-                        stringResource(id = R.string.course_accessibility_download_course_section)
-                    }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(

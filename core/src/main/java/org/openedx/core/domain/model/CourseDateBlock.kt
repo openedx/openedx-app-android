@@ -13,6 +13,7 @@ data class CourseDateBlock(
     val complete: Boolean = false,
     val date: Date?,
     val dateType: DateType = DateType.NONE,
+    val assignmentType: String? = "",
     var dateBlockBadge: CourseDatesBadge = CourseDatesBadge.BLANK,
 ) {
     companion object {

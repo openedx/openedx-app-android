@@ -293,10 +293,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                                     requireActivity().supportFragmentManager,
                                     it.id,
                                     viewModel.courseId,
-                                    requireArguments().getString(
-                                        ARG_COURSE_NAME,
-                                        ""
-                                    ),
                                     requireArguments().serializable(ARG_MODE)!!
                                 )
                             }
@@ -319,20 +315,17 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_COURSE_NAME = "courseName"
         private const val ARG_MODE = "mode"
 
         fun newInstance(
             blockId: String,
             courseId: String,
-            courseName: String,
             mode: CourseViewMode,
         ): CourseUnitContainerFragment {
             val fragment = CourseUnitContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_ID to blockId,
                 ARG_COURSE_ID to courseId,
-                ARG_COURSE_NAME to courseName,
                 ARG_MODE to mode
             )
             return fragment

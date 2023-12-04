@@ -1,6 +1,7 @@
 package org.openedx.core.domain.model
 
-import java.util.*
+import org.openedx.core.BlockType
+import java.util.Date
 
 data class CourseStructure(
     val root: String,
@@ -17,4 +18,12 @@ data class CourseStructure(
     val media: Media?,
     val certificate: Certificate?,
     val isSelfPaced: Boolean
-)
+) {
+    fun getVerticalBlocks(): List<Block> {
+        return blockData.filter { it.type == BlockType.VERTICAL }
+    }
+
+    fun getSequentialBlocks(): List<Block> {
+        return blockData.filter { it.type == BlockType.SEQUENTIAL }
+    }
+}
