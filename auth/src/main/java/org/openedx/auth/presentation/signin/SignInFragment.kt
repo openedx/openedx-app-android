@@ -101,13 +101,12 @@ class SignInFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val loginSuccess by viewModel.loginSuccess.observeAsState(initial = false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
-                val isLogistrationEnabled by viewModel.isLogistrationEnabled.observeAsState(initial = false)
 
                 if (appUpgradeEvent == null) {
                     LoginScreen(
                         windowSize = windowSize,
                         showProgress = showProgress,
-                        isLogistrationEnabled = isLogistrationEnabled,
+                        isLogistrationEnabled = viewModel.isLogistrationEnabled,
                         uiMessage = uiMessage,
                         onLoginClick = { login, password ->
                             viewModel.login(login, password)

@@ -30,6 +30,8 @@ class SignInViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
+    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
+
     private val _showProgress = MutableLiveData<Boolean>()
     val showProgress: LiveData<Boolean>
         get() = _showProgress
@@ -46,11 +48,7 @@ class SignInViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
-    private val _isLogistrationEnabled = MutableLiveData<Boolean>()
-    val isLogistrationEnabled: LiveData<Boolean> = _isLogistrationEnabled
-
     init {
-        _isLogistrationEnabled.value = config.isPreLoginExperienceEnabled()
         collectAppUpgradeEvent()
     }
 
