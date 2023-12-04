@@ -15,7 +15,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
-import org.openedx.auth.presentation.logistration.Logistration
+import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
@@ -26,7 +26,6 @@ import org.openedx.core.ui.WindowType
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
-import org.openedx.core.BuildConfig as coreBuildConfig
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
@@ -113,8 +112,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (savedInstanceState == null) {
             when {
                 corePreferencesManager.user == null -> {
-                    if (coreBuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
-                        addFragment(Logistration())
+                    if (viewModel.isLogistrationEnabled) {
+                        addFragment(LogistrationFragment())
                     } else {
                         addFragment(SignInFragment())
                     }
@@ -131,7 +130,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         }
 
         viewModel.logoutUser.observe(this) {
-            profileRouter.restartApp(supportFragmentManager)
+            profileRouter.restartApp(supportFragmentManager, viewModel.isLogistrationEnabled)
         }
     }
 

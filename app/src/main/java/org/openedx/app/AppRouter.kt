@@ -4,11 +4,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.logistration.Logistration
+import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
-import org.openedx.core.BuildConfig
 import org.openedx.core.FragmentViewType
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
@@ -290,14 +289,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, DeleteProfileFragment())
     }
 
-    override fun restartApp(fm: FragmentManager) {
+    override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
             for (fragment in fragments) {
                 beginTransaction().remove(fragment).commit()
             }
             popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            if (BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED) {
-                replaceFragment(fm, Logistration())
+            if (isLogistrationEnabled) {
+                replaceFragment(fm, LogistrationFragment())
             } else {
                 replaceFragment(fm, SignInFragment())
             }

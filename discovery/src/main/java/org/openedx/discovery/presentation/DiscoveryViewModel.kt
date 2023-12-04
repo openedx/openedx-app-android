@@ -7,12 +7,11 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
-import org.openedx.core.BuildConfig
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -32,6 +31,7 @@ class DiscoveryViewModel(
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
+    val canShowBackButton get() = config.isPreLoginExperienceEnabled() && corePreferences.user == null
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
     val uiState: LiveData<DiscoveryUIState>
@@ -53,9 +53,6 @@ class DiscoveryViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent>
         get() = _appUpgradeEvent
 
-    private val _canShowBackButton = MutableLiveData<Boolean>()
-    val canShowBackButton: LiveData<Boolean> = _canShowBackButton
-
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -64,8 +61,6 @@ class DiscoveryViewModel(
     private var isLoading = false
 
     init {
-        _canShowBackButton.value =
-            BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED && corePreferences.user == null
         getCoursesList()
         collectAppUpgradeEvent()
     }

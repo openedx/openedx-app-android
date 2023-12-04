@@ -56,6 +56,7 @@ class DiscoveryViewModelTest {
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { corePreferences.user } returns null
         every { config.getApiHostURL() } returns "http://localhost:8000"
+        every { config.isPreLoginExperienceEnabled() } returns false
     }
 
     @After

@@ -1,14 +1,6 @@
 package org.openedx.auth.presentation.signin
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.openedx.auth.R
-import org.openedx.auth.domain.interactor.AuthInteractor
-import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.core.UIMessage
-import org.openedx.core.Validator
-import org.openedx.core.data.model.User
-import org.openedx.core.system.EdxError
-import org.openedx.core.system.ResourceManager
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -28,7 +20,16 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.auth.R
+import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.core.UIMessage
+import org.openedx.core.Validator
+import org.openedx.core.config.Config
+import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.EdxError
+import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import java.net.UnknownHostException
 import org.openedx.core.R as CoreRes
@@ -41,6 +42,7 @@ class SignInViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val validator = mockk<Validator>()
     private val resourceManager = mockk<ResourceManager>()
     private val preferencesManager = mockk<CorePreferences>()
@@ -65,6 +67,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(R.string.auth_invalid_email) } returns invalidEmail
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { config.isPreLoginExperienceEnabled() } returns false
     }
 
     @After
@@ -77,7 +80,15 @@ class SignInViewModelTest {
         every { validator.isEmailValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel = SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+        val viewModel = SignInViewModel(
+            config,
+            interactor,
+            resourceManager,
+            preferencesManager,
+            validator,
+            analytics,
+            appUpgradeNotifier
+        )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
@@ -95,7 +106,15 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel =
-            SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+            SignInViewModel(
+                config,
+                interactor,
+                resourceManager,
+                preferencesManager,
+                validator,
+                analytics,
+                appUpgradeNotifier
+            )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
@@ -115,7 +134,15 @@ class SignInViewModelTest {
         every { analytics.setUserIdForSession(any()) } returns Unit
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         val viewModel =
-            SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+            SignInViewModel(
+                config,
+                interactor,
+                resourceManager,
+                preferencesManager,
+                validator,
+                analytics,
+                appUpgradeNotifier
+            )
         viewModel.login("acc@test.org", "")
 
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
@@ -133,7 +160,15 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel =
-            SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+            SignInViewModel(
+                config,
+                interactor,
+                resourceManager,
+                preferencesManager,
+                validator,
+                analytics,
+                appUpgradeNotifier
+            )
         viewModel.login("acc@test.org", "ed")
 
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -152,7 +187,15 @@ class SignInViewModelTest {
         every { analytics.userLoginEvent(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel = SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+        val viewModel = SignInViewModel(
+            config,
+            interactor,
+            resourceManager,
+            preferencesManager,
+            validator,
+            analytics,
+            appUpgradeNotifier
+        )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
@@ -174,7 +217,15 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel =
-            SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+            SignInViewModel(
+                config,
+                interactor,
+                resourceManager,
+                preferencesManager,
+                validator,
+                analytics,
+                appUpgradeNotifier
+            )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
@@ -196,7 +247,15 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel =
-            SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+            SignInViewModel(
+                config,
+                interactor,
+                resourceManager,
+                preferencesManager,
+                validator,
+                analytics,
+                appUpgradeNotifier
+            )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
@@ -218,7 +277,15 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel =
-            SignInViewModel(interactor, resourceManager, preferencesManager, validator, analytics, appUpgradeNotifier)
+            SignInViewModel(
+                config,
+                interactor,
+                resourceManager,
+                preferencesManager,
+                validator,
+                analytics,
+                appUpgradeNotifier
+            )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()

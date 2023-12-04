@@ -64,7 +64,6 @@ class DiscoveryFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
                 val wasUpdateDialogClosed by remember { wasUpdateDialogClosed }
                 val querySearch = arguments?.getString(ARG_SEARCH_QUERY, "") ?: ""
-                val canShowBackButton by viewModel.canShowBackButton.observeAsState(false)
 
                 DiscoveryScreen(
                     windowSize = windowSize,
@@ -74,7 +73,7 @@ class DiscoveryFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
-                    canShowBackButton = canShowBackButton,
+                    canShowBackButton = viewModel.canShowBackButton,
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
                         wasUpdateDialogClosed = wasUpdateDialogClosed,

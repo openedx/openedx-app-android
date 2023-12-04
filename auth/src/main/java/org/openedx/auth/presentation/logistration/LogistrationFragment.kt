@@ -52,7 +52,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
-class Logistration : Fragment() {
+class LogistrationFragment : Fragment() {
 
     private val router: AuthRouter by inject()
 

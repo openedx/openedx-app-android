@@ -5,7 +5,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.openedx.core.R
 import java.io.InputStreamReader
 
 class Config(context: Context) {
@@ -51,6 +50,10 @@ class Config(context: Context) {
         return getBoolean(WHATS_NEW_ENABLED, false)
     }
 
+    fun isPreLoginExperienceEnabled(): Boolean {
+        return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
+    }
+
     private fun getString(key: String, defaultValue: String): String {
         val element = getObject(key)
         return if (element != null) {
@@ -93,5 +96,6 @@ class Config(context: Context) {
         private const val AGREEMENT_URLS = "AGREEMENT_URLS"
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
         private const val FIREBASE = "FIREBASE"
+        private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
     }
 }

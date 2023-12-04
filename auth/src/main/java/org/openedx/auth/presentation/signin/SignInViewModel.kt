@@ -8,10 +8,10 @@ import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.BaseViewModel
-import org.openedx.core.BuildConfig
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
@@ -21,6 +21,7 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.R as CoreRes
 
 class SignInViewModel(
+    private val config: Config,
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val preferencesManager: CorePreferences,
@@ -49,7 +50,7 @@ class SignInViewModel(
     val isLogistrationEnabled: LiveData<Boolean> = _isLogistrationEnabled
 
     init {
-        _isLogistrationEnabled.value = BuildConfig.PRE_LOGIN_EXPERIENCE_ENABLED
+        _isLogistrationEnabled.value = config.isPreLoginExperienceEnabled()
         collectAppUpgradeEvent()
     }
 

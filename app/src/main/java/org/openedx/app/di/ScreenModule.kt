@@ -54,57 +54,173 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
 
-    viewModel { AppViewModel(get(), get(), get(), get(named("IODispatcher")), get()) }
+    viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get()) }
     viewModel { MainViewModel() }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
-    viewModel { SignInViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { SignInViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { SignUpViewModel(get(), get(), get(), get(), get()) }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
-    factory { DashboardRepository(get(), get(),get()) }
+    factory { DashboardRepository(get(), get(), get()) }
     factory { DashboardInteractor(get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
-    viewModel { ProfileViewModel(get(), get(), get(), get(named("IODispatcher")), get(), get(), get(), get()) }
+    viewModel {
+        ProfileViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(named("IODispatcher")),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get()) }
     viewModel { VideoQualityViewModel(get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
 
-    single { CourseRepository(get(), get(), get(),get()) }
+    single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
-    viewModel { (courseId: String) -> CourseDetailsViewModel(courseId, get(), get(), get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseContainerViewModel(courseId, get(), get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseOutlineViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> CourseSectionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), courseId) }
+    viewModel { (courseId: String) ->
+        CourseDetailsViewModel(
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        CourseContainerViewModel(
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        CourseOutlineViewModel(
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+    viewModel { (courseId: String) ->
+        CourseSectionViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            courseId
+        )
+    }
     viewModel { (courseId: String) -> CourseUnitContainerViewModel(get(), get(), get(), courseId) }
-    viewModel { (courseId: String) -> CourseVideoViewModel(courseId, get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) ->
+        CourseVideoViewModel(
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
     viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
-    viewModel { (courseId: String, blockId: String) -> EncodedVideoUnitViewModel(courseId, blockId, get(), get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String, blockId: String) ->
+        EncodedVideoUnitViewModel(
+            courseId,
+            blockId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (courseId: String) -> CourseDatesViewModel(courseId, get(), get(), get()) }
-    viewModel { (courseId:String, handoutsType: String) -> HandoutsViewModel(courseId, get(), handoutsType, get()) }
+    viewModel { (courseId: String, handoutsType: String) ->
+        HandoutsViewModel(
+            courseId,
+            get(),
+            handoutsType,
+            get()
+        )
+    }
     viewModel { CourseSearchViewModel(get(), get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
     single { DiscussionRepository(get(), get()) }
     factory { DiscussionInteractor(get()) }
     viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), get(), courseId) }
-    viewModel { (courseId: String, topicId: String, threadType: String) ->  DiscussionThreadsViewModel(get(), get(), get(), courseId, topicId, threadType) }
-    viewModel { (thread: org.openedx.discussion.domain.model.Thread) -> DiscussionCommentsViewModel(get(), get(), get(), thread) }
-    viewModel { (comment: DiscussionComment) -> DiscussionResponsesViewModel(get(), get(), get(), comment) }
+    viewModel { (courseId: String, topicId: String, threadType: String) ->
+        DiscussionThreadsViewModel(
+            get(),
+            get(),
+            get(),
+            courseId,
+            topicId,
+            threadType
+        )
+    }
+    viewModel { (thread: org.openedx.discussion.domain.model.Thread) ->
+        DiscussionCommentsViewModel(
+            get(),
+            get(),
+            get(),
+            thread
+        )
+    }
+    viewModel { (comment: DiscussionComment) ->
+        DiscussionResponsesViewModel(
+            get(),
+            get(),
+            get(),
+            comment
+        )
+    }
     viewModel { (courseId: String) -> DiscussionAddThreadViewModel(get(), get(), get(), courseId) }
-    viewModel { (courseId: String) -> DiscussionSearchThreadViewModel(get(), get(), get(), courseId) }
+    viewModel { (courseId: String) ->
+        DiscussionSearchThreadViewModel(
+            get(),
+            get(),
+            get(),
+            courseId
+        )
+    }
 
     viewModel { WhatsNewViewModel(get()) }
 }
