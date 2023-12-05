@@ -22,7 +22,7 @@ class FacebookAuthHelper {
             object : FacebookCallback<LoginResult> {
                 override fun onCancel() {
                     logger.d { "Facebook login canceled" }
-                    continuation.cancel()
+                    continuation.resume("")
                 }
 
                 override fun onError(error: FacebookException) {

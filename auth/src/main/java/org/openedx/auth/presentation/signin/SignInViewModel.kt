@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.auth.R
-import org.openedx.auth.data.model.LoginType
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
@@ -85,7 +85,7 @@ class SignInViewModel(
                 interactor.login(username, password)
                 _uiState.update { it.copy(loginSuccess = true) }
                 setUserId()
-                analytics.userLoginEvent(LoginType.PASSWORD.methodName)
+                analytics.userLoginEvent(AuthType.PASSWORD.methodName)
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =
@@ -117,9 +117,9 @@ class SignInViewModel(
                 runCatching {
                     googleAuthHelper.signIn(activityContext)
                 }
-            }.getOrNull()?.let {
-                exchangeToken(it, LoginType.GOOGLE)
-            } ?: onUnknownError()
+            }
+                .getOrNull()
+                .checkToken(AuthType.GOOGLE)
         }
     }
 
@@ -130,9 +130,9 @@ class SignInViewModel(
                 facebookAuthHelper.signIn(fragment)
             }.onFailure {
                 logger.e { "Facebook auth error: $it" }
-            }.getOrNull()?.let {
-                exchangeToken(it, LoginType.FACEBOOK)
-            } ?: onUnknownError()
+            }
+                .getOrNull()
+                .checkToken(AuthType.FACEBOOK)
         }
     }
 
@@ -145,9 +145,9 @@ class SignInViewModel(
                 }
             }.onFailure {
                 logger.e { "Microsoft auth error: $it" }
-            }.getOrNull()?.let {
-                exchangeToken(it, LoginType.MICROSOFT)
-            } ?: onUnknownError()
+            }
+                .getOrNull()
+                .checkToken(AuthType.MICROSOFT)
         }
     }
 
@@ -164,17 +164,17 @@ class SignInViewModel(
         facebookAuthHelper.clear()
     }
 
-    private suspend fun exchangeToken(token: String?, loginType: LoginType) {
+    private suspend fun exchangeToken(token: String, authType: AuthType) {
         runCatching {
-            interactor.loginSocial(token, loginType)
+            interactor.loginSocial(token, authType)
         }.onFailure { error ->
             logger.e { "Social login error: $error" }
             onUnknownError()
         }.onSuccess {
-            logger.d { "Social login (${loginType.methodName}) success" }
+            logger.d { "Social login (${authType.methodName}) success" }
             _uiState.update { it.copy(loginSuccess = true) }
             setUserId()
-            analytics.userLoginEvent(loginType.methodName)
+            analytics.userLoginEvent(authType.methodName)
             _uiState.update { it.copy(showProgress = false) }
         }
     }
@@ -193,5 +193,15 @@ class SignInViewModel(
         preferencesManager.user?.let {
             analytics.setUserIdForSession(it.id)
         }
+    }
+
+    private suspend fun String?.checkToken(authType: AuthType) {
+        this?.let { token ->
+            if (token.isNotEmpty()) {
+                exchangeToken(token, authType)
+            } else {
+                _uiState.update { it.copy(showProgress = false) }
+            }
+        } ?: onUnknownError()
     }
 }

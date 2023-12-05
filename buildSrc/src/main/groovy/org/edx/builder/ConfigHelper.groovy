@@ -82,9 +82,10 @@ class ConfigHelper {
         def sign = URLEncoder.encode(packageSign, "UTF-8")
         def configJson = [
                 client_id                     : clientId,
+                authorization_user_agent      : "DEFAULT",
                 redirect_uri                  : "msauth://$applicationId/$sign",
                 account_mode                  : "SINGLE",
-                broker_redirect_uri_registered: true
+                broker_redirect_uri_registered: false
         ]
         new FileWriter(microsoftConfigsJsonPath + "/microsoft_auth_config.json").withWriter {
             it.write(new JsonBuilder(configJson).toPrettyString())

@@ -9,7 +9,6 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = AppColors(
     material = darkColors(
@@ -64,7 +63,10 @@ private val DarkColorPalette = AppColors(
     datesBadgeToday = dark_dates_badge_today,
     datesBadgeTextToday = dark_dates_badge_text_today,
     datesBadgeDue = dark_dates_badge_due,
-    datesBadgeTextDue = dark_dates_badge_text_due
+    datesBadgeTextDue = dark_dates_badge_text_due,
+
+    authFacebookButtonBackground = dark_auth_facebook_button_background,
+    authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
 )
 
 private val LightColorPalette = AppColors(
@@ -120,7 +122,10 @@ private val LightColorPalette = AppColors(
     datesBadgeToday = light_dates_badge_today,
     datesBadgeTextToday = light_dates_badge_text_today,
     datesBadgeDue = light_dates_badge_due,
-    datesBadgeTextDue = light_dates_badge_text_due
+    datesBadgeTextDue = light_dates_badge_text_due,
+
+    authFacebookButtonBackground = light_auth_facebook_button_background,
+    authMicrosoftButtonBackground = light_auth_microsoft_button_background,
 )
 
 val MaterialTheme.appColors: AppColors

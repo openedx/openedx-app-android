@@ -39,7 +39,7 @@ class MicrosoftAuthHelper {
 
                     override fun onCancel() {
                         logger.d { "Microsoft auth canceled" }
-                        continuation.cancel()
+                        continuation.resume("")
                     }
                 }).build()
             clientApplication.acquireToken(params)

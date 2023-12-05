@@ -1,7 +1,7 @@
 package org.openedx.auth.data.repository
 
 import org.openedx.auth.data.api.AuthApi
-import org.openedx.auth.data.model.LoginType
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
@@ -20,39 +20,27 @@ class AuthRepository(
         username: String,
         password: String,
     ) {
-        val authResponse: AuthResponse = api.getAccessToken(
+        api.getAccessToken(
             ApiConstants.GRANT_TYPE_PASSWORD,
             config.getOAuthClientId(),
             username,
             password,
             config.getAccessTokenType(),
-        ).mapToDomain()
-        if (authResponse.error != null) {
-            throw EdxError.UnknownException(authResponse.error!!)
-        }
-        preferencesManager.accessToken = authResponse.accessToken ?: ""
-        preferencesManager.refreshToken = authResponse.refreshToken ?: ""
-        preferencesManager.accessTokenExpiresAt = authResponse.getTokenExpiryTime()
-        val user = api.getProfile()
-        preferencesManager.user = user
+        )
+            .mapToDomain()
+            .processAuthResponse()
     }
 
-    suspend fun socialLogin(token: String?, loginType: LoginType) {
+    suspend fun socialLogin(token: String?, authType: AuthType) {
         if (token.isNullOrBlank()) throw IllegalArgumentException("Token is null")
-        val authResponse = api.exchangeAccessToken(
+        api.exchangeAccessToken(
             accessToken = token,
             clientId = config.getOAuthClientId(),
             tokenType = config.getAccessTokenType(),
-            authType = loginType.postfix
-        ).mapToDomain()
-        if (authResponse.error != null) {
-            throw EdxError.UnknownException(authResponse.error!!)
-        }
-        preferencesManager.accessToken = authResponse.accessToken ?: ""
-        preferencesManager.refreshToken = authResponse.refreshToken ?: ""
-        preferencesManager.accessTokenExpiresAt = authResponse.getTokenExpiryTime()
-        val user = api.getProfile()
-        preferencesManager.user = user
+            authType = authType.postfix
+        )
+            .mapToDomain()
+            .processAuthResponse()
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {
@@ -69,5 +57,16 @@ class AuthRepository(
 
     suspend fun passwordReset(email: String): Boolean {
         return api.passwordReset(email).success
+    }
+
+    private suspend fun AuthResponse.processAuthResponse() {
+        if (error != null) {
+            throw EdxError.UnknownException(error!!)
+        }
+        preferencesManager.accessToken = accessToken ?: ""
+        preferencesManager.refreshToken = refreshToken ?: ""
+        preferencesManager.accessTokenExpiresAt = getTokenExpiryTime()
+        val user = api.getProfile()
+        preferencesManager.user = user
     }
 }

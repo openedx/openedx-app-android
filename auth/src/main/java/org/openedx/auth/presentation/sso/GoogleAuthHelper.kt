@@ -2,10 +2,12 @@ package org.openedx.auth.presentation.sso
 
 import android.accounts.Account
 import android.app.Activity
+import android.credentials.GetCredentialException
 import androidx.annotation.WorkerThread
 import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -27,7 +29,7 @@ class GoogleAuthHelper(private val config: Config) {
         }.getOrNull()
     }
 
-    private suspend fun getCredentials(activityContext: Activity): GoogleIdTokenCredential? {
+    private suspend fun getCredentials(activityContext: Activity): String? {
         return runCatching {
             val credentialManager = CredentialManager.create(activityContext)
             val googleIdOption =
@@ -39,8 +41,13 @@ class GoogleAuthHelper(private val config: Config) {
                 request = request,
                 context = activityContext,
             )
-            getGoogleIdToken(result.credential)
+            getGoogleIdToken(result.credential)?.id
         }.onFailure {
+            if (it is GetCredentialCancellationException &&
+                it.type == GetCredentialException.TYPE_USER_CANCELED
+            ) {
+                return ""
+            }
             logger.e { "GetCredentials error: ${it.message}" }
         }.getOrNull()
     }
@@ -65,9 +72,12 @@ class GoogleAuthHelper(private val config: Config) {
 
     @WorkerThread
     suspend fun signIn(activityContext: Activity): String? {
-        val credentials = getCredentials(activityContext)
-        return credentials?.id?.let {
-            getAuthToken(activityContext, it)
+        return getCredentials(activityContext)?.let { token ->
+            if (token.isNotBlank()) {
+                getAuthToken(activityContext, token)
+            } else {
+                ""
+            }
         }
     }
 
