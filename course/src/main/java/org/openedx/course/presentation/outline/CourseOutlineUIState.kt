@@ -8,7 +8,7 @@ sealed class CourseOutlineUIState {
     data class CourseData(
         val courseStructure: CourseStructure,
         val downloadedState: Map<String, DownloadedState>,
-        val resumeBlock: Block?
+        val resumeComponent: Block?
     ) : CourseOutlineUIState()
 
     object Loading : CourseOutlineUIState()

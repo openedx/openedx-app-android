@@ -3,6 +3,10 @@ package org.openedx.course.presentation.unit.container
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
@@ -15,10 +19,6 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
@@ -79,7 +79,7 @@ class CourseUnitContainerViewModel(
         _indexInContainer.value = 0
     }
 
-    fun setupCurrentIndex(blockId: String) {
+    fun setupCurrentIndex(blockId: String, componentId: String = "") {
         if (currentSectionIndex != -1) {
             return
         }
@@ -99,6 +99,11 @@ class CourseUnitContainerViewModel(
                 }
                 if (block.descendants.isNotEmpty()) {
                     _currentBlock.value = blocks.first { it.id == block.descendants.first() }
+                }
+                if(componentId.isNotEmpty()){
+                    _currentBlock.value = blocks.first { it.id == componentId }
+                    _indexInContainer.value = descendants.indexOf(componentId)
+                    currentIndex = descendants.indexOf(componentId)
                 }
                 return
             }

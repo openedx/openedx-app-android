@@ -96,7 +96,7 @@ class CourseVideosFragment : Fragment() {
                         router.navigateToCourseSubsections(
                             requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
-                            blockId = block.id,
+                            subSectionId = block.id,
                             mode = CourseViewMode.VIDEOS
                         )
                     },

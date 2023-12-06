@@ -2,11 +2,13 @@ package org.openedx.course.presentation.unit.container
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
-import androidx.compose.foundation.layout.statusBarsPadding
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
@@ -42,6 +44,7 @@ import org.openedx.course.presentation.ui.NavigationUnitsButtons
 import org.openedx.course.presentation.ui.VerticalPageIndicator
 import org.openedx.course.presentation.ui.VideoTitle
 
+
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
 
     private val binding: FragmentCourseUnitContainerBinding
@@ -55,6 +58,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     private val router by inject<CourseRouter>()
 
     private var blockId: String = ""
+    private var componentId: String = ""
 
     private lateinit var adapter: CourseUnitContainerAdapter
 
@@ -76,9 +80,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
-        blockId = requireArguments().getString(ARG_BLOCK_ID, "")
+        blockId = requireArguments().getString(UNIT_ID, "")
+        componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
         viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
-        viewModel.setupCurrentIndex(blockId)
+        viewModel.setupCurrentIndex(blockId, componentId)
     }
 
     override fun onCreateView(
@@ -115,6 +120,13 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             if (currentBlockIndex != -1) {
                 binding.viewPager.currentItem = currentBlockIndex
             }
+        }
+        if (componentId.isEmpty().not()) {
+            Handler(Looper.getMainLooper()).post {
+                binding.viewPager.setCurrentItem(viewModel.indexInContainer.value!!, true)
+            }
+            requireArguments().putString(ARG_COMPONENT_ID, "")
+            componentId = ""
         }
 
         binding.cvVideoTitle?.setContent {
@@ -290,10 +302,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                             )
                             if (it.type.isContainer()) {
                                 router.replaceCourseContainer(
-                                    requireActivity().supportFragmentManager,
-                                    it.id,
-                                    viewModel.courseId,
-                                    requireArguments().serializable(ARG_MODE)!!
+                                    fm = requireActivity().supportFragmentManager,
+                                    courseId = viewModel.courseId,
+                                    unitId = it.id,
+                                    mode = requireArguments().serializable(ARG_MODE)!!
                                 )
                             }
                         }
@@ -313,19 +325,22 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     companion object {
 
-        private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
+        private const val UNIT_ID = "unitId"
+        private const val ARG_COMPONENT_ID = "componentId"
         private const val ARG_MODE = "mode"
 
         fun newInstance(
-            blockId: String,
             courseId: String,
+            unitId: String,
+            componentId: String?,
             mode: CourseViewMode,
         ): CourseUnitContainerFragment {
             val fragment = CourseUnitContainerFragment()
             fragment.arguments = bundleOf(
-                ARG_BLOCK_ID to blockId,
                 ARG_COURSE_ID to courseId,
+                UNIT_ID to unitId,
+                ARG_COMPONENT_ID to componentId,
                 ARG_MODE to mode
             )
             return fragment

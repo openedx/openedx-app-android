@@ -24,22 +24,25 @@ interface CourseRouter {
     fun navigateToCourseSubsections(
         fm: FragmentManager,
         courseId: String,
-        blockId: String,
-        mode: CourseViewMode,
-        descendantId: String? = ""
+        subSectionId: String,
+        unitId: String? = "",
+        componentId: String? = "",
+        mode: CourseViewMode
     )
 
     fun navigateToCourseContainer(
         fm: FragmentManager,
-        blockId: String,
         courseId: String,
+        unitId: String,
+        componentId: String? = "",
         mode: CourseViewMode
     )
 
     fun replaceCourseContainer(
         fm: FragmentManager,
-        blockId: String,
         courseId: String,
+        unitId: String,
+        componentId: String? = "",
         mode: CourseViewMode
     )
 

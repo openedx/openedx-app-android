@@ -19,11 +19,17 @@ data class CourseStructure(
     val certificate: Certificate?,
     val isSelfPaced: Boolean
 ) {
-    fun getVerticalBlocks(): List<Block> {
-        return blockData.filter { it.type == BlockType.VERTICAL }
-    }
+    val getVerticalBlocks: List<Block>
+        get() = blockData.getVerticalBlocks()
 
-    fun getSequentialBlocks(): List<Block> {
-        return blockData.filter { it.type == BlockType.SEQUENTIAL }
-    }
+    val getSequentialBlocks: List<Block>
+        get() = blockData.getSequentialBlocks()
+}
+
+fun List<Block>.getVerticalBlocks(): List<Block> {
+    return this.filter { it.type == BlockType.VERTICAL }
+}
+
+fun List<Block>.getSequentialBlocks(): List<Block> {
+    return this.filter { it.type == BlockType.SEQUENTIAL }
 }

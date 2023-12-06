@@ -148,11 +148,11 @@ class CourseDatesFragment : Fragment() {
                                 viewModel.getSequentialBlock(verticalBlock.id)
                                     ?.let { sequentialBlock ->
                                         router.navigateToCourseSubsections(
-                                            requireActivity().supportFragmentManager,
-                                            blockId = sequentialBlock.id,
+                                            fm = requireActivity().supportFragmentManager,
+                                            subSectionId = sequentialBlock.id,
                                             courseId = viewModel.courseId,
-                                            mode = CourseViewMode.FULL,
-                                            descendantId = verticalBlock.id
+                                            unitId = verticalBlock.id,
+                                            mode = CourseViewMode.FULL
                                         )
                                     }
                             }

@@ -97,21 +97,25 @@ class CourseOutlineFragment : Fragment() {
                     onItemClick = { block ->
                         viewModel.sequentialClickedEvent(block.blockId, block.displayName)
                         router.navigateToCourseSubsections(
-                            requireActivity().supportFragmentManager,
+                            fm = requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
-                            blockId = block.id,
+                            subSectionId = block.id,
                             mode = CourseViewMode.FULL
                         )
                     },
-                    onResumeClick = { blockId ->
-                        viewModel.resumeSectionBlock?.let { sequential ->
-                            viewModel.resumeCourseTappedEvent(sequential.blockId)
-                            router.navigateToCourseSubsections(
-                                requireActivity().supportFragmentManager,
-                                viewModel.courseId,
-                                sequential.id,
-                                CourseViewMode.FULL
-                            )
+                    onResumeClick = { componentId ->
+                        viewModel.resumeSectionBlock?.let { subSection ->
+                            viewModel.resumeCourseTappedEvent(subSection.id)
+                            viewModel.resumeVerticalBlock?.let { unit ->
+                                router.navigateToCourseSubsections(
+                                    requireActivity().supportFragmentManager,
+                                    courseId = viewModel.courseId,
+                                    subSectionId = subSection.id,
+                                    mode = CourseViewMode.FULL,
+                                    unitId = unit.id,
+                                    componentId = componentId
+                                )
+                            }
                         }
                     },
                     onBackClick = {
@@ -290,18 +294,18 @@ internal fun CourseOutlineScreen(
                                             courseName = uiState.courseStructure.name
                                         )
                                     }
-                                    if (uiState.resumeBlock != null) {
+                                    if (uiState.resumeComponent != null) {
                                         item {
                                             Spacer(Modifier.height(28.dp))
                                             Box(listPadding) {
                                                 if (windowSize.isTablet) {
                                                     ResumeCourseTablet(
-                                                        block = uiState.resumeBlock,
+                                                        block = uiState.resumeComponent,
                                                         onResumeClick = onResumeClick
                                                     )
                                                 } else {
                                                     ResumeCourse(
-                                                        block = uiState.resumeBlock,
+                                                        block = uiState.resumeComponent,
                                                         onResumeClick = onResumeClick
                                                     )
                                                 }
