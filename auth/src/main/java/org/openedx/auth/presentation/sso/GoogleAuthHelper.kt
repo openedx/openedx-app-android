@@ -33,7 +33,7 @@ class GoogleAuthHelper(private val config: Config) {
         return runCatching {
             val credentialManager = CredentialManager.create(activityContext)
             val googleIdOption =
-                GetSignInWithGoogleOption.Builder(config.getSocialConfig().googleClientId).build()
+                GetSignInWithGoogleOption.Builder(config.getGoogleConfig().clientId).build()
             val request: GetCredentialRequest = GetCredentialRequest.Builder()
                 .addCredentialOption(googleIdOption)
                 .build()

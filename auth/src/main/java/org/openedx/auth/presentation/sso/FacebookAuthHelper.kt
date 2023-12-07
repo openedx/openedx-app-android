@@ -36,6 +36,7 @@ class FacebookAuthHelper {
                 }
             }
         )
+        LoginManager.getInstance().logOut()
         LoginManager.getInstance().logInWithReadPermissions(
             fragment,
             callbackManager,

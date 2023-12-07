@@ -261,8 +261,8 @@ private fun AuthForm(
                 }
             )
         }
-        if (state.shouldShowSocialLogin) {
-            SocialLoginView(buttonWidth = buttonWidth, onEvent = onEvent)
+        if (state.isSocialAuthEnabled) {
+            SocialLoginView(state = state, buttonWidth = buttonWidth, onEvent = onEvent)
         }
     }
 }
@@ -270,69 +270,76 @@ private fun AuthForm(
 @Composable
 private fun SocialLoginView(
     buttonWidth: Modifier,
+    state: SignInUIState,
     onEvent: (AuthEvent) -> Unit,
 ) {
-    OpenEdXOutlinedButton(
-        modifier = buttonWidth.padding(top = 24.dp),
-        backgroundColor = MaterialTheme.appColors.background,
-        borderColor = MaterialTheme.appColors.primary,
-        textColor = Color.Unspecified,
-        onClick = {
-            onEvent(AuthEvent.SignInGoogle)
-        }
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_auth_google),
-                contentDescription = null,
-                tint = Color.Unspecified,
-            )
-            Text(
-                modifier = Modifier.padding(start = 10.dp),
-                text = stringResource(id = R.string.auth_google)
-            )
-        }
-    }
-    OpenEdXButton(
-        width = buttonWidth.padding(top = 12.dp),
-        text = stringResource(id = R.string.auth_facebook),
-        backgroundColor = MaterialTheme.appColors.authFacebookButtonBackground,
-        onClick = {
-            onEvent(AuthEvent.SignInFacebook)
-        }
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_auth_facebook),
-                contentDescription = null,
-                tint = MaterialTheme.appColors.buttonText,
-            )
-            Text(
-                modifier = Modifier.padding(start = 10.dp),
-                color = MaterialTheme.appColors.buttonText,
-                text = stringResource(id = R.string.auth_facebook)
-            )
+    if (state.isGoogleAuthEnabled) {
+        OpenEdXOutlinedButton(
+            modifier = buttonWidth.padding(top = 24.dp),
+            backgroundColor = MaterialTheme.appColors.background,
+            borderColor = MaterialTheme.appColors.primary,
+            textColor = Color.Unspecified,
+            onClick = {
+                onEvent(AuthEvent.SignInGoogle)
+            }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_auth_google),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                )
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    text = stringResource(id = R.string.auth_google)
+                )
+            }
         }
     }
-    OpenEdXButton(
-        width = buttonWidth.padding(top = 12.dp),
-        text = stringResource(id = R.string.auth_microsoft),
-        backgroundColor = MaterialTheme.appColors.authMicrosoftButtonBackground,
-        onClick = {
-            onEvent(AuthEvent.SignInMicrosoft)
+    if (state.isFacebookAuthEnabled) {
+        OpenEdXButton(
+            width = buttonWidth.padding(top = 12.dp),
+            text = stringResource(id = R.string.auth_facebook),
+            backgroundColor = MaterialTheme.appColors.authFacebookButtonBackground,
+            onClick = {
+                onEvent(AuthEvent.SignInFacebook)
+            }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_auth_facebook),
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.buttonText,
+                )
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    color = MaterialTheme.appColors.buttonText,
+                    text = stringResource(id = R.string.auth_facebook)
+                )
+            }
         }
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_auth_microsoft),
-                contentDescription = null,
-                tint = Color.Unspecified,
-            )
-            Text(
-                modifier = Modifier.padding(start = 10.dp),
-                color = MaterialTheme.appColors.buttonText,
-                text = stringResource(id = R.string.auth_microsoft)
-            )
+    }
+    if (state.isMicrosoftAuthEnabled) {
+        OpenEdXButton(
+            width = buttonWidth.padding(top = 12.dp),
+            text = stringResource(id = R.string.auth_microsoft),
+            backgroundColor = MaterialTheme.appColors.authMicrosoftButtonBackground,
+            onClick = {
+                onEvent(AuthEvent.SignInMicrosoft)
+            }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_auth_microsoft),
+                    contentDescription = null,
+                    tint = Color.Unspecified,
+                )
+                Text(
+                    modifier = Modifier.padding(start = 10.dp),
+                    color = MaterialTheme.appColors.buttonText,
+                    text = stringResource(id = R.string.auth_microsoft)
+                )
+            }
         }
     }
 }
@@ -413,7 +420,12 @@ private fun SignInScreenTabletPreview() {
     OpenEdXTheme {
         LoginScreen(
             windowSize = WindowSize(WindowType.Expanded, WindowType.Expanded),
-            state = SignInUIState().copy(shouldShowSocialLogin = true),
+            state = SignInUIState().copy(
+                isSocialAuthEnabled = true,
+                isFacebookAuthEnabled = true,
+                isGoogleAuthEnabled = true,
+                isMicrosoftAuthEnabled = true,
+            ),
             uiMessage = null,
             onEvent = {},
         )

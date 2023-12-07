@@ -154,16 +154,31 @@ def insertBuildConfigFields(currentFlavour, buildType) {
     def config = configHelper.fetchConfig()
     def platformName = config.getOrDefault("PLATFORM_NAME", "")
     def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
-    def social = config.get("SOCIAL")
-    def facebookAppId = social.getOrDefault("FACEBOOK_APP_ID", "")
-    def facebookClientToken = social.getOrDefault("FACEBOOK_CLIENT_TOKEN", "")
 
     buildType.resValue "string", "platform_name", platformName
     buildType.resValue "string", "platform_full_name", platformFullName
+    insertFacebookBuildConfigFields(config, buildType)
+    insertMicrosoftManifestPlaceholder(config, buildType)
+}
+
+static def insertFacebookBuildConfigFields(config, buildType) {
+    def facebook = config.get("FACEBOOK")
+    def facebookAppId = ""
+    def facebookClientToken = ""
+    if (facebook) {
+        facebookAppId = facebook.getOrDefault("FACEBOOK_APP_ID", "")
+        facebookClientToken = facebook.getOrDefault("CLIENT_TOKEN", "")
+    }
     buildType.resValue "string", "facebook_app_id", facebookAppId
     buildType.resValue "string", "fb_login_protocol_scheme", "fb$facebookAppId"
     buildType.resValue "string", "facebook_client_token", facebookClientToken
+}
 
-    buildType.manifestPlaceholders =
-            [microsoftSignature: social.getOrDefault("MICROSOFT_PACKAGE_SIGNATURE", "")]
+static def insertMicrosoftManifestPlaceholder(config, buildType) {
+    def microsoft = config.get("MICROSOFT")
+    def microsoftPackageSignature = ""
+    if (microsoft) {
+        microsoftPackageSignature = microsoft.getOrDefault("PACKAGE_SIGNATURE", "")
+    }
+    buildType.manifestPlaceholders = [microsoftSignature: microsoftPackageSignature]
 }

@@ -73,10 +73,14 @@ class ConfigHelper {
 
     def generateMicrosoftConfig() {
         def config = fetchConfig()
-        def social = config.get("SOCIAL")
         def applicationId = config.getOrDefault("APPLICATION_ID", "")
-        def clientId = social.getOrDefault("MICROSOFT_CLIENT_ID", "")
-        def packageSign = social.getOrDefault("MICROSOFT_PACKAGE_SIGNATURE", "")
+        def clientId = ""
+        def packageSign = ""
+        def microsoft = config.get("MICROSOFT")
+        if (microsoft) {
+            packageSign = microsoft.getOrDefault("PACKAGE_SIGNATURE", "")
+            clientId = microsoft.getOrDefault("CLIENT_ID", "")
+        }
         def microsoftConfigsJsonPath = projectDir.path + "/core/src/main/res/raw/"
         new File(microsoftConfigsJsonPath).mkdirs()
         def sign = URLEncoder.encode(packageSign, "UTF-8")
@@ -84,7 +88,7 @@ class ConfigHelper {
                 client_id                     : clientId,
                 authorization_user_agent      : "DEFAULT",
                 redirect_uri                  : "msauth://$applicationId/$sign",
-                account_mode                  : "SINGLE",
+                account_mode                  : "MULTIPLE",
                 broker_redirect_uri_registered: false
         ]
         new FileWriter(microsoftConfigsJsonPath + "/microsoft_auth_config.json").withWriter {

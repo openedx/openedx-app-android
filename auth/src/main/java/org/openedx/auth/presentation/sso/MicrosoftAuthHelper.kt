@@ -20,7 +20,7 @@ class MicrosoftAuthHelper {
     suspend fun signIn(activityContext: Activity): String? =
         suspendCancellableCoroutine { continuation ->
             val clientApplication =
-                PublicClientApplication.createSingleAccountPublicClientApplication(
+                PublicClientApplication.createMultipleAccountPublicClientApplication(
                     activityContext,
                     R.raw.microsoft_auth_config
                 )
@@ -42,6 +42,9 @@ class MicrosoftAuthHelper {
                         continuation.resume("")
                     }
                 }).build()
+            clientApplication.accounts.forEach {
+                clientApplication.removeAccount(it)
+            }
             clientApplication.acquireToken(params)
         }
 

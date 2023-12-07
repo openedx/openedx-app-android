@@ -49,7 +49,10 @@ class SignInViewModel(
 
     private val _uiState = MutableStateFlow(
         SignInUIState(
-            shouldShowSocialLogin = config.isSocialAuthEnabled(),
+            isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
+            isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
+            isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
+            isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
         )
     )

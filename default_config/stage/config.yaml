@@ -9,12 +9,19 @@ AGREEMENT_URLS:
   TOS_URL: 'https://example.com/tos'
   CONTACT_US_URL: 'https://example.com/contact'
 
-  SOCIAL:
-    GOOGLE_CLIENT_ID: ""
-    FACEBOOK_APP_ID: ""
-    FACEBOOK_CLIENT_TOKEN: ""
-    MICROSOFT_CLIENT_ID: ""
-    MICROSOFT_PACKAGE_SIGNATURE: ""
+GOOGLE:
+  ENABLED: false
+  CLIENT_ID: ''
+
+MICROSOFT:
+  ENABLED: false
+  CLIENT_ID: ''
+  PACKAGE_SIGNATURE: ''
+
+FACEBOOK:
+  ENABLED: false
+  FACEBOOK_APP_ID: ''
+  CLIENT_TOKEN: ''
 
 #Platform names
 PLATFORM_NAME: "OpenEdX"
