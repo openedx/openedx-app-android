@@ -64,6 +64,7 @@
     <string name="core_rate_us">Rate Us</string>
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
+    <string name="core_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
 
     <!-- region: Course Date types -->
     <!-- Label used when the date is Today -->

@@ -34,7 +34,6 @@
     <string name="course_you_cant_enroll">Ви не можете записатися на цей курс, оскільки термін запису вже минув.</string>
     <string name="course_not_started">Цей курс ще не розпочався.</string>
     <string name="course_access_expired">Ваш доступ до цього курсу закінчився.</string>
-    <string name="course_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
     <string name="course_navigation_course">Курс</string>
     <string name="course_navigation_video">Відео</string>
     <string name="course_navigation_discussion">Обговорення</string>
