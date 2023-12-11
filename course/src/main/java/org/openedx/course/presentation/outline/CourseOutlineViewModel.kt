@@ -13,8 +13,8 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
-import org.openedx.core.domain.model.getSequentialBlocks
-import org.openedx.core.domain.model.getVerticalBlocks
+import org.openedx.core.extension.getSequentialBlocks
+import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao

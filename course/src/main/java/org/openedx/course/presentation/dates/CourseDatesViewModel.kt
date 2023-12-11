@@ -9,6 +9,8 @@ import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
+import org.openedx.core.extension.getSequentialBlocks
+import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -73,7 +75,7 @@ class CourseDatesViewModel(
     fun getVerticalBlock(blockId: String): Block? {
         return try {
             val courseStructure = interactor.getCourseStructureFromCache()
-            courseStructure.getVerticalBlocks.find { it.descendants.contains(blockId) }
+            courseStructure.blockData.getVerticalBlocks().find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
             null
         }
@@ -82,7 +84,8 @@ class CourseDatesViewModel(
     fun getSequentialBlock(blockId: String): Block? {
         return try {
             val courseStructure = interactor.getCourseStructureFromCache()
-            courseStructure.getSequentialBlocks.find { it.descendants.contains(blockId) }
+            courseStructure.blockData.getSequentialBlocks()
+                .find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
             null
         }

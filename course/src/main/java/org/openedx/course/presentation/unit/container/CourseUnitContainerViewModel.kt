@@ -79,12 +79,12 @@ class CourseUnitContainerViewModel(
         _indexInContainer.value = 0
     }
 
-    fun setupCurrentIndex(blockId: String, componentId: String = "") {
+    fun setupCurrentIndex(unitId: String, componentId: String = "") {
         if (currentSectionIndex != -1) {
             return
         }
         blocks.forEachIndexed { index, block ->
-            if (block.id == blockId) {
+            if (block.id == unitId) {
                 currentVerticalIndex = index
                 currentSectionIndex = blocks.indexOfFirst {
                     it.descendants.contains(blocks[currentVerticalIndex].id)

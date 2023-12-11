@@ -2,8 +2,6 @@ package org.openedx.course.presentation.unit.container
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
@@ -22,8 +20,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.gms.cast.framework.CastButtonFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -57,7 +58,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
     private val router by inject<CourseRouter>()
 
-    private var blockId: String = ""
+    private var unitId: String = ""
     private var componentId: String = ""
 
     private lateinit var adapter: CourseUnitContainerAdapter
@@ -80,10 +81,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
-        blockId = requireArguments().getString(UNIT_ID, "")
+        unitId = requireArguments().getString(UNIT_ID, "")
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
         viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
-        viewModel.setupCurrentIndex(blockId, componentId)
+        viewModel.setupCurrentIndex(unitId, componentId)
     }
 
     override fun onCreateView(
@@ -122,8 +123,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
         }
         if (componentId.isEmpty().not()) {
-            Handler(Looper.getMainLooper()).post {
-                binding.viewPager.setCurrentItem(viewModel.indexInContainer.value!!, true)
+            lifecycleScope.launch(Dispatchers.Main) {
+                viewModel.indexInContainer.value?.let { index ->
+                    binding.viewPager.setCurrentItem(index, true)
+                }
             }
             requireArguments().putString(ARG_COMPONENT_ID, "")
             componentId = ""
@@ -346,5 +349,4 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             return fragment
         }
     }
-
 }
