@@ -20,6 +20,7 @@ import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
 import org.openedx.course.presentation.detail.CourseDetailsFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
+import org.openedx.course.presentation.info.CourseInfoFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
@@ -94,6 +95,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToUpgradeRequired(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
+    }
+
+    override fun navigateToCourseInfo(
+        fm: FragmentManager,
+        courseId: String,
+        infoType: String,
+    ) {
+        replaceFragmentWithBackStack(fm, CourseInfoFragment.newInstance(courseId, infoType))
     }
     //endregion
 

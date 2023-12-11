@@ -1,11 +1,10 @@
-package org.openedx.discovery.presentation
+package org.openedx.course.presentation.info
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -44,16 +43,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
-import org.openedx.core.WebViewLink
 import org.openedx.core.WebViewLink.Authority.COURSE_INFO
-import org.openedx.core.WebViewLink.Authority.PROGRAM_INFO
-import org.openedx.core.WebViewLink.Param
 import org.openedx.core.config.Config
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.DefaultWebViewClient
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -63,13 +61,12 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.discovery.R
+import org.openedx.course.R
 
-class WebviewDiscoveryFragment : Fragment() {
+class CourseInfoFragment : Fragment() {
 
     private val edxCookieManager by inject<AppCookieManager>()
     private val networkConnection by inject<NetworkConnection>()
-    private val router: DiscoveryRouter by inject()
     private val config by inject<Config>()
 
     override fun onCreateView(
@@ -81,7 +78,11 @@ class WebviewDiscoveryFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                var isLoading by remember { mutableStateOf(true) }
+
+                var isLoading by remember {
+                    mutableStateOf(true)
+                }
+
                 var hasInternetConnection by remember {
                     mutableStateOf(networkConnection.isOnline())
                 }
@@ -94,20 +95,16 @@ class WebviewDiscoveryFragment : Fragment() {
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (hasInternetConnection) {
-                            WebViewDiscoverScreen(
+                            CourseInfoScreen(
                                 windowSize = windowSize,
-                                url = config.getDiscoveryConfig().webViewConfig.baseUrl,
+                                url = getInitialUrl(),
                                 cookieManager = edxCookieManager,
                                 onWebPageLoaded = {
                                     isLoading = false
                                 },
-                                onInfoCardClicked = { pathId, infoType ->
-                                    router.navigateToCourseInfo(
-                                        requireActivity().supportFragmentManager,
-                                        pathId,
-                                        infoType
-                                    )
-                                }
+                                onBackClick = {
+                                    requireActivity().supportFragmentManager.popBackStackImmediate()
+                                },
                             )
                         } else {
                             ConnectionErrorView(
@@ -134,16 +131,47 @@ class WebviewDiscoveryFragment : Fragment() {
             }
         }
     }
+
+    private fun getInitialUrl(): String {
+        return arguments?.let { args ->
+            val pathId = args.getString(ARG_PATH_ID) ?: ""
+            val config = config.getDiscoveryConfig().webViewConfig
+            val urlTemplate = if (args.getString(ARG_INFO_TYPE) == COURSE_INFO.name) {
+                config.courseUrlTemplate
+            } else {
+                config.programUrlTemplate
+            }
+            urlTemplate.replace("{$ARG_PATH_ID}", pathId)
+        } ?: config.getDiscoveryConfig().webViewConfig.baseUrl
+    }
+
+
+    companion object {
+        private const val ARG_PATH_ID = "path_id"
+        private const val ARG_INFO_TYPE = "info_type"
+
+        fun newInstance(
+            pathId: String,
+            infoType: String,
+        ): CourseInfoFragment {
+            val fragment = CourseInfoFragment()
+            fragment.arguments = bundleOf(
+                ARG_PATH_ID to pathId,
+                ARG_INFO_TYPE to infoType
+            )
+            return fragment
+        }
+    }
 }
 
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
-private fun WebViewDiscoverScreen(
+private fun CourseInfoScreen(
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
     onWebPageLoaded: () -> Unit,
-    onInfoCardClicked: (String, String) -> Unit
+    onBackClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -157,6 +185,7 @@ private fun WebViewDiscoverScreen(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
+
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -187,11 +216,14 @@ private fun WebViewDiscoverScreen(
                         .zIndex(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
+                    BackBtn {
+                        onBackClick()
+                    }
                     Text(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 56.dp),
-                        text = stringResource(R.string.discovery_explore_the_catalog),
+                        text = stringResource(R.string.course_discover),
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium,
                         maxLines = 1,
@@ -211,38 +243,12 @@ private fun WebViewDiscoverScreen(
                                 context = context,
                                 webView = this@apply,
                                 coroutineScope = coroutineScope,
-                                cookieManager = cookieManager
+                                cookieManager = cookieManager,
                             ) {
+
                                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                                     super.onPageCommitVisible(view, url)
                                     onWebPageLoaded()
-                                }
-
-                                override fun shouldOverrideUrlLoading(
-                                    view: WebView?,
-                                    request: WebResourceRequest?
-                                ): Boolean {
-                                    val clickUrl = request?.url?.toString() ?: ""
-                                    if (handleRecognizedLink(clickUrl)) {
-                                        return true
-                                    }
-
-                                    return super.shouldOverrideUrlLoading(view, request)
-                                }
-
-                                private fun handleRecognizedLink(clickUrl: String): Boolean {
-                                    val link = WebViewLink.parse(clickUrl) ?: return false
-
-                                    return when (link.authority) {
-                                        COURSE_INFO,
-                                        PROGRAM_INFO -> {
-                                            val pathId = link.params[Param.PATH_ID] ?: ""
-                                            onInfoCardClicked(pathId, link.authority.name)
-                                            true
-                                        }
-
-                                        else -> false
-                                    }
                                 }
                             }
 
