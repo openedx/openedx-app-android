@@ -25,8 +25,8 @@ import org.openedx.course.presentation.unit.container.CourseUnitContainerFragmen
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.discovery.presentation.DiscoveryFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread
@@ -72,7 +72,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     override fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String) {
-        replaceFragmentWithBackStack(fm, DiscoveryFragment.newInstance(querySearch))
+        replaceFragmentWithBackStack(fm, NativeDiscoveryFragment.newInstance(querySearch))
     }
 
     override fun navigateToWhatsNew(fm: FragmentManager) {
