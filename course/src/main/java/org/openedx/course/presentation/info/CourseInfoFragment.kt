@@ -289,6 +289,7 @@ private fun CourseInfoScreen(
                                 webView = this@apply,
                                 coroutineScope = coroutineScope,
                                 cookieManager = cookieManager,
+                                allLinksExternal = true,
                             ) {
 
                                 override fun onPageCommitVisible(view: WebView?, url: String?) {

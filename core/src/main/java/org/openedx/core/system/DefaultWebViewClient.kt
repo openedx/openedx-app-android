@@ -1,10 +1,12 @@
 package org.openedx.core.system
 
 import android.content.Context
+import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.openedx.core.extension.isEmailValid
@@ -15,10 +17,26 @@ open class DefaultWebViewClient(
     val webView: WebView,
     val coroutineScope: CoroutineScope,
     val cookieManager: AppCookieManager,
+    val allLinksExternal: Boolean = false,
 ) : WebViewClient() {
+
+    private var hostForThisPage: String? = null
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+
+        if (hostForThisPage == null && url != null) {
+            hostForThisPage = Uri.parse(url).host
+        }
+    }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val clickUrl = request?.url?.toString() ?: ""
+
+        if (allLinksExternal || isExternalLink(clickUrl)) {
+            Toast.makeText(context, "External Link", Toast.LENGTH_SHORT).show()
+            return true
+        }
 
         return if (clickUrl.startsWith("mailto:")) {
             val email = clickUrl.replace("mailto:", "")
@@ -49,5 +67,22 @@ open class DefaultWebViewClient(
             }
         }
         super.onReceivedHttpError(view, request, errorResponse)
+    }
+
+    private fun isExternalLink(strUrl: String?): Boolean {
+        return strUrl?.let { url ->
+            val uri = Uri.parse(url)
+            val externalLinkValue = if (uri.isHierarchical) {
+                uri.getQueryParameter(QUERY_PARAM_EXTERNAL_LINK)
+            } else {
+                null
+            }
+            hostForThisPage != null && hostForThisPage != uri.host ||
+                    externalLinkValue?.toBoolean() == true
+        } ?: false
+    }
+
+    companion object {
+        const val QUERY_PARAM_EXTERNAL_LINK = "external_link"
     }
 }
