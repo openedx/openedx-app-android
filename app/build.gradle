@@ -6,11 +6,14 @@ plugins {
     id 'com.google.firebase.crashlytics'
 }
 
+def config = configHelper.fetchConfig()
+def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
+
 android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.openedx.app"
+        applicationId appId
         minSdk 24
         targetSdk 34
         versionCode 1

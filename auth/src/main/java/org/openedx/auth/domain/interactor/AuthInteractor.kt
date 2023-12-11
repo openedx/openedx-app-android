@@ -1,5 +1,6 @@
 package org.openedx.auth.domain.interactor
 
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.core.domain.model.RegistrationField
@@ -11,6 +12,10 @@ class AuthInteractor(private val repository: AuthRepository) {
         password: String
     ) {
         repository.login(username, password)
+    }
+
+    suspend fun loginSocial(token: String?, authType: AuthType) {
+        repository.socialLogin(token, authType)
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {

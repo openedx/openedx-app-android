@@ -12,6 +12,16 @@ import retrofit2.http.*
 interface AuthApi {
 
     @FormUrlEncoded
+    @POST(ApiConstants.URL_EXCHANGE_TOKEN)
+    suspend fun exchangeAccessToken(
+        @Field("access_token") accessToken: String,
+        @Field("client_id") clientId: String,
+        @Field("token_type") tokenType: String,
+        @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
+        @Path("auth_type") authType: String,
+    ): AuthResponse
+
+    @FormUrlEncoded
     @POST(ApiConstants.URL_ACCESS_TOKEN)
     suspend fun getAccessToken(
         @Field("grant_type") grantType: String,

@@ -1,4 +1,5 @@
 API_HOST_URL: 'http://localhost:8000'
+APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
@@ -8,6 +9,20 @@ AGREEMENT_URLS:
   TOS_URL: 'https://example.com/tos'
   CONTACT_US_URL: 'https://example.com/contact'
 
+GOOGLE:
+  ENABLED: false
+  CLIENT_ID: ''
+
+MICROSOFT:
+  ENABLED: false
+  CLIENT_ID: ''
+  PACKAGE_SIGNATURE: ''
+
+FACEBOOK:
+  ENABLED: false
+  FACEBOOK_APP_ID: ''
+  CLIENT_TOKEN: ''
+
 #Platform names
 PLATFORM_NAME: "OpenEdX"
 PLATFORM_FULL_NAME: "OpenEdX"
@@ -15,3 +30,5 @@ PLATFORM_FULL_NAME: "OpenEdX"
 TOKEN_TYPE: "JWT"
 #feature flag for activating What’s New feature
 WHATS_NEW_ENABLED: false
+#feature flag enable Social Login buttons
+SOCIAL_AUTH_ENABLED: false

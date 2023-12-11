@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,9 +24,15 @@ import org.junit.rules.TestRule
 import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.sso.FacebookAuthHelper
+import org.openedx.auth.presentation.sso.GoogleAuthHelper
+import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
+import org.openedx.core.config.FacebookConfig
+import org.openedx.core.config.GoogleConfig
+import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.EdxError
@@ -49,6 +56,9 @@ class SignInViewModelTest {
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val facebookAuthHelper = mockk<FacebookAuthHelper>()
+    private val googleAuthHelper = mockk<GoogleAuthHelper>()
+    private val microsoftAuthHelper = mockk<MicrosoftAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -68,6 +78,10 @@ class SignInViewModelTest {
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
+        every { config.isSocialAuthEnabled() } returns false
+        every { config.getFacebookConfig() } returns FacebookConfig()
+        every { config.getGoogleConfig() } returns GoogleConfig()
+        every { config.getMicrosoftConfig() } returns MicrosoftConfig()
     }
 
     @After
@@ -81,23 +95,26 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel = SignInViewModel(
-            config,
-            interactor,
-            resourceManager,
-            preferencesManager,
-            validator,
-            analytics,
-            appUpgradeNotifier
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
-
+        val uiState = viewModel.uiState.value
         assertEquals(invalidEmail, message.message)
-        assert(viewModel.showProgress.value != true)
-        assert(viewModel.loginSuccess.value != true)
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
     }
 
     @Test
@@ -105,25 +122,27 @@ class SignInViewModelTest {
         every { validator.isEmailValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel =
-            SignInViewModel(
-                config,
-                interactor,
-                resourceManager,
-                preferencesManager,
-                validator,
-                analytics,
-                appUpgradeNotifier
-            )
+        val viewModel = SignInViewModel(
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
+        )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
-
+        val uiState = viewModel.uiState.value
         assertEquals(invalidEmail, message.message)
-        assert(viewModel.showProgress.value != true)
-        assert(viewModel.loginSuccess.value != true)
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
     }
 
     @Test
@@ -133,24 +152,27 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         coVerify(exactly = 0) { interactor.login(any(), any()) }
-        val viewModel =
-            SignInViewModel(
-                config,
-                interactor,
-                resourceManager,
-                preferencesManager,
-                validator,
-                analytics,
-                appUpgradeNotifier
-            )
+        val viewModel = SignInViewModel(
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
+        )
         viewModel.login("acc@test.org", "")
 
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val uiState = viewModel.uiState.value
         assertEquals(invalidPassword, message.message)
-        assert(viewModel.showProgress.value != true)
-        assert(viewModel.loginSuccess.value != true)
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
     }
 
     @Test
@@ -159,25 +181,28 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel =
-            SignInViewModel(
-                config,
-                interactor,
-                resourceManager,
-                preferencesManager,
-                validator,
-                analytics,
-                appUpgradeNotifier
-            )
+        val viewModel = SignInViewModel(
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
+        )
         viewModel.login("acc@test.org", "ed")
 
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
+        val uiState = viewModel.uiState.value
         assertEquals(invalidPassword, message.message)
-        assert(viewModel.showProgress.value != true)
-        assert(viewModel.loginSuccess.value != true)
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
     }
 
     @Test
@@ -188,13 +213,16 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel = SignInViewModel(
-            config,
-            interactor,
-            resourceManager,
-            preferencesManager,
-            validator,
-            analytics,
-            appUpgradeNotifier
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -204,9 +232,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { analytics.userLoginEvent(any()) }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
-
-        assertEquals(false, viewModel.showProgress.value)
-        assertEquals(true, viewModel.loginSuccess.value)
+        val uiState = viewModel.uiState.value
+        assertFalse(uiState.showProgress)
+        assert(uiState.loginSuccess)
         assertEquals(null, viewModel.uiMessage.value)
     }
 
@@ -216,16 +244,18 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel =
-            SignInViewModel(
-                config,
-                interactor,
-                resourceManager,
-                preferencesManager,
-                validator,
-                analytics,
-                appUpgradeNotifier
-            )
+        val viewModel = SignInViewModel(
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
+        )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
@@ -235,8 +265,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(false, viewModel.showProgress.value)
-        assert(viewModel.loginSuccess.value != true)
+        val uiState = viewModel.uiState.value
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
         assertEquals(noInternet, message?.message)
     }
 
@@ -246,16 +277,18 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel =
-            SignInViewModel(
-                config,
-                interactor,
-                resourceManager,
-                preferencesManager,
-                validator,
-                analytics,
-                appUpgradeNotifier
-            )
+        val viewModel = SignInViewModel(
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
+        )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
@@ -265,8 +298,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
-        assertEquals(false, viewModel.showProgress.value)
-        assert(viewModel.loginSuccess.value != true)
+        val uiState = viewModel.uiState.value
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
         assertEquals(invalidCredential, message.message)
     }
 
@@ -276,16 +310,18 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        val viewModel =
-            SignInViewModel(
-                config,
-                interactor,
-                resourceManager,
-                preferencesManager,
-                validator,
-                analytics,
-                appUpgradeNotifier
-            )
+        val viewModel = SignInViewModel(
+            interactor = interactor,
+            resourceManager = resourceManager,
+            preferencesManager = preferencesManager,
+            validator = validator,
+            analytics = analytics,
+            appUpgradeNotifier = appUpgradeNotifier,
+            facebookAuthHelper = facebookAuthHelper,
+            googleAuthHelper = googleAuthHelper,
+            microsoftAuthHelper = microsoftAuthHelper,
+            config = config,
+        )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
@@ -295,8 +331,9 @@ class SignInViewModelTest {
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
-        assertEquals(false, viewModel.showProgress.value)
-        assert(viewModel.loginSuccess.value != true)
+        val uiState = viewModel.uiState.value
+        assertFalse(uiState.showProgress)
+        assertFalse(uiState.loginSuccess)
         assertEquals(somethingWrong, message.message)
     }
 

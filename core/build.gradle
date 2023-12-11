@@ -1,8 +1,3 @@
-import org.edx.builder.ConfigHelper
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
 buildscript {
     repositories {
         mavenCentral()
@@ -39,15 +34,15 @@ android {
     productFlavors {
         prod {
             dimension 'env'
-            insertBuildConfigFields(currentFlavour, it, "prod")
+            insertBuildConfigFields(currentFlavour, it)
         }
         develop {
             dimension 'env'
-            insertBuildConfigFields(currentFlavour, it, "dev")
+            insertBuildConfigFields(currentFlavour, it)
         }
         stage {
             dimension 'env'
-            insertBuildConfigFields(currentFlavour, it, "stage")
+            insertBuildConfigFields(currentFlavour, it)
         }
     }
 
@@ -151,31 +146,39 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
-def getCurrentFlavor() {
-    String tskReqStr = getGradle().getStartParameter().getTaskRequests().toString()
-    Pattern pattern
-    if (tskReqStr.contains("assemble")) // to run ./gradlew assembleRelease to build APK
-        pattern = Pattern.compile("assemble(\\w+)(Release|Debug)")
-    else if (tskReqStr.contains("bundle")) // to run ./gradlew bundleRelease to build .aab
-        pattern = Pattern.compile("bundle(\\w+)(Release|Debug)")
-    else
-        pattern = Pattern.compile("generate(\\w+)(Release|Debug)")
-    Matcher matcher = pattern.matcher(tskReqStr)
-    if (matcher.find()) {
-        return matcher.group(1).toLowerCase()
-    } else {
-        return ""
-    }
-}
-
-def insertBuildConfigFields(currentFlavour, buildType, environment) {
-    def helper = new ConfigHelper(projectDir, environment)
-    def config = helper.fetchConfig()
+def insertBuildConfigFields(currentFlavour, buildType) {
     if (currentFlavour == buildType.name) {
-        helper.generateConfigJson(config)
+        configHelper.generateConfigJson()
+        configHelper.generateMicrosoftConfig()
     }
+    def config = configHelper.fetchConfig()
     def platformName = config.getOrDefault("PLATFORM_NAME", "")
     def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
+
     buildType.resValue "string", "platform_name", platformName
     buildType.resValue "string", "platform_full_name", platformFullName
+    insertFacebookBuildConfigFields(config, buildType)
+    insertMicrosoftManifestPlaceholder(config, buildType)
+}
+
+static def insertFacebookBuildConfigFields(config, buildType) {
+    def facebook = config.get("FACEBOOK")
+    def facebookAppId = ""
+    def facebookClientToken = ""
+    if (facebook) {
+        facebookAppId = facebook.getOrDefault("FACEBOOK_APP_ID", "")
+        facebookClientToken = facebook.getOrDefault("CLIENT_TOKEN", "")
+    }
+    buildType.resValue "string", "facebook_app_id", facebookAppId
+    buildType.resValue "string", "fb_login_protocol_scheme", "fb$facebookAppId"
+    buildType.resValue "string", "facebook_client_token", facebookClientToken
+}
+
+static def insertMicrosoftManifestPlaceholder(config, buildType) {
+    def microsoft = config.get("MICROSOFT")
+    def microsoftPackageSignature = ""
+    if (microsoft) {
+        microsoftPackageSignature = microsoft.getOrDefault("PACKAGE_SIGNATURE", "")
+    }
+    buildType.manifestPlaceholders = [microsoftSignature: microsoftPackageSignature]
 }

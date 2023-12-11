@@ -46,6 +46,20 @@ class Config(context: Context) {
         return getObjectOrNewInstance(FIREBASE, FirebaseConfig::class.java)
     }
 
+    fun getFacebookConfig(): FacebookConfig {
+        return getObjectOrNewInstance(FACEBOOK, FacebookConfig::class.java)
+    }
+
+    fun getGoogleConfig(): GoogleConfig {
+        return getObjectOrNewInstance(GOOGLE, GoogleConfig::class.java)
+    }
+
+    fun getMicrosoftConfig(): MicrosoftConfig {
+        return getObjectOrNewInstance(MICROSOFT, MicrosoftConfig::class.java)
+    }
+
+    fun isSocialAuthEnabled() = getBoolean(SOCIAL_AUTH_ENABLED, false)
+
     fun isWhatsNewEnabled(): Boolean {
         return getBoolean(WHATS_NEW_ENABLED, false)
     }
@@ -75,7 +89,7 @@ class Config(context: Context) {
             gson.fromJson(element, cls)
         } else {
             try {
-                cls.newInstance()
+                cls.getDeclaredConstructor().newInstance()
             } catch (e: InstantiationException) {
                 throw RuntimeException(e)
             } catch (e: IllegalAccessException) {
@@ -95,7 +109,11 @@ class Config(context: Context) {
         private const val FEEDBACK_EMAIL_ADDRESS = "FEEDBACK_EMAIL_ADDRESS"
         private const val AGREEMENT_URLS = "AGREEMENT_URLS"
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
+        private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
         private const val FIREBASE = "FIREBASE"
+        private const val FACEBOOK = "FACEBOOK"
+        private const val GOOGLE = "GOOGLE"
+        private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
     }
 }
