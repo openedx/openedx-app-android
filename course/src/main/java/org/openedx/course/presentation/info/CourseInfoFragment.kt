@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,13 +49,19 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.UIMessage
+import org.openedx.core.WebViewLink
 import org.openedx.core.WebViewLink.Authority.COURSE_INFO
+import org.openedx.core.WebViewLink.Authority.ENROLL
 import org.openedx.core.config.Config
+import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.DefaultWebViewClient
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
@@ -62,11 +71,14 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
+import org.openedx.course.presentation.CourseRouter
 
 class CourseInfoFragment : Fragment() {
 
+    private val viewModel by viewModel<CourseInfoViewModel>()
     private val edxCookieManager by inject<AppCookieManager>()
     private val networkConnection by inject<NetworkConnection>()
+    private val router: CourseRouter by inject()
     private val config by inject<Config>()
 
     override fun onCreateView(
@@ -77,6 +89,10 @@ class CourseInfoFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val uiMessage by viewModel.uiMessage.observeAsState()
+                val showAlert by viewModel.showAlert.observeAsState()
+                val enrollmentSuccess by viewModel.courseEnrollSuccess.observeAsState()
+
                 val windowSize = rememberWindowSize()
 
                 var isLoading by remember {
@@ -85,6 +101,28 @@ class CourseInfoFragment : Fragment() {
 
                 var hasInternetConnection by remember {
                     mutableStateOf(networkConnection.isOnline())
+                }
+
+                LaunchedEffect(showAlert) {
+                    if (showAlert == true) {
+                        InfoDialogFragment.newInstance(
+                            title = context.getString(R.string.course_enrollment_error),
+                            message = context.getString(R.string.course_enrollment_error_message)
+                        ).show(
+                            requireActivity().supportFragmentManager,
+                            InfoDialogFragment::class.simpleName
+                        )
+                    }
+                }
+
+                LaunchedEffect(enrollmentSuccess) {
+                    if (enrollmentSuccess?.isNotEmpty() == true) {
+                        router.navigateToCourseOutline(
+                            requireActivity().supportFragmentManager,
+                            courseId = enrollmentSuccess!!,
+                            courseTitle = ""
+                        )
+                    }
                 }
 
                 Surface {
@@ -97,6 +135,7 @@ class CourseInfoFragment : Fragment() {
                         if (hasInternetConnection) {
                             CourseInfoScreen(
                                 windowSize = windowSize,
+                                uiMessage = uiMessage,
                                 url = getInitialUrl(),
                                 cookieManager = edxCookieManager,
                                 onWebPageLoaded = {
@@ -105,6 +144,9 @@ class CourseInfoFragment : Fragment() {
                                 onBackClick = {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 },
+                                onEnrollClick = { courseId ->
+                                    viewModel.enrollInACourse(courseId!!)
+                                }
                             )
                         } else {
                             ConnectionErrorView(
@@ -145,7 +187,6 @@ class CourseInfoFragment : Fragment() {
         } ?: config.getDiscoveryConfig().webViewConfig.baseUrl
     }
 
-
     companion object {
         private const val ARG_PATH_ID = "path_id"
         private const val ARG_INFO_TYPE = "info_type"
@@ -168,15 +209,19 @@ class CourseInfoFragment : Fragment() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun CourseInfoScreen(
     windowSize: WindowSize,
+    uiMessage: UIMessage?,
     url: String,
     cookieManager: AppCookieManager,
     onWebPageLoaded: () -> Unit,
     onBackClick: () -> Unit,
+    onEnrollClick: (String?) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
+
+    HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
     Scaffold(
         modifier = Modifier
@@ -249,6 +294,32 @@ private fun CourseInfoScreen(
                                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                                     super.onPageCommitVisible(view, url)
                                     onWebPageLoaded()
+                                }
+
+                                override fun shouldOverrideUrlLoading(
+                                    view: WebView?,
+                                    request: WebResourceRequest?
+                                ): Boolean {
+                                    val clickUrl = request?.url?.toString() ?: ""
+                                    if (handleRecognizedLink(clickUrl)) {
+                                        return true
+                                    }
+
+                                    return super.shouldOverrideUrlLoading(view, request)
+                                }
+
+                                private fun handleRecognizedLink(clickUrl: String): Boolean {
+                                    val link = WebViewLink.parse(clickUrl) ?: return false
+
+                                    return when (link.authority) {
+                                        ENROLL -> {
+                                            val courseId = link.params[WebViewLink.Param.COURSE_ID]
+                                            onEnrollClick(courseId)
+                                            true
+                                        }
+
+                                        else -> false
+                                    }
                                 }
                             }
 

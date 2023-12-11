@@ -18,6 +18,7 @@ import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.detail.CourseDetailsViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
+import org.openedx.course.presentation.info.CourseInfoViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
@@ -110,6 +111,7 @@ val screenModule = module {
 
     single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
+    viewModel { CourseInfoViewModel(get(), get(), get(), get()) }
     viewModel { (courseId: String) ->
         CourseDetailsViewModel(
             courseId,
