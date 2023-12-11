@@ -23,8 +23,8 @@ class CourseUnitContainerAdapter(
 
     private fun unitBlockFragment(block: Block): Fragment {
         return when {
-            block.isVideoBlock -> {
-                val encodedVideos = block.studentViewData!!.encodedVideos!!
+            (block.isVideoBlock && block.studentViewData?.encodedVideos != null) -> {
+                val encodedVideos = block.studentViewData?.encodedVideos!!
                 val transcripts = block.studentViewData!!.transcripts
                 with(encodedVideos) {
                     var isDownloaded = false
@@ -65,7 +65,7 @@ class CourseUnitContainerAdapter(
                 }
             }
 
-            block.isDiscussionBlock -> {
+            (block.isDiscussionBlock && block.studentViewData?.topicId.isNullOrEmpty().not()) -> {
                 DiscussionThreadsFragment.newInstance(
                     DiscussionTopicsFragment.TOPIC,
                     viewModel.courseId,
