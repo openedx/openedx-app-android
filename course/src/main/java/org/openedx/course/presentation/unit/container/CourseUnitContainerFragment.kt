@@ -113,7 +113,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         CastButtonFactory.setUpMediaRouteButton(requireContext(), binding.mediaRouteButton)
 
         initViewPager()
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && componentId.isEmpty()) {
             val currentBlockIndex = viewModel.getUnitBlocks().indexOfFirst {
                 viewModel.getCurrentBlock().id == it.id
             }

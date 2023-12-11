@@ -100,7 +100,7 @@ class CourseUnitContainerViewModel(
                 if (block.descendants.isNotEmpty()) {
                     _currentBlock.value = blocks.first { it.id == block.descendants.first() }
                 }
-                if(componentId.isNotEmpty()){
+                if (componentId.isNotEmpty()) {
                     _currentBlock.value = blocks.first { it.id == componentId }
                     _indexInContainer.value = descendants.indexOf(componentId)
                     currentIndex = descendants.indexOf(componentId)
