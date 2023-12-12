@@ -16,7 +16,7 @@ open class DefaultWebViewClient(
     val webView: WebView,
     val coroutineScope: CoroutineScope,
     val cookieManager: AppCookieManager,
-    val allLinksExternal: Boolean = false,
+    val isAllLinksExternal: Boolean,
     val openExternalLink: (String) -> Unit
 ) : WebViewClient() {
 
@@ -33,7 +33,7 @@ open class DefaultWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val clickUrl = request?.url?.toString() ?: ""
 
-        if (allLinksExternal || isExternalLink(clickUrl)) {
+        if (isAllLinksExternal || isExternalLink(clickUrl)) {
             openExternalLink(clickUrl)
             return true
         }

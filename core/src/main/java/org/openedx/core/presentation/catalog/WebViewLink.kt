@@ -1,4 +1,4 @@
-package org.openedx.core
+package org.openedx.core.presentation.catalog
 
 import android.net.Uri
 import org.openedx.core.extension.getQueryParams

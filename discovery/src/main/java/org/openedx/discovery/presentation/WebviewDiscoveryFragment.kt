@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -31,14 +30,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
@@ -54,13 +51,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.WebViewLink
-import org.openedx.core.WebViewLink.Authority.COURSE_INFO
-import org.openedx.core.WebViewLink.Authority.PROGRAM_INFO
-import org.openedx.core.WebViewLink.Param
+import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.DefaultWebViewClient
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.WindowSize
@@ -107,11 +100,11 @@ class WebviewDiscoveryFragment : Fragment() {
                                 windowSize = windowSize,
                                 url = viewModel.discoveryUrl,
                                 cookieManager = edxCookieManager,
-                                onWebPageLoaded = { url ->
+                                onWebPageLoaded = {
                                     isLoading = false
-                                    url?.let {
-                                        viewModel.updateDiscoveryUrl(url)
-                                    }
+                                },
+                                onWebPageUpdated = { url ->
+                                    viewModel.updateDiscoveryUrl(url)
                                 },
                                 onInfoCardClicked = { pathId, infoType ->
                                     router.navigateToCourseInfo(
@@ -167,71 +160,22 @@ private fun WebViewDiscoverScreen(
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
-    onWebPageLoaded: (String?) -> Unit,
+    onWebPageLoaded: () -> Unit,
+    onWebPageUpdated: (String) -> Unit,
     onInfoCardClicked: (String, String) -> Unit,
     openExternalLink: (String) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    val context = LocalContext.current
 
-    val webView = remember {
-        WebView(context).apply {
-            webViewClient = object : DefaultWebViewClient(
-                context = context,
-                webView = this@apply,
-                coroutineScope = coroutineScope,
-                cookieManager = cookieManager,
-                openExternalLink = openExternalLink,
-            ) {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    onWebPageLoaded(url)
-                }
-
-                override fun shouldOverrideUrlLoading(
-                    view: WebView?,
-                    request: WebResourceRequest?
-                ): Boolean {
-                    val clickUrl = request?.url?.toString() ?: ""
-                    if (handleRecognizedLink(clickUrl)) {
-                        return true
-                    }
-
-                    return super.shouldOverrideUrlLoading(view, request)
-                }
-
-                private fun handleRecognizedLink(clickUrl: String): Boolean {
-                    val link = WebViewLink.parse(clickUrl) ?: return false
-
-                    return when (link.authority) {
-                        COURSE_INFO,
-                        PROGRAM_INFO -> {
-                            val pathId = link.params[Param.PATH_ID] ?: ""
-                            onInfoCardClicked(pathId, link.authority.name)
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
-            }
-
-            with(settings) {
-                javaScriptEnabled = true
-                loadWithOverviewMode = true
-                builtInZoomControls = false
-                setSupportZoom(true)
-                loadsImagesAutomatically = true
-                domStorageEnabled = true
-            }
-            isVerticalScrollBarEnabled = false
-            isHorizontalScrollBarEnabled = false
-
-            loadUrl(url)
-        }
-    }
+    val webView = CatalogWebViewScreen(
+        url = url,
+        cookieManager = cookieManager,
+        onWebPageLoaded = onWebPageLoaded,
+        onWebPageUpdated = onWebPageUpdated,
+        openExternalLink = openExternalLink,
+        onInfoCardClicked = onInfoCardClicked,
+    )
 
     Scaffold(
         modifier = Modifier

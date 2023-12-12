@@ -5,8 +5,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,14 +28,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -51,14 +47,12 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
-import org.openedx.core.WebViewLink
-import org.openedx.core.WebViewLink.Authority.COURSE_INFO
-import org.openedx.core.WebViewLink.Authority.ENROLL
+import org.openedx.core.presentation.catalog.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.config.Config
+import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.DefaultWebViewClient
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.ConnectionErrorView
@@ -150,7 +144,7 @@ class CourseInfoFragment : Fragment() {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 },
                                 onEnrollClick = { courseId ->
-                                    viewModel.enrollInACourse(courseId!!)
+                                    viewModel.enrollInACourse(courseId)
                                 },
                                 openExternalLink = { url ->
                                     ActionDialogFragment.newInstance(
@@ -163,6 +157,13 @@ class CourseInfoFragment : Fragment() {
                                     ).show(
                                         requireActivity().supportFragmentManager,
                                         ActionDialogFragment::class.simpleName
+                                    )
+                                },
+                                onInfoCardClicked = { pathId, infoType ->
+                                    router.navigateToCourseInfo(
+                                        requireActivity().supportFragmentManager,
+                                        pathId,
+                                        infoType
                                     )
                                 },
                             )
@@ -232,13 +233,12 @@ private fun CourseInfoScreen(
     cookieManager: AppCookieManager,
     onWebPageLoaded: () -> Unit,
     onBackClick: () -> Unit,
-    onEnrollClick: (String?) -> Unit,
+    onEnrollClick: (String) -> Unit,
+    onInfoCardClicked: (String, String) -> Unit,
     openExternalLink: (String) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    val context = LocalContext.current
 
     HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -262,6 +262,16 @@ private fun CourseInfoScreen(
                 )
             )
         }
+
+        val webView = CatalogWebViewScreen(
+            url = url,
+            isAllLinksExternal = true,
+            cookieManager = cookieManager,
+            onWebPageLoaded = onWebPageLoaded,
+            openExternalLink = openExternalLink,
+            onEnrollClick = onEnrollClick,
+            onInfoCardClicked = onInfoCardClicked,
+        )
 
         Box(
             modifier = Modifier
@@ -302,61 +312,7 @@ private fun CourseInfoScreen(
                         .then(modifierScreenWidth)
                         .background(MaterialTheme.appColors.background),
                     factory = {
-                        WebView(context).apply {
-                            webViewClient = object : DefaultWebViewClient(
-                                context = context,
-                                webView = this@apply,
-                                coroutineScope = coroutineScope,
-                                cookieManager = cookieManager,
-                                allLinksExternal = true,
-                                openExternalLink = openExternalLink,
-                            ) {
-
-                                override fun onPageCommitVisible(view: WebView?, url: String?) {
-                                    super.onPageCommitVisible(view, url)
-                                    onWebPageLoaded()
-                                }
-
-                                override fun shouldOverrideUrlLoading(
-                                    view: WebView?,
-                                    request: WebResourceRequest?
-                                ): Boolean {
-                                    val clickUrl = request?.url?.toString() ?: ""
-                                    if (handleRecognizedLink(clickUrl)) {
-                                        return true
-                                    }
-
-                                    return super.shouldOverrideUrlLoading(view, request)
-                                }
-
-                                private fun handleRecognizedLink(clickUrl: String): Boolean {
-                                    val link = WebViewLink.parse(clickUrl) ?: return false
-
-                                    return when (link.authority) {
-                                        ENROLL -> {
-                                            val courseId = link.params[WebViewLink.Param.COURSE_ID]
-                                            onEnrollClick(courseId)
-                                            true
-                                        }
-
-                                        else -> false
-                                    }
-                                }
-                            }
-
-                            with(settings) {
-                                javaScriptEnabled = true
-                                loadWithOverviewMode = true
-                                builtInZoomControls = false
-                                setSupportZoom(true)
-                                loadsImagesAutomatically = true
-                                domStorageEnabled = true
-                            }
-                            isVerticalScrollBarEnabled = false
-                            isHorizontalScrollBarEnabled = false
-
-                            loadUrl(url)
-                        }
+                        webView
                     }
                 )
             }
