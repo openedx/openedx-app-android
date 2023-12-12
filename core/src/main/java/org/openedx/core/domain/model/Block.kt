@@ -49,6 +49,14 @@ data class Block(
 
     fun isDownloaded() = downloadModel?.downloadedState == DownloadedState.DOWNLOADED
 
+    val isVideoBlock get() = type == BlockType.VIDEO
+    val isDiscussionBlock get() = type == BlockType.DISCUSSION
+    val isHTMLBlock get() = type == BlockType.HTML
+    val isProblemBlock get() = type == BlockType.PROBLEM
+    val isOpenAssessmentBlock get() = type == BlockType.OPENASSESSMENT
+    val isDragAndDropBlock get() = type == BlockType.DRAG_AND_DROP_V2
+    val isWordCloudBlock get() = type == BlockType.WORD_CLOUD
+    val isLTIConsumerBlock get() = type == BlockType.LTI_CONSUMER
 }
 
 data class StudentViewData(
