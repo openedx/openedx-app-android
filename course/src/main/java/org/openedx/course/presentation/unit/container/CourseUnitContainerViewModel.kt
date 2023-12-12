@@ -7,8 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.clearAndAddAll
 import org.openedx.core.extension.indexOfFirstFromIndex
@@ -17,10 +20,12 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
+import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 
 class CourseUnitContainerViewModel(
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
@@ -29,18 +34,22 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    private var currentIndex = 0
+    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+
+    val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+
+    var currentIndex = 0
     private var currentVerticalIndex = 0
     private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return descendants.first() == descendants[currentIndex]
+            return descendants.firstOrNull() == descendants.getOrNull(currentIndex)
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return descendants.last() == descendants[currentIndex]
+            return descendants.lastOrNull() == descendants.getOrNull(currentIndex)
         }
 
     private val _verticalBlockCounts = MutableLiveData<Int>()
@@ -55,13 +64,24 @@ class CourseUnitContainerViewModel(
     val currentBlock: LiveData<Block?>
         get() = _currentBlock
 
+    private val _selectBlockDialogShowed = MutableLiveData<Boolean>()
+    val selectBlockDialogShowed: LiveData<Boolean>
+        get() = _selectBlockDialogShowed
+
+    private val _subSectionsBlocks = MutableStateFlow<List<Block>>(listOf())
+    val subSectionsBlocks = _subSectionsBlocks.asStateFlow()
+
     var nextButtonText = ""
     var hasNextBlock = false
+
+    private var currentMode: CourseViewMode? = null
     private var courseName = ""
 
     private val descendants = mutableListOf<String>()
+    val descendantsBlocks = mutableListOf<Block>()
 
     fun loadBlocks(mode: CourseViewMode) {
+        currentMode = mode
         try {
             val courseStructure = when (mode) {
                 CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
@@ -77,6 +97,16 @@ class CourseUnitContainerViewModel(
 
     init {
         _indexInContainer.value = 0
+
+        viewModelScope.launch {
+            notifier.notifier.collect { event ->
+                if (event is CourseStructureUpdated) {
+                    currentMode?.let { loadBlocks(it) }
+                    val blockId = blocks[currentVerticalIndex].id
+                    _subSectionsBlocks.value = getSectionsBlocks(blocks, getSectionId(blockId))
+                }
+            }
+        }
     }
 
     fun setupCurrentIndex(unitId: String, componentId: String = "") {
@@ -89,8 +119,11 @@ class CourseUnitContainerViewModel(
                 currentSectionIndex = blocks.indexOfFirst {
                     it.descendants.contains(blocks[currentVerticalIndex].id)
                 }
-                if (block.descendants.isNotEmpty()) {
+                if (block.descendants.isNotEmpty() || block.isGated()) {
                     descendants.clearAndAddAll(block.descendants)
+                    descendantsBlocks.clearAndAddAll(blocks.filter { block.descendants.contains(it.id) })
+                    _subSectionsBlocks.value = getSectionsBlocks(blocks, getSectionId(unitId))
+
                 } else {
                     setNextVerticalIndex()
                 }
@@ -108,6 +141,34 @@ class CourseUnitContainerViewModel(
                 return
             }
         }
+    }
+
+    private fun getSectionId(blockId: String): String {
+        return blocks.firstOrNull { it.descendants.contains(blockId) }?.id ?: ""
+    }
+
+    private fun getSectionsBlocks(blocks: List<Block>, id: String): List<Block> {
+        val resultList = mutableListOf<Block>()
+        val gatedList = mutableListOf<Block>()
+        if (blocks.isEmpty()) return emptyList()
+        val selectedBlock = blocks.first { it.id == id }
+
+        for (descendant in selectedBlock.descendants) {
+            val blockDescendant = blocks.find {
+                it.id == descendant
+            }
+            if (blockDescendant != null) {
+                if (blockDescendant.type == BlockType.VERTICAL) {
+                    if (blockDescendant.isGated()) {
+                        gatedList.add(blockDescendant)
+                    } else {
+                        resultList.add(blockDescendant)
+                    }
+                }
+            } else continue
+        }
+        resultList.addAll(gatedList)
+        return resultList
     }
 
     private fun setNextVerticalIndex() {
@@ -142,23 +203,9 @@ class CourseUnitContainerViewModel(
         return blocks[currentIndex]
     }
 
-    fun moveToNextBlock(): Block? {
-        for (i in currentIndex + 1 until descendants.size) {
-            val block = blocks.firstOrNull { descendants[i] == it.id }
-            currentIndex = i
-            if (currentVerticalIndex != -1) {
-                _indexInContainer.value = currentIndex
-            }
-            _currentBlock.value = block
-            return block
-        }
-        return null
-    }
-
-    fun moveToPrevBlock(): Block? {
-        for (i in currentIndex - 1 downTo 0) {
-            val block = blocks.firstOrNull { descendants[i] == it.id }
-            currentIndex = i
+    fun moveToBlock(index: Int): Block? {
+        descendantsBlocks.getOrNull(index)?.let { block ->
+            currentIndex = index
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
@@ -185,6 +232,10 @@ class CourseUnitContainerViewModel(
 
     fun getUnitBlocks(): List<Block> = blocks.filter { descendants.contains(it.id) }
 
+    fun getModuleBlock(sectionBlockId: String): Block {
+        return blocks.first { it.descendants.contains(sectionBlockId) }
+    }
+
     fun nextBlockClickedEvent(blockId: String, blockName: String) {
         analytics.nextBlockClickedEvent(courseId, courseName, blockId, blockName)
     }
@@ -203,5 +254,13 @@ class CourseUnitContainerViewModel(
 
     fun finishVerticalBackClickedEvent() {
         analytics.finishVerticalBackClickedEvent(courseId, courseName)
+    }
+
+    fun showSelectBlockDialog() {
+        _selectBlockDialogShowed.value = true
+    }
+
+    fun hideSelectBlockDialog() {
+        _selectBlockDialogShowed.value = false
     }
 }

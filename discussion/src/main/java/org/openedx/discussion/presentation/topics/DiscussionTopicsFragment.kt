@@ -97,9 +97,6 @@ class DiscussionTopicsFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             viewModel.courseId
                         )
-                    },
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStack()
                     }
                 )
             }
@@ -136,8 +133,7 @@ private fun DiscussionTopicsScreen(
     refreshing: Boolean,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
-    onItemClick: (String, String, String) -> Unit,
-    onBackClick: () -> Unit
+    onItemClick: (String, String, String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
@@ -203,25 +199,6 @@ private fun DiscussionTopicsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            text = stringResource(id = discussionR.string.discussion_discussions),
-                            color = MaterialTheme.appColors.textPrimary,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.appTypography.titleMedium
-                        )
-
-                        BackBtn {
-                            onBackClick()
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
                     StaticSearchBar(
                         modifier = Modifier
                             .height(48.dp)
@@ -354,7 +331,6 @@ private fun DiscussionTopicsScreenPreview() {
             uiMessage = null,
             refreshing = false,
             onItemClick = { _, _, _ -> },
-            onBackClick = {},
             onSwipeRefresh = {},
             onSearchClick = {}
         )
@@ -372,7 +348,6 @@ private fun DiscussionTopicsScreenTabletPreview() {
             uiMessage = null,
             refreshing = false,
             onItemClick = { _, _, _ -> },
-            onBackClick = {},
             onSwipeRefresh = {},
             onSearchClick = {}
         )

@@ -11,6 +11,7 @@ import org.openedx.core.AppDataConstants
 import org.openedx.core.BaseViewModel
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSubtitleLanguageChanged
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
@@ -105,6 +106,7 @@ open class VideoUnitViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false
                 }

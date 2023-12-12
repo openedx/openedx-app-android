@@ -480,5 +480,6 @@ private val mockBlock = Block(
     blockCounts = BlockCounts(0),
     descendants = emptyList(),
     descendantsType = BlockType.HTML,
-    completion = 0.0
+    completion = 0.0,
+    containsGatedContent = false
 )

@@ -132,7 +132,6 @@ class CourseDatesFragment : Fragment() {
 
                 CourseDatesScreen(windowSize = windowSize,
                     uiState = uiState,
-                    courseTitle = viewModel.courseTitle,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
@@ -157,9 +156,6 @@ class CourseDatesFragment : Fragment() {
                                     }
                             }
                         }
-                    },
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStack()
                     })
             }
         }
@@ -181,14 +177,12 @@ class CourseDatesFragment : Fragment() {
 internal fun CourseDatesScreen(
     windowSize: WindowSize,
     uiState: DatesUIState?,
-    courseTitle: String,
     uiMessage: UIMessage?,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onItemClick: (String) -> Unit,
-    onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -233,27 +227,6 @@ internal fun CourseDatesScreen(
             Column(
                 modifierScreenWidth
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .zIndex(1f), contentAlignment = Alignment.CenterStart
-                ) {
-                    BackBtn {
-                        onBackClick()
-                    }
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 56.dp),
-                        text = courseTitle,
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
                 Surface(
                     color = MaterialTheme.appColors.background,
                     shape = MaterialTheme.appShapes.screenBackgroundShape
@@ -631,14 +604,12 @@ private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
         CourseDatesScreen(windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DatesUIState.Dates(mockedCourseDates),
-            courseTitle = "Course Dates",
             uiMessage = null,
             hasInternetConnection = true,
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onItemClick = {},
-            onBackClick = {})
+            onItemClick = {})
     }
 }
 
@@ -649,14 +620,12 @@ private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
         CourseDatesScreen(windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DatesUIState.Dates(mockedCourseDates),
-            courseTitle = "Course Dates",
             uiMessage = null,
             hasInternetConnection = true,
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onItemClick = {},
-            onBackClick = {})
+            onItemClick = {})
     }
 }
 

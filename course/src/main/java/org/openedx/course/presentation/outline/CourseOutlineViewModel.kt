@@ -42,6 +42,10 @@ class CourseOutlineViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
 
+    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
+
+    val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
+
     private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: LiveData<CourseOutlineUIState>
         get() = _uiState
@@ -64,6 +68,10 @@ class CourseOutlineViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    private val courseSections = mutableMapOf<String, MutableList<Block>>()
+    private val courseSectionsState = mutableMapOf<String, Boolean>()
+    val courseSubSection = mutableMapOf<String, Block?>()
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -83,7 +91,9 @@ class CourseOutlineViewModel(
                     _uiState.value = CourseOutlineUIState.CourseData(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
-                        resumeComponent = state.resumeComponent
+                        resumeComponent = state.resumeComponent,
+                        courseSections = courseSections,
+                        courseSectionsState = courseSectionsState
                     )
                 }
             }
@@ -121,6 +131,23 @@ class CourseOutlineViewModel(
         getCourseDataInternal()
     }
 
+    fun switchCourseSections(blockId: String): Boolean {
+        courseSectionsState[blockId] = !(courseSectionsState[blockId] ?: false)
+        if (_uiState.value is CourseOutlineUIState.CourseData) {
+            val state = _uiState.value as CourseOutlineUIState.CourseData
+            _uiState.value = null
+            _uiState.value = CourseOutlineUIState.CourseData(
+                courseStructure = state.courseStructure,
+                downloadedState = state.downloadedState,
+                resumeBlock = state.resumeBlock,
+                courseSections = courseSections,
+                courseSectionsState = courseSectionsState
+            )
+        }
+
+        return courseSectionsState[blockId] ?: false
+    }
+
     private fun getCourseDataInternal() {
         viewModelScope.launch {
             try {
@@ -139,7 +166,9 @@ class CourseOutlineViewModel(
                 _uiState.value = CourseOutlineUIState.CourseData(
                     courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
-                    resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId)
+                    resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
+                    courseSections = courseSections,
+                    courseSectionsState = courseSectionsState
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -164,13 +193,32 @@ class CourseOutlineViewModel(
                 resultBlocks.add(block)
                 block.descendants.forEach { descendant ->
                     blocks.find { it.id == descendant }?.let { sequentialBlock ->
-                        resultBlocks.add(sequentialBlock)
+                        if (isCourseNestedListEnabled) {
+                            courseSections.getOrPut(block.id) { mutableListOf() }
+                                .add(sequentialBlock)
+                            courseSubSection[sequentialBlock.id] =
+                                getCourseFirstSubSection(blocks, sequentialBlock.id)
+
+                        } else {
+                            resultBlocks.add(sequentialBlock)
+                        }
                         addDownloadableChildrenForSequentialBlock(sequentialBlock)
                     }
                 }
             }
         }
         return resultBlocks.toList()
+    }
+
+    private fun getCourseFirstSubSection(blocks: List<Block>, blockId: String): Block? {
+        if (blocks.isEmpty()) return null
+        val selectedBlock = blocks.first {
+            it.id == blockId
+        }
+        selectedBlock.descendants.firstOrNull()?.let { id ->
+            return blocks.find { it.id == id }
+        }
+        return null
     }
 
     private fun getResumeBlock(
@@ -204,4 +252,10 @@ class CourseOutlineViewModel(
         }
     }
 
+    fun verticalClickedEvent(blockId: String, blockName: String) {
+        val currentState = uiState.value
+        if (currentState is CourseOutlineUIState.CourseData) {
+            analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+        }
+    }
 }

@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -17,6 +18,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment
+import org.openedx.course.presentation.ui.CourseToolbar
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
 
@@ -46,37 +48,16 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        observe()
-
-        binding.bottomNavView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.outline -> {
-                    viewModel.courseTabClickedEvent()
-                    binding.viewPager.setCurrentItem(0, false)
+        binding.toolbar.setContent {
+            CourseToolbar(
+                title = courseTitle,
+                onBackClick = {
+                    requireActivity().supportFragmentManager.popBackStack()
                 }
-
-                R.id.videos -> {
-                    viewModel.videoTabClickedEvent()
-                    binding.viewPager.setCurrentItem(1, false)
-                }
-
-                R.id.discussions -> {
-                    viewModel.discussionTabClickedEvent()
-                    binding.viewPager.setCurrentItem(2, false)
-                }
-
-                R.id.dates -> {
-                    viewModel.datesTabClickedEvent()
-                    binding.viewPager.setCurrentItem(3, false)
-                }
-
-                R.id.resources -> {
-                    viewModel.handoutsTabClickedEvent()
-                    binding.viewPager.setCurrentItem(4, false)
-                }
-            }
-            true
+            )
         }
+
+        observe()
     }
 
     override fun onDestroyView() {
@@ -88,8 +69,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         viewModel.dataReady.observe(viewLifecycleOwner) { coursewareAccess ->
             if (coursewareAccess != null) {
                 if (coursewareAccess.hasAccess) {
-                    binding.viewPager.isVisible = true
-                    binding.bottomNavView.isVisible = true
                     initViewPager()
                 } else {
                     router.navigateToNoAccess(
@@ -115,6 +94,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun initViewPager() {
+        binding.viewPager.isVisible = true
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         adapter = CourseContainerAdapter(this).apply {
             addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
@@ -125,7 +105,54 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
         binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
         binding.viewPager.adapter = adapter
-        binding.viewPager.isUserInputEnabled = false
+
+        if (viewModel.isCourseTopTabBarEnabled) {
+            TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+                tab.text = getString(
+                    when (position) {
+                        0 -> R.string.course_navigation_course
+                        1 -> R.string.course_navigation_video
+                        2 -> R.string.course_navigation_discussion
+                        3 -> R.string.course_navigation_dates
+                        else -> R.string.course_navigation_handouts
+                    }
+                )
+            }.attach()
+            binding.tabLayout.isVisible = true
+
+        } else {
+            binding.viewPager.isUserInputEnabled = false
+            binding.bottomNavView.setOnItemSelectedListener {
+                when (it.itemId) {
+                    R.id.outline -> {
+                        viewModel.courseTabClickedEvent()
+                        binding.viewPager.setCurrentItem(0, false)
+                    }
+
+                    R.id.videos -> {
+                        viewModel.videoTabClickedEvent()
+                        binding.viewPager.setCurrentItem(1, false)
+                    }
+
+                    R.id.discussions -> {
+                        viewModel.discussionTabClickedEvent()
+                        binding.viewPager.setCurrentItem(2, false)
+                    }
+
+                    R.id.dates -> {
+                        viewModel.datesTabClickedEvent()
+                        binding.viewPager.setCurrentItem(3, false)
+                    }
+
+                    R.id.resources -> {
+                        viewModel.handoutsTabClickedEvent()
+                        binding.viewPager.setCurrentItem(4, false)
+                    }
+                }
+                true
+            }
+            binding.bottomNavView.isVisible = true
+        }
     }
 
     fun updateCourseStructure(withSwipeRefresh: Boolean) {

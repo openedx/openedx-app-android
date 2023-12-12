@@ -16,15 +16,20 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
+import org.openedx.core.config.Config
+import org.openedx.core.system.notifier.CourseCompletionSet
 
 class CourseContainerViewModel(
     val courseId: String,
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
+
+    val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
 
     private val _dataReady = MutableLiveData<CoursewareAccess>()
     val dataReady: LiveData<CoursewareAccess>
@@ -39,6 +44,16 @@ class CourseContainerViewModel(
         get() = _showProgress
 
     private var courseName = ""
+
+    init {
+        viewModelScope.launch {
+            notifier.notifier.collect { event ->
+                if (event is CourseCompletionSet) {
+                    updateData(false)
+                }
+            }
+        }
+    }
 
     fun preloadCourseStructure() {
         if (_dataReady.value != null) {

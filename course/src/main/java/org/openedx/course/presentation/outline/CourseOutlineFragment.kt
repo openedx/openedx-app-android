@@ -5,6 +5,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,6 +37,7 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.*
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.*
@@ -45,8 +47,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
-import org.openedx.course.presentation.ui.CourseImageHeader
-import org.openedx.course.presentation.ui.CourseSectionCard
+import org.openedx.course.presentation.ui.*
 import java.io.File
 import java.util.*
 
@@ -83,7 +84,8 @@ class CourseOutlineFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState!!,
                     apiHostUrl = viewModel.apiHostUrl,
-                    courseTitle = viewModel.courseTitle,
+                    isCourseNestedListEnabled = viewModel.isCourseNestedListEnabled,
+                    isCourseBannerEnabled = viewModel.isCourseBannerEnabled,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
                     onSwipeRefresh = {
@@ -118,8 +120,21 @@ class CourseOutlineFragment : Fragment() {
                             }
                         }
                     },
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStack()
+                    onExpandClick = { block ->
+                        if (viewModel.switchCourseSections(block.id)) {
+                            viewModel.sequentialClickedEvent(block.blockId, block.displayName)
+                        }
+                    },
+                    onSectionClick = { sectionBlock ->
+                        viewModel.courseSubSection[sectionBlock.id]?.let { block ->
+                            viewModel.verticalClickedEvent(block.blockId, block.displayName)
+                            router.navigateToCourseContainer(
+                                requireActivity().supportFragmentManager,
+                                unitId = block.id,
+                                courseId = viewModel.courseId,
+                                mode = CourseViewMode.FULL
+                            )
+                        }
                     },
                     onDownloadClick = {
                         if (viewModel.isBlockDownloading(it.id)) {
@@ -175,15 +190,17 @@ internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
     apiHostUrl: String,
-    courseTitle: String,
+    isCourseNestedListEnabled: Boolean,
+    isCourseBannerEnabled: Boolean,
     uiMessage: UIMessage?,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onItemClick: (Block) -> Unit,
+    onExpandClick: (Block) -> Unit,
+    onSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
-    onBackClick: () -> Unit,
     onDownloadClick: (Block) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -234,35 +251,12 @@ internal fun CourseOutlineScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .statusBarsInset()
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
                 screenWidth
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .zIndex(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    BackBtn {
-                        onBackClick()
-                    }
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 56.dp),
-                        text = courseTitle,
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
                 Surface(
                     color = MaterialTheme.appColors.background
                 ) {
@@ -282,17 +276,19 @@ internal fun CourseOutlineScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
                                 ) {
-                                    item {
-                                        CourseImageHeader(
-                                            modifier = Modifier
-                                                .aspectRatio(1.86f)
-                                                .padding(6.dp),
-                                            apiHostUrl = apiHostUrl,
-                                            courseImage = uiState.courseStructure.media?.image?.large
-                                                ?: "",
-                                            courseCertificate = uiState.courseStructure.certificate,
-                                            courseName = uiState.courseStructure.name
-                                        )
+                                    if (isCourseBannerEnabled) {
+                                        item {
+                                            CourseImageHeader(
+                                                modifier = Modifier
+                                                    .aspectRatio(1.86f)
+                                                    .padding(6.dp),
+                                                apiHostUrl = apiHostUrl,
+                                                courseImage = uiState.courseStructure.media?.image?.large
+                                                    ?: "",
+                                                courseCertificate = uiState.courseStructure.certificate,
+                                                courseName = uiState.courseStructure.name
+                                            )
+                                        }
                                     }
                                     if (uiState.resumeComponent != null) {
                                         item {
@@ -312,6 +308,67 @@ internal fun CourseOutlineScreen(
                                             }
                                         }
                                     }
+
+                                    if (isCourseNestedListEnabled) {
+                                        item {
+                                            Spacer(Modifier.height(16.dp))
+                                        }
+                                        uiState.courseStructure.blockData.forEach { block ->
+                                            val courseSections = uiState.courseSections[block.id]
+                                            val courseSectionsState =
+                                                uiState.courseSectionsState[block.id]
+
+                                            item {
+                                                Column {
+                                                    val downloadsCount =
+                                                        courseSections?.count { sectionBlock ->
+                                                            uiState.downloadedState[sectionBlock.id] != null
+                                                        } ?: 0
+
+                                                    CourseExpandableChapterCard(
+                                                        modifier = listPadding,
+                                                        block = block,
+                                                        downloadedState = uiState.downloadedState[block.id],
+                                                        downloadsCount = downloadsCount,
+                                                        onItemClick = { blockSelected ->
+                                                            onExpandClick(blockSelected)
+                                                        },
+                                                        onDownloadClick = onDownloadClick,
+                                                        arrowDegrees = if (courseSectionsState == true) -90f else 90f
+                                                    )
+                                                    Divider()
+                                                }
+                                            }
+
+
+                                            courseSections?.forEach { subSectionBlock ->
+                                                item {
+                                                    Column {
+                                                        AnimatedVisibility(
+                                                            visible = courseSectionsState == true
+                                                        ) {
+                                                            Column {
+                                                                CourseSectionItem(
+                                                                    modifier = listPadding,
+                                                                    block = subSectionBlock,
+                                                                    downloadedState = uiState.downloadedState[subSectionBlock.id],
+                                                                    onClick = { sectionBlock ->
+                                                                        onSectionClick(
+                                                                            sectionBlock
+                                                                        )
+                                                                    },
+                                                                    onDownloadClick = onDownloadClick
+                                                                )
+                                                                Divider()
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        return@LazyColumn
+                                    }
+
                                     items(uiState.courseStructure.blockData) { block ->
                                         Column(listPadding) {
                                             if (block.type == BlockType.CHAPTER) {
@@ -484,17 +541,21 @@ private fun CourseOutlineScreenPreview() {
             uiState = CourseOutlineUIState.CourseData(
                 mockCourseStructure,
                 mapOf(),
-                mockChapterBlock
+                mockChapterBlock,
+                mapOf(),
+                mapOf()
             ),
             apiHostUrl = "",
-            courseTitle = "",
+            isCourseNestedListEnabled = true,
+            isCourseBannerEnabled = true,
             uiMessage = null,
             refreshing = false,
             hasInternetConnection = true,
             onSwipeRefresh = {},
             onItemClick = {},
+            onExpandClick = {},
+            onSectionClick = {},
             onResumeClick = {},
-            onBackClick = {},
             onReloadClick = {},
             onDownloadClick = {}
         )
@@ -511,17 +572,21 @@ private fun CourseOutlineScreenTabletPreview() {
             uiState = CourseOutlineUIState.CourseData(
                 mockCourseStructure,
                 mapOf(),
-                mockChapterBlock
+                mockChapterBlock,
+                mapOf(),
+                mapOf()
             ),
             apiHostUrl = "",
-            courseTitle = "",
+            isCourseNestedListEnabled = true,
+            isCourseBannerEnabled = true,
             uiMessage = null,
             refreshing = false,
             hasInternetConnection = true,
             onSwipeRefresh = {},
             onItemClick = {},
+            onExpandClick = {},
+            onSectionClick = {},
             onResumeClick = {},
-            onBackClick = {},
             onReloadClick = {},
             onDownloadClick = {}
         )
@@ -551,7 +616,8 @@ private val mockChapterBlock = Block(
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
-    completion = 0.0
+    completion = 0.0,
+    containsGatedContent = false
 )
 private val mockSequentialBlock = Block(
     id = "id",
@@ -567,7 +633,8 @@ private val mockSequentialBlock = Block(
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
-    completion = 0.0
+    completion = 0.0,
+    containsGatedContent = false
 )
 
 private val mockCourseStructure = CourseStructure(

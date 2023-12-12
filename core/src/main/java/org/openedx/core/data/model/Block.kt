@@ -30,7 +30,9 @@ data class Block(
     @SerializedName("block_counts")
     val blockCounts: BlockCounts?,
     @SerializedName("completion")
-    val completion: Double?
+    val completion: Double?,
+    @SerializedName("contains_gated_content")
+    val containsGatedContent: Boolean?
 ) {
     fun mapToDomain(blockData: Map<String, org.openedx.core.data.model.Block>): Block {
         val blockType = BlockType.getBlockType(type ?: "")
@@ -58,7 +60,8 @@ data class Block(
             studentViewData = studentViewData?.mapToDomain(),
             studentViewMultiDevice = studentViewMultiDevice ?: false,
             blockCounts = blockCounts?.mapToDomain()!!,
-            completion = completion ?: 0.0
+            completion = completion ?: 0.0,
+            containsGatedContent = containsGatedContent
         )
     }
 }
