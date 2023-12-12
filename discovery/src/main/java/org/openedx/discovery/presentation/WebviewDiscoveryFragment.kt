@@ -53,11 +53,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.WebViewLink
 import org.openedx.core.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.WebViewLink.Authority.PROGRAM_INFO
 import org.openedx.core.WebViewLink.Param
-import org.openedx.core.config.Config
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.DefaultWebViewClient
 import org.openedx.core.system.connection.NetworkConnection
@@ -77,7 +77,7 @@ class WebviewDiscoveryFragment : Fragment() {
     private val edxCookieManager by inject<AppCookieManager>()
     private val networkConnection by inject<NetworkConnection>()
     private val router: DiscoveryRouter by inject()
-    private val config by inject<Config>()
+    private val viewModel by viewModel<WebViewDiscoveryViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -103,10 +103,13 @@ class WebviewDiscoveryFragment : Fragment() {
                         if (hasInternetConnection) {
                             WebViewDiscoverScreen(
                                 windowSize = windowSize,
-                                url = config.getDiscoveryConfig().webViewConfig.baseUrl,
+                                url = viewModel.discoveryUrl,
                                 cookieManager = edxCookieManager,
-                                onWebPageLoaded = {
+                                onWebPageLoaded = { url ->
                                     isLoading = false
+                                    url?.let {
+                                        viewModel.updateDiscoveryUrl(url)
+                                    }
                                 },
                                 onInfoCardClicked = { pathId, infoType ->
                                     router.navigateToCourseInfo(
@@ -149,7 +152,7 @@ private fun WebViewDiscoverScreen(
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
-    onWebPageLoaded: () -> Unit,
+    onWebPageLoaded: (String?) -> Unit,
     onInfoCardClicked: (String, String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -165,9 +168,9 @@ private fun WebViewDiscoverScreen(
                 coroutineScope = coroutineScope,
                 cookieManager = cookieManager
             ) {
-                override fun onPageCommitVisible(view: WebView?, url: String?) {
-                    super.onPageCommitVisible(view, url)
-                    onWebPageLoaded()
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    onWebPageLoaded(url)
                 }
 
                 override fun shouldOverrideUrlLoading(

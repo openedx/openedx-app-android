@@ -31,7 +31,8 @@ import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
-import org.openedx.discovery.presentation.DiscoveryViewModel
+import org.openedx.discovery.presentation.NativeDiscoveryViewModel
+import org.openedx.discovery.presentation.WebViewDiscoveryViewModel
 import org.openedx.discovery.presentation.search.CourseSearchViewModel
 import org.openedx.discussion.data.repository.DiscussionRepository
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
@@ -84,7 +85,8 @@ val screenModule = module {
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { WebViewDiscoveryViewModel(get()) }
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }

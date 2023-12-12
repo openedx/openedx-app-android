@@ -78,7 +78,7 @@ import org.openedx.discovery.R
 
 class NativeDiscoveryFragment : Fragment() {
 
-    private val viewModel by viewModel<DiscoveryViewModel>()
+    private val viewModel by viewModel<NativeDiscoveryViewModel>()
     private val router: DiscoveryRouter by inject()
 
     override fun onCreateView(
