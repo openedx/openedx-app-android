@@ -171,9 +171,9 @@ class CourseSectionFragment : Fragment() {
         fun newInstance(
             courseId: String,
             subSectionId: String,
-            mode: CourseViewMode,
             unitId: String?,
             componentId: String?,
+            mode: CourseViewMode,
         ): CourseSectionFragment {
             val fragment = CourseSectionFragment()
             fragment.arguments = bundleOf(

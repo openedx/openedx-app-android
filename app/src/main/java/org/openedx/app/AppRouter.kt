@@ -128,13 +128,19 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         subSectionId: String,
-        unitId: String?,
-        componentId: String?,
+        unitId: String,
+        componentId: String,
         mode: CourseViewMode
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseSectionFragment.newInstance(courseId, subSectionId, mode, unitId, componentId)
+            CourseSectionFragment.newInstance(
+                courseId = courseId,
+                subSectionId = subSectionId,
+                unitId = unitId,
+                componentId = componentId,
+                mode = mode
+            )
         )
     }
 
@@ -142,16 +148,16 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         unitId: String,
-        componentId: String?,
+        componentId: String,
         mode: CourseViewMode
     ) {
         replaceFragmentWithBackStack(
             fm,
             CourseUnitContainerFragment.newInstance(
-                courseId,
-                unitId,
-                componentId,
-                mode
+                courseId = courseId,
+                unitId = unitId,
+                componentId = componentId,
+                mode = mode
             )
         )
     }
@@ -160,16 +166,16 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         unitId: String,
-        componentId: String?,
+        componentId: String,
         mode: CourseViewMode
     ) {
         replaceFragment(
             fm,
             CourseUnitContainerFragment.newInstance(
-                courseId,
-                unitId,
-                componentId,
-                mode
+                courseId = courseId,
+                unitId = unitId,
+                componentId = componentId,
+                mode = mode
             ),
             FragmentTransaction.TRANSIT_FRAGMENT_FADE
         )

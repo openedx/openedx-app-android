@@ -25,8 +25,8 @@ interface CourseRouter {
         fm: FragmentManager,
         courseId: String,
         subSectionId: String,
-        unitId: String? = "",
-        componentId: String? = "",
+        unitId: String = "",
+        componentId: String = "",
         mode: CourseViewMode
     )
 
@@ -34,7 +34,7 @@ interface CourseRouter {
         fm: FragmentManager,
         courseId: String,
         unitId: String,
-        componentId: String? = "",
+        componentId: String = "",
         mode: CourseViewMode
     )
 
@@ -42,7 +42,7 @@ interface CourseRouter {
         fm: FragmentManager,
         courseId: String,
         unitId: String,
-        componentId: String? = "",
+        componentId: String = "",
         mode: CourseViewMode
     )
 
