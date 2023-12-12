@@ -13,5 +13,7 @@ interface ProfileRouter {
 
     fun navigateToDeleteAccount(fm: FragmentManager)
 
+    fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
+
     fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
 }

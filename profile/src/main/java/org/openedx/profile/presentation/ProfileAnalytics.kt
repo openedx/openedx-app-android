@@ -6,6 +6,7 @@ interface ProfileAnalytics {
     fun profileDeleteAccountClickedEvent()
     fun profileVideoSettingsClickedEvent()
     fun privacyPolicyClickedEvent()
+    fun termsOfUseClickedEvent()
     fun cookiePolicyClickedEvent()
     fun emailSupportClickedEvent()
     fun logoutEvent(force: Boolean)

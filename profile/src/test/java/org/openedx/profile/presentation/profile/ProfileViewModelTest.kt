@@ -25,11 +25,13 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 import java.net.UnknownHostException
@@ -49,7 +51,15 @@ class ProfileViewModelTest {
     private val cookieManager = mockk<AppCookieManager>()
     private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<ProfileAnalytics>()
+    private val router = mockk<ProfileRouter>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+
+    private val appData = AppData(
+        versionName = "1.0.0",
+        feedbackEmailAddress = "support@example.com",
+        tosUrl = "https://example.com/tos",
+        privacyPolicyUrl = "https://example.com/privacy",
+    )
 
     private val account = org.openedx.profile.domain.model.Account(
         username = "",
@@ -90,6 +100,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection and cache is null`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -98,6 +109,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
@@ -115,6 +127,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection and cache is not null`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -123,6 +136,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns account
@@ -140,6 +154,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount unknown exception`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -148,6 +163,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
@@ -165,6 +181,7 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount success`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -173,6 +190,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null
@@ -189,6 +207,7 @@ class ProfileViewModelTest {
     @Test
     fun `logout no internet connection`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -197,6 +216,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.logout() } throws UnknownHostException()
@@ -217,6 +237,7 @@ class ProfileViewModelTest {
     @Test
     fun `logout unknown exception`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -225,6 +246,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.logout() } throws Exception()
@@ -247,6 +269,7 @@ class ProfileViewModelTest {
     @Test
     fun `logout success`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -255,6 +278,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns mockk()
@@ -277,6 +301,7 @@ class ProfileViewModelTest {
     @Test
     fun `AccountUpdated notifier test`() = runTest {
         val viewModel = ProfileViewModel(
+            appData,
             config,
             interactor,
             resourceManager,
@@ -285,6 +310,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
+            router,
             appUpgradeNotifier
         )
         coEvery { interactor.getCachedAccount() } returns null

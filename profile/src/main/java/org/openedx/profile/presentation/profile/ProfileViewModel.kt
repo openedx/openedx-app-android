@@ -1,29 +1,39 @@
 package org.openedx.profile.presentation.profile
 
+import android.content.Context
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openedx.core.AppUpdateState
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
 class ProfileViewModel(
+    private val appData: AppData,
     private val config: Config,
     private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
@@ -32,12 +42,13 @@ class ProfileViewModel(
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
+    private val router: ProfileRouter,
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
-    private val _uiState = MutableLiveData<ProfileUIState>(ProfileUIState.Loading)
-    val uiState: LiveData<ProfileUIState>
-        get() = _uiState
+    private val _uiState: MutableStateFlow<ProfileUIState> =
+        MutableStateFlow(ProfileUIState.Loading)
+    internal val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
 
     private val _successLogout = MutableLiveData<Boolean>()
     val successLogout: LiveData<Boolean>
@@ -83,10 +94,16 @@ class ProfileViewModel(
                 if (cachedAccount == null) {
                     _uiState.value = ProfileUIState.Loading
                 } else {
-                    _uiState.value = ProfileUIState.Data(cachedAccount)
+                    _uiState.value = ProfileUIState.Data(
+                        account = cachedAccount,
+                        versionName = appData.versionName
+                    )
                 }
                 val account = interactor.getAccount()
-                _uiState.value = ProfileUIState.Data(account)
+                _uiState.value = ProfileUIState.Data(
+                    account = account,
+                    versionName = appData.versionName
+                )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -137,24 +154,57 @@ class ProfileViewModel(
         }
     }
 
-    fun profileEditClickedEvent() {
+    fun profileEditClicked(fragmentManager: FragmentManager) {
+        (uiState.value as? ProfileUIState.Data)?.let { data ->
+            router.navigateToEditProfile(
+                fragmentManager,
+                data.account
+            )
+        }
         analytics.profileEditClickedEvent()
     }
 
-    fun profileVideoSettingsClickedEvent() {
+    fun profileVideoSettingsClicked(fragmentManager: FragmentManager) {
+        router.navigateToVideoSettings(fragmentManager)
         analytics.profileVideoSettingsClickedEvent()
     }
 
-    fun privacyPolicyClickedEvent() {
+    fun privacyPolicyClicked(fragmentManager: FragmentManager) {
+        router.navigateToWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(R.string.core_privacy_policy),
+            url = appData.privacyPolicyUrl,
+        )
         analytics.privacyPolicyClickedEvent()
     }
 
-    fun cookiePolicyClickedEvent() {
-        analytics.cookiePolicyClickedEvent()
+    fun termsOfUseClicked(fragmentManager: FragmentManager) {
+        router.navigateToWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(R.string.core_terms_of_use),
+            url = appData.tosUrl,
+        )
+        analytics.termsOfUseClickedEvent()
     }
 
-    fun emailSupportClickedEvent() {
+    fun emailSupportClicked(context: Context) {
+        EmailUtil.showFeedbackScreen(
+            context = context,
+            feedbackEmailAddress = appData.feedbackEmailAddress,
+            appVersion = appData.versionName
+        )
         analytics.emailSupportClickedEvent()
+    }
+
+    fun appVersionClickedEvent(context: Context) {
+        AppUpdateState.openPlayMarket(context)
+    }
+
+    fun restartApp(fragmentManager: FragmentManager) {
+        router.restartApp(
+            fragmentManager,
+            isLogistrationEnabled
+        )
     }
 
 }
