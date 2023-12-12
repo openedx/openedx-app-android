@@ -66,6 +66,9 @@
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
     <string name="core_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
+    <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
+    <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
+    <string name="core_leaving_the_app_message" tools:ignore="MissingTranslation">You are now leaving the %s app and opening a browser.</string>
 
     <!-- region: Course Date types -->
     <!-- Label used when the date is Today -->

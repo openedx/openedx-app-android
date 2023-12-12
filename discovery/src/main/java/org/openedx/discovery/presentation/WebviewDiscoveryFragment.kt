@@ -58,6 +58,7 @@ import org.openedx.core.WebViewLink
 import org.openedx.core.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.WebViewLink.Authority.PROGRAM_INFO
 import org.openedx.core.WebViewLink.Param
+import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.DefaultWebViewClient
 import org.openedx.core.system.connection.NetworkConnection
@@ -71,6 +72,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
+import org.openedx.core.R as CoreR
 
 class WebviewDiscoveryFragment : Fragment() {
 
@@ -117,7 +119,20 @@ class WebviewDiscoveryFragment : Fragment() {
                                         pathId,
                                         infoType
                                     )
-                                }
+                                },
+                                openExternalLink = { url ->
+                                    ActionDialogFragment.newInstance(
+                                        title = getString(CoreR.string.core_leaving_the_app),
+                                        message = getString(
+                                            CoreR.string.core_leaving_the_app_message,
+                                            getString(CoreR.string.platform_name)
+                                        ),
+                                        url = url,
+                                    ).show(
+                                        requireActivity().supportFragmentManager,
+                                        ActionDialogFragment::class.simpleName
+                                    )
+                                },
                             )
                         } else {
                             ConnectionErrorView(
@@ -153,7 +168,8 @@ private fun WebViewDiscoverScreen(
     url: String,
     cookieManager: AppCookieManager,
     onWebPageLoaded: (String?) -> Unit,
-    onInfoCardClicked: (String, String) -> Unit
+    onInfoCardClicked: (String, String) -> Unit,
+    openExternalLink: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -166,7 +182,8 @@ private fun WebViewDiscoverScreen(
                 context = context,
                 webView = this@apply,
                 coroutineScope = coroutineScope,
-                cookieManager = cookieManager
+                cookieManager = cookieManager,
+                openExternalLink = openExternalLink,
             ) {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)

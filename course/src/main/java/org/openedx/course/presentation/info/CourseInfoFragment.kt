@@ -55,6 +55,7 @@ import org.openedx.core.WebViewLink
 import org.openedx.core.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.WebViewLink.Authority.ENROLL
 import org.openedx.core.config.Config
+import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.DefaultWebViewClient
@@ -72,6 +73,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.core.R as CoreR
 
 class CourseInfoFragment : Fragment() {
 
@@ -107,7 +109,10 @@ class CourseInfoFragment : Fragment() {
                     if (showAlert == true) {
                         InfoDialogFragment.newInstance(
                             title = context.getString(R.string.course_enrollment_error),
-                            message = context.getString(R.string.course_enrollment_error_message)
+                            message = context.getString(
+                                R.string.course_enrollment_error_message,
+                                getString(CoreR.string.platform_name)
+                            )
                         ).show(
                             requireActivity().supportFragmentManager,
                             InfoDialogFragment::class.simpleName
@@ -146,7 +151,20 @@ class CourseInfoFragment : Fragment() {
                                 },
                                 onEnrollClick = { courseId ->
                                     viewModel.enrollInACourse(courseId!!)
-                                }
+                                },
+                                openExternalLink = { url ->
+                                    ActionDialogFragment.newInstance(
+                                        title = getString(CoreR.string.core_leaving_the_app),
+                                        message = getString(
+                                            CoreR.string.core_leaving_the_app_message,
+                                            getString(CoreR.string.platform_name)
+                                        ),
+                                        url = url,
+                                    ).show(
+                                        requireActivity().supportFragmentManager,
+                                        ActionDialogFragment::class.simpleName
+                                    )
+                                },
                             )
                         } else {
                             ConnectionErrorView(
@@ -215,6 +233,7 @@ private fun CourseInfoScreen(
     onWebPageLoaded: () -> Unit,
     onBackClick: () -> Unit,
     onEnrollClick: (String?) -> Unit,
+    openExternalLink: (String) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -290,6 +309,7 @@ private fun CourseInfoScreen(
                                 coroutineScope = coroutineScope,
                                 cookieManager = cookieManager,
                                 allLinksExternal = true,
+                                openExternalLink = openExternalLink,
                             ) {
 
                                 override fun onPageCommitVisible(view: WebView?, url: String?) {

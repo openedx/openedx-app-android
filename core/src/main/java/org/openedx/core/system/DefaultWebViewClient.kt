@@ -6,7 +6,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.openedx.core.extension.isEmailValid
@@ -18,6 +17,7 @@ open class DefaultWebViewClient(
     val coroutineScope: CoroutineScope,
     val cookieManager: AppCookieManager,
     val allLinksExternal: Boolean = false,
+    val openExternalLink: (String) -> Unit
 ) : WebViewClient() {
 
     private var hostForThisPage: String? = null
@@ -34,7 +34,7 @@ open class DefaultWebViewClient(
         val clickUrl = request?.url?.toString() ?: ""
 
         if (allLinksExternal || isExternalLink(clickUrl)) {
-            Toast.makeText(context, "External Link", Toast.LENGTH_SHORT).show()
+            openExternalLink(clickUrl)
             return true
         }
 
