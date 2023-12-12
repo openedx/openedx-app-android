@@ -13,6 +13,8 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.extension.getSequentialBlocks
+import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
@@ -81,7 +83,7 @@ class CourseOutlineViewModel(
                     _uiState.value = CourseOutlineUIState.CourseData(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
-                        resumeBlock = state.resumeBlock
+                        resumeComponent = state.resumeComponent
                     )
                 }
             }
@@ -137,7 +139,7 @@ class CourseOutlineViewModel(
                 _uiState.value = CourseOutlineUIState.CourseData(
                     courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
-                    resumeBlock = getResumeBlock(blocks, courseStatus.lastVisitedBlockId)
+                    resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId)
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -176,13 +178,11 @@ class CourseOutlineViewModel(
         continueBlockId: String
     ): Block? {
         val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
-        resumeVerticalBlock = blocks.find {
-            it.descendants.contains(resumeBlock?.id) && it.type == BlockType.VERTICAL
-        }
-        resumeSectionBlock = blocks.find {
-            it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
-        }
-        return resumeVerticalBlock
+        resumeVerticalBlock =
+            blocks.getVerticalBlocks().find { it.descendants.contains(resumeBlock?.id) }
+        resumeSectionBlock =
+            blocks.getSequentialBlocks().find { it.descendants.contains(resumeVerticalBlock?.id) }
+        return resumeBlock
     }
 
     fun resumeCourseTappedEvent(blockId: String) {

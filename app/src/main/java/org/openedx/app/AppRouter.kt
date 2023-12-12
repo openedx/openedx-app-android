@@ -127,37 +127,56 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToCourseSubsections(
         fm: FragmentManager,
         courseId: String,
-        blockId: String,
-        mode: CourseViewMode,
-        descendantId: String?
+        subSectionId: String,
+        unitId: String,
+        componentId: String,
+        mode: CourseViewMode
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseSectionFragment.newInstance(courseId, blockId, mode, descendantId)
+            CourseSectionFragment.newInstance(
+                courseId = courseId,
+                subSectionId = subSectionId,
+                unitId = unitId,
+                componentId = componentId,
+                mode = mode
+            )
         )
     }
 
     override fun navigateToCourseContainer(
         fm: FragmentManager,
-        blockId: String,
         courseId: String,
+        unitId: String,
+        componentId: String,
         mode: CourseViewMode
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseUnitContainerFragment.newInstance(blockId, courseId, mode)
+            CourseUnitContainerFragment.newInstance(
+                courseId = courseId,
+                unitId = unitId,
+                componentId = componentId,
+                mode = mode
+            )
         )
     }
 
     override fun replaceCourseContainer(
         fm: FragmentManager,
-        blockId: String,
         courseId: String,
+        unitId: String,
+        componentId: String,
         mode: CourseViewMode
     ) {
         replaceFragment(
             fm,
-            CourseUnitContainerFragment.newInstance(blockId, courseId, mode),
+            CourseUnitContainerFragment.newInstance(
+                courseId = courseId,
+                unitId = unitId,
+                componentId = componentId,
+                mode = mode
+            ),
             FragmentTransaction.TRANSIT_FRAGMENT_FADE
         )
     }

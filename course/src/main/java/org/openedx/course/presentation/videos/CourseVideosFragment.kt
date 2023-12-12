@@ -94,9 +94,9 @@ class CourseVideosFragment : Fragment() {
                     },
                     onItemClick = { block ->
                         router.navigateToCourseSubsections(
-                            requireActivity().supportFragmentManager,
+                            fm = requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
-                            blockId = block.id,
+                            subSectionId = block.id,
                             mode = CourseViewMode.VIDEOS
                         )
                     },

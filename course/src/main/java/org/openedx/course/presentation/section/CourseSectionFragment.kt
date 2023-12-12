@@ -93,9 +93,9 @@ class CourseSectionFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
-        val blockId = requireArguments().getString(ARG_BLOCK_ID, "")
+        val subSectionId = requireArguments().getString(ARG_SUBSECTION_ID, "")
         viewModel.mode = requireArguments().serializable(ARG_MODE)!!
-        viewModel.getBlocks(blockId, viewModel.mode)
+        viewModel.getBlocks(subSectionId, viewModel.mode)
     }
 
     override fun onCreateView(
@@ -121,9 +121,9 @@ class CourseSectionFragment : Fragment() {
                         if (block.descendants.isNotEmpty()) {
                             viewModel.verticalClickedEvent(block.blockId, block.displayName)
                             router.navigateToCourseContainer(
-                                requireActivity().supportFragmentManager,
-                                block.id,
+                                fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
+                                unitId = block.id,
                                 mode = viewModel.mode
                             )
                         }
@@ -146,15 +146,16 @@ class CourseSectionFragment : Fragment() {
                 )
 
                 LaunchedEffect(rememberSaveable { true }) {
-                    val descendantId = requireArguments().getString(ARG_DESCENDANT_ID, "")
-                    if (descendantId.isNotEmpty()) {
+                    val unitId = requireArguments().getString(ARG_UNIT_ID, "")
+                    if (unitId.isNotEmpty()) {
                         router.navigateToCourseContainer(
-                            requireActivity().supportFragmentManager,
-                            descendantId,
+                            fm = requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
+                            unitId = unitId,
+                            componentId = requireArguments().getString(ARG_COMPONENT_ID, ""),
                             mode = viewModel.mode
                         )
-                        requireArguments().putString(ARG_DESCENDANT_ID, "")
+                        requireArguments().putString(ARG_UNIT_ID, "")
                     }
                 }
             }
@@ -163,20 +164,23 @@ class CourseSectionFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_BLOCK_ID = "blockId"
-        private const val ARG_DESCENDANT_ID = "descendantId"
+        private const val ARG_SUBSECTION_ID = "subSectionId"
+        private const val ARG_UNIT_ID = "unitId"
+        private const val ARG_COMPONENT_ID = "componentId"
         private const val ARG_MODE = "mode"
         fun newInstance(
             courseId: String,
-            blockId: String,
+            subSectionId: String,
+            unitId: String?,
+            componentId: String?,
             mode: CourseViewMode,
-            descendantId: String?,
         ): CourseSectionFragment {
             val fragment = CourseSectionFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_BLOCK_ID to blockId,
-                ARG_DESCENDANT_ID to descendantId,
+                ARG_SUBSECTION_ID to subSectionId,
+                ARG_UNIT_ID to unitId,
+                ARG_COMPONENT_ID to componentId,
                 ARG_MODE to mode
             )
             return fragment
