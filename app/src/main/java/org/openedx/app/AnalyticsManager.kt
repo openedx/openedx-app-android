@@ -163,6 +163,10 @@ class AnalyticsManager(
         logEvent(Event.PRIVACY_POLICY_CLICKED)
     }
 
+    override fun termsOfUseClickedEvent() {
+        logEvent(Event.TERMS_OF_USE_CLICKED)
+    }
+
     override fun cookiePolicyClickedEvent() {
         logEvent(Event.COOKIE_POLICY_CLICKED)
     }
@@ -415,6 +419,7 @@ private enum class Event(val eventName: String) {
     PROFILE_DELETE_ACCOUNT_CLICKED("Profile_Delete_Account_Clicked"),
     PROFILE_VIDEO_SETTINGS_CLICKED("Profile_Video_settings_Clicked"),
     PRIVACY_POLICY_CLICKED("Privacy_Policy_Clicked"),
+    TERMS_OF_USE_CLICKED("Terms_Of_Use_Clicked"),
     COOKIE_POLICY_CLICKED("Cookie_Policy_Clicked"),
     EMAIL_SUPPORT_CLICKED("Email_Support_Clicked"),
     COURSE_ENROLL_CLICKED("Course_Enroll_Clicked"),

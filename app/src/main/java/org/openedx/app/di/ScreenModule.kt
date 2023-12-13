@@ -89,15 +89,17 @@ val screenModule = module {
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(named("IODispatcher")),
-            get(),
-            get(),
-            get(),
-            get()
+            appData = get(),
+            config = get(),
+            interactor = get(),
+            resourceManager = get(),
+            notifier = get(),
+            dispatcher = get(named("IODispatcher")),
+            cookieManager = get(),
+            workerController = get(),
+            analytics = get(),
+            appUpgradeNotifier = get(),
+            router = get(),
         )
     }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }

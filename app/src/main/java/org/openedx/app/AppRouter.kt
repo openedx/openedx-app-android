@@ -13,12 +13,13 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
+import org.openedx.core.presentation.global.webview.WebContentFragment
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
 import org.openedx.course.presentation.detail.CourseDetailsFragment
 import org.openedx.course.presentation.handouts.HandoutsType
-import org.openedx.course.presentation.handouts.WebViewFragment
+import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
@@ -223,7 +224,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ) {
         replaceFragmentWithBackStack(
             fm,
-            WebViewFragment.newInstance(title, type.name, courseId)
+            HandoutsWebViewFragment.newInstance(title, type.name, courseId)
         )
     }
     //endregion
@@ -305,6 +306,13 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToDeleteAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, DeleteProfileFragment())
+    }
+
+    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
+        replaceFragmentWithBackStack(
+            fm,
+            WebContentFragment.newInstance(title = title, url = url)
+        )
     }
 
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {

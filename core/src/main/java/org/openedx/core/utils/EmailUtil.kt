@@ -3,6 +3,7 @@ package org.openedx.core.utils
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import org.openedx.core.R
@@ -37,11 +38,12 @@ object EmailUtil {
         subject: String,
         email: String
     ) {
-        val emailIntent = Intent(Intent.ACTION_SEND)
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(to))
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
-        emailIntent.putExtra(Intent.EXTRA_TEXT, email)
-        emailIntent.type = "plain/text"
+        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(to))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, email)
+        }
         try {
             emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context?.let {
