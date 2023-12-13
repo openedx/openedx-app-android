@@ -292,16 +292,10 @@ private fun CourseVideosScreen(
 
                                                 item {
                                                     Column {
-                                                        val downloadsCount =
-                                                            courseSections?.count { sectionBlock ->
-                                                                uiState.downloadedState[sectionBlock.id] != null
-                                                            } ?: 0
-
                                                         CourseExpandableChapterCard(
                                                             modifier = listPadding,
                                                             block = block,
                                                             downloadedState = uiState.downloadedState[block.id],
-                                                            downloadsCount = downloadsCount,
                                                             onItemClick = { blockSelected ->
                                                                 onExpandClick(blockSelected)
                                                             },
@@ -320,10 +314,15 @@ private fun CourseVideosScreen(
                                                                 visible = courseSectionsState == true
                                                             ) {
                                                                 Column {
+                                                                    val downloadsCount =
+                                                                        uiState.downloadsCount[subSectionBlock.id]
+                                                                            ?: 0
+
                                                                     CourseSectionItem(
                                                                         modifier = listPadding,
                                                                         block = subSectionBlock,
                                                                         downloadedState = uiState.downloadedState[subSectionBlock.id],
+                                                                        downloadsCount = downloadsCount,
                                                                         onClick = { sectionBlock ->
                                                                             onSectionClick(
                                                                                 sectionBlock
@@ -410,6 +409,7 @@ private fun CourseVideosScreenPreview() {
                 mockCourseStructure,
                 emptyMap(),
                 mapOf(),
+                mapOf(),
                 mapOf()
             ),
             apiHostUrl = "",
@@ -464,6 +464,7 @@ private fun CourseVideosScreenTabletPreview() {
             uiState = CourseVideosUIState.CourseData(
                 mockCourseStructure,
                 emptyMap(),
+                mapOf(),
                 mapOf(),
                 mapOf()
             ),

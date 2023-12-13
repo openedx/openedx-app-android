@@ -70,6 +70,7 @@ class CourseOutlineViewModel(
 
     private val courseSections = mutableMapOf<String, MutableList<Block>>()
     private val courseSectionsState = mutableMapOf<String, Boolean>()
+    private val downloadsCount = mutableMapOf<String, Int>()
     val courseSubSection = mutableMapOf<String, Block?>()
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -93,7 +94,8 @@ class CourseOutlineViewModel(
                         downloadedState = it.toMap(),
                         resumeComponent = state.resumeComponent,
                         courseSections = courseSections,
-                        courseSectionsState = courseSectionsState
+                        courseSectionsState = courseSectionsState,
+                        downloadsCount = downloadsCount
                     )
                 }
             }
@@ -141,7 +143,8 @@ class CourseOutlineViewModel(
                 downloadedState = state.downloadedState,
                 resumeBlock = state.resumeBlock,
                 courseSections = courseSections,
-                courseSectionsState = courseSectionsState
+                courseSectionsState = courseSectionsState,
+                downloadsCount = downloadsCount
             )
         }
 
@@ -170,7 +173,8 @@ class CourseOutlineViewModel(
                     downloadedState = getDownloadModelsStatus(),
                     resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
                     courseSections = courseSections,
-                    courseSectionsState = courseSectionsState
+                    courseSectionsState = courseSectionsState,
+                    downloadsCount = downloadsCount
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -199,7 +203,10 @@ class CourseOutlineViewModel(
                             courseSections.getOrPut(block.id) { mutableListOf() }
                                 .add(sequentialBlock)
                             courseSubSection[sequentialBlock.id] =
-                                getCourseFirstSubSection(blocks, sequentialBlock.id)
+                                getCourseFirstSubSection(blocks, sequentialBlock)
+                            sequentialBlock.descendants
+                            downloadsCount[sequentialBlock.id] =
+                                getDownloadsCount(blocks, sequentialBlock)
 
                         } else {
                             resultBlocks.add(sequentialBlock)
@@ -212,15 +219,23 @@ class CourseOutlineViewModel(
         return resultBlocks.toList()
     }
 
-    private fun getCourseFirstSubSection(blocks: List<Block>, blockId: String): Block? {
+    private fun getCourseFirstSubSection(blocks: List<Block>, selectedBlock: Block): Block? {
         if (blocks.isEmpty()) return null
-        val selectedBlock = blocks.first {
-            it.id == blockId
-        }
         selectedBlock.descendants.firstOrNull()?.let { id ->
             return blocks.find { it.id == id }
         }
         return null
+    }
+
+    private fun getDownloadsCount(blocks: List<Block>, selectedBlock: Block): Int {
+        if (blocks.isEmpty()) return 0
+        var count = 0
+        selectedBlock.descendants.forEach { id ->
+            blocks.find { it.id == id }?.let { descendantBlock ->
+                count += blocks.filter { descendantBlock.descendants.contains(it.id) && it.isDownloadable }.size
+            }
+        }
+        return count
     }
 
     private fun getResumeBlock(

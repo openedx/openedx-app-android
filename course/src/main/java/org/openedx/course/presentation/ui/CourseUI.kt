@@ -617,7 +617,6 @@ fun CourseExpandableChapterCard(
     modifier: Modifier,
     block: Block,
     downloadedState: DownloadedState?,
-    downloadsCount: Int,
     onItemClick: (Block) -> Unit,
     onDownloadClick: (Block) -> Unit,
     arrowDegrees: Float = 0f
@@ -641,7 +640,8 @@ fun CourseExpandableChapterCard(
             if (block.completion == 1.0) {
                 val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
                 val completedIconColor = MaterialTheme.appColors.primary
-                val completedIconDescription = stringResource(id = R.string.course_accessibility_section_completed)
+                val completedIconDescription =
+                    stringResource(id = R.string.course_accessibility_section_completed)
 
                 Icon(
                     painter = completedIconPainter,
@@ -661,7 +661,7 @@ fun CourseExpandableChapterCard(
             Spacer(modifier = Modifier.width(16.dp))
             Row(
                 modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(if (downloadsCount > 0) 8.dp else 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
@@ -699,13 +699,6 @@ fun CourseExpandableChapterCard(
                         }
                     }
                 }
-                if (downloadsCount > 0) {
-                    Text(
-                        text = downloadsCount.toString(),
-                        style = MaterialTheme.appTypography.titleSmall,
-                        color = MaterialTheme.appColors.textPrimary
-                    )
-                }
                 CardArrow(
                     degrees = arrowDegrees
                 )
@@ -719,13 +712,14 @@ fun CourseSectionItem(
     modifier: Modifier,
     block: Block,
     downloadedState: DownloadedState?,
+    downloadsCount: Int,
     onClick: (Block) -> Unit,
     onDownloadClick: (Block) -> Unit
 ) {
     val icon =
         if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-                R.drawable.ic_course_chapter_icon
-            )
+            R.drawable.ic_course_chapter_icon
+        )
     val iconColor =
         if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
 
@@ -761,7 +755,7 @@ fun CourseSectionItem(
             Spacer(modifier = Modifier.width(16.dp))
             Row(
                 modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (downloadsCount > 0) 8.dp else 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
@@ -804,6 +798,13 @@ fun CourseSectionItem(
                             )
                         }
                     }
+                }
+                if (downloadsCount > 0) {
+                    Text(
+                        text = downloadsCount.toString(),
+                        style = MaterialTheme.appTypography.titleSmall,
+                        color = MaterialTheme.appColors.textPrimary
+                    )
                 }
             }
         }

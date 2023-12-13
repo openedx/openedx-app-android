@@ -10,7 +10,8 @@ sealed class CourseOutlineUIState {
         val downloadedState: Map<String, DownloadedState>,
         val resumeComponent: Block?,
         val courseSections: Map<String, List<Block>>,
-        val courseSectionsState: Map<String, Boolean>
+        val courseSectionsState: Map<String, Boolean>,
+        val downloadsCount: Map<String, Int>
     ) : CourseOutlineUIState()
 
     object Loading : CourseOutlineUIState()

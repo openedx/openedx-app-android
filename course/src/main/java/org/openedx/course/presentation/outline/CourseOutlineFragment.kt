@@ -22,13 +22,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
@@ -37,8 +35,10 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -47,9 +47,12 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
-import org.openedx.course.presentation.ui.*
+import org.openedx.course.presentation.ui.CourseExpandableChapterCard
+import org.openedx.course.presentation.ui.CourseImageHeader
+import org.openedx.course.presentation.ui.CourseSectionCard
+import org.openedx.course.presentation.ui.CourseSectionItem
 import java.io.File
-import java.util.*
+import java.util.Date
 
 class CourseOutlineFragment : Fragment() {
 
@@ -320,16 +323,10 @@ internal fun CourseOutlineScreen(
 
                                             item {
                                                 Column {
-                                                    val downloadsCount =
-                                                        courseSections?.count { sectionBlock ->
-                                                            uiState.downloadedState[sectionBlock.id] != null
-                                                        } ?: 0
-
                                                     CourseExpandableChapterCard(
                                                         modifier = listPadding,
                                                         block = block,
                                                         downloadedState = uiState.downloadedState[block.id],
-                                                        downloadsCount = downloadsCount,
                                                         onItemClick = { blockSelected ->
                                                             onExpandClick(blockSelected)
                                                         },
@@ -348,10 +345,15 @@ internal fun CourseOutlineScreen(
                                                             visible = courseSectionsState == true
                                                         ) {
                                                             Column {
+                                                                val downloadsCount =
+                                                                    uiState.downloadsCount[subSectionBlock.id]
+                                                                        ?: 0
+
                                                                 CourseSectionItem(
                                                                     modifier = listPadding,
                                                                     block = subSectionBlock,
                                                                     downloadedState = uiState.downloadedState[subSectionBlock.id],
+                                                                    downloadsCount = downloadsCount,
                                                                     onClick = { sectionBlock ->
                                                                         onSectionClick(
                                                                             sectionBlock
@@ -545,6 +547,7 @@ private fun CourseOutlineScreenPreview() {
                 mapOf(),
                 mockChapterBlock,
                 mapOf(),
+                mapOf(),
                 mapOf()
             ),
             apiHostUrl = "",
@@ -575,6 +578,7 @@ private fun CourseOutlineScreenTabletPreview() {
                 mockCourseStructure,
                 mapOf(),
                 mockChapterBlock,
+                mapOf(),
                 mapOf(),
                 mapOf()
             ),

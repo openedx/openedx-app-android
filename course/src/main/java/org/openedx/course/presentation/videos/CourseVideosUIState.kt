@@ -9,7 +9,8 @@ sealed class CourseVideosUIState {
         val courseStructure: CourseStructure,
         val downloadedState: Map<String, DownloadedState>,
         val courseSections: Map<String, List<Block>>,
-        val courseSectionsState: Map<String, Boolean>
+        val courseSectionsState: Map<String, Boolean>,
+        val downloadsCount: Map<String, Int>
     ) : CourseVideosUIState()
 
     data class Empty(val message: String) : CourseVideosUIState()
