@@ -82,7 +82,7 @@ class CourseOutlineFragment : Fragment() {
 
                 CourseOutlineScreen(
                     windowSize = windowSize,
-                    uiState = uiState!!,
+                    uiState = uiState,
                     apiHostUrl = viewModel.apiHostUrl,
                     isCourseNestedListEnabled = viewModel.isCourseNestedListEnabled,
                     isCourseBannerEnabled = viewModel.isCourseBannerEnabled,
@@ -188,7 +188,7 @@ class CourseOutlineFragment : Fragment() {
 @Composable
 internal fun CourseOutlineScreen(
     windowSize: WindowSize,
-    uiState: CourseOutlineUIState,
+    uiState: CourseOutlineUIState?,
     apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
     isCourseBannerEnabled: Boolean,
@@ -396,6 +396,8 @@ internal fun CourseOutlineScreen(
                                     }
                                 }
                             }
+
+                            else -> {}
                         }
                         PullRefreshIndicator(
                             refreshing,

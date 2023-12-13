@@ -160,15 +160,29 @@ class CourseUnitContainerViewModel(
             if (blockDescendant != null) {
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     if (blockDescendant.isGated()) {
-                        gatedList.add(blockDescendant)
+                        gatedList.add(blockDescendant.copy(type = getSectionType(blockDescendant.descendants)))
                     } else {
-                        resultList.add(blockDescendant)
+                        resultList.add(blockDescendant.copy(type = getSectionType(blockDescendant.descendants)))
                     }
                 }
             } else continue
         }
         resultList.addAll(gatedList)
         return resultList
+    }
+
+    private fun getSectionType(descendant: List<String>): BlockType {
+        blocks.filter { descendant.contains(it.id) }.let { descendantBlocks ->
+            if (descendantBlocks.find { it.type == BlockType.PROBLEM } != null) {
+                return BlockType.PROBLEM
+            } else if (descendantBlocks.find { it.type == BlockType.VIDEO } != null) {
+                return BlockType.VIDEO
+            } else if (descendantBlocks.find { it.type == BlockType.DISCUSSION } != null) {
+                return BlockType.DISCUSSION
+            }
+        }
+
+        return BlockType.OTHERS
     }
 
     private fun setNextVerticalIndex() {

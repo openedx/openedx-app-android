@@ -128,7 +128,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         if (viewModel.isCourseUnitProgressEnabled) {
-            binding.horizontalProgress?.setContent {
+            binding.horizontalProgress.setContent {
                 OpenEdXTheme {
                     val index by viewModel.indexInContainer.observeAsState(1)
 
@@ -141,7 +141,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     )
                 }
             }
-            binding.horizontalProgress?.isVisible = true
+            binding.horizontalProgress.isVisible = true
 
         } else {
             binding.cvCount.setContent {
@@ -179,7 +179,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         if (viewModel.isCourseExpandableSectionsEnabled) {
-            binding.unitSubSectionsTitle?.setContent {
+            binding.unitSubSectionsTitle.setContent {
                 val subSectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
                 val currentSubSection = subSectionsBlocks.firstOrNull { it.id == blockId }
                 val subSectionName = currentSubSection?.displayName ?: ""
@@ -193,9 +193,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 )
             }
 
-            binding.subSectionsBlocksBg?.setOnClickListener { handleSectionClick() }
+            binding.subSectionsBlocksBg.setOnClickListener { handleSectionClick() }
 
-            binding.subSectionsBlocksList?.setContent {
+            binding.subSectionsBlocksList.setContent {
                 val sectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
                 val selectedIndex = sectionsBlocks.indexOfFirst { it.id == blockId }
                 OpenEdXTheme {
@@ -204,7 +204,12 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         selectedSection = selectedIndex
                     ) { index, block ->
                         if (index != selectedIndex) {
-                            proceedToNextSection(block)
+                            router.replaceCourseContainer(
+                                requireActivity().supportFragmentManager,
+                                block.id,
+                                viewModel.courseId,
+                                requireArguments().serializable(ARG_MODE)!!
+                            )
 
                         } else {
                             handleSectionClick()
@@ -214,7 +219,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
 
         } else {
-            binding.unitSubSectionsTitle?.isGone = true
+            binding.unitSubSectionsTitle.isGone = true
         }
 
         if (viewModel.selectBlockDialogShowed.value == true) handleSectionClick()
@@ -338,14 +343,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     }
 
     private fun handleSectionClick() {
-        if (binding.subSectionsBlocksList?.visibility == View.VISIBLE) {
-            binding.subSectionsBlocksList?.visibility = View.GONE
-            binding.subSectionsBlocksBg?.visibility = View.GONE
+        if (binding.subSectionsBlocksList.visibility == View.VISIBLE) {
+            binding.subSectionsBlocksList.visibility = View.GONE
+            binding.subSectionsBlocksBg.visibility = View.GONE
             viewModel.hideSelectBlockDialog()
 
         } else {
-            binding.subSectionsBlocksList?.visibility = View.VISIBLE
-            binding.subSectionsBlocksBg?.visibility = View.VISIBLE
+            binding.subSectionsBlocksList.visibility = View.VISIBLE
+            binding.subSectionsBlocksBg.visibility = View.VISIBLE
             viewModel.showSelectBlockDialog()
         }
     }

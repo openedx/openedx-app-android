@@ -46,8 +46,8 @@ class CourseOutlineViewModel(
 
     val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
 
-    private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
-    val uiState: LiveData<CourseOutlineUIState>
+    private val _uiState = MutableLiveData<CourseOutlineUIState?>(CourseOutlineUIState.Loading)
+    val uiState: LiveData<CourseOutlineUIState?>
         get() = _uiState
 
     private val _uiMessage = SingleEventLiveData<UIMessage>()
@@ -160,6 +160,8 @@ class CourseOutlineViewModel(
                     CourseComponentStatus("")
                 }
                 setBlocks(blocks)
+                courseSections.clear()
+                courseSubSection.clear()
                 courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
 
