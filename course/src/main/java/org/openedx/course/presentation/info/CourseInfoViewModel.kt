@@ -7,6 +7,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -15,6 +16,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 
 class CourseInfoViewModel(
+    private val config: Config,
     private val networkConnection: NetworkConnection,
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
@@ -35,6 +37,8 @@ class CourseInfoViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
 
     fun enrollInACourse(courseId: String) {
         _showAlert.value = false

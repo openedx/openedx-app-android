@@ -47,9 +47,8 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
-import org.openedx.core.presentation.catalog.WebViewLink.Authority.COURSE_INFO
-import org.openedx.core.config.Config
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
+import org.openedx.core.presentation.catalog.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.system.AppCookieManager
@@ -75,7 +74,6 @@ class CourseInfoFragment : Fragment() {
     private val edxCookieManager by inject<AppCookieManager>()
     private val networkConnection by inject<NetworkConnection>()
     private val router: CourseRouter by inject()
-    private val config by inject<Config>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -196,14 +194,13 @@ class CourseInfoFragment : Fragment() {
     private fun getInitialUrl(): String {
         return arguments?.let { args ->
             val pathId = args.getString(ARG_PATH_ID) ?: ""
-            val config = config.getDiscoveryConfig().webViewConfig
             val urlTemplate = if (args.getString(ARG_INFO_TYPE) == COURSE_INFO.name) {
-                config.courseUrlTemplate
+                viewModel.webViewConfig.courseUrlTemplate
             } else {
-                config.programUrlTemplate
+                viewModel.webViewConfig.programUrlTemplate
             }
             urlTemplate.replace("{$ARG_PATH_ID}", pathId)
-        } ?: config.getDiscoveryConfig().webViewConfig.baseUrl
+        } ?: viewModel.webViewConfig.baseUrl
     }
 
     companion object {
