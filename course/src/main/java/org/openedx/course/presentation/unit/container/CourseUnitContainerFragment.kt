@@ -5,7 +5,6 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
@@ -28,7 +27,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
-import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
@@ -207,10 +205,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     ) { index, block ->
                         if (index != selectedIndex) {
                             router.replaceCourseContainer(
-                                requireActivity().supportFragmentManager,
-                                block.id,
-                                viewModel.courseId,
-                                requireArguments().serializable(ARG_MODE)!!
+                                fm = requireActivity().supportFragmentManager,
+                                courseId = viewModel.courseId,
+                                unitId = block.id,
+                                mode = requireArguments().serializable(ARG_MODE)!!
                             )
 
                         } else {

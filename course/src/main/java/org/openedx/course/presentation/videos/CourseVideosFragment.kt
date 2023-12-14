@@ -112,9 +112,9 @@ class CourseVideosFragment : Fragment() {
                         viewModel.courseSubSection[sectionBlock.id]?.let { block ->
                             viewModel.verticalClickedEvent(block.blockId, block.displayName)
                             router.navigateToCourseContainer(
-                                requireActivity().supportFragmentManager,
-                                blockId = block.id,
+                                fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
+                                unitId = block.id,
                                 mode = CourseViewMode.VIDEOS
                             )
                         }

@@ -108,6 +108,22 @@ class CourseOutlineFragment : Fragment() {
                             mode = CourseViewMode.FULL
                         )
                     },
+                    onExpandClick = { block ->
+                        if (viewModel.switchCourseSections(block.id)) {
+                            viewModel.sequentialClickedEvent(block.blockId, block.displayName)
+                        }
+                    },
+                    onSectionClick = { sectionBlock ->
+                        viewModel.courseSubSection[sectionBlock.id]?.let { block ->
+                            viewModel.verticalClickedEvent(block.blockId, block.displayName)
+                            router.navigateToCourseContainer(
+                                requireActivity().supportFragmentManager,
+                                courseId = viewModel.courseId,
+                                unitId = block.id,
+                                mode = CourseViewMode.FULL
+                            )
+                        }
+                    },
                     onResumeClick = { componentId ->
                         viewModel.resumeSectionBlock?.let { subSection ->
                             viewModel.resumeCourseTappedEvent(subSection.id)
@@ -121,22 +137,6 @@ class CourseOutlineFragment : Fragment() {
                                     componentId = componentId
                                 )
                             }
-                        }
-                    },
-                    onExpandClick = { block ->
-                        if (viewModel.switchCourseSections(block.id)) {
-                            viewModel.sequentialClickedEvent(block.blockId, block.displayName)
-                        }
-                    },
-                    onSectionClick = { sectionBlock ->
-                        viewModel.courseSubSection[sectionBlock.id]?.let { block ->
-                            viewModel.verticalClickedEvent(block.blockId, block.displayName)
-                            router.navigateToCourseContainer(
-                                requireActivity().supportFragmentManager,
-                                unitId = block.id,
-                                courseId = viewModel.courseId,
-                                mode = CourseViewMode.FULL
-                            )
                         }
                     },
                     onDownloadClick = {
