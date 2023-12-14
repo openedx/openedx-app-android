@@ -933,27 +933,32 @@ fun UnitSubSectionsList(
             itemsIndexed(sectionsBlocks) { index, block ->
                 Column {
                     if (block.isGated() && (index == 0 || !sectionsBlocks[index - 1].isGated())) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier
+                                .background(MaterialTheme.appColors.background)
                         ) {
-                            Image(
-                                modifier = Modifier
-                                    .size(16.dp),
-                                painter = painterResource(id = R.drawable.ic_course_gated),
-                                contentDescription = "gated"
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 8.dp, end = 8.dp)
-                                    .weight(1f),
-                                text = stringResource(id = R.string.course_gated_content_label),
-                                color = MaterialTheme.appColors.textSecondary,
-                                style = MaterialTheme.appTypography.labelSmall,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                textAlign = TextAlign.Start,
-                            )
+                            Row(
+                                modifier = Modifier.padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    modifier = Modifier
+                                        .size(16.dp),
+                                    painter = painterResource(id = R.drawable.ic_course_gated),
+                                    contentDescription = "gated"
+                                )
+                                Text(
+                                    modifier = Modifier
+                                        .padding(start = 8.dp, end = 8.dp)
+                                        .weight(1f),
+                                    text = stringResource(id = R.string.course_gated_content_label),
+                                    color = MaterialTheme.appColors.textPrimaryVariant,
+                                    style = MaterialTheme.appTypography.labelSmall,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    textAlign = TextAlign.Start,
+                                )
+                            }
                         }
                         Divider()
                     }
