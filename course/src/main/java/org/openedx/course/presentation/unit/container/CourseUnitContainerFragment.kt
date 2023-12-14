@@ -185,12 +185,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 val subSectionName = currentSubSection?.displayName ?: ""
                 val blockShowed by viewModel.selectBlockDialogShowed.observeAsState()
 
-                UnitSubSectionsTitle(
-                    subSectionName = subSectionName,
-                    subSectionsCount = subSectionsBlocks.size,
-                    blockListShowed = blockShowed,
-                    onBlockClick = { handleSectionClick() }
-                )
+                OpenEdXTheme {
+                    UnitSubSectionsTitle(
+                        subSectionName = subSectionName,
+                        subSectionsCount = subSectionsBlocks.size,
+                        blockListShowed = blockShowed,
+                        onBlockClick = { handleSectionClick() }
+                    )
+                }
             }
 
             binding.subSectionsBlocksBg.setOnClickListener { handleSectionClick() }

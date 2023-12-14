@@ -994,7 +994,7 @@ fun UnitSubSectionsList(
                                     id = CourseOutlineFragment.getUnitBlockIcon(block)
                                 ),
                                 contentDescription = null,
-                                tint = Color(0xFF707070)
+                                tint = MaterialTheme.appColors.textPrimary
                             )
                         }
                     }
