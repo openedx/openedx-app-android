@@ -6,18 +6,15 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.utils.EmailUtil
 
 open class DefaultWebViewClient(
     val context: Context,
     val webView: WebView,
-    val coroutineScope: CoroutineScope,
-    val cookieManager: AppCookieManager,
     val isAllLinksExternal: Boolean,
-    val openExternalLink: (String) -> Unit
+    val refreshSessionCookie: () -> Unit,
+    val openExternalLink: (String) -> Unit,
 ) : WebViewClient() {
 
     private var hostForThisPage: String? = null
@@ -59,10 +56,8 @@ open class DefaultWebViewClient(
         if (request.url.toString() == view.url) {
             when (errorResponse.statusCode) {
                 403, 401, 404 -> {
-                    coroutineScope.launch {
-                        cookieManager.tryToRefreshSessionCookie()
-                        webView.loadUrl(request.url.toString())
-                    }
+                    refreshSessionCookie()
+                    webView.loadUrl(request.url.toString())
                 }
             }
         }

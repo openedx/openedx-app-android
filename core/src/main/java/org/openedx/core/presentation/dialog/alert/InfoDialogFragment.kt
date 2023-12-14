@@ -1,5 +1,6 @@
 package org.openedx.core.presentation.dialog.alert
 
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,7 +28,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.R
 import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -40,13 +40,12 @@ class InfoDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
-        if (dialog != null && dialog!!.window != null) {
-            dialog!!.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-        }
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                SimpleDialog(
+                InfoDialog(
                     title = requireArguments().getString(ARG_TITLE, ""),
                     message = requireArguments().getString(ARG_MESSAGE, ""),
                     onClick = {
@@ -76,7 +75,7 @@ class InfoDialogFragment : DialogFragment() {
 }
 
 @Composable
-fun SimpleDialog(
+private fun InfoDialog(
     title: String,
     message: String,
     onClick: () -> Unit,
@@ -86,7 +85,6 @@ fun SimpleDialog(
             .widthIn(max = 640.dp)
             .fillMaxWidth()
             .clip(MaterialTheme.appShapes.cardShape)
-            .noRippleClickable {}
             .background(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.cardShape
@@ -120,8 +118,8 @@ fun SimpleDialog(
 
 @Preview
 @Composable
-fun SimpleDialogPreview() {
-    SimpleDialog(
+private fun SimpleDialogPreview() {
+    InfoDialog(
         title = "Important Notice",
         message = "This is an important announcement.",
         onClick = {}

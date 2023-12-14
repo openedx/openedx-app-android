@@ -49,12 +49,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
-import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -69,9 +66,6 @@ import org.openedx.core.R as CoreR
 
 class WebviewDiscoveryFragment : Fragment() {
 
-    private val edxCookieManager by inject<AppCookieManager>()
-    private val networkConnection by inject<NetworkConnection>()
-    private val router: DiscoveryRouter by inject()
     private val viewModel by viewModel<WebViewDiscoveryViewModel>()
 
     override fun onCreateView(
@@ -85,7 +79,7 @@ class WebviewDiscoveryFragment : Fragment() {
                 val windowSize = rememberWindowSize()
                 var isLoading by remember { mutableStateOf(true) }
                 var hasInternetConnection by remember {
-                    mutableStateOf(networkConnection.isOnline())
+                    mutableStateOf(viewModel.hasInternetConnection)
                 }
 
                 Surface {
@@ -99,7 +93,9 @@ class WebviewDiscoveryFragment : Fragment() {
                             WebViewDiscoverScreen(
                                 windowSize = windowSize,
                                 url = viewModel.discoveryUrl,
-                                cookieManager = edxCookieManager,
+                                refreshSessionCookie = {
+                                    viewModel.tryToRefreshSessionCookie()
+                                },
                                 onWebPageLoaded = {
                                     isLoading = false
                                 },
@@ -107,10 +103,10 @@ class WebviewDiscoveryFragment : Fragment() {
                                     viewModel.updateDiscoveryUrl(url)
                                 },
                                 onInfoCardClicked = { pathId, infoType ->
-                                    router.navigateToCourseInfo(
-                                        requireActivity().supportFragmentManager,
-                                        pathId,
-                                        infoType
+                                    viewModel.infoCardClicked(
+                                        fragmentManager = requireActivity().supportFragmentManager,
+                                        pathId = pathId,
+                                        infoType = infoType
                                     )
                                 },
                                 openExternalLink = { url ->
@@ -134,7 +130,7 @@ class WebviewDiscoveryFragment : Fragment() {
                                     .fillMaxHeight()
                                     .background(MaterialTheme.appColors.background)
                             ) {
-                                hasInternetConnection = networkConnection.isOnline()
+                                hasInternetConnection = viewModel.hasInternetConnection
                             }
                         }
                         if (isLoading && hasInternetConnection) {
@@ -159,8 +155,8 @@ class WebviewDiscoveryFragment : Fragment() {
 private fun WebViewDiscoverScreen(
     windowSize: WindowSize,
     url: String,
-    cookieManager: AppCookieManager,
     onWebPageLoaded: () -> Unit,
+    refreshSessionCookie: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onInfoCardClicked: (String, String) -> Unit,
     openExternalLink: (String) -> Unit,
@@ -170,11 +166,11 @@ private fun WebViewDiscoverScreen(
 
     val webView = CatalogWebViewScreen(
         url = url,
-        cookieManager = cookieManager,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
         openExternalLink = openExternalLink,
         onInfoCardClicked = onInfoCardClicked,
+        refreshSessionCookie = refreshSessionCookie,
     )
 
     Scaffold(
@@ -244,7 +240,7 @@ private fun WebViewDiscoverScreen(
 }
 
 @Composable
-fun HandleWebViewBackNavigation(
+private fun HandleWebViewBackNavigation(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     webView: WebView?
 ) {

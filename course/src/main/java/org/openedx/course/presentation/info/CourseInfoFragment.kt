@@ -24,8 +24,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,15 +44,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
-import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
@@ -65,15 +62,11 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.core.R as CoreR
 
 class CourseInfoFragment : Fragment() {
 
     private val viewModel by viewModel<CourseInfoViewModel>()
-    private val edxCookieManager by inject<AppCookieManager>()
-    private val networkConnection by inject<NetworkConnection>()
-    private val router: CourseRouter by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,9 +76,9 @@ class CourseInfoFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val showAlert by viewModel.showAlert.observeAsState()
-                val enrollmentSuccess by viewModel.courseEnrollSuccess.observeAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
+                val showAlert by viewModel.showAlert.collectAsState(initial = false)
+                val enrollmentSuccess by viewModel.courseEnrollSuccess.collectAsState(initial = "")
 
                 val windowSize = rememberWindowSize()
 
@@ -94,11 +87,11 @@ class CourseInfoFragment : Fragment() {
                 }
 
                 var hasInternetConnection by remember {
-                    mutableStateOf(networkConnection.isOnline())
+                    mutableStateOf(viewModel.hasInternetConnection)
                 }
 
                 LaunchedEffect(showAlert) {
-                    if (showAlert == true) {
+                    if (showAlert) {
                         InfoDialogFragment.newInstance(
                             title = context.getString(R.string.course_enrollment_error),
                             message = context.getString(
@@ -113,11 +106,10 @@ class CourseInfoFragment : Fragment() {
                 }
 
                 LaunchedEffect(enrollmentSuccess) {
-                    if (enrollmentSuccess?.isNotEmpty() == true) {
-                        router.navigateToCourseOutline(
-                            requireActivity().supportFragmentManager,
-                            courseId = enrollmentSuccess!!,
-                            courseTitle = ""
+                    if (enrollmentSuccess.isNotEmpty()) {
+                        viewModel.onSuccessfulCourseEnrollment(
+                            fragmentManager = requireActivity().supportFragmentManager,
+                            courseId = enrollmentSuccess,
                         )
                     }
                 }
@@ -134,7 +126,6 @@ class CourseInfoFragment : Fragment() {
                                 windowSize = windowSize,
                                 uiMessage = uiMessage,
                                 url = getInitialUrl(),
-                                cookieManager = edxCookieManager,
                                 onWebPageLoaded = {
                                     isLoading = false
                                 },
@@ -143,6 +134,9 @@ class CourseInfoFragment : Fragment() {
                                 },
                                 onEnrollClick = { courseId ->
                                     viewModel.enrollInACourse(courseId)
+                                },
+                                refreshSessionCookie = {
+                                    viewModel.tryToRefreshSessionCookie()
                                 },
                                 openExternalLink = { url ->
                                     ActionDialogFragment.newInstance(
@@ -158,10 +152,10 @@ class CourseInfoFragment : Fragment() {
                                     )
                                 },
                                 onInfoCardClicked = { pathId, infoType ->
-                                    router.navigateToCourseInfo(
-                                        requireActivity().supportFragmentManager,
-                                        pathId,
-                                        infoType
+                                    viewModel.infoCardClicked(
+                                        fragmentManager = requireActivity().supportFragmentManager,
+                                        pathId = pathId,
+                                        infoType = infoType
                                     )
                                 },
                             )
@@ -172,7 +166,7 @@ class CourseInfoFragment : Fragment() {
                                     .fillMaxHeight()
                                     .background(MaterialTheme.appColors.background)
                             ) {
-                                hasInternetConnection = networkConnection.isOnline()
+                                hasInternetConnection = viewModel.hasInternetConnection
                             }
                         }
                         if (isLoading && hasInternetConnection) {
@@ -227,10 +221,10 @@ private fun CourseInfoScreen(
     windowSize: WindowSize,
     uiMessage: UIMessage?,
     url: String,
-    cookieManager: AppCookieManager,
     onWebPageLoaded: () -> Unit,
     onBackClick: () -> Unit,
     onEnrollClick: (String) -> Unit,
+    refreshSessionCookie: () -> Unit,
     onInfoCardClicked: (String, String) -> Unit,
     openExternalLink: (String) -> Unit
 ) {
@@ -263,11 +257,11 @@ private fun CourseInfoScreen(
         val webView = CatalogWebViewScreen(
             url = url,
             isAllLinksExternal = true,
-            cookieManager = cookieManager,
             onWebPageLoaded = onWebPageLoaded,
             openExternalLink = openExternalLink,
             onEnrollClick = onEnrollClick,
             onInfoCardClicked = onInfoCardClicked,
+            refreshSessionCookie = refreshSessionCookie,
         )
 
         Box(

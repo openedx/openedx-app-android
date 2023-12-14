@@ -86,7 +86,7 @@ val screenModule = module {
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
     viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { WebViewDiscoveryViewModel(get()) }
+    viewModel { WebViewDiscoveryViewModel(get(), get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
@@ -113,7 +113,7 @@ val screenModule = module {
 
     single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
-    viewModel { CourseInfoViewModel(get(), get(), get(), get(), get()) }
+    viewModel { CourseInfoViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) ->
         CourseDetailsViewModel(
             courseId,

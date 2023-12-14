@@ -1,6 +1,7 @@
 package org.openedx.core.presentation.dialog.alert
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -32,7 +33,6 @@ import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
 import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -48,9 +48,7 @@ class ActionDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
-        if (dialog != null && dialog!!.window != null) {
-            dialog!!.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
-        }
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -96,7 +94,7 @@ class ActionDialogFragment : DialogFragment() {
 }
 
 @Composable
-fun ActionDialog(
+private fun ActionDialog(
     title: String,
     message: String,
     onPositiveClick: () -> Unit,
@@ -107,7 +105,6 @@ fun ActionDialog(
             .widthIn(max = 640.dp)
             .fillMaxWidth()
             .clip(MaterialTheme.appShapes.cardShape)
-            .noRippleClickable {}
             .background(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.cardShape
@@ -148,7 +145,7 @@ fun ActionDialog(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun ActionDialogPreview() {
+private fun ActionDialogPreview() {
     ActionDialog(
         title = "Leaving the app",
         message = "You are now leaving the app and opening a browser.",

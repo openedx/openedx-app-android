@@ -3,11 +3,10 @@ package org.openedx.core.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.text.TextUtils
 
 object UrlUtils {
     fun openInBrowser(activity: Context, apiHostUrl: String, url: String) {
-        if (TextUtils.isEmpty(url)) {
+        if (url.isEmpty()) {
             return
         }
         if (url.startsWith("/")) {

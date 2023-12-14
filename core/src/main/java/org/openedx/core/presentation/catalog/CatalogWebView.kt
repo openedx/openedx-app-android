@@ -5,9 +5,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.DefaultWebViewClient
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
@@ -15,15 +13,14 @@ import org.openedx.core.system.DefaultWebViewClient
 fun CatalogWebViewScreen(
     url: String,
     isAllLinksExternal: Boolean = false,
-    cookieManager: AppCookieManager,
     onWebPageLoaded: () -> Unit,
+    refreshSessionCookie: () -> Unit,
     openExternalLink: (String) -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
     onEnrollClick: (String) -> Unit = {},
     onInfoCardClicked: (String, String) -> Unit = { _, _ -> },
 ): WebView {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
 
     return remember {
         WebView(context).apply {
@@ -31,9 +28,8 @@ fun CatalogWebViewScreen(
                 context = context,
                 webView = this@apply,
                 isAllLinksExternal = isAllLinksExternal,
-                coroutineScope = coroutineScope,
-                cookieManager = cookieManager,
                 openExternalLink = openExternalLink,
+                refreshSessionCookie = refreshSessionCookie,
             ) {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
