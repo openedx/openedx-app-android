@@ -24,7 +24,7 @@ data class Block(
     val descendants: List<String>,
     val descendantsType: BlockType,
     val completion: Double,
-    val containsGatedContent: Boolean?,
+    val containsGatedContent: Boolean? = false,
     val downloadModel: DownloadModel? = null
 ) {
     val isDownloadable: Boolean

@@ -228,6 +228,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+        every { config.isCourseNestedListEnabled() } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -266,6 +267,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+        every { config.isCourseNestedListEnabled() } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -304,6 +306,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+        every { config.isCourseNestedListEnabled() } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -375,6 +378,7 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { config.isCourseNestedListEnabled() } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -405,6 +409,7 @@ class CourseOutlineViewModelTest {
         coEvery { downloadDao.readAllData() } returns mockk()
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { config.isCourseNestedListEnabled() } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -433,6 +438,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns false
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { config.isCourseNestedListEnabled() } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
