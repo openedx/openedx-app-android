@@ -141,7 +141,7 @@ class CourseOutlineViewModel(
             _uiState.value = CourseOutlineUIState.CourseData(
                 courseStructure = state.courseStructure,
                 downloadedState = state.downloadedState,
-                resumeBlock = state.resumeBlock,
+                resumeComponent = state.resumeComponent,
                 courseSections = courseSections,
                 courseSectionsState = courseSectionsState,
                 downloadsCount = downloadsCount

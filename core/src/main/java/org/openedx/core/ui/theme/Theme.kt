@@ -67,6 +67,10 @@ private val DarkColorPalette = AppColors(
 
     authFacebookButtonBackground = dark_auth_facebook_button_background,
     authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
+
+    unitHorizontalProgressCompleted = dark_unit_horizontal_progress_completed,
+    unitHorizontalProgressSelected = dark_unit_horizontal_progress_selected,
+    unitHorizontalProgressDefault = dark_unit_horizontal_progress_default,
 )
 
 private val LightColorPalette = AppColors(
@@ -126,6 +130,10 @@ private val LightColorPalette = AppColors(
 
     authFacebookButtonBackground = light_auth_facebook_button_background,
     authMicrosoftButtonBackground = light_auth_microsoft_button_background,
+
+    unitHorizontalProgressCompleted = light_unit_horizontal_progress_completed,
+    unitHorizontalProgressSelected = light_unit_horizontal_progress_selected,
+    unitHorizontalProgressDefault = light_unit_horizontal_progress_default,
 )
 
 val MaterialTheme.appColors: AppColors

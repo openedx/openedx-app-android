@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
@@ -133,9 +132,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     HorizontalPageIndicator(
                         blocks = viewModel.descendantsBlocks,
                         selectedPage = index,
-                        completedColor = Color(0xFF2EA171),
-                        selectedColor = Color(0xFFF0CB00),
-                        defaultColor = Color(0xFFD6D3D1)
+                        completedColor = MaterialTheme.appColors.unitHorizontalProgressCompleted,
+                        selectedColor = MaterialTheme.appColors.unitHorizontalProgressSelected,
+                        defaultColor = MaterialTheme.appColors.unitHorizontalProgressDefault
                     )
                 }
             }
@@ -164,7 +163,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
         binding.btnBack.setContent {
             val sectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
-            val currentSection = sectionsBlocks.firstOrNull { it.id == blockId }
+            val currentSection = sectionsBlocks.firstOrNull { it.id == unitId }
             val title =
                 if (currentSection == null) "" else viewModel.getModuleBlock(currentSection.id).displayName
 
@@ -179,7 +178,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         if (viewModel.isCourseExpandableSectionsEnabled) {
             binding.unitSubSectionsTitle.setContent {
                 val subSectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
-                val currentSubSection = subSectionsBlocks.firstOrNull { it.id == blockId }
+                val currentSubSection = subSectionsBlocks.firstOrNull { it.id == unitId }
                 val subSectionName = currentSubSection?.displayName ?: ""
                 val blockShowed by viewModel.selectBlockDialogShowed.observeAsState()
 
@@ -197,7 +196,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
             binding.subSectionsBlocksList.setContent {
                 val sectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
-                val selectedIndex = sectionsBlocks.indexOfFirst { it.id == blockId }
+                val selectedIndex = sectionsBlocks.indexOfFirst { it.id == unitId }
                 OpenEdXTheme {
                     UnitSubSectionsList(
                         sectionsBlocks = sectionsBlocks,
@@ -352,17 +351,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             binding.subSectionsBlocksList.visibility = View.VISIBLE
             binding.subSectionsBlocksBg.visibility = View.VISIBLE
             viewModel.showSelectBlockDialog()
-        }
-    }
-
-    private fun proceedToNextSection(nextBlock: Block) {
-        if (nextBlock.type.isContainer()) {
-            router.replaceCourseContainer(
-                requireActivity().supportFragmentManager,
-                nextBlock.id,
-                viewModel.courseId,
-                requireArguments().serializable(ARG_MODE)!!
-            )
         }
     }
 
