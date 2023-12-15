@@ -102,7 +102,8 @@ class CourseDetailsFragment : Fragment() {
                             when {
                                 (!currentState.isUserLoggedIn && router is AuthRouter) -> {
                                     (router as AuthRouter).navigateToLogistration(
-                                        parentFragmentManager
+                                        parentFragmentManager,
+                                        currentState.course.courseId
                                     )
                                 }
 

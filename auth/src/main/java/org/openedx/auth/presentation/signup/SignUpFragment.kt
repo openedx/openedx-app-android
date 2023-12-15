@@ -4,27 +4,59 @@ package org.openedx.auth.presentation.signup
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.*
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -33,26 +65,46 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.ui.ExpandableText
 import org.openedx.auth.presentation.ui.OptionalFields
 import org.openedx.auth.presentation.ui.RequiredFields
+import org.openedx.core.AppUpdateState
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
-import org.openedx.core.ui.*
-import org.openedx.core.ui.theme.*
-import org.openedx.core.AppUpdateState
+import org.openedx.core.ui.BackBtn
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.SheetContent
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.isImeVisibleState
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberSaveableMap
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
+import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
+import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 
 class SignUpFragment : Fragment() {
 
-    private val viewModel by viewModel<SignUpViewModel>()
+    private val viewModel by viewModel<SignUpViewModel> {
+        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+    }
     private val router by inject<AuthRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +146,10 @@ class SignUpFragment : Fragment() {
 
                     LaunchedEffect(successLogin) {
                         if (successLogin == true) {
-                            router.navigateToMain(parentFragmentManager)
+                            if (!TextUtils.isEmpty(viewModel.courseId)) {
+                                router.clearBackStack(parentFragmentManager)
+                            }
+                            router.navigateToMain(parentFragmentManager, viewModel.courseId)
                         }
                     }
                 } else {
@@ -105,6 +160,17 @@ class SignUpFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_COURSE_ID = "courseId"
+        fun newInstance(courseId: String?): SignUpFragment {
+            val fragment = SignUpFragment()
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId
+            )
+            return fragment
         }
     }
 }

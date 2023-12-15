@@ -62,7 +62,7 @@ val screenModule = module {
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
-    viewModel {
+    viewModel { (courseId: String?) ->
         SignInViewModel(
             get(),
             get(),
@@ -73,10 +73,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            courseId,
         )
     }
-    viewModel { SignUpViewModel(get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String?) ->
+        SignUpViewModel(get(), get(), get(), get(), get(), courseId)
+    }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
     factory { DashboardRepository(get(), get(), get()) }

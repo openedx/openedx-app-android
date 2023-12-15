@@ -38,11 +38,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.R as coreR
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SearchBar
@@ -51,6 +51,7 @@ import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.R as coreR
 
 class LogistrationFragment : Fragment() {
 
@@ -64,18 +65,30 @@ class LogistrationFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val courseId = arguments?.getString(ARG_COURSE_ID, "")
                 LogistrationScreen(
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager)
+                        router.navigateToSignIn(parentFragmentManager, courseId)
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager)
+                        router.navigateToSignUp(parentFragmentManager, courseId)
                     },
                     onSearchClick = { querySearch ->
                         router.navigateToDiscoverCourses(parentFragmentManager, querySearch)
                     }
                 )
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_COURSE_ID = "courseId"
+        fun newInstance(courseId: String?): LogistrationFragment {
+            val fragment = LogistrationFragment()
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId
+            )
+            return fragment
         }
     }
 }

@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signin
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
@@ -9,9 +10,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.signin.compose.LoginScreen
 import org.openedx.core.AppUpdateState
@@ -22,7 +25,9 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 
 class SignInFragment : Fragment() {
 
-    private val viewModel: SignInViewModel by viewModel()
+    private val viewModel: SignInViewModel by viewModel {
+        parametersOf(requireArguments().getString(ARG_COURSE_ID, null))
+    }
     private val router: AuthRouter by inject()
     private val whatsNewGlobalManager by inject<WhatsNewGlobalManager>()
 
@@ -35,7 +40,6 @@ class SignInFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-
                 val state by viewModel.uiState.collectAsState()
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
@@ -66,7 +70,7 @@ class SignInFragment : Fragment() {
                                     viewModel.signUpClickedEvent()
                                     router.navigateToSignUp(parentFragmentManager)
                                 }
-                                
+
                                 AuthEvent.BackClick -> {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 }
@@ -80,7 +84,10 @@ class SignInFragment : Fragment() {
                             if (isNeedToShowWhatsNew) {
                                 router.navigateToWhatsNew(parentFragmentManager)
                             } else {
-                                router.navigateToMain(parentFragmentManager)
+                                if (!TextUtils.isEmpty(viewModel.courseId)) {
+                                    router.clearBackStack(parentFragmentManager)
+                                }
+                                router.navigateToMain(parentFragmentManager, viewModel.courseId)
                             }
                         }
 
@@ -93,6 +100,17 @@ class SignInFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_COURSE_ID = "courseId"
+        fun newInstance(courseId: String?): SignInFragment {
+            val fragment = SignInFragment()
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId
+            )
+            return fragment
         }
     }
 }

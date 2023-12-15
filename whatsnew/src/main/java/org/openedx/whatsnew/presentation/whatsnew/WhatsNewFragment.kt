@@ -90,7 +90,7 @@ class WhatsNewFragment : Fragment() {
                     onCloseClick = {
                         val versionName = appData.versionName
                         preferencesManager.lastWhatsNewVersion = versionName
-                        router.navigateToMain(parentFragmentManager)
+                        router.navigateToMain(parentFragmentManager, null)
                     }
                 )
             }
