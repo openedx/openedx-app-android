@@ -35,7 +35,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -50,7 +49,6 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
@@ -73,74 +71,44 @@ class WebviewDiscoveryFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                var isLoading by remember { mutableStateOf(true) }
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
 
-                Surface {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        if (hasInternetConnection) {
-                            WebViewDiscoverScreen(
-                                windowSize = windowSize,
-                                url = viewModel.discoveryUrl,
-                                refreshSessionCookie = {
-                                    viewModel.tryToRefreshSessionCookie()
-                                },
-                                onWebPageLoaded = {
-                                    isLoading = false
-                                },
-                                onWebPageUpdated = { url ->
-                                    viewModel.updateDiscoveryUrl(url)
-                                },
-                                onInfoCardClicked = { pathId, infoType ->
-                                    viewModel.infoCardClicked(
-                                        fragmentManager = requireActivity().supportFragmentManager,
-                                        pathId = pathId,
-                                        infoType = infoType
-                                    )
-                                },
-                                openExternalLink = { url ->
-                                    ActionDialogFragment.newInstance(
-                                        title = getString(CoreR.string.core_leaving_the_app),
-                                        message = getString(
-                                            CoreR.string.core_leaving_the_app_message,
-                                            getString(CoreR.string.platform_name)
-                                        ),
-                                        url = url,
-                                    ).show(
-                                        requireActivity().supportFragmentManager,
-                                        ActionDialogFragment::class.simpleName
-                                    )
-                                },
-                            )
-                        } else {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background)
-                            ) {
-                                hasInternetConnection = viewModel.hasInternetConnection
-                            }
-                        }
-                        if (isLoading && hasInternetConnection) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .zIndex(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-                    }
-                }
+                WebViewDiscoveryScreen(
+                    windowSize = windowSize,
+                    contentUrl = viewModel.discoveryUrl,
+                    hasInternetConnection = hasInternetConnection,
+                    checkInternetConnection = {
+                        hasInternetConnection = viewModel.hasInternetConnection
+                    },
+                    refreshSessionCookie = {
+                        viewModel.tryToRefreshSessionCookie()
+                    },
+                    onWebPageUpdated = { url ->
+                        viewModel.updateDiscoveryUrl(url)
+                    },
+                    onInfoCardClicked = { pathId, infoType ->
+                        viewModel.infoCardClicked(
+                            fragmentManager = requireActivity().supportFragmentManager,
+                            pathId = pathId,
+                            infoType = infoType
+                        )
+                    },
+                    openExternalLink = { url ->
+                        ActionDialogFragment.newInstance(
+                            title = getString(CoreR.string.core_leaving_the_app),
+                            message = getString(
+                                CoreR.string.core_leaving_the_app_message,
+                                getString(CoreR.string.platform_name)
+                            ),
+                            url = url,
+                        ).show(
+                            requireActivity().supportFragmentManager,
+                            ActionDialogFragment::class.simpleName
+                        )
+                    },
+                )
             }
         }
     }
@@ -148,10 +116,11 @@ class WebviewDiscoveryFragment : Fragment() {
 
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
-private fun WebViewDiscoverScreen(
+private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
-    url: String,
-    onWebPageLoaded: () -> Unit,
+    contentUrl: String,
+    hasInternetConnection: Boolean,
+    checkInternetConnection: () -> Unit,
     refreshSessionCookie: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onInfoCardClicked: (String, String) -> Unit,
@@ -159,15 +128,7 @@ private fun WebViewDiscoverScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-
-    val webView = CatalogWebViewScreen(
-        url = url,
-        onWebPageLoaded = onWebPageLoaded,
-        onWebPageUpdated = onWebPageUpdated,
-        openExternalLink = openExternalLink,
-        onInfoCardClicked = onInfoCardClicked,
-        refreshSessionCookie = refreshSessionCookie,
-    )
+    var isLoading by remember { mutableStateOf(true) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -197,16 +158,75 @@ private fun WebViewDiscoverScreen(
         ) {
             Toolbar(label = stringResource(id = R.string.discovery_explore_the_catalog))
 
-            AndroidView(
-                modifier = Modifier
-                    .then(modifierScreenWidth)
-                    .background(MaterialTheme.appColors.background),
-                factory = {
-                    webView
+            Surface {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    if (hasInternetConnection) {
+                        DiscoveryWebView(
+                            contentUrl = contentUrl,
+                            refreshSessionCookie = refreshSessionCookie,
+                            onWebPageLoaded = { isLoading = false },
+                            onWebPageUpdated = onWebPageUpdated,
+                            onInfoCardClicked = onInfoCardClicked,
+                            openExternalLink = openExternalLink,
+                        )
+                    } else {
+                        ConnectionErrorView(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                                .background(MaterialTheme.appColors.background)
+                        ) {
+                            checkInternetConnection()
+                        }
+                    }
+                    if (isLoading && hasInternetConnection) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .zIndex(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                        }
+                    }
                 }
-            )
+            }
         }
     }
+}
+
+@Composable
+@SuppressLint("SetJavaScriptEnabled")
+private fun DiscoveryWebView(
+    contentUrl: String,
+    onWebPageLoaded: () -> Unit,
+    refreshSessionCookie: () -> Unit,
+    onWebPageUpdated: (String) -> Unit,
+    onInfoCardClicked: (String, String) -> Unit,
+    openExternalLink: (String) -> Unit,
+) {
+    val webView = CatalogWebViewScreen(
+        url = contentUrl,
+        onWebPageLoaded = onWebPageLoaded,
+        onWebPageUpdated = onWebPageUpdated,
+        openExternalLink = openExternalLink,
+        onInfoCardClicked = onInfoCardClicked,
+        refreshSessionCookie = refreshSessionCookie,
+    )
+
+    AndroidView(
+        modifier = Modifier
+            .background(MaterialTheme.appColors.background),
+        factory = {
+            webView
+        }
+    )
+
     HandleWebViewBackNavigation(webView = webView)
 }
 

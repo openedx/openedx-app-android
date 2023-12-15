@@ -72,13 +72,7 @@ class CourseInfoFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val showAlert by viewModel.showAlert.collectAsState(initial = false)
                 val enrollmentSuccess by viewModel.courseEnrollSuccess.collectAsState(initial = "")
-
                 val windowSize = rememberWindowSize()
-
-                var isLoading by remember {
-                    mutableStateOf(true)
-                }
-
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
@@ -107,73 +101,44 @@ class CourseInfoFragment : Fragment() {
                     }
                 }
 
-                Surface {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        if (hasInternetConnection) {
-                            CourseInfoScreen(
-                                windowSize = windowSize,
-                                uiMessage = uiMessage,
-                                url = getInitialUrl(),
-                                onWebPageLoaded = {
-                                    isLoading = false
-                                },
-                                onBackClick = {
-                                    requireActivity().supportFragmentManager.popBackStackImmediate()
-                                },
-                                onEnrollClick = { courseId ->
-                                    viewModel.enrollInACourse(courseId)
-                                },
-                                refreshSessionCookie = {
-                                    viewModel.tryToRefreshSessionCookie()
-                                },
-                                openExternalLink = { url ->
-                                    ActionDialogFragment.newInstance(
-                                        title = getString(CoreR.string.core_leaving_the_app),
-                                        message = getString(
-                                            CoreR.string.core_leaving_the_app_message,
-                                            getString(CoreR.string.platform_name)
-                                        ),
-                                        url = url,
-                                    ).show(
-                                        requireActivity().supportFragmentManager,
-                                        ActionDialogFragment::class.simpleName
-                                    )
-                                },
-                                onInfoCardClicked = { pathId, infoType ->
-                                    viewModel.infoCardClicked(
-                                        fragmentManager = requireActivity().supportFragmentManager,
-                                        pathId = pathId,
-                                        infoType = infoType
-                                    )
-                                },
-                            )
-                        } else {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background)
-                            ) {
-                                hasInternetConnection = viewModel.hasInternetConnection
-                            }
-                        }
-                        if (isLoading && hasInternetConnection) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .zIndex(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-                    }
-                }
+                CourseInfoScreen(
+                    windowSize = windowSize,
+                    uiMessage = uiMessage,
+                    contentUrl = getInitialUrl(),
+                    hasInternetConnection = hasInternetConnection,
+                    checkInternetConnection = {
+                        hasInternetConnection = viewModel.hasInternetConnection
+                    },
+                    onBackClick = {
+                        requireActivity().supportFragmentManager.popBackStackImmediate()
+                    },
+                    onEnrollClick = { courseId ->
+                        viewModel.enrollInACourse(courseId)
+                    },
+                    refreshSessionCookie = {
+                        viewModel.tryToRefreshSessionCookie()
+                    },
+                    openExternalLink = { url ->
+                        ActionDialogFragment.newInstance(
+                            title = getString(CoreR.string.core_leaving_the_app),
+                            message = getString(
+                                CoreR.string.core_leaving_the_app_message,
+                                getString(CoreR.string.platform_name)
+                            ),
+                            url = url,
+                        ).show(
+                            requireActivity().supportFragmentManager,
+                            ActionDialogFragment::class.simpleName
+                        )
+                    },
+                    onInfoCardClicked = { pathId, infoType ->
+                        viewModel.infoCardClicked(
+                            fragmentManager = requireActivity().supportFragmentManager,
+                            pathId = pathId,
+                            infoType = infoType
+                        )
+                    },
+                )
             }
         }
     }
@@ -209,12 +174,12 @@ class CourseInfoFragment : Fragment() {
 }
 
 @Composable
-@SuppressLint("SetJavaScriptEnabled")
 private fun CourseInfoScreen(
     windowSize: WindowSize,
     uiMessage: UIMessage?,
-    url: String,
-    onWebPageLoaded: () -> Unit,
+    contentUrl: String,
+    hasInternetConnection: Boolean,
+    checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
     onEnrollClick: (String) -> Unit,
     refreshSessionCookie: () -> Unit,
@@ -223,6 +188,7 @@ private fun CourseInfoScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
+    var isLoading by remember { mutableStateOf(true) }
 
     HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -244,16 +210,6 @@ private fun CourseInfoScreen(
             )
         }
 
-        val webView = CatalogWebViewScreen(
-            url = url,
-            isAllLinksExternal = true,
-            onWebPageLoaded = onWebPageLoaded,
-            openExternalLink = openExternalLink,
-            onEnrollClick = onEnrollClick,
-            onInfoCardClicked = onInfoCardClicked,
-            refreshSessionCookie = refreshSessionCookie,
-        )
-
         Column(
             modifier = modifierScreenWidth
                 .fillMaxSize()
@@ -267,14 +223,77 @@ private fun CourseInfoScreen(
                 onBackClick = onBackClick
             )
 
-            AndroidView(
-                modifier = Modifier
-                    .then(modifierScreenWidth)
-                    .background(MaterialTheme.appColors.background),
-                factory = {
-                    webView
+            Surface {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    if (hasInternetConnection) {
+                        CourseInfoWebView(
+                            contentUrl = contentUrl,
+                            onWebPageLoaded = { isLoading = false },
+                            onEnrollClick = onEnrollClick,
+                            refreshSessionCookie = refreshSessionCookie,
+                            onInfoCardClicked = onInfoCardClicked,
+                            openExternalLink = openExternalLink,
+                        )
+                    } else {
+                        ConnectionErrorView(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                                .background(MaterialTheme.appColors.background)
+                        ) {
+                            checkInternetConnection()
+                        }
+                    }
+                    if (isLoading && hasInternetConnection) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .zIndex(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                        }
+                    }
                 }
-            )
+            }
         }
     }
+}
+
+@Composable
+@SuppressLint("SetJavaScriptEnabled")
+private fun CourseInfoWebView(
+    contentUrl: String,
+    onWebPageLoaded: () -> Unit,
+    onEnrollClick: (String) -> Unit,
+    refreshSessionCookie: () -> Unit,
+    onInfoCardClicked: (String, String) -> Unit,
+    openExternalLink: (String) -> Unit
+) {
+
+    val webView = CatalogWebViewScreen(
+        url = contentUrl,
+        isAllLinksExternal = true,
+        onWebPageLoaded = onWebPageLoaded,
+        openExternalLink = openExternalLink,
+        onEnrollClick = onEnrollClick,
+        onInfoCardClicked = onInfoCardClicked,
+        refreshSessionCookie = refreshSessionCookie,
+    )
+
+    AndroidView(
+        modifier = Modifier
+            .background(MaterialTheme.appColors.background),
+        factory = {
+            webView
+        },
+        update = {
+            webView.loadUrl(contentUrl)
+        }
+    )
 }
