@@ -138,6 +138,55 @@ fun StaticSearchBar(
     }
 }
 
+@Composable
+fun Toolbar(
+    modifier: Modifier = Modifier,
+    label: String
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp),
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(),
+            text = label,
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+fun ToolbarWithBackBtn(
+    modifier: Modifier = Modifier,
+    label: String,
+    onBackClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp),
+    ) {
+        BackBtn(onBackClick = onBackClick)
+
+        Text(
+            modifier = Modifier
+                .align(Alignment.Center),
+            text = label,
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
