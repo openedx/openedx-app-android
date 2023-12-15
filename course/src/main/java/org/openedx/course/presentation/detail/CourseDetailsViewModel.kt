@@ -9,6 +9,7 @@ import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -21,6 +22,7 @@ import org.openedx.course.presentation.CourseAnalytics
 class CourseDetailsViewModel(
     private val courseId: String,
     private val config: Config,
+    private val corePreferences: CorePreferences,
     private val networkConnection: NetworkConnection,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -54,7 +56,11 @@ class CourseDetailsViewModel(
                 } else {
                     interactor.getCourseDetailsFromCache(courseId)
                 }
-                _uiState.value = CourseDetailsUIState.CourseData(course = course!!)
+                _uiState.value = CourseDetailsUIState.CourseData(
+                    course = course!!,
+                    config.isPreLoginExperienceEnabled(),
+                    corePreferences.user != null
+                )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =

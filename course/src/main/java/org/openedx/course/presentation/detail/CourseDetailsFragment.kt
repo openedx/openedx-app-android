@@ -39,6 +39,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
@@ -98,18 +99,28 @@ class CourseDetailsFragment : Fragment() {
                     onButtonClick = {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
-                            if (currentState.course.isEnrolled) {
-                                viewModel.viewCourseClickedEvent(
-                                    currentState.course.courseId,
-                                    currentState.course.name
-                                )
-                                router.navigateToCourseOutline(
-                                    requireActivity().supportFragmentManager,
-                                    currentState.course.courseId,
-                                    currentState.course.name
-                                )
-                            } else {
-                                viewModel.enrollInACourse(currentState.course.courseId)
+                            when {
+                                (!currentState.isUserLoggedIn && router is AuthRouter) -> {
+                                    (router as AuthRouter).navigateToLogistration(
+                                        parentFragmentManager
+                                    )
+                                }
+
+                                currentState.course.isEnrolled -> {
+                                    viewModel.viewCourseClickedEvent(
+                                        currentState.course.courseId,
+                                        currentState.course.name
+                                    )
+                                    router.navigateToCourseOutline(
+                                        requireActivity().supportFragmentManager,
+                                        currentState.course.courseId,
+                                        currentState.course.name
+                                    )
+                                }
+
+                                else -> {
+                                    viewModel.enrollInACourse(currentState.course.courseId)
+                                }
                             }
                         }
                     })

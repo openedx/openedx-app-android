@@ -68,6 +68,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, SignUpFragment())
     }
 
+    override fun navigateToLogistration(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, LogistrationFragment())
+    }
+
     override fun navigateToRestorePassword(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, RestorePasswordFragment())
     }

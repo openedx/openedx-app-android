@@ -8,6 +8,8 @@ interface AuthRouter {
 
     fun navigateToSignIn(fm: FragmentManager)
 
+    fun navigateToLogistration(fm: FragmentManager)
+
     fun navigateToSignUp(fm: FragmentManager)
 
     fun navigateToRestorePassword(fm: FragmentManager)
