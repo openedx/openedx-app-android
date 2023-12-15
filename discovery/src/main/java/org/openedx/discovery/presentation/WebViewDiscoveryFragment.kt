@@ -58,7 +58,7 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
 import org.openedx.core.R as CoreR
 
-class WebviewDiscoveryFragment : Fragment() {
+class WebViewDiscoveryFragment : Fragment() {
 
     private val viewModel by viewModel<WebViewDiscoveryViewModel>()
 

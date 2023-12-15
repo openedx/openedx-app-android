@@ -7,19 +7,19 @@ data class DiscoveryConfig(
     private val viewType: String = Type.NATIVE.name,
 
     @SerializedName("WEBVIEW")
-    val webViewConfig: DiscoveryWebviewConfig = DiscoveryWebviewConfig(),
+    val webViewConfig: DiscoveryWebViewConfig = DiscoveryWebViewConfig(),
 ) {
     enum class Type {
         NATIVE,
         WEBVIEW
     }
 
-    fun isViewTypeWebview(): Boolean {
+    fun isViewTypeWebView(): Boolean {
         return Type.WEBVIEW.name.equals(viewType, ignoreCase = true)
     }
 }
 
-data class DiscoveryWebviewConfig(
+data class DiscoveryWebViewConfig(
     @SerializedName("BASE_URL")
     val baseUrl: String = "",
 

@@ -13,7 +13,7 @@ class MainViewModel(
     val isBottomBarEnabled: LiveData<Boolean>
         get() = _isBottomBarEnabled
 
-    val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebview()
+    val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 
     fun enableBottomBar(enable: Boolean) {
         _isBottomBarEnabled.value = enable
