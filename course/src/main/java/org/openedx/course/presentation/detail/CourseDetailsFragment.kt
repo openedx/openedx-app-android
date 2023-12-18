@@ -39,7 +39,6 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
@@ -101,8 +100,8 @@ class CourseDetailsFragment : Fragment() {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
                             when {
-                                (!currentState.isUserLoggedIn && router is AuthRouter) -> {
-                                    (router as AuthRouter).navigateToLogistration(
+                                (!currentState.isUserLoggedIn) -> {
+                                    router.navigateToLogistration(
                                         parentFragmentManager,
                                         currentState.course.courseId
                                     )

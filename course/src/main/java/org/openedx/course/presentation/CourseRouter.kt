@@ -75,4 +75,6 @@ interface CourseRouter {
     fun navigateToSignUp(fm: FragmentManager, courseId: String?)
 
     fun navigateToSignIn(fm: FragmentManager, courseId: String?)
+
+    fun navigateToLogistration(fm: FragmentManager, courseId: String?)
 }
