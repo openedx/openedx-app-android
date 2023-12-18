@@ -4,6 +4,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
@@ -69,7 +72,6 @@ class CourseOutlineViewModel(
         get() = networkConnection.isOnline()
 
     private val courseSections = mutableMapOf<String, MutableList<Block>>()
-    private val courseSectionsState = mutableMapOf<String, Boolean>()
     private val downloadsCount = mutableMapOf<String, Int>()
     val courseSubSection = mutableMapOf<String, Block?>()
 
@@ -94,7 +96,7 @@ class CourseOutlineViewModel(
                         downloadedState = it.toMap(),
                         resumeComponent = state.resumeComponent,
                         courseSections = courseSections,
-                        courseSectionsState = courseSectionsState,
+                        courseSectionsState = state.courseSectionsState,
                         downloadsCount = downloadsCount
                     )
                 }
@@ -134,10 +136,11 @@ class CourseOutlineViewModel(
     }
 
     fun switchCourseSections(blockId: String): Boolean {
-        courseSectionsState[blockId] = !(courseSectionsState[blockId] ?: false)
-        if (_uiState.value is CourseOutlineUIState.CourseData) {
+        return if (_uiState.value is CourseOutlineUIState.CourseData) {
             val state = _uiState.value as CourseOutlineUIState.CourseData
-            _uiState.value = null
+            val courseSectionsState = state.courseSectionsState.toMutableMap()
+            courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
+
             _uiState.value = CourseOutlineUIState.CourseData(
                 courseStructure = state.courseStructure,
                 downloadedState = state.downloadedState,
@@ -146,9 +149,12 @@ class CourseOutlineViewModel(
                 courseSectionsState = courseSectionsState,
                 downloadsCount = downloadsCount
             )
-        }
 
-        return courseSectionsState[blockId] ?: false
+            courseSectionsState[blockId] ?: false
+
+        } else {
+            false
+        }
     }
 
     private fun getCourseDataInternal() {
@@ -168,6 +174,9 @@ class CourseOutlineViewModel(
                 courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
 
+                val courseSectionsState =
+                    (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState
+                        ?: emptyMap()
                 _uiState.value = CourseOutlineUIState.CourseData(
                     courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),

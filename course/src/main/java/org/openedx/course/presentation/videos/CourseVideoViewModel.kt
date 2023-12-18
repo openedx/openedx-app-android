@@ -21,6 +21,7 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.outline.CourseOutlineUIState
 
 class CourseVideoViewModel(
     val courseId: String,
@@ -59,7 +60,6 @@ class CourseVideoViewModel(
         get() = networkConnection.isOnline()
 
     private val courseSections = mutableMapOf<String, MutableList<Block>>()
-    private val courseSectionsState = mutableMapOf<String, Boolean>()
     private val downloadsCount = mutableMapOf<String, Int>()
     val courseSubSection = mutableMapOf<String, Block?>()
 
@@ -83,7 +83,7 @@ class CourseVideoViewModel(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
                         courseSections = courseSections,
-                        courseSectionsState = courseSectionsState,
+                        courseSectionsState = state.courseSectionsState,
                         downloadsCount = downloadsCount
                     )
                 }
@@ -131,6 +131,10 @@ class CourseVideoViewModel(
                 courseSubSection.clear()
                 courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
+
+                val courseSectionsState =
+                    (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState
+                        ?: emptyMap()
                 _uiState.value =
                     CourseVideosUIState.CourseData(
                         courseStructure, getDownloadModelsStatus(), courseSections,
@@ -141,10 +145,11 @@ class CourseVideoViewModel(
     }
 
     fun switchCourseSections(blockId: String) {
-        courseSectionsState[blockId] = !(courseSectionsState[blockId] ?: false)
         if (_uiState.value is CourseVideosUIState.CourseData) {
             val state = _uiState.value as CourseVideosUIState.CourseData
-            _uiState.value = null
+            val courseSectionsState = state.courseSectionsState.toMutableMap()
+            courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
+
             _uiState.value = CourseVideosUIState.CourseData(
                 courseStructure = state.courseStructure,
                 downloadedState = state.downloadedState,
