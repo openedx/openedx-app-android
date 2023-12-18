@@ -6,14 +6,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -43,8 +41,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.AuthButtons
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
@@ -180,25 +177,7 @@ private fun LogistrationScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Row {
-                    OpenEdXButton(
-                        width = Modifier
-                            .width(0.dp)
-                            .weight(1f),
-                        text = stringResource(id = R.string.auth_register),
-                        onClick = { onRegisterClick() }
-                    )
-
-                    OpenEdXOutlinedButton(
-                        modifier = Modifier
-                            .width(100.dp)
-                            .padding(start = 16.dp),
-                        text = stringResource(id = R.string.auth_sign_in),
-                        onClick = { onSignInClick() },
-                        borderColor = MaterialTheme.appColors.textFieldBorder,
-                        textColor = MaterialTheme.appColors.primary
-                    )
-                }
+                AuthButtons(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
             }
         }
     }

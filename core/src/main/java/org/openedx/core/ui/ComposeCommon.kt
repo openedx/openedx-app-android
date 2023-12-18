@@ -1158,6 +1158,32 @@ fun ConnectionErrorView(
     }
 }
 
+@Composable
+fun AuthButtons(
+    onRegisterClick: () -> Unit,
+    onSignInClick: () -> Unit
+) {
+    Row {
+        OpenEdXButton(
+            width = Modifier
+                .width(0.dp)
+                .weight(1f),
+            text = stringResource(id = R.string.core_register),
+            onClick = { onRegisterClick() }
+        )
+
+        OpenEdXOutlinedButton(
+            modifier = Modifier
+                .width(100.dp)
+                .padding(start = 16.dp),
+            text = stringResource(id = R.string.core_sign_in),
+            onClick = { onSignInClick() },
+            borderColor = MaterialTheme.appColors.textFieldBorder,
+            textColor = MaterialTheme.appColors.primary
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun StaticSearchBarPreview() {

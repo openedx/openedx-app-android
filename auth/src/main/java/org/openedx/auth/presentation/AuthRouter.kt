@@ -6,11 +6,11 @@ interface AuthRouter {
 
     fun navigateToMain(fm: FragmentManager, courseId: String?)
 
-    fun navigateToSignIn(fm: FragmentManager, courseId: String? = null)
+    fun navigateToSignIn(fm: FragmentManager, courseId: String?)
 
-    fun navigateToLogistration(fm: FragmentManager, courseId: String? = null)
+    fun navigateToLogistration(fm: FragmentManager, courseId: String?)
 
-    fun navigateToSignUp(fm: FragmentManager, courseId: String? = null)
+    fun navigateToSignUp(fm: FragmentManager, courseId: String?)
 
     fun navigateToRestorePassword(fm: FragmentManager)
 

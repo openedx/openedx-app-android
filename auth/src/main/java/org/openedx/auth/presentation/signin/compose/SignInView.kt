@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
+import org.openedx.core.R as coreR
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
@@ -172,7 +173,7 @@ internal fun LoginScreen(
                             .then(contentPaddings),
                     ) {
                         Text(
-                            text = stringResource(id = R.string.auth_sign_in),
+                            text = stringResource(id = coreR.string.core_sign_in),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.displaySmall
                         )
@@ -234,7 +235,7 @@ private fun AuthForm(
                     modifier = Modifier.noRippleClickable {
                         onEvent(AuthEvent.RegisterClick)
                     },
-                    text = stringResource(id = R.string.auth_register),
+                    text = stringResource(id = coreR.string.core_register),
                     color = MaterialTheme.appColors.primary,
                     style = MaterialTheme.appTypography.labelLarge
                 )
@@ -255,7 +256,7 @@ private fun AuthForm(
         } else {
             OpenEdXButton(
                 width = buttonWidth,
-                text = stringResource(id = R.string.auth_sign_in),
+                text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
                     onEvent(AuthEvent.SignIn(login = login, password = password))
                 }

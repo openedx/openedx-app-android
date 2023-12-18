@@ -60,6 +60,9 @@
     <string name="core_thank_you_dialog_negative_description">Ми отримали ваш відгук і використовуватимемо його, щоб покращити ваш досвід навчання в майбутньому. Дякуємо, що поділилися!</string>
     <string name="core_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
 
+    <string name="core_register">Зареєструватися</string>
+    <string name="core_sign_in">Увійти</string>
+
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s зображення профілю</string>
 </resources>

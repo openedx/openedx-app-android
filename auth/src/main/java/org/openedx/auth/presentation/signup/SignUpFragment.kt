@@ -146,9 +146,7 @@ class SignUpFragment : Fragment() {
 
                     LaunchedEffect(successLogin) {
                         if (successLogin == true) {
-                            if (!TextUtils.isEmpty(viewModel.courseId)) {
-                                router.clearBackStack(parentFragmentManager)
-                            }
+                            router.clearBackStack(requireActivity().supportFragmentManager)
                             router.navigateToMain(parentFragmentManager, viewModel.courseId)
                         }
                     }
@@ -348,7 +346,7 @@ internal fun RegistrationScreen(
                     Text(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        text = stringResource(id = org.openedx.auth.R.string.auth_register),
+                        text = stringResource(id = R.string.core_register),
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.appTypography.titleMedium

@@ -31,7 +31,8 @@ class NativeDiscoveryViewModel(
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
-    val canShowBackButton get() = config.isPreLoginExperienceEnabled() && corePreferences.user == null
+    val isUserLoggedIn get() = corePreferences.user != null
+    val canShowBackButton get() = config.isPreLoginExperienceEnabled() && !isUserLoggedIn
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
     val uiState: LiveData<DiscoveryUIState>

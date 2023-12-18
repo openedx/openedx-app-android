@@ -92,6 +92,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             for (fragment in fragments) {
                 beginTransaction().remove(fragment).commit()
             }
+            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
     //endregion
@@ -339,7 +340,6 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
             clearBackStack(this)
-            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             if (isLogistrationEnabled) {
                 replaceFragment(fm, LogistrationFragment())
             } else {

@@ -20,7 +20,7 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 
 class CourseDetailsViewModel(
-    private val courseId: String,
+    val courseId: String,
     private val config: Config,
     private val corePreferences: CorePreferences,
     private val networkConnection: NetworkConnection,
@@ -30,6 +30,7 @@ class CourseDetailsViewModel(
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
     val apiHostUrl get() = config.getApiHostURL()
+    val isUserLoggedIn get() = corePreferences.user != null
 
     private val _uiState = MutableLiveData<CourseDetailsUIState>(CourseDetailsUIState.Loading)
     val uiState: LiveData<CourseDetailsUIState>

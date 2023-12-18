@@ -9,9 +9,7 @@ import java.util.Date
 interface CourseRouter {
 
     fun navigateToCourseOutline(
-        fm: FragmentManager,
-        courseId: String,
-        courseTitle: String
+        fm: FragmentManager, courseId: String, courseTitle: String
     )
 
     fun navigateToNoAccess(
@@ -65,10 +63,7 @@ interface CourseRouter {
     )
 
     fun navigateToHandoutsWebView(
-        fm: FragmentManager,
-        courseId: String,
-        title: String,
-        type: HandoutsType
+        fm: FragmentManager, courseId: String, title: String, type: HandoutsType
     )
 
     fun navigateToCourseInfo(
@@ -77,4 +72,7 @@ interface CourseRouter {
         infoType: String,
     )
 
+    fun navigateToSignUp(fm: FragmentManager, courseId: String?)
+
+    fun navigateToSignIn(fm: FragmentManager, courseId: String?)
 }

@@ -63,6 +63,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
+import org.openedx.core.ui.AuthButtons
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.DiscoveryCourseItem
 import org.openedx.core.ui.HandleUIMessage
@@ -113,6 +114,7 @@ class CourseSearchFragment : Fragment() {
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     querySearch = querySearch,
+                    isUserLoggedIn = viewModel.isUserLoggedIn,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
@@ -130,7 +132,13 @@ class CourseSearchFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             it
                         )
-                    }
+                    },
+                    onRegisterClick = {
+                        router.navigateToSignUp(parentFragmentManager, null)
+                    },
+                    onSignInClick = {
+                        router.navigateToSignIn(parentFragmentManager, null)
+                    },
                 )
             }
         }
@@ -159,11 +167,14 @@ private fun CourseSearchScreen(
     canLoadMore: Boolean,
     refreshing: Boolean,
     querySearch: String,
+    isUserLoggedIn: Boolean,
     onBackClick: () -> Unit,
     onSearchTextChanged: (String) -> Unit,
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
-    onItemClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
+    onRegisterClick: () -> Unit,
+    onSignInClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -195,7 +206,23 @@ private fun CourseSearchScreen(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding(),
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.background,
+        bottomBar = {
+            if (!isUserLoggedIn) {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 32.dp,
+                        )
+                ) {
+                    AuthButtons(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick
+                    )
+                }
+            }
+        }
     ) {
 
         val screenWidth by remember(key1 = windowSize) {
@@ -397,11 +424,14 @@ fun CourseSearchScreenPreview() {
             canLoadMore = false,
             refreshing = false,
             querySearch = "",
+            isUserLoggedIn = true,
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
             paginationCallback = {},
-            onItemClick = {}
+            onItemClick = {},
+            onSignInClick = {},
+            onRegisterClick = {},
         )
     }
 }
@@ -419,11 +449,14 @@ fun CourseSearchScreenTabletPreview() {
             canLoadMore = false,
             refreshing = false,
             querySearch = "",
+            isUserLoggedIn = false,
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
             paginationCallback = {},
-            onItemClick = {}
+            onItemClick = {},
+            onSignInClick = {},
+            onRegisterClick = {},
         )
     }
 }

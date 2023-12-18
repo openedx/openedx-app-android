@@ -213,7 +213,7 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { CourseSearchViewModel(get(), get(), get(), get()) }
+    viewModel { CourseSearchViewModel(get(), get(), get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
     single { DiscussionRepository(get(), get()) }
