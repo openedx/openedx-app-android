@@ -28,24 +28,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,23 +44,17 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import me.saket.extendedspans.ExtendedSpans
@@ -84,19 +67,11 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.presentation.course.CourseDatesBadge
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.BackBtn
-import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
-import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.statusBarsInset
+import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
@@ -224,78 +199,75 @@ internal fun CourseDatesScreen(
                 .statusBarsInset()
                 .displayCutoutForLandscape(), contentAlignment = Alignment.TopCenter
         ) {
-            Column(
-                modifierScreenWidth
+            Surface(
+                modifier = modifierScreenWidth,
+                color = MaterialTheme.appColors.background,
+                shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
-                Surface(
-                    color = MaterialTheme.appColors.background,
-                    shape = MaterialTheme.appShapes.screenBackgroundShape
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .pullRefresh(pullRefreshState)
                 ) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .pullRefresh(pullRefreshState)
-                    ) {
-                        uiState?.let {
-                            when (uiState) {
-                                is DatesUIState.Loading -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                    }
+                    uiState?.let {
+                        when (uiState) {
+                            is DatesUIState.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
+                            }
 
-                                is DatesUIState.Dates -> {
-                                    LazyColumn(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(10.dp),
-                                        contentPadding = listBottomPadding
-                                    ) {
-                                        itemsIndexed(uiState.courseDates.keys.toList()) { dateIndex, _ ->
-                                            CourseDateBlockSection(
-                                                courseDates = uiState.courseDates,
-                                                dateIndex = dateIndex,
-                                                onItemClick = onItemClick
-                                            )
-                                        }
-                                    }
-                                }
-
-                                DatesUIState.Empty -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            text = stringResource(id = R.string.course_dates_unavailable_message),
-                                            color = MaterialTheme.appColors.textPrimary,
-                                            style = MaterialTheme.appTypography.titleMedium,
-                                            textAlign = TextAlign.Center
+                            is DatesUIState.Dates -> {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(10.dp),
+                                    contentPadding = listBottomPadding
+                                ) {
+                                    itemsIndexed(uiState.courseDates.keys.toList()) { dateIndex, _ ->
+                                        CourseDateBlockSection(
+                                            courseDates = uiState.courseDates,
+                                            dateIndex = dateIndex,
+                                            onItemClick = onItemClick
                                         )
                                     }
                                 }
                             }
+
+                            DatesUIState.Empty -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = stringResource(id = R.string.course_dates_unavailable_message),
+                                        color = MaterialTheme.appColors.textPrimary,
+                                        style = MaterialTheme.appTypography.titleMedium,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
                         }
-                        PullRefreshIndicator(
-                            refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter)
-                        )
-                        if (!isInternetConnectionShown && !hasInternetConnection) {
-                            OfflineModeDialog(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.BottomCenter),
-                                onDismissCLick = {
-                                    isInternetConnectionShown = true
-                                },
-                                onReloadClick = {
-                                    isInternetConnectionShown = true
-                                    onReloadClick()
-                                })
-                        }
+                    }
+                    PullRefreshIndicator(
+                        refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter)
+                    )
+                    if (!isInternetConnectionShown && !hasInternetConnection) {
+                        OfflineModeDialog(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                            onDismissCLick = {
+                                isInternetConnectionShown = true
+                            },
+                            onReloadClick = {
+                                isInternetConnectionShown = true
+                                onReloadClick()
+                            })
                     }
                 }
             }

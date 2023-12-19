@@ -33,7 +33,7 @@ data class BlockDb(
     @ColumnInfo("completion")
     val completion: Double,
     @ColumnInfo("contains_gated_content")
-    val containsGatedContent: Boolean?
+    val containsGatedContent: Boolean
 ) {
     fun mapToDomain(blocks: List<BlockDb>): Block {
         val blockType = BlockType.getBlockType(type)

@@ -42,8 +42,8 @@ class CourseVideoViewModel(
 
     val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
 
-    private val _uiState = MutableLiveData<CourseVideosUIState?>()
-    val uiState: LiveData<CourseVideosUIState?>
+    private val _uiState = MutableLiveData<CourseVideosUIState>()
+    val uiState: LiveData<CourseVideosUIState>
         get() = _uiState
 
     var courseTitle = ""

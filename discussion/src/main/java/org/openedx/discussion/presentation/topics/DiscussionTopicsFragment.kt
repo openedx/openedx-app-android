@@ -24,13 +24,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.FragmentViewType
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.*
@@ -42,9 +44,6 @@ import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import org.openedx.discussion.R as discussionR
 
 class DiscussionTopicsFragment : Fragment() {
@@ -193,22 +192,15 @@ private fun DiscussionTopicsScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {
-                Column(
+                StaticSearchBar(
                     modifier = Modifier
+                        .height(48.dp)
+                        .then(searchTabWidth)
+                        .padding(horizontal = contentPaddings)
                         .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    StaticSearchBar(
-                        modifier = Modifier
-                            .height(48.dp)
-                            .then(searchTabWidth)
-                            .padding(horizontal = contentPaddings),
-                        text = stringResource(id = discussionR.string.discussion_search_all_posts),
-                        onClick = onSearchClick
-                    )
-
-                }
+                    text = stringResource(id = discussionR.string.discussion_search_all_posts),
+                    onClick = onSearchClick
+                )
                 Surface(
                     modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.appColors.background,

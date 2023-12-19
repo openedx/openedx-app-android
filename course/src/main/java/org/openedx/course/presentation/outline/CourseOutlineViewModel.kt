@@ -49,8 +49,8 @@ class CourseOutlineViewModel(
 
     val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
 
-    private val _uiState = MutableLiveData<CourseOutlineUIState?>(CourseOutlineUIState.Loading)
-    val uiState: LiveData<CourseOutlineUIState?>
+    private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
+    val uiState: LiveData<CourseOutlineUIState>
         get() = _uiState
 
     private val _uiMessage = SingleEventLiveData<UIMessage>()
@@ -213,7 +213,6 @@ class CourseOutlineViewModel(
                                 .add(sequentialBlock)
                             courseSubSection[sequentialBlock.id] =
                                 getCourseFirstSubSection(blocks, sequentialBlock)
-                            sequentialBlock.descendants
                             downloadsCount[sequentialBlock.id] =
                                 getDownloadsCount(blocks, sequentialBlock)
 

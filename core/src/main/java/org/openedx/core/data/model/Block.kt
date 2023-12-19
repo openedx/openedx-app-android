@@ -32,7 +32,7 @@ data class Block(
     @SerializedName("completion")
     val completion: Double?,
     @SerializedName("contains_gated_content")
-    val containsGatedContent: Boolean?,
+    val containsGatedContent: Boolean,
 ) {
     fun mapToDomain(blockData: Map<String, org.openedx.core.data.model.Block>): Block {
         val blockType = BlockType.getBlockType(type ?: "")

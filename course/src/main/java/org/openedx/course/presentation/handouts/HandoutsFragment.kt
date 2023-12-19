@@ -112,30 +112,29 @@ private fun HandoutsScreen(
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
-            Column(screenWidth) {
-                Surface(
-                    color = MaterialTheme.appColors.background
+            Surface(
+                modifier = screenWidth,
+                color = MaterialTheme.appColors.background
+            ) {
+                LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 10.dp, horizontal = 24.dp)
                 ) {
-                    LazyColumn(
-                        Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 24.dp)
-                    ) {
-                        item {
-                            HandoutsItem(
-                                title = stringResource(id = courseR.string.course_handouts),
-                                description = stringResource(id = courseR.string.course_find_important_info),
-                                painter = painterResource(id = courseR.drawable.course_ic_handouts),
-                                onClick = onHandoutsClick
-                            )
-                        }
-                        item {
-                            HandoutsItem(
-                                title = stringResource(id = courseR.string.course_announcements),
-                                description = stringResource(id = courseR.string.course_latest_news),
-                                painter = painterResource(id = courseR.drawable.course_ic_announcements),
-                                onClick = onAnnouncementsClick
-                            )
-                        }
+                    item {
+                        HandoutsItem(
+                            title = stringResource(id = courseR.string.course_handouts),
+                            description = stringResource(id = courseR.string.course_find_important_info),
+                            painter = painterResource(id = courseR.drawable.course_ic_handouts),
+                            onClick = onHandoutsClick
+                        )
+                    }
+                    item {
+                        HandoutsItem(
+                            title = stringResource(id = courseR.string.course_announcements),
+                            description = stringResource(id = courseR.string.course_latest_news),
+                            painter = painterResource(id = courseR.drawable.course_ic_announcements),
+                            onClick = onAnnouncementsClick
+                        )
                     }
                 }
             }

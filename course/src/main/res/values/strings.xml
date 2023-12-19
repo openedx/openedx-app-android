@@ -45,7 +45,7 @@
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>
     <string name="course_continue_with">Continue with:</string>
-    <string name="course_continue">Resume</string>
+    <string name="course_resume">Resume</string>
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>

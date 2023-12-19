@@ -160,7 +160,7 @@ class CourseVideosFragment : Fragment() {
 @Composable
 private fun CourseVideosScreen(
     windowSize: WindowSize,
-    uiState: CourseVideosUIState?,
+    uiState: CourseVideosUIState,
     uiMessage: UIMessage?,
     apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
@@ -225,171 +225,167 @@ private fun CourseVideosScreen(
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
-            Column(screenWidth) {
-                Surface(
-                    color = MaterialTheme.appColors.background,
-                    shape = MaterialTheme.appShapes.screenBackgroundShape
-                ) {
-                    Box(Modifier.pullRefresh(pullRefreshState)) {
-                        Column(
-                            Modifier
-                                .fillMaxSize()
-                        ) {
-                            when (uiState) {
-                                is CourseVideosUIState.Empty -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(id = org.openedx.course.R.string.course_does_not_include_videos),
-                                            color = MaterialTheme.appColors.textPrimary,
-                                            style = MaterialTheme.appTypography.headlineSmall,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.padding(horizontal = 40.dp)
-                                        )
-                                    }
+            Surface(
+                modifier = screenWidth,
+                color = MaterialTheme.appColors.background,
+                shape = MaterialTheme.appShapes.screenBackgroundShape
+            ) {
+                Box(Modifier.pullRefresh(pullRefreshState)) {
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                    ) {
+                        when (uiState) {
+                            is CourseVideosUIState.Empty -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(id = org.openedx.course.R.string.course_does_not_include_videos),
+                                        color = MaterialTheme.appColors.textPrimary,
+                                        style = MaterialTheme.appTypography.headlineSmall,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(horizontal = 40.dp)
+                                    )
                                 }
+                            }
 
-                                is CourseVideosUIState.Loading -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                    }
+                            is CourseVideosUIState.Loading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
+                            }
 
-                                is CourseVideosUIState.CourseData -> {
-                                    LazyColumn(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentPadding = listBottomPadding
-                                    ) {
-                                        if (isCourseBannerEnabled) {
-                                            item {
-                                                CourseImageHeader(
-                                                    modifier = Modifier
-                                                        .aspectRatio(1.86f)
-                                                        .padding(6.dp),
-                                                    apiHostUrl = apiHostUrl,
-                                                    courseImage = uiState.courseStructure.media?.image?.large
-                                                        ?: "",
-                                                    courseCertificate = uiState.courseStructure.certificate,
-                                                    courseName = uiState.courseStructure.name
-                                                )
-                                            }
+                            is CourseVideosUIState.CourseData -> {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = listBottomPadding
+                                ) {
+                                    if (isCourseBannerEnabled) {
+                                        item {
+                                            CourseImageHeader(
+                                                modifier = Modifier
+                                                    .aspectRatio(1.86f)
+                                                    .padding(6.dp),
+                                                apiHostUrl = apiHostUrl,
+                                                courseImage = uiState.courseStructure.media?.image?.large
+                                                    ?: "",
+                                                courseCertificate = uiState.courseStructure.certificate,
+                                                courseName = uiState.courseStructure.name
+                                            )
                                         }
+                                    }
 
-                                        if (isCourseNestedListEnabled) {
+                                    if (isCourseNestedListEnabled) {
+                                        item {
+                                            Spacer(Modifier.height(16.dp))
+                                        }
+                                        uiState.courseStructure.blockData.forEach { block ->
+                                            val courseSections =
+                                                uiState.courseSections[block.id]
+                                            val courseSectionsState =
+                                                uiState.courseSectionsState[block.id]
+
                                             item {
-                                                Spacer(Modifier.height(16.dp))
+                                                Column {
+                                                    CourseExpandableChapterCard(
+                                                        modifier = listPadding,
+                                                        block = block,
+                                                        downloadedState = uiState.downloadedState[block.id],
+                                                        onItemClick = { blockSelected ->
+                                                            onExpandClick(blockSelected)
+                                                        },
+                                                        onDownloadClick = onDownloadClick,
+                                                        arrowDegrees = if (courseSectionsState == true) -90f else 90f
+                                                    )
+                                                    Divider()
+                                                }
                                             }
-                                            uiState.courseStructure.blockData.forEach { block ->
-                                                val courseSections =
-                                                    uiState.courseSections[block.id]
-                                                val courseSectionsState =
-                                                    uiState.courseSectionsState[block.id]
 
+                                            courseSections?.forEach { subSectionBlock ->
                                                 item {
                                                     Column {
-                                                        CourseExpandableChapterCard(
-                                                            modifier = listPadding,
-                                                            block = block,
-                                                            downloadedState = uiState.downloadedState[block.id],
-                                                            onItemClick = { blockSelected ->
-                                                                onExpandClick(blockSelected)
-                                                            },
-                                                            onDownloadClick = onDownloadClick,
-                                                            arrowDegrees = if (courseSectionsState == true) -90f else 90f
-                                                        )
-                                                        Divider()
-                                                    }
-                                                }
+                                                        AnimatedVisibility(
+                                                            visible = courseSectionsState == true
+                                                        ) {
+                                                            Column {
+                                                                val downloadsCount =
+                                                                    uiState.downloadsCount[subSectionBlock.id]
+                                                                        ?: 0
 
-
-                                                courseSections?.forEach { subSectionBlock ->
-                                                    item {
-                                                        Column {
-                                                            AnimatedVisibility(
-                                                                visible = courseSectionsState == true
-                                                            ) {
-                                                                Column {
-                                                                    val downloadsCount =
-                                                                        uiState.downloadsCount[subSectionBlock.id]
-                                                                            ?: 0
-
-                                                                    CourseSectionItem(
-                                                                        modifier = listPadding,
-                                                                        block = subSectionBlock,
-                                                                        downloadedState = uiState.downloadedState[subSectionBlock.id],
-                                                                        downloadsCount = downloadsCount,
-                                                                        onClick = { sectionBlock ->
-                                                                            onSectionClick(
-                                                                                sectionBlock
-                                                                            )
-                                                                        },
-                                                                        onDownloadClick = onDownloadClick
-                                                                    )
-                                                                    Divider()
-                                                                }
+                                                                CourseSectionItem(
+                                                                    modifier = listPadding,
+                                                                    block = subSectionBlock,
+                                                                    downloadedState = uiState.downloadedState[subSectionBlock.id],
+                                                                    downloadsCount = downloadsCount,
+                                                                    onClick = { sectionBlock ->
+                                                                        onSectionClick(
+                                                                            sectionBlock
+                                                                        )
+                                                                    },
+                                                                    onDownloadClick = onDownloadClick
+                                                                )
+                                                                Divider()
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
-                                            return@LazyColumn
                                         }
+                                        return@LazyColumn
+                                    }
 
-                                        items(uiState.courseStructure.blockData) { block ->
-                                            Column(listPadding) {
-                                                if (block.type == BlockType.CHAPTER) {
-                                                    Text(
-                                                        modifier = Modifier.padding(
-                                                            top = 36.dp,
-                                                            bottom = 8.dp
-                                                        ),
-                                                        text = block.displayName,
-                                                        style = MaterialTheme.appTypography.titleMedium,
-                                                        color = MaterialTheme.appColors.textPrimaryVariant
-                                                    )
-                                                } else {
-                                                    CourseSectionCard(
-                                                        block = block,
-                                                        downloadedState = uiState.downloadedState[block.id],
-                                                        onItemClick = { blockSelected ->
-                                                            onItemClick(blockSelected)
-                                                        },
-                                                        onDownloadClick = onDownloadClick
-                                                    )
-                                                    Divider()
-                                                }
+                                    items(uiState.courseStructure.blockData) { block ->
+                                        Column(listPadding) {
+                                            if (block.type == BlockType.CHAPTER) {
+                                                Text(
+                                                    modifier = Modifier.padding(
+                                                        top = 36.dp,
+                                                        bottom = 8.dp
+                                                    ),
+                                                    text = block.displayName,
+                                                    style = MaterialTheme.appTypography.titleMedium,
+                                                    color = MaterialTheme.appColors.textPrimaryVariant
+                                                )
+                                            } else {
+                                                CourseSectionCard(
+                                                    block = block,
+                                                    downloadedState = uiState.downloadedState[block.id],
+                                                    onItemClick = { blockSelected ->
+                                                        onItemClick(blockSelected)
+                                                    },
+                                                    onDownloadClick = onDownloadClick
+                                                )
+                                                Divider()
                                             }
                                         }
                                     }
                                 }
-
-                                else -> {}
                             }
                         }
-                        PullRefreshIndicator(
-                            isUpdating,
-                            pullRefreshState,
-                            Modifier.align(Alignment.TopCenter)
+                    }
+                    PullRefreshIndicator(
+                        isUpdating,
+                        pullRefreshState,
+                        Modifier.align(Alignment.TopCenter)
+                    )
+                    if (!isInternetConnectionShown && !hasInternetConnection) {
+                        OfflineModeDialog(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                            onDismissCLick = {
+                                isInternetConnectionShown = true
+                            },
+                            onReloadClick = {
+                                isInternetConnectionShown = true
+                                onReloadClick()
+                            }
                         )
-                        if (!isInternetConnectionShown && !hasInternetConnection) {
-                            OfflineModeDialog(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.BottomCenter),
-                                onDismissCLick = {
-                                    isInternetConnectionShown = true
-                                },
-                                onReloadClick = {
-                                    isInternetConnectionShown = true
-                                    onReloadClick()
-                                }
-                            )
-                        }
                     }
                 }
             }
