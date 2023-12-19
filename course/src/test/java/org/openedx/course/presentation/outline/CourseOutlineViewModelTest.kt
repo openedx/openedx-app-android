@@ -4,18 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.BlockType
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.*
-import org.openedx.core.module.DownloadWorkerController
-import org.openedx.core.module.db.*
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalytics
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +16,20 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.BlockType
+import org.openedx.core.R
+import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.*
+import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.module.db.*
+import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
 import java.net.UnknownHostException
 import java.util.*
 
@@ -40,6 +41,7 @@ class CourseOutlineViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val preferencesManager = mockk<CorePreferences>()
@@ -67,6 +69,7 @@ class CourseOutlineViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -82,6 +85,7 @@ class CourseOutlineViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -97,6 +101,7 @@ class CourseOutlineViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         )
     )
@@ -142,6 +147,7 @@ class CourseOutlineViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
+        every { config.getApiHostURL() } returns "http://localhost:8000"
     }
 
     @After
@@ -157,6 +163,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -185,6 +192,7 @@ class CourseOutlineViewModelTest {
         coEvery { interactor.getCourseStatus(any()) } throws Exception()
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -223,6 +231,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -260,6 +269,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -297,6 +307,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -322,6 +333,7 @@ class CourseOutlineViewModelTest {
     fun `CourseStructureUpdated notifier test`() = runTest {
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -366,6 +378,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -395,6 +408,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -422,6 +436,7 @@ class CourseOutlineViewModelTest {
 
         val viewModel = CourseOutlineViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             notifier,

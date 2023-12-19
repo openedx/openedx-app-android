@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -44,9 +47,6 @@ import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.util.*
 
@@ -82,6 +82,7 @@ class CourseOutlineFragment : Fragment() {
                 CourseOutlineScreen(
                     windowSize = windowSize,
                     uiState = uiState!!,
+                    apiHostUrl = viewModel.apiHostUrl,
                     courseTitle = viewModel.courseTitle,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
@@ -96,23 +97,25 @@ class CourseOutlineFragment : Fragment() {
                     onItemClick = { block ->
                         viewModel.sequentialClickedEvent(block.blockId, block.displayName)
                         router.navigateToCourseSubsections(
-                            requireActivity().supportFragmentManager,
+                            fm = requireActivity().supportFragmentManager,
                             courseId = viewModel.courseId,
-                            blockId = block.id,
-                            title = block.displayName,
+                            subSectionId = block.id,
                             mode = CourseViewMode.FULL
                         )
                     },
-                    onResumeClick = { blockId ->
-                        viewModel.resumeSectionBlock?.let { sequential ->
-                            viewModel.resumeCourseTappedEvent(sequential.blockId)
-                            router.navigateToCourseSubsections(
-                                requireActivity().supportFragmentManager,
-                                viewModel.courseId,
-                                sequential.id,
-                                sequential.displayName,
-                                CourseViewMode.FULL
-                            )
+                    onResumeClick = { componentId ->
+                        viewModel.resumeSectionBlock?.let { subSection ->
+                            viewModel.resumeCourseTappedEvent(subSection.id)
+                            viewModel.resumeVerticalBlock?.let { unit ->
+                                router.navigateToCourseSubsections(
+                                    requireActivity().supportFragmentManager,
+                                    courseId = viewModel.courseId,
+                                    subSectionId = subSection.id,
+                                    mode = CourseViewMode.FULL,
+                                    unitId = unit.id,
+                                    componentId = componentId
+                                )
+                            }
                         }
                     },
                     onBackClick = {
@@ -171,6 +174,7 @@ class CourseOutlineFragment : Fragment() {
 internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
+    apiHostUrl: String,
     courseTitle: String,
     uiMessage: UIMessage?,
     refreshing: Boolean,
@@ -230,7 +234,8 @@ internal fun CourseOutlineScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
@@ -282,23 +287,25 @@ internal fun CourseOutlineScreen(
                                             modifier = Modifier
                                                 .aspectRatio(1.86f)
                                                 .padding(6.dp),
+                                            apiHostUrl = apiHostUrl,
                                             courseImage = uiState.courseStructure.media?.image?.large
                                                 ?: "",
-                                            courseCertificate = uiState.courseStructure.certificate
+                                            courseCertificate = uiState.courseStructure.certificate,
+                                            courseName = uiState.courseStructure.name
                                         )
                                     }
-                                    if (uiState.resumeBlock != null) {
+                                    if (uiState.resumeComponent != null) {
                                         item {
                                             Spacer(Modifier.height(28.dp))
                                             Box(listPadding) {
                                                 if (windowSize.isTablet) {
                                                     ResumeCourseTablet(
-                                                        block = uiState.resumeBlock,
+                                                        block = uiState.resumeComponent,
                                                         onResumeClick = onResumeClick
                                                     )
                                                 } else {
                                                     ResumeCourse(
-                                                        block = uiState.resumeBlock,
+                                                        block = uiState.resumeComponent,
                                                         onResumeClick = onResumeClick
                                                     )
                                                 }
@@ -479,6 +486,7 @@ private fun CourseOutlineScreenPreview() {
                 mapOf(),
                 mockChapterBlock
             ),
+            apiHostUrl = "",
             courseTitle = "",
             uiMessage = null,
             refreshing = false,
@@ -505,6 +513,7 @@ private fun CourseOutlineScreenTabletPreview() {
                 mapOf(),
                 mockChapterBlock
             ),
+            apiHostUrl = "",
             courseTitle = "",
             uiMessage = null,
             refreshing = false,
@@ -541,6 +550,7 @@ private val mockChapterBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
     completion = 0.0
 )
 private val mockSequentialBlock = Block(
@@ -556,6 +566,7 @@ private val mockSequentialBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
     completion = 0.0
 )
 

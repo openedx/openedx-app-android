@@ -36,7 +36,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.openedx.core.BuildConfig
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
@@ -50,9 +52,6 @@ import org.openedx.core.utils.EmailUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseImageHeader
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.nio.charset.StandardCharsets
 import java.util.*
 import org.openedx.course.R as courseR
@@ -84,6 +83,7 @@ class CourseDetailsFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState!!,
                     uiMessage = uiMessage,
+                    apiHostUrl = viewModel.apiHostUrl,
                     htmlBody = viewModel.getCourseAboutBody(
                         colorBackgroundValue,
                         colorTextValue
@@ -99,7 +99,10 @@ class CourseDetailsFragment : Fragment() {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
                             if (currentState.course.isEnrolled) {
-                                viewModel.viewCourseClickedEvent(currentState.course.courseId, currentState.course.name)
+                                viewModel.viewCourseClickedEvent(
+                                    currentState.course.courseId,
+                                    currentState.course.name
+                                )
                                 router.navigateToCourseOutline(
                                     requireActivity().supportFragmentManager,
                                     currentState.course.courseId,
@@ -132,6 +135,7 @@ internal fun CourseDetailsScreen(
     windowSize: WindowSize,
     uiState: CourseDetailsUIState,
     uiMessage: UIMessage?,
+    apiHostUrl: String,
     htmlBody: String,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
@@ -181,7 +185,8 @@ internal fun CourseDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .statusBarsInset(),
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
@@ -227,11 +232,13 @@ internal fun CourseDetailsScreen(
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         }
+
                         is CourseDetailsUIState.CourseData -> {
                             Column(Modifier.verticalScroll(rememberScrollState())) {
                                 if (configuration.orientation == ORIENTATION_LANDSCAPE && windowSize.isTablet) {
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
+                                        apiHostUrl = apiHostUrl,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -240,6 +247,7 @@ internal fun CourseDetailsScreen(
                                 } else {
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
+                                        apiHostUrl = apiHostUrl,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -269,6 +277,7 @@ internal fun CourseDetailsScreen(
                                     ) {
                                         CourseDescription(
                                             paddingModifier = webViewPadding,
+                                            apiHostUrl = apiHostUrl,
                                             body = htmlBody,
                                             onWebPageLoaded = {
                                                 webViewAlpha = 1f
@@ -302,6 +311,7 @@ internal fun CourseDetailsScreen(
 @Composable
 private fun CourseDetailNativeContent(
     windowSize: WindowSize,
+    apiHostUrl: String,
     course: Course,
     onButtonClick: () -> Unit,
 ) {
@@ -336,8 +346,10 @@ private fun CourseDetailNativeContent(
                 modifier = Modifier
                     .aspectRatio(1.86f)
                     .padding(6.dp),
+                apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
-                courseCertificate = null
+                courseCertificate = null,
+                courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
@@ -348,7 +360,7 @@ private fun CourseDetailNativeContent(
                     Icon(
                         modifier = Modifier.size(40.dp),
                         painter = painterResource(courseR.drawable.course_ic_play),
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.course_accessibility_play_video),
                         tint = Color.LightGray
                     )
                 }
@@ -398,6 +410,7 @@ private fun CourseDetailNativeContent(
 @Composable
 private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
+    apiHostUrl: String,
     course: Course,
     onButtonClick: () -> Unit,
 ) {
@@ -465,8 +478,10 @@ private fun CourseDetailNativeContentLandscape(
                 modifier = Modifier
                     .width(263.dp)
                     .height(200.dp),
+                apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
-                courseCertificate = null
+                courseCertificate = null,
+                courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
@@ -538,6 +553,7 @@ private fun EnrollOverLabel() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun CourseDescription(
     paddingModifier: Modifier,
+    apiHostUrl: String,
     body: String,
     onWebPageLoaded: () -> Unit
 ) {
@@ -585,7 +601,11 @@ private fun CourseDescription(
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
             loadDataWithBaseURL(
-                org.openedx.core.BuildConfig.BASE_URL, body, "text/html", StandardCharsets.UTF_8.name(), null
+                apiHostUrl,
+                body,
+                "text/html",
+                StandardCharsets.UTF_8.name(),
+                null
             )
         }
     })
@@ -600,6 +620,7 @@ private fun CourseDetailNativeContentPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
+            apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
@@ -618,6 +639,7 @@ private fun CourseDetailNativeContentTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseDetailsUIState.CourseData(mockCourse),
             uiMessage = null,
+            apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},

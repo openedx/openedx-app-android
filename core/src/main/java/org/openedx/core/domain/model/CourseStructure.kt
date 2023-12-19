@@ -1,6 +1,6 @@
 package org.openedx.core.domain.model
 
-import java.util.*
+import java.util.Date
 
 data class CourseStructure(
     val root: String,

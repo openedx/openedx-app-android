@@ -6,6 +6,7 @@ interface DiscoveryRouter {
 
     fun navigateToCourseDetail(fm: FragmentManager, courseId: String)
 
-    fun navigateToCourseSearch(fm: FragmentManager)
+    fun navigateToCourseSearch(fm: FragmentManager, querySearch: String)
 
+    fun navigateToUpgradeRequired(fm: FragmentManager)
 }

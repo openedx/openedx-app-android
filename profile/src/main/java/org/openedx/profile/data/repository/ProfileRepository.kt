@@ -1,16 +1,18 @@
 package org.openedx.profile.data.repository
 
 import androidx.room.RoomDatabase
-import org.openedx.core.ApiConstants
-import org.openedx.profile.data.api.ProfileApi
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
+import org.openedx.core.ApiConstants
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.profile.data.api.ProfileApi
 import org.openedx.profile.data.storage.ProfilePreferences
-import java.io.File
 import org.openedx.profile.domain.model.Account
+import java.io.File
 
 class ProfileRepository(
+    private val config: Config,
     private val api: ProfileApi,
     private val room: RoomDatabase,
     private val profilePreferences: ProfilePreferences,
@@ -23,7 +25,12 @@ class ProfileRepository(
         return account.mapToDomain()
     }
 
-    fun getCachedAccount() : Account? {
+    suspend fun getAccount(username: String): Account {
+        val account = api.getAccount(username)
+        return account.mapToDomain()
+    }
+
+    fun getCachedAccount(): Account? {
         return profilePreferences.profile?.mapToDomain()
     }
 
@@ -47,12 +54,15 @@ class ProfileRepository(
     suspend fun deactivateAccount(password: String) = api.deactivateAccount(password)
 
     suspend fun logout() {
-        api.revokeAccessToken(
-            org.openedx.core.BuildConfig.CLIENT_ID,
-            corePreferences.refreshToken,
-            ApiConstants.TOKEN_TYPE_REFRESH
-        )
-        corePreferences.clear()
-        room.clearAllTables()
+        try {
+            api.revokeAccessToken(
+                config.getOAuthClientId(),
+                corePreferences.refreshToken,
+                ApiConstants.TOKEN_TYPE_REFRESH
+            )
+        } finally {
+            corePreferences.clear()
+            room.clearAllTables()
+        }
     }
 }

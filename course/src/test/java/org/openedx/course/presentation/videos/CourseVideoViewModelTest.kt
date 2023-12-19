@@ -4,7 +4,20 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import io.mockk.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestRule
 import org.openedx.core.BlockType
+import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -18,18 +31,6 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TestRule
-import org.openedx.core.data.storage.CorePreferences
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,6 +40,7 @@ class CourseVideoViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val notifier = spyk<CourseNotifier>()
@@ -63,6 +65,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -78,6 +81,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -93,6 +97,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         )
     )
@@ -130,6 +135,7 @@ class CourseVideoViewModelTest {
         every { resourceManager.getString(R.string.course_does_not_include_videos) } returns ""
         every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
         Dispatchers.setMain(dispatcher)
+        every { config.getApiHostURL() } returns "http://localhost:8000"
     }
 
     @After
@@ -144,6 +150,7 @@ class CourseVideoViewModelTest {
 
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -167,6 +174,7 @@ class CourseVideoViewModelTest {
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -197,6 +205,7 @@ class CourseVideoViewModelTest {
         }
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -223,6 +232,7 @@ class CourseVideoViewModelTest {
     fun `setIsUpdating success`() = runTest {
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -243,6 +253,7 @@ class CourseVideoViewModelTest {
     fun `saveDownloadModels test`() = runTest {
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -267,6 +278,7 @@ class CourseVideoViewModelTest {
     fun `saveDownloadModels only wifi download, with connection`() = runTest {
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -291,6 +303,7 @@ class CourseVideoViewModelTest {
     fun `saveDownloadModels only wifi download, without conection`() = runTest {
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,

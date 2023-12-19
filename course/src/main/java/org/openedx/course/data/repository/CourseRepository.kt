@@ -99,9 +99,10 @@ class CourseRepository(
         return api.markBlocksCompletion(blocksCompletionBody)
     }
 
+    suspend fun getCourseDates(courseId: String) = api.getCourseDates(courseId).mapToDomain()
+
     suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
     suspend fun getAnnouncements(courseId: String) =
         api.getAnnouncements(courseId).map { it.mapToDomain() }
-
 }

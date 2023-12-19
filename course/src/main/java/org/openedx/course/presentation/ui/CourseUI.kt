@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,12 +46,16 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -61,6 +67,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.jsoup.Jsoup
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -77,12 +84,13 @@ import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
-import org.jsoup.Jsoup
+import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.course.R as courseR
@@ -90,14 +98,24 @@ import org.openedx.course.R as courseR
 @Composable
 fun CourseImageHeader(
     modifier: Modifier,
+    apiHostUrl: String,
     courseImage: String?,
     courseCertificate: Certificate?,
+    courseName: String
 ) {
+    val configuration = LocalConfiguration.current
+    val windowSize = rememberWindowSize()
+    val contentScale =
+        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            ContentScale.Fit
+        } else {
+            ContentScale.Crop
+        }
     val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
-        org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + courseImage
+        apiHostUrl.dropLast(1) + courseImage
     }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AsyncImage(
@@ -106,8 +124,11 @@ fun CourseImageHeader(
                 .error(org.openedx.core.R.drawable.core_no_image_course)
                 .placeholder(org.openedx.core.R.drawable.core_no_image_course)
                 .build(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentDescription = stringResource(
+                id = R.string.course_accessibility_header_image_for,
+                courseName
+            ),
+            contentScale = contentScale,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(MaterialTheme.appShapes.cardShape)
@@ -123,7 +144,7 @@ fun CourseImageHeader(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_course_completed_mark),
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.course_congratulations),
                     tint = Color.White
                 )
                 Spacer(Modifier.height(6.dp))
@@ -175,15 +196,21 @@ fun CourseSectionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val icon =
-                if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
-            val iconColor =
+            val completedIconPainter =
+                if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+                    R.drawable.ic_course_chapter_icon
+                )
+            val completedIconColor =
                 if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
-
+            val completedIconDescription = if (block.completion == 1.0) {
+                stringResource(id = R.string.course_accessibility_section_completed)
+            } else {
+                stringResource(id = R.string.course_accessibility_section_uncompleted)
+            }
             Icon(
-                painter = icon,
-                contentDescription = null,
-                tint = iconColor
+                painter = completedIconPainter,
+                contentDescription = completedIconDescription,
+                tint = completedIconColor
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
@@ -201,16 +228,22 @@ fun CourseSectionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val iconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
                         painterResource(id = R.drawable.course_ic_remove_download)
                     } else {
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
-                            painter = iconPainter,
-                            contentDescription = null,
+                            painter = downloadIconPainter,
+                            contentDescription = downloadIconDescription,
                             tint = MaterialTheme.appColors.textPrimary
                         )
                     }
@@ -229,7 +262,7 @@ fun CourseSectionCard(
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }
@@ -298,36 +331,16 @@ fun SequentialItem(
 }
 
 @Composable
-fun VideoRotateView() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.appShapes.buttonShape)
-            .background(MaterialTheme.appColors.info)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.course_ic_screen_rotation),
-            contentDescription = null,
-            tint = Color.White
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = stringResource(id = R.string.course_video_rotate_for_fullscreen),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
-fun VideoTitle(text: String) {
+fun VideoTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = text,
+        modifier = modifier,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.titleLarge,
-        maxLines = 3,
+        maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
 }
@@ -344,16 +357,25 @@ fun NavigationUnitsButtons(
     val nextButtonIcon = if (hasNextBlock) {
         painterResource(id = org.openedx.core.R.drawable.core_ic_down)
     } else {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_check)
+        painterResource(id = org.openedx.core.R.drawable.core_ic_check_in_box)
     }
 
-    val nextButtonModifier = if (hasPrevBlock) {
-        Modifier
-    } else Modifier.fillMaxWidth(0.6f)
+    val subModifier =
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Modifier
+                .height(72.dp)
+                .fillMaxWidth()
+        } else {
+            Modifier
+                .statusBarsPadding()
+                .padding(end = 32.dp)
+                .padding(top = 2.dp)
+        }
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .navigationBarsPadding()
+            .then(subModifier)
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -391,7 +413,7 @@ fun NavigationUnitsButtons(
         }
         Button(
             modifier = Modifier
-                .height(42.dp).then(nextButtonModifier),
+                .height(42.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.appColors.buttonBackground
             ),
@@ -459,11 +481,13 @@ fun Indicator(
 ) {
     val size by animateDpAsState(
         targetValue = if (isSelected) selectedSize else defaultRadius,
-        animationSpec = tween(300)
+        animationSpec = tween(300),
+        label = ""
     )
     val color by animateColorAsState(
         targetValue = if (isSelected) selectedColor else defaultColor,
-        animationSpec = tween(300)
+        animationSpec = tween(300),
+        label = ""
     )
 
     Box(
@@ -515,11 +539,20 @@ fun VideoSubtitles(
     subtitleLanguage: String,
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
+    onTranscriptClick: (Caption) -> Unit,
     onSettingsClick: () -> Unit
 ) {
     timedTextObject?.let {
+        val autoScrollDelay = 3000L
+        var lastScrollTime by remember {
+            mutableLongStateOf(0L)
+        }
+        if (listState.isScrollInProgress) {
+            lastScrollTime = Date().time
+        }
+
         LaunchedEffect(key1 = currentIndex) {
-            if (currentIndex > 1) {
+            if (currentIndex > 1 && lastScrollTime + autoScrollDelay < Date().time) {
                 listState.animateScrollToItem(currentIndex - 1)
             }
         }
@@ -551,8 +584,7 @@ fun VideoSubtitles(
                 }
                 Spacer(Modifier.height(24.dp))
                 LazyColumn(
-                    state = listState,
-                    userScrollEnabled = false
+                    state = listState
                 ) {
                     itemsIndexed(subtitles) { index, item ->
                         val textColor =
@@ -562,7 +594,11 @@ fun VideoSubtitles(
                                 MaterialTheme.appColors.textFieldBorder
                             }
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .noRippleClickable {
+                                    onTranscriptClick(item)
+                                },
                             text = Jsoup.parse(item.content).text(),
                             color = textColor,
                             style = MaterialTheme.appTypography.bodyMedium
@@ -634,15 +670,6 @@ private fun NavigationUnitsButtonsWithNextPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun VideoRotateViewPreview() {
-    OpenEdXTheme {
-        VideoRotateView()
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
 private fun SequentialItemPreview() {
     OpenEdXTheme() {
         Surface(color = MaterialTheme.appColors.background) {
@@ -678,8 +705,10 @@ private fun CourseHeaderPreview() {
                     .fillMaxWidth()
                     .height(200.dp)
                     .padding(6.dp),
+                apiHostUrl = "",
                 courseCertificate = Certificate(""),
-                courseImage = ""
+                courseImage = "",
+                courseName = ""
             )
         }
     }
@@ -734,5 +763,6 @@ private val mockChapterBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
+    descendantsType = BlockType.CHAPTER,
     completion = 0.0
 )

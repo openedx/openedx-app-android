@@ -730,7 +730,13 @@ fun AutoSizeText(
 }
 
 @Composable
-fun DiscoveryCourseItem(course: Course, windowSize: WindowSize, onClick: (String) -> Unit) {
+fun DiscoveryCourseItem(
+    apiHostUrl: String,
+    course: Course,
+    windowSize: WindowSize,
+    onClick: (String) -> Unit
+) {
+
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -740,7 +746,7 @@ fun DiscoveryCourseItem(course: Course, windowSize: WindowSize, onClick: (String
         )
     }
 
-    val imageUrl = org.openedx.core.BuildConfig.BASE_URL.dropLast(1) + course.media.courseImage?.uri
+    val imageUrl = apiHostUrl.dropLast(1) + course.media.courseImage?.uri
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -986,7 +992,7 @@ fun OpenEdXOutlinedButton(
     backgroundColor: Color = Color.Transparent,
     borderColor: Color,
     textColor: Color,
-    text: String,
+    text: String = "",
     onClick: () -> Unit,
     content: (@Composable RowScope.() -> Unit)? = null
 ) {

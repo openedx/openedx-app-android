@@ -1,5 +1,3 @@
-import org.yaml.snakeyaml.Yaml
-
 buildscript {
     repositories {
         mavenCentral()
@@ -17,8 +15,7 @@ plugins {
     id 'kotlin-kapt'
 }
 
-
-def config = new Yaml().load(new File("config.yaml").newInputStream())
+def currentFlavour = getCurrentFlavor()
 
 android {
     compileSdk 34
@@ -37,66 +34,26 @@ android {
     productFlavors {
         prod {
             dimension 'env'
-
-            def envMap = config.environments.find { it.key == "PROD" }
-            def clientId = envMap.value.OAUTH_CLIENT_ID
-            def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap)
-
-            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-            resValue "string", "google_app_id", firebase.appId
-            resValue "string", "platform_name", config.platformName
-            resValue "string", "platform_full_name", config.platformFullName
-            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-            resValue "string", "terms_of_service_link", envUrls.termsOfService
-            resValue "string", "contact_us_link", envUrls.contactUs
-            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+            insertBuildConfigFields(currentFlavour, it)
         }
         develop {
             dimension 'env'
-
-            def envMap = config.environments.find { it.key == "DEV" }
-            def clientId = envMap.value.OAUTH_CLIENT_ID
-            def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap)
-
-            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-            resValue "string", "google_app_id", firebase.appId
-            resValue "string", "platform_name", config.platformName
-            resValue "string", "platform_full_name", config.platformFullName
-            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-            resValue "string", "terms_of_service_link", envUrls.termsOfService
-            resValue "string", "contact_us_link", envUrls.contactUs
-            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+            insertBuildConfigFields(currentFlavour, it)
         }
         stage {
             dimension 'env'
+            insertBuildConfigFields(currentFlavour, it)
+        }
+    }
 
-            def envMap = config.environments.find { it.key == "STAGE" }
-            def clientId = envMap.value.OAUTH_CLIENT_ID
-            def envUrls = envMap.value.URLS
-            def firebase = getFirebaseConfig(envMap)
-
-            buildConfigField "String", "BASE_URL", "\"${envUrls.API_HOST_URL}\""
-            buildConfigField "String", "CLIENT_ID", "\"${clientId}\""
-            buildConfigField "String", "FIREBASE_PROJECT_ID", "\"${firebase.projectId}\""
-            buildConfigField "String", "FIREBASE_API_KEY", "\"${firebase.apiKey}\""
-            buildConfigField "String", "FIREBASE_GCM_SENDER_ID", "\"${firebase.gcmSenderId}\""
-            resValue "string", "google_app_id", firebase.appId
-            resValue "string", "platform_name", config.platformName
-            resValue "string", "platform_full_name", config.platformFullName
-            resValue "string", "privacy_policy_link", envUrls.privacyPolicy
-            resValue "string", "terms_of_service_link", envUrls.termsOfService
-            resValue "string", "contact_us_link", envUrls.contactUs
-            resValue "string", "feedback_email_address", envUrls.FEEDBACK_EMAIL_ADDRESS
+    sourceSets {
+        develop {
+            res.srcDirs = ['src/openedx/res']
+        }
+        main {
+            assets {
+                srcDirs 'src/main/assets', 'assets'
+            }
         }
     }
 
@@ -181,35 +138,47 @@ dependencies {
     api "com.google.firebase:firebase-crashlytics-ktx"
     api "com.google.firebase:firebase-analytics-ktx"
 
+    //Play In-App Review
+    api "com.google.android.play:review-ktx:$in_app_review"
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
-class FirebaseConfig {
-    public String projectId = ""
-    public String appId = ""
-    public String apiKey = ""
-    public String gcmSenderId = ""
+def insertBuildConfigFields(currentFlavour, buildType) {
+    if (currentFlavour == buildType.name) {
+        configHelper.generateConfigJson()
+        configHelper.generateMicrosoftConfig()
+    }
+    def config = configHelper.fetchConfig()
+    def platformName = config.getOrDefault("PLATFORM_NAME", "")
+    def platformFullName = config.getOrDefault("PLATFORM_FULL_NAME", "")
+
+    buildType.resValue "string", "platform_name", platformName
+    buildType.resValue "string", "platform_full_name", platformFullName
+    insertFacebookBuildConfigFields(config, buildType)
+    insertMicrosoftManifestPlaceholder(config, buildType)
 }
 
-def getFirebaseConfig(envMap) {
-    FirebaseConfig config = new FirebaseConfig()
-    if (envMap.value["FIREBASE"] != null) {
-        config.projectId = setValue(envMap.value["FIREBASE"]["PROJECT_ID"])
-        config.appId = setValue(envMap.value["FIREBASE"]["APPLICATION_ID"])
-        config.apiKey = setValue(envMap.value["FIREBASE"]["API_KEY"])
-        config.gcmSenderId = setValue(envMap.value["FIREBASE"]["GCM_SENDER_ID"])
+static def insertFacebookBuildConfigFields(config, buildType) {
+    def facebook = config.get("FACEBOOK")
+    def facebookAppId = ""
+    def facebookClientToken = ""
+    if (facebook) {
+        facebookAppId = facebook.getOrDefault("FACEBOOK_APP_ID", "")
+        facebookClientToken = facebook.getOrDefault("CLIENT_TOKEN", "")
     }
-    return config
+    buildType.resValue "string", "facebook_app_id", facebookAppId
+    buildType.resValue "string", "fb_login_protocol_scheme", "fb$facebookAppId"
+    buildType.resValue "string", "facebook_client_token", facebookClientToken
 }
 
-def setValue(value) {
-    def result
-    if (value == null) {
-        result = ""
-    } else {
-        result = value
+static def insertMicrosoftManifestPlaceholder(config, buildType) {
+    def microsoft = config.get("MICROSOFT")
+    def microsoftPackageSignature = ""
+    if (microsoft) {
+        microsoftPackageSignature = microsoft.getOrDefault("PACKAGE_SIGNATURE", "")
     }
-    return result
+    buildType.manifestPlaceholders = [microsoftSignature: microsoftPackageSignature]
 }

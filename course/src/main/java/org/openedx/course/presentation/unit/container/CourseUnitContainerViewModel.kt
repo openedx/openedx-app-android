@@ -3,6 +3,10 @@ package org.openedx.course.presentation.unit.container
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
@@ -15,10 +19,6 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
@@ -29,10 +29,8 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    var currentIndex = 0
-        private set
-    var currentVerticalIndex = 0
-        private set
+    private var currentIndex = 0
+    private var currentVerticalIndex = 0
     private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
@@ -52,6 +50,10 @@ class CourseUnitContainerViewModel(
     private val _indexInContainer = MutableLiveData<Int>()
     val indexInContainer: LiveData<Int>
         get() = _indexInContainer
+
+    private val _currentBlock = MutableLiveData<Block?>()
+    val currentBlock: LiveData<Block?>
+        get() = _currentBlock
 
     var nextButtonText = ""
     var hasNextBlock = false
@@ -77,9 +79,12 @@ class CourseUnitContainerViewModel(
         _indexInContainer.value = 0
     }
 
-    fun setupCurrentIndex(blockId: String) {
+    fun setupCurrentIndex(unitId: String, componentId: String = "") {
+        if (currentSectionIndex != -1) {
+            return
+        }
         blocks.forEachIndexed { index, block ->
-            if (block.id == blockId) {
+            if (block.id == unitId) {
                 currentVerticalIndex = index
                 currentSectionIndex = blocks.indexOfFirst {
                     it.descendants.contains(blocks[currentVerticalIndex].id)
@@ -91,6 +96,14 @@ class CourseUnitContainerViewModel(
                 }
                 if (currentVerticalIndex != -1) {
                     _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
+                }
+                if (block.descendants.isNotEmpty()) {
+                    _currentBlock.value = blocks.first { it.id == block.descendants.first() }
+                }
+                if (componentId.isNotEmpty()) {
+                    _currentBlock.value = blocks.first { it.id == componentId }
+                    _indexInContainer.value = descendants.indexOf(componentId)
+                    currentIndex = descendants.indexOf(componentId)
                 }
                 return
             }
@@ -136,6 +149,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null
@@ -148,6 +162,7 @@ class CourseUnitContainerViewModel(
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
+            _currentBlock.value = block
             return block
         }
         return null

@@ -5,14 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <View
-        android:id="@+id/statusBarInset"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <FrameLayout
         android:id="@+id/frameBack"
         android:layout_width="wrap_content"
@@ -22,14 +14,23 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/statusBarInset">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="12dp" />
+
+        <androidx.mediarouter.app.MediaRouteButton
+            android:id="@+id/mediaRouteButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="24dp"
+            android:layout_marginTop="12dp"
+            android:mediaRouteTypes="user" />
 
     </FrameLayout>
 
@@ -45,7 +46,7 @@
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/cv_navigationBar"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
+            android:layout_height="wrap_content"
             android:elevation="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,24 +61,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.cardview.widget.CardView
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="24dp"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="30dp"
-            app:cardElevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/viewPager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </androidx.cardview.widget.CardView>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

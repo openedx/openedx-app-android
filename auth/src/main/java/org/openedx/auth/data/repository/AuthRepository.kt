@@ -1,13 +1,17 @@
 package org.openedx.auth.data.repository
 
 import org.openedx.auth.data.api.AuthApi
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
+import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.EdxError
 
 class AuthRepository(
+    private val config: Config,
     private val api: AuthApi,
     private val preferencesManager: CorePreferences,
 ) {
@@ -16,19 +20,27 @@ class AuthRepository(
         username: String,
         password: String,
     ) {
-        val authResponse = api.getAccessToken(
+        api.getAccessToken(
             ApiConstants.GRANT_TYPE_PASSWORD,
-            org.openedx.core.BuildConfig.CLIENT_ID,
+            config.getOAuthClientId(),
             username,
-            password
+            password,
+            config.getAccessTokenType(),
         )
-        if (authResponse.error != null) {
-            throw EdxError.UnknownException(authResponse.error!!)
-        }
-        preferencesManager.accessToken = authResponse.accessToken ?: ""
-        preferencesManager.refreshToken = authResponse.refreshToken ?: ""
-        val user = api.getProfile()
-        preferencesManager.user = user
+            .mapToDomain()
+            .processAuthResponse()
+    }
+
+    suspend fun socialLogin(token: String?, authType: AuthType) {
+        if (token.isNullOrBlank()) throw IllegalArgumentException("Token is null")
+        api.exchangeAccessToken(
+            accessToken = token,
+            clientId = config.getOAuthClientId(),
+            tokenType = config.getAccessTokenType(),
+            authType = authType.postfix
+        )
+            .mapToDomain()
+            .processAuthResponse()
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {
@@ -45,5 +57,16 @@ class AuthRepository(
 
     suspend fun passwordReset(email: String): Boolean {
         return api.passwordReset(email).success
+    }
+
+    private suspend fun AuthResponse.processAuthResponse() {
+        if (error != null) {
+            throw EdxError.UnknownException(error!!)
+        }
+        preferencesManager.accessToken = accessToken ?: ""
+        preferencesManager.refreshToken = refreshToken ?: ""
+        preferencesManager.accessTokenExpiresAt = getTokenExpiryTime()
+        val user = api.getProfile()
+        preferencesManager.user = user
     }
 }

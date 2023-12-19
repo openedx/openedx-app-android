@@ -22,24 +22,25 @@ interface CourseRouter {
     fun navigateToCourseSubsections(
         fm: FragmentManager,
         courseId: String,
-        blockId: String,
-        title: String,
-        mode: CourseViewMode,
+        subSectionId: String,
+        unitId: String = "",
+        componentId: String = "",
+        mode: CourseViewMode
     )
 
     fun navigateToCourseContainer(
         fm: FragmentManager,
-        blockId: String,
         courseId: String,
-        courseName: String,
+        unitId: String,
+        componentId: String = "",
         mode: CourseViewMode
     )
 
     fun replaceCourseContainer(
         fm: FragmentManager,
-        blockId: String,
         courseId: String,
-        courseName: String,
+        unitId: String,
+        componentId: String = "",
         mode: CourseViewMode
     )
 
@@ -48,7 +49,8 @@ interface CourseRouter {
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     )
 
     fun navigateToFullScreenYoutubeVideo(
@@ -56,7 +58,8 @@ interface CourseRouter {
         videoUrl: String,
         videoTime: Long,
         blockId: String,
-        courseId: String
+        courseId: String,
+        isPlaying: Boolean
     )
 
     fun navigateToHandoutsWebView(

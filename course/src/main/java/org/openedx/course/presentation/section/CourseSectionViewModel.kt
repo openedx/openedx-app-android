@@ -49,15 +49,16 @@ class CourseSectionViewModel(
         super.onCreate(owner)
         viewModelScope.launch {
             downloadModelsStatusFlow.collect { downloadModels ->
-                if (uiState.value is CourseSectionUIState.Blocks) {
-                    val list = (uiState.value as CourseSectionUIState.Blocks).blocks
-                    val courseName = (uiState.value as CourseSectionUIState.Blocks).courseName
-                    _uiState.value =
-                        CourseSectionUIState.Blocks(
-                            ArrayList(list),
-                            downloadModels.toMap(),
-                            courseName
-                        )
+                when (val state = uiState.value) {
+                    is CourseSectionUIState.Blocks -> {
+                        val list = (uiState.value as CourseSectionUIState.Blocks).blocks
+                        _uiState.value = CourseSectionUIState.Blocks(
+                            sectionName = state.sectionName,
+                            courseName = state.courseName,
+                            blocks = ArrayList(list),
+                            downloadedState = downloadModels.toMap())
+                    }
+                    else -> {}
                 }
             }
         }
@@ -82,12 +83,14 @@ class CourseSectionViewModel(
                 val blocks = courseStructure.blockData
                 setBlocks(blocks)
                 val newList = getDescendantBlocks(blocks, blockId)
+                val sequentialBlock = getSequentialBlock(blocks, blockId)
                 initDownloadModelsStatus()
                 _uiState.value =
                     CourseSectionUIState.Blocks(
-                        ArrayList(newList),
-                        getDownloadModelsStatus(),
-                        courseStructure.name
+                        blocks = ArrayList(newList),
+                        downloadedState = getDownloadModelsStatus(),
+                        courseName = courseStructure.name,
+                        sectionName = sequentialBlock.displayName
                     )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -117,9 +120,7 @@ class CourseSectionViewModel(
     private fun getDescendantBlocks(blocks: List<Block>, id: String): List<Block> {
         val resultList = mutableListOf<Block>()
         if (blocks.isEmpty()) return emptyList()
-        val selectedBlock = blocks.first {
-            it.id == id
-        }
+        val selectedBlock = getSequentialBlock(blocks, id)
         for (descendant in selectedBlock.descendants) {
             val blockDescendant = blocks.find {
                 it.id == descendant
@@ -132,6 +133,12 @@ class CourseSectionViewModel(
             } else continue
         }
         return resultList
+    }
+
+    private fun getSequentialBlock(blocks: List<Block>, id: String): Block {
+        return blocks.first {
+            it.id == id
+        }
     }
 
     fun verticalClickedEvent(blockId: String, blockName: String) {

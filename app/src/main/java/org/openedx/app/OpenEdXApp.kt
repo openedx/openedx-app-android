@@ -4,13 +4,17 @@ import android.app.Application
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 import org.openedx.app.di.appModule
 import org.openedx.app.di.networkingModule
 import org.openedx.app.di.screenModule
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
+import org.openedx.core.config.Config
 
 class OpenEdXApp : Application() {
+
+    private val config by inject<Config>()
 
     override fun onCreate() {
         super.onCreate()
@@ -22,13 +26,13 @@ class OpenEdXApp : Application() {
                 screenModule
             )
         }
-
-        if (org.openedx.core.BuildConfig.FIREBASE_PROJECT_ID.isNotEmpty()) {
+        val firebaseConfig = config.getFirebaseConfig()
+        if (firebaseConfig.enabled) {
             val options = FirebaseOptions.Builder()
-                .setProjectId(org.openedx.core.BuildConfig.FIREBASE_PROJECT_ID)
-                .setApplicationId(getString(org.openedx.core.R.string.google_app_id))
-                .setApiKey(org.openedx.core.BuildConfig.FIREBASE_API_KEY)
-                .setGcmSenderId(org.openedx.core.BuildConfig.FIREBASE_GCM_SENDER_ID)
+                .setProjectId(firebaseConfig.projectId)
+                .setApplicationId(firebaseConfig.applicationId)
+                .setApiKey(firebaseConfig.apiKey)
+                .setGcmSenderId(firebaseConfig.gcmSenderId)
                 .build()
             Firebase.initialize(this, options)
         }

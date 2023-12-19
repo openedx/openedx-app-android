@@ -41,7 +41,7 @@ data class CourseStructureModel(
         return CourseStructure(
             root = root,
             blockData = blockData.map {
-                it.value.mapToDomain()
+                it.value.mapToDomain(blockData)
             },
             id = id ?: "",
             name = name ?: "",

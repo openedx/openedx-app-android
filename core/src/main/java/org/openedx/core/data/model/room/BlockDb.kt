@@ -33,7 +33,18 @@ data class BlockDb(
     @ColumnInfo("completion")
     val completion: Double
 ) {
-    fun mapToDomain(): Block {
+    fun mapToDomain(blocks: List<BlockDb>): Block {
+        val blockType = BlockType.getBlockType(type)
+        val descendantsType = if (blockType == BlockType.VERTICAL) {
+            val types = descendants.map { descendant ->
+                BlockType.getBlockType(blocks.find { it.id == descendant }?.type ?: "")
+            }
+            val sortedBlockTypes = BlockType.sortByPriority(types)
+            sortedBlockTypes.firstOrNull() ?: blockType
+        } else {
+            blockType
+        }
+
         return Block(
             id = id,
             blockId = blockId,
@@ -47,6 +58,7 @@ data class BlockDb(
             studentViewMultiDevice = studentViewMultiDevice,
             blockCounts = blockCounts.mapToDomain(),
             descendants = descendants,
+            descendantsType = descendantsType,
             completion = completion,
         )
     }

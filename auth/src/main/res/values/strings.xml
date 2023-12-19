@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="pre_auth_title" tools:ignore="ExtraTranslation">Courses and programs from the world\'s best universities in your pocket.</string>
+    <string name="pre_auth_search_title" tools:ignore="ExtraTranslation">What do you want to learn?</string>
+    <string name="pre_auth_search_hint" tools:ignore="ExtraTranslation">Search our 3000+ courses</string>
+    <string name="pre_auth_explore_all_courses" tools:ignore="ExtraTranslation">Explore all courses</string>
     <string name="auth_sign_in">Sign in</string>
     <string name="auth_sign_up">Sign up</string>
     <string name="auth_register">Register</string>
@@ -20,4 +24,7 @@
     <string name="auth_example_email" translatable="false">username@domain.com</string>
     <string name="auth_enter_password">Enter password</string>
     <string name="auth_create_new_account">Create new account.</string>
+    <string name="auth_google" tools:ignore="ExtraTranslation">Sign in with Google</string>
+    <string name="auth_facebook" tools:ignore="ExtraTranslation">Sign in with Facebook</string>
+    <string name="auth_microsoft" tools:ignore="ExtraTranslation">Sign in with Microsoft</string>
 </resources>

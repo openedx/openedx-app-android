@@ -50,6 +50,7 @@ class CourseUnitContainerViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("id2", "id1"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -65,6 +66,7 @@ class CourseUnitContainerViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("id2", "id"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -80,6 +82,7 @@ class CourseUnitContainerViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -95,6 +98,7 @@ class CourseUnitContainerViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         )
 

@@ -23,6 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.config.Config
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -34,6 +35,7 @@ class CourseSearchViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscoveryInteractor>()
     private val analytics = mockk<DiscoveryAnalytics>()
@@ -74,6 +76,7 @@ class CourseSearchViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { config.getApiHostURL() } returns "http://localhost:8000"
     }
 
     @After
@@ -83,7 +86,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search empty query`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
 
         viewModel.search("")
         advanceUntilIdle()
@@ -97,7 +100,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query no internet connection exception`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), any()) } throws UnknownHostException()
 
         viewModel.search("course")
@@ -112,7 +115,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query unknown exception`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), any()) } throws Exception()
 
         viewModel.search("course")
@@ -127,7 +130,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query success without next page`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), any()) } returns CourseList(
             Pagination(
                 10,
@@ -152,7 +155,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query success with next page and fetch`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), eq(1)) } returns CourseList(
             Pagination(
                 10,
@@ -186,7 +189,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query success with next page and fetch, update`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), eq(1)) } returns CourseList(
             Pagination(
                 10,
@@ -221,7 +224,7 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query update in empty state`() = runTest {
-        val viewModel = CourseSearchViewModel(interactor, resourceManager, analytics)
+        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), eq(1)) } returns CourseList(
             Pagination(
                 10,
