@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.math.ceil
+import kotlin.math.floor
 
 object TimeUtils {
 
@@ -19,7 +21,6 @@ object TimeUtils {
     private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "yyyy-MM-dd'T'HH:mm:ssXXX"
     private const val FORMAT_APPLICATION = "dd.MM.yyyy HH:mm"
     const val FORMAT_DATE = "dd MMM, yyyy"
-    const val FORMAT_DATE_TAB = "EEE, MMM dd, yyyy"
 
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
 
@@ -209,5 +210,40 @@ object TimeUtils {
             }
         }
         return formattedDate
+    }
+
+    fun addDays(currentDate: Date, days: Int): Date? {
+        val calendar = Calendar.getInstance()
+        calendar.time = currentDate
+        calendar.add(Calendar.DATE, days)
+        return calendar.time
+    }
+
+    fun getCourseFormattedDate(date: Date): String {
+        val currentDate = Calendar.getInstance()
+        val inputDate = Calendar.getInstance()
+        inputDate.time = date
+
+        val daysDifference = daysDifference(currentDate, inputDate)
+
+        return when {
+            daysDifference == 0 -> "Today"
+            daysDifference == 1 -> "Tomorrow"
+            daysDifference == - 1 -> "Yesterday"
+            daysDifference in -2 downTo -7 -> "${-daysDifference} days ago"
+            daysDifference in 2..7 -> SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
+            inputDate.get(Calendar.YEAR) != currentDate.get(Calendar.YEAR) -> SimpleDateFormat(
+                "MMMM d, yyyy",
+                Locale.getDefault()
+            ).format(date)
+
+            else -> SimpleDateFormat("MMMM d", Locale.getDefault()).format(date)
+        }
+    }
+
+    private fun daysDifference(currentDate: Calendar, inputDate: Calendar): Int {
+        val difference = inputDate.timeInMillis - currentDate.timeInMillis
+        val diffInDays = (difference / (24 * 60 * 60 * 1000).toDouble())
+        return if (diffInDays > 0) ceil(diffInDays).toInt() else floor(diffInDays).toInt()
     }
 }

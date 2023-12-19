@@ -37,13 +37,11 @@ data class AppColors(
 
     val accessGreen: Color,
 
-    val datesBadgeDefault: Color,
-    val datesBadgeTextDefault: Color,
-    val datesBadgePastDue: Color,
-    val datesBadgeToday: Color,
-    val datesBadgeTextToday: Color, // also used for locked date block
-    val datesBadgeDue: Color, // Also used for not release date block text and stoke
-    val datesBadgeTextDue: Color, // Also used for locked date block color
+    val datesSectionBarPastDue: Color,
+    val datesSectionBarToday: Color,
+    val datesSectionBarThisWeek: Color,
+    val datesSectionBarNextWeek: Color,
+    val datesSectionBarUpcoming: Color,
 
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,

@@ -1,7 +1,6 @@
 package org.openedx.core.domain.model
 
 import org.openedx.core.data.model.DateType
-import org.openedx.core.presentation.course.CourseDatesBadge
 import java.util.Date
 
 data class CourseDateBlock(
@@ -14,14 +13,13 @@ data class CourseDateBlock(
     val date: Date?,
     val dateType: DateType = DateType.NONE,
     val assignmentType: String? = "",
-    var dateBlockBadge: CourseDatesBadge = CourseDatesBadge.BLANK,
 ) {
-    companion object {
-        fun getTodayDateBlock() =
-            CourseDateBlock(
-                date = Date(),
-                dateType = DateType.TODAY_DATE,
-                dateBlockBadge = CourseDatesBadge.TODAY
-            )
+    fun isCompleted(): Boolean {
+        return complete || (dateType in setOf(
+            DateType.COURSE_START_DATE,
+            DateType.COURSE_END_DATE,
+            DateType.CERTIFICATE_AVAILABLE_DATE,
+            DateType.VERIFICATION_DEADLINE_DATE
+        ) && date?.before(Date()) == true)
     }
 }
