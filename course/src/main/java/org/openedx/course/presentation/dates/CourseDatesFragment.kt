@@ -82,7 +82,6 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
-import org.openedx.course.data.repository.datesResponse
 import org.openedx.course.presentation.CourseRouter
 
 class CourseDatesFragment : Fragment() {
