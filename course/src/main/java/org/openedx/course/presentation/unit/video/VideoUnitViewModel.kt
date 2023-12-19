@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -74,9 +75,9 @@ open class VideoUnitViewModel(
     }
 
     fun downloadSubtitles() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             transcriptManager.downloadTranscriptsForVideo(getTranscriptUrl())?.let { result ->
-                _transcriptObject.value = result
+                _transcriptObject.postValue(result)
                 timeList = result.captions.values.toList()
                     .map { it.start.mseconds.toLong() }
             }
