@@ -21,6 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import java.net.UnknownHostException
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseContainerViewModelTest {
@@ -46,7 +47,7 @@ class CourseContainerViewModelTest {
         name = "Course name",
         number = "",
         org = "Org",
-        start = null,
+        start = Date(0),
         startDisplay = "",
         startType = "",
         end = null,
