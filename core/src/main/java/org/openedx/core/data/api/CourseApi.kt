@@ -19,6 +19,7 @@ interface CourseApi {
         @Query("search_term") searchQuery: String? = null,
         @Query("page") page: Int,
         @Query("mobile") mobile: Boolean,
+        @Query("mobile_search") mobileSearch: Boolean,
         @Query("username") username: String? = null,
         @Query("org") org: String? = null,
         @Query("permissions") permission: List<String> = listOf(
