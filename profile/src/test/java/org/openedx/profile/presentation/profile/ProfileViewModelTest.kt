@@ -89,6 +89,7 @@ class ProfileViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
+        every { config.getFeedbackEmailAddress() } returns ""
         every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
         every { config.getFaqUrl() } returns ""
     }
