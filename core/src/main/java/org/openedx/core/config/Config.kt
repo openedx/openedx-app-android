@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
 class Config(context: Context) {
@@ -34,12 +35,18 @@ class Config(context: Context) {
         return getString(TOKEN_TYPE, "")
     }
 
+    fun getFaqUrl(): String {
+        return getString(FAQ_URL, "")
+    }
+
     fun getFeedbackEmailAddress(): String {
         return getString(FEEDBACK_EMAIL_ADDRESS, "")
     }
 
-    fun getAgreementUrlsConfig(): AgreementUrlsConfig {
-        return getObjectOrNewInstance(AGREEMENT_URLS, AgreementUrlsConfig::class.java)
+    fun getAgreement(locale: String): AgreementUrls {
+        val agreement =
+            getObjectOrNewInstance(AGREEMENT_URLS, AgreementUrlsConfig::class.java).mapToDomain()
+        return agreement.getAgreementForLocale(locale)
     }
 
     fun getFirebaseConfig(): FirebaseConfig {
@@ -106,6 +113,7 @@ class Config(context: Context) {
         private const val API_HOST_URL = "API_HOST_URL"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
+        private const val FAQ_URL = "FAQ_URL"
         private const val FEEDBACK_EMAIL_ADDRESS = "FEEDBACK_EMAIL_ADDRESS"
         private const val AGREEMENT_URLS = "AGREEMENT_URLS"
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"

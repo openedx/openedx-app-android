@@ -68,6 +68,20 @@ class ProfileFragment : Fragment() {
                                 )
                             }
 
+                            ProfileViewAction.CookiePolicyClick -> {
+                                viewModel.cookiePolicyClicked(
+                                    requireParentFragment().parentFragmentManager
+                                )
+                            }
+
+                            ProfileViewAction.DataSellClick -> {
+                                viewModel.dataSellClicked(
+                                    requireParentFragment().parentFragmentManager
+                                )
+                            }
+
+                            ProfileViewAction.FaqClick -> viewModel.faqClicked()
+
                             ProfileViewAction.SupportClick -> {
                                 viewModel.emailSupportClicked(requireContext())
                             }
