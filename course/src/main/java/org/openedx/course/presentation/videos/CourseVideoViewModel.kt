@@ -21,7 +21,6 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.course.presentation.outline.CourseOutlineUIState
 
 class CourseVideoViewModel(
     val courseId: String,
@@ -59,9 +58,9 @@ class CourseVideoViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
-    private val courseSections = mutableMapOf<String, MutableList<Block>>()
-    private val downloadsCount = mutableMapOf<String, Int>()
-    val courseSubSection = mutableMapOf<String, Block?>()
+    private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
+    private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
+    val courseSubSectionUnit = mutableMapOf<String, Block?>()
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -82,9 +81,9 @@ class CourseVideoViewModel(
                     _uiState.value = CourseVideosUIState.CourseData(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
-                        courseSections = courseSections,
+                        courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
-                        downloadsCount = downloadsCount
+                        subSectionsDownloadsCount = subSectionsDownloadsCount
                     )
                 }
             }
@@ -127,18 +126,18 @@ class CourseVideoViewModel(
                 )
             } else {
                 setBlocks(courseStructure.blockData)
-                courseSections.clear()
-                courseSubSection.clear()
+                courseSubSections.clear()
+                courseSubSectionUnit.clear()
                 courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
 
                 val courseSectionsState =
-                    (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState
-                        ?: emptyMap()
+                    (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
+
                 _uiState.value =
                     CourseVideosUIState.CourseData(
-                        courseStructure, getDownloadModelsStatus(), courseSections,
-                        courseSectionsState, downloadsCount
+                        courseStructure, getDownloadModelsStatus(), courseSubSections,
+                        courseSectionsState, subSectionsDownloadsCount
                     )
             }
         }
@@ -153,17 +152,17 @@ class CourseVideoViewModel(
             _uiState.value = CourseVideosUIState.CourseData(
                 courseStructure = state.courseStructure,
                 downloadedState = state.downloadedState,
-                courseSections = courseSections,
+                courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
-                downloadsCount = downloadsCount
+                subSectionsDownloadsCount = subSectionsDownloadsCount
             )
         }
     }
 
-    fun verticalClickedEvent(blockId: String, blockName: String) {
+    fun sequentialClickedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
         if (currentState is CourseVideosUIState.CourseData) {
-            analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+            analytics.sequentialClickedEvent(courseId, courseTitle, blockId, blockName)
         }
     }
 
@@ -176,10 +175,10 @@ class CourseVideoViewModel(
                 block.descendants.forEach { descendant ->
                     blocks.find { it.id == descendant }?.let {
                         if (isCourseNestedListEnabled) {
-                            courseSections.getOrPut(block.id) { mutableListOf() }
+                            courseSubSections.getOrPut(block.id) { mutableListOf() }
                                 .add(it)
-                            courseSubSection[it.id] = getCourseFirstSubSection(blocks, it)
-                            downloadsCount[it.id] = getDownloadsCount(blocks, it)
+                            courseSubSectionUnit[it.id] = it.getFirstDescendantBlock(blocks)
+                            subSectionsDownloadsCount[it.id] = it.getDownloadsCount(blocks)
 
                         } else {
                             resultBlocks.add(it)
@@ -190,26 +189,5 @@ class CourseVideoViewModel(
             }
         }
         return resultBlocks.toList()
-    }
-
-    private fun getCourseFirstSubSection(blocks: List<Block>, selectedBlock: Block): Block? {
-        if (blocks.isEmpty()) return null
-        selectedBlock.descendants.forEach { descendant ->
-            blocks.find { it.id == descendant }?.let { block ->
-                return block
-            }
-        }
-        return null
-    }
-
-    private fun getDownloadsCount(blocks: List<Block>, selectedBlock: Block): Int {
-        if (blocks.isEmpty()) return 0
-        var count = 0
-        selectedBlock.descendants.forEach { id ->
-            blocks.find { it.id == id }?.let { descendantBlock ->
-                count += blocks.filter { descendantBlock.descendants.contains(it.id) && it.isDownloadable }.size
-            }
-        }
-        return count
     }
 }

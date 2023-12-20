@@ -50,8 +50,29 @@ data class Block(
 
     fun isDownloaded() = downloadModel?.downloadedState == DownloadedState.DOWNLOADED
 
-    fun isGated(): Boolean {
-        return containsGatedContent == true
+    fun isGated() = containsGatedContent
+
+    fun isCompleted() = completion == 1.0
+
+    fun getFirstDescendantBlock(blocks: List<Block>): Block? {
+        if (blocks.isEmpty()) return null
+        descendants.forEach { descendant ->
+            blocks.find { it.id == descendant }?.let { descendantBlock ->
+                return descendantBlock
+            }
+        }
+        return null
+    }
+
+    fun getDownloadsCount(blocks: List<Block>): Int {
+        if (blocks.isEmpty()) return 0
+        var count = 0
+        descendants.forEach { id ->
+            blocks.find { it.id == id }?.let { descendantBlock ->
+                count += blocks.filter { descendantBlock.descendants.contains(it.id) && it.isDownloadable }.size
+            }
+        }
+        return count
     }
 
     val isVideoBlock get() = type == BlockType.VIDEO

@@ -48,7 +48,7 @@ import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
-import org.openedx.course.presentation.ui.CourseSectionItem
+import org.openedx.course.presentation.ui.CourseSubSectionItem
 import java.io.File
 import java.util.Date
 
@@ -108,13 +108,13 @@ class CourseVideosFragment : Fragment() {
                     onExpandClick = { block ->
                         viewModel.switchCourseSections(block.id)
                     },
-                    onSectionClick = { sectionBlock ->
-                        viewModel.courseSubSection[sectionBlock.id]?.let { block ->
-                            viewModel.verticalClickedEvent(block.blockId, block.displayName)
+                    onSubSectionClick = { subSectionBlock ->
+                        viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                            viewModel.sequentialClickedEvent(unit.blockId, unit.displayName)
                             router.navigateToCourseContainer(
                                 fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
-                                unitId = block.id,
+                                unitId = unit.id,
                                 mode = CourseViewMode.VIDEOS
                             )
                         }
@@ -170,7 +170,7 @@ private fun CourseVideosScreen(
     onSwipeRefresh: () -> Unit,
     onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
-    onSectionClick: (Block) -> Unit,
+    onSubSectionClick: (Block) -> Unit,
     onReloadClick: () -> Unit,
     onDownloadClick: (Block) -> Unit
 ) {
@@ -284,29 +284,25 @@ private fun CourseVideosScreen(
                                         item {
                                             Spacer(Modifier.height(16.dp))
                                         }
-                                        uiState.courseStructure.blockData.forEach { block ->
-                                            val courseSections =
-                                                uiState.courseSections[block.id]
+                                        uiState.courseStructure.blockData.forEach { section ->
+                                            val courseSubSections =
+                                                uiState.courseSubSections[section.id]
                                             val courseSectionsState =
-                                                uiState.courseSectionsState[block.id]
+                                                uiState.courseSectionsState[section.id]
 
                                             item {
                                                 Column {
                                                     CourseExpandableChapterCard(
                                                         modifier = listPadding,
-                                                        block = block,
-                                                        downloadedState = uiState.downloadedState[block.id],
-                                                        onItemClick = { blockSelected ->
-                                                            onExpandClick(blockSelected)
-                                                        },
-                                                        onDownloadClick = onDownloadClick,
+                                                        block = section,
+                                                        onItemClick = onExpandClick,
                                                         arrowDegrees = if (courseSectionsState == true) -90f else 90f
                                                     )
                                                     Divider()
                                                 }
                                             }
 
-                                            courseSections?.forEach { subSectionBlock ->
+                                            courseSubSections?.forEach { subSectionBlock ->
                                                 item {
                                                     Column {
                                                         AnimatedVisibility(
@@ -314,19 +310,15 @@ private fun CourseVideosScreen(
                                                         ) {
                                                             Column {
                                                                 val downloadsCount =
-                                                                    uiState.downloadsCount[subSectionBlock.id]
+                                                                    uiState.subSectionsDownloadsCount[subSectionBlock.id]
                                                                         ?: 0
 
-                                                                CourseSectionItem(
+                                                                CourseSubSectionItem(
                                                                     modifier = listPadding,
                                                                     block = subSectionBlock,
                                                                     downloadedState = uiState.downloadedState[subSectionBlock.id],
                                                                     downloadsCount = downloadsCount,
-                                                                    onClick = { sectionBlock ->
-                                                                        onSectionClick(
-                                                                            sectionBlock
-                                                                        )
-                                                                    },
+                                                                    onClick = onSubSectionClick,
                                                                     onDownloadClick = onDownloadClick
                                                                 )
                                                                 Divider()
@@ -355,9 +347,7 @@ private fun CourseVideosScreen(
                                                 CourseSectionCard(
                                                     block = block,
                                                     downloadedState = uiState.downloadedState[block.id],
-                                                    onItemClick = { blockSelected ->
-                                                        onItemClick(blockSelected)
-                                                    },
+                                                    onItemClick = onItemClick,
                                                     onDownloadClick = onDownloadClick
                                                 )
                                                 Divider()
@@ -413,7 +403,7 @@ private fun CourseVideosScreenPreview() {
             isCourseBannerEnabled = true,
             onItemClick = { },
             onExpandClick = { },
-            onSectionClick = { },
+            onSubSectionClick = { },
             hasInternetConnection = true,
             isUpdating = false,
             onSwipeRefresh = {},
@@ -439,7 +429,7 @@ private fun CourseVideosScreenEmptyPreview() {
             isCourseBannerEnabled = true,
             onItemClick = { },
             onExpandClick = { },
-            onSectionClick = { },
+            onSubSectionClick = { },
             onSwipeRefresh = {},
             onReloadClick = {},
             hasInternetConnection = true,
@@ -469,7 +459,7 @@ private fun CourseVideosScreenTabletPreview() {
             isCourseBannerEnabled = true,
             onItemClick = { },
             onExpandClick = { },
-            onSectionClick = { },
+            onSubSectionClick = { },
             onSwipeRefresh = {},
             onReloadClick = {},
             isUpdating = false,

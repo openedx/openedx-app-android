@@ -15,17 +15,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.TaskAlt
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -48,13 +39,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
-import org.openedx.core.domain.model.Block
-import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.Certificate
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.*
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.ui.*
@@ -171,12 +156,12 @@ fun CourseSectionCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             val completedIconPainter =
-                if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+                if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
                     R.drawable.ic_course_chapter_icon
                 )
             val completedIconColor =
-                if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
-            val completedIconDescription = if (block.completion == 1.0) {
+                if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+            val completedIconDescription = if (block.isCompleted()) {
                 stringResource(id = R.string.course_accessibility_section_completed)
             } else {
                 stringResource(id = R.string.course_accessibility_section_uncompleted)
@@ -267,9 +252,9 @@ fun SequentialItem(
     block: Block,
     onClick: (Block) -> Unit
 ) {
-    val icon = if (block.completion == 1.0) Icons.Filled.TaskAlt else Icons.Filled.Home
+    val icon = if (block.isCompleted()) Icons.Filled.TaskAlt else Icons.Filled.Home
     val iconColor =
-        if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
     Row(
         Modifier
             .fillMaxWidth()
@@ -429,12 +414,15 @@ fun HorizontalPageIndicator(
         modifier = modifier
     ) {
         blocks.forEachIndexed { index, block ->
+            val backgroundColor = when {
+                index == selectedPage -> selectedColor
+                block.isCompleted() -> completedColor
+                else -> defaultColor
+            }
+
             Box(
                 modifier = Modifier
-                    .background(
-                        if (index == selectedPage) selectedColor else
-                            if (block.completion == 1.0) completedColor else defaultColor
-                    )
+                    .background(backgroundColor)
                     .fillMaxHeight()
                     .weight(1f)
             )
@@ -616,16 +604,12 @@ fun VideoSubtitles(
 fun CourseExpandableChapterCard(
     modifier: Modifier,
     block: Block,
-    downloadedState: DownloadedState?,
     onItemClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit,
     arrowDegrees: Float = 0f
 ) {
-    val iconModifier = Modifier.size(24.dp)
-
     Column(modifier = Modifier
         .clickable { onItemClick(block) }
-        .background(if (block.completion == 1.0) MaterialTheme.appColors.surface else Color.Transparent)
+        .background(if (block.isCompleted()) MaterialTheme.appColors.surface else Color.Transparent)
     ) {
         Row(
             modifier
@@ -637,7 +621,7 @@ fun CourseExpandableChapterCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (block.completion == 1.0) {
+            if (block.isCompleted()) {
                 val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
                 val completedIconColor = MaterialTheme.appColors.primary
                 val completedIconDescription =
@@ -659,56 +643,13 @@ fun CourseExpandableChapterCard(
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Row(
-                modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val iconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        painterResource(id = R.drawable.course_ic_remove_download)
-                    } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
-                    }
-                    IconButton(modifier = iconModifier,
-                        onClick = { onDownloadClick(block) }) {
-                        Icon(
-                            painter = iconPainter,
-                            contentDescription = null,
-                            tint = MaterialTheme.appColors.textPrimary
-                        )
-                    }
-                } else if (downloadedState != null) {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(34.dp),
-                                backgroundColor = Color.LightGray,
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
-                        IconButton(
-                            modifier = iconModifier.padding(top = 2.dp),
-                            onClick = { onDownloadClick(block) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = null,
-                                tint = MaterialTheme.appColors.error
-                            )
-                        }
-                    }
-                }
-                CardArrow(
-                    degrees = arrowDegrees
-                )
-            }
+            CardArrow(degrees = arrowDegrees)
         }
     }
 }
 
 @Composable
-fun CourseSectionItem(
+fun CourseSubSectionItem(
     modifier: Modifier,
     block: Block,
     downloadedState: DownloadedState?,
@@ -717,17 +658,17 @@ fun CourseSectionItem(
     onDownloadClick: (Block) -> Unit
 ) {
     val icon =
-        if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
             R.drawable.ic_course_chapter_icon
         )
     val iconColor =
-        if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
 
     val iconModifier = Modifier.size(24.dp)
 
     Column(Modifier
         .clickable { onClick(block) }
-        .background(if (block.completion == 1.0) MaterialTheme.appColors.surface else Color.Transparent)
+        .background(if (block.isCompleted()) MaterialTheme.appColors.surface else Color.Transparent)
     ) {
         Row(
             modifier
@@ -977,7 +918,7 @@ fun UnitSubSectionsList(
                             Image(
                                 modifier = Modifier
                                     .size(16.dp)
-                                    .alpha(if (block.completion == 1.0) 1f else 0f),
+                                    .alpha(if (block.isCompleted()) 1f else 0f),
                                 painter = painterResource(id = R.drawable.ic_course_check),
                                 contentDescription = "done"
                             )
