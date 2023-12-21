@@ -232,7 +232,7 @@ class CourseUnitContainerViewModelTest {
 
         verify(exactly = 0) { interactor.getCourseStructureFromCache() }
         verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(viewModel.moveToBlock(viewModel.currentIndex - 1) == null)
+        assert(viewModel.moveToPrevBlock() == null)
     }
 
     @Test
@@ -249,7 +249,7 @@ class CourseUnitContainerViewModelTest {
 
         verify(exactly = 0) { interactor.getCourseStructureFromCache() }
         verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(viewModel.moveToBlock(viewModel.currentIndex - 1) != null)
+        assert(viewModel.moveToPrevBlock() != null)
     }
 
     @Test
@@ -266,7 +266,7 @@ class CourseUnitContainerViewModelTest {
 
         verify(exactly = 0) { interactor.getCourseStructureFromCache() }
         verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(viewModel.moveToBlock(viewModel.currentIndex + 1) == null)
+        assert(viewModel.moveToNextBlock() == null)
     }
 
     @Test
@@ -283,7 +283,7 @@ class CourseUnitContainerViewModelTest {
 
         verify(exactly = 0) { interactor.getCourseStructureFromCache() }
         verify(exactly = 1) { interactor.getCourseStructureForVideos() }
-        assert(viewModel.moveToBlock(viewModel.currentIndex + 1) != null)
+        assert(viewModel.moveToNextBlock() != null)
     }
 
     @Test

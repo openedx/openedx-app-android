@@ -119,7 +119,10 @@ class CourseUnitContainerViewModel(
                     it.descendants.contains(blocks[currentVerticalIndex].id)
                 }
                 if (block.descendants.isNotEmpty() || block.isGated()) {
-                    _descendantsBlocks.value = blocks.filter { block.descendants.contains(it.id) }
+                    _descendantsBlocks.value =
+                        block.descendants.mapNotNull { descendant ->
+                            blocks.firstOrNull { descendant == it.id }
+                        }
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(unitId))
 
