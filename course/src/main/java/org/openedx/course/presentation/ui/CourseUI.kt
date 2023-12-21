@@ -811,14 +811,14 @@ fun CourseUnitToolbar(
 }
 
 @Composable
-fun UnitSubSectionsTitle(
-    subSectionName: String,
-    subSectionsCount: Int,
-    blockListShowed: Boolean?,
-    onBlockClick: () -> Unit
+fun SubSectionUnitsTitle(
+    unitName: String,
+    unitsCount: Int,
+    unitsListShowed: Boolean,
+    onUnitsClick: () -> Unit
 ) {
     val textStyle = MaterialTheme.appTypography.titleMedium
-    val hasSections = subSectionsCount > 0
+    val hasUnits = unitsCount > 0
     var rowModifier = Modifier
         .fillMaxWidth()
         .padding(
@@ -826,8 +826,8 @@ fun UnitSubSectionsTitle(
             vertical = 8.dp
         )
         .displayCutoutForLandscape()
-    if (hasSections) {
-        rowModifier = rowModifier.noRippleClickable { onBlockClick() }
+    if (hasUnits) {
+        rowModifier = rowModifier.noRippleClickable { onUnitsClick() }
     }
 
     Row(
@@ -838,7 +838,7 @@ fun UnitSubSectionsTitle(
         Text(
             modifier = Modifier
                 .weight(1f),
-            text = subSectionName,
+            text = unitName,
             color = MaterialTheme.appColors.textPrimary,
             style = textStyle,
             maxLines = 1,
@@ -846,9 +846,9 @@ fun UnitSubSectionsTitle(
             textAlign = TextAlign.Start
         )
 
-        if (hasSections) {
+        if (hasUnits) {
             Icon(
-                modifier = Modifier.rotate(if (blockListShowed == true) 180f else 0f),
+                modifier = Modifier.rotate(if (unitsListShowed) 180f else 0f),
                 painter = painterResource(id = R.drawable.ic_course_arrow_down),
                 contentDescription = null,
                 tint = MaterialTheme.appColors.textPrimary
@@ -858,10 +858,10 @@ fun UnitSubSectionsTitle(
 }
 
 @Composable
-fun UnitSubSectionsList(
-    sectionsBlocks: List<Block>,
-    selectedSection: Int = 0,
-    onSectionClick: (index: Int, block: Block) -> Unit
+fun SubSectionUnitsList(
+    unitBlocks: List<Block>,
+    selectedUnitIndex: Int = 0,
+    onUnitClick: (index: Int, unit: Block) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -871,9 +871,9 @@ fun UnitSubSectionsList(
         border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.12f))
     ) {
         LazyColumn(Modifier.fillMaxWidth()) {
-            itemsIndexed(sectionsBlocks) { index, block ->
+            itemsIndexed(unitBlocks) { index, unit ->
                 Column {
-                    if (block.isGated() && (index == 0 || !sectionsBlocks[index - 1].isGated())) {
+                    if (unit.isGated() && (index == 0 || !unitBlocks[index - 1].isGated())) {
                         Box(
                             modifier = Modifier
                                 .background(MaterialTheme.appColors.background)
@@ -905,10 +905,10 @@ fun UnitSubSectionsList(
                     }
                     Box(modifier = Modifier
                         .background(
-                            if (index == selectedSection) MaterialTheme.appColors.surface else
+                            if (index == selectedUnitIndex) MaterialTheme.appColors.surface else
                                 MaterialTheme.appColors.background
                         )
-                        .clickable { onSectionClick(index, block) }
+                        .clickable { onUnitClick(index, unit) }
                     ) {
                         Row(
                             modifier = Modifier
@@ -918,7 +918,7 @@ fun UnitSubSectionsList(
                             Image(
                                 modifier = Modifier
                                     .size(16.dp)
-                                    .alpha(if (block.isCompleted()) 1f else 0f),
+                                    .alpha(if (unit.isCompleted()) 1f else 0f),
                                 painter = painterResource(id = R.drawable.ic_course_check),
                                 contentDescription = "done"
                             )
@@ -926,7 +926,7 @@ fun UnitSubSectionsList(
                                 modifier = Modifier
                                     .padding(start = 8.dp, end = 8.dp)
                                     .weight(1f),
-                                text = block.displayName,
+                                text = unit.displayName,
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.labelMedium,
                                 maxLines = 2,
@@ -937,7 +937,7 @@ fun UnitSubSectionsList(
                                 modifier = Modifier
                                     .size(18.dp),
                                 painter = painterResource(
-                                    id = CourseOutlineFragment.getUnitBlockIcon(block)
+                                    id = CourseOutlineFragment.getUnitBlockIcon(unit)
                                 ),
                                 contentDescription = null,
                                 tint = MaterialTheme.appColors.textPrimary

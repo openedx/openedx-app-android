@@ -127,10 +127,11 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         if (viewModel.isCourseUnitProgressEnabled) {
             binding.horizontalProgress.setContent {
                 OpenEdXTheme {
-                    val index by viewModel.indexInContainer.observeAsState(1)
+                    val index by viewModel.indexInContainer.observeAsState(0)
+                    val descendantsBlocks by viewModel.descendantsBlocks.collectAsState()
 
                     HorizontalPageIndicator(
-                        blocks = viewModel.descendantsBlocks,
+                        blocks = descendantsBlocks,
                         selectedPage = index,
                         completedColor = MaterialTheme.appColors.unitHorizontalProgressCompleted,
                         selectedColor = MaterialTheme.appColors.unitHorizontalProgressSelected,
@@ -143,8 +144,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         } else {
             binding.cvCount.setContent {
                 OpenEdXTheme {
-                    val index by viewModel.indexInContainer.observeAsState(1)
-                    val units by viewModel.verticalBlockCounts.observeAsState(1)
+                    val index by viewModel.indexInContainer.observeAsState(0)
+                    val units by viewModel.verticalBlockCounts.observeAsState(0)
 
                     VerticalPageIndicator(
                         numberOfPages = units,
@@ -162,10 +163,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         binding.btnBack.setContent {
-            val sectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
-            val currentSection = sectionsBlocks.firstOrNull { it.id == unitId }
-            val title =
-                if (currentSection == null) "" else viewModel.getModuleBlock(currentSection.id).displayName
+            val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+            val title = unitBlocks.firstOrNull()?.let {
+                viewModel.getSubSectionBlock(it.id).displayName
+            } ?: ""
 
             CourseUnitToolbar(
                 title = title,
@@ -176,52 +177,52 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         if (viewModel.isCourseExpandableSectionsEnabled) {
-            binding.unitSubSectionsTitle.setContent {
-                val subSectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
-                val currentSubSection = subSectionsBlocks.firstOrNull { it.id == unitId }
-                val subSectionName = currentSubSection?.displayName ?: ""
-                val blockShowed by viewModel.selectBlockDialogShowed.observeAsState()
+            binding.subSectionUnitsTitle.setContent {
+                val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+                val currentUnit = unitBlocks.firstOrNull { it.id == unitId }
+                val unitName = currentUnit?.displayName ?: ""
+                val unitsListShowed by viewModel.unitsListShowed.observeAsState(false)
 
                 OpenEdXTheme {
-                    UnitSubSectionsTitle(
-                        subSectionName = subSectionName,
-                        subSectionsCount = subSectionsBlocks.size,
-                        blockListShowed = blockShowed,
-                        onBlockClick = { handleSectionClick() }
+                    SubSectionUnitsTitle(
+                        unitName = unitName,
+                        unitsCount = unitBlocks.size,
+                        unitsListShowed = unitsListShowed,
+                        onUnitsClick = { handleUnitsClick() }
                     )
                 }
             }
 
-            binding.subSectionsBlocksBg.setOnClickListener { handleSectionClick() }
+            binding.subSectionUnitsBg.setOnClickListener { handleUnitsClick() }
 
-            binding.subSectionsBlocksList.setContent {
-                val sectionsBlocks by viewModel.subSectionsBlocks.collectAsState()
-                val selectedIndex = sectionsBlocks.indexOfFirst { it.id == unitId }
+            binding.subSectionUnitsList.setContent {
+                val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == unitId }
                 OpenEdXTheme {
-                    UnitSubSectionsList(
-                        sectionsBlocks = sectionsBlocks,
-                        selectedSection = selectedIndex
-                    ) { index, block ->
-                        if (index != selectedIndex) {
+                    SubSectionUnitsList(
+                        unitBlocks = unitBlocks,
+                        selectedUnitIndex = selectedUnitIndex
+                    ) { index, unit ->
+                        if (index != selectedUnitIndex) {
                             router.replaceCourseContainer(
                                 fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
-                                unitId = block.id,
+                                unitId = unit.id,
                                 mode = requireArguments().serializable(ARG_MODE)!!
                             )
 
                         } else {
-                            handleSectionClick()
+                            handleUnitsClick()
                         }
                     }
                 }
             }
 
         } else {
-            binding.unitSubSectionsTitle.isGone = true
+            binding.subSectionUnitsTitle.isGone = true
         }
 
-        if (viewModel.selectBlockDialogShowed.value == true) handleSectionClick()
+        if (viewModel.unitsListShowed.value == true) handleUnitsClick()
     }
 
     override fun onDestroyView() {
@@ -260,18 +261,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         binding.viewPager.registerOnPageChangeCallback(onPageChangeCallback)
     }
 
-    private fun handlePrevClick(
-        prevIndex: Int = viewModel.currentIndex - 1,
-        buttonChanged: (String, Boolean, Boolean) -> Unit
-    ) {
+    private fun handlePrevClick(buttonChanged: (String, Boolean, Boolean) -> Unit) {
         if (!restrictDoubleClick()) {
-            val block = viewModel.moveToBlock(prevIndex)
+            val block = viewModel.moveToPrevBlock()
             if (block != null) {
                 viewModel.prevBlockClickedEvent(block.blockId, block.displayName)
                 if (!block.type.isContainer()) {
-                    binding.viewPager.setCurrentItem(
-                        viewModel.currentIndex, true
-                    )
+                    val prevIndex = binding.viewPager.currentItem - 1
+                    binding.viewPager.setCurrentItem(prevIndex, true)
                     updateNavigationButtons { next, hasPrev, hasNext ->
                         buttonChanged(next, hasPrev, hasNext)
                     }
@@ -280,18 +277,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
     }
 
-    private fun handleNextClick(
-        nextIndex: Int = viewModel.currentIndex + 1,
-        buttonChanged: (String, Boolean, Boolean) -> Unit
-    ) {
+    private fun handleNextClick(buttonChanged: (String, Boolean, Boolean) -> Unit) {
         if (!restrictDoubleClick()) {
-            val block = viewModel.moveToBlock(nextIndex)
+            val block = viewModel.moveToNextBlock()
             if (block != null) {
                 viewModel.nextBlockClickedEvent(block.blockId, block.displayName)
                 if (!block.type.isContainer()) {
-                    binding.viewPager.setCurrentItem(
-                        viewModel.currentIndex, true
-                    )
+                    val nextIndex = binding.viewPager.currentItem + 1
+                    binding.viewPager.setCurrentItem(nextIndex, true)
                     updateNavigationButtons { next, hasPrev, hasNext ->
                         buttonChanged(next, hasPrev, hasNext)
                     }
@@ -341,16 +334,16 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
     }
 
-    private fun handleSectionClick() {
-        if (binding.subSectionsBlocksList.visibility == View.VISIBLE) {
-            binding.subSectionsBlocksList.visibility = View.GONE
-            binding.subSectionsBlocksBg.visibility = View.GONE
-            viewModel.hideSelectBlockDialog()
+    private fun handleUnitsClick() {
+        if (binding.subSectionUnitsList.visibility == View.VISIBLE) {
+            binding.subSectionUnitsList.visibility = View.GONE
+            binding.subSectionUnitsBg.visibility = View.GONE
+            viewModel.setUnitsListVisibility(false)
 
         } else {
-            binding.subSectionsBlocksList.visibility = View.VISIBLE
-            binding.subSectionsBlocksBg.visibility = View.VISIBLE
-            viewModel.showSelectBlockDialog()
+            binding.subSectionUnitsList.visibility = View.VISIBLE
+            binding.subSectionUnitsBg.visibility = View.VISIBLE
+            viewModel.setUnitsListVisibility(true)
         }
     }
 

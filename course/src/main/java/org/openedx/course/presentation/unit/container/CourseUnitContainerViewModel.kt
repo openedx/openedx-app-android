@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
@@ -38,18 +38,20 @@ class CourseUnitContainerViewModel(
 
     val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
 
-    var currentIndex = 0
+    private var currentIndex = 0
     private var currentVerticalIndex = 0
     private var currentSectionIndex = -1
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return descendants.firstOrNull() == descendants.getOrNull(currentIndex)
+            return _descendantsBlocks.value.firstOrNull() ==
+                    _descendantsBlocks.value.getOrNull(currentIndex)
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return descendants.lastOrNull() == descendants.getOrNull(currentIndex)
+            return _descendantsBlocks.value.lastOrNull() ==
+                    _descendantsBlocks.value.getOrNull(currentIndex)
         }
 
     private val _verticalBlockCounts = MutableLiveData<Int>()
@@ -60,16 +62,12 @@ class CourseUnitContainerViewModel(
     val indexInContainer: LiveData<Int>
         get() = _indexInContainer
 
-    private val _currentBlock = MutableLiveData<Block?>()
-    val currentBlock: LiveData<Block?>
-        get() = _currentBlock
+    private val _unitsListShowed = MutableLiveData<Boolean>()
+    val unitsListShowed: LiveData<Boolean>
+        get() = _unitsListShowed
 
-    private val _selectBlockDialogShowed = MutableLiveData<Boolean>()
-    val selectBlockDialogShowed: LiveData<Boolean>
-        get() = _selectBlockDialogShowed
-
-    private val _subSectionsBlocks = MutableStateFlow<List<Block>>(listOf())
-    val subSectionsBlocks = _subSectionsBlocks.asStateFlow()
+    private val _subSectionUnitBlocks = MutableStateFlow<List<Block>>(listOf())
+    val subSectionUnitBlocks = _subSectionUnitBlocks.asStateFlow()
 
     var nextButtonText = ""
     var hasNextBlock = false
@@ -77,8 +75,8 @@ class CourseUnitContainerViewModel(
     private var currentMode: CourseViewMode? = null
     private var courseName = ""
 
-    private val descendants = mutableListOf<String>()
-    val descendantsBlocks = mutableListOf<Block>()
+    private val _descendantsBlocks = MutableStateFlow<List<Block>>(listOf())
+    val descendantsBlocks = _descendantsBlocks.asStateFlow()
 
     fun loadBlocks(mode: CourseViewMode) {
         currentMode = mode
@@ -103,7 +101,8 @@ class CourseUnitContainerViewModel(
                 if (event is CourseStructureUpdated) {
                     currentMode?.let { loadBlocks(it) }
                     val blockId = blocks[currentVerticalIndex].id
-                    _subSectionsBlocks.value = getSectionsBlocks(blocks, getSectionId(blockId))
+                    _subSectionUnitBlocks.value =
+                        getSubSectionUnitBlocks(blocks, getSubSectionId(blockId))
                 }
             }
         }
@@ -120,9 +119,9 @@ class CourseUnitContainerViewModel(
                     it.descendants.contains(blocks[currentVerticalIndex].id)
                 }
                 if (block.descendants.isNotEmpty() || block.isGated()) {
-                    descendants.clearAndAddAll(block.descendants)
-                    descendantsBlocks.clearAndAddAll(blocks.filter { block.descendants.contains(it.id) })
-                    _subSectionsBlocks.value = getSectionsBlocks(blocks, getSectionId(unitId))
+                    _descendantsBlocks.value = blocks.filter { block.descendants.contains(it.id) }
+                    _subSectionUnitBlocks.value =
+                        getSubSectionUnitBlocks(blocks, getSubSectionId(unitId))
 
                 } else {
                     setNextVerticalIndex()
@@ -130,24 +129,20 @@ class CourseUnitContainerViewModel(
                 if (currentVerticalIndex != -1) {
                     _verticalBlockCounts.value = blocks[currentVerticalIndex].descendants.size
                 }
-                if (block.descendants.isNotEmpty()) {
-                    _currentBlock.value = blocks.first { it.id == block.descendants.first() }
-                }
                 if (componentId.isNotEmpty()) {
-                    _currentBlock.value = blocks.first { it.id == componentId }
-                    _indexInContainer.value = descendants.indexOf(componentId)
-                    currentIndex = descendants.indexOf(componentId)
+                    currentIndex = _descendantsBlocks.value.indexOfFirst { it.id == componentId }
+                    _indexInContainer.value = currentIndex
                 }
                 return
             }
         }
     }
 
-    private fun getSectionId(blockId: String): String {
+    private fun getSubSectionId(blockId: String): String {
         return blocks.firstOrNull { it.descendants.contains(blockId) }?.id ?: ""
     }
 
-    private fun getSectionsBlocks(blocks: List<Block>, id: String): List<Block> {
+    private fun getSubSectionUnitBlocks(blocks: List<Block>, id: String): List<Block> {
         val resultList = mutableListOf<Block>()
         val gatedList = mutableListOf<Block>()
         if (blocks.isEmpty()) return emptyList()
@@ -160,9 +155,9 @@ class CourseUnitContainerViewModel(
             if (blockDescendant != null) {
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     if (blockDescendant.isGated()) {
-                        gatedList.add(blockDescendant.copy(type = getSectionType(blockDescendant.descendants)))
+                        gatedList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
                     } else {
-                        resultList.add(blockDescendant.copy(type = getSectionType(blockDescendant.descendants)))
+                        resultList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
                     }
                 }
             } else continue
@@ -171,18 +166,15 @@ class CourseUnitContainerViewModel(
         return resultList
     }
 
-    private fun getSectionType(descendant: List<String>): BlockType {
-        blocks.filter { descendant.contains(it.id) }.let { descendantBlocks ->
-            if (descendantBlocks.find { it.type == BlockType.PROBLEM } != null) {
-                return BlockType.PROBLEM
-            } else if (descendantBlocks.find { it.type == BlockType.VIDEO } != null) {
-                return BlockType.VIDEO
-            } else if (descendantBlocks.find { it.type == BlockType.DISCUSSION } != null) {
-                return BlockType.DISCUSSION
-            }
-        }
+    private fun getUnitType(descendant: List<String>): BlockType {
+        val descendantBlocks = blocks.filter { descendant.contains(it.id) }
 
-        return BlockType.OTHERS
+        return when {
+            descendantBlocks.any { it.isProblemBlock } -> BlockType.PROBLEM
+            descendantBlocks.any { it.isVideoBlock } -> BlockType.VIDEO
+            descendantBlocks.any { it.isDiscussionBlock } -> BlockType.DISCUSSION
+            else -> BlockType.OTHERS
+        }
     }
 
     private fun setNextVerticalIndex() {
@@ -217,13 +209,20 @@ class CourseUnitContainerViewModel(
         return blocks[currentIndex]
     }
 
-    fun moveToBlock(index: Int): Block? {
-        descendantsBlocks.getOrNull(index)?.let { block ->
+    fun moveToNextBlock(): Block? {
+        return moveToBlock(currentIndex + 1)
+    }
+
+    fun moveToPrevBlock(): Block? {
+        return moveToBlock(currentIndex - 1)
+    }
+
+    private fun moveToBlock(index: Int): Block? {
+        _descendantsBlocks.value.getOrNull(index)?.let { block ->
             currentIndex = index
             if (currentVerticalIndex != -1) {
                 _indexInContainer.value = currentIndex
             }
-            _currentBlock.value = block
             return block
         }
         return null
@@ -244,10 +243,10 @@ class CourseUnitContainerViewModel(
         return blocks.getOrNull(index)
     }
 
-    fun getUnitBlocks(): List<Block> = blocks.filter { descendants.contains(it.id) }
+    fun getUnitBlocks(): List<Block> = _descendantsBlocks.value
 
-    fun getModuleBlock(sectionBlockId: String): Block {
-        return blocks.first { it.descendants.contains(sectionBlockId) }
+    fun getSubSectionBlock(unitId: String): Block {
+        return blocks.first { it.descendants.contains(unitId) }
     }
 
     fun nextBlockClickedEvent(blockId: String, blockName: String) {
@@ -270,11 +269,7 @@ class CourseUnitContainerViewModel(
         analytics.finishVerticalBackClickedEvent(courseId, courseName)
     }
 
-    fun showSelectBlockDialog() {
-        _selectBlockDialogShowed.value = true
-    }
-
-    fun hideSelectBlockDialog() {
-        _selectBlockDialogShowed.value = false
+    fun setUnitsListVisibility(isVisible: Boolean) {
+        _unitsListShowed.value = isVisible
     }
 }

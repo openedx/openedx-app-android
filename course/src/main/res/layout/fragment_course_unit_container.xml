@@ -23,7 +23,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/unitSubSectionsTitle"
+        android:id="@+id/subSectionUnitsTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,7 +36,7 @@
         android:layout_marginTop="4dp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/unitSubSectionsTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/subSectionUnitsTitle" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -79,13 +79,13 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
-        android:id="@+id/subSectionsBlocksBg"
+        android:id="@+id/subSectionUnitsBg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
 
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/subSectionsBlocksList"
+        android:id="@+id/subSectionUnitsList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -94,5 +94,5 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/unitSubSectionsTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/subSectionUnitsTitle" />
 </androidx.constraintlayout.widget.ConstraintLayout>
