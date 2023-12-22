@@ -52,7 +52,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
-import org.openedx.core.R as coreR
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
@@ -70,6 +69,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.R as coreR
 
 @Composable
 internal fun LoginScreen(
@@ -116,7 +116,7 @@ internal fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.3f),
-            painter = painterResource(id = org.openedx.core.R.drawable.core_top_header),
+            painter = painterResource(id = coreR.drawable.core_top_header),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
         )
@@ -150,7 +150,7 @@ internal fun LoginScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = org.openedx.core.R.drawable.core_ic_logo),
+                    painter = painterResource(id = coreR.drawable.core_ic_logo),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(top = 20.dp)
@@ -359,7 +359,7 @@ private fun PasswordTextField(
     val focusManager = LocalFocusManager.current
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = stringResource(id = org.openedx.core.R.string.core_password),
+        text = stringResource(id = coreR.string.core_password),
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
     )

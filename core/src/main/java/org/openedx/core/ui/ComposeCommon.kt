@@ -1159,7 +1159,7 @@ fun ConnectionErrorView(
 }
 
 @Composable
-fun AuthButtons(
+fun AuthButtonsPanel(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit
 ) {
@@ -1205,4 +1205,10 @@ private fun SearchBarPreview() {
         keyboardActions = {},
         onClearValue = {}
     )
+}
+
+@Preview
+@Composable
+private fun AuthButtonsPanelPreview() {
+    AuthButtonsPanel(onRegisterClick = {}, onSignInClick = {})
 }

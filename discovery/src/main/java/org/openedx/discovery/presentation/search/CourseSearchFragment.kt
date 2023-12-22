@@ -63,7 +63,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
-import org.openedx.core.ui.AuthButtons
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.DiscoveryCourseItem
 import org.openedx.core.ui.HandleUIMessage
@@ -216,7 +216,7 @@ private fun CourseSearchScreen(
                             vertical = 32.dp,
                         )
                 ) {
-                    AuthButtons(
+                    AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
                         onSignInClick = onSignInClick
                     )

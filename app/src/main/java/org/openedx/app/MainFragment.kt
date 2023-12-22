@@ -68,11 +68,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             enableBottomBar(isBottomBarEnabled)
         }
 
-        arguments?.let {
-            it.getString(ARG_COURSE_ID, null)?.apply {
+        requireArguments().apply {
+            this.getString(ARG_COURSE_ID, null)?.apply {
                 router.navigateToCourseDetail(parentFragmentManager, this)
             }
-            it.putString(ARG_COURSE_ID, null)
+            this.putString(ARG_COURSE_ID, null)
         }
     }
 
@@ -101,7 +101,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String?): MainFragment {
+        fun newInstance(courseId: String? = null): MainFragment {
             val fragment = MainFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId

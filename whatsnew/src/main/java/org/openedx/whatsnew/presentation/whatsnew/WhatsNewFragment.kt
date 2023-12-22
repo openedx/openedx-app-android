@@ -90,7 +90,7 @@ class WhatsNewFragment : Fragment() {
                     onCloseClick = {
                         val versionName = appData.versionName
                         preferencesManager.lastWhatsNewVersion = versionName
-                        router.navigateToMain(parentFragmentManager, null)
+                        router.navigateToMain(parentFragmentManager)
                     }
                 )
             }
@@ -329,7 +329,7 @@ private fun WhatsNewScreenLandscape(
                     state = pagerState
                 ) { page ->
                     val image = whatsNewItem.messages[page].image
-                    val alpha = (0.2f + pagerState.calculateCurrentOffsetForPage(page))*10
+                    val alpha = (0.2f + pagerState.calculateCurrentOffsetForPage(page)) * 10
                     Image(
                         modifier = Modifier
                             .alpha(alpha)
@@ -443,8 +443,18 @@ private fun WhatsNewPortraitPreview() {
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 720,
+    heightDp = 360
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 720,
+    heightDp = 360
+)
 @Composable
 private fun WhatsNewLandscapePreview() {
     OpenEdXTheme {

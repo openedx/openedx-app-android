@@ -41,7 +41,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.ui.AuthButtons
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
@@ -177,7 +177,7 @@ private fun LogistrationScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                AuthButtons(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
+                AuthButtonsPanel(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
             }
         }
     }

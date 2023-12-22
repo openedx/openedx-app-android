@@ -124,7 +124,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                 }
 
                 corePreferencesManager.user != null -> {
-                    addFragment(MainFragment())
+                    addFragment(MainFragment.newInstance())
                 }
             }
         }

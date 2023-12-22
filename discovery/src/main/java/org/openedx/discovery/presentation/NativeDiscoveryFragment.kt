@@ -60,7 +60,7 @@ import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.ui.AuthButtons
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.DiscoveryCourseItem
 import org.openedx.core.ui.HandleUIMessage
@@ -233,7 +233,7 @@ internal fun DiscoveryScreen(
                             vertical = 32.dp,
                         )
                 ) {
-                    AuthButtons(
+                    AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
                         onSignInClick = onSignInClick
                     )

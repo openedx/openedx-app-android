@@ -180,7 +180,10 @@ internal fun CourseDetailsScreen(
         bottomBar = {
             if (!isUserLoggedIn) {
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
-                    AuthButtons(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
+                    AuthButtonsPanel(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick
+                    )
                 }
             }
         }

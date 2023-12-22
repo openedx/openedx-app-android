@@ -12,7 +12,7 @@ interface DiscoveryRouter {
 
     fun navigateToCourseInfo(fm: FragmentManager, courseId: String, infoType: String)
 
-    fun navigateToSignUp(fm: FragmentManager, courseId: String?)
+    fun navigateToSignUp(fm: FragmentManager, courseId: String? = null)
 
     fun navigateToSignIn(fm: FragmentManager, courseId: String?)
 }

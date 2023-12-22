@@ -57,11 +57,15 @@ class CourseDetailsViewModel(
                 } else {
                     interactor.getCourseDetailsFromCache(courseId)
                 }
-                _uiState.value = CourseDetailsUIState.CourseData(
-                    course = course!!,
-                    config.isPreLoginExperienceEnabled(),
-                    corePreferences.user != null
-                )
+                course?.let {
+                    _uiState.value = CourseDetailsUIState.CourseData(
+                        course = it,
+                        isUserLoggedIn = corePreferences.user != null
+                    )
+                } ?: run {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
