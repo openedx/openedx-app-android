@@ -339,7 +339,7 @@ fun ExpandableView(
                     .background(Color.Transparent)
             ) {
                 Text(
-                    text = sectionKey.getTitle(LocalContext.current),
+                    text = stringResource(id = sectionKey.stringResId),
                     style = TextStyle(
                         fontSize = 16.sp,
                         lineHeight = 24.sp,
@@ -409,7 +409,7 @@ private fun CourseDateBlockSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, bottom = 4.dp),
-                text = sectionKey.getTitle(LocalContext.current),
+                text = stringResource(id = sectionKey.stringResId),
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 24.sp,
