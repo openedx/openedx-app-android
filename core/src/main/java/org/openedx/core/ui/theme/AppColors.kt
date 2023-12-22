@@ -48,9 +48,9 @@ data class AppColors(
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
 
-    val unitHorizontalProgressCompleted: Color,
-    val unitHorizontalProgressSelected: Color,
-    val unitHorizontalProgressDefault: Color,
+    val componentHorizontalProgressCompleted: Color,
+    val componentHorizontalProgressSelected: Color,
+    val componentHorizontalProgressDefault: Color,
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant
