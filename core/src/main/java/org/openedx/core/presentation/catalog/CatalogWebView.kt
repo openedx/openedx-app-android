@@ -15,7 +15,7 @@ fun CatalogWebViewScreen(
     uriScheme: String,
     isAllLinksExternal: Boolean = false,
     onWebPageLoaded: () -> Unit,
-    refreshSessionCookie: () -> Unit,
+    refreshSessionCookie: () -> Unit = {},
     openExternalLink: (String) -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
     onEnrollClick: (String) -> Unit = {},

@@ -1,6 +1,7 @@
 package org.openedx.core.system
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -19,8 +20,8 @@ open class DefaultWebViewClient(
 
     private var hostForThisPage: String? = null
 
-    override fun onPageFinished(view: WebView?, url: String?) {
-        super.onPageFinished(view, url)
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        super.onPageStarted(view, url, favicon)
 
         if (hostForThisPage == null && url != null) {
             hostForThisPage = Uri.parse(url).host

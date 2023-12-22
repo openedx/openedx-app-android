@@ -10,7 +10,6 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
-import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -27,7 +26,6 @@ class CourseInfoViewModel(
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val resourceManager: ResourceManager,
-    private val cookieManager: AppCookieManager,
 ) : BaseViewModel() {
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
@@ -74,12 +72,6 @@ class CourseInfoViewModel(
                     _showAlert.emit(true)
                 }
             }
-        }
-    }
-
-    fun tryToRefreshSessionCookie() {
-        viewModelScope.launch {
-            cookieManager.tryToRefreshSessionCookie()
         }
     }
 

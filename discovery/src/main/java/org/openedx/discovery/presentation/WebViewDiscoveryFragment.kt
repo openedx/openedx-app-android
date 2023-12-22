@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -49,6 +50,7 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
@@ -82,9 +84,6 @@ class WebViewDiscoveryFragment : Fragment() {
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
-                    },
-                    refreshSessionCookie = {
-                        viewModel.tryToRefreshSessionCookie()
                     },
                     onWebPageUpdated = { url ->
                         viewModel.updateDiscoveryUrl(url)
@@ -123,7 +122,6 @@ private fun WebViewDiscoveryScreen(
     uriScheme: String,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
-    refreshSessionCookie: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onInfoCardClicked: (String, String) -> Unit,
     openExternalLink: (String) -> Unit,
@@ -171,7 +169,6 @@ private fun WebViewDiscoveryScreen(
                         DiscoveryWebView(
                             contentUrl = contentUrl,
                             uriScheme = uriScheme,
-                            refreshSessionCookie = refreshSessionCookie,
                             onWebPageLoaded = { isLoading = false },
                             onWebPageUpdated = onWebPageUpdated,
                             onInfoCardClicked = onInfoCardClicked,
@@ -209,7 +206,6 @@ private fun DiscoveryWebView(
     contentUrl: String,
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
-    refreshSessionCookie: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onInfoCardClicked: (String, String) -> Unit,
     openExternalLink: (String) -> Unit,
@@ -221,7 +217,6 @@ private fun DiscoveryWebView(
         onWebPageUpdated = onWebPageUpdated,
         openExternalLink = openExternalLink,
         onInfoCardClicked = onInfoCardClicked,
-        refreshSessionCookie = refreshSessionCookie,
     )
 
     AndroidView(
@@ -275,5 +270,23 @@ private fun HandleWebViewBackNavigation(
         onDispose {
             onBackPressedCallback.remove()
         }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun WebViewDiscoveryScreenPreview() {
+    OpenEdXTheme {
+        WebViewDiscoveryScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            contentUrl = "https://www.example.com/",
+            uriScheme = "",
+            hasInternetConnection = false,
+            checkInternetConnection = {},
+            onWebPageUpdated = {},
+            onInfoCardClicked = { _, _ -> },
+            openExternalLink = {}
+        )
     }
 }
