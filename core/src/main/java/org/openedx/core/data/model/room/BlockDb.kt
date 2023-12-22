@@ -86,7 +86,7 @@ data class BlockDb(
                     studentViewMultiDevice = studentViewMultiDevice ?: false,
                     blockCounts = BlockCountsDb.createFrom(blockCounts),
                     completion = completion ?: 0.0,
-                    containsGatedContent = containsGatedContent
+                    containsGatedContent = containsGatedContent ?: false
                 )
             }
         }
