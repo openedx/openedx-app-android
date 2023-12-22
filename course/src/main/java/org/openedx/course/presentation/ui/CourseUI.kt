@@ -872,75 +872,70 @@ fun SubSectionUnitsList(
     ) {
         LazyColumn(Modifier.fillMaxWidth()) {
             itemsIndexed(unitBlocks) { index, unit ->
-                Column {
-                    if (unit.isGated() && (index == 0 || !unitBlocks[index - 1].isGated())) {
-                        Box(
-                            modifier = Modifier
-                                .background(MaterialTheme.appColors.background)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Image(
-                                    modifier = Modifier
-                                        .size(16.dp),
-                                    painter = painterResource(id = R.drawable.ic_course_gated),
-                                    contentDescription = "gated"
-                                )
-                                Text(
-                                    modifier = Modifier
-                                        .padding(start = 8.dp, end = 8.dp)
-                                        .weight(1f),
-                                    text = stringResource(id = R.string.course_gated_content_label),
-                                    color = MaterialTheme.appColors.textPrimaryVariant,
-                                    style = MaterialTheme.appTypography.labelSmall,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    textAlign = TextAlign.Start,
-                                )
-                            }
-                        }
-                        Divider()
-                    }
-                    Box(modifier = Modifier
+                Column(
+                    modifier = Modifier
                         .background(
                             if (index == selectedUnitIndex) MaterialTheme.appColors.surface else
                                 MaterialTheme.appColors.background
                         )
                         .clickable { onUnitClick(index, unit) }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Image(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .alpha(if (unit.isCompleted()) 1f else 0f),
+                            painter = painterResource(id = R.drawable.ic_course_check),
+                            contentDescription = "done"
+                        )
+                        Text(
+                            modifier = Modifier
+                                .padding(start = 8.dp, end = 8.dp)
+                                .weight(1f),
+                            text = unit.displayName,
+                            color = MaterialTheme.appColors.textPrimary,
+                            style = MaterialTheme.appTypography.labelMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Start,
+                        )
+                        Icon(
+                            modifier = Modifier
+                                .size(18.dp),
+                            painter = painterResource(
+                                id = CourseOutlineFragment.getUnitBlockIcon(unit)
+                            ),
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.textPrimary
+                        )
+                    }
+                    if (unit.isGated()) {
                         Row(
                             modifier = Modifier
-                                .padding(8.dp),
+                                .padding(horizontal = 8.dp)
+                                .padding(bottom = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
                                 modifier = Modifier
-                                    .size(16.dp)
-                                    .alpha(if (unit.isCompleted()) 1f else 0f),
-                                painter = painterResource(id = R.drawable.ic_course_check),
-                                contentDescription = "done"
+                                    .size(16.dp),
+                                painter = painterResource(id = R.drawable.ic_course_gated),
+                                contentDescription = "gated"
                             )
                             Text(
                                 modifier = Modifier
                                     .padding(start = 8.dp, end = 8.dp)
                                     .weight(1f),
-                                text = unit.displayName,
-                                color = MaterialTheme.appColors.textPrimary,
-                                style = MaterialTheme.appTypography.labelMedium,
+                                text = stringResource(id = R.string.course_gated_content_label),
+                                color = MaterialTheme.appColors.textPrimaryVariant,
+                                style = MaterialTheme.appTypography.labelSmall,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Start,
-                            )
-                            Icon(
-                                modifier = Modifier
-                                    .size(18.dp),
-                                painter = painterResource(
-                                    id = CourseOutlineFragment.getUnitBlockIcon(unit)
-                                ),
-                                contentDescription = null,
-                                tint = MaterialTheme.appColors.textPrimary
                             )
                         }
                     }

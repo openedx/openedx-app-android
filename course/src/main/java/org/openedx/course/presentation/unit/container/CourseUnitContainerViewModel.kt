@@ -147,7 +147,6 @@ class CourseUnitContainerViewModel(
 
     private fun getSubSectionUnitBlocks(blocks: List<Block>, id: String): List<Block> {
         val resultList = mutableListOf<Block>()
-        val gatedList = mutableListOf<Block>()
         if (blocks.isEmpty()) return emptyList()
         val selectedBlock = blocks.first { it.id == id }
 
@@ -157,15 +156,10 @@ class CourseUnitContainerViewModel(
             }
             if (blockDescendant != null) {
                 if (blockDescendant.type == BlockType.VERTICAL) {
-                    if (blockDescendant.isGated()) {
-                        gatedList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
-                    } else {
-                        resultList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
-                    }
+                    resultList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
                 }
             } else continue
         }
-        resultList.addAll(gatedList)
         return resultList
     }
 
