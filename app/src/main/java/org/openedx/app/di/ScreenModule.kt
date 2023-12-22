@@ -255,5 +255,5 @@ val screenModule = module {
         )
     }
 
-    viewModel { WhatsNewViewModel(get()) }
+    viewModel { (courseId: String) -> WhatsNewViewModel(courseId, get()) }
 }

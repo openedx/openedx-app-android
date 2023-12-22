@@ -1,7 +1,6 @@
 package org.openedx.auth.presentation.signin
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
@@ -12,7 +11,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -82,10 +80,10 @@ class SignInFragment : Fragment() {
                         val isNeedToShowWhatsNew =
                             whatsNewGlobalManager.shouldShowWhatsNew()
                         if (state.loginSuccess) {
+                            router.clearBackStack(parentFragmentManager)
                             if (isNeedToShowWhatsNew) {
-                                router.navigateToWhatsNew(parentFragmentManager)
+                                router.navigateToWhatsNew(parentFragmentManager, viewModel.courseId)
                             } else {
-                                router.clearBackStack(parentFragmentManager)
                                 router.navigateToMain(parentFragmentManager, viewModel.courseId)
                             }
                         }

@@ -14,7 +14,7 @@ interface AuthRouter {
 
     fun navigateToRestorePassword(fm: FragmentManager)
 
-    fun navigateToWhatsNew(fm: FragmentManager)
+    fun navigateToWhatsNew(fm: FragmentManager, courseId: String? = null)
 
     fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String)
 

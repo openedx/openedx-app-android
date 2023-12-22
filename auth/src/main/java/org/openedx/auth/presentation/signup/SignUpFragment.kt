@@ -4,7 +4,6 @@ package org.openedx.auth.presentation.signup
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
@@ -72,7 +71,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.ui.ExpandableText
 import org.openedx.auth.presentation.ui.OptionalFields
 import org.openedx.auth.presentation.ui.RequiredFields

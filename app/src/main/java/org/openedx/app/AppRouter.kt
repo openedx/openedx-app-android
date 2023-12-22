@@ -80,10 +80,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, NativeDiscoveryFragment.newInstance(querySearch))
     }
 
-    override fun navigateToWhatsNew(fm: FragmentManager) {
+    override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, WhatsNewFragment())
+            .replace(R.id.container, WhatsNewFragment.newInstance(courseId))
             .commit()
     }
 
