@@ -12,6 +12,7 @@ import org.openedx.core.system.DefaultWebViewClient
 @Composable
 fun CatalogWebViewScreen(
     url: String,
+    uriScheme: String,
     isAllLinksExternal: Boolean = false,
     onWebPageLoaded: () -> Unit,
     refreshSessionCookie: () -> Unit,
@@ -54,7 +55,7 @@ fun CatalogWebViewScreen(
                 }
 
                 private fun handleRecognizedLink(clickUrl: String): Boolean {
-                    val link = WebViewLink.parse(clickUrl) ?: return false
+                    val link = WebViewLink.parse(clickUrl, uriScheme) ?: return false
 
                     return when (link.authority) {
                         WebViewLink.Authority.COURSE_INFO,

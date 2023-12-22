@@ -23,6 +23,9 @@ data class DiscoveryWebViewConfig(
     @SerializedName("BASE_URL")
     val baseUrl: String = "",
 
+    @SerializedName("URI_SCHEME")
+    val uriScheme: String = "",
+
     @SerializedName("COURSE_DETAIL_TEMPLATE")
     val courseUrlTemplate: String = "",
 

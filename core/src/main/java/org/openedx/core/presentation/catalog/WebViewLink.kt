@@ -27,9 +27,7 @@ class WebViewLink(
     }
 
     companion object {
-        private const val SCHEME = "edxapp"
-
-        fun parse(uriStr: String?): WebViewLink? {
+        fun parse(uriStr: String?, uriScheme: String): WebViewLink? {
             if (uriStr.isNullOrEmpty()) {
                 return null
             }
@@ -37,7 +35,7 @@ class WebViewLink(
             val uri = Uri.parse(sanitizedUriStr)
 
             // Validate the URI scheme
-            if (SCHEME != uri.scheme) {
+            if (uriScheme != uri.scheme) {
                 return null
             }
 

@@ -9,13 +9,15 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 
 class WebViewDiscoveryViewModel(
-    config: Config,
+    private val config: Config,
     private val networkConnection: NetworkConnection,
     private val router: DiscoveryRouter,
     private val cookieManager: AppCookieManager,
 ) : BaseViewModel() {
 
-    private var _discoveryUrl = config.getDiscoveryConfig().webViewConfig.baseUrl
+    val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
+
+    private var _discoveryUrl = webViewConfig.baseUrl
     val discoveryUrl: String
         get() = _discoveryUrl
 

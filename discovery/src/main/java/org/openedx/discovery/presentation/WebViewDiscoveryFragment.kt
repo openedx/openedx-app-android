@@ -78,6 +78,7 @@ class WebViewDiscoveryFragment : Fragment() {
                 WebViewDiscoveryScreen(
                     windowSize = windowSize,
                     contentUrl = viewModel.discoveryUrl,
+                    uriScheme = viewModel.webViewConfig.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
@@ -119,6 +120,7 @@ class WebViewDiscoveryFragment : Fragment() {
 private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
     contentUrl: String,
+    uriScheme: String,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     refreshSessionCookie: () -> Unit,
@@ -168,6 +170,7 @@ private fun WebViewDiscoveryScreen(
                     if (hasInternetConnection) {
                         DiscoveryWebView(
                             contentUrl = contentUrl,
+                            uriScheme = uriScheme,
                             refreshSessionCookie = refreshSessionCookie,
                             onWebPageLoaded = { isLoading = false },
                             onWebPageUpdated = onWebPageUpdated,
@@ -204,6 +207,7 @@ private fun WebViewDiscoveryScreen(
 @SuppressLint("SetJavaScriptEnabled")
 private fun DiscoveryWebView(
     contentUrl: String,
+    uriScheme: String,
     onWebPageLoaded: () -> Unit,
     refreshSessionCookie: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
@@ -212,6 +216,7 @@ private fun DiscoveryWebView(
 ) {
     val webView = CatalogWebViewScreen(
         url = contentUrl,
+        uriScheme = uriScheme,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
         openExternalLink = openExternalLink,

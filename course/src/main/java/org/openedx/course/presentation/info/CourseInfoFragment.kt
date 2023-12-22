@@ -105,6 +105,7 @@ class CourseInfoFragment : Fragment() {
                     windowSize = windowSize,
                     uiMessage = uiMessage,
                     contentUrl = getInitialUrl(),
+                    uriScheme = viewModel.webViewConfig.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
@@ -178,6 +179,7 @@ private fun CourseInfoScreen(
     windowSize: WindowSize,
     uiMessage: UIMessage?,
     contentUrl: String,
+    uriScheme: String,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
@@ -233,6 +235,7 @@ private fun CourseInfoScreen(
                     if (hasInternetConnection) {
                         CourseInfoWebView(
                             contentUrl = contentUrl,
+                            uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
                             onEnrollClick = onEnrollClick,
                             refreshSessionCookie = refreshSessionCookie,
@@ -269,6 +272,7 @@ private fun CourseInfoScreen(
 @SuppressLint("SetJavaScriptEnabled")
 private fun CourseInfoWebView(
     contentUrl: String,
+    uriScheme: String,
     onWebPageLoaded: () -> Unit,
     onEnrollClick: (String) -> Unit,
     refreshSessionCookie: () -> Unit,
@@ -278,6 +282,7 @@ private fun CourseInfoWebView(
 
     val webView = CatalogWebViewScreen(
         url = contentUrl,
+        uriScheme = uriScheme,
         isAllLinksExternal = true,
         onWebPageLoaded = onWebPageLoaded,
         openExternalLink = openExternalLink,
