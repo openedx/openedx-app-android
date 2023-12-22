@@ -163,10 +163,17 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         binding.btnBack.setContent {
-            val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
-            val title = unitBlocks.firstOrNull()?.let {
-                viewModel.getSubSectionBlock(it.id).displayName
-            } ?: ""
+            val title = if (viewModel.isCourseExpandableSectionsEnabled) {
+                val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+                unitBlocks.firstOrNull()?.let {
+                    viewModel.getSubSectionBlock(it.id).displayName
+                } ?: ""
+
+            } else {
+                val index by viewModel.indexInContainer.observeAsState(0)
+                val descendantsBlocks by viewModel.descendantsBlocks.collectAsState()
+                descendantsBlocks[index].displayName
+            }
 
             CourseUnitToolbar(
                 title = title,
