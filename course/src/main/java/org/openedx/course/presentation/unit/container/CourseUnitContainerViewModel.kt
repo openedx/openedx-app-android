@@ -99,6 +99,8 @@ class CourseUnitContainerViewModel(
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is CourseStructureUpdated) {
+                    if (event.courseId != courseId) return@collect
+
                     currentMode?.let { loadBlocks(it) }
                     val blockId = blocks[currentVerticalIndex].id
                     _subSectionUnitBlocks.value =
