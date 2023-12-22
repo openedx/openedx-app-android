@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -231,7 +232,7 @@ internal fun CourseDatesScreen(
                                 LazyColumn(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(start = 16.dp, end = 16.dp),
+                                        .padding(horizontal = 16.dp),
                                     contentPadding = listBottomPadding
                                 ) {
                                     // Handle DatesSection.COMPLETED separately
@@ -249,7 +250,7 @@ internal fun CourseDatesScreen(
                                             uiState.courseDates.keys.minus(DatesSection.COMPLETED)
                                                 .toList()
                                         sectionsKey.forEach { sectionKey ->
-                                            uiState.courseDates[sectionKey]?.isNotEmptyThenLet {section ->
+                                            uiState.courseDates[sectionKey]?.isNotEmptyThenLet { section ->
                                             item {
                                                     CourseDateBlockSection(
                                                         sectionKey = sectionKey,
@@ -338,7 +339,7 @@ fun ExpandableView(
                     .background(Color.Transparent)
             ) {
                 Text(
-                    text = sectionKey.key,
+                    text = sectionKey.getTitle(LocalContext.current),
                     style = TextStyle(
                         fontSize = 16.sp,
                         lineHeight = 24.sp,
@@ -408,7 +409,7 @@ private fun CourseDateBlockSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp, bottom = 4.dp),
-                text = sectionKey.key,
+                text = sectionKey.getTitle(LocalContext.current),
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 24.sp,
@@ -496,7 +497,7 @@ private fun CourseDateItem(
         }
         if (canShowDate && dateBlock.date != null) {
             Text(
-                text = TimeUtils.getCourseFormattedDate(dateBlock.date!!),
+                text = TimeUtils.getCourseFormattedDate(LocalContext.current, dateBlock.date!!),
                 style = TextStyle(
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
@@ -518,9 +519,11 @@ private fun CourseDateItem(
                     .weight(1f)
                     .padding(end = 8.dp),
                 // append assignment type if available with title
-                text = (if (dateBlock.assignmentType.isNullOrEmpty()
-                        .not()
-                ) "${dateBlock.assignmentType}: " else "") + dateBlock.title,
+                text = if (dateBlock.assignmentType.isNullOrEmpty().not()) {
+                    "${dateBlock.assignmentType}: ${dateBlock.title}"
+                } else {
+                    dateBlock.title
+                },
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 24.sp,
@@ -578,6 +581,7 @@ private fun CourseDatesScreenTabletPreview() {
             onItemClick = {})
     }
 }
+
 private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
     linkedMapOf(
         Pair(

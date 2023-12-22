@@ -12,8 +12,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
-import kotlin.math.floor
 
 object TimeUtils {
 
@@ -219,7 +219,7 @@ object TimeUtils {
         return calendar.time
     }
 
-    fun getCourseFormattedDate(date: Date): String {
+    fun getCourseFormattedDate(context: Context, date: Date): String {
         val currentDate = Calendar.getInstance()
         val inputDate = Calendar.getInstance()
         inputDate.time = date
@@ -227,23 +227,53 @@ object TimeUtils {
         val daysDifference = daysDifference(currentDate, inputDate)
 
         return when {
-            daysDifference == 0 -> "Today"
-            daysDifference == 1 -> "Tomorrow"
-            daysDifference == - 1 -> "Yesterday"
-            daysDifference in -2 downTo -7 -> "${-daysDifference} days ago"
-            daysDifference in 2..7 -> SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
-            inputDate.get(Calendar.YEAR) != currentDate.get(Calendar.YEAR) -> SimpleDateFormat(
-                "MMMM d, yyyy",
-                Locale.getDefault()
-            ).format(date)
+            daysDifference == 0 -> {
+                context.getString(R.string.core_date_format_today)
+            }
 
-            else -> SimpleDateFormat("MMMM d", Locale.getDefault()).format(date)
+            daysDifference == 1 -> {
+                context.getString(R.string.core_date_format_tomorrow)
+            }
+
+            daysDifference == -1 -> {
+                context.getString(R.string.core_date_format_yesterday)
+            }
+
+            daysDifference in -2 downTo -7 -> {
+                context.getString(
+                    R.string.core_date_format_days_ago,
+                    ceil(-daysDifference.toDouble()).toInt().toString()
+                )
+            }
+
+            daysDifference in 2..7 -> {
+                DateUtils.formatDateTime(
+                    context,
+                    date.time,
+                    DateUtils.FORMAT_SHOW_WEEKDAY
+                )
+            }
+
+            inputDate.get(Calendar.YEAR) != currentDate.get(Calendar.YEAR) -> {
+                DateUtils.formatDateTime(
+                    context,
+                    date.time,
+                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
+                )
+            }
+
+            else -> {
+                DateUtils.formatDateTime(
+                    context,
+                    date.time,
+                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR
+                )
+            }
         }
     }
 
     private fun daysDifference(currentDate: Calendar, inputDate: Calendar): Int {
         val difference = inputDate.timeInMillis - currentDate.timeInMillis
-        val diffInDays = (difference / (24 * 60 * 60 * 1000).toDouble())
-        return if (diffInDays > 0) ceil(diffInDays).toInt() else floor(diffInDays).toInt()
+        return TimeUnit.MILLISECONDS.toDays(difference).toInt()
     }
 }

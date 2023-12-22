@@ -65,20 +65,18 @@
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
 
-    <!-- region: Course Date types -->
-    <!-- Label used when the date is Today -->
-    <string name="core_date_type_today" tools:ignore="MissingTranslation">Today</string>
-    <!-- Label used when an assignment is for verified user only -->
-    <string name="core_date_type_verified_only" tools:ignore="MissingTranslation">Verified Only</string>
-    <!-- Label used when an assignment is completed -->
+    <!-- region: Course Date Sections -->
     <string name="core_date_type_completed" tools:ignore="MissingTranslation">Completed</string>
-    <!-- Label used when an assignment is past due -->
     <string name="core_date_type_past_due" tools:ignore="MissingTranslation">Past Due</string>
-    <!-- Label used when an assignment is due next -->
-    <string name="core_date_type_due_next" tools:ignore="MissingTranslation">Due Next</string>
-    <!-- Label used when an assignment is not yet released -->
-    <string name="core_date_type_not_yet_released" tools:ignore="MissingTranslation">Not Yet Released</string>
-    <!-- endregion -->
+    <string name="core_date_type_today" tools:ignore="MissingTranslation">Today</string>
+    <string name="core_date_type_this_week" tools:ignore="MissingTranslation">This Week</string>
+    <string name="core_date_type_next_week" tools:ignore="MissingTranslation">Next Week</string>
+    <string name="core_date_type_upcoming" tools:ignore="MissingTranslation">Upcoming</string>
+    <string name="core_date_type_none" tools:ignore="MissingTranslation">None</string>
+    <string name="core_date_format_today" tools:ignore="MissingTranslation">Today</string>
+    <string name="core_date_format_tomorrow" tools:ignore="MissingTranslation">Tomorrow</string>
+    <string name="core_date_format_yesterday" tools:ignore="MissingTranslation">Yesterday</string>
+    <string name="core_date_format_days_ago" tools:ignore="MissingTranslation">%1$s days ago</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
