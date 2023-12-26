@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +82,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.R as coreR
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
@@ -236,32 +238,32 @@ internal fun CourseDatesScreen(
                                     contentPadding = listBottomPadding
                                 ) {
                                     // Handle DatesSection.COMPLETED separately
-                                        uiState.courseDates[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
+                                    uiState.courseDates[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
+                                        item {
+                                            ExpandableView(
+                                                sectionKey = DatesSection.COMPLETED,
+                                                sectionDates = section,
+                                                onItemClick = onItemClick,
+                                            )
+                                        }
+                                    }
+                                    // Handle other sections
+                                    val sectionsKey =
+                                        uiState.courseDates.keys.minus(DatesSection.COMPLETED)
+                                            .toList()
+                                    sectionsKey.forEach { sectionKey ->
+                                        uiState.courseDates[sectionKey]?.isNotEmptyThenLet { section ->
                                             item {
-                                                ExpandableView(
-                                                    sectionKey = DatesSection.COMPLETED,
+                                                CourseDateBlockSection(
+                                                    sectionKey = sectionKey,
                                                     sectionDates = section,
                                                     onItemClick = onItemClick,
                                                 )
                                             }
                                         }
-                                        // Handle other sections
-                                        val sectionsKey =
-                                            uiState.courseDates.keys.minus(DatesSection.COMPLETED)
-                                                .toList()
-                                        sectionsKey.forEach { sectionKey ->
-                                            uiState.courseDates[sectionKey]?.isNotEmptyThenLet { section ->
-                                            item {
-                                                    CourseDateBlockSection(
-                                                        sectionKey = sectionKey,
-                                                        sectionDates = section,
-                                                        onItemClick = onItemClick,
-                                                    )
-                                                }
-                                            }
-                                        }
                                     }
                                 }
+                            }
 
                             DatesUIState.Empty -> {
                                 Box(
@@ -352,7 +354,11 @@ fun ExpandableView(
 
                 AnimatedVisibility(visible = expanded.not()) {
                     Text(
-                        text = sectionDates.size.toString() + " Items Hidden",
+                        text = pluralStringResource(
+                            id = coreR.plurals.core_date_items_hidden,
+                            count = sectionDates.size,
+                            formatArgs = arrayOf(sectionDates.size)
+                        ),
                         style = TextStyle(
                             fontSize = 12.sp,
                             lineHeight = 16.sp,
