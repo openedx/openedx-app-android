@@ -7,12 +7,9 @@
 
     <FrameLayout
         android:id="@+id/frameBack"
-        android:layout_width="wrap_content"
+        android:layout_width="560dp"
         android:layout_height="wrap_content"
-        android:maxWidth="560dp"
-        android:minWidth="560dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -21,18 +18,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp" />
 
         <androidx.mediarouter.app.MediaRouteButton
             android:id="@+id/mediaRouteButton"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="end|bottom"
-            android:layout_marginEnd="24dp"
             android:layout_marginTop="12dp"
+            android:layout_marginEnd="24dp"
             android:mediaRouteTypes="user" />
-
     </FrameLayout>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/subSectionUnitsTitle"
+        android:layout_width="560dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameBack" />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/horizontalProgress"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/subSectionUnitsTitle" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -41,12 +55,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/frameBack">
+        app:layout_constraintTop_toBottomOf="@+id/horizontalProgress">
 
         <androidx.compose.ui.platform.ComposeView
             android:id="@+id/cv_navigationBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:elevation="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -73,4 +88,20 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <View
+        android:id="@+id/subSectionUnitsBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/subSectionUnitsList"
+        android:layout_width="560dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="48dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/subSectionUnitsTitle" />
 </androidx.constraintlayout.widget.ConstraintLayout>

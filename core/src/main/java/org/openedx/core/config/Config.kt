@@ -68,6 +68,22 @@ class Config(context: Context) {
         return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
     }
 
+    fun isCourseNestedListEnabled(): Boolean {
+        return getBoolean(COURSE_NESTED_LIST_ENABLED, false)
+    }
+
+    fun isCourseBannerEnabled(): Boolean {
+        return getBoolean(COURSE_BANNER_ENABLED, true)
+    }
+
+    fun isCourseTopTabBarEnabled(): Boolean {
+        return getBoolean(COURSE_TOP_TAB_BAR_ENABLED, false)
+    }
+
+    fun isCourseUnitProgressEnabled(): Boolean {
+        return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
+    }
+
     private fun getString(key: String, defaultValue: String): String {
         val element = getObject(key)
         return if (element != null) {
@@ -115,5 +131,9 @@ class Config(context: Context) {
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
+        private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
+        private const val COURSE_BANNER_ENABLED = "COURSE_BANNER_ENABLED"
+        private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"
+        private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
     }
 }

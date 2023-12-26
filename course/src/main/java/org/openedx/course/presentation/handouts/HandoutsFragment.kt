@@ -19,22 +19,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
-import org.koin.android.ext.android.inject
 import org.openedx.course.R as courseR
 
 class HandoutsFragment : Fragment() {
@@ -52,9 +49,6 @@ class HandoutsFragment : Fragment() {
                 val windowSize = rememberWindowSize()
                 HandoutsScreen(
                     windowSize = windowSize,
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStack()
-                    },
                     onHandoutsClick = {
                         router.navigateToHandoutsWebView(
                             requireActivity().supportFragmentManager,
@@ -91,7 +85,6 @@ class HandoutsFragment : Fragment() {
 @Composable
 private fun HandoutsScreen(
     windowSize: WindowSize,
-    onBackClick: () -> Unit,
     onHandoutsClick: () -> Unit,
     onAnnouncementsClick: () -> Unit,
 ) {
@@ -116,56 +109,32 @@ private fun HandoutsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(it)
-                .statusBarsInset()
                 .displayCutoutForLandscape(),
             contentAlignment = Alignment.TopCenter
         ) {
-            Column(screenWidth) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .zIndex(1f),
-                    contentAlignment = Alignment.CenterStart
+            Surface(
+                modifier = screenWidth,
+                color = MaterialTheme.appColors.background
+            ) {
+                LazyColumn(
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 10.dp, horizontal = 24.dp)
                 ) {
-                    BackBtn {
-                        onBackClick()
+                    item {
+                        HandoutsItem(
+                            title = stringResource(id = courseR.string.course_handouts),
+                            description = stringResource(id = courseR.string.course_find_important_info),
+                            painter = painterResource(id = courseR.drawable.course_ic_handouts),
+                            onClick = onHandoutsClick
+                        )
                     }
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 56.dp),
-                        text = stringResource(id = courseR.string.course_handouts),
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                Surface(
-                    color = MaterialTheme.appColors.background
-                ) {
-                    LazyColumn(
-                        Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 24.dp)
-                    ) {
-                        item {
-                            HandoutsItem(
-                                title = stringResource(id = courseR.string.course_handouts),
-                                description = stringResource(id = courseR.string.course_find_important_info),
-                                painter = painterResource(id = courseR.drawable.course_ic_handouts),
-                                onClick = onHandoutsClick
-                            )
-                        }
-                        item {
-                            HandoutsItem(
-                                title = stringResource(id = courseR.string.course_announcements),
-                                description = stringResource(id = courseR.string.course_latest_news),
-                                painter = painterResource(id = courseR.drawable.course_ic_announcements),
-                                onClick = onAnnouncementsClick
-                            )
-                        }
+                    item {
+                        HandoutsItem(
+                            title = stringResource(id = courseR.string.course_announcements),
+                            description = stringResource(id = courseR.string.course_latest_news),
+                            painter = painterResource(id = courseR.drawable.course_ic_announcements),
+                            onClick = onAnnouncementsClick
+                        )
                     }
                 }
             }
@@ -222,7 +191,7 @@ private fun HandoutsScreenPreview() {
     OpenEdXTheme {
         HandoutsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            onBackClick = {}, onHandoutsClick = {}, onAnnouncementsClick = {})
+            onHandoutsClick = {}, onAnnouncementsClick = {})
     }
 }
 
@@ -233,6 +202,6 @@ private fun HandoutsScreenTabletPreview() {
     OpenEdXTheme {
         HandoutsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            onBackClick = {}, onHandoutsClick = {}, onAnnouncementsClick = {})
+            onHandoutsClick = {}, onAnnouncementsClick = {})
     }
 }
