@@ -18,6 +18,7 @@ import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.detail.CourseDetailsViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
+import org.openedx.course.presentation.info.CourseInfoViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
@@ -30,7 +31,8 @@ import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
-import org.openedx.discovery.presentation.DiscoveryViewModel
+import org.openedx.discovery.presentation.NativeDiscoveryViewModel
+import org.openedx.discovery.presentation.WebViewDiscoveryViewModel
 import org.openedx.discovery.presentation.search.CourseSearchViewModel
 import org.openedx.discussion.data.repository.DiscussionRepository
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
@@ -55,7 +57,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 val screenModule = module {
 
     viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get()) }
-    viewModel { MainViewModel() }
+    viewModel { MainViewModel(get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -83,7 +85,8 @@ val screenModule = module {
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
-    viewModel { DiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { WebViewDiscoveryViewModel(get(), get(), get()) }
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
@@ -110,6 +113,7 @@ val screenModule = module {
 
     single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
+    viewModel { CourseInfoViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { (courseId: String) ->
         CourseDetailsViewModel(
             courseId,

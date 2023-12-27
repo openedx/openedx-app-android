@@ -71,4 +71,10 @@ interface CourseRouter {
         type: HandoutsType
     )
 
+    fun navigateToCourseInfo(
+        fm: FragmentManager,
+        courseId: String,
+        infoType: String,
+    )
+
 }

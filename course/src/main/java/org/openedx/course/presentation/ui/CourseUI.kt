@@ -488,40 +488,6 @@ fun Indicator(
 }
 
 @Composable
-fun ConnectionErrorView(
-    modifier: Modifier,
-    onReloadClick: () -> Unit
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            modifier = Modifier.size(100.dp),
-            imageVector = Icons.Filled.Wifi,
-            contentDescription = null,
-            tint = MaterialTheme.appColors.onSurface
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(
-            modifier = Modifier.fillMaxWidth(0.6f),
-            text = stringResource(id = R.string.course_not_connected_to_internet),
-            color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(16.dp))
-        OpenEdXButton(
-            width = Modifier
-                .widthIn(Dp.Unspecified, 162.dp),
-            text = stringResource(id = org.openedx.core.R.string.core_reload),
-            onClick = onReloadClick
-        )
-    }
-}
-
-@Composable
 fun VideoSubtitles(
     listState: LazyListState,
     timedTextObject: TimedTextObject?,

@@ -58,6 +58,7 @@
     <string name="core_rate_us">Оцінити нас</string>
     <string name="core_thank_you_dialog_positive_description">Дякуємо за надання відгуку. Чи бажаєте ви поділитися своєю оцінкою цього додатка з іншими користувачами в магазині додатків?</string>
     <string name="core_thank_you_dialog_negative_description">Ми отримали ваш відгук і використовуватимемо його, щоб покращити ваш досвід навчання в майбутньому. Дякуємо, що поділилися!</string>
+    <string name="core_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s зображення профілю</string>

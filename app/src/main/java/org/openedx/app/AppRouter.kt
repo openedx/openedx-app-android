@@ -20,13 +20,14 @@ import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
 import org.openedx.course.presentation.detail.CourseDetailsFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
+import org.openedx.course.presentation.info.CourseInfoFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.discovery.presentation.DiscoveryFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread
@@ -72,7 +73,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     override fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String) {
-        replaceFragmentWithBackStack(fm, DiscoveryFragment.newInstance(querySearch))
+        replaceFragmentWithBackStack(fm, NativeDiscoveryFragment.newInstance(querySearch))
     }
 
     override fun navigateToWhatsNew(fm: FragmentManager) {
@@ -94,6 +95,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToUpgradeRequired(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
+    }
+
+    override fun navigateToCourseInfo(
+        fm: FragmentManager,
+        courseId: String,
+        infoType: String,
+    ) {
+        replaceFragmentWithBackStack(fm, CourseInfoFragment.newInstance(courseId, infoType))
     }
     //endregion
 

@@ -12,7 +12,7 @@ import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.dashboard.presentation.DashboardFragment
-import org.openedx.discovery.presentation.DiscoveryFragment
+import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -69,8 +69,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4
+
+        val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView)
+            .getDiscoveryFragment()
+
         adapter = MainNavigationFragmentAdapter(this).apply {
-            addFragment(DiscoveryFragment())
+            addFragment(discoveryFragment)
             addFragment(DashboardFragment())
             addFragment(InDevelopmentFragment())
             addFragment(ProfileFragment())

@@ -20,7 +20,7 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 
-class DiscoveryViewModel(
+class NativeDiscoveryViewModel(
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val interactor: DiscoveryInteractor,
