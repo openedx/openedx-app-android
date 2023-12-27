@@ -1,23 +1,20 @@
 package org.openedx.course.presentation.unit.container
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -32,7 +29,6 @@ import org.openedx.core.BlockType
 import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
-import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -41,9 +37,7 @@ import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
-import org.openedx.course.presentation.ui.NavigationUnitsButtons
-import org.openedx.course.presentation.ui.VerticalPageIndicator
-import org.openedx.course.presentation.ui.VideoTitle
+import org.openedx.course.presentation.ui.*
 
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
@@ -103,12 +97,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
-        val configuration = requireActivity().resources.configuration
-        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            val countParams = binding.cvCount.layoutParams as ConstraintLayout.LayoutParams
-            countParams.rightMargin = insetHolder.cutoutInset
-            binding.cvCount.layoutParams = countParams
-        }
 
         binding.mediaRouteButton.setAlwaysVisible(true)
         CastButtonFactory.setUpMediaRouteButton(requireContext(), binding.mediaRouteButton)
@@ -132,85 +120,116 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             componentId = ""
         }
 
-        binding.cvVideoTitle?.setContent {
-            OpenEdXTheme {
-                val block by viewModel.currentBlock.observeAsState()
-                if (block?.type == BlockType.VIDEO) {
-                    VideoTitle(
-                        text = block?.displayName ?: "",
-                        modifier = Modifier.statusBarsPadding()
+        binding.cvNavigationBar.setContent {
+            NavigationBar()
+        }
+
+        if (viewModel.isCourseUnitProgressEnabled) {
+            binding.horizontalProgress.setContent {
+                OpenEdXTheme {
+                    val index by viewModel.indexInContainer.observeAsState(0)
+                    val descendantsBlocks by viewModel.descendantsBlocks.collectAsState()
+
+                    HorizontalPageIndicator(
+                        blocks = descendantsBlocks,
+                        selectedPage = index,
+                        completedColor = MaterialTheme.appColors.componentHorizontalProgressCompleted,
+                        selectedColor = MaterialTheme.appColors.componentHorizontalProgressSelected,
+                        defaultColor = MaterialTheme.appColors.componentHorizontalProgressDefault
                     )
                 }
             }
-        }
+            binding.horizontalProgress.isVisible = true
 
-        binding.cvNavigationBar.setContent {
-            OpenEdXTheme {
-                var nextButtonText by rememberSaveable {
-                    mutableStateOf(viewModel.nextButtonText)
-                }
-                var hasNextBlock by rememberSaveable {
-                    mutableStateOf(viewModel.hasNextBlock)
-                }
-                var hasPrevBlock by rememberSaveable {
-                    mutableStateOf(viewModel.hasNextBlock)
-                }
+        } else {
+            binding.cvCount.setContent {
+                OpenEdXTheme {
+                    val index by viewModel.indexInContainer.observeAsState(0)
+                    val units by viewModel.verticalBlockCounts.observeAsState(0)
 
-                val windowSize = rememberWindowSize()
-
-                updateNavigationButtons { next, hasPrev, hasNext ->
-                    nextButtonText = next
-                    hasPrevBlock = hasPrev
-                    hasNextBlock = hasNext
+                    VerticalPageIndicator(
+                        numberOfPages = units,
+                        selectedColor = MaterialTheme.appColors.primary,
+                        defaultColor = MaterialTheme.appColors.bottomSheetToggle,
+                        selectedPage = index,
+                        defaultRadius = 3.dp,
+                        selectedLength = 5.dp,
+                        modifier = Modifier
+                            .width(24.dp)
+                    )
                 }
-                NavigationUnitsButtons(
-                    windowSize = windowSize,
-                    hasPrevBlock = hasPrevBlock,
-                    nextButtonText = nextButtonText,
-                    hasNextBlock = hasNextBlock,
-                    onPrevClick = {
-                        handlePrevClick { next, hasPrev, hasNext ->
-                            nextButtonText = next
-                            hasPrevBlock = hasPrev
-                            hasNextBlock = hasNext
-                        }
-                    },
-                    onNextClick = {
-                        handleNextClick { next, hasPrev, hasNext ->
-                            nextButtonText = next
-                            hasPrevBlock = hasPrev
-                            hasNextBlock = hasNext
-                        }
-                    }
-                )
             }
-        }
-
-        binding.cvCount.setContent {
-            OpenEdXTheme {
-                val index by viewModel.indexInContainer.observeAsState(1)
-                val units by viewModel.verticalBlockCounts.observeAsState(1)
-
-                VerticalPageIndicator(
-                    numberOfPages = units,
-                    selectedColor = MaterialTheme.appColors.primary,
-                    defaultColor = MaterialTheme.appColors.bottomSheetToggle,
-                    selectedPage = index,
-                    defaultRadius = 3.dp,
-                    selectedLength = 5.dp,
-                    modifier = Modifier
-                        .width(24.dp)
-                )
-            }
+            binding.cvCount.isVisible = true
         }
 
         binding.btnBack.setContent {
-            OpenEdXTheme {
-                BackBtn(modifier = Modifier.statusBarsPadding()) {
+            val title = if (viewModel.isCourseExpandableSectionsEnabled) {
+                val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+                unitBlocks.firstOrNull()?.let {
+                    viewModel.getSubSectionBlock(it.id).displayName
+                } ?: ""
+
+            } else {
+                val index by viewModel.indexInContainer.observeAsState(0)
+                val descendantsBlocks by viewModel.descendantsBlocks.collectAsState()
+                descendantsBlocks[index].displayName
+            }
+
+            CourseUnitToolbar(
+                title = title,
+                onBackClick = {
                     requireActivity().supportFragmentManager.popBackStack()
                 }
-            }
+            )
         }
+
+        if (viewModel.isCourseExpandableSectionsEnabled) {
+            binding.subSectionUnitsTitle.setContent {
+                val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+                val currentUnit = unitBlocks.firstOrNull { it.id == unitId }
+                val unitName = currentUnit?.displayName ?: ""
+                val unitsListShowed by viewModel.unitsListShowed.observeAsState(false)
+
+                OpenEdXTheme {
+                    SubSectionUnitsTitle(
+                        unitName = unitName,
+                        unitsCount = unitBlocks.size,
+                        unitsListShowed = unitsListShowed,
+                        onUnitsClick = { handleUnitsClick() }
+                    )
+                }
+            }
+
+            binding.subSectionUnitsBg.setOnClickListener { handleUnitsClick() }
+
+            binding.subSectionUnitsList.setContent {
+                val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
+                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == unitId }
+                OpenEdXTheme {
+                    SubSectionUnitsList(
+                        unitBlocks = unitBlocks,
+                        selectedUnitIndex = selectedUnitIndex
+                    ) { index, unit ->
+                        if (index != selectedUnitIndex) {
+                            router.replaceCourseContainer(
+                                fm = requireActivity().supportFragmentManager,
+                                courseId = viewModel.courseId,
+                                unitId = unit.id,
+                                mode = requireArguments().serializable(ARG_MODE)!!
+                            )
+
+                        } else {
+                            handleUnitsClick()
+                        }
+                    }
+                }
+            }
+
+        } else {
+            binding.subSectionUnitsTitle.isGone = true
+        }
+
+        if (viewModel.unitsListShowed.value == true) handleUnitsClick()
     }
 
     override fun onDestroyView() {
@@ -255,10 +274,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             if (block != null) {
                 viewModel.prevBlockClickedEvent(block.blockId, block.displayName)
                 if (!block.type.isContainer()) {
-                    binding.viewPager.setCurrentItem(
-                        binding.viewPager.currentItem - 1,
-                        true
-                    )
+                    val prevIndex = binding.viewPager.currentItem - 1
+                    binding.viewPager.setCurrentItem(prevIndex, true)
                     updateNavigationButtons { next, hasPrev, hasNext ->
                         buttonChanged(next, hasPrev, hasNext)
                     }
@@ -273,10 +290,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             if (block != null) {
                 viewModel.nextBlockClickedEvent(block.blockId, block.displayName)
                 if (!block.type.isContainer()) {
-                    binding.viewPager.setCurrentItem(
-                        binding.viewPager.currentItem + 1,
-                        true
-                    )
+                    val nextIndex = binding.viewPager.currentItem + 1
+                    binding.viewPager.setCurrentItem(nextIndex, true)
                     updateNavigationButtons { next, hasPrev, hasNext ->
                         buttonChanged(next, hasPrev, hasNext)
                     }
@@ -323,6 +338,62 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     ChapterEndFragmentDialog::class.simpleName
                 )
             }
+        }
+    }
+
+    private fun handleUnitsClick() {
+        if (binding.subSectionUnitsList.visibility == View.VISIBLE) {
+            binding.subSectionUnitsList.visibility = View.GONE
+            binding.subSectionUnitsBg.visibility = View.GONE
+            viewModel.setUnitsListVisibility(false)
+
+        } else {
+            binding.subSectionUnitsList.visibility = View.VISIBLE
+            binding.subSectionUnitsBg.visibility = View.VISIBLE
+            viewModel.setUnitsListVisibility(true)
+        }
+    }
+
+    @Composable
+    private fun NavigationBar() {
+        OpenEdXTheme {
+            var nextButtonText by rememberSaveable {
+                mutableStateOf(viewModel.nextButtonText)
+            }
+            var hasNextBlock by rememberSaveable {
+                mutableStateOf(viewModel.hasNextBlock)
+            }
+            var hasPrevBlock by rememberSaveable {
+                mutableStateOf(viewModel.hasNextBlock)
+            }
+
+            updateNavigationButtons { next, hasPrev, hasNext ->
+                nextButtonText = next
+                hasPrevBlock = hasPrev
+                hasNextBlock = hasNext
+            }
+            val windowSize = rememberWindowSize()
+
+            NavigationUnitsButtons(
+                windowSize = windowSize,
+                hasPrevBlock = hasPrevBlock,
+                nextButtonText = nextButtonText,
+                hasNextBlock = hasNextBlock,
+                onPrevClick = {
+                    handlePrevClick { next, hasPrev, hasNext ->
+                        nextButtonText = next
+                        hasPrevBlock = hasPrev
+                        hasNextBlock = hasNext
+                    }
+                },
+                onNextClick = {
+                    handleNextClick { next, hasPrev, hasNext ->
+                        nextButtonText = next
+                        hasPrevBlock = hasPrev
+                        hasNextBlock = hasNext
+                    }
+                }
+            )
         }
     }
 

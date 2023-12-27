@@ -29,11 +29,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.openedx.core.config.Config
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.roundBorderWithoutBottom
@@ -45,8 +49,10 @@ import org.openedx.course.presentation.ui.ConnectionErrorView
 
 class HtmlUnitFragment : Fragment() {
 
+    private val config by inject<Config>()
     private val edxCookieManager by inject<AppCookieManager>()
     private val networkConnection by inject<NetworkConnection>()
+    private val notifier by inject<CourseNotifier>()
     private var blockId: String = ""
     private var blockUrl: String = ""
 
@@ -82,7 +88,7 @@ class HtmlUnitFragment : Fragment() {
                     0.dp
                 }
 
-                val border = if (!isSystemInDarkTheme()) {
+                val border = if (!isSystemInDarkTheme() && !config.isCourseUnitProgressEnabled()) {
                     Modifier.roundBorderWithoutBottom(
                         borderWidth = 2.dp,
                         cornerRadius = 30.dp
@@ -109,6 +115,11 @@ class HtmlUnitFragment : Fragment() {
                                 windowSize = windowSize,
                                 url = blockUrl,
                                 cookieManager = edxCookieManager,
+                                onCompletionSet = {
+                                    lifecycleScope.launch {
+                                        notifier.send(CourseCompletionSet())
+                                    }
+                                },
                                 onWebPageLoaded = {
                                     isLoading = false
                                 }
@@ -163,6 +174,7 @@ private fun HTMLContentView(
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
+    onCompletionSet: () -> Unit,
     onWebPageLoaded: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -183,12 +195,30 @@ private fun HTMLContentView(
             .background(MaterialTheme.appColors.background),
         factory = {
             WebView(context).apply {
+                addJavascriptInterface(object {
+                    @Suppress("unused")
+                    @JavascriptInterface
+                    fun completionSet() {
+                        onCompletionSet()
+                    }
+                }, "callback")
                 webViewClient = object : WebViewClient() {
 
                     override fun onPageCommitVisible(view: WebView?, url: String?) {
                         super.onPageCommitVisible(view, url)
                         Log.d("HTML", "onPageCommitVisible")
                         onWebPageLoaded()
+
+                        evaluateJavascript(
+                            """
+                            ${'$'}(document).ajaxSuccess(function(event, request, settings)  {
+                                if (settings.url.includes("publish_completion") && 
+                                    request.responseText.includes("ok")) {
+                                    javascript:window.callback.completionSet();
+                                }
+                            });
+                        """.trimIndent(), null
+                        )
                     }
 
                     override fun shouldOverrideUrlLoading(

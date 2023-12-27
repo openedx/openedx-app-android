@@ -31,6 +31,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -44,6 +45,7 @@ class CourseVideoViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val notifier = spyk<CourseNotifier>()
+    private val analytics = mockk<CourseAnalytics>()
     private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
     private val downloadDao = mockk<DownloadDao>()
@@ -145,6 +147,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos empty list`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure.copy(blockData = emptyList())
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
 
@@ -156,6 +159,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -170,6 +174,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos success`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseVideoViewModel(
@@ -180,6 +185,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -195,6 +201,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("", false)) }
         every { downloadDao.readAllData() } returns flow {
@@ -211,6 +218,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -230,6 +238,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `setIsUpdating success`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
             config,
@@ -238,6 +247,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -251,6 +261,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
             config,
@@ -259,6 +270,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -276,6 +288,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
             config,
@@ -284,6 +297,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -301,6 +315,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without conection`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
             config,
@@ -309,6 +324,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
