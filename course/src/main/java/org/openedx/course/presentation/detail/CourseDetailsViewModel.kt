@@ -52,7 +52,7 @@ class CourseDetailsViewModel(
         _uiState.value = CourseDetailsUIState.Loading
         viewModelScope.launch {
             try {
-                course = if (networkConnection.isOnline()) {
+                course = if (hasInternetConnection) {
                     interactor.getCourseDetails(courseId)
                 } else {
                     interactor.getCourseDetailsFromCache(courseId)
@@ -60,7 +60,7 @@ class CourseDetailsViewModel(
                 course?.let {
                     _uiState.value = CourseDetailsUIState.CourseData(
                         course = it,
-                        isUserLoggedIn = corePreferences.user != null
+                        isUserLoggedIn = isUserLoggedIn
                     )
                 } ?: run {
                     _uiMessage.value =
