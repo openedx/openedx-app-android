@@ -3,8 +3,8 @@ package org.openedx.core.data.model
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.utils.TimeUtils
-import java.util.Collections
-import java.util.Date
+import org.openedx.core.utils.addDays
+import org.openedx.core.utils.isToday
 import org.openedx.core.domain.model.CourseDateBlock as DomainCourseDateBlock
 
 data class CourseDates(
@@ -24,43 +24,45 @@ data class CourseDates(
     val verifiedUpgradeLink: String? = "",
 ) {
     fun getStructuredCourseDates(): LinkedHashMap<DatesSection, List<DomainCourseDateBlock>> {
-        val currentDate = Date()
+        val currentDate = TimeUtils.getCurrentDate()
         val courseDatesResponse: LinkedHashMap<DatesSection, List<DomainCourseDateBlock>> =
             LinkedHashMap()
-        val datesList = mapToDomains()
+        val datesList = mapToDomain()
         // Added dates for completed, past due, today, this week, next week and upcoming
-        courseDatesResponse[DatesSection.COMPLETED] = datesList.filter { it.isCompleted() }
+        courseDatesResponse[DatesSection.COMPLETED] =
+            datesList.filter { it.isCompleted() }.also { datesList.removeAll(it) }
 
         courseDatesResponse[DatesSection.PAST_DUE] =
-            datesList.filter { it.date != null && it.date < currentDate && !it.isCompleted() }
+            datesList.filter { currentDate.after(it.date) }.also { datesList.removeAll(it) }
 
-        courseDatesResponse[DatesSection.TODAY] = datesList.filter {
-            it.date != null && TimeUtils.areDatesSame(it.date, currentDate) && !it.isCompleted()
-        }
+        courseDatesResponse[DatesSection.TODAY] =
+            datesList.filter { it.date != null && it.date.isToday() }
+                .also { datesList.removeAll(it) }
+
         // for current week except today
         courseDatesResponse[DatesSection.THIS_WEEK] = datesList.filter {
-            it.date != null && !it.isCompleted() &&
-                    TimeUtils.areDatesSame(it.date, currentDate).not() &&
-                    it.date > currentDate && it.date < TimeUtils.addDays(currentDate, 7)
-        }
+            it.date != null && it.date.after(currentDate) &&
+                    it.date.before(currentDate.addDays(8))
+        }.also { datesList.removeAll(it) }
+
         // for coming week
         courseDatesResponse[DatesSection.NEXT_WEEK] = datesList.filter {
-            it.date != null && !it.isCompleted() &&
-                    it.date > TimeUtils.addDays(currentDate, 7) &&
-                    it.date < TimeUtils.addDays(currentDate, 14)
-        }
+            it.date != null &&
+                    it.date.after(currentDate.addDays(7)) &&
+                    it.date.before(currentDate.addDays(15))
+        }.also { datesList.removeAll(it) }
+
         // for upcoming
         courseDatesResponse[DatesSection.UPCOMING] = datesList.filter {
-            it.date != null && it.date > TimeUtils.addDays(currentDate, 14) && !it.isCompleted()
-        }
+            it.date != null && it.date.after(currentDate.addDays(14))
+        }.also { datesList.removeAll(it) }
 
         return courseDatesResponse
     }
 
-    private fun mapToDomains(): ArrayList<DomainCourseDateBlock> {
-        val courseDates = ArrayList<DomainCourseDateBlock>()
-        courseDateBlocks.forEach { item ->
-            val dateBlock = DomainCourseDateBlock(
+    private fun mapToDomain(): MutableList<DomainCourseDateBlock> {
+        return courseDateBlocks.map { item ->
+            DomainCourseDateBlock(
                 title = item.title,
                 description = item.description,
                 link = item.link,
@@ -71,9 +73,6 @@ data class CourseDates(
                 dateType = item.dateType,
                 assignmentType = item.assignmentType
             )
-            courseDates.add(dateBlock)
-        }
-        Collections.sort(courseDates, Comparator.comparing(DomainCourseDateBlock::date))
-        return courseDates
+        }.sortedBy { it.date }.filter { it.date != null }.toMutableList()
     }
 }

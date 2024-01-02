@@ -517,7 +517,7 @@ private fun CourseDateItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(enabled = dateBlock.blockId.isNotEmpty(),
+                .clickable(enabled = dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess,
                     onClick = { onItemClick(dateBlock.blockId) })
         ) {
             Text(
@@ -542,7 +542,7 @@ private fun CourseDateItem(
             )
             Spacer(modifier = Modifier.width(16.dp))
 
-            if (dateBlock.blockId.isNotEmpty()) {
+            if (dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess) {
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowRight,
                     tint = MaterialTheme.appColors.textDark,

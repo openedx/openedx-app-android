@@ -19,10 +19,17 @@ object TimeUtils {
 
     private const val FORMAT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "yyyy-MM-dd'T'HH:mm:ssXXX"
-    private const val FORMAT_APPLICATION = "dd.MM.yyyy HH:mm"
-    const val FORMAT_DATE = "dd MMM, yyyy"
 
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
+
+    /**
+     * This method used to get the current date
+     * @return The current date with time set to midnight.
+     */
+    fun getCurrentDate(): Date {
+        val calendar = Calendar.getInstance().also { it.clearTimeComponents() }
+        return calendar.time
+    }
 
     fun getCurrentTime(): Long {
         return Calendar.getInstance().timeInMillis
@@ -101,27 +108,8 @@ object TimeUtils {
      * @return <code>true</code> if the other date is past today,
      * <code>false</code> otherwise.
      */
-    fun isDatePassed(today: Date, otherDate: Date?): Boolean {
+    private fun isDatePassed(today: Date, otherDate: Date?): Boolean {
         return otherDate != null && today.after(otherDate)
-    }
-
-    /**
-     * This function compare the provide date with current date
-     * @param today     Today's date.
-     * @param otherDate Other date to cross-match with today's date.
-     * @return <code>true</code> if the other date is due today,
-     */
-    fun isDueDate(today: Date, otherDate: Date?): Boolean {
-        return otherDate != null && today.before(otherDate)
-    }
-
-    /**
-     * This function compare the provide date are same
-     * @return true if the provided date are same else false
-     */
-    fun areDatesSame(date: Date?, otherDate: Date?): Boolean {
-        return date != null && otherDate != null &&
-                formatDate(FORMAT_DATE, date) == formatDate(FORMAT_DATE, otherDate)
     }
 
     fun getCourseFormattedDate(
@@ -212,19 +200,15 @@ object TimeUtils {
         return formattedDate
     }
 
-    fun addDays(currentDate: Date, days: Int): Date? {
-        val calendar = Calendar.getInstance()
-        calendar.time = currentDate
-        calendar.add(Calendar.DATE, days)
-        return calendar.time
-    }
-
+    /**
+     * Returns a formatted date string for the given date.
+     */
     fun getCourseFormattedDate(context: Context, date: Date): String {
-        val currentDate = Calendar.getInstance()
-        val inputDate = Calendar.getInstance()
-        inputDate.time = date
-
-        val daysDifference = daysDifference(currentDate, inputDate)
+        val inputDate = Calendar.getInstance().also {
+            it.time = date
+            it.clearTimeComponents()
+        }
+        val daysDifference = getDayDifference(inputDate)
 
         return when {
             daysDifference == 0 -> {
@@ -254,7 +238,7 @@ object TimeUtils {
                 )
             }
 
-            inputDate.get(Calendar.YEAR) != currentDate.get(Calendar.YEAR) -> {
+            inputDate.get(Calendar.YEAR) != Calendar.getInstance().get(Calendar.YEAR) -> {
                 DateUtils.formatDateTime(
                     context,
                     date.time,
@@ -272,8 +256,37 @@ object TimeUtils {
         }
     }
 
-    private fun daysDifference(currentDate: Calendar, inputDate: Calendar): Int {
+    /**
+     * Returns the number of days difference between the given date and the current date.
+     */
+    private fun getDayDifference(inputDate: Calendar): Int {
+        val currentDate = Calendar.getInstance().also { it.clearTimeComponents() }
         val difference = inputDate.timeInMillis - currentDate.timeInMillis
         return TimeUnit.MILLISECONDS.toDays(difference).toInt()
     }
+}
+
+// Extension function to clear time components
+fun Calendar.clearTimeComponents() {
+    this.set(Calendar.HOUR_OF_DAY, 0)
+    this.set(Calendar.MINUTE, 0)
+    this.set(Calendar.SECOND, 0)
+    this.set(Calendar.MILLISECOND, 0)
+}
+
+// Extension function to check if a date is today
+fun Date.isToday(): Boolean {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.clearTimeComponents()
+    return calendar.time == TimeUtils.getCurrentDate()
+}
+
+// Extension function to add number of days to a date
+fun Date.addDays(days: Int): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.clearTimeComponents()
+    calendar.add(Calendar.DATE, days)
+    return calendar.time
 }
