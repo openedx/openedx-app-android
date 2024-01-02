@@ -15,8 +15,7 @@ interface CourseRouter {
 
     fun navigateToNoAccess(
         fm: FragmentManager,
-        title: String,
-        auditAccessExpires: Date?
+        title: String
     )
 
     fun navigateToCourseSubsections(

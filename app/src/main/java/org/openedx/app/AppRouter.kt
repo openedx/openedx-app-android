@@ -111,10 +111,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToNoAccess(
         fm: FragmentManager,
-        title: String,
-        auditAccessExpires: Date?
+        title: String
     ) {
-        replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title, auditAccessExpires))
+        replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title))
     }
     //endregion
 

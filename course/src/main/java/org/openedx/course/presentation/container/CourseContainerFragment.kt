@@ -72,8 +72,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             } else {
                 router.navigateToNoAccess(
                     requireActivity().supportFragmentManager,
-                    courseTitle,
-                    null
+                    courseTitle
                 )
             }
         }
