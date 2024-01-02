@@ -60,6 +60,10 @@ class Config(context: Context) {
 
     fun isSocialAuthEnabled() = getBoolean(SOCIAL_AUTH_ENABLED, false)
 
+    fun getDiscoveryConfig(): DiscoveryConfig {
+        return getObjectOrNewInstance(DISCOVERY, DiscoveryConfig::class.java)
+    }
+
     fun isWhatsNewEnabled(): Boolean {
         return getBoolean(WHATS_NEW_ENABLED, false)
     }
@@ -131,6 +135,7 @@ class Config(context: Context) {
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
+        private const val DISCOVERY = "DISCOVERY"
         private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
         private const val COURSE_BANNER_ENABLED = "COURSE_BANNER_ENABLED"
         private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"

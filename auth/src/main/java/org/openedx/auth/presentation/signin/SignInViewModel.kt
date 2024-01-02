@@ -42,7 +42,8 @@ class SignInViewModel(
     private val facebookAuthHelper: FacebookAuthHelper,
     private val googleAuthHelper: GoogleAuthHelper,
     private val microsoftAuthHelper: MicrosoftAuthHelper,
-    config: Config,
+    val config: Config,
+    val courseId: String?,
 ) : BaseViewModel() {
 
     private val logger = Logger("SignInViewModel")

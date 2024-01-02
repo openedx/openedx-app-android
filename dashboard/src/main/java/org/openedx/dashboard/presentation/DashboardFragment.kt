@@ -193,15 +193,7 @@ internal fun MyCoursesScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 12.dp),
-                text = stringResource(id = R.string.dashboard_title),
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.titleMedium,
-                textAlign = TextAlign.Center
-            )
+            Toolbar(label = stringResource(id = R.string.dashboard_title))
 
             Surface(
                 color = MaterialTheme.appColors.background,

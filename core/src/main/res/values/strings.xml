@@ -64,6 +64,11 @@
     <string name="core_rate_us">Rate Us</string>
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
+    <string name="core_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
+    <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
+    <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
+    <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
+    <string name="core_leaving_the_app_message" tools:ignore="MissingTranslation">You are now leaving the %s app and opening a browser.</string>
 
     <!-- region: Course Date types -->
     <!-- Label used when the date is Today -->
@@ -79,6 +84,9 @@
     <!-- Label used when an assignment is not yet released -->
     <string name="core_date_type_not_yet_released" tools:ignore="MissingTranslation">Not Yet Released</string>
     <!-- endregion -->
+
+    <string name="core_register">Register</string>
+    <string name="core_sign_in">Sign in</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>

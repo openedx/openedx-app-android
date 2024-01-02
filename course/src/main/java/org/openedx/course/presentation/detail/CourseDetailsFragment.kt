@@ -89,6 +89,7 @@ class CourseDetailsFragment : Fragment() {
                         colorTextValue
                     ),
                     hasInternetConnection = viewModel.hasInternetConnection,
+                    isUserLoggedIn = viewModel.isUserLoggedIn,
                     onReloadClick = {
                         viewModel.getCourseDetail()
                     },
@@ -98,21 +99,39 @@ class CourseDetailsFragment : Fragment() {
                     onButtonClick = {
                         val currentState = uiState
                         if (currentState is CourseDetailsUIState.CourseData) {
-                            if (currentState.course.isEnrolled) {
-                                viewModel.viewCourseClickedEvent(
-                                    currentState.course.courseId,
-                                    currentState.course.name
-                                )
-                                router.navigateToCourseOutline(
-                                    requireActivity().supportFragmentManager,
-                                    currentState.course.courseId,
-                                    currentState.course.name
-                                )
-                            } else {
-                                viewModel.enrollInACourse(currentState.course.courseId)
+                            when {
+                                (!currentState.isUserLoggedIn) -> {
+                                    router.navigateToLogistration(
+                                        parentFragmentManager,
+                                        currentState.course.courseId
+                                    )
+                                }
+
+                                currentState.course.isEnrolled -> {
+                                    viewModel.viewCourseClickedEvent(
+                                        currentState.course.courseId,
+                                        currentState.course.name
+                                    )
+                                    router.navigateToCourseOutline(
+                                        requireActivity().supportFragmentManager,
+                                        currentState.course.courseId,
+                                        currentState.course.name
+                                    )
+                                }
+
+                                else -> {
+                                    viewModel.enrollInACourse(currentState.course.courseId)
+                                }
                             }
                         }
-                    })
+                    },
+                    onRegisterClick = {
+                        router.navigateToSignUp(parentFragmentManager, viewModel.courseId)
+                    },
+                    onSignInClick = {
+                        router.navigateToSignIn(parentFragmentManager, viewModel.courseId)
+                    },
+                )
             }
         }
     }
@@ -138,9 +157,12 @@ internal fun CourseDetailsScreen(
     apiHostUrl: String,
     htmlBody: String,
     hasInternetConnection: Boolean,
+    isUserLoggedIn: Boolean,
     onReloadClick: () -> Unit,
     onBackClick: () -> Unit,
     onButtonClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onSignInClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -154,7 +176,17 @@ internal fun CourseDetailsScreen(
             .fillMaxSize()
             .navigationBarsPadding(),
         scaffoldState = scaffoldState,
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.background,
+        bottomBar = {
+            if (!isUserLoggedIn) {
+                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
+                    AuthButtonsPanel(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick
+                    )
+                }
+            }
+        }
     ) {
 
         val screenWidth by remember(key1 = windowSize) {
@@ -216,7 +248,6 @@ internal fun CourseDetailsScreen(
                 Spacer(Modifier.height(6.dp))
                 Box(
                     Modifier
-                        .padding(it)
                         .fillMaxSize()
                         .background(MaterialTheme.appColors.background),
                     contentAlignment = Alignment.TopCenter
@@ -622,10 +653,13 @@ private fun CourseDetailNativeContentPreview() {
             uiMessage = null,
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
+            isUserLoggedIn = true,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
             onBackClick = {},
-            onButtonClick = {}
+            onButtonClick = {},
+            onRegisterClick = {},
+            onSignInClick = {},
         )
     }
 }
@@ -641,10 +675,13 @@ private fun CourseDetailNativeContentTabletPreview() {
             uiMessage = null,
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
+            isUserLoggedIn = true,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
             onBackClick = {},
-            onButtonClick = {}
+            onButtonClick = {},
+            onRegisterClick = {},
+            onSignInClick = {},
         )
     }
 }

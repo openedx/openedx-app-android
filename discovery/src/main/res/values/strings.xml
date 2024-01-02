@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="discovery_Discovery">Discover</string>
     <string name="discovery_discovery_new">Discover new</string>
     <string name="discovery_lets_find">Let\'s find something new for you</string>
     <string name="discovery_search_results">Search results</string>
     <string name="discovery_start_typing_to_find">Start typing to find the course</string>
+    <string name="discovery_explore_the_catalog" tools:ignore="MissingTranslation">Explore the catalog</string>
 
     <plurals name="discovery_found_courses">
         <item quantity="zero">Found %s courses on your request</item>

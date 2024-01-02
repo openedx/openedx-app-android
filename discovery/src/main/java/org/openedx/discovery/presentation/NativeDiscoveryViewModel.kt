@@ -20,7 +20,7 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 
-class DiscoveryViewModel(
+class NativeDiscoveryViewModel(
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val interactor: DiscoveryInteractor,
@@ -31,7 +31,8 @@ class DiscoveryViewModel(
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
-    val canShowBackButton get() = config.isPreLoginExperienceEnabled() && corePreferences.user == null
+    val isUserLoggedIn get() = corePreferences.user != null
+    val canShowBackButton get() = config.isPreLoginExperienceEnabled() && !isUserLoggedIn
 
     private val _uiState = MutableLiveData<DiscoveryUIState>(DiscoveryUIState.Loading)
     val uiState: LiveData<DiscoveryUIState>

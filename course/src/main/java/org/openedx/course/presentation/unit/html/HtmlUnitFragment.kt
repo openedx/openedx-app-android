@@ -38,6 +38,7 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.roundBorderWithoutBottom
@@ -45,7 +46,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
-import org.openedx.course.presentation.ui.ConnectionErrorView
 
 class HtmlUnitFragment : Fragment() {
 
@@ -277,3 +277,4 @@ private fun HTMLContentView(
             }
         })
 }
+

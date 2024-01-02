@@ -23,7 +23,8 @@ class SignUpViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
     private val preferencesManager: CorePreferences,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
+    val courseId: String?,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<SignUpUIState>(SignUpUIState.Loading)

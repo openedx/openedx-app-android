@@ -39,6 +39,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
 import org.openedx.core.AppUpdateState
 import org.openedx.auth.R as authR
+import org.openedx.core.R
 
 class RestorePasswordFragment : Fragment() {
 
@@ -296,7 +297,7 @@ private fun RestorePasswordScreen(
                                 Spacer(Modifier.height(48.dp))
                                 OpenEdXButton(
                                     width = buttonWidth,
-                                    text = stringResource(id = authR.string.auth_sign_in),
+                                    text = stringResource(id = R.string.core_sign_in),
                                     onClick = {
                                         onBackClick()
                                     }
