@@ -1,8 +1,28 @@
 package org.openedx.discovery.presentation.search
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.CourseList
 import org.openedx.core.domain.model.Media
@@ -10,20 +30,6 @@ import org.openedx.core.domain.model.Pagination
 import org.openedx.core.system.ResourceManager
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.DiscoveryAnalytics
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.*
-import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TestRule
-import org.openedx.core.config.Config
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -36,6 +42,7 @@ class CourseSearchViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
     private val config = mockk<Config>()
+    private val corePreferences = mockk<CorePreferences>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DiscoveryInteractor>()
     private val analytics = mockk<DiscoveryAnalytics>()
@@ -86,7 +93,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search empty query`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
 
         viewModel.search("")
         advanceUntilIdle()
@@ -100,7 +108,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query no internet connection exception`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), any()) } throws UnknownHostException()
 
         viewModel.search("course")
@@ -115,7 +124,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query unknown exception`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), any()) } throws Exception()
 
         viewModel.search("course")
@@ -130,7 +140,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query success without next page`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), any()) } returns CourseList(
             Pagination(
                 10,
@@ -155,7 +166,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query success with next page and fetch`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), eq(1)) } returns CourseList(
             Pagination(
                 10,
@@ -189,7 +201,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query success with next page and fetch, update`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), eq(1)) } returns CourseList(
             Pagination(
                 10,
@@ -224,7 +237,8 @@ class CourseSearchViewModelTest {
 
     @Test
     fun `search query update in empty state`() = runTest {
-        val viewModel = CourseSearchViewModel(config, interactor, resourceManager, analytics)
+        val viewModel =
+            CourseSearchViewModel(config, corePreferences, interactor, resourceManager, analytics)
         coEvery { interactor.getCoursesListByQuery(any(), eq(1)) } returns CourseList(
             Pagination(
                 10,

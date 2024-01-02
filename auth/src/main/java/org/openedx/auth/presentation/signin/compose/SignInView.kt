@@ -69,6 +69,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.R as coreR
 
 @Composable
 internal fun LoginScreen(
@@ -115,7 +116,7 @@ internal fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.3f),
-            painter = painterResource(id = org.openedx.core.R.drawable.core_top_header),
+            painter = painterResource(id = coreR.drawable.core_top_header),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
         )
@@ -149,7 +150,7 @@ internal fun LoginScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = org.openedx.core.R.drawable.core_ic_logo),
+                    painter = painterResource(id = coreR.drawable.core_ic_logo),
                     contentDescription = null,
                     modifier = Modifier
                         .padding(top = 20.dp)
@@ -172,7 +173,7 @@ internal fun LoginScreen(
                             .then(contentPaddings),
                     ) {
                         Text(
-                            text = stringResource(id = R.string.auth_sign_in),
+                            text = stringResource(id = coreR.string.core_sign_in),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.displaySmall
                         )
@@ -234,7 +235,7 @@ private fun AuthForm(
                     modifier = Modifier.noRippleClickable {
                         onEvent(AuthEvent.RegisterClick)
                     },
-                    text = stringResource(id = R.string.auth_register),
+                    text = stringResource(id = coreR.string.core_register),
                     color = MaterialTheme.appColors.primary,
                     style = MaterialTheme.appTypography.labelLarge
                 )
@@ -255,7 +256,7 @@ private fun AuthForm(
         } else {
             OpenEdXButton(
                 width = buttonWidth,
-                text = stringResource(id = R.string.auth_sign_in),
+                text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
                     onEvent(AuthEvent.SignIn(login = login, password = password))
                 }
@@ -358,7 +359,7 @@ private fun PasswordTextField(
     val focusManager = LocalFocusManager.current
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = stringResource(id = org.openedx.core.R.string.core_password),
+        text = stringResource(id = coreR.string.core_password),
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
     )

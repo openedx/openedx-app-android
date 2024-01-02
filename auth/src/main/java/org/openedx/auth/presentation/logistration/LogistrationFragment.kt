@@ -6,14 +6,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,19 +36,19 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.R as coreR
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.R as coreR
 
 class LogistrationFragment : Fragment() {
 
@@ -64,18 +62,30 @@ class LogistrationFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val courseId = arguments?.getString(ARG_COURSE_ID, "")
                 LogistrationScreen(
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager)
+                        router.navigateToSignIn(parentFragmentManager, courseId)
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager)
+                        router.navigateToSignUp(parentFragmentManager, courseId)
                     },
                     onSearchClick = { querySearch ->
                         router.navigateToDiscoverCourses(parentFragmentManager, querySearch)
                     }
                 )
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_COURSE_ID = "courseId"
+        fun newInstance(courseId: String?): LogistrationFragment {
+            val fragment = LogistrationFragment()
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId
+            )
+            return fragment
         }
     }
 }
@@ -167,25 +177,7 @@ private fun LogistrationScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Row {
-                    OpenEdXButton(
-                        width = Modifier
-                            .width(0.dp)
-                            .weight(1f),
-                        text = stringResource(id = R.string.auth_register),
-                        onClick = { onRegisterClick() }
-                    )
-
-                    OpenEdXOutlinedButton(
-                        modifier = Modifier
-                            .width(100.dp)
-                            .padding(start = 16.dp),
-                        text = stringResource(id = R.string.auth_sign_in),
-                        onClick = { onSignInClick() },
-                        borderColor = MaterialTheme.appColors.textFieldBorder,
-                        textColor = MaterialTheme.appColors.primary
-                    )
-                }
+                AuthButtonsPanel(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
             }
         }
     }

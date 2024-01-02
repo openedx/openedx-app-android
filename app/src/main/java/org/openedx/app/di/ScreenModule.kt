@@ -62,7 +62,7 @@ val screenModule = module {
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
-    viewModel {
+    viewModel { (courseId: String?) ->
         SignInViewModel(
             get(),
             get(),
@@ -73,10 +73,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            courseId,
         )
     }
-    viewModel { SignUpViewModel(get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String?) ->
+        SignUpViewModel(get(), get(), get(), get(), get(), courseId)
+    }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
     factory { DashboardRepository(get(), get(), get()) }
@@ -117,6 +120,7 @@ val screenModule = module {
     viewModel { (courseId: String) ->
         CourseDetailsViewModel(
             courseId,
+            get(),
             get(),
             get(),
             get(),
@@ -209,7 +213,7 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { CourseSearchViewModel(get(), get(), get(), get()) }
+    viewModel { CourseSearchViewModel(get(), get(), get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
     single { DiscussionRepository(get(), get()) }
@@ -251,5 +255,5 @@ val screenModule = module {
         )
     }
 
-    viewModel { WhatsNewViewModel(get()) }
+    viewModel { (courseId: String) -> WhatsNewViewModel(courseId, get()) }
 }

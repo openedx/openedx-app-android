@@ -47,10 +47,12 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.calculateCurrentOffsetForPage
@@ -69,7 +71,9 @@ import org.openedx.whatsnew.presentation.ui.PageIndicator
 
 class WhatsNewFragment : Fragment() {
 
-    private val viewModel: WhatsNewViewModel by viewModel()
+    private val viewModel: WhatsNewViewModel by viewModel {
+        parametersOf(requireArguments().getString(ARG_COURSE_ID, null))
+    }
     private val preferencesManager by inject<WhatsNewPreferences>()
     private val router by inject<WhatsNewRouter>()
     private val appData: AppData by inject()
@@ -90,10 +94,21 @@ class WhatsNewFragment : Fragment() {
                     onCloseClick = {
                         val versionName = appData.versionName
                         preferencesManager.lastWhatsNewVersion = versionName
-                        router.navigateToMain(parentFragmentManager)
+                        router.navigateToMain(parentFragmentManager, viewModel.courseId)
                     }
                 )
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_COURSE_ID = "courseId"
+        fun newInstance(courseId: String? = null): WhatsNewFragment {
+            val fragment = WhatsNewFragment()
+            fragment.arguments = bundleOf(
+                ARG_COURSE_ID to courseId
+            )
+            return fragment
         }
     }
 }
@@ -329,7 +344,7 @@ private fun WhatsNewScreenLandscape(
                     state = pagerState
                 ) { page ->
                     val image = whatsNewItem.messages[page].image
-                    val alpha = (0.2f + pagerState.calculateCurrentOffsetForPage(page))*10
+                    val alpha = (0.2f + pagerState.calculateCurrentOffsetForPage(page)) * 10
                     Image(
                         modifier = Modifier
                             .alpha(alpha)
@@ -443,8 +458,18 @@ private fun WhatsNewPortraitPreview() {
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 720,
+    heightDp = 360
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = Devices.AUTOMOTIVE_1024p,
+    widthDp = 720,
+    heightDp = 360
+)
 @Composable
 private fun WhatsNewLandscapePreview() {
     OpenEdXTheme {

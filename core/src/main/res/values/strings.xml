@@ -85,6 +85,9 @@
     <string name="core_date_type_not_yet_released" tools:ignore="MissingTranslation">Not Yet Released</string>
     <!-- endregion -->
 
+    <string name="core_register">Register</string>
+    <string name="core_sign_in">Sign in</string>
+
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
 </resources>

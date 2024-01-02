@@ -105,6 +105,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -133,6 +134,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -163,6 +165,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         viewModel.login("acc@test.org", "")
 
@@ -192,6 +195,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -223,6 +227,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -255,6 +260,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -288,6 +294,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -321,6 +328,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
@@ -336,5 +344,4 @@ class SignInViewModelTest {
         assertFalse(uiState.loginSuccess)
         assertEquals(somethingWrong, message.message)
     }
-
 }

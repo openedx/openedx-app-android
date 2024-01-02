@@ -53,19 +53,23 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
-    override fun navigateToMain(fm: FragmentManager) {
+    override fun navigateToMain(fm: FragmentManager, courseId: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, MainFragment())
+            .replace(R.id.container, MainFragment.newInstance(courseId))
             .commit()
     }
 
-    override fun navigateToSignIn(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, SignInFragment())
+    override fun navigateToSignIn(fm: FragmentManager, courseId: String?) {
+        replaceFragmentWithBackStack(fm, SignInFragment.newInstance(courseId))
     }
 
-    override fun navigateToSignUp(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, SignUpFragment())
+    override fun navigateToSignUp(fm: FragmentManager, courseId: String?) {
+        replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId))
+    }
+
+    override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {
+        replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId))
     }
 
     override fun navigateToRestorePassword(fm: FragmentManager) {
@@ -76,11 +80,20 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, NativeDiscoveryFragment.newInstance(querySearch))
     }
 
-    override fun navigateToWhatsNew(fm: FragmentManager) {
+    override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, WhatsNewFragment())
+            .replace(R.id.container, WhatsNewFragment.newInstance(courseId))
             .commit()
+    }
+
+    override fun clearBackStack(fm: FragmentManager) {
+        fm.apply {
+            for (fragment in fragments) {
+                beginTransaction().remove(fragment).commit()
+            }
+            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        }
     }
     //endregion
 
@@ -326,10 +339,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
-            for (fragment in fragments) {
-                beginTransaction().remove(fragment).commit()
-            }
-            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            clearBackStack(this)
             if (isLogistrationEnabled) {
                 replaceFragment(fm, LogistrationFragment())
             } else {

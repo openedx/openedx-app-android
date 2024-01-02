@@ -9,6 +9,7 @@ import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -19,8 +20,9 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 
 class CourseDetailsViewModel(
-    private val courseId: String,
+    val courseId: String,
     private val config: Config,
+    private val corePreferences: CorePreferences,
     private val networkConnection: NetworkConnection,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -28,6 +30,7 @@ class CourseDetailsViewModel(
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
     val apiHostUrl get() = config.getApiHostURL()
+    val isUserLoggedIn get() = corePreferences.user != null
 
     private val _uiState = MutableLiveData<CourseDetailsUIState>(CourseDetailsUIState.Loading)
     val uiState: LiveData<CourseDetailsUIState>
@@ -49,12 +52,20 @@ class CourseDetailsViewModel(
         _uiState.value = CourseDetailsUIState.Loading
         viewModelScope.launch {
             try {
-                course = if (networkConnection.isOnline()) {
+                course = if (hasInternetConnection) {
                     interactor.getCourseDetails(courseId)
                 } else {
                     interactor.getCourseDetailsFromCache(courseId)
                 }
-                _uiState.value = CourseDetailsUIState.CourseData(course = course!!)
+                course?.let {
+                    _uiState.value = CourseDetailsUIState.CourseData(
+                        course = it,
+                        isUserLoggedIn = isUserLoggedIn
+                    )
+                } ?: run {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
