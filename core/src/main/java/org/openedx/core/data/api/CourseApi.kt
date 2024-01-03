@@ -29,11 +29,10 @@ interface CourseApi {
         )
     ): CourseList
 
-    @GET("/api/mobile/v3/course_info/{course_id}/info")
+    @GET("/api/courses/v1/courses/{course_id}")
     suspend fun getCourseDetail(
         @Path("course_id") courseId: String?,
-        @Query("username") username: String? = null,
-        @Query("is_enrolled") isEnrolled: Boolean = true,
+        @Query("username") username: String? = null
     ): CourseDetails
 
     @GET(
