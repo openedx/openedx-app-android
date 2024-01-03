@@ -34,3 +34,9 @@ fun List<Block>.getVerticalBlocks(): List<Block> {
 fun List<Block>.getSequentialBlocks(): List<Block> {
     return this.filter { it.type == BlockType.SEQUENTIAL }
 }
+
+fun <T> List<T>?.isNotEmptyThenLet(block: (List<T>) -> Unit) {
+    if (!isNullOrEmpty()) {
+        block(this)
+    }
+}

@@ -22,6 +22,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -50,12 +51,16 @@ class CourseDatesViewModelTest {
     )
     private val mockDateBlocks = linkedMapOf(
         Pair(
-            "2023-10-20T15:08:07Z",
-            arrayListOf(dateBlock, dateBlock)
+            DatesSection.COMPLETED,
+            listOf(dateBlock, dateBlock)
         ),
         Pair(
-            "2023-10-30T15:08:07Z",
-            arrayListOf(dateBlock, dateBlock)
+            DatesSection.PAST_DUE,
+            listOf(dateBlock, dateBlock)
+        ),
+        Pair(
+            DatesSection.TODAY,
+            listOf(dateBlock, dateBlock)
         )
     )
 

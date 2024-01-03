@@ -57,13 +57,11 @@ private val DarkColorPalette = AppColors(
 
     accessGreen = dark_access_green,
 
-    datesBadgeDefault = dark_dates_badge_default,
-    datesBadgeTextDefault = dark_dates_badge_text_default,
-    datesBadgePastDue = dark_dates_badge_past_due,
-    datesBadgeToday = dark_dates_badge_today,
-    datesBadgeTextToday = dark_dates_badge_text_today,
-    datesBadgeDue = dark_dates_badge_due,
-    datesBadgeTextDue = dark_dates_badge_text_due,
+    datesSectionBarPastDue = dark_dates_section_bar_past_due,
+    datesSectionBarToday = dark_dates_section_bar_today,
+    datesSectionBarThisWeek = dark_dates_section_bar_this_week,
+    datesSectionBarNextWeek = dark_dates_section_bar_next_week,
+    datesSectionBarUpcoming = dark_dates_section_bar_upcoming,
 
     authFacebookButtonBackground = dark_auth_facebook_button_background,
     authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
@@ -120,13 +118,11 @@ private val LightColorPalette = AppColors(
 
     accessGreen = light_access_green,
 
-    datesBadgeDefault = light_dates_badge_default,
-    datesBadgeTextDefault = light_dates_badge_text_default,
-    datesBadgePastDue = light_dates_badge_past_due,
-    datesBadgeToday = light_dates_badge_today,
-    datesBadgeTextToday = light_dates_badge_text_today,
-    datesBadgeDue = light_dates_badge_due,
-    datesBadgeTextDue = light_dates_badge_text_due,
+    datesSectionBarPastDue = light_dates_section_bar_past_due,
+    datesSectionBarToday = light_dates_section_bar_today,
+    datesSectionBarThisWeek = light_dates_section_bar_this_week,
+    datesSectionBarNextWeek = light_dates_section_bar_next_week,
+    datesSectionBarUpcoming = light_dates_section_bar_upcoming,
 
     authFacebookButtonBackground = light_auth_facebook_button_background,
     authMicrosoftButtonBackground = light_auth_microsoft_button_background,
