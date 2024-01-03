@@ -27,6 +27,7 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.Configuration
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountDeactivated
@@ -69,7 +70,13 @@ class ProfileViewModel(
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
-    private val agreementUrls = config.getAgreement(Locale.current.language)
+    private val configuration
+        get() = Configuration(
+            agreementUrls = config.getAgreement(Locale.current.language),
+            faqUrl = config.getFaqUrl(),
+            supportEmail = config.getFeedbackEmailAddress(),
+            versionName = appData.versionName,
+        )
 
     init {
         getAccount()
@@ -99,19 +106,13 @@ class ProfileViewModel(
                 } else {
                     _uiState.value = ProfileUIState.Data(
                         account = cachedAccount,
-                        agreementUrls = agreementUrls,
-                        faqUrl = config.getFaqUrl(),
-                        supportEmail = config.getFeedbackEmailAddress(),
-                        versionName = appData.versionName,
+                        configuration = configuration,
                     )
                 }
                 val account = interactor.getAccount()
                 _uiState.value = ProfileUIState.Data(
                     account = account,
-                    agreementUrls = agreementUrls,
-                    faqUrl = config.getFaqUrl(),
-                    supportEmail = config.getFeedbackEmailAddress(),
-                    versionName = appData.versionName,
+                    configuration = configuration,
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -182,7 +183,7 @@ class ProfileViewModel(
         router.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_privacy_policy),
-            url = agreementUrls.privacyPolicyUrl,
+            url = configuration.agreementUrls.privacyPolicyUrl,
         )
         analytics.privacyPolicyClickedEvent()
     }
@@ -191,7 +192,7 @@ class ProfileViewModel(
         router.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_cookie_policy),
-            url = agreementUrls.cookiePolicyUrl,
+            url = configuration.agreementUrls.cookiePolicyUrl,
         )
         analytics.cookiePolicyClickedEvent()
     }
@@ -200,7 +201,7 @@ class ProfileViewModel(
         router.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_data_sell),
-            url = agreementUrls.dataSellConsentUrl,
+            url = configuration.agreementUrls.dataSellConsentUrl,
         )
         analytics.dataSellClickedEvent()
     }
@@ -213,7 +214,7 @@ class ProfileViewModel(
         router.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_terms_of_use),
-            url = agreementUrls.tosUrl,
+            url = configuration.agreementUrls.tosUrl,
         )
         analytics.termsOfUseClickedEvent()
     }

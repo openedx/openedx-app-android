@@ -81,6 +81,7 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.profile.ProfileUIState
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
+import org.openedx.profile.domain.model.Configuration as AppConfiguration
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -291,7 +292,7 @@ private fun SupportInfoSection(
             backgroundColor = MaterialTheme.appColors.cardViewBackground
         ) {
             Column(Modifier.fillMaxWidth()) {
-                if (uiState.supportEmail.isNotBlank()) {
+                if (uiState.configuration.supportEmail.isNotBlank()) {
                     ProfileInfoItem(text = stringResource(id = org.openedx.profile.R.string.profile_contact_support)) {
                         onAction(ProfileViewAction.SupportClick)
                     }
@@ -300,7 +301,7 @@ private fun SupportInfoSection(
                         color = MaterialTheme.appColors.divider
                     )
                 }
-                if (uiState.agreementUrls.tosUrl.isNotBlank()) {
+                if (uiState.configuration.agreementUrls.tosUrl.isNotBlank()) {
                     ProfileInfoItem(text = stringResource(id = R.string.core_terms_of_use)) {
                         onAction(ProfileViewAction.TermsClick)
                     }
@@ -309,7 +310,7 @@ private fun SupportInfoSection(
                         color = MaterialTheme.appColors.divider
                     )
                 }
-                if (uiState.agreementUrls.privacyPolicyUrl.isNotBlank()) {
+                if (uiState.configuration.agreementUrls.privacyPolicyUrl.isNotBlank()) {
                     ProfileInfoItem(text = stringResource(id = R.string.core_privacy_policy)) {
                         onAction(ProfileViewAction.PrivacyPolicyClick)
                     }
@@ -318,7 +319,7 @@ private fun SupportInfoSection(
                         color = MaterialTheme.appColors.divider
                     )
                 }
-                if (uiState.agreementUrls.cookiePolicyUrl.isNotBlank()) {
+                if (uiState.configuration.agreementUrls.cookiePolicyUrl.isNotBlank()) {
                     ProfileInfoItem(text = stringResource(id = R.string.core_cookie_policy)) {
                         onAction(ProfileViewAction.CookiePolicyClick)
                     }
@@ -327,7 +328,7 @@ private fun SupportInfoSection(
                         color = MaterialTheme.appColors.divider
                     )
                 }
-                if (uiState.agreementUrls.dataSellConsentUrl.isNotBlank()) {
+                if (uiState.configuration.agreementUrls.dataSellConsentUrl.isNotBlank()) {
                     ProfileInfoItem(text = stringResource(id = R.string.core_data_sell)) {
                         onAction(ProfileViewAction.DataSellClick)
                     }
@@ -336,13 +337,13 @@ private fun SupportInfoSection(
                         color = MaterialTheme.appColors.divider
                     )
                 }
-                if (uiState.faqUrl.isNotBlank()) {
+                if (uiState.configuration.faqUrl.isNotBlank()) {
                     val uriHandler = LocalUriHandler.current
                     ProfileInfoItem(
                         text = stringResource(id = R.string.core_faq),
                         external = true,
                     ) {
-                        uriHandler.openUri(uiState.faqUrl)
+                        uriHandler.openUri(uiState.configuration.faqUrl)
                         onAction(ProfileViewAction.FaqClick)
                     }
                     Divider(
@@ -351,7 +352,7 @@ private fun SupportInfoSection(
                     )
                 }
                 AppVersionItem(
-                    versionName = uiState.versionName,
+                    versionName = uiState.configuration.versionName,
                     appUpgradeEvent = appUpgradeEvent,
                 ) {
                     onAction(ProfileViewAction.AppVersionClick)
@@ -765,12 +766,16 @@ private val mockAccount = Account(
     accountPrivacy = Account.Privacy.ALL_USERS
 )
 
-private val mockUiState = ProfileUIState.Data(
-    account = mockAccount,
+private val mockConfiguration = AppConfiguration(
     agreementUrls = AgreementUrls(),
     faqUrl = "https://example.com/faq",
     supportEmail = "test@example.com",
     versionName = mockAppData.versionName,
+)
+
+private val mockUiState = ProfileUIState.Data(
+    account = mockAccount,
+    configuration = mockConfiguration,
 )
 
 internal interface ProfileViewAction {
