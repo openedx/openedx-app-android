@@ -1,6 +1,7 @@
 package org.openedx.profile.presentation.profile
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -23,6 +24,7 @@ import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.presentation.global.AppData
@@ -56,9 +58,6 @@ class ProfileViewModelTest {
 
     private val appData = AppData(
         versionName = "1.0.0",
-        feedbackEmailAddress = "support@example.com",
-        tosUrl = "https://example.com/tos",
-        privacyPolicyUrl = "https://example.com/privacy",
     )
 
     private val account = org.openedx.profile.domain.model.Account(
@@ -90,6 +89,9 @@ class ProfileViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
+        every { config.getFeedbackEmailAddress() } returns ""
+        every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
+        every { config.getFaqUrl() } returns ""
     }
 
     @After

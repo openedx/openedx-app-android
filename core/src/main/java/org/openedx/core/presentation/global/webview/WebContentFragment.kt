@@ -3,15 +3,21 @@ package org.openedx.core.presentation.global.webview
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.openedx.core.config.Config
 import org.openedx.core.ui.WebContentScreen
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 
 class WebContentFragment : Fragment() {
+
+    private val config: Config by inject()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -22,6 +28,7 @@ class WebContentFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 WebContentScreen(
+                    apiHostUrl = config.getApiHostURL(),
                     windowSize = windowSize,
                     title = requireArguments().getString(ARG_TITLE, ""),
                     contentUrl = requireArguments().getString(ARG_URL, ""),
@@ -30,6 +37,11 @@ class WebContentFragment : Fragment() {
                     })
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CookieManager.getInstance().flush()
     }
 
     companion object {

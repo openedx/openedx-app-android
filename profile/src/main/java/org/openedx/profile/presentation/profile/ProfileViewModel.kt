@@ -1,6 +1,7 @@
 package org.openedx.profile.presentation.profile
 
 import android.content.Context
+import androidx.compose.ui.text.intl.Locale
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -26,6 +27,7 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.Configuration
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountDeactivated
@@ -68,6 +70,14 @@ class ProfileViewModel(
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
+    private val configuration
+        get() = Configuration(
+            agreementUrls = config.getAgreement(Locale.current.language),
+            faqUrl = config.getFaqUrl(),
+            supportEmail = config.getFeedbackEmailAddress(),
+            versionName = appData.versionName,
+        )
+
     init {
         getAccount()
         collectAppUpgradeEvent()
@@ -96,13 +106,13 @@ class ProfileViewModel(
                 } else {
                     _uiState.value = ProfileUIState.Data(
                         account = cachedAccount,
-                        versionName = appData.versionName
+                        configuration = configuration,
                     )
                 }
                 val account = interactor.getAccount()
                 _uiState.value = ProfileUIState.Data(
                     account = account,
-                    versionName = appData.versionName
+                    configuration = configuration,
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -173,16 +183,38 @@ class ProfileViewModel(
         router.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_privacy_policy),
-            url = appData.privacyPolicyUrl,
+            url = configuration.agreementUrls.privacyPolicyUrl,
         )
         analytics.privacyPolicyClickedEvent()
+    }
+
+    fun cookiePolicyClicked(fragmentManager: FragmentManager) {
+        router.navigateToWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(R.string.core_cookie_policy),
+            url = configuration.agreementUrls.cookiePolicyUrl,
+        )
+        analytics.cookiePolicyClickedEvent()
+    }
+
+    fun dataSellClicked(fragmentManager: FragmentManager) {
+        router.navigateToWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(R.string.core_data_sell),
+            url = configuration.agreementUrls.dataSellConsentUrl,
+        )
+        analytics.dataSellClickedEvent()
+    }
+
+    fun faqClicked() {
+        analytics.faqClickedEvent()
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {
         router.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_terms_of_use),
-            url = appData.tosUrl,
+            url = configuration.agreementUrls.tosUrl,
         )
         analytics.termsOfUseClickedEvent()
     }
@@ -190,7 +222,7 @@ class ProfileViewModel(
     fun emailSupportClicked(context: Context) {
         EmailUtil.showFeedbackScreen(
             context = context,
-            feedbackEmailAddress = appData.feedbackEmailAddress,
+            feedbackEmailAddress = config.getFeedbackEmailAddress(),
             appVersion = appData.versionName
         )
         analytics.emailSupportClickedEvent()
