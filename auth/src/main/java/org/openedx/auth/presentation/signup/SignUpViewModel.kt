@@ -3,6 +3,9 @@ package org.openedx.auth.presentation.signup
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
@@ -11,6 +14,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.isInternetError
@@ -24,12 +28,20 @@ class SignUpViewModel(
     private val analytics: AuthAnalytics,
     private val preferencesManager: CorePreferences,
     private val appUpgradeNotifier: AppUpgradeNotifier,
+    config: Config,
     val courseId: String?,
 ) : BaseViewModel() {
 
-    private val _uiState = MutableLiveData<SignUpUIState>(SignUpUIState.Loading)
-    val uiState: LiveData<SignUpUIState>
-        get() = _uiState
+    private val _uiState = MutableStateFlow(
+        SignUpUIState(
+            isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
+            isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
+            isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
+            isSocialAuthEnabled = config.isSocialAuthEnabled(),
+            isLoading = true,
+        )
+    )
+    val uiState = _uiState.asStateFlow()
 
     private val _uiMessage = SingleEventLiveData<UIMessage>()
     val uiMessage: LiveData<UIMessage>
@@ -59,14 +71,17 @@ class SignUpViewModel(
     }
 
     fun getRegistrationFields() {
-        _uiState.value = SignUpUIState.Loading
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
                 val fields = interactor.getRegistrationFields()
-                _uiState.value = SignUpUIState.Fields(
-                    fields = fields.filter { it.required },
-                    optionalFields = fields.filter { !it.required }
-                )
+                _uiState.update { state ->
+                    state.copy(
+                        fields = fields.filter { it.required },
+                        optionalFields = fields.filter { !it.required },
+                        isLoading = false,
+                    )
+                }
                 optionalFields.clear()
                 allFields.clear()
                 allFields.addAll(fields)
@@ -86,7 +101,7 @@ class SignUpViewModel(
     fun register(mapFields: Map<String, String>) {
         analytics.createAccountClickedEvent("")
         val resultMap = mapFields.toMutableMap()
-        optionalFields.forEach { (k, v) ->
+        optionalFields.forEach { (k, _) ->
             if (mapFields[k].isNullOrEmpty()) {
                 resultMap.remove(k)
             }
@@ -134,10 +149,13 @@ class SignUpViewModel(
         }
         allFields.clear()
         allFields.addAll(updatedFields)
-        _uiState.value = SignUpUIState.Fields(
-            updatedFields.filter { it.required },
-            updatedFields.filter { !it.required }
-        )
+        _uiState.update { state ->
+            state.copy(
+                fields = updatedFields.filter { it.required },
+                optionalFields = updatedFields.filter { !it.required },
+                isLoading = false,
+            )
+        }
     }
 
     private fun collectAppUpgradeEvent() {
@@ -155,10 +173,4 @@ class SignUpViewModel(
         }
     }
 
-}
-
-private enum class RegisterProvider(val keyName: String) {
-    GOOGLE("google-oauth2"),
-    AZURE("azuread-oauth2"),
-    FACEBOOK("facebook")
 }

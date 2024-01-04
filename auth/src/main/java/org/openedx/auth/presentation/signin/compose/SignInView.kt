@@ -22,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
@@ -52,14 +51,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
+import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -265,83 +265,19 @@ private fun AuthForm(
             )
         }
         if (state.isSocialAuthEnabled) {
-            SocialLoginView(state = state, buttonWidth = buttonWidth, onEvent = onEvent)
-        }
-    }
-}
-
-@Composable
-private fun SocialLoginView(
-    buttonWidth: Modifier,
-    state: SignInUIState,
-    onEvent: (AuthEvent) -> Unit,
-) {
-    if (state.isGoogleAuthEnabled) {
-        OpenEdXOutlinedButton(
-            modifier = buttonWidth.padding(top = 24.dp),
-            backgroundColor = MaterialTheme.appColors.background,
-            borderColor = MaterialTheme.appColors.primary,
-            textColor = Color.Unspecified,
-            onClick = {
-                onEvent(AuthEvent.SignInGoogle)
-            }
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_auth_google),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 10.dp),
-                    text = stringResource(id = R.string.auth_google)
-                )
-            }
-        }
-    }
-    if (state.isFacebookAuthEnabled) {
-        OpenEdXButton(
-            width = buttonWidth.padding(top = 12.dp),
-            text = stringResource(id = R.string.auth_facebook),
-            backgroundColor = MaterialTheme.appColors.authFacebookButtonBackground,
-            onClick = {
-                onEvent(AuthEvent.SignInFacebook)
-            }
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_auth_facebook),
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.buttonText,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 10.dp),
-                    color = MaterialTheme.appColors.buttonText,
-                    text = stringResource(id = R.string.auth_facebook)
-                )
-            }
-        }
-    }
-    if (state.isMicrosoftAuthEnabled) {
-        OpenEdXButton(
-            width = buttonWidth.padding(top = 12.dp),
-            text = stringResource(id = R.string.auth_microsoft),
-            backgroundColor = MaterialTheme.appColors.authMicrosoftButtonBackground,
-            onClick = {
-                onEvent(AuthEvent.SignInMicrosoft)
-            }
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_auth_microsoft),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 10.dp),
-                    color = MaterialTheme.appColors.buttonText,
-                    text = stringResource(id = R.string.auth_microsoft)
-                )
+            SocialAuthView(
+                modifier = buttonWidth,
+                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
+                isFacebookAuthEnabled = state.isFacebookAuthEnabled,
+                isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
+                isSignIn = true,
+            ) {
+                when (it) {
+                    AuthType.GOOGLE -> onEvent(AuthEvent.SignInGoogle)
+                    AuthType.FACEBOOK -> onEvent(AuthEvent.SignInFacebook)
+                    AuthType.MICROSOFT -> onEvent(AuthEvent.SignInMicrosoft)
+                    else -> Unit
+                }
             }
         }
     }
