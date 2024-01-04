@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isEmailValid
+import org.openedx.core.extension.readAsText
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
@@ -210,14 +211,12 @@ private fun HTMLContentView(
                         onWebPageLoaded()
 
                         evaluateJavascript(
-                            """
-                            ${'$'}(document).ajaxSuccess(function(event, request, settings)  {
-                                if (settings.url.includes("publish_completion") && 
-                                    request.responseText.includes("ok")) {
-                                    javascript:window.callback.completionSet();
-                                }
-                            });
-                        """.trimIndent(), null
+                            context.assets.readAsText("js_injection/completions.js"),
+                            null
+                        )
+                        evaluateJavascript(
+                            context.assets.readAsText("js_injection/survey_css.js"),
+                            null
                         )
                     }
 

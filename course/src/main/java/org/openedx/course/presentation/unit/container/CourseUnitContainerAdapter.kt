@@ -88,7 +88,8 @@ class CourseUnitContainerAdapter(
                     block.isOpenAssessmentBlock ||
                     block.isDragAndDropBlock ||
                     block.isWordCloudBlock ||
-                    block.isLTIConsumerBlock -> {
+                    block.isLTIConsumerBlock ||
+                    block.isSurveyBlock -> {
                 HtmlUnitFragment.newInstance(block.id, block.studentViewUrl)
             }
 
