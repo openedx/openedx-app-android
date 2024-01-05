@@ -33,7 +33,7 @@ data class CourseStructureEntity(
     @ColumnInfo("end")
     val end: String?,
     @Embedded
-    val coursewareAccess: CoursewareAccessDb,
+    val coursewareAccess: CoursewareAccessDb?,
     @Embedded
     val media: MediaDb?,
     @Embedded
@@ -54,7 +54,7 @@ data class CourseStructureEntity(
             startDisplay,
             startType,
             TimeUtils.iso8601ToDate(end ?: ""),
-            coursewareAccess.mapToDomain(),
+            coursewareAccess?.mapToDomain(),
             media?.mapToDomain(),
             certificate?.mapToDomain(),
             isSelfPaced

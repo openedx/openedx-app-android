@@ -1,7 +1,6 @@
 package org.openedx.course.presentation
 
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.course.presentation.handouts.HandoutsType
 import java.util.Date
@@ -14,9 +13,7 @@ interface CourseRouter {
 
     fun navigateToNoAccess(
         fm: FragmentManager,
-        title: String,
-        coursewareAccess: CoursewareAccess,
-        auditAccessExpires: Date?
+        title: String
     )
 
     fun navigateToCourseSubsections(

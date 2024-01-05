@@ -42,7 +42,7 @@ interface ProfileApi {
     suspend fun deleteProfileImage(@Path("username") username: String?): Response<Unit>
 
     @FormUrlEncoded
-    @POST("/mobile_api_extensions/user/v1/accounts/deactivate_logout/")
+    @POST("/api/user/v1/accounts/deactivate_logout/")
     suspend fun deactivateAccount(
         @Field("password") password: String
     ): Response<Unit>

@@ -33,7 +33,7 @@
     <string name="course_next_section">Next section</string>
     <string name="course_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
-    <string name="course_access_expired">Your access to this course has expired.</string>
+    <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_navigation_course">Course</string>
     <string name="course_navigation_video">Video</string>
     <string name="course_navigation_discussion">Discussion</string>

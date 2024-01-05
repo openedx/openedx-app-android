@@ -16,7 +16,7 @@ data class EnrolledCourseData(
     val end: Date?,
     val dynamicUpgradeDeadline: String,
     val subscriptionId: String,
-    val coursewareAccess: CoursewareAccess,
+    val coursewareAccess: CoursewareAccess?,
     val media: Media?,
     val courseImage: String,
     val courseAbout: String,

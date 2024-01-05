@@ -98,7 +98,7 @@ interface DiscussionApi {
         @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
     ): CommentsResponse
 
-    @POST("/mobile_api_extensions/discussion/v1/comments/")
+    @POST("/api/discussion/v1/comments/")
     suspend fun createComment(
         @Body commentBody: CommentBody
     ) : CommentResult
