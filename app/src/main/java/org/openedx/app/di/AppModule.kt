@@ -40,8 +40,8 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.dashboard.presentation.DashboardAnalytics
-import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
+import org.openedx.dashboard.presentation.dashboard.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discussion.presentation.DiscussionAnalytics

@@ -12,7 +12,7 @@ import org.openedx.app.adapter.MainNavigationFragmentAdapter
 import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dashboard.presentation.DashboardFragment
+import org.openedx.dashboard.presentation.dashboard.DashboardFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.profile.presentation.profile.ProfileFragment
