@@ -65,6 +65,12 @@ fun CatalogWebViewScreen(
                             true
                         }
 
+                        WebViewLink.Authority.ENROLLED_PROGRAM_INFO -> {
+                            val pathId = link.params[WebViewLink.Param.PATH_ID] ?: ""
+                            onInfoCardClicked(pathId,"")
+                            true
+                        }
+
                         WebViewLink.Authority.ENROLL -> {
                             val courseId = link.params[WebViewLink.Param.COURSE_ID]
                             courseId?.let { onEnrollClick(it) }

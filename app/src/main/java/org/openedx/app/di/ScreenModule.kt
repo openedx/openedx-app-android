@@ -30,6 +30,7 @@ import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.dashboard.DashboardViewModel
+import org.openedx.dashboard.presentation.program.ProgramViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -257,12 +258,7 @@ val screenModule = module {
     }
 
     viewModel { (courseId: String?) -> WhatsNewViewModel(courseId, get()) }
-    viewModel {
-        HtmlUnitViewModel(
-            get(),
-            get(),
-            get(),
-            get()
-        )
-    }
+    viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
+
+    viewModel { ProgramViewModel(get(), get(), get()) }
 }

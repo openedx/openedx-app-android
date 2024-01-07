@@ -15,6 +15,8 @@ class MainViewModel(
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 
+    val isMyProgramsEnabled get() = config.getProgramConfig().enabled
+
     fun enableBottomBar(enable: Boolean) {
         _isBottomBarEnabled.value = enable
     }
