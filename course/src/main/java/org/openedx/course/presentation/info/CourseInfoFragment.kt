@@ -107,7 +107,7 @@ class CourseInfoFragment : Fragment() {
                     windowSize = windowSize,
                     uiMessage = uiMessage,
                     contentUrl = getInitialUrl(),
-                    uriScheme = viewModel.webViewConfig.uriScheme,
+                    uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection

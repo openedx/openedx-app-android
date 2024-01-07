@@ -27,6 +27,10 @@ class Config(context: Context) {
         return getString(API_HOST_URL, "")
     }
 
+    fun getUriScheme(): String {
+        return getString(URI_SCHEME, "")
+    }
+
     fun getOAuthClientId(): String {
         return getString(OAUTH_CLIENT_ID, "")
     }
@@ -69,6 +73,10 @@ class Config(context: Context) {
 
     fun getDiscoveryConfig(): DiscoveryConfig {
         return getObjectOrNewInstance(DISCOVERY, DiscoveryConfig::class.java)
+    }
+
+    fun getProgramConfig(): ProgramConfig {
+        return getObjectOrNewInstance(PROGRAM, ProgramConfig::class.java)
     }
 
     fun isWhatsNewEnabled(): Boolean {
@@ -131,6 +139,7 @@ class Config(context: Context) {
 
     companion object {
         private const val API_HOST_URL = "API_HOST_URL"
+        private const val URI_SCHEME = "URI_SCHEME"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
         private const val FAQ_URL = "FAQ_URL"
@@ -144,6 +153,7 @@ class Config(context: Context) {
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
         private const val DISCOVERY = "DISCOVERY"
+        private const val PROGRAM = "PROGRAM"
         private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
         private const val COURSE_BANNER_ENABLED = "COURSE_BANNER_ENABLED"
         private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"

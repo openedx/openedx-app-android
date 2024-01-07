@@ -80,7 +80,7 @@ class WebViewDiscoveryFragment : Fragment() {
                 WebViewDiscoveryScreen(
                     windowSize = windowSize,
                     contentUrl = viewModel.discoveryUrl,
-                    uriScheme = viewModel.webViewConfig.uriScheme,
+                    uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection

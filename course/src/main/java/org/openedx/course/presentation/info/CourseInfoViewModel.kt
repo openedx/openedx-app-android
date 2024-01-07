@@ -43,6 +43,8 @@ class CourseInfoViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    val uriScheme: String get() = config.getUriScheme()
+
     val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
 
     fun enrollInACourse(courseId: String) {
