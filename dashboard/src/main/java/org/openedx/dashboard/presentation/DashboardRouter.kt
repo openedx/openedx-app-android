@@ -7,7 +7,7 @@ interface DashboardRouter {
     fun navigateToCourseOutline(
         fm: FragmentManager,
         courseId: String,
-        courseTitle: String = ""
+        courseTitle: String
     )
 
     fun navigateToProgramInfo(

@@ -7,7 +7,7 @@ import org.openedx.course.presentation.handouts.HandoutsType
 interface CourseRouter {
 
     fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String = ""
+        fm: FragmentManager, courseId: String, courseTitle: String
     )
 
     fun navigateToNoAccess(
