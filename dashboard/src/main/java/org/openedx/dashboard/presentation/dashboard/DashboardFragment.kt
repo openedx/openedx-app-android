@@ -53,6 +53,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
+import org.openedx.dashboard.presentation.DashboardRouter
 import java.util.*
 
 class DashboardFragment : Fragment() {
