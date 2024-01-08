@@ -46,11 +46,20 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.ui.*
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.ToolbarWithBackBtn
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.shouldLoadMore
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import org.openedx.dashboard.presentation.DashboardRouter
@@ -194,7 +203,7 @@ internal fun MyCoursesScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Toolbar(label = stringResource(id = R.string.dashboard_title))
+            ToolbarWithBackBtn(label = stringResource(id = R.string.dashboard_title))
 
             Surface(
                 color = MaterialTheme.appColors.background,

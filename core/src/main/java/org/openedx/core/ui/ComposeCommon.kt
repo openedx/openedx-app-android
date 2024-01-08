@@ -140,41 +140,20 @@ fun StaticSearchBar(
 }
 
 @Composable
-fun Toolbar(
-    modifier: Modifier = Modifier,
-    label: String
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-    ) {
-        Text(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth(),
-            text = label,
-            color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
 fun ToolbarWithBackBtn(
     modifier: Modifier = Modifier,
     label: String,
-    onBackClick: () -> Unit
+    canShowBackBtn: Boolean = false,
+    onBackClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
     ) {
-        BackBtn(onBackClick = onBackClick)
+        if (canShowBackBtn) {
+            BackBtn(onBackClick = onBackClick)
+        }
 
         Text(
             modifier = Modifier
@@ -1214,6 +1193,20 @@ private fun SearchBarPreview() {
         searchValue = TextFieldValue(),
         keyboardActions = {},
         onClearValue = {}
+    )
+}
+
+@Preview
+@Composable
+private fun ToolbarPreview() {
+    ToolbarWithBackBtn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.appColors.background)
+            .height(48.dp),
+        label = "Toolbar",
+        canShowBackBtn = true,
+        onBackClick = {}
     )
 }
 

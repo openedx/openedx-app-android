@@ -156,7 +156,7 @@ private fun WebViewDiscoveryScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Toolbar(label = stringResource(id = R.string.discovery_explore_the_catalog))
+            ToolbarWithBackBtn(label = stringResource(id = R.string.discovery_explore_the_catalog))
 
             Surface {
                 Box(

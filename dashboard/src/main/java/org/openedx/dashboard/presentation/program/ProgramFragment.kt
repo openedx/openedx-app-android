@@ -40,7 +40,6 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.R
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.system.AppCookieManager
@@ -54,6 +53,8 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.dashboard.R
+import org.openedx.core.R as coreR
 
 class ProgramFragment : Fragment() {
 
@@ -78,6 +79,8 @@ class ProgramFragment : Fragment() {
                     windowSize = windowSize,
                     contentUrl = getInitialUrl(),
                     uriScheme = viewModel.uriScheme,
+                    canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
+                        ?.isNotEmpty() == true,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
@@ -93,10 +96,10 @@ class ProgramFragment : Fragment() {
                     },
                     openExternalLink = { url ->
                         ActionDialogFragment.newInstance(
-                            title = getString(R.string.core_leaving_the_app),
+                            title = getString(coreR.string.core_leaving_the_app),
                             message = getString(
-                                R.string.core_leaving_the_app_message,
-                                getString(R.string.platform_name)
+                                coreR.string.core_leaving_the_app_message,
+                                getString(coreR.string.platform_name)
                             ),
                             url = url,
                         ).show(
@@ -141,6 +144,7 @@ private fun ProgramInfoScreen(
     windowSize: WindowSize,
     contentUrl: String,
     uriScheme: String,
+    canShowBackBtn: Boolean,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
@@ -179,7 +183,8 @@ private fun ProgramInfoScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ToolbarWithBackBtn(
-                label = stringResource(id = org.openedx.dashboard.R.string.dashboard_programs),
+                label = stringResource(id = R.string.dashboard_programs),
+                canShowBackBtn = canShowBackBtn,
                 onBackClick = onBackClick
             )
 
@@ -246,6 +251,7 @@ fun MyProgramsPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             contentUrl = "https://www.edx.org/",
             uriScheme = "https",
+            canShowBackBtn = false,
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
