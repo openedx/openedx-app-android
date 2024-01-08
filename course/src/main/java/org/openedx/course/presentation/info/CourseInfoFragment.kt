@@ -42,7 +42,6 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
-import org.openedx.core.presentation.catalog.WebViewLink.Authority.COURSE_INFO
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
@@ -58,6 +57,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.core.R as CoreR
+import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 class CourseInfoFragment : Fragment() {
 
@@ -115,29 +115,37 @@ class CourseInfoFragment : Fragment() {
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
-                    onEnrollClick = { courseId ->
-                        viewModel.enrollInACourse(courseId)
-                    },
-                    openExternalLink = { url ->
-                        ActionDialogFragment.newInstance(
-                            title = getString(CoreR.string.core_leaving_the_app),
-                            message = getString(
-                                CoreR.string.core_leaving_the_app_message,
-                                getString(CoreR.string.platform_name)
-                            ),
-                            url = url,
-                        ).show(
-                            requireActivity().supportFragmentManager,
-                            ActionDialogFragment::class.simpleName
-                        )
-                    },
-                    onInfoCardClicked = { pathId, infoType ->
-                        viewModel.infoCardClicked(
-                            fragmentManager = requireActivity().supportFragmentManager,
-                            pathId = pathId,
-                            infoType = infoType
-                        )
-                    },
+                    onURLClick = { param, type ->
+                        when (type) {
+                            linkAuthority.COURSE_INFO -> {
+                                viewModel.infoCardClicked(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param,
+                                    infoType = type.name
+                                )
+                            }
+
+                            linkAuthority.EXTERNAL -> {
+                                ActionDialogFragment.newInstance(
+                                    title = getString(CoreR.string.core_leaving_the_app),
+                                    message = getString(
+                                        CoreR.string.core_leaving_the_app_message,
+                                        getString(CoreR.string.platform_name)
+                                    ),
+                                    url = param,
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    ActionDialogFragment::class.simpleName
+                                )
+                            }
+
+                            linkAuthority.ENROLL -> {
+                                viewModel.enrollInACourse(param)
+                            }
+
+                            else -> {}
+                        }
+                    }
                 )
             }
         }
@@ -146,7 +154,7 @@ class CourseInfoFragment : Fragment() {
     private fun getInitialUrl(): String {
         return arguments?.let { args ->
             val pathId = args.getString(ARG_PATH_ID) ?: ""
-            val urlTemplate = if (args.getString(ARG_INFO_TYPE) == COURSE_INFO.name) {
+            val urlTemplate = if (args.getString(ARG_INFO_TYPE) == linkAuthority.COURSE_INFO.name) {
                 viewModel.webViewConfig.courseUrlTemplate
             } else {
                 viewModel.webViewConfig.programUrlTemplate
@@ -182,9 +190,7 @@ private fun CourseInfoScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
-    onEnrollClick: (String) -> Unit,
-    onInfoCardClicked: (String, String) -> Unit,
-    openExternalLink: (String) -> Unit
+    onURLClick: (String, linkAuthority) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -235,9 +241,7 @@ private fun CourseInfoScreen(
                             contentUrl = contentUrl,
                             uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
-                            onEnrollClick = onEnrollClick,
-                            onInfoCardClicked = onInfoCardClicked,
-                            openExternalLink = openExternalLink,
+                            onURLClick = onURLClick,
                         )
                     } else {
                         ConnectionErrorView(
@@ -271,9 +275,7 @@ private fun CourseInfoWebView(
     contentUrl: String,
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
-    onEnrollClick: (String) -> Unit,
-    onInfoCardClicked: (String, String) -> Unit,
-    openExternalLink: (String) -> Unit
+    onURLClick: (String, linkAuthority) -> Unit,
 ) {
 
     val webView = CatalogWebViewScreen(
@@ -281,9 +283,7 @@ private fun CourseInfoWebView(
         uriScheme = uriScheme,
         isAllLinksExternal = true,
         onWebPageLoaded = onWebPageLoaded,
-        openExternalLink = openExternalLink,
-        onEnrollClick = onEnrollClick,
-        onInfoCardClicked = onInfoCardClicked,
+        onURLClick = onURLClick,
     )
 
     AndroidView(
@@ -311,9 +311,7 @@ fun CourseInfoScreenPreview() {
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
-            onEnrollClick = {},
-            onInfoCardClicked = { _, _ -> },
-            openExternalLink = {}
+            onURLClick = { _, _ -> },
         )
     }
 }

@@ -81,8 +81,7 @@ class CourseInfoViewModel(
         if (courseId.isNotEmpty()) {
             router.navigateToCourseOutline(
                 fm = fragmentManager,
-                courseId = courseId,
-                courseTitle = "",
+                courseId = courseId
             )
         }
     }

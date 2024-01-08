@@ -26,20 +26,17 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private val binding by viewBinding(FragmentCourseContainerBinding::bind)
     private val viewModel by viewModel<CourseContainerViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_TITLE, "")
+        )
     }
     private val router by inject<CourseRouter>()
 
-
     private var adapter: CourseContainerAdapter? = null
-
-    private var courseTitle = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        with(requireArguments()) {
-            courseTitle = getString(ARG_TITLE, "")
-        }
         viewModel.preloadCourseStructure()
     }
 
@@ -47,16 +44,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.toolbar.setContent {
-            CourseToolbar(
-                title = courseTitle,
-                onBackClick = {
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-            )
-        }
-
+        setupToolbar(viewModel.courseName)
         observe()
     }
 
@@ -68,11 +56,12 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private fun observe() {
         viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
             if (isReady == true) {
+                setupToolbar(viewModel.courseName)
                 initViewPager()
             } else {
                 router.navigateToNoAccess(
                     requireActivity().supportFragmentManager,
-                    courseTitle
+                    viewModel.courseName
                 )
             }
         }
@@ -89,14 +78,25 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 
+    private fun setupToolbar(courseName: String) {
+        binding.toolbar.setContent {
+            CourseToolbar(
+                title = courseName,
+                onBackClick = {
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+            )
+        }
+    }
+
     private fun initViewPager() {
         binding.viewPager.isVisible = true
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         adapter = CourseContainerAdapter(this).apply {
-            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(CourseVideosFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, courseTitle))
+            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName))
+            addFragment(CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName))
+            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName))
+            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, viewModel.courseName))
             addFragment(HandoutsFragment.newInstance(viewModel.courseId))
         }
         binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1

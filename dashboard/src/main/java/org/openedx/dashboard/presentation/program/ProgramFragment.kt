@@ -18,10 +18,11 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,13 +38,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.UIMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
+import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
-import org.openedx.core.system.AppCookieManager
+import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.ToolbarWithBackBtn
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -55,11 +57,12 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.dashboard.R
 import org.openedx.core.R as coreR
+import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
+import org.openedx.course.R as courseR
 
 class ProgramFragment : Fragment() {
 
     private val viewModel by viewModel<ProgramViewModel>()
-    private val edxCookieManager by inject<AppCookieManager>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,17 +73,46 @@ class ProgramFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
+                val showAlert by viewModel.showAlert.collectAsState(initial = false)
+                val showLoading by viewModel.showLoading.collectAsState(initial = true)
+                val enrollmentSuccess by viewModel.courseEnrollSuccess.collectAsState(initial = "")
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
-                val coroutineScope = rememberCoroutineScope()
+
+                LaunchedEffect(showAlert) {
+                    if (showAlert) {
+                        InfoDialogFragment.newInstance(
+                            title = context.getString(courseR.string.course_enrollment_error),
+                            message = context.getString(
+                                courseR.string.course_enrollment_error_message,
+                                getString(coreR.string.platform_name)
+                            )
+                        ).show(
+                            requireActivity().supportFragmentManager,
+                            InfoDialogFragment::class.simpleName
+                        )
+                    }
+                }
+
+                LaunchedEffect(enrollmentSuccess) {
+                    if (enrollmentSuccess.isNotEmpty()) {
+                        viewModel.onEnrolledCourseClick(
+                            fragmentManager = requireActivity().supportFragmentManager,
+                            courseId = enrollmentSuccess,
+                        )
+                    }
+                }
 
                 ProgramInfoScreen(
                     windowSize = windowSize,
+                    canShowLoading = showLoading,
+                    uiMessage = uiMessage,
                     contentUrl = getInitialUrl(),
-                    uriScheme = viewModel.uriScheme,
                     canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
                         ?.isNotEmpty() == true,
+                    uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
@@ -88,29 +120,53 @@ class ProgramFragment : Fragment() {
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
-                    onInfoCardClicked = { pathId, _ ->
-                        viewModel.infoCardClicked(
-                            fragmentManager = requireActivity().supportFragmentManager,
-                            pathId = pathId
-                        )
-                    },
-                    openExternalLink = { url ->
-                        ActionDialogFragment.newInstance(
-                            title = getString(coreR.string.core_leaving_the_app),
-                            message = getString(
-                                coreR.string.core_leaving_the_app_message,
-                                getString(coreR.string.platform_name)
-                            ),
-                            url = url,
-                        ).show(
-                            requireActivity().supportFragmentManager,
-                            ActionDialogFragment::class.simpleName
-                        )
+                    onURLClick = { param, type ->
+                        when (type) {
+                            linkAuthority.ENROLLED_COURSE_INFO -> {
+                                viewModel.onEnrolledCourseClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    courseId = param
+                                )
+                            }
+
+                            linkAuthority.ENROLLED_PROGRAM_INFO -> {
+                                viewModel.onProgramCardClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param
+                                )
+                            }
+
+                            linkAuthority.COURSE_INFO -> {
+                                viewModel.onViewCourseClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    courseId = param,
+                                    infoType = type.name
+                                )
+                            }
+
+                            linkAuthority.ENROLL -> {
+                                viewModel.enrollInACourse(param)
+                            }
+
+                            linkAuthority.EXTERNAL -> {
+                                ActionDialogFragment.newInstance(
+                                    title = getString(coreR.string.core_leaving_the_app),
+                                    message = getString(
+                                        coreR.string.core_leaving_the_app_message,
+                                        getString(coreR.string.platform_name)
+                                    ),
+                                    url = param,
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    ActionDialogFragment::class.simpleName
+                                )
+                            }
+
+                            else -> {}
+                        }
                     },
                     refreshSessionCookie = {
-                        coroutineScope.launch {
-                            edxCookieManager.tryToRefreshSessionCookie()
-                        }
+                        viewModel.refreshCookie()
                     },
                 )
             }
@@ -142,19 +198,22 @@ class ProgramFragment : Fragment() {
 @Composable
 private fun ProgramInfoScreen(
     windowSize: WindowSize,
+    canShowLoading: Boolean,
+    uiMessage: UIMessage?,
     contentUrl: String,
     uriScheme: String,
     canShowBackBtn: Boolean,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
-    openExternalLink: (String) -> Unit,
-    onInfoCardClicked: (String, String) -> Unit,
+    onURLClick: (String, WebViewLink.Authority) -> Unit,
     refreshSessionCookie: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(canShowLoading) }
+
+    HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -201,9 +260,8 @@ private fun ProgramInfoScreen(
                             uriScheme = uriScheme,
                             isAllLinksExternal = true,
                             onWebPageLoaded = { isLoading = false },
-                            openExternalLink = openExternalLink,
-                            onInfoCardClicked = onInfoCardClicked,
-                            refreshSessionCookie = refreshSessionCookie
+                            refreshSessionCookie = refreshSessionCookie,
+                            onURLClick = onURLClick,
                         )
 
                         AndroidView(
@@ -249,14 +307,15 @@ fun MyProgramsPreview() {
     OpenEdXTheme {
         ProgramInfoScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            contentUrl = "https://www.edx.org/",
-            uriScheme = "https",
+            uiMessage = null,
+            canShowLoading = false,
+            contentUrl = "https://www.example.com/",
+            uriScheme = "",
             canShowBackBtn = false,
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
-            onInfoCardClicked = { _, _ -> },
-            openExternalLink = {}
+            onURLClick = { _, _ -> },
         )
     }
 }

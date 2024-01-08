@@ -46,9 +46,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
+import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.ToolbarWithBackBtn
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -88,26 +89,33 @@ class WebViewDiscoveryFragment : Fragment() {
                     onWebPageUpdated = { url ->
                         viewModel.updateDiscoveryUrl(url)
                     },
-                    onInfoCardClicked = { pathId, infoType ->
-                        viewModel.infoCardClicked(
-                            fragmentManager = requireActivity().supportFragmentManager,
-                            pathId = pathId,
-                            infoType = infoType
-                        )
-                    },
-                    openExternalLink = { url ->
-                        ActionDialogFragment.newInstance(
-                            title = getString(CoreR.string.core_leaving_the_app),
-                            message = getString(
-                                CoreR.string.core_leaving_the_app_message,
-                                getString(CoreR.string.platform_name)
-                            ),
-                            url = url,
-                        ).show(
-                            requireActivity().supportFragmentManager,
-                            ActionDialogFragment::class.simpleName
-                        )
-                    },
+                    onURLClick = { param, authority ->
+                        when (authority) {
+                            WebViewLink.Authority.COURSE_INFO -> {
+                                viewModel.infoCardClicked(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param,
+                                    infoType = authority.name
+                                )
+                            }
+
+                            WebViewLink.Authority.EXTERNAL -> {
+                                ActionDialogFragment.newInstance(
+                                    title = getString(CoreR.string.core_leaving_the_app),
+                                    message = getString(
+                                        CoreR.string.core_leaving_the_app_message,
+                                        getString(CoreR.string.platform_name)
+                                    ),
+                                    url = param,
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    ActionDialogFragment::class.simpleName
+                                )
+                            }
+
+                            else -> {}
+                        }
+                    }
                 )
             }
         }
@@ -123,8 +131,7 @@ private fun WebViewDiscoveryScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
-    onInfoCardClicked: (String, String) -> Unit,
-    openExternalLink: (String) -> Unit,
+    onURLClick: (String, WebViewLink.Authority) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -171,8 +178,7 @@ private fun WebViewDiscoveryScreen(
                             uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
                             onWebPageUpdated = onWebPageUpdated,
-                            onInfoCardClicked = onInfoCardClicked,
-                            openExternalLink = openExternalLink,
+                            onURLClick = onURLClick,
                         )
                     } else {
                         ConnectionErrorView(
@@ -207,16 +213,14 @@ private fun DiscoveryWebView(
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
-    onInfoCardClicked: (String, String) -> Unit,
-    openExternalLink: (String) -> Unit,
+    onURLClick: (String, WebViewLink.Authority) -> Unit,
 ) {
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
-        openExternalLink = openExternalLink,
-        onInfoCardClicked = onInfoCardClicked,
+        onURLClick = onURLClick,
     )
 
     AndroidView(
@@ -285,8 +289,7 @@ private fun WebViewDiscoveryScreenPreview() {
             hasInternetConnection = false,
             checkInternetConnection = {},
             onWebPageUpdated = {},
-            onInfoCardClicked = { _, _ -> },
-            openExternalLink = {}
+            onURLClick = { _, _ -> },
         )
     }
 }

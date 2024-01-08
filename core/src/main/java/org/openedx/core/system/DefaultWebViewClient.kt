@@ -8,6 +8,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import org.openedx.core.extension.isEmailValid
+import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.utils.EmailUtil
 
 open class DefaultWebViewClient(
@@ -15,7 +16,7 @@ open class DefaultWebViewClient(
     val webView: WebView,
     val isAllLinksExternal: Boolean,
     val refreshSessionCookie: () -> Unit,
-    val openExternalLink: (String) -> Unit,
+    val onURLClick: (String, WebViewLink.Authority) -> Unit,
 ) : WebViewClient() {
 
     private var hostForThisPage: String? = null
@@ -31,8 +32,8 @@ open class DefaultWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val clickUrl = request?.url?.toString() ?: ""
 
-        if (isAllLinksExternal || isExternalLink(clickUrl)) {
-            openExternalLink(clickUrl)
+        if (clickUrl.isNotEmpty() && (isAllLinksExternal || isExternalLink(clickUrl))) {
+            onURLClick(clickUrl, WebViewLink.Authority.EXTERNAL)
             return true
         }
 

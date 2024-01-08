@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.openedx.core.system.DefaultWebViewClient
+import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
 @Composable
@@ -16,10 +17,8 @@ fun CatalogWebViewScreen(
     isAllLinksExternal: Boolean = false,
     onWebPageLoaded: () -> Unit,
     refreshSessionCookie: () -> Unit = {},
-    openExternalLink: (String) -> Unit,
     onWebPageUpdated: (String) -> Unit = {},
-    onEnrollClick: (String) -> Unit = {},
-    onInfoCardClicked: (String, String) -> Unit = { _, _ -> },
+    onURLClick: (String, linkAuthority) -> Unit,
 ): WebView {
     val context = LocalContext.current
 
@@ -29,7 +28,7 @@ fun CatalogWebViewScreen(
                 context = context,
                 webView = this@apply,
                 isAllLinksExternal = isAllLinksExternal,
-                openExternalLink = openExternalLink,
+                onURLClick = onURLClick,
                 refreshSessionCookie = refreshSessionCookie,
             ) {
                 override fun onPageFinished(view: WebView?, url: String?) {
@@ -58,22 +57,19 @@ fun CatalogWebViewScreen(
                     val link = WebViewLink.parse(clickUrl, uriScheme) ?: return false
 
                     return when (link.authority) {
-                        WebViewLink.Authority.COURSE_INFO,
-                        WebViewLink.Authority.PROGRAM_INFO -> {
+                        linkAuthority.COURSE_INFO,
+                        linkAuthority.PROGRAM_INFO,
+                        linkAuthority.ENROLLED_PROGRAM_INFO -> {
                             val pathId = link.params[WebViewLink.Param.PATH_ID] ?: ""
-                            onInfoCardClicked(pathId, link.authority.name)
+                            onURLClick(pathId, link.authority)
                             true
                         }
 
-                        WebViewLink.Authority.ENROLLED_PROGRAM_INFO -> {
-                            val pathId = link.params[WebViewLink.Param.PATH_ID] ?: ""
-                            onInfoCardClicked(pathId,"")
-                            true
-                        }
-
-                        WebViewLink.Authority.ENROLL -> {
-                            val courseId = link.params[WebViewLink.Param.COURSE_ID]
-                            courseId?.let { onEnrollClick(it) }
+                        linkAuthority.COURSE,
+                        linkAuthority.ENROLL,
+                        linkAuthority.ENROLLED_COURSE_INFO -> {
+                            val courseId = link.params[WebViewLink.Param.COURSE_ID] ?: ""
+                            onURLClick(courseId, link.authority)
                             true
                         }
 

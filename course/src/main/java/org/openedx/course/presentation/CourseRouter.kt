@@ -3,12 +3,11 @@ package org.openedx.course.presentation
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.course.presentation.handouts.HandoutsType
-import java.util.Date
 
 interface CourseRouter {
 
     fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String
+        fm: FragmentManager, courseId: String, courseTitle: String = ""
     )
 
     fun navigateToNoAccess(

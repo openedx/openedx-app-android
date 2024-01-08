@@ -131,9 +131,10 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseContainerViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -260,5 +261,5 @@ val screenModule = module {
     viewModel { (courseId: String?) -> WhatsNewViewModel(courseId, get()) }
     viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
 
-    viewModel { ProgramViewModel(get(), get(), get()) }
+    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
