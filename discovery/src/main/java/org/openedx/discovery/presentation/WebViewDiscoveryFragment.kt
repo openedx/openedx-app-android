@@ -49,7 +49,7 @@ import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.ToolbarWithBackBtn
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -89,9 +89,10 @@ class WebViewDiscoveryFragment : Fragment() {
                     onWebPageUpdated = { url ->
                         viewModel.updateDiscoveryUrl(url)
                     },
-                    onURLClick = { param, authority ->
+                    onUriClick = { param, authority ->
                         when (authority) {
-                            WebViewLink.Authority.COURSE_INFO -> {
+                            WebViewLink.Authority.COURSE_INFO,
+                            WebViewLink.Authority.PROGRAM_INFO -> {
                                 viewModel.infoCardClicked(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     pathId = param,
@@ -131,7 +132,7 @@ private fun WebViewDiscoveryScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
-    onURLClick: (String, WebViewLink.Authority) -> Unit
+    onUriClick: (String, WebViewLink.Authority) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -163,7 +164,7 @@ private fun WebViewDiscoveryScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ToolbarWithBackBtn(label = stringResource(id = R.string.discovery_explore_the_catalog))
+            Toolbar(label = stringResource(id = R.string.discovery_explore_the_catalog))
 
             Surface {
                 Box(
@@ -178,7 +179,7 @@ private fun WebViewDiscoveryScreen(
                             uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
                             onWebPageUpdated = onWebPageUpdated,
-                            onURLClick = onURLClick,
+                            onUriClick = onUriClick,
                         )
                     } else {
                         ConnectionErrorView(
@@ -213,14 +214,14 @@ private fun DiscoveryWebView(
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
-    onURLClick: (String, WebViewLink.Authority) -> Unit,
+    onUriClick: (String, WebViewLink.Authority) -> Unit,
 ) {
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
-        onURLClick = onURLClick,
+        onUriClick = onUriClick,
     )
 
     AndroidView(
@@ -289,7 +290,7 @@ private fun WebViewDiscoveryScreenPreview() {
             hasInternetConnection = false,
             checkInternetConnection = {},
             onWebPageUpdated = {},
-            onURLClick = { _, _ -> },
+            onUriClick = { _, _ -> },
         )
     }
 }

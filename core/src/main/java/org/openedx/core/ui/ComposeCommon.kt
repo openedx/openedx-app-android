@@ -140,7 +140,7 @@ fun StaticSearchBar(
 }
 
 @Composable
-fun ToolbarWithBackBtn(
+fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
@@ -1199,7 +1199,7 @@ private fun SearchBarPreview() {
 @Preview
 @Composable
 private fun ToolbarPreview() {
-    ToolbarWithBackBtn(
+    Toolbar(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.appColors.background)

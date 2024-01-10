@@ -59,7 +59,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 val screenModule = module {
 
     viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get()) }
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -86,7 +86,7 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }

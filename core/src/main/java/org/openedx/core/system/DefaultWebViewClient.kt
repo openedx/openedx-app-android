@@ -16,7 +16,7 @@ open class DefaultWebViewClient(
     val webView: WebView,
     val isAllLinksExternal: Boolean,
     val refreshSessionCookie: () -> Unit,
-    val onURLClick: (String, WebViewLink.Authority) -> Unit,
+    val onUriClick: (String, WebViewLink.Authority) -> Unit,
 ) : WebViewClient() {
 
     private var hostForThisPage: String? = null
@@ -33,7 +33,7 @@ open class DefaultWebViewClient(
         val clickUrl = request?.url?.toString() ?: ""
 
         if (clickUrl.isNotEmpty() && (isAllLinksExternal || isExternalLink(clickUrl))) {
-            onURLClick(clickUrl, WebViewLink.Authority.EXTERNAL)
+            onUriClick(clickUrl, WebViewLink.Authority.EXTERNAL)
             return true
         }
 

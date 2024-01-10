@@ -17,7 +17,7 @@ class WebViewLink(
         ENROLLED_PROGRAM_INFO("enrolled_program_info"),
         ENROLLED_COURSE_INFO("enrolled_course_info"),
         COURSE("course"),
-        EXTERNAL("external"),// This is a link to an external site
+        EXTERNAL("external"),
     }
 
     object Param {

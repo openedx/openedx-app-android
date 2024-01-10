@@ -159,4 +159,9 @@ class Config(context: Context) {
         private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
     }
+
+    enum class ViewType {
+        NATIVE,
+        WEBVIEW
+    }
 }

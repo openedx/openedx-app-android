@@ -4,18 +4,14 @@ import com.google.gson.annotations.SerializedName
 
 data class DiscoveryConfig(
     @SerializedName("TYPE")
-    private val viewType: String = Type.NATIVE.name,
+    private val viewType: String = Config.ViewType.NATIVE.name,
 
     @SerializedName("WEBVIEW")
     val webViewConfig: DiscoveryWebViewConfig = DiscoveryWebViewConfig(),
 ) {
-    enum class Type {
-        NATIVE,
-        WEBVIEW
-    }
 
     fun isViewTypeWebView(): Boolean {
-        return Type.WEBVIEW.name.equals(viewType, ignoreCase = true)
+        return Config.ViewType.WEBVIEW.name.equals(viewType, ignoreCase = true)
     }
 }
 

@@ -7,24 +7,26 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
-import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.dashboard.R
+import org.openedx.dashboard.notifier.DashboardNotifier
+import org.openedx.dashboard.notifier.NavigationToDiscovery
+import org.openedx.dashboard.notifier.NewCourseEnrolled
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.core.R as coreR
 
 class ProgramViewModel(
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val router: DashboardRouter,
     private val interactor: CourseInteractor,
-    private val notifier: CourseNotifier,
+    private val notifier: DashboardNotifier,
     private val edxCookieManager: AppCookieManager,
     private val resourceManager: ResourceManager,
 ) : BaseViewModel() {
@@ -47,7 +49,7 @@ class ProgramViewModel(
 
     val uriScheme: String get() = config.getUriScheme()
 
-    val programConfig get() = config.getProgramConfig()
+    val programConfig get() = config.getProgramConfig().webViewConfig
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
@@ -57,14 +59,14 @@ class ProgramViewModel(
             _showLoading.emit(true)
             try {
                 interactor.enrollInACourse(courseId)
-                notifier.send(CourseDashboardUpdate())
+                notifier.send(NewCourseEnrolled())
                 _courseEnrollSuccess.emit(courseId)
                 _showLoading.emit(false)
-
+                _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.dashboard_enrolled_successfully)))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                        UIMessage.SnackBarMessage(resourceManager.getString(coreR.string.core_error_no_connection))
                     )
                 } else {
                     _showAlert.emit(true)
@@ -100,6 +102,12 @@ class ProgramViewModel(
                 courseId = courseId,
                 courseTitle = ""
             )
+        }
+    }
+
+    fun navigateToDiscovery() {
+        viewModelScope.launch {
+            notifier.send(NavigationToDiscovery())
         }
     }
 

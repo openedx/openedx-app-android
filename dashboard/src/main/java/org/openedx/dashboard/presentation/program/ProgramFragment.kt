@@ -46,7 +46,7 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.ToolbarWithBackBtn
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -120,7 +120,7 @@ class ProgramFragment : Fragment() {
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
-                    onURLClick = { param, type ->
+                    onUriClick = { param, type ->
                         when (type) {
                             linkAuthority.ENROLLED_COURSE_INFO -> {
                                 viewModel.onEnrolledCourseClick(
@@ -136,6 +136,7 @@ class ProgramFragment : Fragment() {
                                 )
                             }
 
+                            linkAuthority.PROGRAM_INFO,
                             linkAuthority.COURSE_INFO -> {
                                 viewModel.onViewCourseClick(
                                     fragmentManager = requireActivity().supportFragmentManager,
@@ -146,6 +147,10 @@ class ProgramFragment : Fragment() {
 
                             linkAuthority.ENROLL -> {
                                 viewModel.enrollInACourse(param)
+                            }
+
+                            linkAuthority.COURSE -> {
+                                viewModel.navigateToDiscovery()
                             }
 
                             linkAuthority.EXTERNAL -> {
@@ -206,7 +211,7 @@ private fun ProgramInfoScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
-    onURLClick: (String, WebViewLink.Authority) -> Unit,
+    onUriClick: (String, WebViewLink.Authority) -> Unit,
     refreshSessionCookie: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -241,7 +246,7 @@ private fun ProgramInfoScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ToolbarWithBackBtn(
+            Toolbar(
                 label = stringResource(id = R.string.dashboard_programs),
                 canShowBackBtn = canShowBackBtn,
                 onBackClick = onBackClick
@@ -261,7 +266,7 @@ private fun ProgramInfoScreen(
                             isAllLinksExternal = true,
                             onWebPageLoaded = { isLoading = false },
                             refreshSessionCookie = refreshSessionCookie,
-                            onURLClick = onURLClick,
+                            onUriClick = onUriClick,
                         )
 
                         AndroidView(
@@ -315,7 +320,7 @@ fun MyProgramsPreview() {
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
-            onURLClick = { _, _ -> },
+            onUriClick = { _, _ -> },
         )
     }
 }

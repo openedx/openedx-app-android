@@ -19,6 +19,8 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
+import org.openedx.dashboard.notifier.DashboardNotifier
+import org.openedx.dashboard.notifier.NewCourseEnrolled
 
 
 class DashboardViewModel(
@@ -26,7 +28,8 @@ class DashboardViewModel(
     private val networkConnection: NetworkConnection,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
+    private val dashboardNotifier: DashboardNotifier,
     private val analytics: DashboardAnalytics,
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
@@ -63,8 +66,15 @@ class DashboardViewModel(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            notifier.notifier.collect {
+            courseNotifier.notifier.collect {
                 if (it is CourseDashboardUpdate) {
+                    updateCourses()
+                }
+            }
+        }
+        viewModelScope.launch {
+            dashboardNotifier.notifier.collect {
+                if (it is NewCourseEnrolled) {
                     updateCourses()
                 }
             }

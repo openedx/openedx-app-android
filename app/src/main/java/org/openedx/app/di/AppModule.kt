@@ -38,6 +38,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
@@ -75,6 +76,7 @@ val appModule = module {
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
     single { AppUpgradeNotifier() }
+    single { DashboardNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }

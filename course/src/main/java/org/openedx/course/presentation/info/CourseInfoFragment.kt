@@ -46,7 +46,7 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.ToolbarWithBackBtn
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -115,8 +115,9 @@ class CourseInfoFragment : Fragment() {
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
-                    onURLClick = { param, type ->
+                    onUriClick = { param, type ->
                         when (type) {
+                            linkAuthority.PROGRAM_INFO,
                             linkAuthority.COURSE_INFO -> {
                                 viewModel.infoCardClicked(
                                     fragmentManager = requireActivity().supportFragmentManager,
@@ -190,7 +191,7 @@ private fun CourseInfoScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onBackClick: () -> Unit,
-    onURLClick: (String, linkAuthority) -> Unit,
+    onUriClick: (String, linkAuthority) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -224,8 +225,9 @@ private fun CourseInfoScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ToolbarWithBackBtn(
+            Toolbar(
                 label = stringResource(id = R.string.course_discover),
+                canShowBackBtn = true,
                 onBackClick = onBackClick
             )
 
@@ -241,7 +243,7 @@ private fun CourseInfoScreen(
                             contentUrl = contentUrl,
                             uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
-                            onURLClick = onURLClick,
+                            onUriClick = onUriClick,
                         )
                     } else {
                         ConnectionErrorView(
@@ -275,7 +277,7 @@ private fun CourseInfoWebView(
     contentUrl: String,
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
-    onURLClick: (String, linkAuthority) -> Unit,
+    onUriClick: (String, linkAuthority) -> Unit,
 ) {
 
     val webView = CatalogWebViewScreen(
@@ -283,7 +285,7 @@ private fun CourseInfoWebView(
         uriScheme = uriScheme,
         isAllLinksExternal = true,
         onWebPageLoaded = onWebPageLoaded,
-        onURLClick = onURLClick,
+        onUriClick = onUriClick,
     )
 
     AndroidView(
@@ -311,7 +313,7 @@ fun CourseInfoScreenPreview() {
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
-            onURLClick = { _, _ -> },
+            onUriClick = { _, _ -> },
         )
     }
 }

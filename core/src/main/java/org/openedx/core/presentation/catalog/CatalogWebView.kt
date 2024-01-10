@@ -18,7 +18,7 @@ fun CatalogWebViewScreen(
     onWebPageLoaded: () -> Unit,
     refreshSessionCookie: () -> Unit = {},
     onWebPageUpdated: (String) -> Unit = {},
-    onURLClick: (String, linkAuthority) -> Unit,
+    onUriClick: (String, linkAuthority) -> Unit,
 ): WebView {
     val context = LocalContext.current
 
@@ -28,7 +28,7 @@ fun CatalogWebViewScreen(
                 context = context,
                 webView = this@apply,
                 isAllLinksExternal = isAllLinksExternal,
-                onURLClick = onURLClick,
+                onUriClick = onUriClick,
                 refreshSessionCookie = refreshSessionCookie,
             ) {
                 override fun onPageFinished(view: WebView?, url: String?) {
@@ -61,7 +61,7 @@ fun CatalogWebViewScreen(
                         linkAuthority.PROGRAM_INFO,
                         linkAuthority.ENROLLED_PROGRAM_INFO -> {
                             val pathId = link.params[WebViewLink.Param.PATH_ID] ?: ""
-                            onURLClick(pathId, link.authority)
+                            onUriClick(pathId, link.authority)
                             true
                         }
 
@@ -69,7 +69,7 @@ fun CatalogWebViewScreen(
                         linkAuthority.ENROLL,
                         linkAuthority.ENROLLED_COURSE_INFO -> {
                             val courseId = link.params[WebViewLink.Param.COURSE_ID] ?: ""
-                            onURLClick(courseId, link.authority)
+                            onUriClick(courseId, link.authority)
                             true
                         }
 
