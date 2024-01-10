@@ -2,12 +2,17 @@ API_HOST_URL: 'http://localhost:8000'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
+FAQ_URL: ''
 OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
 
+# Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: 'https://example.com/privacy'
-  TOS_URL: 'https://example.com/tos'
-  CONTACT_US_URL: 'https://example.com/contact'
+  PRIVACY_POLICY_URL: ''
+  COOKIE_POLICY_URL: ''
+  DATA_SELL_CONSENT_URL: ''
+  TOS_URL: ''
+  EULA_URL: ''
+  SUPPORTED_LANGUAGES: [ ] #en is defalut language
 
 DISCOVERY:
   TYPE: 'native'

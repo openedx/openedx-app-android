@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.extension.parcelable
 import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -36,19 +35,6 @@ import org.openedx.course.R as courseR
 
 class NoAccessCourseContainerFragment : Fragment() {
 
-    private var courseTitle = ""
-    private var coursewareAccess: CoursewareAccess? = null
-    private var auditAccessExpires: Date? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        with(requireArguments()) {
-            courseTitle = getString(ARG_TITLE, "")
-            coursewareAccess = parcelable(ARG_COURSEWARE_ACCESS)
-            auditAccessExpires = parcelable(ARG_AUDIT_ACCESS_EXPIRES)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -58,12 +44,9 @@ class NoAccessCourseContainerFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                val auditAccessExpired =
-                    auditAccessExpires != null && Date().after(auditAccessExpires)
                 NoAccessCourseContainerScreen(
                     windowSize = windowSize,
-                    title = courseTitle,
-                    auditAccessExpired = auditAccessExpired,
+                    title = requireArguments().getString(ARG_TITLE, ""),
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     }
@@ -74,19 +57,13 @@ class NoAccessCourseContainerFragment : Fragment() {
 
     companion object {
         private const val ARG_TITLE = "title"
-        private const val ARG_COURSEWARE_ACCESS = "coursewareAccess"
-        private const val ARG_AUDIT_ACCESS_EXPIRES = "auditAccessExpires"
 
         fun newInstance(
             title: String,
-            coursewareAccess: CoursewareAccess,
-            auditAccessExpires: Date?
         ): NoAccessCourseContainerFragment {
             val fragment = NoAccessCourseContainerFragment()
             fragment.arguments = bundleOf(
-                ARG_TITLE to title,
-                ARG_COURSEWARE_ACCESS to coursewareAccess,
-                ARG_AUDIT_ACCESS_EXPIRES to auditAccessExpires
+                ARG_TITLE to title
             )
             return fragment
         }
@@ -99,7 +76,6 @@ class NoAccessCourseContainerFragment : Fragment() {
 private fun NoAccessCourseContainerScreen(
     windowSize: WindowSize,
     title: String,
-    auditAccessExpired: Boolean,
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -165,11 +141,7 @@ private fun NoAccessCourseContainerScreen(
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = if (auditAccessExpired) {
-                                stringResource(id = courseR.string.course_access_expired)
-                            } else {
-                                stringResource(id = courseR.string.course_not_started)
-                            },
+                            text = stringResource(id = courseR.string.course_not_started),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.bodyLarge
                         )
@@ -189,8 +161,7 @@ fun NoAccessCourseContainerScreenPreview() {
     OpenEdXTheme {
         NoAccessCourseContainerScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            title = "Example title",
-            auditAccessExpired = false,
+            title = "Course title",
             onBackClick = {}
         )
     }

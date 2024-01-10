@@ -21,7 +21,7 @@ class CourseRepository(
     private var courseStructure: CourseStructure? = null
 
     suspend fun getCourseDetail(id: String): Course {
-        val course = api.getCourseDetail(id)
+        val course = api.getCourseDetail(id, preferencesManager.user?.username)
         courseDao.updateCourseEntity(CourseEntity.createFrom(course))
         return course.mapToDomain()
     }
@@ -51,7 +51,7 @@ class CourseRepository(
     suspend fun preloadCourseStructure(courseId: String) {
         val response = api.getCourseStructure(
             "stale-if-error=0",
-            "v1",
+            "v3",
             preferencesManager.user?.username,
             courseId
         )
