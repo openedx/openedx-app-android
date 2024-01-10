@@ -4,11 +4,15 @@ import java.util.regex.Pattern
 
 class Validator {
 
-    fun isEmailValid(email: String): Boolean {
-        val validEmailAddressRegex =
-            Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE)
-        val matcher = validEmailAddressRegex.matcher(email)
-        return matcher.find()
+    fun isEmailOrUserNameValid(email: String): Boolean {
+        return if (email.contains("@")) {
+            val validEmailAddressRegex = Pattern.compile(
+                "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE
+            )
+            validEmailAddressRegex.matcher(email).find()
+        } else {
+            email.isEmpty().not()
+        }
     }
 
     fun isPasswordValid(password: String): Boolean {

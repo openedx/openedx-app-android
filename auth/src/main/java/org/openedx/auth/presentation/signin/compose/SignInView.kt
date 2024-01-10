@@ -209,6 +209,8 @@ private fun AuthForm(
         LoginTextField(
             modifier = Modifier
                 .fillMaxWidth(),
+            title = stringResource(id = R.string.auth_username_email),
+            description = stringResource(id = R.string.auth_enter_email_username),
             onValueChanged = {
                 login = it
             })

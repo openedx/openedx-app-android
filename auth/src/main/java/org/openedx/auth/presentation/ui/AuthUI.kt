@@ -214,6 +214,8 @@ fun OptionalFields(
 @Composable
 fun LoginTextField(
     modifier: Modifier = Modifier,
+    title: String,
+    description: String,
     onValueChanged: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) }
@@ -226,7 +228,7 @@ fun LoginTextField(
     val focusManager = LocalFocusManager.current
     Text(
         modifier = Modifier.fillMaxWidth(),
-        text = stringResource(id = R.string.auth_email),
+        text = title,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
     )
@@ -244,7 +246,7 @@ fun LoginTextField(
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
             Text(
-                text = stringResource(id = R.string.auth_example_email),
+                text = description,
                 color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
