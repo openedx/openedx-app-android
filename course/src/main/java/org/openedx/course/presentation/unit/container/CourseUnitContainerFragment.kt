@@ -260,7 +260,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     }
 
     private fun initViewPager() {
-        binding.viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        if (!viewModel.isCourseUnitProgressEnabled) {
+            binding.viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        }
         binding.viewPager.offscreenPageLimit = 1
         adapter = CourseUnitContainerAdapter(this, viewModel.getUnitBlocks(), viewModel)
         binding.viewPager.adapter = adapter
@@ -301,7 +303,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 val nextVerticalBlock = viewModel.getNextVerticalBlock()
                 val dialog = ChapterEndFragmentDialog.newInstance(
                     currentVerticalBlock?.displayName ?: "",
-                    nextVerticalBlock?.displayName ?: ""
+                    nextVerticalBlock?.displayName ?: "",
+                    !viewModel.isCourseUnitProgressEnabled
                 )
                 currentVerticalBlock?.let {
                     viewModel.finishVerticalClickedEvent(
@@ -379,6 +382,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 hasPrevBlock = hasPrevBlock,
                 nextButtonText = nextButtonText,
                 hasNextBlock = hasNextBlock,
+                isVerticalNavigation = !viewModel.isCourseUnitProgressEnabled,
                 onPrevClick = {
                     handlePrevClick { next, hasPrev, hasNext ->
                         nextButtonText = next
