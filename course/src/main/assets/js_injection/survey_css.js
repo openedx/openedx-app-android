@@ -1,3 +1,4 @@
+//Injection to fix CSS issues for Survey xBlock
 var css = `
     .survey-table:not(.poll-results) .survey-option label {
         margin-bottom: 0px !important;
@@ -14,9 +15,9 @@ var css = `
 
     .survey-percentage .percentage {
         width: 54px !important;
-    }`,
-head = document.head || document.getElementsByTagName('head')[0],
-style = document.createElement('style');
+    }`;
+var head = document.head || document.getElementsByTagName('head')[0];
+var style = document.createElement('style');
 
 head.appendChild(style);
 style.type = 'text/css';
