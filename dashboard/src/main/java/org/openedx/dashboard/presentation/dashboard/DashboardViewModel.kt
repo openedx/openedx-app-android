@@ -19,8 +19,8 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
+import org.openedx.dashboard.notifier.DashboardEvent
 import org.openedx.dashboard.notifier.DashboardNotifier
-import org.openedx.dashboard.notifier.NewCourseEnrolled
 
 
 class DashboardViewModel(
@@ -74,7 +74,7 @@ class DashboardViewModel(
         }
         viewModelScope.launch {
             dashboardNotifier.notifier.collect {
-                if (it is NewCourseEnrolled) {
+                if (it is DashboardEvent.NewCourseEnrolled) {
                     updateCourses()
                 }
             }

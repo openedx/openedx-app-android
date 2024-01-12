@@ -8,11 +8,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
+import org.openedx.dashboard.notifier.DashboardEvent
 import org.openedx.dashboard.notifier.DashboardNotifier
-import org.openedx.dashboard.notifier.NavigationToDiscovery
 
 class MainViewModel(
     private val config: Config,
@@ -31,17 +30,11 @@ class MainViewModel(
 
     val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
 
-    init {
-        runBlocking {
-            _navigateToDiscovery.emit(false)
-        }
-    }
-
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            notifier.notifier.collect{
-                if(it is NavigationToDiscovery) {
+            notifier.notifier.collect {
+                if (it is DashboardEvent.NavigationToDiscovery) {
                     _navigateToDiscovery.emit(true)
                 }
             }

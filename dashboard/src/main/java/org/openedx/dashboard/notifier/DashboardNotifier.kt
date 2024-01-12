@@ -10,7 +10,5 @@ class DashboardNotifier {
 
     val notifier: Flow<DashboardEvent> = channel.asSharedFlow()
 
-    suspend fun send(event: NavigationToDiscovery) = channel.emit(event)
-    suspend fun send(event: NewCourseEnrolled) = channel.emit(event)
-
+    suspend fun send(event: DashboardEvent) = channel.emit(event)
 }

@@ -65,11 +65,15 @@ fun CatalogWebViewScreen(
                             true
                         }
 
-                        linkAuthority.COURSE,
                         linkAuthority.ENROLL,
                         linkAuthority.ENROLLED_COURSE_INFO -> {
                             val courseId = link.params[WebViewLink.Param.COURSE_ID] ?: ""
                             onUriClick(courseId, link.authority)
+                            true
+                        }
+
+                        linkAuthority.COURSE -> {
+                            onUriClick("", link.authority)
                             true
                         }
 

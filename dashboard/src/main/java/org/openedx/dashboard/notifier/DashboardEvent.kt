@@ -1,7 +1,6 @@
 package org.openedx.dashboard.notifier
 
-interface DashboardEvent
-
-class NavigationToDiscovery: DashboardEvent
-
-class NewCourseEnrolled: DashboardEvent
+sealed class DashboardEvent {
+    object NavigationToDiscovery : DashboardEvent()
+    object NewCourseEnrolled : DashboardEvent()
+}

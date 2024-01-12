@@ -77,7 +77,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             viewModel.navigateToDiscovery.collect { shouldNavigateToDiscovery ->
                 if (shouldNavigateToDiscovery) {
                     binding.bottomNavView.selectedItemId = R.id.fragmentHome
-                    binding.viewPager.setCurrentItem(0, true)
                 }
             }
         }

@@ -15,9 +15,8 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.dashboard.R
+import org.openedx.dashboard.notifier.DashboardEvent
 import org.openedx.dashboard.notifier.DashboardNotifier
-import org.openedx.dashboard.notifier.NavigationToDiscovery
-import org.openedx.dashboard.notifier.NewCourseEnrolled
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.core.R as coreR
 
@@ -59,7 +58,7 @@ class ProgramViewModel(
             _showLoading.emit(true)
             try {
                 interactor.enrollInACourse(courseId)
-                notifier.send(NewCourseEnrolled())
+                notifier.send(DashboardEvent.NewCourseEnrolled)
                 _courseEnrollSuccess.emit(courseId)
                 _showLoading.emit(false)
                 _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.dashboard_enrolled_successfully)))
@@ -107,7 +106,7 @@ class ProgramViewModel(
 
     fun navigateToDiscovery() {
         viewModelScope.launch {
-            notifier.send(NavigationToDiscovery())
+            notifier.send(DashboardEvent.NavigationToDiscovery)
         }
     }
 
