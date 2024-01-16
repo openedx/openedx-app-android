@@ -86,6 +86,7 @@ fun RequiredFields(
                 val linkedText =
                     TextConverter.htmlTextToLinkedText(field.label)
                 HyperlinkText(
+                    modifier = Modifier.testTag("txt_${field.name}"),
                     fullText = linkedText.text,
                     hyperLinks = linkedText.links,
                     linkTextColor = MaterialTheme.appColors.primary
@@ -305,7 +306,9 @@ fun InputRegistrationField(
     }
     Column {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_${registrationField.name}_label")
+                .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -343,10 +346,11 @@ fun InputRegistrationField(
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
-            modifier = modifier
+            modifier = modifier.testTag("tf_${registrationField.name}")
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
+            modifier = Modifier.testTag("txt_${registrationField.name}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor
@@ -388,7 +392,9 @@ fun SelectableRegisterField(
             }
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_${registrationField.name}_label")
+                .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -409,6 +415,7 @@ fun SelectableRegisterField(
             textStyle = MaterialTheme.appTypography.bodyMedium,
             onValueChange = { },
             modifier = Modifier
+                .testTag("tf_${registrationField.name}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick(registrationField.name, registrationField.options)
@@ -430,6 +437,7 @@ fun SelectableRegisterField(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
+            modifier = Modifier.testTag("txt_${registrationField.name}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor
@@ -439,6 +447,7 @@ fun SelectableRegisterField(
 
 @Composable
 fun ExpandableText(
+    modifier: Modifier = Modifier,
     isExpanded: Boolean,
     onClick: (Boolean) -> Unit
 ) {
@@ -462,7 +471,7 @@ fun ExpandableText(
     val icon = Icons.Filled.ChevronRight
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .noRippleClickable {
                 onClick(isExpanded)
