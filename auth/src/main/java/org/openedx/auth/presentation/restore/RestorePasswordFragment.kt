@@ -35,13 +35,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -112,6 +116,7 @@ class RestorePasswordFragment : Fragment() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun RestorePasswordScreen(
     windowSize: WindowSize,
@@ -129,6 +134,9 @@ private fun RestorePasswordScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+            }
             .fillMaxSize()
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
@@ -217,6 +225,7 @@ private fun RestorePasswordScreen(
 
             Surface(
                 modifier = Modifier
+                    .testTag("txt_forgot_password_description")
                     .fillMaxWidth(),
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape
@@ -239,6 +248,7 @@ private fun RestorePasswordScreen(
                             ) {
                                 Text(
                                     modifier = Modifier
+                                        .testTag("txt_forgot_password_title")
                                         .fillMaxWidth(),
                                     text = stringResource(id = authR.string.auth_forgot_your_password),
                                     style = MaterialTheme.appTypography.displaySmall,
@@ -279,7 +289,7 @@ private fun RestorePasswordScreen(
                                     }
                                 } else {
                                     OpenEdXButton(
-                                        width = buttonWidth,
+                                        width = buttonWidth.testTag("btn_reset_password"),
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
                                             onRestoreButtonClick(email)

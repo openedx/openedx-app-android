@@ -37,6 +37,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -227,7 +228,9 @@ fun LoginTextField(
     }
     val focusManager = LocalFocusManager.current
     Text(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .testTag("txt_email_label")
+            .fillMaxWidth(),
         text = title,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
@@ -260,7 +263,7 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier
+        modifier = modifier.testTag("tf_email")
     )
 }
 
