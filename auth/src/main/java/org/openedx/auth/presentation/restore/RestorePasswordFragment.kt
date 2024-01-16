@@ -255,8 +255,8 @@ private fun RestorePasswordScreen(
                                 Spacer(modifier = Modifier.height(32.dp))
                                 LoginTextField(
                                     modifier = Modifier.fillMaxWidth(),
-                                    title = stringResource(id = org.openedx.auth.R.string.auth_email),
-                                    description = stringResource(id = org.openedx.auth.R.string.auth_example_email),
+                                    title = stringResource(id = authR.string.auth_email),
+                                    description = stringResource(id = authR.string.auth_example_email),
                                     onValueChanged = {
                                         email = it
                                     },

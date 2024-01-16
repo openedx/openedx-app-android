@@ -63,7 +63,7 @@ class SignInViewModelTest {
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
-    private val invalidEmailOrUserName = "Invalid email or username"
+    private val invalidEmailOrUsername = "Invalid email or username"
     private val invalidPassword = "Password too short"
 
     private val user = User(0, "", "", "")
@@ -74,7 +74,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(CoreRes.string.core_error_invalid_grant) } returns invalidCredential
         every { resourceManager.getString(CoreRes.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(CoreRes.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(R.string.auth_invalid_user_name_email) } returns invalidEmailOrUserName
+        every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
@@ -113,7 +113,7 @@ class SignInViewModelTest {
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmailOrUserName, message.message)
+        assertEquals(invalidEmailOrUsername, message.message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
@@ -142,7 +142,7 @@ class SignInViewModelTest {
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmailOrUserName, message.message)
+        assertEquals(invalidEmailOrUsername, message.message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }

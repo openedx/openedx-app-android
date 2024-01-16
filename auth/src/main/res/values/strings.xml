@@ -8,8 +8,8 @@
     <string name="auth_forgot_password">Forgot password?</string>
     <string name="auth_email">Email</string>
     <string name="auth_invalid_email">Invalid email</string>
-    <string name="auth_username_email" tools:ignore="MissingTranslation">Email or Username</string>
-    <string name="auth_invalid_user_name_email" tools:ignore="MissingTranslation">Invalid email or username</string>
+    <string name="auth_email_username" tools:ignore="MissingTranslation">Email or Username</string>
+    <string name="auth_invalid_email_username" tools:ignore="MissingTranslation">Invalid email or username</string>
     <string name="auth_invalid_password">Password is too short</string>
     <string name="auth_welcome_back">Welcome back! Please authorize to continue.</string>
     <string name="auth_show_optional_fields">Show optional fields</string>

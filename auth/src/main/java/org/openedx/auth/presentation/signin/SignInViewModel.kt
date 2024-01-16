@@ -74,7 +74,7 @@ class SignInViewModel(
     fun login(username: String, password: String) {
         if (!validator.isEmailOrUserNameValid(username)) {
             _uiMessage.value =
-                UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_user_name_email))
+                UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_email_username))
             return
         }
         if (!validator.isPasswordValid(password)) {

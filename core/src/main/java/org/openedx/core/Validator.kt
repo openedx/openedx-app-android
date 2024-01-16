@@ -11,7 +11,7 @@ class Validator {
             )
             validEmailAddressRegex.matcher(email).find()
         } else {
-            email.isEmpty().not()
+            email.isBlank().not()
         }
     }
 
