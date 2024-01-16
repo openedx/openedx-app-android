@@ -66,18 +66,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun observe() {
-        viewModel.dataReady.observe(viewLifecycleOwner) { coursewareAccess ->
-            if (coursewareAccess != null) {
-                if (coursewareAccess.hasAccess) {
-                    initViewPager()
-                } else {
-                    router.navigateToNoAccess(
-                        requireActivity().supportFragmentManager,
-                        courseTitle,
-                        coursewareAccess,
-                        null
-                    )
-                }
+        viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
+            if (isReady == true) {
+                initViewPager()
+            } else {
+                router.navigateToNoAccess(
+                    requireActivity().supportFragmentManager,
+                    courseTitle
+                )
             }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) {

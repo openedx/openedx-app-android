@@ -171,6 +171,14 @@ class AnalyticsManager(
         logEvent(Event.COOKIE_POLICY_CLICKED)
     }
 
+    override fun dataSellClickedEvent() {
+        logEvent(Event.DATE_SELL_CLICKED)
+    }
+
+    override fun faqClickedEvent() {
+        logEvent(Event.FAQ_CLICKED)
+    }
+
     override fun emailSupportClickedEvent() {
         logEvent(Event.EMAIL_SUPPORT_CLICKED)
     }
@@ -421,6 +429,8 @@ private enum class Event(val eventName: String) {
     PRIVACY_POLICY_CLICKED("Privacy_Policy_Clicked"),
     TERMS_OF_USE_CLICKED("Terms_Of_Use_Clicked"),
     COOKIE_POLICY_CLICKED("Cookie_Policy_Clicked"),
+    DATE_SELL_CLICKED("Data_Sell_Clicked"),
+    FAQ_CLICKED("FAQ_Clicked"),
     EMAIL_SUPPORT_CLICKED("Email_Support_Clicked"),
     COURSE_ENROLL_CLICKED("Course_Enroll_Clicked"),
     COURSE_ENROLL_SUCCESS("Course_Enroll_Success"),

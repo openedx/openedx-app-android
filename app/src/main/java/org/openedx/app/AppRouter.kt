@@ -9,7 +9,6 @@ import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.FragmentViewType
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
@@ -134,14 +133,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToNoAccess(
         fm: FragmentManager,
-        title: String,
-        coursewareAccess: CoursewareAccess,
-        auditAccessExpires: Date?
+        title: String
     ) {
-        replaceFragment(
-            fm,
-            NoAccessCourseContainerFragment.newInstance(title, coursewareAccess, auditAccessExpires)
-        )
+        replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title))
     }
     //endregion
 

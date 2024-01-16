@@ -34,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -48,9 +49,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -58,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -77,6 +81,7 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.profile.ProfileUIState
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
+import org.openedx.profile.domain.model.Configuration as AppConfiguration
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -215,7 +220,7 @@ internal fun ProfileView(
                                     Spacer(modifier = Modifier.height(24.dp))
 
                                     SupportInfoSection(
-                                        versionName = uiState.versionName,
+                                        uiState = uiState,
                                         onAction = onAction,
                                         appUpgradeEvent = appUpgradeEvent,
                                     )
@@ -257,12 +262,7 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
             elevation = 0.dp,
             backgroundColor = MaterialTheme.appColors.cardViewBackground
         ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
+            Column(Modifier.fillMaxWidth()) {
                 ProfileInfoItem(
                     text = stringResource(id = org.openedx.profile.R.string.profile_video_settings),
                     onClick = onVideoSettingsClick
@@ -274,7 +274,7 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 
 @Composable
 private fun SupportInfoSection(
-    versionName: String,
+    uiState: ProfileUIState.Data,
     appUpgradeEvent: AppUpgradeEvent?,
     onAction: (ProfileViewAction) -> Unit
 ) {
@@ -291,35 +291,68 @@ private fun SupportInfoSection(
             elevation = 0.dp,
             backgroundColor = MaterialTheme.appColors.cardViewBackground
         ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                ProfileInfoItem(
-                    text = stringResource(id = org.openedx.profile.R.string.profile_contact_support),
-                    onClick = {
+            Column(Modifier.fillMaxWidth()) {
+                if (uiState.configuration.supportEmail.isNotBlank()) {
+                    ProfileInfoItem(text = stringResource(id = org.openedx.profile.R.string.profile_contact_support)) {
                         onAction(ProfileViewAction.SupportClick)
                     }
-                )
-                Divider(color = MaterialTheme.appColors.divider)
-                ProfileInfoItem(
-                    text = stringResource(id = R.string.core_terms_of_use),
-                    onClick = {
+                    Divider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
+                }
+                if (uiState.configuration.agreementUrls.tosUrl.isNotBlank()) {
+                    ProfileInfoItem(text = stringResource(id = R.string.core_terms_of_use)) {
                         onAction(ProfileViewAction.TermsClick)
                     }
-                )
-                Divider(color = MaterialTheme.appColors.divider)
-                ProfileInfoItem(
-                    text = stringResource(id = R.string.core_privacy_policy),
-                    onClick = {
+                    Divider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
+                }
+                if (uiState.configuration.agreementUrls.privacyPolicyUrl.isNotBlank()) {
+                    ProfileInfoItem(text = stringResource(id = R.string.core_privacy_policy)) {
                         onAction(ProfileViewAction.PrivacyPolicyClick)
                     }
-                )
-                Divider(color = MaterialTheme.appColors.divider)
+                    Divider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
+                }
+                if (uiState.configuration.agreementUrls.cookiePolicyUrl.isNotBlank()) {
+                    ProfileInfoItem(text = stringResource(id = R.string.core_cookie_policy)) {
+                        onAction(ProfileViewAction.CookiePolicyClick)
+                    }
+                    Divider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
+                }
+                if (uiState.configuration.agreementUrls.dataSellConsentUrl.isNotBlank()) {
+                    ProfileInfoItem(text = stringResource(id = R.string.core_data_sell)) {
+                        onAction(ProfileViewAction.DataSellClick)
+                    }
+                    Divider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
+                }
+                if (uiState.configuration.faqUrl.isNotBlank()) {
+                    val uriHandler = LocalUriHandler.current
+                    ProfileInfoItem(
+                        text = stringResource(id = R.string.core_faq),
+                        external = true,
+                    ) {
+                        uriHandler.openUri(uiState.configuration.faqUrl)
+                        onAction(ProfileViewAction.FaqClick)
+                    }
+                    Divider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        color = MaterialTheme.appColors.divider
+                    )
+                }
                 AppVersionItem(
-                    versionName = versionName,
+                    versionName = uiState.configuration.versionName,
                     appUpgradeEvent = appUpgradeEvent,
                 ) {
                     onAction(ProfileViewAction.AppVersionClick)
@@ -446,23 +479,35 @@ private fun LogoutDialog(
 }
 
 @Composable
-private fun ProfileInfoItem(text: String, onClick: () -> Unit) {
+private fun ProfileInfoItem(
+    text: String,
+    external: Boolean = false,
+    onClick: () -> Unit
+) {
+    val icon = if (external) {
+        Icons.Filled.OpenInNew
+    } else {
+        Icons.Filled.ArrowForwardIos
+    }
     Row(
         Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .padding(20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.weight(1f),
             text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary
         )
         Icon(
             modifier = Modifier.size(16.dp),
-            imageVector = Icons.Filled.ArrowForwardIos,
+            imageVector = icon,
             contentDescription = null
         )
     }
@@ -474,26 +519,28 @@ private fun AppVersionItem(
     appUpgradeEvent: AppUpgradeEvent?,
     onClick: () -> Unit
 ) {
-    when (appUpgradeEvent) {
-        is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-            AppVersionItemUpgradeRecommended(
-                versionName = versionName,
-                appUpgradeEvent = appUpgradeEvent,
-                onClick = onClick
-            )
-        }
+    Box(modifier = Modifier.padding(20.dp)) {
+        when (appUpgradeEvent) {
+            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
+                AppVersionItemUpgradeRecommended(
+                    versionName = versionName,
+                    appUpgradeEvent = appUpgradeEvent,
+                    onClick = onClick
+                )
+            }
 
-        is AppUpgradeEvent.UpgradeRequiredEvent -> {
-            AppVersionItemUpgradeRequired(
-                versionName = versionName,
-                onClick = onClick
-            )
-        }
+            is AppUpgradeEvent.UpgradeRequiredEvent -> {
+                AppVersionItemUpgradeRequired(
+                    versionName = versionName,
+                    onClick = onClick
+                )
+            }
 
-        else -> {
-            AppVersionItemAppToDate(
-                versionName = versionName
-            )
+            else -> {
+                AppVersionItemAppToDate(
+                    versionName = versionName
+                )
+            }
         }
     }
 }
@@ -670,10 +717,7 @@ private fun ProfileScreenPreview() {
     OpenEdXTheme {
         ProfileView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = ProfileUIState.Data(
-                account = mockAccount,
-                versionName = mockAppData.versionName,
-            ),
+            uiState = mockUiState,
             uiMessage = null,
             refreshing = false,
             onAction = {},
@@ -690,10 +734,7 @@ private fun ProfileScreenTabletPreview() {
     OpenEdXTheme {
         ProfileView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = ProfileUIState.Data(
-                account = mockAccount,
-                versionName = mockAppData.versionName,
-            ),
+            uiState = mockUiState,
             uiMessage = null,
             refreshing = false,
             onAction = {},
@@ -704,9 +745,6 @@ private fun ProfileScreenTabletPreview() {
 
 private val mockAppData = AppData(
     versionName = "1.0.0",
-    feedbackEmailAddress = "support@example.com",
-    tosUrl = "https://example.com/tos",
-    privacyPolicyUrl = "https://example.com/privacy",
 )
 
 private val mockAccount = Account(
@@ -728,12 +766,26 @@ private val mockAccount = Account(
     accountPrivacy = Account.Privacy.ALL_USERS
 )
 
+private val mockConfiguration = AppConfiguration(
+    agreementUrls = AgreementUrls(),
+    faqUrl = "https://example.com/faq",
+    supportEmail = "test@example.com",
+    versionName = mockAppData.versionName,
+)
+
+private val mockUiState = ProfileUIState.Data(
+    account = mockAccount,
+    configuration = mockConfiguration,
+)
 
 internal interface ProfileViewAction {
     object AppVersionClick : ProfileViewAction
     object EditAccountClick : ProfileViewAction
     object LogoutClick : ProfileViewAction
     object PrivacyPolicyClick : ProfileViewAction
+    object CookiePolicyClick : ProfileViewAction
+    object DataSellClick : ProfileViewAction
+    object FaqClick : ProfileViewAction
     object TermsClick : ProfileViewAction
     object SupportClick : ProfileViewAction
     object VideoSettingsClick : ProfileViewAction

@@ -20,6 +20,7 @@ class DiscoveryRepository(
         val pageResponse = api.getCourseList(
             page = pageNumber,
             mobile = true,
+            mobileSearch = false,
             username = username,
             org = organization
         )
@@ -42,7 +43,12 @@ class DiscoveryRepository(
         query: String,
         pageNumber: Int,
     ): CourseList {
-        val pageResponse = api.getCourseList(searchQuery = query, page = pageNumber, mobile = true)
+        val pageResponse = api.getCourseList(
+            searchQuery = query,
+            page = pageNumber,
+            mobile = true,
+            mobileSearch = true
+        )
         return CourseList(
             pageResponse.pagination.mapToDomain(),
             pageResponse.results?.map { it.mapToDomain() } ?: emptyList()

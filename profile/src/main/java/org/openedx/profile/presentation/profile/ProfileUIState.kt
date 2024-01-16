@@ -1,15 +1,16 @@
 package org.openedx.profile.presentation.profile
 
 import org.openedx.profile.domain.model.Account
+import org.openedx.profile.domain.model.Configuration
 
 sealed class ProfileUIState {
     /**
      * @param account User account data
-     * @param versionName Version of the application (1.0.0)
+     * @param configuration Configuration data
      */
     data class Data(
         val account: Account,
-        val versionName: String,
+        val configuration: Configuration,
     ) : ProfileUIState()
 
     object Loading : ProfileUIState()

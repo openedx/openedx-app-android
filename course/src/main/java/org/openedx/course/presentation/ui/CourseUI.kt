@@ -689,14 +689,14 @@ fun CourseSubSectionItem(
                     Box(contentAlignment = Alignment.Center) {
                         if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(34.dp),
+                                modifier = Modifier.size(28.dp),
                                 backgroundColor = Color.LightGray,
                                 strokeWidth = 2.dp,
                                 color = MaterialTheme.appColors.primary
                             )
                         }
                         IconButton(
-                            modifier = iconModifier.padding(top = 2.dp),
+                            modifier = iconModifier.padding(2.dp),
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
