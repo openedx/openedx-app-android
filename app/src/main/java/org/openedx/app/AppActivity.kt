@@ -3,6 +3,7 @@ package org.openedx.app
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -24,6 +25,7 @@ import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
+import org.openedx.core.ApiConstants
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
@@ -64,6 +66,18 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private var _insetCutout = 0
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+    private val authCode: String?
+        get() {
+            val data = intent?.data
+            if (
+                data is Uri &&
+                data.scheme == BuildConfig.APPLICATION_ID &&
+                data.host == ApiConstants.BrowserLogin.REDIRECT_HOST
+            ) {
+                return data.getQueryParameter(ApiConstants.BrowserLogin.CODE_QUERY_PARAM)
+            }
+            return null
+        }
 
     private val branchCallback =
         BranchUniversalReferralInitListener { branchUniversalObject, _, error ->
@@ -154,10 +168,12 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (savedInstanceState == null) {
             when {
                 corePreferencesManager.user == null -> {
-                    val fragment = if (viewModel.isLogistrationEnabled) {
-                        LogistrationFragment()
+                    val authCode = authCode;
+
+                    if (viewModel.isLogistrationEnabled && authCode == null) {
+                        addFragment(LogistrationFragment())
                     } else {
-                        SignInFragment()
+                        addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
                     }
                     addFragment(fragment)
                 }
@@ -203,6 +219,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         this.intent = intent
+
+        if (authCode != null) {
+            addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
+        }
 
         val extras = intent?.extras
         if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
