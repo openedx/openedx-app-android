@@ -1172,6 +1172,7 @@ fun AuthButtonsPanel(
     Row {
         OpenEdXButton(
             width = Modifier
+                .testTag("btn_register")
                 .width(0.dp)
                 .weight(1f),
             text = stringResource(id = R.string.core_register),
@@ -1180,6 +1181,7 @@ fun AuthButtonsPanel(
 
         OpenEdXOutlinedButton(
             modifier = Modifier
+                .testTag("btn_sign_in")
                 .width(100.dp)
                 .padding(start = 16.dp),
             text = stringResource(id = R.string.core_sign_in),

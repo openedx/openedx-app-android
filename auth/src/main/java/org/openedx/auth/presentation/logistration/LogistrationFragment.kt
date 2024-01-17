@@ -25,13 +25,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -90,6 +94,7 @@ class LogistrationFragment : Fragment() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LogistrationScreen(
     onSearchClick: (String) -> Unit,
@@ -105,6 +110,9 @@ private fun LogistrationScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+            }
             .fillMaxSize()
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
@@ -135,17 +143,22 @@ private fun LogistrationScreen(
                     text = stringResource(id = R.string.pre_auth_title),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.headlineSmall,
-                    modifier = Modifier.padding(bottom = 40.dp)
+                    modifier = Modifier
+                        .testTag("txt_screen_title")
+                        .padding(bottom = 40.dp)
                 )
                 val focusManager = LocalFocusManager.current
                 Column(Modifier.padding(bottom = 8.dp)) {
                     Text(
-                        modifier = Modifier.padding(bottom = 10.dp),
+                        modifier = Modifier
+                            .testTag("txt_search_label")
+                            .padding(bottom = 10.dp),
                         style = MaterialTheme.appTypography.titleMedium,
                         text = stringResource(id = R.string.pre_auth_search_title),
                     )
                     SearchBar(
                         modifier = Modifier
+                            .testTag("tf_discovery_search")
                             .fillMaxWidth()
                             .height(48.dp),
                         label = stringResource(id = R.string.pre_auth_search_hint),
@@ -166,6 +179,7 @@ private fun LogistrationScreen(
 
                 Text(
                     modifier = Modifier
+                        .testTag("txt_explore_all_courses")
                         .padding(bottom = 32.dp)
                         .noRippleClickable {
                             onSearchClick("")
