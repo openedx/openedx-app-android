@@ -1,6 +1,8 @@
 package org.openedx.auth.presentation.logistration
 
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -41,6 +43,8 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.config.Config
+import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -48,11 +52,13 @@ import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.UrlUtils
 import org.openedx.core.R as coreR
 
 class LogistrationFragment : Fragment() {
 
     private val router: AuthRouter by inject()
+    private val config: Config by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,7 +74,15 @@ class LogistrationFragment : Fragment() {
                         router.navigateToSignIn(parentFragmentManager, courseId)
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, courseId)
+                        if (config.isBrowserRegistrationEnabled()) {
+                            UrlUtils.openInBrowser(
+                                activity = context,
+                                apiHostUrl = config.getApiHostURL(),
+                                url = "/register",
+                            )
+                        } else {
+                            router.navigateToSignUp(parentFragmentManager, courseId)
+                        }
                     },
                     onSearchClick = { querySearch ->
                         router.navigateToDiscoverCourses(parentFragmentManager, querySearch)

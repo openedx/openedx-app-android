@@ -1,5 +1,6 @@
 package org.openedx.auth.data.repository
 
+import android.util.Log
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
@@ -41,6 +42,14 @@ class AuthRepository(
         )
             .mapToDomain()
             .processAuthResponse()
+    }
+
+    suspend fun browserAuthCodeLogin(code: String) {
+        api.getAccessTokenFromCode(
+            grantType = ApiConstants.GRANT_TYPE_CODE,
+            clientId = config.getOAuthClientId(),
+            code = code,
+        ).mapToDomain().processAuthResponse()
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {

@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,11 @@ class SignInFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {
+                    val authCode = arguments?.getString("auth_code")
+                    if (authCode is String && !state.loginFailure && !state.loginSuccess) {
+                        arguments?.remove("auth_code")
+                        viewModel.signInAuthCode(authCode)
+                    }
                     LoginScreen(
                         windowSize = windowSize,
                         state = state,
@@ -63,6 +69,10 @@ class SignInFragment : Fragment() {
                                 AuthEvent.ForgotPasswordClick -> {
                                     viewModel.forgotPasswordClickedEvent()
                                     router.navigateToRestorePassword(parentFragmentManager)
+                                }
+
+                                AuthEvent.SignInBrowser -> {
+                                    viewModel.signInBrowser(requireActivity())
                                 }
 
                                 AuthEvent.RegisterClick -> {
@@ -117,6 +127,7 @@ internal sealed interface AuthEvent {
     object SignInGoogle : AuthEvent
     object SignInFacebook : AuthEvent
     object SignInMicrosoft : AuthEvent
+    object SignInBrowser : AuthEvent
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent

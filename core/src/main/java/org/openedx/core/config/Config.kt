@@ -95,6 +95,14 @@ class Config(context: Context) {
         return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
     }
 
+    fun isBrowserLoginEnabled(): Boolean {
+        return getBoolean(BROWSER_LOGIN, false)
+    }
+
+    fun isBrowserRegistrationEnabled(): Boolean {
+        return getBoolean(BROWSER_REGISTRATION, false)
+    }
+
     private fun getString(key: String, defaultValue: String): String {
         val element = getObject(key)
         return if (element != null) {
@@ -143,6 +151,8 @@ class Config(context: Context) {
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
+        private const val BROWSER_LOGIN = "BROWSER_LOGIN"
+        private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
         private const val DISCOVERY = "DISCOVERY"
         private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
         private const val COURSE_BANNER_ENABLED = "COURSE_BANNER_ENABLED"

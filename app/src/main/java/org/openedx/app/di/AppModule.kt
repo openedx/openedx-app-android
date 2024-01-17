@@ -20,6 +20,7 @@ import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
@@ -153,4 +154,5 @@ val appModule = module {
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
+    factory { BrowserAuthHelper(get()) }
 }

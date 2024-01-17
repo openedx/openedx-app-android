@@ -55,6 +55,7 @@ android {
 dependencies {
     implementation project(path: ':core')
 
+    implementation 'androidx.browser:browser:1.7.0'
     implementation "androidx.credentials:credentials:1.2.0"
     implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
     implementation "com.facebook.android:facebook-login:16.2.0"

@@ -15,6 +15,7 @@ import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
@@ -42,6 +43,7 @@ class SignInViewModel(
     private val facebookAuthHelper: FacebookAuthHelper,
     private val googleAuthHelper: GoogleAuthHelper,
     private val microsoftAuthHelper: MicrosoftAuthHelper,
+    private val browserAuthHelper: BrowserAuthHelper,
     val config: Config,
     val courseId: String?,
 ) : BaseViewModel() {
@@ -53,6 +55,8 @@ class SignInViewModel(
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
+            isBrowserLoginEnabled = config.isBrowserLoginEnabled(),
+            isBrowserRegistrationEnabled = config.isBrowserRegistrationEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
         )
@@ -140,6 +144,17 @@ class SignInViewModel(
         }
     }
 
+    fun signInBrowser(activityContext: Activity) {
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            runCatching {
+                browserAuthHelper.signIn(activityContext)
+            }.onFailure {
+                logger.e { "Browser auth error: $it" }
+            }
+        }
+    }
+
     fun signInMicrosoft(activityContext: Activity) {
         _uiState.update { it.copy(showProgress = true) }
         viewModelScope.launch {
@@ -152,6 +167,26 @@ class SignInViewModel(
             }
                 .getOrNull()
                 .checkToken(AuthType.MICROSOFT)
+        }
+    }
+
+    fun signInAuthCode(authCode: String) {
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            runCatching {
+                interactor.loginAuthCode(authCode)
+            }
+                .onFailure {
+                    logger.e { "OAuth2 code error: $it" }
+                    onUnknownError()
+                    _uiState.update { it.copy(loginFailure = true) }
+                }.onSuccess {
+                    logger.d { "Browser login success" }
+                    _uiState.update { it.copy(loginSuccess = true) }
+                    setUserId()
+                    analytics.userLoginEvent(AuthType.BROWSER.methodName)
+                    _uiState.update { it.copy(showProgress = false) }
+                }
         }
     }
 

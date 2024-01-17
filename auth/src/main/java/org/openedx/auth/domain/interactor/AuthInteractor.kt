@@ -18,6 +18,10 @@ class AuthInteractor(private val repository: AuthRepository) {
         repository.socialLogin(token, authType)
     }
 
+    suspend fun loginAuthCode(authCode: String) {
+        repository.browserAuthCodeLogin(authCode)
+    }
+
     suspend fun getRegistrationFields(): List<RegistrationField> {
         return repository.getRegistrationFields()
     }

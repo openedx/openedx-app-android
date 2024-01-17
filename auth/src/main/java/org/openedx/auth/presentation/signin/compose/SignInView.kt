@@ -206,49 +206,55 @@ private fun AuthForm(
     var password by rememberSaveable { mutableStateOf("") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        LoginTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            onValueChanged = {
-                login = it
-            })
+        if (!state.isBrowserLoginEnabled) {
+            LoginTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onValueChanged = {
+                    login = it
+                })
 
-        Spacer(modifier = Modifier.height(18.dp))
-        PasswordTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            onValueChanged = {
-                password = it
-            },
-            onPressDone = {
-                onEvent(AuthEvent.SignIn(login = login, password = password))
-            }
-        )
+            Spacer(modifier = Modifier.height(18.dp))
+            PasswordTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onValueChanged = {
+                    password = it
+                },
+                onPressDone = {
+                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                }
+            )
+        } else {
+            Spacer(modifier = Modifier.height(40.dp))
+        }
 
         Row(
             Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp, bottom = 36.dp)
         ) {
-            if (state.isLogistrationEnabled.not()) {
+            if (!state.isBrowserLoginEnabled) {
+                if (state.isLogistrationEnabled.not()) {
+                    Text(
+                        modifier = Modifier.noRippleClickable {
+                            onEvent(AuthEvent.RegisterClick)
+                        },
+                        text = stringResource(id = coreR.string.core_register),
+                        color = MaterialTheme.appColors.primary,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     modifier = Modifier.noRippleClickable {
-                        onEvent(AuthEvent.RegisterClick)
+                        onEvent(AuthEvent.ForgotPasswordClick)
                     },
-                    text = stringResource(id = coreR.string.core_register),
+                    text = stringResource(id = R.string.auth_forgot_password),
                     color = MaterialTheme.appColors.primary,
                     style = MaterialTheme.appTypography.labelLarge
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                modifier = Modifier.noRippleClickable {
-                    onEvent(AuthEvent.ForgotPasswordClick)
-                },
-                text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.primary,
-                style = MaterialTheme.appTypography.labelLarge
-            )
         }
 
         if (state.showProgress) {
@@ -258,7 +264,11 @@ private fun AuthForm(
                 width = buttonWidth,
                 text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
-                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                    if(state.isBrowserLoginEnabled) {
+                        onEvent(AuthEvent.SignInBrowser)
+                    } else {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    }
                 }
             )
         }
@@ -407,6 +417,24 @@ private fun SignInScreenPreview() {
         LoginScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             state = SignInUIState(),
+            uiMessage = null,
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun SignInUsingBrowserScreenPreview() {
+    OpenEdXTheme {
+        LoginScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            state = SignInUIState().copy(
+                isBrowserLoginEnabled = true,
+            ),
             uiMessage = null,
             onEvent = {},
         )

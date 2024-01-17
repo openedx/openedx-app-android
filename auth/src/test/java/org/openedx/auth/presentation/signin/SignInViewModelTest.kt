@@ -24,6 +24,7 @@ import org.junit.rules.TestRule
 import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
@@ -59,6 +60,7 @@ class SignInViewModelTest {
     private val facebookAuthHelper = mockk<FacebookAuthHelper>()
     private val googleAuthHelper = mockk<GoogleAuthHelper>()
     private val microsoftAuthHelper = mockk<MicrosoftAuthHelper>()
+    private val browserAuthHelper = mockk<BrowserAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -82,6 +84,8 @@ class SignInViewModelTest {
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { config.isBrowserLoginEnabled() } returns false
+        every { config.isBrowserRegistrationEnabled() } returns false
     }
 
     @After
@@ -105,6 +109,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         viewModel.login("", "")
@@ -134,6 +139,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         viewModel.login("acc@test.o", "")
@@ -165,6 +171,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         viewModel.login("acc@test.org", "")
@@ -195,6 +202,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         viewModel.login("acc@test.org", "ed")
@@ -227,6 +235,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
@@ -260,6 +269,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
@@ -294,6 +304,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
@@ -328,6 +339,7 @@ class SignInViewModelTest {
             googleAuthHelper = googleAuthHelper,
             microsoftAuthHelper = microsoftAuthHelper,
             config = config,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
