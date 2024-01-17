@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.unit.html
 
 import android.content.res.AssetManager
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,18 +25,20 @@ class HtmlUnitViewModel(
 
     val isOnline get() = networkConnection.isOnline()
     val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+    val apiHostURL get() = config.getApiHostURL()
     val cookieManager get() = edxCookieManager
 
     fun setWebPageLoaded(assets: AssetManager) {
         if (_injectJSList.value.isNotEmpty()) return
 
-        _injectJSList.value = listOf(
-            //Injection to intercept completion state for xBlocks
-            assets.readAsText("js_injection/completions.js"),
+        val jsList = mutableListOf<String>()
 
-            //Injection to fix CSS issues for Survey xBlock
-            assets.readAsText("js_injection/survey_css.js")
-        )
+        //Injection to intercept completion state for xBlocks
+        assets.readAsText("js_injection/completions.js")?.let { jsList.add(it) }
+        //Injection to fix CSS issues for Survey xBlock
+        assets.readAsText("js_injection/survey_css.js")?.let { jsList.add(it) }
+
+        _injectJSList.value = jsList
     }
 
     fun notifyCompletionSet() {

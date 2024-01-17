@@ -106,10 +106,14 @@ class HtmlUnitFragment : Fragment() {
                                 windowSize = windowSize,
                                 url = blockUrl,
                                 cookieManager = viewModel.cookieManager,
-                                isLoading,
-                                injectJSList,
+                                apiHostURL = viewModel.apiHostURL,
+                                isLoading = isLoading,
+                                injectJSList = injectJSList,
                                 onCompletionSet = {
                                     viewModel.notifyCompletionSet()
+                                },
+                                onWebPageStartLoad = {
+                                    isLoading = true
                                 },
                                 onWebPageLoaded = {
                                     isLoading = false
@@ -166,9 +170,11 @@ private fun HTMLContentView(
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
+    apiHostURL: String,
     isLoading: Boolean,
     injectJSList: List<String>,
     onCompletionSet: () -> Unit,
+    onWebPageStartLoad: () -> Unit,
     onWebPageLoaded: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -233,11 +239,12 @@ private fun HTMLContentView(
                         request: WebResourceRequest,
                         errorResponse: WebResourceResponse,
                     ) {
-                        if (request.url.toString() == view.url) {
+                        if (request.url.toString().startsWith(apiHostURL)) {
                             when (errorResponse.statusCode) {
                                 403, 401, 404 -> {
                                     coroutineScope.launch {
                                         cookieManager.tryToRefreshSessionCookie()
+                                        onWebPageStartLoad()
                                         loadUrl(url)
                                     }
                                 }
@@ -256,6 +263,7 @@ private fun HTMLContentView(
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
+                onWebPageStartLoad()
                 loadUrl(url)
             }
         },
