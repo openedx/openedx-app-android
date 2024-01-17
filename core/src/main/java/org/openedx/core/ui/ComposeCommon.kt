@@ -1122,7 +1122,7 @@ fun BackBtn(
     tint: Color = MaterialTheme.appColors.primary,
     onBackClick: () -> Unit
 ) {
-    IconButton(modifier = modifier,
+    IconButton(modifier = modifier.testTag("ib_back"),
         onClick = { onBackClick() }) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),

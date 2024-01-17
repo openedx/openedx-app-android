@@ -349,6 +349,7 @@ internal fun RegistrationScreen(
                 ) {
                     Text(
                         modifier = Modifier
+                            .testTag("txt_screen_title")
                             .fillMaxWidth(),
                         text = stringResource(id = R.string.core_register),
                         color = Color.White,

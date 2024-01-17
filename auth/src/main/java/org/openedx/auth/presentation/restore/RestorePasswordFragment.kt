@@ -208,6 +208,7 @@ private fun RestorePasswordScreen(
             ) {
                 Text(
                     modifier = Modifier
+                        .testTag("txt_screen_title")
                         .fillMaxWidth(),
                     text = stringResource(id = authR.string.auth_forgot_your_password),
                     color = Color.White,
@@ -257,6 +258,7 @@ private fun RestorePasswordScreen(
                                 Spacer(Modifier.height(2.dp))
                                 Text(
                                     modifier = Modifier
+                                        .testTag("txt_forgot_password_description")
                                         .fillMaxWidth(),
                                     text = stringResource(id = authR.string.auth_please_enter_your_log_in),
                                     style = MaterialTheme.appTypography.titleSmall,

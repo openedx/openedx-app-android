@@ -197,14 +197,18 @@ private fun WhatsNewTopBar(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .testTag("txt_screen_title")
+                        .fillMaxWidth(),
                     text = stringResource(id = org.openedx.whatsnew.R.string.whats_new_title),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleMedium
                 )
                 IconButton(
-                    modifier = Modifier.padding(end = 16.dp),
+                    modifier = Modifier
+                        .testTag("ib_close")
+                        .padding(end = 16.dp),
                     onClick = onCloseClick
                 ) {
                     Icon(
