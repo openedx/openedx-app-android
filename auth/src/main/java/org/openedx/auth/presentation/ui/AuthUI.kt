@@ -250,6 +250,7 @@ fun LoginTextField(
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
             Text(
+                modifier = Modifier.testTag("txt_email_placeholder"),
                 text = description,
                 color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
@@ -331,6 +332,7 @@ fun InputRegistrationField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
+                    modifier = modifier.testTag("txt_${registrationField.name}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -422,6 +424,7 @@ fun SelectableRegisterField(
                 },
             placeholder = {
                 Text(
+                    modifier = Modifier.testTag("txt_${registrationField.name}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium

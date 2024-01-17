@@ -403,6 +403,7 @@ private fun PasswordTextField(
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
             Text(
+                modifier = Modifier.testTag("txt_password_placeholder"),
                 text = stringResource(id = R.string.auth_enter_password),
                 color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium

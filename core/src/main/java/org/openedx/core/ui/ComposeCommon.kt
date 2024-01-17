@@ -242,7 +242,9 @@ fun SearchBar(
         ),
         placeholder = {
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("txt_search_placeholder")
+                    .fillMaxWidth(),
                 text = label,
                 color = MaterialTheme.appColors.textSecondary,
                 style = MaterialTheme.appTypography.bodyMedium
