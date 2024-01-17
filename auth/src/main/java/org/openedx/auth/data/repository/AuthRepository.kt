@@ -1,5 +1,6 @@
 package org.openedx.auth.data.repository
 
+import android.util.Log
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.data.model.ValidationFields
@@ -43,6 +44,14 @@ class AuthRepository(
             .processAuthResponse()
     }
 
+    suspend fun browserAuthCodeLogin(code: String) {
+        api.getAccessTokenFromCode(
+            grantType = ApiConstants.GRANT_TYPE_CODE,
+            clientId = config.getOAuthClientId(),
+            code = code,
+        ).mapToDomain().processAuthResponse()
+    }
+
     suspend fun getRegistrationFields(): List<RegistrationField> {
         return api.getRegistrationFields().fields?.map { it.mapToDomain() } ?: emptyList()
     }
@@ -60,12 +69,16 @@ class AuthRepository(
     }
 
     private suspend fun AuthResponse.processAuthResponse() {
+        Log.d("MMMMMMMM", error.toString())
         if (error != null) {
             throw EdxError.UnknownException(error!!)
         }
         preferencesManager.accessToken = accessToken ?: ""
         preferencesManager.refreshToken = refreshToken ?: ""
         preferencesManager.accessTokenExpiresAt = getTokenExpiryTime()
+        Log.d("MMMMMMMM", preferencesManager.accessToken)
+        Log.d("MMMMMMMM", preferencesManager.refreshToken)
+        Log.d("MMMMMMMM", preferencesManager.accessTokenExpiresAt.toString())
         val user = api.getProfile()
         preferencesManager.user = user
     }
