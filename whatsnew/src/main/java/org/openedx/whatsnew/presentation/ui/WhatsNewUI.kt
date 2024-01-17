@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,7 +64,8 @@ fun PageIndicator(
     ) {
         for (i in 0 until numberOfPages) {
             val isSelected = i == selectedPage
-            val unselectedColor = if (i < selectedPage) previousUnselectedColor else nextUnselectedColor
+            val unselectedColor =
+                if (i < selectedPage) previousUnselectedColor else nextUnselectedColor
             PageIndicatorView(
                 isSelected = isSelected,
                 selectedColor = selectedColor,
@@ -168,6 +170,7 @@ fun PrevButton(
 
     OutlinedButton(
         modifier = Modifier
+            .testTag("btn_previous")
             .height(42.dp)
             .alpha(prevButtonAnimationFactor),
         colors = ButtonDefaults.outlinedButtonColors(
@@ -204,6 +207,7 @@ fun NextFinishButton(
 ) {
     Button(
         modifier = Modifier
+            .testTag("btn_next")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.appColors.buttonBackground
@@ -225,6 +229,7 @@ fun NextFinishButton(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
+                        modifier = Modifier.testTag("txt_next"),
                         text = stringResource(id = R.string.whats_new_navigation_next),
                         color = MaterialTheme.appColors.buttonText,
                         style = MaterialTheme.appTypography.labelLarge
@@ -242,6 +247,7 @@ fun NextFinishButton(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
+                        modifier = Modifier.testTag("txt_done"),
                         text = stringResource(id = R.string.whats_new_navigation_done),
                         color = MaterialTheme.appColors.buttonText,
                         style = MaterialTheme.appTypography.labelLarge

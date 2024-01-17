@@ -35,13 +35,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -113,7 +117,7 @@ class WhatsNewFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun WhatsNewScreen(
     windowSize: WindowSize,
@@ -128,7 +132,11 @@ fun WhatsNewScreen(
             }
 
             Scaffold(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .semantics {
+                        testTagsAsResourceId = true
+                    }
+                    .fillMaxSize(),
                 scaffoldState = scaffoldState,
                 topBar = {
                     WhatsNewTopBar(
@@ -271,6 +279,7 @@ private fun WhatsNewScreenPortrait(
                         ) {
                             Text(
                                 modifier = Modifier
+                                    .testTag("txt_whats_new_title")
                                     .fillMaxWidth(),
                                 text = targetText.title,
                                 color = MaterialTheme.appColors.textPrimary,
@@ -279,6 +288,7 @@ private fun WhatsNewScreenPortrait(
                             )
                             Text(
                                 modifier = Modifier
+                                    .testTag("txt_whats_new_description")
                                     .fillMaxWidth()
                                     .height(80.dp),
                                 text = targetText.message,

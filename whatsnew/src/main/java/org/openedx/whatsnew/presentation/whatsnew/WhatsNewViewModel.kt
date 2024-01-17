@@ -7,7 +7,7 @@ import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.domain.model.WhatsNewItem
 
 class WhatsNewViewModel(
-    val courseId: String,
+    val courseId: String?,
     private val whatsNewManager: WhatsNewManager
 ) : BaseViewModel() {
 
