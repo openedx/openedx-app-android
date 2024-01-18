@@ -82,9 +82,9 @@ class CourseInfoFragment : Fragment() {
                 LaunchedEffect(showAlert) {
                     if (showAlert) {
                         InfoDialogFragment.newInstance(
-                            title = context.getString(R.string.course_enrollment_error),
+                            title = context.getString(CoreR.string.course_enrollment_error),
                             message = context.getString(
-                                R.string.course_enrollment_error_message,
+                                CoreR.string.course_enrollment_error_message,
                                 getString(CoreR.string.platform_name)
                             )
                         ).show(

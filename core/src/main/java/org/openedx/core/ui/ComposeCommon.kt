@@ -1,5 +1,6 @@
 package org.openedx.core.ui
 
+import android.content.Context
 import android.os.Build.VERSION.SDK_INT
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -365,12 +366,19 @@ fun HandleUIMessage(
 
             is UIMessage.ToastMessage -> {
                 val message = uiMessage.message
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                toastMessage(context, message)
             }
 
             else -> {}
         }
     }
+}
+
+fun toastMessage(
+    context: Context,
+    message: String
+) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
 @Composable

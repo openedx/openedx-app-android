@@ -18,7 +18,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +38,6 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.UIMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -54,15 +52,22 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.toastMessage
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.dashboard.R
 import org.openedx.core.R as coreR
 import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
-import org.openedx.course.R as courseR
 
-class ProgramFragment : Fragment() {
+class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
 
     private val viewModel by viewModel<ProgramViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (myPrograms.not()) {
+            lifecycle.addObserver(viewModel)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,42 +78,14 @@ class ProgramFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
-                val showAlert by viewModel.showAlert.collectAsState(initial = false)
-                val showLoading by viewModel.showLoading.collectAsState(initial = true)
-                val enrollmentSuccess by viewModel.courseEnrollSuccess.collectAsState(initial = "")
+                val uiState by viewModel.uiState.collectAsState(initial = ProgramUIState.Loading)
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
 
-                LaunchedEffect(showAlert) {
-                    if (showAlert) {
-                        InfoDialogFragment.newInstance(
-                            title = context.getString(courseR.string.course_enrollment_error),
-                            message = context.getString(
-                                courseR.string.course_enrollment_error_message,
-                                getString(coreR.string.platform_name)
-                            )
-                        ).show(
-                            requireActivity().supportFragmentManager,
-                            InfoDialogFragment::class.simpleName
-                        )
-                    }
-                }
-
-                LaunchedEffect(enrollmentSuccess) {
-                    if (enrollmentSuccess.isNotEmpty()) {
-                        viewModel.onEnrolledCourseClick(
-                            fragmentManager = requireActivity().supportFragmentManager,
-                            courseId = enrollmentSuccess,
-                        )
-                    }
-                }
-
                 ProgramInfoScreen(
                     windowSize = windowSize,
-                    canShowLoading = showLoading,
-                    uiMessage = uiMessage,
+                    uiState = uiState,
                     contentUrl = getInitialUrl(),
                     canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
                         ?.isNotEmpty() == true,
@@ -176,7 +153,38 @@ class ProgramFragment : Fragment() {
                 )
             }
         }
+
+        if (myPrograms.not()) {
+
+            viewModel.navigateToCourseDashboard.observe(viewLifecycleOwner) { courseId ->
+                if (courseId.isNotEmpty()) {
+                    viewModel.onEnrolledCourseClick(
+                        fragmentManager = requireActivity().supportFragmentManager,
+                        courseId = courseId,
+                    )
+                    toastMessage(
+                        context = context,
+                        message = getString(R.string.dashboard_enrolled_successfully)
+                    )
+                    viewModel.navigateToCourseDashboard.value = ""
+                }
+            }
+
+            viewModel.showEnrollmentError.observe(viewLifecycleOwner) { errorMessage ->
+                if (errorMessage.isNotEmpty()) {
+                    InfoDialogFragment.newInstance(
+                        title = getString(coreR.string.course_enrollment_error),
+                        message = getString(coreR.string.course_enrollment_error_message)
+                    ).show(
+                        requireActivity().supportFragmentManager,
+                        InfoDialogFragment::class.simpleName
+                    )
+                    viewModel.showEnrollmentError.value = ""
+                }
+            }
+        }
     }
+
 
     private fun getInitialUrl(): String {
         return arguments?.let { args ->
@@ -191,7 +199,7 @@ class ProgramFragment : Fragment() {
         fun newInstance(
             pathId: String,
         ): ProgramFragment {
-            val fragment = ProgramFragment()
+            val fragment = ProgramFragment(false)
             fragment.arguments = bundleOf(
                 ARG_PATH_ID to pathId,
             )
@@ -203,8 +211,7 @@ class ProgramFragment : Fragment() {
 @Composable
 private fun ProgramInfoScreen(
     windowSize: WindowSize,
-    canShowLoading: Boolean,
-    uiMessage: UIMessage?,
+    uiState: ProgramUIState?,
     contentUrl: String,
     uriScheme: String,
     canShowBackBtn: Boolean,
@@ -216,9 +223,19 @@ private fun ProgramInfoScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(canShowLoading) }
+    var isLoading by remember { mutableStateOf(true) }
 
-    HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+    when (uiState) {
+        is ProgramUIState.Loading -> {
+            isLoading = true
+        }
+
+        is ProgramUIState.UiMessage -> {
+            HandleUIMessage(uiMessage = uiState.uiMessage, scaffoldState = scaffoldState)
+        }
+
+        else -> {}
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -312,8 +329,7 @@ fun MyProgramsPreview() {
     OpenEdXTheme {
         ProgramInfoScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiMessage = null,
-            canShowLoading = false,
+            uiState = ProgramUIState.Loading,
             contentUrl = "https://www.example.com/",
             uriScheme = "",
             canShowBackBtn = false,

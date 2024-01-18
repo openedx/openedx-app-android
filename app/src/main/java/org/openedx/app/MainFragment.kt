@@ -96,7 +96,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView)
             .getDiscoveryFragment()
         val programFragment = if (viewModel.isProgramTypeWebView) {
-            ProgramFragment()
+            ProgramFragment(true)
         } else {
             InDevelopmentFragment()
         }

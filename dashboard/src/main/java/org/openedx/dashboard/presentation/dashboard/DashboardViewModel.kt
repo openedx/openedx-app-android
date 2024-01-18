@@ -74,7 +74,7 @@ class DashboardViewModel(
         }
         viewModelScope.launch {
             dashboardNotifier.notifier.collect {
-                if (it is DashboardEvent.NewCourseEnrolled) {
+                if (it is DashboardEvent.CourseEnrolledSuccess) {
                     updateCourses()
                 }
             }

@@ -50,9 +50,6 @@
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="course_you_are_already_enrolled" tools:ignore="MissingTranslation">You are already enrolled in this course.</string>
     <string name="course_discover" tools:ignore="MissingTranslation">Discover</string>
-    <string name="course_enrollment_error" tools:ignore="MissingTranslation">Enrollment Error</string>
-    <string name="course_enrollment_error_message" tools:ignore="MissingTranslation">We are unable to enroll you in this course at this time using the %s mobile application. Please try again on your web browser.</string>
-
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 

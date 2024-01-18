@@ -1,20 +1,24 @@
 package org.openedx.dashboard.presentation.program
 
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
+import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.dashboard.R
 import org.openedx.dashboard.notifier.DashboardEvent
 import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.dashboard.presentation.DashboardRouter
@@ -24,54 +28,52 @@ class ProgramViewModel(
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val router: DashboardRouter,
-    private val interactor: CourseInteractor,
     private val notifier: DashboardNotifier,
     private val edxCookieManager: AppCookieManager,
     private val resourceManager: ResourceManager,
 ) : BaseViewModel() {
-
-    private val _uiMessage = MutableSharedFlow<UIMessage>()
-    val uiMessage: SharedFlow<UIMessage>
-        get() = _uiMessage.asSharedFlow()
-
-    private val _showAlert = MutableSharedFlow<Boolean>()
-    val showAlert: SharedFlow<Boolean>
-        get() = _showAlert.asSharedFlow()
-
-    private val _showLoading = MutableSharedFlow<Boolean>()
-    val showLoading: SharedFlow<Boolean>
-        get() = _showLoading.asSharedFlow()
-
-    private val _courseEnrollSuccess = MutableSharedFlow<String>()
-    val courseEnrollSuccess: SharedFlow<String>
-        get() = _courseEnrollSuccess.asSharedFlow()
-
     val uriScheme: String get() = config.getUriScheme()
 
     val programConfig get() = config.getProgramConfig().webViewConfig
 
+    var navigateToCourseDashboard: SingleEventLiveData<String> = SingleEventLiveData()
+    var showEnrollmentError: SingleEventLiveData<String> = SingleEventLiveData()
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    private val _uiState = MutableStateFlow<ProgramUIState>(ProgramUIState.Loading)
+    val uiState: StateFlow<ProgramUIState>
+        get() = _uiState.asStateFlow()
+
+    override fun onCreate(owner: LifecycleOwner) {
+        super.onCreate(owner)
+        owner.lifecycleScope.launch {
+            owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                notifier.notifier.collectLatest {
+                    if (it is DashboardEvent.CourseEnrolledSuccess && it.courseId.isNotEmpty()) {
+                        if (it.courseId.isNotEmpty()) {
+                            navigateToCourseDashboard.value = it.courseId
+                            notifier.send(DashboardEvent.Empty)
+                        }
+                    } else if (it is DashboardEvent.CourseEnrolledError) {
+                        if (it.exception.isInternetError()) {
+                            _uiState.value = ProgramUIState.UiMessage(
+                                UIMessage.SnackBarMessage(resourceManager.getString(coreR.string.core_error_no_connection))
+                            )
+                        } else {
+                            showEnrollmentError.value = it.exception.message
+                        }
+                        notifier.send(DashboardEvent.Empty)
+                    }
+                }
+            }
+        }
+    }
+
     fun enrollInACourse(courseId: String) {
         viewModelScope.launch {
-            _showLoading.emit(true)
-            try {
-                interactor.enrollInACourse(courseId)
-                notifier.send(DashboardEvent.NewCourseEnrolled)
-                _courseEnrollSuccess.emit(courseId)
-                _showLoading.emit(false)
-                _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.dashboard_enrolled_successfully)))
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(coreR.string.core_error_no_connection))
-                    )
-                } else {
-                    _showAlert.emit(true)
-                }
-                _showLoading.emit(false)
-            }
+            notifier.send(DashboardEvent.CourseEnrolled(courseId = courseId))
         }
     }
 
