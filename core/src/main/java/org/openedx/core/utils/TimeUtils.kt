@@ -22,15 +22,6 @@ object TimeUtils {
 
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
 
-    /**
-     * This method used to get the current date
-     * @return The current date with time set to midnight.
-     */
-    fun getCurrentDate(): Date {
-        val calendar = Calendar.getInstance().also { it.clearTimeComponents() }
-        return calendar.time
-    }
-
     fun getCurrentTime(): Long {
         return Calendar.getInstance().timeInMillis
     }
@@ -53,15 +44,6 @@ object TimeUtils {
         }
     }
 
-    /**
-     * This method used to convert the date to ISO 8601 compliant format date string
-     * @param date [Date]needs to be converted
-     * @return The current date and time in a ISO 8601 compliant format.
-     */
-    fun dateToIso8601(date: Date?): String {
-        return ISO8601Utils.format(date, true)
-    }
-
     fun iso8601ToDateWithTime(context: Context, text: String): String {
         return try {
             val courseDateFormat = SimpleDateFormat(FORMAT_ISO_8601, Locale.getDefault())
@@ -75,29 +57,18 @@ object TimeUtils {
         }
     }
 
-    fun dateToCourseDate(resourceManager: ResourceManager, date: Date?): String {
+    private fun dateToCourseDate(resourceManager: ResourceManager, date: Date?): String {
         return formatDate(
             format = resourceManager.getString(R.string.core_date_format_MMMM_dd), date = date
         )
     }
 
-    fun formatDate(format: String, date: String): String {
-        return formatDate(format, iso8601ToDate(date))
-    }
-
-    fun formatDate(format: String, date: Date?): String {
+    private fun formatDate(format: String, date: Date?): String {
         if (date == null) {
             return ""
         }
         val sdf = SimpleDateFormat(format, Locale.getDefault())
         return sdf.format(date)
-    }
-
-    fun stringToDate(dateFormat: String, date: String): Date? {
-        if (dateFormat.isEmpty() || date.isEmpty()) {
-            return null
-        }
-        return SimpleDateFormat(dateFormat, Locale.getDefault()).parse(date)
     }
 
     /**
@@ -200,6 +171,15 @@ object TimeUtils {
         return formattedDate
     }
 
+    fun getFormattedTime(date: Date): String {
+        return DateUtils.getRelativeTimeSpanString(
+            date.time,
+            getCurrentTime(),
+            DateUtils.MINUTE_IN_MILLIS,
+            DateUtils.FORMAT_ABBREV_TIME
+        ).toString()
+    }
+
     /**
      * Returns a formatted date string for the given date.
      */
@@ -279,7 +259,7 @@ fun Date.isToday(): Boolean {
     val calendar = Calendar.getInstance()
     calendar.time = this
     calendar.clearTimeComponents()
-    return calendar.time == TimeUtils.getCurrentDate()
+    return calendar.time == Date().clearTime()
 }
 
 // Extension function to add number of days to a date
@@ -289,4 +269,18 @@ fun Date.addDays(days: Int): Date {
     calendar.clearTimeComponents()
     calendar.add(Calendar.DATE, days)
     return calendar.time
+}
+
+fun Date.clearTime(): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.clearTimeComponents()
+    return calendar.time
+}
+
+fun Date.isTimeLessThan24Hours(): Boolean {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    val timeInMillis = (calendar.timeInMillis - TimeUtils.getCurrentTime()).unaryPlus()
+    return timeInMillis < TimeUnit.DAYS.toMillis(1)
 }

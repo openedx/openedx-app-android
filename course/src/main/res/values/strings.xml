@@ -55,6 +55,7 @@
 
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
+    <string name="course_dates_locked_content_description" tools:ignore="MissingTranslation">You must successfully complete verification before this date to qualify for a Verified Certificate.</string>
 
     <!-- Accessibility -->
     <string name="course_accessibility_header_image_for">Header image for %1$s</string>
