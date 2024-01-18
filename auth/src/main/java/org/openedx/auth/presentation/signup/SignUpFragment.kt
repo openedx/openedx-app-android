@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
@@ -44,19 +43,13 @@ class SignUpFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val uiState by viewModel.uiState.collectAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val isButtonClicked by viewModel.isButtonLoading.observeAsState(false)
-                val successLogin by viewModel.successLogin.observeAsState()
-                val validationError by viewModel.validationError.observeAsState(false)
-                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
 
-                if (appUpgradeEvent == null) {
+                if (uiState.appUpgradeEvent == null) {
                     SignUpView(
                         windowSize = windowSize,
                         uiState = uiState,
                         uiMessage = uiMessage,
-                        isButtonClicked = isButtonClicked,
-                        validationError,
                         onBackClick = {
                             requireActivity().supportFragmentManager.popBackStackImmediate()
                         },
@@ -65,8 +58,8 @@ class SignUpFragment : Fragment() {
                         }
                     )
 
-                    LaunchedEffect(successLogin) {
-                        if (successLogin == true) {
+                    LaunchedEffect(uiState.successLogin) {
+                        if (uiState.successLogin) {
                             router.clearBackStack(requireActivity().supportFragmentManager)
                             router.navigateToMain(parentFragmentManager, viewModel.courseId)
                         }

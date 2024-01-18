@@ -89,8 +89,6 @@ internal fun SignUpView(
     windowSize: WindowSize,
     uiState: SignUpUIState,
     uiMessage: UIMessage?,
-    isButtonClicked: Boolean,
-    validationError: Boolean,
     onBackClick: () -> Unit,
     onRegisterClick: (Map<String, String?>) -> Unit,
 ) {
@@ -136,8 +134,8 @@ internal fun SignUpView(
 
     val isImeVisible by isImeVisibleState()
 
-    LaunchedEffect(validationError) {
-        if (validationError) {
+    LaunchedEffect(uiState.validationError) {
+        if (uiState.validationError) {
             coroutine.launch {
                 scrollState.animateScrollTo(0, tween(300))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -370,7 +368,7 @@ internal fun SignUpView(
                                     }
                                 }
 
-                                if (isButtonClicked) {
+                                if (uiState.isButtonLoading) {
                                     Box(
                                         Modifier
                                             .fillMaxWidth()
@@ -425,8 +423,6 @@ private fun RegistrationScreenPreview() {
                 )
             ),
             uiMessage = null,
-            isButtonClicked = false,
-            validationError = false,
             onBackClick = {},
             onRegisterClick = {}
         )
@@ -445,8 +441,6 @@ private fun RegistrationScreenTabletPreview() {
                 optionalFields = listOf(field)
             ),
             uiMessage = null,
-            isButtonClicked = false,
-            validationError = false,
             onBackClick = {},
             onRegisterClick = {}
         )
