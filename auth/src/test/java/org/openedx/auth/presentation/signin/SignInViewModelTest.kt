@@ -63,7 +63,7 @@ class SignInViewModelTest {
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
-    private val invalidEmail = "Invalid email"
+    private val invalidEmailOrUsername = "Invalid email or username"
     private val invalidPassword = "Password too short"
 
     private val user = User(0, "", "", "")
@@ -74,7 +74,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(CoreRes.string.core_error_invalid_grant) } returns invalidCredential
         every { resourceManager.getString(CoreRes.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(CoreRes.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(R.string.auth_invalid_email) } returns invalidEmail
+        every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
@@ -91,7 +91,7 @@ class SignInViewModelTest {
 
     @Test
     fun `login empty credentials validation error`() = runTest {
-        every { validator.isEmailValid(any()) } returns false
+        every { validator.isEmailOrUserNameValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -113,14 +113,14 @@ class SignInViewModelTest {
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmail, message.message)
+        assertEquals(invalidEmailOrUsername, message.message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
 
     @Test
     fun `login invalid email validation error`() = runTest {
-        every { validator.isEmailValid(any()) } returns false
+        every { validator.isEmailOrUserNameValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -142,14 +142,14 @@ class SignInViewModelTest {
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
-        assertEquals(invalidEmail, message.message)
+        assertEquals(invalidEmailOrUsername, message.message)
         assertFalse(uiState.showProgress)
         assertFalse(uiState.loginSuccess)
     }
 
     @Test
     fun `login empty password validation error`() = runTest {
-        every { validator.isEmailValid(any()) } returns true
+        every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
@@ -180,7 +180,7 @@ class SignInViewModelTest {
 
     @Test
     fun `login invalid password validation error`() = runTest {
-        every { validator.isEmailValid(any()) } returns true
+        every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
@@ -211,7 +211,7 @@ class SignInViewModelTest {
 
     @Test
     fun `login success`() = runTest {
-        every { validator.isEmailValid(any()) } returns true
+        every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
         every { analytics.userLoginEvent(any()) } returns Unit
         every { preferencesManager.user } returns user
@@ -245,7 +245,7 @@ class SignInViewModelTest {
 
     @Test
     fun `login network error`() = runTest {
-        every { validator.isEmailValid(any()) } returns true
+        every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
@@ -279,7 +279,7 @@ class SignInViewModelTest {
 
     @Test
     fun `login invalid grant error`() = runTest {
-        every { validator.isEmailValid(any()) } returns true
+        every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
@@ -313,7 +313,7 @@ class SignInViewModelTest {
 
     @Test
     fun `login unknown exception`() = runTest {
-        every { validator.isEmailValid(any()) } returns true
+        every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
