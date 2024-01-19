@@ -14,7 +14,8 @@ enum class BlockType {
     SEQUENTIAL{ override fun isContainer() = true },
     VERTICAL{ override fun isContainer() = true },
     VIDEO{ override fun isContainer() = false },
-    WORD_CLOUD{ override fun isContainer() = false };
+    WORD_CLOUD{ override fun isContainer() = false },
+    SURVEY{ override fun isContainer() = false };
 
     abstract fun isContainer() : Boolean
 

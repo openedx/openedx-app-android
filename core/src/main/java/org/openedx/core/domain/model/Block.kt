@@ -83,6 +83,7 @@ data class Block(
     val isDragAndDropBlock get() = type == BlockType.DRAG_AND_DROP_V2
     val isWordCloudBlock get() = type == BlockType.WORD_CLOUD
     val isLTIConsumerBlock get() = type == BlockType.LTI_CONSUMER
+    val isSurveyBlock get() = type == BlockType.SURVEY
 }
 
 data class StudentViewData(

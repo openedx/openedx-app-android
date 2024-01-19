@@ -3,6 +3,7 @@ package org.openedx.course.presentation.unit.html
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -29,30 +30,18 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import org.openedx.core.config.Config
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseCompletionSet
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.roundBorderWithoutBottom
+import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
 
 class HtmlUnitFragment : Fragment() {
 
-    private val config by inject<Config>()
-    private val edxCookieManager by inject<AppCookieManager>()
-    private val networkConnection by inject<NetworkConnection>()
-    private val notifier by inject<CourseNotifier>()
+    private val viewModel by viewModel<HtmlUnitViewModel>()
     private var blockId: String = ""
     private var blockUrl: String = ""
 
@@ -77,18 +66,21 @@ class HtmlUnitFragment : Fragment() {
                 }
 
                 var hasInternetConnection by remember {
-                    mutableStateOf(networkConnection.isOnline())
+                    mutableStateOf(viewModel.isOnline)
                 }
+
+                val injectJSList by viewModel.injectJSList.collectAsState()
 
                 val configuration = LocalConfiguration.current
 
-                val bottomPadding = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    72.dp
-                } else {
-                    0.dp
-                }
+                val bottomPadding =
+                    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        72.dp
+                    } else {
+                        0.dp
+                    }
 
-                val border = if (!isSystemInDarkTheme() && !config.isCourseUnitProgressEnabled()) {
+                val border = if (!isSystemInDarkTheme() && !viewModel.isCourseUnitProgressEnabled) {
                     Modifier.roundBorderWithoutBottom(
                         borderWidth = 2.dp,
                         cornerRadius = 30.dp
@@ -114,14 +106,19 @@ class HtmlUnitFragment : Fragment() {
                             HTMLContentView(
                                 windowSize = windowSize,
                                 url = blockUrl,
-                                cookieManager = edxCookieManager,
+                                cookieManager = viewModel.cookieManager,
+                                apiHostURL = viewModel.apiHostURL,
+                                isLoading = isLoading,
+                                injectJSList = injectJSList,
                                 onCompletionSet = {
-                                    lifecycleScope.launch {
-                                        notifier.send(CourseCompletionSet())
-                                    }
+                                    viewModel.notifyCompletionSet()
+                                },
+                                onWebPageLoading = {
+                                    isLoading = true
                                 },
                                 onWebPageLoaded = {
                                     isLoading = false
+                                    viewModel.setWebPageLoaded(requireContext().assets)
                                 }
                             )
                         } else {
@@ -131,7 +128,7 @@ class HtmlUnitFragment : Fragment() {
                                     .fillMaxHeight()
                                     .background(MaterialTheme.appColors.background)
                             ) {
-                                hasInternetConnection = networkConnection.isOnline()
+                                hasInternetConnection = viewModel.isOnline
                             }
                         }
                         if (isLoading && hasInternetConnection) {
@@ -174,7 +171,11 @@ private fun HTMLContentView(
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
+    apiHostURL: String,
+    isLoading: Boolean,
+    injectJSList: List<String>,
     onCompletionSet: () -> Unit,
+    onWebPageLoading: () -> Unit,
     onWebPageLoaded: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -204,21 +205,15 @@ private fun HTMLContentView(
                 }, "callback")
                 webViewClient = object : WebViewClient() {
 
+                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                        super.onPageStarted(view, url, favicon)
+                        onWebPageLoading()
+                    }
+
                     override fun onPageCommitVisible(view: WebView?, url: String?) {
                         super.onPageCommitVisible(view, url)
                         Log.d("HTML", "onPageCommitVisible")
                         onWebPageLoaded()
-
-                        evaluateJavascript(
-                            """
-                            ${'$'}(document).ajaxSuccess(function(event, request, settings)  {
-                                if (settings.url.includes("publish_completion") && 
-                                    request.responseText.includes("ok")) {
-                                    javascript:window.callback.completionSet();
-                                }
-                            });
-                        """.trimIndent(), null
-                        )
                     }
 
                     override fun shouldOverrideUrlLoading(
@@ -250,7 +245,7 @@ private fun HTMLContentView(
                         request: WebResourceRequest,
                         errorResponse: WebResourceResponse,
                     ) {
-                        if (request.url.toString() == view.url) {
+                        if (request.url.toString().startsWith(apiHostURL)) {
                             when (errorResponse.statusCode) {
                                 403, 401, 404 -> {
                                     coroutineScope.launch {
@@ -274,6 +269,11 @@ private fun HTMLContentView(
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
                 loadUrl(url)
+            }
+        },
+        update = { webView ->
+            if (!isLoading && injectJSList.isNotEmpty()) {
+                injectJSList.forEach { webView.evaluateJavascript(it, null) }
             }
         })
 }
