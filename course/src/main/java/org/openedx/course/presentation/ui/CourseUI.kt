@@ -310,6 +310,7 @@ fun NavigationUnitsButtons(
     nextButtonText: String,
     hasPrevBlock: Boolean,
     hasNextBlock: Boolean,
+    isVerticalNavigation: Boolean,
     onPrevClick: () -> Unit,
     onNextClick: () -> Unit
 ) {
@@ -362,6 +363,7 @@ fun NavigationUnitsButtons(
                     )
                     Spacer(Modifier.width(8.dp))
                     Icon(
+                        modifier = Modifier.rotate(if (isVerticalNavigation) 0f else -90f),
                         painter = painterResource(id = org.openedx.core.R.drawable.core_ic_up),
                         contentDescription = null,
                         tint = MaterialTheme.appColors.primary
@@ -391,6 +393,7 @@ fun NavigationUnitsButtons(
                 )
                 Spacer(Modifier.width(8.dp))
                 Icon(
+                    modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
                     painter = nextButtonIcon,
                     contentDescription = null,
                     tint = MaterialTheme.appColors.buttonText
@@ -921,6 +924,7 @@ private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = true,
+            isVerticalNavigation = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}
     }
@@ -935,6 +939,7 @@ private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = false,
+            isVerticalNavigation = true,
             nextButtonText = "Finish",
             onPrevClick = {}) {}
     }
@@ -949,6 +954,7 @@ private fun NavigationUnitsButtonsWithFinishPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = false,
+            isVerticalNavigation = true,
             nextButtonText = "Finish",
             onPrevClick = {}) {}
     }
@@ -963,6 +969,7 @@ private fun NavigationUnitsButtonsWithNextPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = true,
+            isVerticalNavigation = true,
             nextButtonText = "Next",
             onPrevClick = {}) {}
     }

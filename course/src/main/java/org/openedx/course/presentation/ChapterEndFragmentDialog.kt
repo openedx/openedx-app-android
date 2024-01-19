@@ -8,27 +8,15 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -78,6 +66,9 @@ class ChapterEndFragmentDialog : DialogFragment() {
                     ChapterEndDialogScreen(
                         sectionName = requireArguments().getString(ARG_SECTION_NAME) ?: "",
                         nextSectionName = requireArguments().getString(ARG_NEXT_SECTION_NAME) ?: "",
+                        isVerticalNavigation = requireArguments().getBoolean(
+                            ARG_IS_VERTICAL_NAVIGATION
+                        ),
                         onBackButtonClick = {
                             dismiss()
                             listener?.onDismiss()
@@ -122,14 +113,17 @@ class ChapterEndFragmentDialog : DialogFragment() {
     companion object {
         private const val ARG_SECTION_NAME = "sectionName"
         private const val ARG_NEXT_SECTION_NAME = "nexSectionName"
+        private const val ARG_IS_VERTICAL_NAVIGATION = "isVerticalNavigation"
         fun newInstance(
             sectionName: String,
-            nextSectionName: String
+            nextSectionName: String,
+            isVerticalNavigation: Boolean
         ): ChapterEndFragmentDialog {
             val dialog = ChapterEndFragmentDialog()
             dialog.arguments = bundleOf(
                 ARG_SECTION_NAME to sectionName,
-                ARG_NEXT_SECTION_NAME to nextSectionName
+                ARG_NEXT_SECTION_NAME to nextSectionName,
+                ARG_IS_VERTICAL_NAVIGATION to isVerticalNavigation
             )
             return dialog
         }
@@ -145,6 +139,7 @@ interface DialogListener {
 private fun ChapterEndDialogScreen(
     sectionName: String,
     nextSectionName: String,
+    isVerticalNavigation: Boolean,
     onBackButtonClick: () -> Unit,
     onProceedButtonClick: () -> Unit,
     onCancelButtonClick: () -> Unit
@@ -206,7 +201,8 @@ private fun ChapterEndDialogScreen(
                             text = stringResource(id = R.string.course_next_section),
                             painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
                             color = MaterialTheme.appColors.buttonText,
-                            textStyle = MaterialTheme.appTypography.labelLarge
+                            textStyle = MaterialTheme.appTypography.labelLarge,
+                            iconModifier = Modifier.rotate(if (isVerticalNavigation) 90f else 0f)
                         )
                     },
                     onClick = onProceedButtonClick
@@ -366,6 +362,7 @@ fun ChapterEndDialogScreenPreview() {
         ChapterEndDialogScreen(
             sectionName = "Section",
             nextSectionName = "Section2",
+            isVerticalNavigation = true,
             onBackButtonClick = {},
             onProceedButtonClick = {},
             onCancelButtonClick = {}
