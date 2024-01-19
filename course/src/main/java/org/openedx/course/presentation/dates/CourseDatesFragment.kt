@@ -80,6 +80,8 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
 import org.openedx.core.presentation.course.CourseViewMode
@@ -92,29 +94,24 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.core.R as coreR
 
 class CourseDatesFragment : Fragment() {
 
     private val viewModel by viewModel<CourseDatesViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getBoolean(ARG_IS_SELF_PACED, true),
+        )
     }
     private val router by inject<CourseRouter>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        lifecycle.addObserver(viewModel)
-        with(requireArguments()) {
-            viewModel.courseTitle = getString(ARG_TITLE, "")
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -129,16 +126,18 @@ class CourseDatesFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
 
-                CourseDatesScreen(windowSize = windowSize,
+                CourseDatesScreen(
+                    windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
+                    isSelfPaced = viewModel.isSelfPaced,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     onReloadClick = {
                         viewModel.getCourseDates()
                     },
                     onSwipeRefresh = {
-                        viewModel.getCourseDates()
+                        viewModel.getCourseDates(swipeToRefresh = true)
                     },
                     onItemClick = { blockId ->
                         if (blockId.isNotEmpty()) {
@@ -155,17 +154,28 @@ class CourseDatesFragment : Fragment() {
                                     }
                             }
                         }
-                    })
+                    },
+                    onSyncDates = {
+                        viewModel.resetCourseDatesBanner()
+                    },
+                )
             }
         }
     }
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_TITLE = "title"
-        fun newInstance(courseId: String, title: String): CourseDatesFragment {
+        private const val ARG_IS_SELF_PACED = "selfPaced"
+        fun newInstance(
+            courseId: String,
+            isSelfPaced: Boolean,
+        ): CourseDatesFragment {
             val fragment = CourseDatesFragment()
-            fragment.arguments = bundleOf(ARG_COURSE_ID to courseId, ARG_TITLE to title)
+            fragment.arguments =
+                bundleOf(
+                    ARG_COURSE_ID to courseId,
+                    ARG_IS_SELF_PACED to isSelfPaced,
+                )
             return fragment
         }
     }
@@ -178,10 +188,12 @@ internal fun CourseDatesScreen(
     uiState: DatesUIState?,
     uiMessage: UIMessage?,
     refreshing: Boolean,
+    isSelfPaced: Boolean,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onItemClick: (String) -> Unit,
+    onSyncDates: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -226,7 +238,6 @@ internal fun CourseDatesScreen(
             Surface(
                 modifier = modifierScreenWidth,
                 color = MaterialTheme.appColors.background,
-                shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
                 Box(
                     Modifier
@@ -251,8 +262,21 @@ internal fun CourseDatesScreen(
                                         .padding(horizontal = 16.dp),
                                     contentPadding = listBottomPadding
                                 ) {
+                                    val courseBanner = uiState.courseDatesResult.courseBanner
+                                    val datesSection = uiState.courseDatesResult.datesSection
+
+                                    if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
+                                        item {
+                                            CourseDatesBanner(
+                                                modifier = Modifier.padding(bottom = 16.dp),
+                                                banner = courseBanner,
+                                                resetDates = onSyncDates
+                                            )
+                                        }
+                                    }
+
                                     // Handle DatesSection.COMPLETED separately
-                                    uiState.courseDates[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
+                                    datesSection[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
                                         item {
                                             ExpandableView(
                                                 sectionKey = DatesSection.COMPLETED,
@@ -261,12 +285,12 @@ internal fun CourseDatesScreen(
                                             )
                                         }
                                     }
+
                                     // Handle other sections
                                     val sectionsKey =
-                                        uiState.courseDates.keys.minus(DatesSection.COMPLETED)
-                                            .toList()
+                                        datesSection.keys.minus(DatesSection.COMPLETED).toList()
                                     sectionsKey.forEach { sectionKey ->
-                                        uiState.courseDates[sectionKey]?.isNotEmptyThenLet { section ->
+                                        datesSection[sectionKey]?.isNotEmptyThenLet { section ->
                                             item {
                                                 CourseDateBlockSection(
                                                     sectionKey = sectionKey,
@@ -605,14 +629,18 @@ private fun CourseDateItem(
 @Composable
 private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DatesUIState.Dates(mockedResponse),
+        CourseDatesScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
+            isSelfPaced = true,
             hasInternetConnection = true,
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onItemClick = {})
+            onItemClick = {},
+            onSyncDates = {},
+        )
     }
 }
 
@@ -621,16 +649,28 @@ private fun CourseDatesScreenPreview() {
 @Composable
 private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DatesUIState.Dates(mockedResponse),
+        CourseDatesScreen(
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+            uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
+            isSelfPaced = true,
             hasInternetConnection = true,
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onItemClick = {})
+            onItemClick = {},
+            onSyncDates = {},
+        )
     }
 }
+
+val mockedCourseBannerInfo = CourseDatesBannerInfo(
+    missedDeadlines = true,
+    missedGatedContent = false,
+    verifiedUpgradeLink = "",
+    contentTypeGatingEnabled = false,
+    hasEnded = false,
+)
 
 private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
     linkedMapOf(

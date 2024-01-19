@@ -207,7 +207,15 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String) -> CourseDatesViewModel(courseId, get(), get(), get()) }
+    viewModel { (courseId: String, isSelfPaced: Boolean) ->
+        CourseDatesViewModel(
+            courseId,
+            isSelfPaced,
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (courseId: String, handoutsType: String) ->
         HandoutsViewModel(
             courseId,

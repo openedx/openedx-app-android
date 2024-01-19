@@ -7,16 +7,51 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,15 +74,31 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.extension.isLinkValid
+import org.openedx.core.extension.nonZero
 import org.openedx.core.module.db.DownloadedState
-import org.openedx.core.ui.*
+import org.openedx.core.ui.BackBtn
+import org.openedx.core.ui.IconText
+import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
+import org.openedx.course.presentation.dates.mockedCourseBannerInfo
 import org.openedx.course.presentation.outline.CourseOutlineFragment
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
@@ -915,6 +966,64 @@ fun SubSectionUnitsList(
     }
 }
 
+@Composable
+fun CourseDatesBanner(
+    modifier: Modifier,
+    banner: CourseDatesBannerInfo,
+    resetDates: () -> Unit,
+) {
+    val cardModifier = modifier
+        .background(
+            MaterialTheme.appColors.cardViewBackground,
+            MaterialTheme.appShapes.material.medium
+        )
+        .border(
+            1.dp,
+            MaterialTheme.appColors.cardViewBorder,
+            MaterialTheme.appShapes.material.medium
+        )
+        .padding(16.dp)
+
+    Column(modifier = cardModifier) {
+        banner.bannerType.headerResId.nonZero()?.let {
+            Text(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = stringResource(id = it),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textDark
+            )
+        }
+
+        banner.bannerType.bodyResId.nonZero()?.let {
+            Text(
+                text = stringResource(id = it),
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = MaterialTheme.appColors.textDark
+            )
+        }
+
+        banner.bannerType.buttonResId.nonZero()?.let {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .height(36.dp),
+                shape = MaterialTheme.appShapes.buttonShape,
+                onClick = resetDates,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.appColors.buttonBackground
+                ),
+            ) {
+                Text(
+                    text = stringResource(id = it),
+                    color = MaterialTheme.appColors.buttonText,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+            }
+        }
+    }
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -1019,6 +1128,19 @@ private fun CourseHeaderPreview() {
                 courseName = ""
             )
         }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseDatesBannerPreview() {
+    OpenEdXTheme {
+        CourseDatesBanner(
+            modifier = Modifier,
+            banner = mockedCourseBannerInfo,
+            resetDates = {}
+        )
     }
 }
 

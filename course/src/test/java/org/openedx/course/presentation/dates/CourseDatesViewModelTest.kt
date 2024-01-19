@@ -22,6 +22,10 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
+import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -63,12 +67,47 @@ class CourseDatesViewModelTest {
             listOf(dateBlock, dateBlock)
         )
     )
+    private val mockCourseDatesBannerInfo = CourseDatesBannerInfo(
+        missedDeadlines = true,
+        missedGatedContent = false,
+        verifiedUpgradeLink = "",
+        contentTypeGatingEnabled = false,
+        hasEnded = true,
+    )
+    private val mockedCourseDatesResult = CourseDatesResult(
+        datesSection = mockDateBlocks,
+        courseBanner = mockCourseDatesBannerInfo,
+    )
+    private val courseStructure = CourseStructure(
+        root = "",
+        blockData = listOf(),
+        id = "id",
+        name = "Course name",
+        number = "",
+        org = "Org",
+        start = Date(0),
+        startDisplay = "",
+        startType = "",
+        end = null,
+        coursewareAccess = CoursewareAccess(
+            true,
+            "",
+            "",
+            "",
+            "",
+            ""
+        ),
+        media = null,
+        certificate = null,
+        isSelfPaced = true,
+    )
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { interactor.getCourseStructureFromCache() } returns courseStructure
     }
 
     @After
@@ -112,7 +151,7 @@ class CourseDatesViewModelTest {
     fun `getCourseDates success with internet`() = runTest {
         val viewModel = CourseDatesViewModel("", interactor, networkConnection, resourceManager)
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDates(any()) } returns mockDateBlocks
+        coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
 
         advanceUntilIdle()
 
@@ -127,7 +166,10 @@ class CourseDatesViewModelTest {
     fun `getCourseDates success with EmptyList`() = runTest {
         val viewModel = CourseDatesViewModel("", interactor, networkConnection, resourceManager)
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseDates(any()) } returns linkedMapOf()
+        coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
+            datesSection = linkedMapOf(),
+            courseBanner = mockCourseDatesBannerInfo,
+        )
 
         advanceUntilIdle()
 
