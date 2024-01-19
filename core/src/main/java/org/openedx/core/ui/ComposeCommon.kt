@@ -98,6 +98,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -365,20 +366,12 @@ fun HandleUIMessage(
             }
 
             is UIMessage.ToastMessage -> {
-                val message = uiMessage.message
-                toastMessage(context, message)
+                context.toastMessage(uiMessage.message)
             }
 
             else -> {}
         }
     }
-}
-
-fun toastMessage(
-    context: Context,
-    message: String
-) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
 @Composable

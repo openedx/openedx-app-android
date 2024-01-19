@@ -1,28 +1,24 @@
 package org.openedx.dashboard.presentation.program
 
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
-import org.openedx.core.SingleEventLiveData
+import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.dashboard.notifier.DashboardEvent
 import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.core.R as coreR
 
 class ProgramViewModel(
     private val config: Config,
@@ -31,58 +27,51 @@ class ProgramViewModel(
     private val notifier: DashboardNotifier,
     private val edxCookieManager: AppCookieManager,
     private val resourceManager: ResourceManager,
+    private val courseInteractor: EnrollInCourseInteractor
 ) : BaseViewModel() {
     val uriScheme: String get() = config.getUriScheme()
 
     val programConfig get() = config.getProgramConfig().webViewConfig
 
-    var navigateToCourseDashboard: SingleEventLiveData<String> = SingleEventLiveData()
-    var showEnrollmentError: SingleEventLiveData<String> = SingleEventLiveData()
+    val hasInternetConnection: Boolean get() = networkConnection.isOnline()
 
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
+    private val _uiState = MutableSharedFlow<ProgramUIState>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val uiState: SharedFlow<ProgramUIState> get() = _uiState.asSharedFlow()
 
-    private val _uiState = MutableStateFlow<ProgramUIState>(ProgramUIState.Loading)
-    val uiState: StateFlow<ProgramUIState>
-        get() = _uiState.asStateFlow()
+    fun showLoading(isLoading: Boolean) {
+        viewModelScope.launch {
+            _uiState.emit(if (isLoading) ProgramUIState.Loading else ProgramUIState.Loaded)
+        }
+    }
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-        owner.lifecycleScope.launch {
-            owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                notifier.notifier.collectLatest {
-                    if (it is DashboardEvent.CourseEnrolledSuccess && it.courseId.isNotEmpty()) {
-                        if (it.courseId.isNotEmpty()) {
-                            navigateToCourseDashboard.value = it.courseId
-                            notifier.send(DashboardEvent.Empty)
-                        }
-                    } else if (it is DashboardEvent.CourseEnrolledError) {
-                        if (it.exception.isInternetError()) {
-                            _uiState.value = ProgramUIState.UiMessage(
-                                UIMessage.SnackBarMessage(resourceManager.getString(coreR.string.core_error_no_connection))
-                            )
-                        } else {
-                            showEnrollmentError.value = it.exception.message
-                        }
-                        notifier.send(DashboardEvent.Empty)
-                    }
+    fun enrollInACourse(courseId: String) {
+        showLoading(true)
+        viewModelScope.launch {
+            try {
+                courseInteractor.enrollInACourse(courseId)
+                _uiState.emit(ProgramUIState.CourseEnrolled(courseId, true))
+                notifier.send(DashboardEvent.UpdateEnrolledCourses)
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiState.emit(
+                        ProgramUIState.UiMessage(
+                            UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                        )
+                    )
+                } else {
+                    _uiState.emit(ProgramUIState.CourseEnrolled(courseId, false))
                 }
             }
         }
     }
 
-    fun enrollInACourse(courseId: String) {
-        viewModelScope.launch {
-            notifier.send(DashboardEvent.CourseEnrolled(courseId = courseId))
-        }
-    }
-
     fun onProgramCardClick(fragmentManager: FragmentManager, pathId: String) {
         if (pathId.isNotEmpty()) {
-            router.navigateToProgramInfo(
-                fm = fragmentManager,
-                pathId = pathId
-            )
+            router.navigateToProgramInfo(fm = fragmentManager, pathId = pathId)
         }
     }
 
@@ -107,14 +96,10 @@ class ProgramViewModel(
     }
 
     fun navigateToDiscovery() {
-        viewModelScope.launch {
-            notifier.send(DashboardEvent.NavigationToDiscovery)
-        }
+        viewModelScope.launch { notifier.send(DashboardEvent.NavigationToDiscovery) }
     }
 
     fun refreshCookie() {
-        viewModelScope.launch {
-            edxCookieManager.tryToRefreshSessionCookie()
-        }
+        viewModelScope.launch { edxCookieManager.tryToRefreshSessionCookie() }
     }
 }

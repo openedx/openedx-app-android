@@ -4,6 +4,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
@@ -72,13 +75,11 @@ class DashboardViewModel(
                 }
             }
         }
-        viewModelScope.launch {
-            dashboardNotifier.notifier.collect {
-                if (it is DashboardEvent.CourseEnrolledSuccess) {
-                    updateCourses()
-                }
+        dashboardNotifier.notifier.onEach {
+            if (it is DashboardEvent.UpdateEnrolledCourses) {
+                updateCourses()
             }
-        }
+        }.distinctUntilChanged().launchIn(viewModelScope)
     }
 
     init {

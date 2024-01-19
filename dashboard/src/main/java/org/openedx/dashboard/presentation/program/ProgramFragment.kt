@@ -18,6 +18,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -52,7 +54,6 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.toastMessage
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.dashboard.R
 import org.openedx.core.R as coreR
@@ -83,6 +84,33 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
 
+                if (myPrograms.not()) {
+                    DisposableEffect(uiState is ProgramUIState.CourseEnrolled) {
+                        if (uiState is ProgramUIState.CourseEnrolled) {
+
+                            val courseId = (uiState as ProgramUIState.CourseEnrolled).courseId
+                            val isEnrolled = (uiState as ProgramUIState.CourseEnrolled).isEnrolled
+
+                            if (isEnrolled) {
+                                viewModel.onEnrolledCourseClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    courseId = courseId,
+                                )
+                                context.toastMessage(getString(R.string.dashboard_enrolled_successfully))
+                            } else {
+                                InfoDialogFragment.newInstance(
+                                    title = getString(coreR.string.course_enrollment_error),
+                                    message = getString(coreR.string.course_enrollment_error_message)
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    InfoDialogFragment::class.simpleName
+                                )
+                            }
+                        }
+                        onDispose {}
+                    }
+                }
+
                 ProgramInfoScreen(
                     windowSize = windowSize,
                     uiState = uiState,
@@ -94,6 +122,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
                     },
+                    onWebPageLoaded = { viewModel.showLoading(false) },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
@@ -153,36 +182,6 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                 )
             }
         }
-
-        if (myPrograms.not()) {
-
-            viewModel.navigateToCourseDashboard.observe(viewLifecycleOwner) { courseId ->
-                if (courseId.isNotEmpty()) {
-                    viewModel.onEnrolledCourseClick(
-                        fragmentManager = requireActivity().supportFragmentManager,
-                        courseId = courseId,
-                    )
-                    toastMessage(
-                        context = context,
-                        message = getString(R.string.dashboard_enrolled_successfully)
-                    )
-                    viewModel.navigateToCourseDashboard.value = ""
-                }
-            }
-
-            viewModel.showEnrollmentError.observe(viewLifecycleOwner) { errorMessage ->
-                if (errorMessage.isNotEmpty()) {
-                    InfoDialogFragment.newInstance(
-                        title = getString(coreR.string.course_enrollment_error),
-                        message = getString(coreR.string.course_enrollment_error_message)
-                    ).show(
-                        requireActivity().supportFragmentManager,
-                        InfoDialogFragment::class.simpleName
-                    )
-                    viewModel.showEnrollmentError.value = ""
-                }
-            }
-        }
     }
 
 
@@ -217,19 +216,16 @@ private fun ProgramInfoScreen(
     canShowBackBtn: Boolean,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
+    onWebPageLoaded: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
     refreshSessionCookie: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(true) }
+    val isLoading = uiState is ProgramUIState.Loading
 
     when (uiState) {
-        is ProgramUIState.Loading -> {
-            isLoading = true
-        }
-
         is ProgramUIState.UiMessage -> {
             HandleUIMessage(uiMessage = uiState.uiMessage, scaffoldState = scaffoldState)
         }
@@ -281,7 +277,7 @@ private fun ProgramInfoScreen(
                             url = contentUrl,
                             uriScheme = uriScheme,
                             isAllLinksExternal = true,
-                            onWebPageLoaded = { isLoading = false },
+                            onWebPageLoaded = onWebPageLoaded,
                             refreshSessionCookie = refreshSessionCookie,
                             onUriClick = onUriClick,
                         )
@@ -336,6 +332,7 @@ fun MyProgramsPreview() {
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
+            onWebPageLoaded = {},
             onUriClick = { _, _ -> },
         )
     }
