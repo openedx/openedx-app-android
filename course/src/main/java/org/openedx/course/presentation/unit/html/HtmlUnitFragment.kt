@@ -3,6 +3,7 @@ package org.openedx.course.presentation.unit.html
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -112,7 +113,7 @@ class HtmlUnitFragment : Fragment() {
                                 onCompletionSet = {
                                     viewModel.notifyCompletionSet()
                                 },
-                                onWebPageStartLoad = {
+                                onWebPageLoading = {
                                     isLoading = true
                                 },
                                 onWebPageLoaded = {
@@ -174,7 +175,7 @@ private fun HTMLContentView(
     isLoading: Boolean,
     injectJSList: List<String>,
     onCompletionSet: () -> Unit,
-    onWebPageStartLoad: () -> Unit,
+    onWebPageLoading: () -> Unit,
     onWebPageLoaded: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -203,6 +204,11 @@ private fun HTMLContentView(
                     }
                 }, "callback")
                 webViewClient = object : WebViewClient() {
+
+                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                        super.onPageStarted(view, url, favicon)
+                        onWebPageLoading()
+                    }
 
                     override fun onPageCommitVisible(view: WebView?, url: String?) {
                         super.onPageCommitVisible(view, url)
@@ -244,7 +250,6 @@ private fun HTMLContentView(
                                 403, 401, 404 -> {
                                     coroutineScope.launch {
                                         cookieManager.tryToRefreshSessionCookie()
-                                        onWebPageStartLoad()
                                         loadUrl(url)
                                     }
                                 }
@@ -263,7 +268,6 @@ private fun HTMLContentView(
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
-                onWebPageStartLoad()
                 loadUrl(url)
             }
         },
