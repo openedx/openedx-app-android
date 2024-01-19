@@ -465,6 +465,7 @@ fun HorizontalPageIndicator(
     modifier: Modifier = Modifier,
     blocks: List<Block>,
     selectedPage: Int = 0,
+    completedAndSelectedColor: Color = Color.Green,
     completedColor: Color = Color.Green,
     selectedColor: Color = Color.White,
     defaultColor: Color = Color.Gray
@@ -475,17 +476,23 @@ fun HorizontalPageIndicator(
     ) {
         blocks.forEachIndexed { index, block ->
             val backgroundColor = when {
-                index == selectedPage -> selectedColor
+                block.isCompleted() && index == selectedPage -> completedAndSelectedColor
                 block.isCompleted() -> completedColor
+                index == selectedPage -> selectedColor
                 else -> defaultColor
             }
 
-            Box(
+            Surface(
                 modifier = Modifier
-                    .background(backgroundColor)
-                    .fillMaxHeight()
+                    .padding(vertical = if (index == selectedPage) 0.dp else 1.dp)
                     .weight(1f)
-            )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(backgroundColor)
+                        .fillMaxHeight()
+                )
+            }
         }
     }
 }

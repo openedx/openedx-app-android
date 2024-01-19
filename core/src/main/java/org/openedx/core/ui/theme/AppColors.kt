@@ -46,6 +46,7 @@ data class AppColors(
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
 
+    val componentHorizontalProgressCompletedAndSelected: Color,
     val componentHorizontalProgressCompleted: Color,
     val componentHorizontalProgressSelected: Color,
     val componentHorizontalProgressDefault: Color,

@@ -133,6 +133,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     HorizontalPageIndicator(
                         blocks = descendantsBlocks,
                         selectedPage = index,
+                        completedAndSelectedColor = MaterialTheme.appColors.componentHorizontalProgressCompletedAndSelected,
                         completedColor = MaterialTheme.appColors.componentHorizontalProgressCompleted,
                         selectedColor = MaterialTheme.appColors.componentHorizontalProgressSelected,
                         defaultColor = MaterialTheme.appColors.componentHorizontalProgressDefault
