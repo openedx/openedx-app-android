@@ -16,6 +16,8 @@ plugins {
 }
 
 def currentFlavour = getCurrentFlavor()
+def config = configHelper.fetchConfig()
+def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
 
 android {
     compileSdk 34
@@ -47,8 +49,17 @@ android {
     }
 
     sourceSets {
+        prod {
+            java.srcDirs = ["src/$platformName"]
+            res.srcDirs = ["src/$platformName/res"]
+        }
         develop {
-            res.srcDirs = ['src/openedx/res']
+            java.srcDirs = ["src/$platformName"]
+            res.srcDirs = ["src/$platformName/res"]
+        }
+        stage {
+            java.srcDirs = ["src/$platformName"]
+            res.srcDirs = ["src/$platformName/res"]
         }
         main {
             assets {
