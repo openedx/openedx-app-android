@@ -158,5 +158,5 @@ val appModule = module {
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
 
-    single<EnrollInCourseInteractor> { get<CourseInteractor>() }
+    factory<EnrollInCourseInteractor> { CourseInteractor(get()) }
 }
