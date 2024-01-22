@@ -310,7 +310,9 @@ private fun SocialLoginView(
                     tint = Color.Unspecified,
                 )
                 Text(
-                    modifier = Modifier.padding(start = 10.dp),
+                    modifier = Modifier
+                        .testTag("txt_google_auth")
+                        .padding(start = 10.dp),
                     text = stringResource(id = R.string.auth_google)
                 )
             }
@@ -334,7 +336,9 @@ private fun SocialLoginView(
                     tint = MaterialTheme.appColors.buttonText,
                 )
                 Text(
-                    modifier = Modifier.padding(start = 10.dp),
+                    modifier = Modifier
+                        .testTag("txt_facebook_auth")
+                        .padding(start = 10.dp),
                     color = MaterialTheme.appColors.buttonText,
                     text = stringResource(id = R.string.auth_facebook)
                 )
@@ -359,7 +363,9 @@ private fun SocialLoginView(
                     tint = Color.Unspecified,
                 )
                 Text(
-                    modifier = Modifier.padding(start = 10.dp),
+                    modifier = Modifier
+                        .testTag("txt_microsoft_auth")
+                        .padding(start = 10.dp),
                     color = MaterialTheme.appColors.buttonText,
                     text = stringResource(id = R.string.auth_microsoft)
                 )

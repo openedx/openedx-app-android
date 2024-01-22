@@ -225,9 +225,7 @@ private fun RestorePasswordScreen(
             }
 
             Surface(
-                modifier = Modifier
-                    .testTag("txt_forgot_password_description")
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
