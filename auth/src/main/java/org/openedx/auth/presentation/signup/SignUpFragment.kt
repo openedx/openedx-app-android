@@ -56,8 +56,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -243,6 +246,9 @@ internal fun RegistrationScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+            }
             .fillMaxSize()
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
@@ -343,6 +349,7 @@ internal fun RegistrationScreen(
                 ) {
                     Text(
                         modifier = Modifier
+                            .testTag("txt_screen_title")
                             .fillMaxWidth(),
                         text = stringResource(id = R.string.core_register),
                         color = Color.White,
@@ -396,13 +403,16 @@ internal fun RegistrationScreen(
                                 ) {
                                     Column() {
                                         Text(
-                                            modifier = Modifier.fillMaxWidth(),
+                                            modifier = Modifier
+                                                .testTag("txt_sign_up_title")
+                                                .fillMaxWidth(),
                                             text = stringResource(id = org.openedx.auth.R.string.auth_sign_up),
                                             color = MaterialTheme.appColors.textPrimary,
                                             style = MaterialTheme.appTypography.displaySmall
                                         )
                                         Text(
                                             modifier = Modifier
+                                                .testTag("txt_sign_up_description")
                                                 .fillMaxWidth()
                                                 .padding(top = 4.dp),
                                             text = stringResource(id = org.openedx.auth.R.string.auth_create_new_account),
@@ -431,9 +441,10 @@ internal fun RegistrationScreen(
                                         }
                                     )
                                     if (uiState.optionalFields.isNotEmpty()) {
-                                        ExpandableText(isExpanded = showOptionalFields, onClick = {
-                                            showOptionalFields = !showOptionalFields
-                                        })
+                                        ExpandableText(modifier = Modifier.testTag("txt_optional_field"),
+                                            isExpanded = showOptionalFields, onClick = {
+                                                showOptionalFields = !showOptionalFields
+                                            })
                                         Surface(color = MaterialTheme.appColors.background) {
                                             AnimatedVisibility(visible = showOptionalFields) {
                                                 OptionalFields(
@@ -472,7 +483,7 @@ internal fun RegistrationScreen(
                                         }
                                     } else {
                                         OpenEdXButton(
-                                            width = buttonWidth,
+                                            width = buttonWidth.testTag("btn_create_account"),
                                             text = stringResource(id = org.openedx.auth.R.string.auth_create_account),
                                             onClick = {
                                                 showErrorMap.clear()
