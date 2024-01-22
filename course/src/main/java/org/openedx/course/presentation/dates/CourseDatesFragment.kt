@@ -544,7 +544,7 @@ private fun CourseDateItem(
                     modifier = Modifier
                         .padding(end = 4.dp)
                         .align(Alignment.CenterVertically),
-                    painter = painterResource(id = icon),
+                    painter = painterResource(id = if (dateBlock.learnerHasAccess.not()) coreR.drawable.core_ic_lock else icon),
                     contentDescription = null,
                     tint = MaterialTheme.appColors.textDark
                 )
@@ -582,17 +582,17 @@ private fun CourseDateItem(
                 )
             }
         }
-        if (dateBlock.isLockedContent()) {
+        if (dateBlock.description.isNotEmpty()) {
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
-                text = stringResource(id = R.string.course_dates_locked_content_description),
+                text = dateBlock.description,
                 style = TextStyle(
                     fontSize = 11.sp,
                     lineHeight = 16.sp,
                     fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.appColors.textFieldBorder,
+                    color = MaterialTheme.appColors.textPrimaryVariant,
                     letterSpacing = 0.5.sp,
                 ),
             )

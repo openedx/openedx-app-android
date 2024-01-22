@@ -23,10 +23,10 @@ enum class DateType(val drawableResId: Int? = null) {
     CERTIFICATE_AVAILABLE_DATE(R.drawable.core_ic_certificate),
 
     @SerializedName("verified-upgrade-deadline")
-    VERIFIED_UPGRADE_DEADLINE(R.drawable.core_ic_lock),
+    VERIFIED_UPGRADE_DEADLINE(R.drawable.core_ic_start_end),
 
     @SerializedName("verification-deadline-date")
-    VERIFICATION_DEADLINE_DATE(R.drawable.core_ic_lock),
+    VERIFICATION_DEADLINE_DATE(R.drawable.core_ic_start_end),
 
     NONE,
 }
