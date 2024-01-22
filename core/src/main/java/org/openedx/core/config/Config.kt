@@ -27,6 +27,10 @@ class Config(context: Context) {
         return getString(API_HOST_URL, "")
     }
 
+    fun getApplicationID(): String {
+        return getString(APPLICATION_ID, "")
+    }
+
     fun getOAuthClientId(): String {
         return getString(OAUTH_CLIENT_ID, "")
     }
@@ -139,6 +143,7 @@ class Config(context: Context) {
 
     companion object {
         private const val API_HOST_URL = "API_HOST_URL"
+        private const val APPLICATION_ID = "APPLICATION_ID"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
         private const val FAQ_URL = "FAQ_URL"

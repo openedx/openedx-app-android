@@ -38,6 +38,7 @@ interface AuthApi {
         @Field("grant_type") grantType: String,
         @Field("client_id") clientId: String,
         @Field("code") code: String,
+        @Field("redirect_uri") redirectUri: String
     ): AuthResponse
 
     @FormUrlEncoded

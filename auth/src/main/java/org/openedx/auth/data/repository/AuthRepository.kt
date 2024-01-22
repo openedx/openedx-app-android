@@ -49,6 +49,7 @@ class AuthRepository(
             grantType = ApiConstants.GRANT_TYPE_CODE,
             clientId = config.getOAuthClientId(),
             code = code,
+            redirectUri = "${config.getApplicationID()}://oauth2Callback"
         ).mapToDomain().processAuthResponse()
     }
 
