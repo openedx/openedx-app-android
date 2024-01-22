@@ -1,5 +1,6 @@
 package org.openedx.core.ui
 
+import android.content.Context
 import android.os.Build.VERSION.SDK_INT
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -97,6 +98,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -142,39 +144,18 @@ fun StaticSearchBar(
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
-    label: String
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-    ) {
-        Text(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth(),
-            text = label,
-            color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
-fun ToolbarWithBackBtn(
-    modifier: Modifier = Modifier,
     label: String,
-    onBackClick: () -> Unit
+    canShowBackBtn: Boolean = false,
+    onBackClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
     ) {
-        BackBtn(onBackClick = onBackClick)
+        if (canShowBackBtn) {
+            BackBtn(onBackClick = onBackClick)
+        }
 
         Text(
             modifier = Modifier
@@ -385,8 +366,7 @@ fun HandleUIMessage(
             }
 
             is UIMessage.ToastMessage -> {
-                val message = uiMessage.message
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                context.toastMessage(uiMessage.message)
             }
 
             else -> {}
@@ -1214,6 +1194,20 @@ private fun SearchBarPreview() {
         searchValue = TextFieldValue(),
         keyboardActions = {},
         onClearValue = {}
+    )
+}
+
+@Preview
+@Composable
+private fun ToolbarPreview() {
+    Toolbar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.appColors.background)
+            .height(48.dp),
+        label = "Toolbar",
+        canShowBackBtn = true,
+        onBackClick = {}
     )
 }
 

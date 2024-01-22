@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 
 fun Context.dpToPixel(dp: Int): Float {
@@ -40,4 +41,8 @@ fun DialogFragment.setWidthPercent(percentage: Int) {
     val rect = dm.run { Rect(0, 0, widthPixels, heightPixels) }
     val percentWidth = rect.width() * percent
     dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+}
+
+fun Context.toastMessage(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }

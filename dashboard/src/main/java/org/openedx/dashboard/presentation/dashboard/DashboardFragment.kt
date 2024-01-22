@@ -1,4 +1,4 @@
-package org.openedx.dashboard.presentation
+package org.openedx.dashboard.presentation.dashboard
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -46,13 +46,23 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.*
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.ui.*
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.shouldLoadMore
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
+import org.openedx.dashboard.presentation.DashboardRouter
 import java.util.*
 
 class DashboardFragment : Fragment() {

@@ -82,6 +82,7 @@ class CourseContainerViewModelTest {
     fun `preloadCourseStructure internet connection exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
             config,
             interactor,
             resourceManager,
@@ -105,6 +106,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `preloadCourseStructure unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             config,
             interactor,
@@ -130,6 +132,7 @@ class CourseContainerViewModelTest {
     fun `preloadCourseStructure success with internet`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
             config,
             interactor,
             resourceManager,
@@ -153,6 +156,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `preloadCourseStructure success without internet`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             config,
             interactor,
@@ -179,6 +183,7 @@ class CourseContainerViewModelTest {
     fun `updateData no internet connection exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
             config,
             interactor,
             resourceManager,
@@ -202,6 +207,7 @@ class CourseContainerViewModelTest {
     fun `updateData unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
             config,
             interactor,
             resourceManager,
@@ -224,6 +230,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `updateData success`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             config,
             interactor,

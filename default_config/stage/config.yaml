@@ -1,6 +1,7 @@
 API_HOST_URL: 'http://localhost:8000'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
+URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
 OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
@@ -18,9 +19,14 @@ DISCOVERY:
   TYPE: 'native'
   WEBVIEW:
     BASE_URL: ''
-    URI_SCHEME: ''
     COURSE_DETAIL_TEMPLATE: ''
     PROGRAM_DETAIL_TEMPLATE: ''
+
+PROGRAM:
+  TYPE: 'native'
+  WEBVIEW:
+    PROGRAM_URL: ''
+    PROGRAM_DETAIL_URL_TEMPLATE: ''
 
 GOOGLE:
   ENABLED: false

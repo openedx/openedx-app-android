@@ -25,6 +25,7 @@ import org.openedx.course.presentation.unit.container.CourseUnitContainerFragmen
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
@@ -46,7 +47,6 @@ import org.openedx.profile.presentation.settings.video.VideoQualityFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
-import java.util.Date
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
     ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
@@ -129,6 +129,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             fm,
             CourseContainerFragment.newInstance(courseId, courseTitle)
         )
+    }
+
+    override fun navigateToProgramInfo(fm: FragmentManager, pathId: String) {
+        replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
     }
 
     override fun navigateToNoAccess(

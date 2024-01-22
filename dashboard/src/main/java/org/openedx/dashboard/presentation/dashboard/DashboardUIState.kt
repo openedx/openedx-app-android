@@ -1,4 +1,4 @@
-package org.openedx.dashboard.presentation
+package org.openedx.dashboard.presentation.dashboard
 
 import org.openedx.core.domain.model.EnrolledCourse
 

@@ -8,7 +8,7 @@ import org.openedx.app.analytics.FirebaseAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.config.Config
 import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.dashboard.presentation.DashboardAnalytics
+import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.profile.presentation.ProfileAnalytics
