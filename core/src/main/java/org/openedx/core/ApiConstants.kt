@@ -17,6 +17,7 @@ object ApiConstants {
     const val TOKEN_TYPE_JWT = "jwt"
     const val TOKEN_TYPE_REFRESH = "refresh_token"
 
+    const val NAME = "name"
     const val EMAIL = "email"
     const val PASSWORD = "password"
 

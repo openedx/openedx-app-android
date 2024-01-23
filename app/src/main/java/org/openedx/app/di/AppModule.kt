@@ -23,6 +23,7 @@ import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
+import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
@@ -153,4 +154,5 @@ val appModule = module {
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
+    factory { OAuthHelper(get(), get(), get()) }
 }

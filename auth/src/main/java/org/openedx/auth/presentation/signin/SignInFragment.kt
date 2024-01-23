@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.signin.compose.LoginScreen
 import org.openedx.core.AppUpdateState
@@ -51,14 +52,10 @@ class SignInFragment : Fragment() {
                         onEvent = { event ->
                             when (event) {
                                 is AuthEvent.SignIn -> viewModel.login(event.login, event.password)
-                                AuthEvent.SignInGoogle -> viewModel.signInGoogle(requireActivity())
-                                AuthEvent.SignInFacebook -> {
-                                    viewModel.signInFacebook(this@SignInFragment)
-                                }
-
-                                AuthEvent.SignInMicrosoft -> {
-                                    viewModel.signInMicrosoft(requireActivity())
-                                }
+                                is AuthEvent.SocialSignIn -> viewModel.socialAuth(
+                                    this@SignInFragment,
+                                    event.authType
+                                )
 
                                 AuthEvent.ForgotPasswordClick -> {
                                     viewModel.forgotPasswordClickedEvent()
@@ -114,9 +111,7 @@ class SignInFragment : Fragment() {
 
 internal sealed interface AuthEvent {
     data class SignIn(val login: String, val password: String) : AuthEvent
-    object SignInGoogle : AuthEvent
-    object SignInFacebook : AuthEvent
-    object SignInMicrosoft : AuthEvent
+    data class SocialSignIn(val authType: AuthType) : AuthEvent
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent

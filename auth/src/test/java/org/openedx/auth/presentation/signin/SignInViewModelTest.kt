@@ -24,9 +24,7 @@ import org.junit.rules.TestRule
 import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.auth.presentation.sso.FacebookAuthHelper
-import org.openedx.auth.presentation.sso.GoogleAuthHelper
-import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
+import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
@@ -56,9 +54,7 @@ class SignInViewModelTest {
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
-    private val facebookAuthHelper = mockk<FacebookAuthHelper>()
-    private val googleAuthHelper = mockk<GoogleAuthHelper>()
-    private val microsoftAuthHelper = mockk<MicrosoftAuthHelper>()
+    private val oAuthHelper = mockk<OAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -101,9 +97,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -130,9 +124,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -161,9 +153,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -191,9 +181,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -223,9 +211,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -256,9 +242,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -290,9 +274,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )
@@ -324,9 +306,7 @@ class SignInViewModelTest {
             validator = validator,
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
-            facebookAuthHelper = facebookAuthHelper,
-            googleAuthHelper = googleAuthHelper,
-            microsoftAuthHelper = microsoftAuthHelper,
+            oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
         )

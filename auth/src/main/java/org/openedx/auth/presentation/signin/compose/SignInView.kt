@@ -51,7 +51,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
-import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
@@ -272,12 +271,7 @@ private fun AuthForm(
                 isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
                 isSignIn = true,
             ) {
-                when (it) {
-                    AuthType.GOOGLE -> onEvent(AuthEvent.SignInGoogle)
-                    AuthType.FACEBOOK -> onEvent(AuthEvent.SignInFacebook)
-                    AuthType.MICROSOFT -> onEvent(AuthEvent.SignInMicrosoft)
-                    else -> Unit
-                }
+                onEvent(AuthEvent.SocialSignIn(it))
             }
         }
     }

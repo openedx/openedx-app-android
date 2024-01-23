@@ -69,8 +69,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
 
         requireArguments().apply {
-            this.getString(ARG_COURSE_ID, null)?.apply {
-                router.navigateToCourseDetail(parentFragmentManager, this)
+            this.getString(ARG_COURSE_ID, null)?.let {
+                if (it.isNotBlank()) {
+                    router.navigateToCourseDetail(parentFragmentManager, it)
+                }
             }
             this.putString(ARG_COURSE_ID, null)
         }

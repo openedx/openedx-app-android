@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.signup.compose.SignUpView
 import org.openedx.core.AppUpdateState
@@ -53,8 +54,19 @@ class SignUpFragment : Fragment() {
                         onBackClick = {
                             requireActivity().supportFragmentManager.popBackStackImmediate()
                         },
-                        onRegisterClick = { map ->
-                            viewModel.register(map.mapValues { it.value ?: "" })
+                        onRegisterClick = { authType ->
+                            when (authType) {
+                                AuthType.PASSWORD -> viewModel.register()
+                                AuthType.GOOGLE,
+                                AuthType.FACEBOOK,
+                                AuthType.MICROSOFT -> viewModel.socialAuth(
+                                    this@SignUpFragment,
+                                    authType
+                                )
+                            }
+                        },
+                        onFieldUpdated = { name, value ->
+                            viewModel.updateField(name, value)
                         }
                     )
 

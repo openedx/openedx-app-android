@@ -57,12 +57,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.openedx.auth.R
+import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signup.SignUpUIState
 import org.openedx.auth.presentation.ui.ExpandableText
 import org.openedx.auth.presentation.ui.OptionalFields
 import org.openedx.auth.presentation.ui.RequiredFields
 import org.openedx.auth.presentation.ui.SocialAuthView
-import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
@@ -82,6 +83,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.R as coreR
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -90,7 +92,8 @@ internal fun SignUpView(
     uiState: SignUpUIState,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
-    onRegisterClick: (Map<String, String?>) -> Unit,
+    onFieldUpdated: (String, String) -> Unit,
+    onRegisterClick: (authType: AuthType) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
@@ -112,9 +115,6 @@ internal fun SignUpView(
     var showOptionalFields by rememberSaveable {
         mutableStateOf(false)
     }
-    val mapFields = rememberSaveableMap {
-        mutableStateMapOf<String, String?>()
-    }
     val showErrorMap = rememberSaveableMap {
         mutableStateMapOf<String, Boolean?>()
     }
@@ -134,11 +134,23 @@ internal fun SignUpView(
 
     val isImeVisible by isImeVisibleState()
 
+    val fields = uiState.allFields.filter { it.required }
+    val optionalFields = uiState.allFields.filter { !it.required }
+
     LaunchedEffect(uiState.validationError) {
         if (uiState.validationError) {
             coroutine.launch {
                 scrollState.animateScrollTo(0, tween(300))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+        }
+    }
+
+    LaunchedEffect(uiState.socialAuth) {
+        if (uiState.socialAuth != null) {
+            coroutine.launch {
+                showErrorMap.clear()
+                scrollState.animateScrollTo(0, tween(300))
             }
         }
     }
@@ -215,7 +227,7 @@ internal fun SignUpView(
                     expandedList = expandedList,
                     listState = listState,
                     onItemClick = { item ->
-                        mapFields[serverFieldName.value] = item.value
+                        onFieldUpdated(serverFieldName.value, item.value)
                         selectableNamesMap[serverFieldName.value] = item.name
                         coroutine.launch {
                             bottomSheetScaffoldState.hide()
@@ -231,7 +243,7 @@ internal fun SignUpView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.3f),
-                painter = painterResource(id = R.drawable.core_top_header),
+                painter = painterResource(id = coreR.drawable.core_top_header),
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
             )
@@ -254,7 +266,7 @@ internal fun SignUpView(
                     Text(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        text = stringResource(id = R.string.core_register),
+                        text = stringResource(id = coreR.string.core_register),
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.appTypography.titleMedium
@@ -286,12 +298,6 @@ internal fun SignUpView(
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
                         } else {
-                            mapFields.let {
-                                if (it.isEmpty()) {
-                                    it.putAll(uiState.fields.associate { it.name to "" })
-                                    it["honor_code"] = true.toString()
-                                }
-                            }
                             Column(
                                 Modifier
                                     .fillMaxHeight()
@@ -302,24 +308,37 @@ internal fun SignUpView(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Column {
-                                    Text(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        text = stringResource(id = org.openedx.auth.R.string.auth_sign_up),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.displaySmall
-                                    )
-                                    Text(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 4.dp),
-                                        text = stringResource(id = org.openedx.auth.R.string.auth_create_new_account),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.titleSmall
-                                    )
+                                    if (uiState.socialAuth != null) {
+                                        SocialSignedView(uiState.socialAuth.authType)
+                                        Text(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 4.dp),
+                                            text = stringResource(
+                                                id = R.string.auth_compete_registration
+                                            ),
+                                            color = MaterialTheme.appColors.textPrimary,
+                                            style = MaterialTheme.appTypography.titleSmall
+                                        )
+                                    } else {
+                                        Text(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            text = stringResource(id = R.string.auth_sign_up),
+                                            color = MaterialTheme.appColors.textPrimary,
+                                            style = MaterialTheme.appTypography.displaySmall
+                                        )
+                                        Text(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 4.dp),
+                                            text = stringResource(id = R.string.auth_create_new_account),
+                                            color = MaterialTheme.appColors.textPrimary,
+                                            style = MaterialTheme.appTypography.titleSmall
+                                        )
+                                    }
                                 }
                                 RequiredFields(
-                                    fields = uiState.fields,
-                                    mapFields = mapFields,
+                                    fields = fields,
                                     showErrorMap = showErrorMap,
                                     selectableNamesMap = selectableNamesMap,
                                     onSelectClick = { serverName, field, list ->
@@ -335,17 +354,17 @@ internal fun SignUpView(
                                                 bottomSheetScaffoldState.show()
                                             }
                                         }
-                                    }
+                                    },
+                                    onFieldUpdated = onFieldUpdated
                                 )
-                                if (uiState.optionalFields.isNotEmpty()) {
+                                if (optionalFields.isNotEmpty()) {
                                     ExpandableText(isExpanded = showOptionalFields, onClick = {
                                         showOptionalFields = !showOptionalFields
                                     })
                                     Surface(color = MaterialTheme.appColors.background) {
                                         AnimatedVisibility(visible = showOptionalFields) {
                                             OptionalFields(
-                                                fields = uiState.optionalFields,
-                                                mapFields = mapFields,
+                                                fields = optionalFields,
                                                 showErrorMap = showErrorMap,
                                                 selectableNamesMap = selectableNamesMap,
                                                 onSelectClick = { serverName, field, list ->
@@ -362,7 +381,8 @@ internal fun SignUpView(
                                                             bottomSheetScaffoldState.show()
                                                         }
                                                     }
-                                                }
+                                                },
+                                                onFieldUpdated = onFieldUpdated,
                                             )
                                         }
                                     }
@@ -380,14 +400,14 @@ internal fun SignUpView(
                                 } else {
                                     OpenEdXButton(
                                         width = buttonWidth,
-                                        text = stringResource(id = org.openedx.auth.R.string.auth_create_account),
+                                        text = stringResource(id = R.string.auth_create_account),
                                         onClick = {
                                             showErrorMap.clear()
-                                            onRegisterClick(mapFields.toMap())
+                                            onRegisterClick(AuthType.PASSWORD)
                                         }
                                     )
                                 }
-                                if (uiState.isSocialAuthEnabled) {
+                                if (uiState.isSocialAuthEnabled && uiState.socialAuth == null) {
                                     SocialAuthView(
                                         modifier = buttonWidth,
                                         isGoogleAuthEnabled = uiState.isGoogleAuthEnabled,
@@ -395,6 +415,7 @@ internal fun SignUpView(
                                         isMicrosoftAuthEnabled = uiState.isMicrosoftAuthEnabled,
                                         isSignIn = false,
                                     ) {
+                                        onRegisterClick(it)
                                     }
                                 }
                                 Spacer(Modifier.height(70.dp))
@@ -417,14 +438,12 @@ private fun RegistrationScreenPreview() {
         SignUpView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = SignUpUIState(
-                fields = listOf(field, field, field),
-                optionalFields = listOf(
-                    field
-                )
+                allFields = listOf(field, field, field.copy(required = false)),
             ),
             uiMessage = null,
             onBackClick = {},
-            onRegisterClick = {}
+            onRegisterClick = {},
+            onFieldUpdated = { _, _ -> },
         )
     }
 }
@@ -437,12 +456,12 @@ private fun RegistrationScreenTabletPreview() {
         SignUpView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = SignUpUIState(
-                fields = listOf(field, field, field),
-                optionalFields = listOf(field)
+                allFields = listOf(field, field, field.copy(required = false)),
             ),
             uiMessage = null,
             onBackClick = {},
-            onRegisterClick = {}
+            onRegisterClick = {},
+            onFieldUpdated = { _, _ -> },
         )
     }
 }

@@ -9,6 +9,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -16,6 +17,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,6 +29,10 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
+import org.openedx.core.config.FacebookConfig
+import org.openedx.core.config.GoogleConfig
+import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
@@ -42,6 +49,7 @@ class SignUpViewModelTest {
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val preferencesManager = mockk<CorePreferences>()
     private val interactor = mockk<AuthInteractor>()
@@ -95,6 +103,10 @@ class SignUpViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { config.isSocialAuthEnabled() } returns false
+        every { config.getFacebookConfig() } returns FacebookConfig()
+        every { config.getGoogleConfig() } returns GoogleConfig()
+        every { config.getMicrosoftConfig() } returns MicrosoftConfig()
     }
 
     @After
@@ -110,6 +122,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
@@ -129,10 +142,10 @@ class SignUpViewModelTest {
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(true, viewModel.validationError.value)
-        assert(viewModel.successLogin.value != true)
-        assert(viewModel.isButtonLoading.value != true)
-        assertEquals(null, viewModel.uiMessage.value)
+        assertEquals(true, viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
+        assertEquals(null, viewModel.uiMessage.first())
     }
 
     @Test
@@ -143,6 +156,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws UnknownHostException()
@@ -165,11 +179,11 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
 
-        assertEquals(false, viewModel.validationError.value)
-        assert(viewModel.successLogin.value != true)
-        assert(viewModel.isButtonLoading.value != true)
+        assertEquals(false, viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
         assertEquals(noInternet, message?.message)
     }
 
@@ -181,6 +195,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws Exception()
@@ -198,11 +213,11 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
 
-        assertEquals(false, viewModel.validationError.value)
-        assert(viewModel.successLogin.value != true)
-        assert(viewModel.isButtonLoading.value != true)
+        assertEquals(false, viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
         assertEquals(somethingWrong, message?.message)
     }
 
@@ -215,6 +230,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
@@ -241,10 +257,10 @@ class SignUpViewModelTest {
         verify(exactly = 1) { analytics.registrationSuccessEvent(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(false, viewModel.validationError.value)
-        assertEquals(false, viewModel.isButtonLoading.value)
-        assertEquals(null, viewModel.uiMessage.value)
-        assertEquals(true, viewModel.successLogin.value)
+        assertEquals(false, viewModel.uiState.value.validationError)
+        assertEquals(false, viewModel.uiState.value.isButtonLoading)
+        assertEquals(null, viewModel.uiMessage.first())
+        assertEquals(true, viewModel.uiState.value.successLogin)
     }
 
     @Test
@@ -255,6 +271,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.getRegistrationFields() } throws UnknownHostException()
@@ -263,9 +280,9 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
 
-        assert(viewModel.uiState.value is SignUpUIState.Loading)
+        assertTrue(viewModel.uiState.value.isLoading)
         assertEquals(noInternet, message?.message)
     }
 
@@ -277,6 +294,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.getRegistrationFields() } throws Exception()
@@ -285,9 +303,9 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
+        val message = viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
 
-        assert(viewModel.uiState.value is SignUpUIState.Loading)
+        assertTrue(viewModel.uiState.value.isLoading)
         assertEquals(somethingWrong, message?.message)
     }
 
@@ -299,6 +317,7 @@ class SignUpViewModelTest {
             analytics,
             preferencesManager,
             appUpgradeNotifier,
+            config,
             courseId = "",
         )
         coEvery { interactor.getRegistrationFields() } returns listOfFields
@@ -309,7 +328,7 @@ class SignUpViewModelTest {
 
         //val fields = viewModel.uiState.value as? SignUpUIState.Fields
 
-        assert(viewModel.uiState.value is SignUpUIState.Fields)
-        assertEquals(null, viewModel.uiMessage.value)
+        assertFalse(viewModel.uiState.value.isLoading)
+        assertEquals(null, viewModel.uiMessage.first())
     }
 }
