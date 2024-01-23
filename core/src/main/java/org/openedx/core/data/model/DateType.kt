@@ -5,7 +5,7 @@ import org.openedx.core.R
 
 enum class DateType(val drawableResId: Int? = null) {
     @SerializedName("todays-date")
-    TODAY_DATE,
+    TODAY_DATE(R.drawable.core_ic_calendar),
 
     @SerializedName("course-start-date")
     COURSE_START_DATE(R.drawable.core_ic_start_end),
@@ -23,10 +23,10 @@ enum class DateType(val drawableResId: Int? = null) {
     CERTIFICATE_AVAILABLE_DATE(R.drawable.core_ic_certificate),
 
     @SerializedName("verified-upgrade-deadline")
-    VERIFIED_UPGRADE_DEADLINE(R.drawable.core_ic_start_end),
+    VERIFIED_UPGRADE_DEADLINE(R.drawable.core_ic_calendar),
 
     @SerializedName("verification-deadline-date")
-    VERIFICATION_DEADLINE_DATE(R.drawable.core_ic_start_end),
+    VERIFICATION_DEADLINE_DATE(R.drawable.core_ic_calendar),
 
     NONE,
 }

@@ -171,6 +171,12 @@ object TimeUtils {
         return formattedDate
     }
 
+    /**
+     * Method to get the formatted time string in terms of relative time with minimum resolution of minutes.
+     * For example, if the time difference is 1 minute, it will return "1m ago".
+     *
+     * @param date Date object to be formatted.
+     */
     fun getFormattedTime(date: Date): String {
         return DateUtils.getRelativeTimeSpanString(
             date.time,
@@ -246,7 +252,10 @@ object TimeUtils {
     }
 }
 
-// Extension function to clear time components
+/**
+ * Extension function to clear time components of a calendar.
+ * for example, if the time is 10:30:45, it will set the time to 00:00:00
+ */
 fun Calendar.clearTimeComponents() {
     this.set(Calendar.HOUR_OF_DAY, 0)
     this.set(Calendar.MINUTE, 0)
@@ -254,7 +263,9 @@ fun Calendar.clearTimeComponents() {
     this.set(Calendar.MILLISECOND, 0)
 }
 
-// Extension function to check if a date is today
+/**
+ * Extension function to check if the given date is today.
+ */
 fun Date.isToday(): Boolean {
     val calendar = Calendar.getInstance()
     calendar.time = this
@@ -262,7 +273,10 @@ fun Date.isToday(): Boolean {
     return calendar.time == Date().clearTime()
 }
 
-// Extension function to add number of days to a date
+/**
+ * Extension function to add days to a date.
+ * for example, if the date is 2020-01-01 10:30:45, and days is 2, it will return 2020-01-03 00:00:00
+ */
 fun Date.addDays(days: Int): Date {
     val calendar = Calendar.getInstance()
     calendar.time = this
@@ -271,6 +285,10 @@ fun Date.addDays(days: Int): Date {
     return calendar.time
 }
 
+/**
+ * Extension function to clear time components of a date.
+ * for example, if the date is 2020-01-01 10:30:45, it will return 2020-01-01 00:00:00
+ */
 fun Date.clearTime(): Date {
     val calendar = Calendar.getInstance()
     calendar.time = this
@@ -278,6 +296,9 @@ fun Date.clearTime(): Date {
     return calendar.time
 }
 
+/**
+ * Extension function to check if the time difference between the given date and the current date is less than 24 hours.
+ */
 fun Date.isTimeLessThan24Hours(): Boolean {
     val calendar = Calendar.getInstance()
     calendar.time = this

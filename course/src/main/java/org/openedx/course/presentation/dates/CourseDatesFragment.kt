@@ -343,7 +343,7 @@ fun ExpandableView(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.appColors.cardViewBackground, MaterialTheme.shapes.medium)
-            .border(2.dp, MaterialTheme.appColors.cardViewBorder, MaterialTheme.shapes.medium)
+            .border(0.75.dp, MaterialTheme.appColors.cardViewBorder, MaterialTheme.shapes.medium)
     ) {
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -637,7 +637,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
         Pair(
             DatesSection.COMPLETED, listOf(
                 CourseDateBlock(
-                    title = "Homework 1: A B C D",
+                    title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                 )
@@ -645,7 +645,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
         ), Pair(
             DatesSection.COMPLETED, listOf(
                 CourseDateBlock(
-                    title = "Homework 1: A B C D",
+                    title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                 )
@@ -653,7 +653,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
         ), Pair(
             DatesSection.PAST_DUE, listOf(
                 CourseDateBlock(
-                    title = "Homework 1: A B C D",
+                    title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                     dateType = DateType.ASSIGNMENT_DUE_DATE,
@@ -662,7 +662,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
         ), Pair(
             DatesSection.TODAY, listOf(
                 CourseDateBlock(
-                    title = "Homework 2: A B C D",
+                    title = "Homework 2: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-21T15:08:07Z")!!,
                 )
@@ -670,7 +670,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
         ), Pair(
             DatesSection.THIS_WEEK, listOf(
                 CourseDateBlock(
-                    title = "Assignment Due: A B C D",
+                    title = "Assignment Due: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-22T15:08:07Z")!!,
                     dateType = DateType.ASSIGNMENT_DUE_DATE,
@@ -688,7 +688,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
         ), Pair(
             DatesSection.NEXT_WEEK, listOf(
                 CourseDateBlock(
-                    title = "Homework 5: A B C D",
+                    title = "Homework 5: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-25T15:08:07Z")!!,
                 )

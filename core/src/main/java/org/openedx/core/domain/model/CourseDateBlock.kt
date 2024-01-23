@@ -21,15 +21,9 @@ data class CourseDateBlock(
             DateType.COURSE_START_DATE,
             DateType.COURSE_END_DATE,
             DateType.CERTIFICATE_AVAILABLE_DATE,
-            DateType.VERIFICATION_DEADLINE_DATE
-        ) && date.before(Date()))
-    }
-
-    fun isLockedContent(): Boolean {
-        return dateType in setOf(
             DateType.VERIFIED_UPGRADE_DEADLINE,
-            DateType.VERIFICATION_DEADLINE_DATE
-        )
+            DateType.VERIFICATION_DEADLINE_DATE,
+        ) && date.before(Date()))
     }
 
     fun isTimeDifferenceLessThan24Hours(): Boolean {
