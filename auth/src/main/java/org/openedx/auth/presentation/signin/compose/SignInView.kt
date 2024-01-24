@@ -36,12 +36,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -70,6 +74,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.R as coreR
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun LoginScreen(
     windowSize: WindowSize,
@@ -83,6 +88,9 @@ internal fun LoginScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+            }
             .fillMaxSize()
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
@@ -172,12 +180,15 @@ internal fun LoginScreen(
                             .then(contentPaddings),
                     ) {
                         Text(
+                            modifier = Modifier.testTag("txt_sign_in_title"),
                             text = stringResource(id = coreR.string.core_sign_in),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.displaySmall
                         )
                         Text(
-                            modifier = Modifier.padding(top = 4.dp),
+                            modifier = Modifier
+                                .testTag("txt_sign_in_description")
+                                .padding(top = 4.dp),
                             text = stringResource(id = R.string.auth_welcome_back),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleSmall
@@ -233,9 +244,11 @@ private fun AuthForm(
         ) {
             if (state.isLogistrationEnabled.not()) {
                 Text(
-                    modifier = Modifier.noRippleClickable {
-                        onEvent(AuthEvent.RegisterClick)
-                    },
+                    modifier = Modifier
+                        .testTag("txt_register")
+                        .noRippleClickable {
+                            onEvent(AuthEvent.RegisterClick)
+                        },
                     text = stringResource(id = coreR.string.core_register),
                     color = MaterialTheme.appColors.primary,
                     style = MaterialTheme.appTypography.labelLarge
@@ -243,9 +256,11 @@ private fun AuthForm(
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                modifier = Modifier.noRippleClickable {
-                    onEvent(AuthEvent.ForgotPasswordClick)
-                },
+                modifier = Modifier
+                    .testTag("txt_forgot_password")
+                    .noRippleClickable {
+                        onEvent(AuthEvent.ForgotPasswordClick)
+                    },
                 text = stringResource(id = R.string.auth_forgot_password),
                 color = MaterialTheme.appColors.primary,
                 style = MaterialTheme.appTypography.labelLarge
@@ -256,7 +271,7 @@ private fun AuthForm(
             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
             OpenEdXButton(
-                width = buttonWidth,
+                width = buttonWidth.testTag("btn_sign_in"),
                 text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
                     onEvent(AuthEvent.SignIn(login = login, password = password))
@@ -290,14 +305,16 @@ private fun PasswordTextField(
     }
     val focusManager = LocalFocusManager.current
     Text(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .testTag("txt_password_label")
+            .fillMaxWidth(),
         text = stringResource(id = coreR.string.core_password),
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
     )
     Spacer(modifier = Modifier.height(8.dp))
     OutlinedTextField(
-        modifier = modifier,
+        modifier = modifier.testTag("tf_password"),
         value = passwordTextFieldValue,
         onValueChange = {
             passwordTextFieldValue = it
@@ -310,6 +327,7 @@ private fun PasswordTextField(
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
             Text(
+                modifier = Modifier.testTag("txt_password_placeholder"),
                 text = stringResource(id = R.string.auth_enter_password),
                 color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium

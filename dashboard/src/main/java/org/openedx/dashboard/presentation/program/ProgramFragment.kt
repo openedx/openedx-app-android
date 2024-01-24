@@ -1,6 +1,5 @@
-package org.openedx.course.presentation.info
+package org.openedx.dashboard.presentation.program
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,7 +18,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +39,9 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.UIMessage
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
+import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
@@ -55,13 +55,20 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.course.R
-import org.openedx.core.R as CoreR
+import org.openedx.dashboard.R
+import org.openedx.core.R as coreR
 import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
 
-class CourseInfoFragment : Fragment() {
+class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
 
-    private val viewModel by viewModel<CourseInfoViewModel>()
+    private val viewModel by viewModel<ProgramViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (myPrograms.not()) {
+            lifecycle.addObserver(viewModel)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,67 +78,93 @@ class CourseInfoFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
-                val showAlert by viewModel.showAlert.collectAsState(initial = false)
-                val enrollmentSuccess by viewModel.courseEnrollSuccess.collectAsState(initial = "")
                 val windowSize = rememberWindowSize()
+                val uiState by viewModel.uiState.collectAsState(initial = ProgramUIState.Loading)
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
 
-                LaunchedEffect(showAlert) {
-                    if (showAlert) {
-                        InfoDialogFragment.newInstance(
-                            title = context.getString(CoreR.string.course_enrollment_error),
-                            message = context.getString(
-                                CoreR.string.course_enrollment_error_message,
-                                getString(CoreR.string.platform_name)
-                            )
-                        ).show(
-                            requireActivity().supportFragmentManager,
-                            InfoDialogFragment::class.simpleName
-                        )
+                if (myPrograms.not()) {
+                    DisposableEffect(uiState is ProgramUIState.CourseEnrolled) {
+                        if (uiState is ProgramUIState.CourseEnrolled) {
+
+                            val courseId = (uiState as ProgramUIState.CourseEnrolled).courseId
+                            val isEnrolled = (uiState as ProgramUIState.CourseEnrolled).isEnrolled
+
+                            if (isEnrolled) {
+                                viewModel.onEnrolledCourseClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    courseId = courseId,
+                                )
+                                context.toastMessage(getString(R.string.dashboard_enrolled_successfully))
+                            } else {
+                                InfoDialogFragment.newInstance(
+                                    title = getString(coreR.string.course_enrollment_error),
+                                    message = getString(coreR.string.course_enrollment_error_message)
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    InfoDialogFragment::class.simpleName
+                                )
+                            }
+                        }
+                        onDispose {}
                     }
                 }
 
-                LaunchedEffect(enrollmentSuccess) {
-                    if (enrollmentSuccess.isNotEmpty()) {
-                        viewModel.onSuccessfulCourseEnrollment(
-                            fragmentManager = requireActivity().supportFragmentManager,
-                            courseId = enrollmentSuccess,
-                        )
-                    }
-                }
-
-                CourseInfoScreen(
+                ProgramInfoScreen(
                     windowSize = windowSize,
-                    uiMessage = uiMessage,
+                    uiState = uiState,
                     contentUrl = getInitialUrl(),
+                    canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
+                        ?.isNotEmpty() == true,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
                     },
+                    onWebPageLoaded = { viewModel.showLoading(false) },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
                     onUriClick = { param, type ->
                         when (type) {
+                            linkAuthority.ENROLLED_COURSE_INFO -> {
+                                viewModel.onEnrolledCourseClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    courseId = param
+                                )
+                            }
+
+                            linkAuthority.ENROLLED_PROGRAM_INFO -> {
+                                viewModel.onProgramCardClick(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param
+                                )
+                            }
+
                             linkAuthority.PROGRAM_INFO,
                             linkAuthority.COURSE_INFO -> {
-                                viewModel.infoCardClicked(
+                                viewModel.onViewCourseClick(
                                     fragmentManager = requireActivity().supportFragmentManager,
-                                    pathId = param,
+                                    courseId = param,
                                     infoType = type.name
                                 )
                             }
 
+                            linkAuthority.ENROLL -> {
+                                viewModel.enrollInACourse(param)
+                            }
+
+                            linkAuthority.COURSE -> {
+                                viewModel.navigateToDiscovery()
+                            }
+
                             linkAuthority.EXTERNAL -> {
                                 ActionDialogFragment.newInstance(
-                                    title = getString(CoreR.string.core_leaving_the_app),
+                                    title = getString(coreR.string.core_leaving_the_app),
                                     message = getString(
-                                        CoreR.string.core_leaving_the_app_message,
-                                        getString(CoreR.string.platform_name)
+                                        coreR.string.core_leaving_the_app_message,
+                                        getString(coreR.string.platform_name)
                                     ),
                                     url = param,
                                 ).show(
@@ -140,42 +173,34 @@ class CourseInfoFragment : Fragment() {
                                 )
                             }
 
-                            linkAuthority.ENROLL -> {
-                                viewModel.enrollInACourse(param)
-                            }
-
                             else -> {}
                         }
-                    }
+                    },
+                    refreshSessionCookie = {
+                        viewModel.refreshCookie()
+                    },
                 )
             }
         }
     }
 
+
     private fun getInitialUrl(): String {
         return arguments?.let { args ->
             val pathId = args.getString(ARG_PATH_ID) ?: ""
-            val urlTemplate = if (args.getString(ARG_INFO_TYPE) == linkAuthority.COURSE_INFO.name) {
-                viewModel.webViewConfig.courseUrlTemplate
-            } else {
-                viewModel.webViewConfig.programUrlTemplate
-            }
-            urlTemplate.replace("{$ARG_PATH_ID}", pathId)
-        } ?: viewModel.webViewConfig.baseUrl
+            viewModel.programConfig.programDetailUrlTemplate.replace("{$ARG_PATH_ID}", pathId)
+        } ?: viewModel.programConfig.programUrl
     }
 
     companion object {
         private const val ARG_PATH_ID = "path_id"
-        private const val ARG_INFO_TYPE = "info_type"
 
         fun newInstance(
             pathId: String,
-            infoType: String,
-        ): CourseInfoFragment {
-            val fragment = CourseInfoFragment()
+        ): ProgramFragment {
+            val fragment = ProgramFragment(false)
             fragment.arguments = bundleOf(
                 ARG_PATH_ID to pathId,
-                ARG_INFO_TYPE to infoType
             )
             return fragment
         }
@@ -183,21 +208,30 @@ class CourseInfoFragment : Fragment() {
 }
 
 @Composable
-private fun CourseInfoScreen(
+private fun ProgramInfoScreen(
     windowSize: WindowSize,
-    uiMessage: UIMessage?,
+    uiState: ProgramUIState?,
     contentUrl: String,
     uriScheme: String,
+    canShowBackBtn: Boolean,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
+    onWebPageLoaded: () -> Unit,
     onBackClick: () -> Unit,
-    onUriClick: (String, linkAuthority) -> Unit,
+    onUriClick: (String, WebViewLink.Authority) -> Unit,
+    refreshSessionCookie: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(true) }
+    val isLoading = uiState is ProgramUIState.Loading
 
-    HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+    when (uiState) {
+        is ProgramUIState.UiMessage -> {
+            HandleUIMessage(uiMessage = uiState.uiMessage, scaffoldState = scaffoldState)
+        }
+
+        else -> {}
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -226,8 +260,8 @@ private fun CourseInfoScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Toolbar(
-                label = stringResource(id = R.string.course_discover),
-                canShowBackBtn = true,
+                label = stringResource(id = R.string.dashboard_programs),
+                canShowBackBtn = canShowBackBtn,
                 onBackClick = onBackClick
             )
 
@@ -239,11 +273,24 @@ private fun CourseInfoScreen(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (hasInternetConnection) {
-                        CourseInfoWebView(
-                            contentUrl = contentUrl,
+                        val webView = CatalogWebViewScreen(
+                            url = contentUrl,
                             uriScheme = uriScheme,
-                            onWebPageLoaded = { isLoading = false },
+                            isAllLinksExternal = true,
+                            onWebPageLoaded = onWebPageLoaded,
+                            refreshSessionCookie = refreshSessionCookie,
                             onUriClick = onUriClick,
+                        )
+
+                        AndroidView(
+                            modifier = Modifier
+                                .background(MaterialTheme.appColors.background),
+                            factory = {
+                                webView
+                            },
+                            update = {
+                                webView.loadUrl(contentUrl)
+                            }
                         )
                     } else {
                         ConnectionErrorView(
@@ -271,48 +318,21 @@ private fun CourseInfoScreen(
     }
 }
 
-@Composable
-@SuppressLint("SetJavaScriptEnabled")
-private fun CourseInfoWebView(
-    contentUrl: String,
-    uriScheme: String,
-    onWebPageLoaded: () -> Unit,
-    onUriClick: (String, linkAuthority) -> Unit,
-) {
-
-    val webView = CatalogWebViewScreen(
-        url = contentUrl,
-        uriScheme = uriScheme,
-        isAllLinksExternal = true,
-        onWebPageLoaded = onWebPageLoaded,
-        onUriClick = onUriClick,
-    )
-
-    AndroidView(
-        modifier = Modifier
-            .background(MaterialTheme.appColors.background),
-        factory = {
-            webView
-        },
-        update = {
-            webView.loadUrl(contentUrl)
-        }
-    )
-}
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CourseInfoScreenPreview() {
+fun MyProgramsPreview() {
     OpenEdXTheme {
-        CourseInfoScreen(
+        ProgramInfoScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiMessage = null,
+            uiState = ProgramUIState.Loading,
             contentUrl = "https://www.example.com/",
             uriScheme = "",
+            canShowBackBtn = false,
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},
+            onWebPageLoaded = {},
             onUriClick = { _, _ -> },
         )
     }

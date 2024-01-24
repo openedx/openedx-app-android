@@ -11,6 +11,8 @@ class WebViewDiscoveryViewModel(
     private val router: DiscoveryRouter,
 ) : BaseViewModel() {
 
+    val uriScheme: String get() = config.getUriScheme()
+
     val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
 
     private var _discoveryUrl = webViewConfig.baseUrl

@@ -29,7 +29,8 @@ import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.DashboardViewModel
+import org.openedx.dashboard.presentation.dashboard.DashboardViewModel
+import org.openedx.dashboard.presentation.program.ProgramViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -58,7 +59,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 val screenModule = module {
 
     viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get()) }
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -83,7 +84,7 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -128,9 +129,10 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseContainerViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -254,13 +256,8 @@ val screenModule = module {
         )
     }
 
-    viewModel { (courseId: String) -> WhatsNewViewModel(courseId, get()) }
-    viewModel {
-        HtmlUnitViewModel(
-            get(),
-            get(),
-            get(),
-            get()
-        )
-    }
+    viewModel { (courseId: String?) -> WhatsNewViewModel(courseId, get()) }
+    viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
+
+    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }

@@ -3,16 +3,20 @@ package org.openedx.app
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.adapter.MainNavigationFragmentAdapter
 import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dashboard.presentation.DashboardFragment
+import org.openedx.dashboard.presentation.dashboard.DashboardFragment
+import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.profile.presentation.profile.ProfileFragment
@@ -28,6 +32,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lifecycle.addObserver(viewModel)
         setFragmentResultListener(UpgradeRequiredFragment.REQUEST_KEY) { _, _ ->
             binding.bottomNavView.selectedItemId = R.id.fragmentProfile
             viewModel.enableBottomBar(false)
@@ -68,6 +73,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             enableBottomBar(isBottomBarEnabled)
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.navigateToDiscovery.collect { shouldNavigateToDiscovery ->
+                if (shouldNavigateToDiscovery) {
+                    binding.bottomNavView.selectedItemId = R.id.fragmentHome
+                }
+            }
+        }
+
         requireArguments().apply {
             this.getString(ARG_COURSE_ID, null)?.let {
                 if (it.isNotBlank()) {
@@ -84,11 +97,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView)
             .getDiscoveryFragment()
+        val programFragment = if (viewModel.isProgramTypeWebView) {
+            ProgramFragment(true)
+        } else {
+            InDevelopmentFragment()
+        }
 
         adapter = MainNavigationFragmentAdapter(this).apply {
             addFragment(discoveryFragment)
             addFragment(DashboardFragment())
-            addFragment(InDevelopmentFragment())
+            addFragment(programFragment)
             addFragment(ProfileFragment())
         }
         binding.viewPager.adapter = adapter
@@ -96,8 +114,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun enableBottomBar(enable: Boolean) {
-        for (i in 0 until binding.bottomNavView.menu.size()) {
-            binding.bottomNavView.menu.getItem(i).isEnabled = enable
+        binding.bottomNavView.menu.forEach {
+            it.isEnabled = enable
         }
     }
 

@@ -16,7 +16,8 @@ class WebViewLink(
         ENROLL("enroll"),
         ENROLLED_PROGRAM_INFO("enrolled_program_info"),
         ENROLLED_COURSE_INFO("enrolled_course_info"),
-        COURSE("course")
+        COURSE("course"),
+        EXTERNAL("external"),
     }
 
     object Param {

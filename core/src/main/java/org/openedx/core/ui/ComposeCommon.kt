@@ -1,5 +1,6 @@
 package org.openedx.core.ui
 
+import android.content.Context
 import android.os.Build.VERSION.SDK_INT
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -68,6 +69,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -96,6 +98,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -141,39 +144,18 @@ fun StaticSearchBar(
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
-    label: String
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-    ) {
-        Text(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth(),
-            text = label,
-            color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
-fun ToolbarWithBackBtn(
-    modifier: Modifier = Modifier,
     label: String,
-    onBackClick: () -> Unit
+    canShowBackBtn: Boolean = false,
+    onBackClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
     ) {
-        BackBtn(onBackClick = onBackClick)
+        if (canShowBackBtn) {
+            BackBtn(onBackClick = onBackClick)
+        }
 
         Text(
             modifier = Modifier
@@ -241,7 +223,9 @@ fun SearchBar(
         ),
         placeholder = {
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("txt_search_placeholder")
+                    .fillMaxWidth(),
                 text = label,
                 color = MaterialTheme.appColors.textSecondary,
                 style = MaterialTheme.appTypography.bodyMedium
@@ -382,8 +366,7 @@ fun HandleUIMessage(
             }
 
             is UIMessage.ToastMessage -> {
-                val message = uiMessage.message
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                context.toastMessage(uiMessage.message)
             }
 
             else -> {}
@@ -601,6 +584,7 @@ fun SheetContent(
     ) {
         Text(
             modifier = Modifier
+                .testTag("txt_selection_title")
                 .fillMaxWidth()
                 .padding(10.dp),
             textAlign = TextAlign.Center,
@@ -609,6 +593,7 @@ fun SheetContent(
         )
         SearchBarStateless(
             modifier = Modifier
+                .testTag("sb_search")
                 .fillMaxWidth()
                 .height(48.dp)
                 .padding(horizontal = 16.dp),
@@ -629,6 +614,7 @@ fun SheetContent(
             }) { item ->
                 Text(
                     modifier = Modifier
+                        .testTag("txt_${item.value}_title")
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
@@ -1116,7 +1102,7 @@ fun BackBtn(
     tint: Color = MaterialTheme.appColors.primary,
     onBackClick: () -> Unit
 ) {
-    IconButton(modifier = modifier,
+    IconButton(modifier = modifier.testTag("ib_back"),
         onClick = { onBackClick() }) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),
@@ -1168,6 +1154,7 @@ fun AuthButtonsPanel(
     Row {
         OpenEdXButton(
             width = Modifier
+                .testTag("btn_register")
                 .width(0.dp)
                 .weight(1f),
             text = stringResource(id = R.string.core_register),
@@ -1176,6 +1163,7 @@ fun AuthButtonsPanel(
 
         OpenEdXOutlinedButton(
             modifier = Modifier
+                .testTag("btn_sign_in")
                 .width(100.dp)
                 .padding(start = 16.dp),
             text = stringResource(id = R.string.core_sign_in),
@@ -1206,6 +1194,20 @@ private fun SearchBarPreview() {
         searchValue = TextFieldValue(),
         keyboardActions = {},
         onClearValue = {}
+    )
+}
+
+@Preview
+@Composable
+private fun ToolbarPreview() {
+    Toolbar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.appColors.background)
+            .height(48.dp),
+        label = "Toolbar",
+        canShowBackBtn = true,
+        onBackClick = {}
     )
 }
 
