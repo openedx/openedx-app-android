@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +37,7 @@ internal fun SocialAuthView(
         if (isGoogleAuthEnabled) {
             OpenEdXOutlinedButton(
                 modifier = Modifier
+                    .testTag("btn_google_auth")
                     .padding(top = 24.dp)
                     .fillMaxWidth(),
                 backgroundColor = MaterialTheme.appColors.background,
@@ -52,7 +54,9 @@ internal fun SocialAuthView(
                         tint = Color.Unspecified,
                     )
                     Text(
-                        modifier = Modifier.padding(start = 10.dp),
+                        modifier = Modifier
+                            .testTag("txt_google_auth")
+                            .padding(start = 10.dp),
                         text = stringResource(id = R.string.auth_google)
                     )
                 }
@@ -61,6 +65,7 @@ internal fun SocialAuthView(
         if (isFacebookAuthEnabled) {
             OpenEdXButton(
                 width = Modifier
+                    .testTag("btn_facebook_auth")
                     .padding(top = 12.dp)
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.auth_facebook),
@@ -76,7 +81,9 @@ internal fun SocialAuthView(
                         tint = MaterialTheme.appColors.buttonText,
                     )
                     Text(
-                        modifier = Modifier.padding(start = 10.dp),
+                        modifier = Modifier
+                            .testTag("txt_facebook_auth")
+                            .padding(start = 10.dp),
                         color = MaterialTheme.appColors.buttonText,
                         text = stringResource(id = R.string.auth_facebook)
                     )
@@ -86,6 +93,7 @@ internal fun SocialAuthView(
         if (isMicrosoftAuthEnabled) {
             OpenEdXButton(
                 width = Modifier
+                    .testTag("btn_microsoft_auth")
                     .padding(top = 12.dp)
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.auth_microsoft),
@@ -101,7 +109,9 @@ internal fun SocialAuthView(
                         tint = Color.Unspecified,
                     )
                     Text(
-                        modifier = Modifier.padding(start = 10.dp),
+                        modifier = Modifier
+                            .testTag("txt_microsoft_auth")
+                            .padding(start = 10.dp),
                         color = MaterialTheme.appColors.buttonText,
                         text = stringResource(id = R.string.auth_microsoft)
                     )
