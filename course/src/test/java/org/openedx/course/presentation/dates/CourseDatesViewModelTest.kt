@@ -117,7 +117,7 @@ class CourseDatesViewModelTest {
 
     @Test
     fun `getCourseDates no internet connection exception`() = runTest {
-        val viewModel = CourseDatesViewModel("", interactor, networkConnection, resourceManager)
+        val viewModel = CourseDatesViewModel("", true, interactor, networkConnection, resourceManager)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
         advanceUntilIdle()
@@ -133,7 +133,7 @@ class CourseDatesViewModelTest {
 
     @Test
     fun `getCourseDates unknown exception`() = runTest {
-        val viewModel = CourseDatesViewModel("", interactor, networkConnection, resourceManager)
+        val viewModel = CourseDatesViewModel("", true, interactor, networkConnection, resourceManager)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws Exception()
         advanceUntilIdle()
@@ -149,7 +149,7 @@ class CourseDatesViewModelTest {
 
     @Test
     fun `getCourseDates success with internet`() = runTest {
-        val viewModel = CourseDatesViewModel("", interactor, networkConnection, resourceManager)
+        val viewModel = CourseDatesViewModel("", true, interactor, networkConnection, resourceManager)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
 
@@ -164,7 +164,7 @@ class CourseDatesViewModelTest {
 
     @Test
     fun `getCourseDates success with EmptyList`() = runTest {
-        val viewModel = CourseDatesViewModel("", interactor, networkConnection, resourceManager)
+        val viewModel = CourseDatesViewModel("", true, interactor, networkConnection, resourceManager)
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),
