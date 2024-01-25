@@ -18,6 +18,7 @@ import org.openedx.course.domain.interactor.CourseInteractor
 
 class CourseDatesViewModel(
     val courseId: String,
+    val isSelfPaced: Boolean,
     private val interactor: CourseInteractor,
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
@@ -35,8 +36,6 @@ class CourseDatesViewModel(
     val updating: LiveData<Boolean>
         get() = _updating
 
-    var courseTitle = ""
-
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -44,17 +43,19 @@ class CourseDatesViewModel(
         getCourseDates()
     }
 
-    fun getCourseDates() {
-        _uiState.value = DatesUIState.Loading
+    fun getCourseDates(swipeToRefresh: Boolean = false) {
+        if (!swipeToRefresh) {
+            _uiState.value = DatesUIState.Loading
+        }
+        _updating.value = swipeToRefresh
         loadingCourseDatesInternal()
     }
 
     private fun loadingCourseDatesInternal() {
         viewModelScope.launch {
             try {
-                _updating.value = true
                 val datesResponse = interactor.getCourseDates(courseId = courseId)
-                if (datesResponse.isEmpty()) {
+                if (datesResponse.datesSection.isEmpty()) {
                     _uiState.value = DatesUIState.Empty
                 } else {
                     _uiState.value = DatesUIState.Dates(datesResponse)
@@ -69,6 +70,23 @@ class CourseDatesViewModel(
                 }
             }
             _updating.value = false
+        }
+    }
+
+    fun resetCourseDatesBanner() {
+        viewModelScope.launch {
+            try {
+                interactor.resetCourseDates(courseId = courseId)
+                getCourseDates()
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                }
+            }
         }
     }
 

@@ -44,6 +44,10 @@ class CourseContainerViewModel(
     val showProgress: LiveData<Boolean>
         get() = _showProgress
 
+    private var _isSelfPaced: Boolean = true
+    val isSelfPaced: Boolean
+        get() = _isSelfPaced
+
     init {
         viewModelScope.launch {
             notifier.notifier.collect { event ->
@@ -69,6 +73,7 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
+                _isSelfPaced = courseStructure.isSelfPaced
                 _dataReady.value = courseStructure.start?.let { start ->
                     start < Date()
                 }
@@ -123,5 +128,4 @@ class CourseContainerViewModel(
     fun handoutsTabClickedEvent() {
         analytics.handoutsTabClickedEvent(courseId, courseName)
     }
-
 }

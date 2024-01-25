@@ -1,6 +1,8 @@
 package org.openedx.core.data.model
 
 import com.google.gson.annotations.SerializedName
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.addDays
@@ -10,22 +12,27 @@ import java.util.Date
 import org.openedx.core.domain.model.CourseDateBlock as DomainCourseDateBlock
 
 data class CourseDates(
-    @SerializedName("dates_banner_info")
-    val datesBannerInfo: CourseDatesBannerInfo?,
     @SerializedName("course_date_blocks")
     val courseDateBlocks: List<CourseDateBlock>,
-    @SerializedName("missed_deadlines")
-    val missedDeadlines: Boolean = false,
-    @SerializedName("missed_gated_content")
-    val missedGatedContent: Boolean = false,
-    @SerializedName("learner_is_full_access")
-    val learnerIsFullAccess: Boolean = false,
-    @SerializedName("user_timezone")
-    val userTimezone: String? = "",
-    @SerializedName("verified_upgrade_link")
-    val verifiedUpgradeLink: String? = "",
+    @SerializedName("dates_banner_info")
+    val datesBannerInfo: DatesBannerInfo?,
+    @SerializedName("has_ended")
+    val hasEnded: Boolean,
 ) {
-    fun getStructuredCourseDates(): LinkedHashMap<DatesSection, List<DomainCourseDateBlock>> {
+    fun getCourseDatesResult(): CourseDatesResult {
+        return CourseDatesResult(
+            datesSection = getStructuredCourseDates(),
+            courseBanner = CourseDatesBannerInfo(
+                missedDeadlines = datesBannerInfo?.missedDeadlines ?: false,
+                missedGatedContent = datesBannerInfo?.missedGatedContent ?: false,
+                verifiedUpgradeLink = datesBannerInfo?.verifiedUpgradeLink ?: "",
+                contentTypeGatingEnabled = datesBannerInfo?.contentTypeGatingEnabled ?: false,
+                hasEnded = hasEnded,
+            )
+        )
+    }
+
+    private fun getStructuredCourseDates(): LinkedHashMap<DatesSection, List<DomainCourseDateBlock>> {
         val currentDate = Date()
         val courseDatesResponse: LinkedHashMap<DatesSection, List<DomainCourseDateBlock>> =
             LinkedHashMap()

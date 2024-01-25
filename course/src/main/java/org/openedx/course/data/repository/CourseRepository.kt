@@ -2,6 +2,7 @@ package org.openedx.course.data.repository
 
 import kotlinx.coroutines.flow.map
 import okhttp3.ResponseBody
+import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.EnrollBody
@@ -100,7 +101,10 @@ class CourseRepository(
     }
 
     suspend fun getCourseDates(courseId: String) =
-        api.getCourseDates(courseId).getStructuredCourseDates()
+        api.getCourseDates(courseId).getCourseDatesResult()
+
+    suspend fun resetCourseDates(courseId: String) =
+        api.resetCourseDates(mapOf(ApiConstants.COURSE_KEY to courseId)).mapToDomain()
 
     suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
