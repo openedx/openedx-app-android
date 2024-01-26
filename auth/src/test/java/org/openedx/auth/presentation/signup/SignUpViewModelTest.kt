@@ -63,12 +63,13 @@ class SignUpViewModelTest {
 
     private val parametersMap = mapOf(
         ApiConstants.EMAIL to "user@gmail.com",
-        ApiConstants.PASSWORD to "password123"
+        ApiConstants.PASSWORD to "password123",
+        "honor_code" to "true",
     )
 
     private val listOfFields = listOf(
         RegistrationField(
-            "",
+            ApiConstants.EMAIL,
             "",
             RegistrationFieldType.TEXT,
             "",
@@ -80,7 +81,7 @@ class SignUpViewModelTest {
         ),
 
         RegistrationField(
-            "",
+            ApiConstants.PASSWORD,
             "",
             RegistrationFieldType.TEXT,
             "",
@@ -132,11 +133,17 @@ class SignUpViewModelTest {
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             parametersMap
         )
+        coEvery { interactor.getRegistrationFields() } returns listOfFields
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        viewModel.getRegistrationFields()
+        advanceUntilIdle()
+        parametersMap.forEach {
+            viewModel.updateField(it.key, it.value)
+        }
         viewModel.register()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
@@ -166,6 +173,7 @@ class SignUpViewModelTest {
         val deferred = async { viewModel.uiMessage.first() }
 
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws UnknownHostException()
+        coEvery { interactor.getRegistrationFields() } returns listOfFields
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
             interactor.login(
@@ -176,6 +184,11 @@ class SignUpViewModelTest {
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        viewModel.getRegistrationFields()
+        advanceUntilIdle()
+        parametersMap.forEach {
+            viewModel.updateField(it.key, it.value)
+        }
         viewModel.register()
         advanceUntilIdle()
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
@@ -244,6 +257,7 @@ class SignUpViewModelTest {
         )
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         every { analytics.registrationSuccessEvent(any()) } returns Unit
+        coEvery { interactor.getRegistrationFields() } returns listOfFields
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
             interactor.login(
@@ -253,6 +267,11 @@ class SignUpViewModelTest {
         } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        viewModel.getRegistrationFields()
+        advanceUntilIdle()
+        parametersMap.forEach {
+            viewModel.updateField(it.key, it.value)
+        }
         viewModel.register()
         advanceUntilIdle()
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
