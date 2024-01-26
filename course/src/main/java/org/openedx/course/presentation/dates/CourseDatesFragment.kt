@@ -45,9 +45,13 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -73,34 +78,40 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
+import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.*
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.R as coreR
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
+import org.openedx.core.utils.clearTime
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.ui.CourseDatesBanner
+import org.openedx.core.R as coreR
 
 class CourseDatesFragment : Fragment() {
 
     private val viewModel by viewModel<CourseDatesViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getBoolean(ARG_IS_SELF_PACED, true),
+        )
     }
     private val router by inject<CourseRouter>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        lifecycle.addObserver(viewModel)
-        with(requireArguments()) {
-            viewModel.courseTitle = getString(ARG_TITLE, "")
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,16 +126,18 @@ class CourseDatesFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
 
-                CourseDatesScreen(windowSize = windowSize,
+                CourseDatesScreen(
+                    windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
+                    isSelfPaced = viewModel.isSelfPaced,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     onReloadClick = {
                         viewModel.getCourseDates()
                     },
                     onSwipeRefresh = {
-                        viewModel.getCourseDates()
+                        viewModel.getCourseDates(swipeToRefresh = true)
                     },
                     onItemClick = { blockId ->
                         if (blockId.isNotEmpty()) {
@@ -141,17 +154,28 @@ class CourseDatesFragment : Fragment() {
                                     }
                             }
                         }
-                    })
+                    },
+                    onSyncDates = {
+                        viewModel.resetCourseDatesBanner()
+                    },
+                )
             }
         }
     }
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_TITLE = "title"
-        fun newInstance(courseId: String, title: String): CourseDatesFragment {
+        private const val ARG_IS_SELF_PACED = "selfPaced"
+        fun newInstance(
+            courseId: String,
+            isSelfPaced: Boolean,
+        ): CourseDatesFragment {
             val fragment = CourseDatesFragment()
-            fragment.arguments = bundleOf(ARG_COURSE_ID to courseId, ARG_TITLE to title)
+            fragment.arguments =
+                bundleOf(
+                    ARG_COURSE_ID to courseId,
+                    ARG_IS_SELF_PACED to isSelfPaced,
+                )
             return fragment
         }
     }
@@ -164,10 +188,12 @@ internal fun CourseDatesScreen(
     uiState: DatesUIState?,
     uiMessage: UIMessage?,
     refreshing: Boolean,
+    isSelfPaced: Boolean,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onItemClick: (String) -> Unit,
+    onSyncDates: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -212,7 +238,6 @@ internal fun CourseDatesScreen(
             Surface(
                 modifier = modifierScreenWidth,
                 color = MaterialTheme.appColors.background,
-                shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
                 Box(
                     Modifier
@@ -237,8 +262,21 @@ internal fun CourseDatesScreen(
                                         .padding(horizontal = 16.dp),
                                     contentPadding = listBottomPadding
                                 ) {
+                                    val courseBanner = uiState.courseDatesResult.courseBanner
+                                    val datesSection = uiState.courseDatesResult.datesSection
+
+                                    if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
+                                        item {
+                                            CourseDatesBanner(
+                                                modifier = Modifier.padding(bottom = 16.dp),
+                                                banner = courseBanner,
+                                                resetDates = onSyncDates
+                                            )
+                                        }
+                                    }
+
                                     // Handle DatesSection.COMPLETED separately
-                                    uiState.courseDates[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
+                                    datesSection[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
                                         item {
                                             ExpandableView(
                                                 sectionKey = DatesSection.COMPLETED,
@@ -247,12 +285,12 @@ internal fun CourseDatesScreen(
                                             )
                                         }
                                     }
+
                                     // Handle other sections
                                     val sectionsKey =
-                                        uiState.courseDates.keys.minus(DatesSection.COMPLETED)
-                                            .toList()
+                                        datesSection.keys.minus(DatesSection.COMPLETED).toList()
                                     sectionsKey.forEach { sectionKey ->
-                                        uiState.courseDates[sectionKey]?.isNotEmptyThenLet { section ->
+                                        datesSection[sectionKey]?.isNotEmptyThenLet { section ->
                                             item {
                                                 CourseDateBlockSection(
                                                     sectionKey = sectionKey,
@@ -329,7 +367,7 @@ fun ExpandableView(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.appColors.cardViewBackground, MaterialTheme.shapes.medium)
-            .border(2.dp, MaterialTheme.appColors.cardViewBorder, MaterialTheme.shapes.medium)
+            .border(0.75.dp, MaterialTheme.appColors.cardViewBorder, MaterialTheme.shapes.medium)
     ) {
         Row(modifier = Modifier
             .fillMaxWidth()
@@ -433,7 +471,7 @@ private fun CourseDateBlockSection(
             if (sectionKey != DatesSection.COMPLETED) {
                 DateBullet(section = sectionKey)
             }
-            DateBlock(section = sectionKey, sectionDates, onItemClick)
+            DateBlock(dateBlocks = sectionDates, onItemClick = onItemClick)
         }
     }
 }
@@ -464,7 +502,6 @@ private fun DateBullet(
 
 @Composable
 private fun DateBlock(
-    section: DatesSection = DatesSection.NONE,
     dateBlocks: List<CourseDateBlock>,
     onItemClick: (String) -> Unit,
 ) {
@@ -474,9 +511,9 @@ private fun DateBlock(
             .wrapContentHeight()
             .padding(start = 8.dp, end = 8.dp),
     ) {
-        var lastAssignmentDate = dateBlocks.firstOrNull()?.date
-        var canShowDate = (section == DatesSection.TODAY).not()
+        var lastAssignmentDate = dateBlocks.first().date.clearTime()
         dateBlocks.forEachIndexed { index, dateBlock ->
+            var canShowDate = index == 0
             if (index != 0) {
                 canShowDate = (lastAssignmentDate != dateBlock.date)
             }
@@ -501,9 +538,14 @@ private fun CourseDateItem(
         if (isMiddleChild) {
             Spacer(modifier = Modifier.height(20.dp))
         }
-        if (canShowDate && dateBlock.date != null) {
+        if (canShowDate) {
+            val timeTitle = if (dateBlock.isTimeDifferenceLessThan24Hours()) {
+                TimeUtils.getFormattedTime(dateBlock.date)
+            } else {
+                TimeUtils.getCourseFormattedDate(LocalContext.current, dateBlock.date)
+            }
             Text(
-                text = TimeUtils.getCourseFormattedDate(LocalContext.current, dateBlock.date!!),
+                text = timeTitle,
                 style = TextStyle(
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
@@ -517,13 +559,24 @@ private fun CourseDateItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(end = 4.dp)
                 .clickable(enabled = dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess,
                     onClick = { onItemClick(dateBlock.blockId) })
         ) {
+            dateBlock.dateType.drawableResId?.let { icon ->
+                Icon(
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .align(Alignment.CenterVertically),
+                    painter = painterResource(id = if (dateBlock.learnerHasAccess.not()) coreR.drawable.core_ic_lock else icon),
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.textDark
+                )
+            }
             Text(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 8.dp),
+                    .align(Alignment.CenterVertically),
                 // append assignment type if available with title
                 text = if (dateBlock.assignmentType.isNullOrEmpty().not()) {
                     "${dateBlock.assignmentType}: ${dateBlock.title}"
@@ -537,10 +590,10 @@ private fun CourseDateItem(
                     color = MaterialTheme.appColors.textDark,
                     letterSpacing = 0.15.sp,
                 ),
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(7.dp))
 
             if (dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess) {
                 Icon(
@@ -553,6 +606,21 @@ private fun CourseDateItem(
                 )
             }
         }
+        if (dateBlock.description.isNotEmpty()) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                text = dateBlock.description,
+                style = TextStyle(
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.appColors.textPrimaryVariant,
+                    letterSpacing = 0.5.sp,
+                ),
+            )
+        }
     }
 }
 
@@ -561,14 +629,18 @@ private fun CourseDateItem(
 @Composable
 private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DatesUIState.Dates(mockedResponse),
+        CourseDatesScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
+            isSelfPaced = true,
             hasInternetConnection = true,
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onItemClick = {})
+            onItemClick = {},
+            onSyncDates = {},
+        )
     }
 }
 
@@ -577,16 +649,28 @@ private fun CourseDatesScreenPreview() {
 @Composable
 private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DatesUIState.Dates(mockedResponse),
+        CourseDatesScreen(
+            windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
+            uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
+            isSelfPaced = true,
             hasInternetConnection = true,
             refreshing = false,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onItemClick = {})
+            onItemClick = {},
+            onSyncDates = {},
+        )
     }
 }
+
+val mockedCourseBannerInfo = CourseDatesBannerInfo(
+    missedDeadlines = true,
+    missedGatedContent = false,
+    verifiedUpgradeLink = "",
+    contentTypeGatingEnabled = false,
+    hasEnded = false,
+)
 
 private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
     linkedMapOf(
@@ -595,7 +679,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                 )
             )
         ), Pair(
@@ -603,7 +687,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                 )
             )
         ), Pair(
@@ -611,7 +695,8 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
+                    dateType = DateType.ASSIGNMENT_DUE_DATE,
                 )
             )
         ), Pair(
@@ -619,7 +704,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Homework 2: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-21T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-21T15:08:07Z")!!,
                 )
             )
         ), Pair(
@@ -627,15 +712,17 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Assignment Due: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-22T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-22T15:08:07Z")!!,
+                    dateType = DateType.ASSIGNMENT_DUE_DATE,
                 ), CourseDateBlock(
                     title = "Assignment Due",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-23T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-23T15:08:07Z")!!,
+                    dateType = DateType.ASSIGNMENT_DUE_DATE,
                 ), CourseDateBlock(
                     title = "Surprise Assignment",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-24T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-24T15:08:07Z")!!,
                 )
             )
         ), Pair(
@@ -643,7 +730,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Homework 5: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-25T15:08:07Z"),
+                    date = TimeUtils.iso8601ToDate("2023-10-25T15:08:07Z")!!,
                 )
             )
         ), Pair(
@@ -651,8 +738,9 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Last Assignment",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-26T15:08:07Z"),
-                    assignmentType = "Module 1"
+                    date = TimeUtils.iso8601ToDate("2023-10-26T15:08:07Z")!!,
+                    assignmentType = "Module 1",
+                    dateType = DateType.VERIFICATION_DEADLINE_DATE,
                 )
             )
         )

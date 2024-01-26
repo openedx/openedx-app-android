@@ -93,6 +93,14 @@
         <item quantity="other">%d Items Hidden</item>
     </plurals>
 
+    <!--  Course Dates Banner  -->
+    <string name="core_dates_reset_dates_banner_button" tools:ignore="MissingTranslation">Shift due dates</string>
+    <string name="core_dates_reset_dates_banner_header" tools:ignore="MissingTranslation">Missed some deadlines?</string>
+    <string name="core_dates_reset_dates_banner_body" tools:ignore="MissingTranslation">Don\'t worry - shift our suggested schedule to complete past due assignments without losing any progress.</string>
+    <string name="core_dates_info_banner_body" tools:ignore="MissingTranslation">We built a suggested schedule to help you stay on track. But don’t worry – it’s flexible so you can learn at your own pace. If you happen to fall behind, you’ll be able to adjust the dates to keep yourself on track.</string>
+    <string name="core_dates_upgrade_to_graded_banner_body" tools:ignore="MissingTranslation">To complete graded assignments as part of this course, you can upgrade today.</string>
+    <string name="core_dates_upgrade_to_reset_banner_body" tools:ignore="MissingTranslation">You are auditing this course, which means that you are unable to participate in graded assignments. It looks like you missed some important deadlines based on our suggested schedule. To complete graded assignments as part of this course and shift the past due assignments into the future, you can upgrade today.</string>
+
     <string name="core_register">Register</string>
     <string name="core_sign_in">Sign in</string>
 

@@ -24,4 +24,6 @@ object ApiConstants {
     const val AUTH_TYPE_GOOGLE = "google-oauth2"
     const val AUTH_TYPE_FB = "facebook"
     const val AUTH_TYPE_MICROSOFT = "azuread-oauth2"
+
+    const val COURSE_KEY = "course_key"
 }

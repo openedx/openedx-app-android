@@ -96,7 +96,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName))
             addFragment(CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName))
             addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, viewModel.courseName))
+            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced))
             addFragment(HandoutsFragment.newInstance(viewModel.courseId))
         }
         binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
