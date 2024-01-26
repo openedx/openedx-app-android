@@ -126,10 +126,10 @@ class CourseDetailsFragment : Fragment() {
                         }
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, viewModel.courseId)
+                        router.navigateToSignUp(parentFragmentManager, viewModel.courseId, null)
                     },
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, viewModel.courseId)
+                        router.navigateToSignIn(parentFragmentManager, viewModel.courseId, null)
                     },
                 )
             }

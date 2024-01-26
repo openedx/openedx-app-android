@@ -21,7 +21,7 @@ class WhatsNewViewModelTest {
     fun `getNewestData success`() = runTest {
         every { whatsNewManager.getNewestData() } returns whatsNewItem
 
-        val viewModel = WhatsNewViewModel("", whatsNewManager)
+        val viewModel = WhatsNewViewModel("", "", whatsNewManager)
 
         verify(exactly = 1) { whatsNewManager.getNewestData() }
         assert(viewModel.whatsNewItem.value == whatsNewItem)

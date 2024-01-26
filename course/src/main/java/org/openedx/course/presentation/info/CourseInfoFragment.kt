@@ -40,10 +40,13 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
+import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
@@ -56,12 +59,18 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
+import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 class CourseInfoFragment : Fragment() {
 
-    private val viewModel by viewModel<CourseInfoViewModel>()
+    private val viewModel by viewModel<CourseInfoViewModel> {
+        parametersOf(
+            requireArguments().getString(ARG_PATH_ID, ""),
+            requireArguments().getString(ARG_INFO_TYPE, "")
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,7 +82,7 @@ class CourseInfoFragment : Fragment() {
             OpenEdXTheme {
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val showAlert by viewModel.showAlert.collectAsState(initial = false)
-                val enrollmentSuccess by viewModel.courseEnrollSuccess.collectAsState(initial = "")
+                val uiState by viewModel.uiState.collectAsState()
                 val windowSize = rememberWindowSize()
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
@@ -94,23 +103,39 @@ class CourseInfoFragment : Fragment() {
                     }
                 }
 
-                LaunchedEffect(enrollmentSuccess) {
-                    if (enrollmentSuccess.isNotEmpty()) {
+                LaunchedEffect(uiState.enrollmentSuccess.get()) {
+                    if (uiState.enrollmentSuccess.get().isNotEmpty()) {
                         viewModel.onSuccessfulCourseEnrollment(
                             fragmentManager = requireActivity().supportFragmentManager,
-                            courseId = enrollmentSuccess,
+                            courseId = uiState.enrollmentSuccess.get(),
                         )
+                        // Clear after navigation
+                        uiState.enrollmentSuccess.set("")
                     }
                 }
 
                 CourseInfoScreen(
                     windowSize = windowSize,
+                    uiState = uiState,
                     uiMessage = uiMessage,
-                    contentUrl = getInitialUrl(),
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
                         hasInternetConnection = viewModel.hasInternetConnection
+                    },
+                    onRegisterClick = {
+                        viewModel.navigateToSignUp(
+                            parentFragmentManager,
+                            viewModel.pathId,
+                            viewModel.infoType
+                        )
+                    },
+                    onSignInClick = {
+                        viewModel.navigateToSignIn(
+                            parentFragmentManager,
+                            viewModel.pathId,
+                            viewModel.infoType
+                        )
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
@@ -141,7 +166,15 @@ class CourseInfoFragment : Fragment() {
                             }
 
                             linkAuthority.ENROLL -> {
-                                viewModel.enrollInACourse(param)
+                                if (uiState.isPreLogin) {
+                                    viewModel.navigateToSignUp(
+                                        fragmentManager = requireActivity().supportFragmentManager,
+                                        courseId = viewModel.pathId,
+                                        infoType = viewModel.infoType
+                                    )
+                                } else {
+                                    viewModel.enrollInACourse(courseId = param)
+                                }
                             }
 
                             else -> {}
@@ -150,18 +183,6 @@ class CourseInfoFragment : Fragment() {
                 )
             }
         }
-    }
-
-    private fun getInitialUrl(): String {
-        return arguments?.let { args ->
-            val pathId = args.getString(ARG_PATH_ID) ?: ""
-            val urlTemplate = if (args.getString(ARG_INFO_TYPE) == linkAuthority.COURSE_INFO.name) {
-                viewModel.webViewConfig.courseUrlTemplate
-            } else {
-                viewModel.webViewConfig.programUrlTemplate
-            }
-            urlTemplate.replace("{$ARG_PATH_ID}", pathId)
-        } ?: viewModel.webViewConfig.baseUrl
     }
 
     companion object {
@@ -185,13 +206,15 @@ class CourseInfoFragment : Fragment() {
 @Composable
 private fun CourseInfoScreen(
     windowSize: WindowSize,
+    uiState: CourseInfoUIState,
     uiMessage: UIMessage?,
-    contentUrl: String,
     uriScheme: String,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onSignInClick: () -> Unit,
     onBackClick: () -> Unit,
-    onUriClick: (String, linkAuthority) -> Unit,
+    onUriClick: (String, WebViewLink.Authority) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -202,7 +225,23 @@ private fun CourseInfoScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.background,
+        bottomBar = {
+            if (uiState.isPreLogin) {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 32.dp,
+                        )
+                ) {
+                    AuthButtonsPanel(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick
+                    )
+                }
+            }
+        }
     ) {
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -240,7 +279,7 @@ private fun CourseInfoScreen(
                 ) {
                     if (hasInternetConnection) {
                         CourseInfoWebView(
-                            contentUrl = contentUrl,
+                            contentUrl = uiState.initialUrl,
                             uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
                             onUriClick = onUriClick,
@@ -307,11 +346,17 @@ fun CourseInfoScreenPreview() {
     OpenEdXTheme {
         CourseInfoScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = CourseInfoUIState(
+                initialUrl = "https://www.example.com/",
+                isPreLogin = false,
+                enrollmentSuccess = AtomicReference("")
+            ),
             uiMessage = null,
-            contentUrl = "https://www.example.com/",
             uriScheme = "",
             hasInternetConnection = false,
             checkInternetConnection = {},
+            onRegisterClick = {},
+            onSignInClick = {},
             onBackClick = {},
             onUriClick = { _, _ -> },
         )

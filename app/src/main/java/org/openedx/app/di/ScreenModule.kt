@@ -64,7 +64,7 @@ val screenModule = module {
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
-    viewModel { (courseId: String?) ->
+    viewModel { (courseId: String?, infoType: String?) ->
         SignInViewModel(
             get(),
             get(),
@@ -75,10 +75,12 @@ val screenModule = module {
             get(),
             get(),
             courseId,
+            infoType,
         )
     }
-    viewModel { (courseId: String?) ->
-        SignUpViewModel(get(), get(), get(), get(), get(), get(), get(), courseId)
+
+    viewModel { (courseId: String?, infoType: String?) ->
+        SignUpViewModel(get(), get(), get(), get(), get(), get(), get(), courseId, infoType)
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
@@ -89,7 +91,15 @@ val screenModule = module {
     factory { DiscoveryRepository(get(), get()) }
     factory { DiscoveryInteractor(get()) }
     viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { WebViewDiscoveryViewModel(get(), get(), get()) }
+    viewModel { (querySearch: String) ->
+        WebViewDiscoveryViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            querySearch
+        )
+    }
 
     factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
@@ -116,7 +126,19 @@ val screenModule = module {
 
     single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
-    viewModel { CourseInfoViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { (pathId: String, infoType: String) ->
+        CourseInfoViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            pathId,
+            infoType
+        )
+    }
     viewModel { (courseId: String) ->
         CourseDetailsViewModel(
             courseId,
@@ -264,7 +286,13 @@ val screenModule = module {
         )
     }
 
-    viewModel { (courseId: String?) -> WhatsNewViewModel(courseId, get()) }
+    viewModel { (courseId: String?, infoType: String?) ->
+        WhatsNewViewModel(
+            courseId,
+            infoType,
+            get()
+        )
+    }
     viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
