@@ -106,6 +106,9 @@ class CourseRepository(
     suspend fun resetCourseDates(courseId: String) =
         api.resetCourseDates(mapOf(ApiConstants.COURSE_KEY to courseId)).mapToDomain()
 
+    suspend fun getDatesBannerInfo(courseId: String) =
+        api.getDatesBannerInfo(courseId).getDatesBannerInfo()
+
     suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
     suspend fun getAnnouncements(courseId: String) =

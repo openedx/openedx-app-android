@@ -163,6 +163,10 @@ class CourseDatesFragment : Fragment() {
         }
     }
 
+    fun updateData() {
+        viewModel.getCourseDates()
+    }
+
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_IS_SELF_PACED = "selfPaced"

@@ -22,13 +22,17 @@ data class CourseDates(
     fun getCourseDatesResult(): CourseDatesResult {
         return CourseDatesResult(
             datesSection = getStructuredCourseDates(),
-            courseBanner = CourseDatesBannerInfo(
-                missedDeadlines = datesBannerInfo?.missedDeadlines ?: false,
-                missedGatedContent = datesBannerInfo?.missedGatedContent ?: false,
-                verifiedUpgradeLink = datesBannerInfo?.verifiedUpgradeLink ?: "",
-                contentTypeGatingEnabled = datesBannerInfo?.contentTypeGatingEnabled ?: false,
-                hasEnded = hasEnded,
-            )
+            courseBanner = getDatesBannerInfo(),
+        )
+    }
+
+    fun getDatesBannerInfo(): CourseDatesBannerInfo {
+        return CourseDatesBannerInfo(
+            missedDeadlines = datesBannerInfo?.missedDeadlines ?: false,
+            missedGatedContent = datesBannerInfo?.missedGatedContent ?: false,
+            verifiedUpgradeLink = datesBannerInfo?.verifiedUpgradeLink ?: "",
+            contentTypeGatingEnabled = datesBannerInfo?.contentTypeGatingEnabled ?: false,
+            hasEnded = hasEnded,
         )
     }
 

@@ -14,4 +14,6 @@ class CourseContainerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment
     fun addFragment(fragment: Fragment) {
         fragments.add(fragment)
     }
+
+    fun getFragment(position: Int): Fragment = fragments[position]
 }

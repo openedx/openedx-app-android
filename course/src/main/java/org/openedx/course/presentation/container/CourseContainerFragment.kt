@@ -21,6 +21,7 @@ import org.openedx.course.presentation.outline.CourseOutlineFragment
 import org.openedx.course.presentation.ui.CourseToolbar
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
+import org.openedx.core.R as coreR
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -153,6 +154,30 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     fun updateCourseStructure(withSwipeRefresh: Boolean) {
         viewModel.updateData(withSwipeRefresh)
+    }
+
+    fun showDatesUpdateSnackbar(isSuccess: Boolean) {
+        val message = if (isSuccess) {
+            getString(coreR.string.core_dates_shift_dates_successfully_msg)
+        } else {
+            getString(coreR.string.core_dates_shift_dates_unsuccessful_msg)
+        }
+        val duration = if (isSuccess) {
+            Snackbar.LENGTH_INDEFINITE
+        } else {
+            Snackbar.LENGTH_LONG
+        }
+        snackBar = Snackbar.make(binding.root, message, duration).also {
+            if (isSuccess) {
+                it.setAction(coreR.string.core_dates_view_all_dates) {
+                    binding.viewPager.setCurrentItem(3, true)
+                    adapter?.getFragment(3)?.let { fragment ->
+                        (fragment as CourseDatesFragment).updateData()
+                    }
+                }
+            }
+        }
+        snackBar?.show()
     }
 
     companion object {

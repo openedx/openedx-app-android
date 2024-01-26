@@ -25,6 +25,10 @@ data class CourseDatesBannerInfo(
         return selfPacedAvailable || instructorPacedAvailable
     }
 
+    fun isBannerAvailableForDashboard(): Boolean {
+        return hasEnded.not() && bannerType == RESET_DATES
+    }
+
     private fun getCourseBannerType(): CourseBannerType = when {
         canUpgradeToGraded() -> UPGRADE_TO_GRADED
         canUpgradeToReset() -> UPGRADE_TO_RESET

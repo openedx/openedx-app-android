@@ -99,8 +99,8 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                                 context.toastMessage(getString(R.string.dashboard_enrolled_successfully))
                             } else {
                                 InfoDialogFragment.newInstance(
-                                    title = getString(coreR.string.course_enrollment_error),
-                                    message = getString(coreR.string.course_enrollment_error_message)
+                                    title = getString(coreR.string.core_enrollment_error),
+                                    message = getString(coreR.string.core_enrollment_error_message)
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     InfoDialogFragment::class.simpleName
