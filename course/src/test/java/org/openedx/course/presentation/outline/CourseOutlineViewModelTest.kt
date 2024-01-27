@@ -130,6 +130,14 @@ class CourseOutlineViewModelTest {
         isSelfPaced = false
     )
 
+    private val mockCourseDatesBannerInfo = CourseDatesBannerInfo(
+        missedDeadlines = true,
+        missedGatedContent = false,
+        verifiedUpgradeLink = "",
+        contentTypeGatingEnabled = false,
+        hasEnded = true,
+    )
+
     private val downloadModel = DownloadModel(
         "id",
         "title",
@@ -229,6 +237,7 @@ class CourseOutlineViewModelTest {
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         every { config.isCourseNestedListEnabled() } returns false
+        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -307,6 +316,7 @@ class CourseOutlineViewModelTest {
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         every { config.isCourseNestedListEnabled() } returns false
+        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -379,6 +389,7 @@ class CourseOutlineViewModelTest {
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
+        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -410,6 +421,7 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(*anyVararg()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
+        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
