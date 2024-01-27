@@ -1033,8 +1033,7 @@ fun CourseDatesBannerTablet(
         .padding(16.dp)
 
     Row(
-        modifier = cardModifier.
-        fillMaxWidth(),
+        modifier = cardModifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -1060,13 +1059,13 @@ fun CourseDatesBannerTablet(
                 )
             }
         }
-//        banner.bannerType.buttonResId.nonZero()?.let {
+        banner.bannerType.buttonResId.nonZero()?.let {
             OpenEdXButton(
                 width = Modifier.width(210.dp),
-                text = stringResource(id = org.openedx.core.R.string.core_dates_reset_dates_banner_button),
+                text = stringResource(id = it),
                 onClick = resetDates,
             )
-//        }
+        }
     }
 }
 

@@ -94,11 +94,26 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.viewPager.isVisible = true
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         adapter = CourseContainerAdapter(this).apply {
-            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced))
-            addFragment(HandoutsFragment.newInstance(viewModel.courseId))
+            addFragment(
+                CourseContainerTab.OUTLINE,
+                CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                CourseContainerTab.VIDEOS,
+                CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                CourseContainerTab.DISCUSSION,
+                DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                CourseContainerTab.DATES,
+                CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced)
+            )
+            addFragment(
+                CourseContainerTab.HANDOUTS,
+                HandoutsFragment.newInstance(viewModel.courseId)
+            )
         }
         binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
         binding.viewPager.adapter = adapter
@@ -170,8 +185,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         snackBar = Snackbar.make(binding.root, message, duration).also {
             if (isSuccess) {
                 it.setAction(coreR.string.core_dates_view_all_dates) {
-                    binding.viewPager.setCurrentItem(3, true)
-                    adapter?.getFragment(3)?.let { fragment ->
+                    adapter?.getFragment(CourseContainerTab.DATES)?.let { fragment ->
+                        binding.viewPager.setCurrentItem(CourseContainerTab.DATES.position, true)
                         (fragment as CourseDatesFragment).updateData()
                     }
                 }
