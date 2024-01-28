@@ -22,6 +22,7 @@ import org.openedx.course.presentation.ui.CourseToolbar
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
 import org.openedx.core.R as coreR
+import org.openedx.course.presentation.container.CourseContainerTab as Tabs
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -95,23 +96,23 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         adapter = CourseContainerAdapter(this).apply {
             addFragment(
-                CourseContainerTab.OUTLINE,
+                Tabs.OUTLINE,
                 CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName)
             )
             addFragment(
-                CourseContainerTab.VIDEOS,
+                Tabs.VIDEOS,
                 CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName)
             )
             addFragment(
-                CourseContainerTab.DISCUSSION,
+                Tabs.DISCUSSION,
                 DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName)
             )
             addFragment(
-                CourseContainerTab.DATES,
+                Tabs.DATES,
                 CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced)
             )
             addFragment(
-                CourseContainerTab.HANDOUTS,
+                Tabs.HANDOUTS,
                 HandoutsFragment.newInstance(viewModel.courseId)
             )
         }
@@ -121,7 +122,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         if (viewModel.isCourseTopTabBarEnabled) {
             TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                 tab.text = getString(
-                    CourseContainerTab.values().find { it.position == position }?.titleResId
+                    Tabs.values().find { it.ordinal == position }?.titleResId
                         ?: R.string.course_navigation_course
                 )
             }.attach()
@@ -130,9 +131,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         } else {
             binding.viewPager.isUserInputEnabled = false
             binding.bottomNavView.setOnItemSelectedListener { menuItem ->
-                CourseContainerTab.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
                     viewModel.courseTabClickedEvent(tab)
-                    binding.viewPager.setCurrentItem(tab.position, false)
+                    binding.viewPager.setCurrentItem(tab.ordinal, false)
                 }
                 true
             }
@@ -158,8 +159,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         snackBar = Snackbar.make(binding.root, message, duration).also {
             if (isSuccess) {
                 it.setAction(coreR.string.core_dates_view_all_dates) {
-                    adapter?.getFragment(CourseContainerTab.DATES)?.let { fragment ->
-                        binding.viewPager.setCurrentItem(CourseContainerTab.DATES.position, true)
+                    adapter?.getFragment(Tabs.DATES)?.let { fragment ->
+                        binding.viewPager.setCurrentItem(Tabs.DATES.ordinal, true)
                         (fragment as CourseDatesFragment).updateData()
                     }
                 }
