@@ -121,45 +121,18 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         if (viewModel.isCourseTopTabBarEnabled) {
             TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                 tab.text = getString(
-                    when (position) {
-                        0 -> R.string.course_navigation_course
-                        1 -> R.string.course_navigation_video
-                        2 -> R.string.course_navigation_discussion
-                        3 -> R.string.course_navigation_dates
-                        else -> R.string.course_navigation_handouts
-                    }
+                    CourseContainerTab.values().find { it.position == position }?.titleResId
+                        ?: R.string.course_navigation_course
                 )
             }.attach()
             binding.tabLayout.isVisible = true
 
         } else {
             binding.viewPager.isUserInputEnabled = false
-            binding.bottomNavView.setOnItemSelectedListener {
-                when (it.itemId) {
-                    R.id.outline -> {
-                        viewModel.courseTabClickedEvent()
-                        binding.viewPager.setCurrentItem(0, false)
-                    }
-
-                    R.id.videos -> {
-                        viewModel.videoTabClickedEvent()
-                        binding.viewPager.setCurrentItem(1, false)
-                    }
-
-                    R.id.discussions -> {
-                        viewModel.discussionTabClickedEvent()
-                        binding.viewPager.setCurrentItem(2, false)
-                    }
-
-                    R.id.dates -> {
-                        viewModel.datesTabClickedEvent()
-                        binding.viewPager.setCurrentItem(3, false)
-                    }
-
-                    R.id.resources -> {
-                        viewModel.handoutsTabClickedEvent()
-                        binding.viewPager.setCurrentItem(4, false)
-                    }
+            binding.bottomNavView.setOnItemSelectedListener { menuItem ->
+                CourseContainerTab.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                    viewModel.courseTabClickedEvent(tab)
+                    binding.viewPager.setCurrentItem(tab.position, false)
                 }
                 true
             }

@@ -109,23 +109,33 @@ class CourseContainerViewModel(
         }
     }
 
-    fun courseTabClickedEvent() {
+    fun courseTabClickedEvent(tab: CourseContainerTab) {
+        when (tab) {
+            CourseContainerTab.OUTLINE -> courseTabClickedEvent()
+            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
+            CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
+            CourseContainerTab.DATES -> datesTabClickedEvent()
+            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
+        }
+    }
+
+    private fun courseTabClickedEvent() {
         analytics.courseTabClickedEvent(courseId, courseName)
     }
 
-    fun videoTabClickedEvent() {
+    private fun videoTabClickedEvent() {
         analytics.videoTabClickedEvent(courseId, courseName)
     }
 
-    fun discussionTabClickedEvent() {
+    private fun discussionTabClickedEvent() {
         analytics.discussionTabClickedEvent(courseId, courseName)
     }
 
-    fun datesTabClickedEvent() {
+    private fun datesTabClickedEvent() {
         analytics.datesTabClickedEvent(courseId, courseName)
     }
 
-    fun handoutsTabClickedEvent() {
+    private fun handoutsTabClickedEvent() {
         analytics.handoutsTabClickedEvent(courseId, courseName)
     }
 }
