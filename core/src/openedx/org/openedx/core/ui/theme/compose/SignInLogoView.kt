@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
+import org.openedx.core.ui.theme.OpenEdXTheme
 
 @Composable
 fun SignInLogoView() {
@@ -25,5 +27,13 @@ fun SignInLogoView() {
             contentDescription = null,
             modifier = Modifier.padding(top = 20.dp)
         )
+    }
+}
+
+@Preview(widthDp = 375, heightDp = 400)
+@Composable
+fun SignInLogoViewPreview() {
+    OpenEdXTheme {
+        SignInLogoView()
     }
 }
