@@ -8,6 +8,7 @@ plugins {
 
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
+def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
 
 android {
     compileSdk 34
@@ -36,6 +37,18 @@ android {
         }
         stage {
             dimension 'env'
+        }
+    }
+
+    sourceSets {
+        prod {
+            res.srcDirs = ["src/$platformName/res"]
+        }
+        develop {
+            res.srcDirs = ["src/$platformName/res"]
+        }
+        stage {
+            res.srcDirs = ["src/$platformName/res"]
         }
     }
 

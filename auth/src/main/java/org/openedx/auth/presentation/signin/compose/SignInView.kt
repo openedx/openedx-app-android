@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -72,6 +71,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.theme.compose.SignInLogoView
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.R as coreR
 
@@ -151,21 +151,7 @@ internal fun LoginScreen(
             Modifier.padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.2f),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = coreR.drawable.core_ic_logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(top = 20.dp)
-                        .width(170.dp)
-                        .height(48.dp)
-                )
-            }
+            SignInLogoView()
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
