@@ -72,8 +72,8 @@
     <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
     <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
     <string name="core_leaving_the_app_message" tools:ignore="MissingTranslation">You are now leaving the %s app and opening a browser.</string>
-    <string name="course_enrollment_error" tools:ignore="MissingTranslation">Enrollment Error</string>
-    <string name="course_enrollment_error_message" tools:ignore="MissingTranslation">We are unable to enroll you in this course at this time using the %s mobile application. Please try again on your web browser.</string>
+    <string name="core_enrollment_error" tools:ignore="MissingTranslation">Enrollment Error</string>
+    <string name="core_enrollment_error_message" tools:ignore="MissingTranslation">We are unable to enroll you in this course at this time using the %s mobile application. Please try again on your web browser.</string>
 
 
     <!-- region: Course Date Sections -->
