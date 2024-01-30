@@ -63,15 +63,12 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
@@ -380,13 +377,8 @@ fun ExpandableView(
             ) {
                 Text(
                     text = stringResource(id = sectionKey.stringResId),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 24.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.appColors.textDark,
-                        letterSpacing = 0.15.sp,
-                    ),
+                    style = MaterialTheme.appTypography.titleMedium,
+                    color = MaterialTheme.appColors.textDark,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -397,13 +389,8 @@ fun ExpandableView(
                             count = sectionDates.size,
                             formatArgs = arrayOf(sectionDates.size)
                         ),
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.appColors.textDark,
-                            letterSpacing = 0.5.sp,
-                        ),
+                        style = MaterialTheme.appTypography.labelMedium,
+                        color = MaterialTheme.appColors.textDark,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
@@ -454,13 +441,8 @@ private fun CourseDateBlockSection(
                     .fillMaxWidth()
                     .padding(top = 16.dp, bottom = 4.dp),
                 text = stringResource(id = sectionKey.stringResId),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.appColors.textDark,
-                    letterSpacing = 0.15.sp,
-                )
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.titleMedium,
             )
         }
         Row(
@@ -546,13 +528,8 @@ private fun CourseDateItem(
             }
             Text(
                 text = timeTitle,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.appColors.textDark,
-                    letterSpacing = 0.5.sp,
-                ),
+                style = MaterialTheme.appTypography.labelMedium,
+                color = MaterialTheme.appColors.textDark,
                 maxLines = 1,
             )
         }
@@ -583,13 +560,8 @@ private fun CourseDateItem(
                 } else {
                     dateBlock.title
                 },
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.appColors.textDark,
-                    letterSpacing = 0.15.sp,
-                ),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textDark,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -612,13 +584,7 @@ private fun CourseDateItem(
                     .fillMaxWidth()
                     .padding(top = 4.dp),
                 text = dateBlock.description,
-                style = TextStyle(
-                    fontSize = 11.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.appColors.textPrimaryVariant,
-                    letterSpacing = 0.5.sp,
-                ),
+                style = MaterialTheme.appTypography.labelMedium,
             )
         }
     }
