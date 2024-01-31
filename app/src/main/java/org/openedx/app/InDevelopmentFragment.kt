@@ -11,15 +11,20 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.fragment.app.Fragment
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
 class InDevelopmentFragment : Fragment() {
 
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -27,7 +32,11 @@ class InDevelopmentFragment : Fragment() {
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            Scaffold {
+            Scaffold(
+                modifier = Modifier.semantics {
+                    testTagsAsResourceId = true
+                },
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -36,6 +45,7 @@ class InDevelopmentFragment : Fragment() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
+                        modifier = Modifier.testTag("txt_in_development"),
                         text = "Will be available soon",
                         style = MaterialTheme.appTypography.headlineMedium
                     )

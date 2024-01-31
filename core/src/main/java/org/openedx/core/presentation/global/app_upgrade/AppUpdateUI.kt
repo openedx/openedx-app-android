@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -305,7 +306,8 @@ fun AppUpgradeRecommendedBox(
             .padding(20.dp)
             .clickable {
                 onClick()
-            },
+            }
+            .testTag("btn_upgrade_box"),
         shape = MaterialTheme.appShapes.cardShape,
         backgroundColor = MaterialTheme.appColors.primary
     ) {
@@ -322,11 +324,13 @@ fun AppUpgradeRecommendedBox(
             )
             Column {
                 Text(
+                    modifier = Modifier.testTag("txt_app_upgrade_title"),
                     text = stringResource(id = R.string.core_app_upgrade_title),
                     color = Color.White,
                     style = MaterialTheme.appTypography.titleMedium
                 )
                 Text(
+                    modifier = Modifier.testTag("txt_app_upgrade_description"),
                     text = stringResource(id = R.string.core_app_upgrade_box_description),
                     color = Color.White,
                     style = MaterialTheme.appTypography.bodyMedium

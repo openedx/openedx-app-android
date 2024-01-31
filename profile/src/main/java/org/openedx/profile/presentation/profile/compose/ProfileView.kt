@@ -46,12 +46,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -83,7 +87,7 @@ import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
 import org.openedx.profile.domain.model.Configuration as AppConfiguration
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun ProfileView(
     windowSize: WindowSize,
@@ -101,7 +105,11 @@ internal fun ProfileView(
         onRefresh = { onAction(ProfileViewAction.SwipeRefresh) })
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         scaffoldState = scaffoldState
     ) { paddingValues ->
 
@@ -153,7 +161,8 @@ internal fun ProfileView(
             ) {
                 Text(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .testTag("txt_profile_title"),
                     text = stringResource(id = R.string.core_profile),
                     color = MaterialTheme.appColors.textPrimary,
                     textAlign = TextAlign.Center,
@@ -163,7 +172,8 @@ internal fun ProfileView(
                 IconText(
                     modifier = Modifier
                         .height(48.dp)
-                        .padding(end = 24.dp),
+                        .padding(end = 24.dp)
+                        .testTag("it_edit_account"),
                     text = stringResource(org.openedx.profile.R.string.profile_edit),
                     painter = painterResource(id = R.drawable.core_ic_edit),
                     textStyle = MaterialTheme.appTypography.labelLarge,
@@ -251,6 +261,7 @@ internal fun ProfileView(
 private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
     Column {
         Text(
+            modifier = Modifier.testTag("txt_settings"),
             text = stringResource(id = org.openedx.profile.R.string.profile_settings),
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textSecondary
@@ -280,6 +291,7 @@ private fun SupportInfoSection(
 ) {
     Column {
         Text(
+            modifier = Modifier.testTag("txt_support_info"),
             text = stringResource(id = org.openedx.profile.R.string.profile_support_info),
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textSecondary
@@ -369,7 +381,8 @@ private fun LogoutButton(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable {
                 onClick()
-            },
+            }
+            .testTag("btn_logout"),
         shape = MaterialTheme.appShapes.cardShape,
         elevation = 0.dp,
         backgroundColor = MaterialTheme.appColors.cardViewBackground
@@ -379,6 +392,7 @@ private fun LogoutButton(onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
+                modifier = Modifier.testTag("txt_logout"),
                 text = stringResource(id = org.openedx.profile.R.string.profile_logout),
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.error
@@ -422,7 +436,9 @@ private fun LogoutDialog(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     IconButton(
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .testTag("ib_close"),
                         onClick = onDismissRequest
                     ) {
                         Icon(
@@ -442,6 +458,7 @@ private fun LogoutDialog(
                 )
                 Spacer(Modifier.size(36.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_logout_dialog_title"),
                     text = stringResource(id = org.openedx.profile.R.string.profile_logout_dialog_body),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleLarge,
@@ -455,17 +472,22 @@ private fun LogoutDialog(
                     content = {
                         Box(
                             Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .testTag("btn_logout"),
                             contentAlignment = Alignment.CenterEnd
                         ) {
                             Text(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("txt_logout"),
                                 text = stringResource(id = org.openedx.profile.R.string.profile_logout),
                                 color = MaterialTheme.appColors.textDark,
                                 style = MaterialTheme.appTypography.labelLarge,
                                 textAlign = TextAlign.Center
                             )
                             Icon(
+                                modifier = Modifier
+                                    .testTag("ic_logout"),
                                 painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_logout),
                                 contentDescription = null,
                                 tint = Color.Black
@@ -493,12 +515,15 @@ private fun ProfileInfoItem(
         Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(20.dp),
+            .padding(20.dp)
+            .testTag("btn_profile_info_item"),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .testTag("txt_profile_info_item_title"),
             text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -553,6 +578,7 @@ private fun AppVersionItemAppToDate(versionName: String) {
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
+            modifier = Modifier.testTag("txt_app_version_code"),
             text = stringResource(id = R.string.core_version, versionName),
             style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary
@@ -570,6 +596,7 @@ private fun AppVersionItemAppToDate(versionName: String) {
                 tint = MaterialTheme.appColors.accessGreen
             )
             Text(
+                modifier = Modifier.testTag("txt_up_to_date"),
                 text = stringResource(id = R.string.core_up_to_date),
                 color = MaterialTheme.appColors.textSecondary,
                 style = MaterialTheme.appTypography.labelLarge
@@ -589,7 +616,8 @@ private fun AppVersionItemUpgradeRecommended(
             .fillMaxWidth()
             .clickable {
                 onClick()
-            },
+            }
+            .testTag("btn_upgrade_recommended"),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -597,11 +625,13 @@ private fun AppVersionItemUpgradeRecommended(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
+                modifier = Modifier.testTag("txt_app_version_code"),
                 text = stringResource(id = R.string.core_version, versionName),
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textPrimary
             )
             Text(
+                modifier = Modifier.testTag("txt_upgrade_recommended"),
                 text = stringResource(
                     id = R.string.core_tap_to_update_to_version,
                     appUpgradeEvent.newVersionName
@@ -629,7 +659,8 @@ fun AppVersionItemUpgradeRequired(
             .fillMaxWidth()
             .clickable {
                 onClick()
-            },
+            }
+            .testTag("btn_upgrade_required"),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -646,12 +677,14 @@ fun AppVersionItemUpgradeRequired(
                     contentDescription = null
                 )
                 Text(
+                    modifier = Modifier.testTag("txt_app_version_code"),
                     text = stringResource(id = R.string.core_version, versionName),
                     style = MaterialTheme.appTypography.titleMedium,
                     color = MaterialTheme.appColors.textPrimary
                 )
             }
             Text(
+                modifier = Modifier.testTag("txt_upgrade_required"),
                 text = stringResource(id = R.string.core_tap_to_install_required_app_update),
                 color = MaterialTheme.appColors.textAccent,
                 style = MaterialTheme.appTypography.labelLarge
@@ -747,7 +780,7 @@ private val mockAppData = AppData(
     versionName = "1.0.0",
 )
 
-private val mockAccount = Account(
+val mockAccount = Account(
     username = "thom84",
     bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
     requiresParentalConsent = true,
@@ -755,7 +788,7 @@ private val mockAccount = Account(
     country = "Ukraine",
     isActive = true,
     profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = 2000,
+    yearOfBirth = null,
     levelOfEducation = "Bachelor",
     goals = "130",
     languageProficiencies = emptyList(),

@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -52,11 +53,11 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -191,26 +192,12 @@ fun DeleteProfileScreen(
                     .displayCutoutForLandscape(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
+                Toolbar(
                     modifier = topBarWidth,
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = stringResource(id = profileR.string.profile_delete_account),
-                        color = MaterialTheme.appColors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.appTypography.titleMedium
-                    )
-
-                    BackBtn(
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        onBackClick()
-                    }
-                }
-
+                    label = stringResource(id = profileR.string.profile_delete_account),
+                    canShowBackBtn = true,
+                    onBackClick = onBackClick
+                )
                 Column(
                     Modifier
                         .fillMaxHeight()
@@ -226,7 +213,9 @@ fun DeleteProfileScreen(
                     )
                     Spacer(Modifier.height(32.dp))
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("txt_delete_account_title"),
                         text = buildAnnotatedString {
                             append(stringResource(id = profileR.string.profile_you_want_to))
                             append(" ")
@@ -251,7 +240,9 @@ fun DeleteProfileScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("txt_delete_account_description"),
                         text = stringResource(id = profileR.string.profile_confirm_action),
                         style = MaterialTheme.appTypography.labelLarge,
                         color = MaterialTheme.appColors.textSecondary,
