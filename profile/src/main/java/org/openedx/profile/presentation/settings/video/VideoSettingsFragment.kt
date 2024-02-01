@@ -180,7 +180,8 @@ private fun VideoSettingsScreen(
                             .noRippleClickable {
                                 wifiDownloadOnly = !wifiDownloadOnly
                                 wifiDownloadChanged(wifiDownloadOnly)
-                            },
+                            }
+                            .testTag("btn_profile_wifi_only_download"),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

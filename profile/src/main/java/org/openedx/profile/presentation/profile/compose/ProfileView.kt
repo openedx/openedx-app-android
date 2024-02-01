@@ -406,6 +406,7 @@ private fun LogoutButton(onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LogoutDialog(
     onDismissRequest: () -> Unit,
@@ -428,7 +429,8 @@ private fun LogoutDialog(
                         MaterialTheme.appColors.cardViewBorder,
                         MaterialTheme.appShapes.cardShape
                     )
-                    .padding(horizontal = 40.dp, vertical = 36.dp),
+                    .padding(horizontal = 40.dp, vertical = 36.dp)
+                    .semantics { testTagsAsResourceId = true },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -516,14 +518,14 @@ private fun ProfileInfoItem(
             .fillMaxWidth()
             .clickable { onClick() }
             .padding(20.dp)
-            .testTag("btn_profile_info_item"),
+            .testTag("btn_profile_info_item_$text"),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             modifier = Modifier
                 .weight(1f)
-                .testTag("txt_profile_info_item_title"),
+                .testTag("txt_profile_info_item_title_$text"),
             text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

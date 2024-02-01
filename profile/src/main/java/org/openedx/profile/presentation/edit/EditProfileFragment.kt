@@ -480,7 +480,8 @@ private fun EditProfileScreen(
                             bottomSheetScaffoldState.hide()
                         }
                     }
-                },
+                }
+                .testTag("btn_bottom_sheet_edit_profile"),
             sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
@@ -829,7 +830,9 @@ private fun ChangeImageDialog(
         val dialogWindowProvider = LocalView.current.parent as DialogWindowProvider
         dialogWindowProvider.window.setGravity(Gravity.BOTTOM)
         Box(
-            Modifier.padding(bottom = 24.dp)
+            Modifier
+                .padding(bottom = 24.dp)
+                .semantics { testTagsAsResourceId = true }
         ) {
             Column(
                 Modifier
@@ -982,7 +985,7 @@ private fun SelectableField(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("txt_edit_profile_field_label"),
+                .testTag("txt_edit_profile_field_label_${name}"),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -1008,10 +1011,10 @@ private fun SelectableField(
                 .noRippleClickable {
                     onClick()
                 }
-                .testTag("tf_edit_profile_field_select"),
+                .testTag("tf_edit_profile_field_select_${name}"),
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_field_placeholder"),
+                    modifier = Modifier.testTag("txt_edit_profile_field_placeholder_${name}"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1038,7 +1041,7 @@ private fun InputEditField(
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("txt_edit_profile_field_label"),
+                .testTag("txt_edit_profile_field_label_${name}"),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -1057,7 +1060,7 @@ private fun InputEditField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_field_placeholder"),
+                    modifier = Modifier.testTag("txt_edit_profile_field_${name}_placeholder"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1073,7 +1076,7 @@ private fun InputEditField(
                 onDoneClick()
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
-            modifier = modifier.testTag("tf_edit_profile_field_input")
+            modifier = modifier.testTag("tf_edit_profile_field_input_${name}")
         )
     }
 }
@@ -1103,7 +1106,10 @@ private fun LeaveProfile(
                         MaterialTheme.appShapes.cardShape
                     )
                     .padding(horizontal = 40.dp)
-                    .padding(top = 48.dp, bottom = 36.dp),
+                    .padding(top = 48.dp, bottom = 36.dp)
+                    .semantics {
+                        testTagsAsResourceId = true
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
@@ -1176,7 +1182,8 @@ private fun LeaveProfileLandscape(
             Card(
                 modifier = Modifier
                     .width(screenWidth * 0.7f)
-                    .clip(MaterialTheme.appShapes.courseImageShape),
+                    .clip(MaterialTheme.appShapes.courseImageShape)
+                    .semantics { testTagsAsResourceId = true },
                 backgroundColor = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.courseImageShape
             ) {

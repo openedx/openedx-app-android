@@ -207,7 +207,8 @@ fun SearchBar(
                 isFocused = it.hasFocus
             }
             .clip(MaterialTheme.appShapes.textFieldShape)
-            .then(modifier),
+            .then(modifier)
+            .testTag("tf_search"),
         shape = MaterialTheme.appShapes.textFieldShape,
         value = textFieldValue,
         onValueChange = {

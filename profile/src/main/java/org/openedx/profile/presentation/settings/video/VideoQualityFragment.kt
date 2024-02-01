@@ -33,11 +33,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -88,6 +91,7 @@ class VideoQualityFragment : Fragment() {
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun VideoQualityScreen(
     windowSize: WindowSize,
@@ -99,7 +103,10 @@ private fun VideoQualityScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         scaffoldState = scaffoldState,
     ) { paddingValues ->
 
@@ -179,7 +186,7 @@ private fun QualityOption(
             .clickable {
                 onClick()
             }
-            .testTag("btn_video_quality"),
+            .testTag("btn_video_quality_$title"),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -188,7 +195,7 @@ private fun QualityOption(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                modifier = Modifier.testTag("txt_video_quality_title"),
+                modifier = Modifier.testTag("txt_video_quality_title_$title"),
                 text = title,
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleMedium
@@ -196,7 +203,7 @@ private fun QualityOption(
             if (description.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    modifier = Modifier.testTag("txt_video_quality_description"),
+                    modifier = Modifier.testTag("txt_video_quality_description_$title"),
                     text = description,
                     color = MaterialTheme.appColors.textSecondary,
                     style = MaterialTheme.appTypography.labelMedium
@@ -205,7 +212,7 @@ private fun QualityOption(
         }
         if (selected) {
             Icon(
-                modifier = Modifier.testTag("ic_video_quality_selected"),
+                modifier = Modifier.testTag("ic_video_quality_selected_$title"),
                 imageVector = Icons.Filled.Done,
                 tint = MaterialTheme.appColors.primary,
                 contentDescription = null

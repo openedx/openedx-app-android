@@ -45,8 +45,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -205,7 +208,8 @@ private fun CourseSearchScreen(
         scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .semantics { testTagsAsResourceId = true },
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
             if (!isUserLoggedIn) {
@@ -283,7 +287,8 @@ private fun CourseSearchScreen(
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 56.dp),
+                                .padding(horizontal = 56.dp)
+                                .testTag("txt_search_title"),
                             text = stringResource(id = org.openedx.core.R.string.core_search),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleMedium,
@@ -340,12 +345,15 @@ private fun CourseSearchScreen(
                             item {
                                 Column {
                                     Text(
+                                        modifier = Modifier.testTag("txt_search_results_title"),
                                         text = stringResource(id = discoveryR.string.discovery_search_results),
                                         color = MaterialTheme.appColors.textPrimary,
                                         style = MaterialTheme.appTypography.displaySmall
                                     )
                                     Text(
-                                        modifier = Modifier.padding(top = 4.dp),
+                                        modifier = Modifier
+                                            .padding(top = 4.dp)
+                                            .testTag("txt_search_results_subtitle"),
                                         text = typingText,
                                         color = MaterialTheme.appColors.textPrimary,
                                         style = MaterialTheme.appTypography.titleSmall
