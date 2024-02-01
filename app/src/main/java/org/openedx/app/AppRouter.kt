@@ -13,6 +13,8 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
+import org.openedx.core.presentation.settings.VideoQualityFragment
+import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
@@ -24,6 +26,7 @@ import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
+import org.openedx.course.settings.download.DownloadQueueFragment
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
@@ -44,7 +47,6 @@ import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
-import org.openedx.profile.presentation.settings.video.VideoQualityFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
@@ -70,6 +72,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {
         replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId))
+    }
+
+    override fun navigateToDownloadQueue(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, DownloadQueueFragment())
     }
 
     override fun navigateToRestorePassword(fm: FragmentManager) {
@@ -325,8 +331,8 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, VideoSettingsFragment())
     }
 
-    override fun navigateToVideoQuality(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, VideoQualityFragment())
+    override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
+        replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
     }
 
     override fun navigateToDeleteAccount(fm: FragmentManager) {

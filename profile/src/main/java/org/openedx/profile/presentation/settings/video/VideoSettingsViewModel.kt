@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.profile.system.notifier.ProfileNotifier
-import org.openedx.profile.system.notifier.VideoQualityChanged
+import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.core.system.notifier.VideoQualityChanged
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

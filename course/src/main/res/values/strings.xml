@@ -62,4 +62,7 @@
     <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
     <string name="course_accessibility_section_completed">Section completed</string>
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
+
+    <string name="course_download_queue_title">Downloads</string>
+
 </resources>

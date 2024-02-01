@@ -5,16 +5,49 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -37,12 +70,20 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.VideoSettings
+import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.*
+import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
@@ -80,6 +121,7 @@ class CourseVideosFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState(CourseVideosUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val isUpdating by viewModel.isUpdating.observeAsState(false)
+                val videoSettings by viewModel.videoSettings.collectAsState()
 
                 CourseVideosScreen(
                     windowSize = windowSize,
@@ -90,6 +132,7 @@ class CourseVideosFragment : Fragment() {
                     isCourseBannerEnabled = viewModel.isCourseBannerEnabled,
                     hasInternetConnection = viewModel.hasInternetConnection,
                     isUpdating = isUpdating,
+                    videoSettings = videoSettings,
                     onSwipeRefresh = {
                         viewModel.setIsUpdating()
                         (parentFragment as CourseContainerFragment).updateCourseStructure(true)
@@ -133,6 +176,29 @@ class CourseVideosFragment : Fragment() {
                                             .replace(Regex("\\s"), "_"), it.id
                             )
                         }
+                    },
+                    onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
+                        if (isAllBlocksDownloadedOrDownloading) {
+                            viewModel.removeOrCancelAllDownloadModels()
+                        } else {
+                            viewModel.saveAllDownloadModels(
+                                requireContext().externalCacheDir.toString() +
+                                        File.separator +
+                                        requireContext()
+                                            .getString(R.string.app_name)
+                                            .replace(Regex("\\s"), "_")
+                            )
+                        }
+                    },
+                    onDownloadQueueClick = {
+                        if (viewModel.hasDownloadModelsInQueue()) {
+                            router.navigateToDownloadQueue(fm = requireActivity().supportFragmentManager)
+                        }
+                    },
+                    onVideoDownloadQualityClick = {
+                        router.navigateToVideoQuality(
+                            requireActivity().supportFragmentManager, VideoQualityType.Download
+                        )
                     }
                 )
             }
@@ -167,12 +233,16 @@ private fun CourseVideosScreen(
     isCourseBannerEnabled: Boolean,
     isUpdating: Boolean,
     hasInternetConnection: Boolean,
+    videoSettings: VideoSettings,
     onSwipeRefresh: () -> Unit,
     onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onReloadClick: () -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
+    onDownloadAllClick: (Boolean) -> Unit,
+    onDownloadQueueClick: () -> Unit,
+    onVideoDownloadQualityClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -227,8 +297,7 @@ private fun CourseVideosScreen(
         ) {
             Surface(
                 modifier = screenWidth,
-                color = MaterialTheme.appColors.background,
-                shape = MaterialTheme.appShapes.screenBackgroundShape
+                color = MaterialTheme.appColors.background
             ) {
                 Box(Modifier.pullRefresh(pullRefreshState)) {
                     Column(
@@ -261,6 +330,33 @@ private fun CourseVideosScreen(
                             }
 
                             is CourseVideosUIState.CourseData -> {
+                                val isDownloadingAllVideos =
+                                    uiState.allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
+                                            uiState.allDownloadModulesState.remainingDownloadModelsCount > 0
+                                val isDownloadedAllVideos =
+                                    uiState.allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
+                                            uiState.allDownloadModulesState.remainingDownloadModelsCount == 0
+
+                                val downloadVideoTitleRes = when {
+                                    isDownloadingAllVideos -> R.string.core_video_downloading_to_device
+                                    isDownloadedAllVideos -> R.string.core_video_downloaded_to_device
+                                    else -> R.string.core_video_download_to_device
+                                }
+                                val downloadVideoSubTitle =
+                                    if (isDownloadedAllVideos) {
+                                        stringResource(
+                                            id = R.string.core_video_downloaded_subtitle,
+                                            uiState.allDownloadModulesState.allDownloadModelsCount,
+                                            uiState.allDownloadModulesState.allDownloadModelsSize.toFileSize()
+                                        )
+                                    } else {
+                                        stringResource(
+                                            id = R.string.core_video_remaining_to_download,
+                                            uiState.allDownloadModulesState.remainingDownloadModelsCount,
+                                            uiState.allDownloadModulesState.remainingDownloadModelsSize.toFileSize()
+                                        )
+                                    }
+
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
@@ -280,10 +376,122 @@ private fun CourseVideosScreen(
                                         }
                                     }
 
-                                    if (isCourseNestedListEnabled) {
-                                        item {
-                                            Spacer(Modifier.height(16.dp))
+                                    item {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    onDownloadQueueClick()
+                                                },
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            if (isDownloadingAllVideos) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier
+                                                        .padding(start = 16.dp)
+                                                        .size(24.dp),
+                                                    color = MaterialTheme.appColors.primary,
+                                                    strokeWidth = 2.dp
+                                                )
+                                            } else {
+                                                Icon(
+                                                    modifier = Modifier
+                                                        .padding(start = 16.dp),
+                                                    imageVector = Icons.Outlined.Videocam,
+                                                    tint = MaterialTheme.appColors.onSurface,
+                                                    contentDescription = null
+                                                )
+                                            }
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(8.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(id = downloadVideoTitleRes),
+                                                    color = MaterialTheme.appColors.textPrimary,
+                                                    style = MaterialTheme.appTypography.titleMedium
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(
+                                                    text = downloadVideoSubTitle,
+                                                    color = MaterialTheme.appColors.textSecondary,
+                                                    style = MaterialTheme.appTypography.labelMedium
+                                                )
+                                            }
+                                            val isChecked =
+                                                uiState.allDownloadModulesState.isAllBlocksDownloadedOrDownloading
+                                            Switch(
+                                                modifier = Modifier
+                                                    .padding(end = 16.dp),
+                                                checked = isChecked,
+                                                onCheckedChange = {
+                                                    onDownloadAllClick(isChecked)
+                                                },
+                                                colors = SwitchDefaults.colors(
+                                                    checkedThumbColor = MaterialTheme.appColors.primary,
+                                                    checkedTrackColor = MaterialTheme.appColors.primary
+                                                )
+                                            )
                                         }
+                                        if (isDownloadingAllVideos) {
+                                            val progress =
+                                                uiState.allDownloadModulesState.remainingDownloadModelsSize.toFloat() /
+                                                        uiState.allDownloadModulesState.allDownloadModelsSize
+
+                                            LinearProgressIndicator(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                progress = 1 - progress
+                                            )
+                                        }
+                                        Divider()
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    onVideoDownloadQualityClick()
+                                                },
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                modifier = Modifier
+                                                    .padding(start = 16.dp),
+                                                imageVector = Icons.Outlined.Settings,
+                                                tint = MaterialTheme.appColors.onSurface,
+                                                contentDescription = null
+                                            )
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(8.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(id = R.string.core_video_download_quality),
+                                                    color = MaterialTheme.appColors.textPrimary,
+                                                    style = MaterialTheme.appTypography.titleMedium
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(
+                                                    text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
+                                                    color = MaterialTheme.appColors.textSecondary,
+                                                    style = MaterialTheme.appTypography.labelMedium
+                                                )
+                                            }
+                                            Icon(
+                                                modifier = Modifier
+                                                    .padding(end = 16.dp),
+                                                imageVector = Icons.Filled.ChevronRight,
+                                                tint = MaterialTheme.appColors.onSurface,
+                                                contentDescription = "Expandable Arrow"
+                                            )
+                                        }
+                                        Divider()
+                                    }
+
+                                    if (isCourseNestedListEnabled) {
                                         uiState.courseStructure.blockData.forEach { section ->
                                             val courseSubSections =
                                                 uiState.courseSubSections[section.id]
@@ -396,7 +604,14 @@ private fun CourseVideosScreenPreview() {
                 emptyMap(),
                 mapOf(),
                 mapOf(),
-                mapOf()
+                mapOf(),
+                AllDownloadModulesState(
+                    isAllBlocksDownloadedOrDownloading = false,
+                    remainingDownloadModelsCount = 0,
+                    remainingDownloadModelsSize = 0,
+                    allDownloadModelsCount = 0,
+                    allDownloadModelsSize = 0
+                )
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
@@ -406,9 +621,13 @@ private fun CourseVideosScreenPreview() {
             onSubSectionClick = { },
             hasInternetConnection = true,
             isUpdating = false,
+            videoSettings = VideoSettings.default,
             onSwipeRefresh = {},
             onReloadClick = {},
-            onDownloadClick = {}
+            onDownloadClick = {},
+            onDownloadAllClick = {},
+            onDownloadQueueClick = {},
+            onVideoDownloadQualityClick = {}
         )
     }
 }
@@ -434,7 +653,11 @@ private fun CourseVideosScreenEmptyPreview() {
             onReloadClick = {},
             hasInternetConnection = true,
             isUpdating = false,
-            onDownloadClick = {}
+            videoSettings = VideoSettings.default,
+            onDownloadClick = {},
+            onDownloadAllClick = {},
+            onDownloadQueueClick = {},
+            onVideoDownloadQualityClick = {}
         )
     }
 }
@@ -452,7 +675,14 @@ private fun CourseVideosScreenTabletPreview() {
                 emptyMap(),
                 mapOf(),
                 mapOf(),
-                mapOf()
+                mapOf(),
+                AllDownloadModulesState(
+                    isAllBlocksDownloadedOrDownloading = false,
+                    remainingDownloadModelsCount = 0,
+                    remainingDownloadModelsSize = 0,
+                    allDownloadModelsCount = 0,
+                    allDownloadModelsSize = 0
+                )
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
@@ -464,7 +694,11 @@ private fun CourseVideosScreenTabletPreview() {
             onReloadClick = {},
             isUpdating = false,
             hasInternetConnection = true,
-            onDownloadClick = {}
+            videoSettings = VideoSettings.default,
+            onDownloadClick = {},
+            onDownloadAllClick = {},
+            onDownloadQueueClick = {},
+            onVideoDownloadQualityClick = {}
         )
     }
 }

@@ -1,9 +1,11 @@
 package org.openedx.course.presentation.videos
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.SingleEventLiveData
@@ -11,6 +13,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
@@ -18,6 +21,10 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.DownloadProgressChanged
+import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -29,7 +36,9 @@ class CourseVideoViewModel(
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
+    private val profileNotifier: ProfileNotifier,
+    private val downloadNotifier: DownloadNotifier,
     private val analytics: CourseAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
@@ -55,6 +64,9 @@ class CourseVideoViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
+    private val _videoSettings = MutableStateFlow(VideoSettings.default)
+    val videoSettings = _videoSettings.asStateFlow()
+
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
@@ -62,10 +74,9 @@ class CourseVideoViewModel(
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
+    init {
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
+            courseNotifier.notifier.collect { event ->
                 if (event is CourseStructureUpdated) {
                     if (event.courseId == courseId) {
                         updateVideos()
@@ -78,20 +89,58 @@ class CourseVideoViewModel(
             downloadModelsStatusFlow.collect {
                 if (_uiState.value is CourseVideosUIState.CourseData) {
                     val state = _uiState.value as CourseVideosUIState.CourseData
-                    _uiState.value = CourseVideosUIState.CourseData(
-                        courseStructure = state.courseStructure,
+                    val isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading()
+                    val remainingSize = if (isAllBlocksDownloadedOrDownloading) {
+                        state.allDownloadModulesState.remainingDownloadModelsSize
+                    } else {
+                        getRemainingDownloadModelsSize()
+                    }
+
+                    _uiState.value = state.copy(
                         downloadedState = it.toMap(),
-                        courseSubSections = courseSubSections,
-                        courseSectionsState = state.courseSectionsState,
-                        subSectionsDownloadsCount = subSectionsDownloadsCount
+                        allDownloadModulesState = AllDownloadModulesState(
+                            isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
+                            remainingDownloadModelsCount = getRemainingDownloadModelsCount(),
+                            remainingDownloadModelsSize = remainingSize,
+                            allDownloadModelsCount = getAllDownloadModelsCount(),
+                            allDownloadModelsSize = getAllDownloadModelsSize()
+                        )
                     )
                 }
             }
         }
-    }
 
-    init {
+        viewModelScope.launch {
+            profileNotifier.notifier.collectLatest { event ->
+                if (event is VideoQualityChanged) {
+                    _videoSettings.value = preferencesManager.videoSettings
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            downloadNotifier.notifier.collect { event ->
+                if (event is DownloadProgressChanged) {
+                    if (_uiState.value is CourseVideosUIState.CourseData) {
+                        if (isAllBlocksDownloadedOrDownloading() &&
+                            getRemainingDownloadModelsCount() > 0
+                        ) {
+                            val remainingSize = getRemainingDownloadModelsSize() - event.value
+                            val state = _uiState.value as CourseVideosUIState.CourseData
+                            _uiState.value = state.copy(
+                                allDownloadModulesState = state.allDownloadModulesState.copy(
+                                    remainingDownloadModelsSize = remainingSize
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         getVideos()
+
+        _videoSettings.value = preferencesManager.videoSettings
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -105,6 +154,16 @@ class CourseVideoViewModel(
         } else {
             super.saveDownloadModels(folder, id)
         }
+    }
+
+    override fun saveAllDownloadModels(folder: String) {
+        if (preferencesManager.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected()) {
+            _uiMessage.value =
+                UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
+            return
+        }
+
+        super.saveAllDownloadModels(folder)
     }
 
     fun setIsUpdating() {
@@ -134,10 +193,18 @@ class CourseVideoViewModel(
                 val courseSectionsState =
                     (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
 
+                val allDownloadModulesState = AllDownloadModulesState(
+                    isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading(),
+                    remainingDownloadModelsCount = getRemainingDownloadModelsCount(),
+                    remainingDownloadModelsSize = getRemainingDownloadModelsSize(),
+                    allDownloadModelsCount = getAllDownloadModelsCount(),
+                    allDownloadModelsSize = getAllDownloadModelsSize()
+                )
+
                 _uiState.value =
                     CourseVideosUIState.CourseData(
                         courseStructure, getDownloadModelsStatus(), courseSubSections,
-                        courseSectionsState, subSectionsDownloadsCount
+                        courseSectionsState, subSectionsDownloadsCount, allDownloadModulesState
                     )
             }
         }
@@ -149,13 +216,7 @@ class CourseVideoViewModel(
             val courseSectionsState = state.courseSectionsState.toMutableMap()
             courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
 
-            _uiState.value = CourseVideosUIState.CourseData(
-                courseStructure = state.courseStructure,
-                downloadedState = state.downloadedState,
-                courseSubSections = courseSubSections,
-                courseSectionsState = courseSectionsState,
-                subSectionsDownloadsCount = subSectionsDownloadsCount
-            )
+            _uiState.value = state.copy(courseSectionsState = courseSectionsState)
         }
     }
 

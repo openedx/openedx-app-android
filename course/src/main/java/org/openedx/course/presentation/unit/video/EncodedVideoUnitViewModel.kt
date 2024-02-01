@@ -141,5 +141,5 @@ class EncodedVideoUnitViewModel(
         ).build()
     }
 
-    private fun getVideoQuality() = preferencesManager.videoSettings.videoQuality
+    private fun getVideoQuality() = preferencesManager.videoSettings.videoStreamingQuality
 }

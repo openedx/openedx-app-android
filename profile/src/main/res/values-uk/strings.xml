@@ -30,7 +30,6 @@
     <string name="profile_video_settings">Налаштування відео</string>
     <string name="profile_wifi_only_download">Завантаження тільки через Wi-Fi</string>
     <string name="profile_only_download_when_wifi_turned_on">Завантажуйте вміст лише тоді, коли ввімкнено wi-fi</string>
-    <string name="profile_video_streaming_quality">Якість транслювання відео</string>
     <string name="profile_delete_account">Видалити акаунт</string>
     <string name="profile_you_want_to">Ви впевнені, що бажаєте</string>
     <string name="profile_delete_your_account">видалити свій акаунт?</string>

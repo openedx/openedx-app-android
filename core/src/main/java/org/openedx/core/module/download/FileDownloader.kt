@@ -37,7 +37,7 @@ class FileDownloader : AbstractDownloader(), ProgressListener {
             }
             Log.d("DownloadProgress", "$bytesRead")
             if (contentLength != -1L) {
-                progressListener?.progress(100 * bytesRead / contentLength)
+                progressListener?.progress(bytesRead, contentLength)
                 Log.d("DownloadProgress", "${100 * bytesRead / contentLength} done")
             }
         }
@@ -46,7 +46,7 @@ class FileDownloader : AbstractDownloader(), ProgressListener {
 }
 
 interface CurrentProgress {
-    fun progress(value: Long)
+    fun progress(value: Long, size: Long)
 }
 
 interface DownloadApi {

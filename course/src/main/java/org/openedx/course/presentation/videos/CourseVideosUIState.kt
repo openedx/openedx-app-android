@@ -10,9 +10,18 @@ sealed class CourseVideosUIState {
         val downloadedState: Map<String, DownloadedState>,
         val courseSubSections: Map<String, List<Block>>,
         val courseSectionsState: Map<String, Boolean>,
-        val subSectionsDownloadsCount: Map<String, Int>
+        val subSectionsDownloadsCount: Map<String, Int>,
+        val allDownloadModulesState: AllDownloadModulesState
     ) : CourseVideosUIState()
 
     data class Empty(val message: String) : CourseVideosUIState()
     object Loading : CourseVideosUIState()
 }
+
+data class AllDownloadModulesState(
+    val isAllBlocksDownloadedOrDownloading: Boolean,
+    val remainingDownloadModelsCount: Int,
+    val remainingDownloadModelsSize: Long,
+    val allDownloadModelsCount: Int,
+    val allDownloadModelsSize: Long
+)

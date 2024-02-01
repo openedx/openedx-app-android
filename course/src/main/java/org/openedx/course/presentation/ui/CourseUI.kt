@@ -86,6 +86,7 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
+import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
@@ -286,6 +287,62 @@ fun CourseSectionCard(
                 }
                 CardArrow(
                     degrees = 0f
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OfflineQueueCard(
+    downloadModel: DownloadModel,
+    onDownloadClick: (DownloadModel) -> Unit
+) {
+    val iconModifier = Modifier.size(24.dp)
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(vertical = 16.dp)
+            .padding(start = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_course_chapter_icon),
+            contentDescription = null,
+            tint = MaterialTheme.appColors.onSurface
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            modifier = Modifier.weight(1f),
+            text = downloadModel.title,
+            style = MaterialTheme.appTypography.titleSmall,
+            color = MaterialTheme.appColors.textPrimary,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Box(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(28.dp),
+                backgroundColor = Color.LightGray,
+                strokeWidth = 2.dp,
+                color = MaterialTheme.appColors.primary
+            )
+            IconButton(
+                modifier = iconModifier
+                    .padding(2.dp),
+                onClick = { onDownloadClick(downloadModel) }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                    tint = MaterialTheme.appColors.error
                 )
             }
         }

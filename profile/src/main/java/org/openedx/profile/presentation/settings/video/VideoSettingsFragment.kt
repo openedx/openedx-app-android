@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.ui.BackBtn
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
@@ -60,8 +62,8 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.profile.R
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.R as profileR
 
 class VideoSettingsFragment : Fragment() {
 
@@ -94,9 +96,14 @@ class VideoSettingsFragment : Fragment() {
                     wifiDownloadChanged = {
                         viewModel.setWifiDownloadOnly(it)
                     },
+                    videoStreamingQualityClick = {
+                        router.navigateToVideoQuality(
+                            requireActivity().supportFragmentManager, VideoQualityType.Streaming
+                        )
+                    },
                     videoDownloadQualityClick = {
                         router.navigateToVideoQuality(
-                            requireActivity().supportFragmentManager
+                            requireActivity().supportFragmentManager, VideoQualityType.Download
                         )
                     }
                 )
@@ -112,6 +119,7 @@ private fun VideoSettingsScreen(
     windowSize: WindowSize,
     videoSettings: VideoSettings,
     wifiDownloadChanged: (Boolean) -> Unit,
+    videoStreamingQualityClick: () -> Unit,
     videoDownloadQualityClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -188,14 +196,14 @@ private fun VideoSettingsScreen(
                         Column(Modifier.weight(1f)) {
                             Text(
                                 modifier = Modifier.testTag("txt_wifi_only_label"),
-                                text = stringResource(id = profileR.string.profile_wifi_only_download),
+                                text = stringResource(id = R.string.profile_wifi_only_download),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
                                 modifier = Modifier.testTag("txt_wifi_only_description"),
-                                text = stringResource(id = profileR.string.profile_only_download_when_wifi_turned_on),
+                                text = stringResource(id = R.string.profile_only_download_when_wifi_turned_on),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
@@ -216,6 +224,36 @@ private fun VideoSettingsScreen(
                     Divider()
                     Row(
                         Modifier
+                            .fillMaxWidth()
+                            .height(92.dp)
+                            .clickable {
+                                videoStreamingQualityClick()
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(id = org.openedx.core.R.string.core_video_streaming_quality),
+                                color = MaterialTheme.appColors.textPrimary,
+                                style = MaterialTheme.appTypography.titleMedium
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(id = videoSettings.videoStreamingQuality.titleResId),
+                                color = MaterialTheme.appColors.textSecondary,
+                                style = MaterialTheme.appTypography.labelMedium
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Filled.ChevronRight,
+                            tint = MaterialTheme.appColors.onSurface,
+                            contentDescription = "Expandable Arrow"
+                        )
+                    }
+                    Divider()
+                    Row(
+                        Modifier
                             .testTag("btn_video_quality")
                             .fillMaxWidth()
                             .height(92.dp)
@@ -227,15 +265,13 @@ private fun VideoSettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                modifier = Modifier.testTag("txt_video_quality_label"),
-                                text = stringResource(id = profileR.string.profile_video_streaming_quality),
+                                text = stringResource(id = org.openedx.core.R.string.core_video_download_quality),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                modifier = Modifier.testTag("txt_video_quality_description"),
-                                text = stringResource(id = videoSettings.videoQuality.titleResId),
+                                text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
@@ -261,9 +297,11 @@ private fun VideoSettingsScreenPreview() {
         VideoSettingsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             wifiDownloadChanged = {},
+            videoStreamingQualityClick = {},
             videoDownloadQualityClick = {},
             onBackClick = {},
             videoSettings = VideoSettings.default
         )
     }
 }
+

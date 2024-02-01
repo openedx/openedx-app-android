@@ -112,4 +112,12 @@
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
+
+    <string name="core_video_download_to_device">Download to device</string>
+    <string name="core_video_downloading_to_device">Downloading videos…</string>
+    <string name="core_video_downloaded_to_device">All videos downloaded</string>
+    <string name="core_video_remaining_to_download" formatted="false">Remaining %d, %s Total</string>
+    <string name="core_video_downloaded_subtitle" formatted="false">Videos %d, %s Total</string>
+    <string name="core_video_streaming_quality">Video streaming quality</string>
+    <string name="core_video_download_quality">Video download quality</string>
 </resources>
