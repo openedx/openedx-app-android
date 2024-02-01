@@ -13,6 +13,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
@@ -171,7 +172,7 @@ class CourseOutlineViewModel(
                 val datesBannerInfo = if (networkConnection.isOnline()) {
                     interactor.getDatesBannerInfo(courseId)
                 } else {
-                    null
+                    CourseDatesBannerInfo()
                 }
                 setBlocks(blocks)
                 courseSubSections.clear()
@@ -249,6 +250,7 @@ class CourseOutlineViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
+                updateCourseData(false)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {

@@ -109,9 +109,9 @@ class CourseContainerViewModel(
         }
     }
 
-    fun courseTabClickedEvent(tab: CourseContainerTab) {
+    fun courseContainerTabClickedEvent(tab: CourseContainerTab) {
         when (tab) {
-            CourseContainerTab.OUTLINE -> courseTabClickedEvent()
+            CourseContainerTab.COURSE -> courseTabClickedEvent()
             CourseContainerTab.VIDEOS -> videoTabClickedEvent()
             CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()

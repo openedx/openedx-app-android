@@ -23,7 +23,7 @@ class CourseContainerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment
 }
 
 enum class CourseContainerTab(val itemId: Int, val titleResId: Int) {
-    OUTLINE(itemId = R.id.outline, titleResId = R.string.course_navigation_course),
+    COURSE(itemId = R.id.course, titleResId = R.string.course_navigation_course),
     VIDEOS(itemId = R.id.videos, titleResId = R.string.course_navigation_video),
     DISCUSSION(itemId = R.id.discussions, titleResId = R.string.course_navigation_discussion),
     DATES(itemId = R.id.dates, titleResId = R.string.course_navigation_dates),

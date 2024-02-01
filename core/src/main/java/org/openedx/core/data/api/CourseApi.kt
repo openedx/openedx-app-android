@@ -72,7 +72,7 @@ interface CourseApi {
     suspend fun resetCourseDates(@Body courseBody: Map<String, String>): ResetCourseDates
 
     @GET("/api/course_experience/v1/course_deadlines_info/{course_id}")
-    suspend fun getDatesBannerInfo(@Path("course_id") courseId: String): CourseDates
+    suspend fun getDatesBannerInfo(@Path("course_id") courseId: String): CourseDatesBannerInfo
 
     @GET("/api/mobile/v1/course_info/{course_id}/handouts")
     suspend fun getHandouts(@Path("course_id") courseId: String): HandoutsModel

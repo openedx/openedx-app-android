@@ -15,13 +15,13 @@ import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment
 import org.openedx.course.presentation.ui.CourseToolbar
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
-import org.openedx.core.R as coreR
 import org.openedx.course.presentation.container.CourseContainerTab as Tabs
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
@@ -96,7 +96,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         adapter = CourseContainerAdapter(this).apply {
             addFragment(
-                Tabs.OUTLINE,
+                Tabs.COURSE,
                 CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName)
             )
             addFragment(
@@ -132,7 +132,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             binding.viewPager.isUserInputEnabled = false
             binding.bottomNavView.setOnItemSelectedListener { menuItem ->
                 Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
-                    viewModel.courseTabClickedEvent(tab)
+                    viewModel.courseContainerTabClickedEvent(tab)
                     binding.viewPager.setCurrentItem(tab.ordinal, false)
                 }
                 true
@@ -145,29 +145,18 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         viewModel.updateData(withSwipeRefresh)
     }
 
-    fun showDatesUpdateSnackbar(isSuccess: Boolean) {
-        val message = if (isSuccess) {
-            getString(coreR.string.core_dates_shift_dates_successfully_msg)
-        } else {
-            getString(coreR.string.core_dates_shift_dates_unsuccessful_msg)
+    fun updateCourseDates() {
+        adapter?.getFragment(Tabs.DATES)?.let {
+            (it as CourseDatesFragment).updateData()
         }
-        val duration = if (isSuccess) {
-            Snackbar.LENGTH_INDEFINITE
-        } else {
-            Snackbar.LENGTH_LONG
-        }
-        snackBar = Snackbar.make(binding.root, message, duration).also {
-            if (isSuccess) {
-                it.setAction(coreR.string.core_dates_view_all_dates) {
-                    adapter?.getFragment(Tabs.DATES)?.let { fragment ->
-                        binding.viewPager.setCurrentItem(Tabs.DATES.ordinal, true)
-                        (fragment as CourseDatesFragment).updateData()
-                    }
-                }
-            }
-        }
-        snackBar?.show()
     }
+
+    fun navigateToTab(tab: CourseContainerTab) {
+        adapter?.getFragment(tab)?.let {
+            binding.viewPager.setCurrentItem(tab.ordinal, true)
+        }
+    }
+
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"

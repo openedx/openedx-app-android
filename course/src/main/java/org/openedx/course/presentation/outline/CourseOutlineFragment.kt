@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -80,6 +81,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
+import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
@@ -96,6 +98,8 @@ class CourseOutlineFragment : Fragment() {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
+
+    private var snackBar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -192,12 +196,36 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onResetDatesClick = {
                         viewModel.resetCourseDatesBanner(onResetDates = {
-                            (parentFragment as CourseContainerFragment).showDatesUpdateSnackbar(it)
+                            (parentFragment as CourseContainerFragment).updateCourseDates()
+                            showDatesUpdateSnackbar(it)
                         })
                     }
                 )
             }
         }
+    }
+
+    override fun onDestroyView() {
+        snackBar?.dismiss()
+        super.onDestroyView()
+    }
+
+    private fun showDatesUpdateSnackbar(isSuccess: Boolean) {
+        val message = if (isSuccess) {
+            getString(R.string.core_dates_shift_dates_successfully_msg)
+        } else {
+            getString(R.string.core_dates_shift_dates_unsuccessful_msg)
+        }
+        snackBar = view?.let {
+            Snackbar.make(it, message, Snackbar.LENGTH_LONG).apply {
+                if (isSuccess) {
+                    setAction(R.string.core_dates_view_all_dates) {
+                        (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
+                    }
+                }
+            }
+        }
+        snackBar?.show()
     }
 
 
@@ -333,8 +361,9 @@ internal fun CourseOutlineScreen(
                                         )
                                     }
                                 }
-                                uiState.datesBannerInfo?.let {
-                                    if (it.isBannerAvailableForDashboard()) {
+                                item { Spacer(Modifier.height(28.dp)) }
+                                uiState.datesBannerInfo?.let { banner ->
+                                    if (banner.isBannerAvailableForDashboard()) {
                                         item {
                                             Box(
                                                 modifier = Modifier
@@ -343,13 +372,13 @@ internal fun CourseOutlineScreen(
                                                 if (windowSize.isTablet) {
                                                     CourseDatesBannerTablet(
                                                         modifier = Modifier.padding(bottom = 16.dp),
-                                                        banner = it,
+                                                        banner = banner,
                                                         resetDates = onResetDatesClick,
                                                     )
                                                 } else {
                                                     CourseDatesBanner(
                                                         modifier = Modifier.padding(bottom = 16.dp),
-                                                        banner = it,
+                                                        banner = banner,
                                                         resetDates = onResetDatesClick,
                                                     )
                                                 }
@@ -359,7 +388,6 @@ internal fun CourseOutlineScreen(
                                 }
                                 if (uiState.resumeComponent != null) {
                                     item {
-                                        Spacer(Modifier.height(28.dp))
                                         Box(listPadding) {
                                             if (windowSize.isTablet) {
                                                 ResumeCourseTablet(
