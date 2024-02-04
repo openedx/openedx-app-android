@@ -7,7 +7,7 @@ data class CourseDatesBannerInfo(
     @SerializedName("dates_banner_info")
     val datesBannerInfo: DatesBannerInfo?,
     @SerializedName("has_ended")
-    val hasEnded: Boolean,
+    val hasEnded: Boolean?,
 ) {
     fun mapToDomain(): CourseDatesBannerInfo {
         return CourseDatesBannerInfo(
@@ -15,7 +15,7 @@ data class CourseDatesBannerInfo(
             missedGatedContent = datesBannerInfo?.missedGatedContent ?: false,
             verifiedUpgradeLink = datesBannerInfo?.verifiedUpgradeLink ?: "",
             contentTypeGatingEnabled = datesBannerInfo?.contentTypeGatingEnabled ?: false,
-            hasEnded = hasEnded,
+            hasEnded = hasEnded ?: false,
         )
     }
 }

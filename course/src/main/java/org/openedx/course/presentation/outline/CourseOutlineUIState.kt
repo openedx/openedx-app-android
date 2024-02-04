@@ -13,7 +13,7 @@ sealed class CourseOutlineUIState {
         val courseSubSections: Map<String, List<Block>>,
         val courseSectionsState: Map<String, Boolean>,
         val subSectionsDownloadsCount: Map<String, Int>,
-        val datesBannerInfo: CourseDatesBannerInfo?,
+        val datesBannerInfo: CourseDatesBannerInfo,
     ) : CourseOutlineUIState()
 
     object Loading : CourseOutlineUIState()

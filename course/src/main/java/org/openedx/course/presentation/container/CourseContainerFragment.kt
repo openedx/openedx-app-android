@@ -157,7 +157,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 
-
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"

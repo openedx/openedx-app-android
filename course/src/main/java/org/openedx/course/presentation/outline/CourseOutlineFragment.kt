@@ -362,26 +362,24 @@ internal fun CourseOutlineScreen(
                                     }
                                 }
                                 item { Spacer(Modifier.height(28.dp)) }
-                                uiState.datesBannerInfo?.let { banner ->
-                                    if (banner.isBannerAvailableForDashboard()) {
-                                        item {
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(all = 6.dp)
-                                            ) {
-                                                if (windowSize.isTablet) {
-                                                    CourseDatesBannerTablet(
-                                                        modifier = Modifier.padding(bottom = 16.dp),
-                                                        banner = banner,
-                                                        resetDates = onResetDatesClick,
-                                                    )
-                                                } else {
-                                                    CourseDatesBanner(
-                                                        modifier = Modifier.padding(bottom = 16.dp),
-                                                        banner = banner,
-                                                        resetDates = onResetDatesClick,
-                                                    )
-                                                }
+                                if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(all = 8.dp)
+                                        ) {
+                                            if (windowSize.isTablet) {
+                                                CourseDatesBannerTablet(
+                                                    modifier = Modifier.padding(bottom = 16.dp),
+                                                    banner = uiState.datesBannerInfo,
+                                                    resetDates = onResetDatesClick,
+                                                )
+                                            } else {
+                                                CourseDatesBanner(
+                                                    modifier = Modifier.padding(bottom = 16.dp),
+                                                    banner = uiState.datesBannerInfo,
+                                                    resetDates = onResetDatesClick,
+                                                )
                                             }
                                         }
                                     }
@@ -628,7 +626,13 @@ private fun CourseOutlineScreenPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CourseDatesBannerInfo(false, false, "", false, false)
+                CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                )
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = true,
@@ -662,7 +666,13 @@ private fun CourseOutlineScreenTabletPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                CourseDatesBannerInfo(false, false, "", false, false)
+                CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                )
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = true,

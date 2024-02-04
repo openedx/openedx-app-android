@@ -8,11 +8,11 @@ import org.openedx.core.domain.model.CourseBannerType.UPGRADE_TO_GRADED
 import org.openedx.core.domain.model.CourseBannerType.UPGRADE_TO_RESET
 
 data class CourseDatesBannerInfo(
-    private val missedDeadlines: Boolean = false,
-    private val missedGatedContent: Boolean = false,
-    private val verifiedUpgradeLink: String = "",
-    private val contentTypeGatingEnabled: Boolean = false,
-    private val hasEnded: Boolean = false,
+    private val missedDeadlines: Boolean,
+    private val missedGatedContent: Boolean,
+    private val verifiedUpgradeLink: String,
+    private val contentTypeGatingEnabled: Boolean,
+    private val hasEnded: Boolean,
 ) {
     val bannerType by lazy { getCourseBannerType() }
 

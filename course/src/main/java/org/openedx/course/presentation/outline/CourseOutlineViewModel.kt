@@ -129,7 +129,7 @@ class CourseOutlineViewModel(
         getCourseDataInternal()
     }
 
-    fun getCourseData() {
+    private fun getCourseData() {
         _uiState.value = CourseOutlineUIState.Loading
         getCourseDataInternal()
     }
@@ -172,7 +172,13 @@ class CourseOutlineViewModel(
                 val datesBannerInfo = if (networkConnection.isOnline()) {
                     interactor.getDatesBannerInfo(courseId)
                 } else {
-                    CourseDatesBannerInfo()
+                    CourseDatesBannerInfo(
+                        missedDeadlines = false,
+                        missedGatedContent = false,
+                        verifiedUpgradeLink = "",
+                        contentTypeGatingEnabled = false,
+                        hasEnded = false
+                    )
                 }
                 setBlocks(blocks)
                 courseSubSections.clear()
