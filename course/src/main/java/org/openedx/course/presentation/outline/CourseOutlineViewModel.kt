@@ -13,7 +13,9 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
@@ -22,10 +24,12 @@ import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
@@ -169,17 +173,24 @@ class CourseOutlineViewModel(
                     CourseComponentStatus("")
                 }
 
-                val datesBannerInfo = if (networkConnection.isOnline()) {
-                    interactor.getDatesBannerInfo(courseId)
+                val courseDatesResult = if (networkConnection.isOnline()) {
+                    interactor.getCourseDates(courseId)
                 } else {
-                    CourseDatesBannerInfo(
-                        missedDeadlines = false,
-                        missedGatedContent = false,
-                        verifiedUpgradeLink = "",
-                        contentTypeGatingEnabled = false,
-                        hasEnded = false
+                    CourseDatesResult(
+                        datesSection = linkedMapOf(),
+                        courseBanner = CourseDatesBannerInfo(
+                            missedDeadlines = false,
+                            missedGatedContent = false,
+                            verifiedUpgradeLink = "",
+                            contentTypeGatingEnabled = false,
+                            hasEnded = false
+                        )
                     )
                 }
+                val datesBannerInfo = courseDatesResult.courseBanner
+
+                checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
+
                 setBlocks(blocks)
                 courseSubSections.clear()
                 courseSubSectionUnit.clear()
@@ -294,6 +305,18 @@ class CourseOutlineViewModel(
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
             analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+        }
+    }
+
+    private fun checkIfCalendarOutOfDate(courseDates: List<CourseDateBlock>) {
+        viewModelScope.launch {
+            notifier.send(
+                CreateCalendarSyncEvent(
+                    courseDates = courseDates,
+                    dialogType = CalendarSyncDialogType.NONE.name,
+                    checkOutOfSync = true,
+                )
+            )
         }
     }
 }

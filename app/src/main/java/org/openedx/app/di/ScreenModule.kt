@@ -161,7 +161,10 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String) ->
@@ -229,13 +232,17 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String, isSelfPaced: Boolean) ->
+    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean) ->
         CourseDatesViewModel(
             courseId,
+            courseName,
             isSelfPaced,
             get(),
             get(),
-            get()
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->

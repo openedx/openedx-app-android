@@ -2,6 +2,11 @@ package org.openedx.course.presentation.container
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -11,10 +16,14 @@ import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.calendarsync.CalendarSyncDialog
+import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
@@ -37,6 +46,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private var adapter: CourseContainerAdapter? = null
 
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { isGranted ->
+        if (!isGranted.containsValue(false)) {
+            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.SYNC_DIALOG)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.preloadCourseStructure()
@@ -47,6 +64,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar(viewModel.courseName)
+        if (viewModel.calendarSyncUIState.value.isCalendarSyncEnabled) {
+            setUpCourseCalendar()
+        }
         observe()
     }
 
@@ -109,7 +129,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             )
             addFragment(
                 Tabs.DATES,
-                CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced)
+                CourseDatesFragment.newInstance(
+                    viewModel.courseId,
+                    viewModel.courseName,
+                    viewModel.isSelfPaced
+                )
             )
             addFragment(
                 Tabs.HANDOUTS,
@@ -138,6 +162,69 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 true
             }
             binding.bottomNavView.isVisible = true
+        }
+    }
+
+    private fun setUpCourseCalendar() {
+        binding.composeContainer.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                OpenEdXTheme {
+                    val syncState by viewModel.calendarSyncUIState.collectAsState()
+
+                    LaunchedEffect(key1 = syncState.checkForOutOfSync) {
+                        if (syncState.isCalendarSyncEnabled && syncState.checkForOutOfSync.get()) {
+                            viewModel.checkIfCalendarOutOfDate()
+                        }
+                    }
+
+                    LaunchedEffect(syncState.uiMessage.get()) {
+                        syncState.uiMessage.get().takeIfNotEmpty()?.let {
+                            Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+                            syncState.uiMessage.set("")
+                        }
+                    }
+
+                    CalendarSyncDialog(
+                        syncDialogType = syncState.dialogType,
+                        calendarTitle = syncState.calendarTitle,
+                        syncDialogAction = { dialog ->
+                            when (dialog) {
+                                CalendarSyncDialogType.SYNC_DIALOG -> {
+                                    viewModel.addOrUpdateEventsInCalendar(
+                                        updatedEvent = false,
+                                    )
+                                }
+
+                                CalendarSyncDialogType.UN_SYNC_DIALOG -> {
+                                    viewModel.deleteCourseCalendar()
+                                }
+
+                                CalendarSyncDialogType.PERMISSION_DIALOG -> {
+                                    permissionLauncher.launch(viewModel.calendarPermissions)
+                                }
+
+                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
+                                    viewModel.addOrUpdateEventsInCalendar(
+                                        updatedEvent = true,
+                                    )
+                                }
+
+                                CalendarSyncDialogType.EVENTS_DIALOG -> {
+                                    viewModel.openCalendarApp()
+                                }
+
+                                CalendarSyncDialogType.LOADING_DIALOG,
+                                CalendarSyncDialogType.NONE -> {
+                                }
+                            }
+                        },
+                        dismissSyncDialog = {
+                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
+                        }
+                    )
+                }
+            }
         }
     }
 

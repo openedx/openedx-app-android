@@ -25,6 +25,7 @@ import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.interfaces.EnrollInCourseInteractor
@@ -40,14 +41,16 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.course.data.storage.CoursePreferences
+import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
+import org.openedx.course.presentation.calendarsync.CalendarManager
+import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discussion.presentation.DiscussionAnalytics
@@ -69,12 +72,18 @@ val appModule = module {
     single<ProfilePreferences> { get<PreferencesManager>() }
     single<WhatsNewPreferences> { get<PreferencesManager>() }
     single<InAppReviewPreferences> { get<PreferencesManager>() }
+    single<CoursePreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
+    single { CalendarManager(get(), get(), get()) }
 
-    single<Gson> { GsonBuilder().create() }
+    single<Gson> {
+        GsonBuilder()
+            .registerTypeAdapter(CourseEnrollments::class.java, CourseEnrollments.Deserializer())
+            .create()
+    }
 
     single { AppNotifier() }
     single { CourseNotifier() }

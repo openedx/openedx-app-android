@@ -4,12 +4,21 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -20,10 +29,23 @@ import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.DateType
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
+import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.module.DownloadWorkerController
-import org.openedx.core.module.db.*
+import org.openedx.core.module.db.DownloadDao
+import org.openedx.core.module.db.DownloadModel
+import org.openedx.core.module.db.DownloadModelEntity
+import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.db.FileType
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -31,7 +53,7 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import java.net.UnknownHostException
-import java.util.*
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseOutlineViewModelTest {
@@ -106,7 +128,7 @@ class CourseOutlineViewModelTest {
         )
     )
 
-    val courseStructure = CourseStructure(
+    private val courseStructure = CourseStructure(
         root = "",
         blockData = blocks,
         id = "id",
@@ -130,12 +152,36 @@ class CourseOutlineViewModelTest {
         isSelfPaced = false
     )
 
+    private val dateBlock = CourseDateBlock(
+        complete = false,
+        date = Date(),
+        dateType = DateType.TODAY_DATE,
+        description = "Mocked Course Date Description"
+    )
+    private val mockDateBlocks = linkedMapOf(
+        Pair(
+            DatesSection.COMPLETED,
+            listOf(dateBlock, dateBlock)
+        ),
+        Pair(
+            DatesSection.PAST_DUE,
+            listOf(dateBlock, dateBlock)
+        ),
+        Pair(
+            DatesSection.TODAY,
+            listOf(dateBlock, dateBlock)
+        )
+    )
     private val mockCourseDatesBannerInfo = CourseDatesBannerInfo(
         missedDeadlines = true,
         missedGatedContent = false,
         verifiedUpgradeLink = "",
         contentTypeGatingEnabled = false,
         hasEnded = true,
+    )
+    private val mockedCourseDatesResult = CourseDatesResult(
+        datesSection = mockDateBlocks,
+        courseBanner = mockCourseDatesBannerInfo,
     )
 
     private val downloadModel = DownloadModel(
@@ -156,6 +202,8 @@ class CourseOutlineViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
         every { config.getApiHostURL() } returns "http://localhost:8000"
+
+        coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
     }
 
     @After
@@ -237,7 +285,6 @@ class CourseOutlineViewModelTest {
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         every { config.isCourseNestedListEnabled() } returns false
-        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -316,7 +363,6 @@ class CourseOutlineViewModelTest {
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         every { config.isCourseNestedListEnabled() } returns false
-        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -389,7 +435,6 @@ class CourseOutlineViewModelTest {
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
-        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -421,7 +466,6 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
-        coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
 
         val viewModel = CourseOutlineViewModel(
             "",
