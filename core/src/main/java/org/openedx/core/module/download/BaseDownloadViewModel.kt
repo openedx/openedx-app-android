@@ -24,7 +24,7 @@ abstract class BaseDownloadViewModel(
     private val workerController: DownloadWorkerController
 ) : BaseViewModel() {
 
-    private val allBlocks = mutableListOf<Block>()
+    private val allBlocks = hashMapOf<String, Block>()
 
     private val downloadableChildrenMap = hashMapOf<String, List<String>>()
     private val downloadModelsStatus = hashMapOf<String, DownloadedState>()
@@ -77,7 +77,7 @@ abstract class BaseDownloadViewModel(
     protected fun setBlocks(list: List<Block>) {
         downloadableChildrenMap.clear()
         allBlocks.clear()
-        allBlocks.addAll(list)
+        allBlocks.putAll(list.map { it.id to it })
     }
 
     fun isBlockDownloading(id: String): Boolean {
@@ -102,7 +102,7 @@ abstract class BaseDownloadViewModel(
             val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
             val downloadModels = mutableListOf<DownloadModel>()
             for (blockId in saveBlocksIds) {
-                allBlocks.find { it.id == blockId }?.let { block ->
+                allBlocks[blockId]?.let { block ->
                     val videoInfo =
                         block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
                             preferencesManager.videoSettings.videoDownloadQuality
@@ -133,10 +133,12 @@ abstract class BaseDownloadViewModel(
     }
 
     open fun saveAllDownloadModels(folder: String) {
-        downloadableChildrenMap.keys.forEach { id ->
-            allBlocks.find { it.id == id }?.let { block ->
-                if (!isBlockDownloaded(block.id) && !isBlockDownloading(block.id)) {
-                    saveDownloadModels(folder, block.id)
+        viewModelScope.launch {
+            downloadableChildrenMap.keys.forEach { id ->
+                allBlocks[id]?.let { block ->
+                    if (!isBlockDownloaded(block.id) && !isBlockDownloading(block.id)) {
+                        saveDownloadModels(folder, block.id)
+                    }
                 }
             }
         }
@@ -179,7 +181,7 @@ abstract class BaseDownloadViewModel(
             .sumOf { id ->
                 var size = 0L
                 downloadableChildrenMap[id]?.forEach { downloadableBlock ->
-                    val block = allBlocks.find { it.id == downloadableBlock }
+                    val block = allBlocks[downloadableBlock]
                     val videoInfo =
                         block?.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
                             preferencesManager.videoSettings.videoDownloadQuality
@@ -200,7 +202,7 @@ abstract class BaseDownloadViewModel(
             .sumOf { list ->
                 var size = 0L
                 list.forEach { downloadableBlock ->
-                    val block = allBlocks.find { it.id == downloadableBlock }
+                    val block = allBlocks[downloadableBlock]
                     val videoInfo =
                         block?.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
                             preferencesManager.videoSettings.videoDownloadQuality
@@ -228,13 +230,14 @@ abstract class BaseDownloadViewModel(
 
     protected fun addDownloadableChildrenForSequentialBlock(sequentialBlock: Block) {
         for (item in sequentialBlock.descendants) {
-            allBlocks.find { it.id == item }?.let { blockDescendant ->
+            allBlocks[item]?.let { blockDescendant ->
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     for (unitBlockId in blockDescendant.descendants) {
-                        allBlocks.find { it.id == unitBlockId && it.isDownloadable }?.let {
+                        val block = allBlocks[unitBlockId]
+                        if (block?.isDownloadable == true) {
                             val id = sequentialBlock.id
                             val children = downloadableChildrenMap[id] ?: listOf()
-                            downloadableChildrenMap[id] = children + it.id
+                            downloadableChildrenMap[id] = children + block.id
                         }
                     }
                 }
@@ -244,10 +247,11 @@ abstract class BaseDownloadViewModel(
 
     protected fun addDownloadableChildrenForVerticalBlock(verticalBlock: Block) {
         for (unitBlockId in verticalBlock.descendants) {
-            allBlocks.find { it.id == unitBlockId && it.isDownloadable }?.let {
+            val block = allBlocks[unitBlockId]
+            if (block?.isDownloadable == true) {
                 val id = verticalBlock.id
                 val children = downloadableChildrenMap[id] ?: listOf()
-                downloadableChildrenMap[id] = children + it.id
+                downloadableChildrenMap[id] = children + block.id
             }
         }
     }
