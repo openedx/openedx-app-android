@@ -48,6 +48,7 @@ class DownloadWorker(
     )
 
     private var currentDownload: DownloadModel? = null
+    private var lastUpdateTime = 0L
 
     private val fileDownloader by inject<FileDownloader>(FileDownloader::class.java)
 
@@ -86,7 +87,12 @@ class DownloadWorker(
         fileDownloader.progressListener = object : CurrentProgress {
             override fun progress(value: Long, size: Long) {
                 val progress = 100 * value / size
-                if (!fileDownloader.isCanceled) {
+                // Update no more than 5 times per sec
+                if (!fileDownloader.isCanceled &&
+                    (System.currentTimeMillis() - lastUpdateTime > 200)
+                ) {
+                    lastUpdateTime = System.currentTimeMillis()
+
                     launch {
                         notifier.send(DownloadProgressChanged(value, size))
                     }

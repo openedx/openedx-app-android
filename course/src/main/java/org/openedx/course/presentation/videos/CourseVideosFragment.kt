@@ -685,13 +685,7 @@ private fun CourseVideosScreenPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                AllDownloadModulesState(
-                    isAllBlocksDownloadedOrDownloading = false,
-                    remainingDownloadModelsCount = 0,
-                    remainingDownloadModelsSize = 0,
-                    allDownloadModelsCount = 0,
-                    allDownloadModelsSize = 0
-                )
+                AllDownloadModulesState.default
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
@@ -756,13 +750,7 @@ private fun CourseVideosScreenTabletPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                AllDownloadModulesState(
-                    isAllBlocksDownloadedOrDownloading = false,
-                    remainingDownloadModelsCount = 0,
-                    remainingDownloadModelsSize = 0,
-                    allDownloadModelsCount = 0,
-                    allDownloadModelsSize = 0
-                )
+                AllDownloadModulesState.default
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = false,

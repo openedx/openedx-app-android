@@ -24,4 +24,14 @@ data class AllDownloadModulesState(
     val remainingDownloadModelsSize: Long,
     val allDownloadModelsCount: Int,
     val allDownloadModelsSize: Long
-)
+) {
+    companion object {
+        val default = AllDownloadModulesState(
+            isAllBlocksDownloadedOrDownloading = false,
+            remainingDownloadModelsCount = 0,
+            remainingDownloadModelsSize = 0,
+            allDownloadModelsCount = 0,
+            allDownloadModelsSize = 0
+        )
+    }
+}
