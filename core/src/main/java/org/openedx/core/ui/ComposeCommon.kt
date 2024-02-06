@@ -1085,7 +1085,7 @@ fun OpenEdXButton(
 ) {
     Button(
         modifier = Modifier
-            .testTag("btn_${text}")
+            .testTag("btn_${text.withoutSpaces()}")
             .then(width)
             .height(42.dp),
         shape = MaterialTheme.appShapes.buttonShape,

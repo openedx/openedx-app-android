@@ -67,6 +67,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.ProfileImage
+import org.openedx.core.extension.withoutSpaces
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
@@ -515,7 +516,7 @@ private fun ProfileInfoItem(
     }
     Row(
         Modifier
-            .testTag("btn_profile_info_item_$text")
+            .testTag("btn_profile_info_item_${text.withoutSpaces()}")
             .fillMaxWidth()
             .clickable { onClick() }
             .padding(20.dp),
@@ -524,7 +525,7 @@ private fun ProfileInfoItem(
     ) {
         Text(
             modifier = Modifier
-                .testTag("txt_profile_info_item_title_$text")
+                .testTag("txt_profile_info_item_title_${text.withoutSpaces()}")
                 .weight(1f),
             text = text,
             maxLines = 1,

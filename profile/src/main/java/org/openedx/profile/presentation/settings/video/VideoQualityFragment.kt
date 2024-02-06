@@ -182,7 +182,7 @@ private fun QualityOption(
 ) {
     Row(
         Modifier
-            .testTag("btn_video_quality_$title")
+            .testTag("btn_video_quality_${title.withoutSpaces()}")
             .fillMaxWidth()
             .height(90.dp)
             .clickable {

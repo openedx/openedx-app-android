@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
+import org.openedx.core.extension.withoutSpaces
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -264,7 +265,7 @@ fun TransparentTextButton(
 ) {
     Button(
         modifier = Modifier
-            .testTag("btn_upgrade_dialog_$text")
+            .testTag("btn_upgrade_dialog_${text.withoutSpaces()}")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color.Transparent
@@ -274,7 +275,7 @@ fun TransparentTextButton(
         onClick = onClick
     ) {
         Text(
-            modifier = Modifier.testTag("txt_app_upgrade_dialog_$text"),
+            modifier = Modifier.testTag("txt_app_upgrade_dialog_${text.withoutSpaces()}"),
             color = MaterialTheme.appColors.textAccent,
             style = MaterialTheme.appTypography.labelLarge,
             text = text
@@ -289,7 +290,7 @@ fun DefaultTextButton(
 ) {
     Button(
         modifier = Modifier
-            .testTag("btn_upgrade_dialog_$text")
+            .testTag("btn_upgrade_dialog_${text.withoutSpaces()}")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.appColors.buttonBackground
@@ -303,7 +304,7 @@ fun DefaultTextButton(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                modifier = Modifier.testTag("txt_app_upgrade_dialog_$text"),
+                modifier = Modifier.testTag("txt_app_upgrade_dialog_${text.withoutSpaces()}"),
                 text = text,
                 color = MaterialTheme.appColors.buttonText,
                 style = MaterialTheme.appTypography.labelLarge
