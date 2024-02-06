@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
@@ -32,6 +33,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Settings
@@ -63,6 +65,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.AppDataConstants
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -286,6 +289,10 @@ private fun CourseVideosScreen(
             )
         }
 
+        var isDownloadConfirmationShowed by rememberSaveable {
+            mutableStateOf(false)
+        }
+
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -427,7 +434,18 @@ private fun CourseVideosScreen(
                                                     .padding(end = 16.dp),
                                                 checked = isChecked,
                                                 onCheckedChange = {
-                                                    onDownloadAllClick(isChecked)
+                                                    if (!isChecked) {
+                                                        if (uiState.allDownloadModulesState.allDownloadModelsSize >
+                                                            AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
+                                                        ) {
+                                                            isDownloadConfirmationShowed = true
+                                                        } else {
+                                                            onDownloadAllClick(false)
+                                                        }
+
+                                                    } else {
+                                                        onDownloadAllClick(true)
+                                                    }
                                                 },
                                                 colors = SwitchDefaults.colors(
                                                     checkedThumbColor = MaterialTheme.appColors.primary,
@@ -587,6 +605,45 @@ private fun CourseVideosScreen(
                     }
                 }
             }
+        }
+
+        if (isDownloadConfirmationShowed) {
+            AlertDialog(
+                title = {
+                    Text(
+                        text = stringResource(id = org.openedx.course.R.string.course_download_big_files_confirmation_title)
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(id = org.openedx.course.R.string.course_download_big_files_confirmation_text)
+                    )
+                },
+                onDismissRequest = {
+                    isDownloadConfirmationShowed = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            isDownloadConfirmationShowed = false
+                            onDownloadAllClick(false)
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.core_confirm)
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            isDownloadConfirmationShowed = false
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.core_dismiss))
+                    }
+                }
+            )
         }
     }
 }

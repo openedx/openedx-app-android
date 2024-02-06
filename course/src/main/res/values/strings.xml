@@ -64,5 +64,7 @@
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
 
     <string name="course_download_queue_title">Downloads</string>
+    <string name="course_download_big_files_confirmation_title">Download</string>
+    <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
 
 </resources>

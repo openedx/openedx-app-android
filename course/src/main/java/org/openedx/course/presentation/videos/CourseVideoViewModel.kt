@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.SingleEventLiveData
@@ -111,9 +110,27 @@ class CourseVideoViewModel(
         }
 
         viewModelScope.launch {
-            profileNotifier.notifier.collectLatest { event ->
+            profileNotifier.notifier.collect { event ->
                 if (event is VideoQualityChanged) {
                     _videoSettings.value = preferencesManager.videoSettings
+
+                    if (_uiState.value is CourseVideosUIState.CourseData) {
+                        val state = _uiState.value as CourseVideosUIState.CourseData
+                        val isAllBlocksDownloadedOrDownloading =
+                            isAllBlocksDownloadedOrDownloading()
+                        val remainingSize = if (isAllBlocksDownloadedOrDownloading) {
+                            state.allDownloadModulesState.remainingDownloadModelsSize
+                        } else {
+                            getRemainingDownloadModelsSize()
+                        }
+
+                        _uiState.value = state.copy(
+                            allDownloadModulesState = state.allDownloadModulesState.copy(
+                                isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
+                                remainingDownloadModelsSize = remainingSize
+                            )
+                        )
+                    }
                 }
             }
         }
