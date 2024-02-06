@@ -337,33 +337,6 @@ private fun CourseVideosScreen(
                             }
 
                             is CourseVideosUIState.CourseData -> {
-                                val isDownloadingAllVideos =
-                                    uiState.allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
-                                            uiState.allDownloadModulesState.remainingDownloadModelsCount > 0
-                                val isDownloadedAllVideos =
-                                    uiState.allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
-                                            uiState.allDownloadModulesState.remainingDownloadModelsCount == 0
-
-                                val downloadVideoTitleRes = when {
-                                    isDownloadingAllVideos -> R.string.core_video_downloading_to_device
-                                    isDownloadedAllVideos -> R.string.core_video_downloaded_to_device
-                                    else -> R.string.core_video_download_to_device
-                                }
-                                val downloadVideoSubTitle =
-                                    if (isDownloadedAllVideos) {
-                                        stringResource(
-                                            id = R.string.core_video_downloaded_subtitle,
-                                            uiState.allDownloadModulesState.allDownloadModelsCount,
-                                            uiState.allDownloadModulesState.allDownloadModelsSize.toFileSize()
-                                        )
-                                    } else {
-                                        stringResource(
-                                            id = R.string.core_video_remaining_to_download,
-                                            uiState.allDownloadModulesState.remainingDownloadModelsCount,
-                                            uiState.allDownloadModulesState.remainingDownloadModelsSize.toFileSize()
-                                        )
-                                    }
-
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
@@ -383,130 +356,19 @@ private fun CourseVideosScreen(
                                         }
                                     }
 
-                                    item {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    onDownloadQueueClick()
+                                    if (uiState.allDownloadModulesState.allDownloadModelsCount > 0) {
+                                        item {
+                                            AllVideosDownloadItem(
+                                                allDownloadModulesState = uiState.allDownloadModulesState,
+                                                videoSettings = videoSettings,
+                                                onShowDownloadConfirmationDialog = {
+                                                    isDownloadConfirmationShowed = true
                                                 },
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            if (isDownloadingAllVideos) {
-                                                CircularProgressIndicator(
-                                                    modifier = Modifier
-                                                        .padding(start = 16.dp)
-                                                        .size(24.dp),
-                                                    color = MaterialTheme.appColors.primary,
-                                                    strokeWidth = 2.dp
-                                                )
-                                            } else {
-                                                Icon(
-                                                    modifier = Modifier
-                                                        .padding(start = 16.dp),
-                                                    imageVector = Icons.Outlined.Videocam,
-                                                    tint = MaterialTheme.appColors.onSurface,
-                                                    contentDescription = null
-                                                )
-                                            }
-                                            Column(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .padding(8.dp)
-                                            ) {
-                                                Text(
-                                                    text = stringResource(id = downloadVideoTitleRes),
-                                                    color = MaterialTheme.appColors.textPrimary,
-                                                    style = MaterialTheme.appTypography.titleMedium
-                                                )
-                                                Spacer(modifier = Modifier.height(2.dp))
-                                                Text(
-                                                    text = downloadVideoSubTitle,
-                                                    color = MaterialTheme.appColors.textSecondary,
-                                                    style = MaterialTheme.appTypography.labelMedium
-                                                )
-                                            }
-                                            val isChecked =
-                                                uiState.allDownloadModulesState.isAllBlocksDownloadedOrDownloading
-                                            Switch(
-                                                modifier = Modifier
-                                                    .padding(end = 16.dp),
-                                                checked = isChecked,
-                                                onCheckedChange = {
-                                                    if (!isChecked) {
-                                                        if (uiState.allDownloadModulesState.allDownloadModelsSize >
-                                                            AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
-                                                        ) {
-                                                            isDownloadConfirmationShowed = true
-                                                        } else {
-                                                            onDownloadAllClick(false)
-                                                        }
-
-                                                    } else {
-                                                        onDownloadAllClick(true)
-                                                    }
-                                                },
-                                                colors = SwitchDefaults.colors(
-                                                    checkedThumbColor = MaterialTheme.appColors.primary,
-                                                    checkedTrackColor = MaterialTheme.appColors.primary
-                                                )
+                                                onDownloadAllClick = onDownloadAllClick,
+                                                onDownloadQueueClick = onDownloadQueueClick,
+                                                onVideoDownloadQualityClick = onVideoDownloadQualityClick
                                             )
                                         }
-                                        if (isDownloadingAllVideos) {
-                                            val progress =
-                                                uiState.allDownloadModulesState.remainingDownloadModelsSize.toFloat() /
-                                                        uiState.allDownloadModulesState.allDownloadModelsSize
-
-                                            LinearProgressIndicator(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                progress = 1 - progress
-                                            )
-                                        }
-                                        Divider()
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    onVideoDownloadQualityClick()
-                                                },
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                modifier = Modifier
-                                                    .padding(start = 16.dp),
-                                                imageVector = Icons.Outlined.Settings,
-                                                tint = MaterialTheme.appColors.onSurface,
-                                                contentDescription = null
-                                            )
-                                            Column(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .padding(8.dp)
-                                            ) {
-                                                Text(
-                                                    text = stringResource(id = R.string.core_video_download_quality),
-                                                    color = MaterialTheme.appColors.textPrimary,
-                                                    style = MaterialTheme.appTypography.titleMedium
-                                                )
-                                                Spacer(modifier = Modifier.height(2.dp))
-                                                Text(
-                                                    text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
-                                                    color = MaterialTheme.appColors.textSecondary,
-                                                    style = MaterialTheme.appTypography.labelMedium
-                                                )
-                                            }
-                                            Icon(
-                                                modifier = Modifier
-                                                    .padding(end = 16.dp),
-                                                imageVector = Icons.Filled.ChevronRight,
-                                                tint = MaterialTheme.appColors.onSurface,
-                                                contentDescription = "Expandable Arrow"
-                                            )
-                                        }
-                                        Divider()
                                     }
 
                                     if (isCourseNestedListEnabled) {
@@ -646,6 +508,167 @@ private fun CourseVideosScreen(
             )
         }
     }
+}
+
+@Composable
+private fun AllVideosDownloadItem(
+    allDownloadModulesState: AllDownloadModulesState,
+    videoSettings: VideoSettings,
+    onShowDownloadConfirmationDialog: () -> Unit,
+    onDownloadAllClick: (Boolean) -> Unit,
+    onDownloadQueueClick: () -> Unit,
+    onVideoDownloadQualityClick: () -> Unit
+) {
+    val isDownloadingAllVideos =
+        allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
+                allDownloadModulesState.remainingDownloadModelsCount > 0
+    val isDownloadedAllVideos =
+        allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
+                allDownloadModulesState.remainingDownloadModelsCount == 0
+
+    val downloadVideoTitleRes = when {
+        isDownloadingAllVideos -> R.string.core_video_downloading_to_device
+        isDownloadedAllVideos -> R.string.core_video_downloaded_to_device
+        else -> R.string.core_video_download_to_device
+    }
+    val downloadVideoSubTitle =
+        if (isDownloadedAllVideos) {
+            stringResource(
+                id = R.string.core_video_downloaded_subtitle,
+                allDownloadModulesState.allDownloadModelsCount,
+                allDownloadModulesState.allDownloadModelsSize.toFileSize()
+            )
+        } else {
+            stringResource(
+                id = R.string.core_video_remaining_to_download,
+                allDownloadModulesState.remainingDownloadModelsCount,
+                allDownloadModulesState.remainingDownloadModelsSize.toFileSize()
+            )
+        }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onDownloadQueueClick()
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (isDownloadingAllVideos) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .size(24.dp),
+                color = MaterialTheme.appColors.primary,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Icon(
+                modifier = Modifier
+                    .padding(start = 16.dp),
+                imageVector = Icons.Outlined.Videocam,
+                tint = MaterialTheme.appColors.onSurface,
+                contentDescription = null
+            )
+        }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp)
+        ) {
+            Text(
+                text = stringResource(id = downloadVideoTitleRes),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = downloadVideoSubTitle,
+                color = MaterialTheme.appColors.textSecondary,
+                style = MaterialTheme.appTypography.labelMedium
+            )
+        }
+        val isChecked =
+            allDownloadModulesState.isAllBlocksDownloadedOrDownloading
+        Switch(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            checked = isChecked,
+            onCheckedChange = {
+                if (!isChecked) {
+                    if (
+                        allDownloadModulesState.allDownloadModelsSize > AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
+                    ) {
+                        onShowDownloadConfirmationDialog()
+                    } else {
+                        onDownloadAllClick(false)
+                    }
+
+                } else {
+                    onDownloadAllClick(true)
+                }
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.appColors.primary,
+                checkedTrackColor = MaterialTheme.appColors.primary
+            )
+        )
+    }
+    if (isDownloadingAllVideos) {
+        val progress =
+            allDownloadModulesState.remainingDownloadModelsSize.toFloat() /
+                    allDownloadModulesState.allDownloadModelsSize
+
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth(),
+            progress = 1 - progress
+        )
+    }
+    Divider()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onVideoDownloadQualityClick()
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            modifier = Modifier
+                .padding(start = 16.dp),
+            imageVector = Icons.Outlined.Settings,
+            tint = MaterialTheme.appColors.onSurface,
+            contentDescription = null
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.core_video_download_quality),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
+                color = MaterialTheme.appColors.textSecondary,
+                style = MaterialTheme.appTypography.labelMedium
+            )
+        }
+        Icon(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            imageVector = Icons.Filled.ChevronRight,
+            tint = MaterialTheme.appColors.onSurface,
+            contentDescription = "Expandable Arrow"
+        )
+    }
+    Divider()
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
