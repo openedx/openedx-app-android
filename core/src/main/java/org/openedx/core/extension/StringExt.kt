@@ -28,3 +28,5 @@ fun String.replaceLinkTags(isDarkTheme: Boolean): String {
     }
     return text
 }
+
+fun String.withoutSpaces(): String = this.replace(" ", "")

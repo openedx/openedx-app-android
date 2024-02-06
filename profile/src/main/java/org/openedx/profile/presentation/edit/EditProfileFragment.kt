@@ -16,7 +16,6 @@ import android.provider.MediaStore
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -116,6 +115,7 @@ import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.getFileName
 import org.openedx.core.extension.parcelable
+import org.openedx.core.extension.withoutSpaces
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -161,21 +161,6 @@ class EditProfileFragment : Fragment() {
                 viewModel.setImageUri(cropImage(it))
             }
         }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val callback = requireActivity()
-            .onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (viewModel.profileDataChanged) {
-                        viewModel.setShowLeaveDialog(true)
-                    } else {
-                        requireActivity().supportFragmentManager.popBackStack()
-                    }
-                }
-            })
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -259,6 +244,7 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun cropImage(uri: Uri): Uri {
         val matrix = Matrix()
         matrix.postRotate(getImageOrientation(uri).toFloat())
@@ -401,12 +387,18 @@ private fun EditProfileScreen(
     }
 
     val imageRes: Any = if (!isImageDeleted) {
-        if (selectedImageUri != null) {
-            selectedImageUri.toString()
-        } else if (uiState.account.profileImage.hasImage) {
-            uiState.account.profileImage.imageUrlFull
-        } else {
-            coreR.drawable.core_ic_default_profile_picture
+        when {
+            selectedImageUri != null -> {
+                selectedImageUri.toString()
+            }
+
+            uiState.account.profileImage.hasImage -> {
+                uiState.account.profileImage.imageUrlFull
+            }
+
+            else -> {
+                coreR.drawable.core_ic_default_profile_picture
+            }
         }
     } else {
         coreR.drawable.core_ic_default_profile_picture
@@ -473,6 +465,7 @@ private fun EditProfileScreen(
 
         ModalBottomSheetLayout(
             modifier = Modifier
+                .testTag("btn_bottom_sheet_edit_profile")
                 .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
@@ -480,8 +473,7 @@ private fun EditProfileScreen(
                             bottomSheetScaffoldState.hide()
                         }
                     }
-                }
-                .testTag("btn_bottom_sheet_edit_profile"),
+                },
             sheetShape = MaterialTheme.appShapes.screenBackgroundShape,
             sheetState = bottomSheetScaffoldState,
             scrimColor = Color.Black.copy(alpha = 0.4f),
@@ -567,8 +559,8 @@ private fun EditProfileScreen(
                 ) {
                     Text(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("txt_edit_profile_title"),
+                            .testTag("txt_edit_profile_title")
+                            .fillMaxWidth(),
                         text = stringResource(id = R.string.profile_edit_profile),
                         color = MaterialTheme.appColors.textPrimary,
                         textAlign = TextAlign.Center,
@@ -636,6 +628,7 @@ private fun EditProfileScreen(
                                         uiState.account.username
                                     ),
                                     modifier = Modifier
+                                        .testTag("img_edit_profile_user_image")
                                         .border(
                                             2.dp,
                                             MaterialTheme.appColors.onSurface,
@@ -651,7 +644,6 @@ private fun EditProfileScreen(
                                                 openWarningMessageDialog = true
                                             }
                                         }
-                                        .testTag("img_edit_profile_user_image")
                                 )
                                 Icon(
                                     modifier = Modifier
@@ -674,6 +666,7 @@ private fun EditProfileScreen(
                             Spacer(modifier = Modifier.height(24.dp))
                             Text(
                                 modifier = Modifier
+                                    .testTag("txt_edit_profile_limited_profile_label")
                                     .clickable {
                                         if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
                                             val privacy = if (uiState.isLimited) {
@@ -686,8 +679,7 @@ private fun EditProfileScreen(
                                         } else {
                                             openWarningMessageDialog = true
                                         }
-                                    }
-                                    .testTag("txt_edit_profile_limited_profile_label"),
+                                    },
                                 text = stringResource(if (uiState.isLimited) R.string.profile_switch_to_full else R.string.profile_switch_to_limited),
                                 color = MaterialTheme.appColors.textAccent,
                                 style = MaterialTheme.appTypography.labelLarge
@@ -696,17 +688,23 @@ private fun EditProfileScreen(
                             ProfileFields(
                                 disabled = uiState.isLimited,
                                 onFieldClick = { it, title ->
-                                    if (it == YEAR_OF_BIRTH) {
-                                        serverFieldName.value = YEAR_OF_BIRTH
-                                        expandedList =
-                                            LocaleUtils.getBirthYearsRange()
-                                    } else if (it == COUNTRY) {
-                                        serverFieldName.value = COUNTRY
-                                        expandedList =
-                                            LocaleUtils.getCountries()
-                                    } else if (it == LANGUAGE) {
-                                        serverFieldName.value = LANGUAGE
-                                        expandedList = LocaleUtils.getLanguages()
+                                    when (it) {
+                                        YEAR_OF_BIRTH -> {
+                                            serverFieldName.value = YEAR_OF_BIRTH
+                                            expandedList =
+                                                LocaleUtils.getBirthYearsRange()
+                                        }
+
+                                        COUNTRY -> {
+                                            serverFieldName.value = COUNTRY
+                                            expandedList =
+                                                LocaleUtils.getCountries()
+                                        }
+
+                                        LANGUAGE -> {
+                                            serverFieldName.value = LANGUAGE
+                                            expandedList = LocaleUtils.getLanguages()
+                                        }
                                     }
                                     bottomDialogTitle = title
                                     keyboardController?.hide()
@@ -790,16 +788,16 @@ private fun LimitedProfileDialog(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     modifier = Modifier
-                        .weight(1f)
-                        .testTag("txt_edit_profile_limited_profile_title"),
+                        .testTag("txt_edit_profile_limited_profile_title")
+                        .weight(1f),
                     text = stringResource(id = R.string.profile_oh_sorry),
                     color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleMedium
                 )
                 Icon(
                     modifier = Modifier
-                        .clickable { onCloseClick() }
-                        .testTag("ic_edit_profile_limited_profile_close"),
+                        .testTag("ic_edit_profile_limited_profile_close")
+                        .clickable { onCloseClick() },
                     imageVector = Icons.Filled.Close,
                     contentDescription = null,
                     tint = MaterialTheme.appColors.textDark
@@ -808,8 +806,8 @@ private fun LimitedProfileDialog(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("txt_edit_profile_limited_profile_message"),
+                    .testTag("txt_edit_profile_limited_profile_message")
+                    .fillMaxWidth(),
                 text = stringResource(id = R.string.profile_must_be_over),
                 color = MaterialTheme.appColors.textDark,
                 style = MaterialTheme.appTypography.bodyMedium
@@ -981,11 +979,11 @@ private fun SelectableField(
             disabledPlaceholderColor = MaterialTheme.appColors.textFieldHint
         )
     }
-    Column() {
+    Column {
         Text(
             modifier = Modifier
-                .fillMaxWidth()
-                .testTag("txt_edit_profile_field_label_${name}"),
+                .testTag("txt_edit_profile_field_label_${name.withoutSpaces()}")
+                .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -1007,14 +1005,14 @@ private fun SelectableField(
                 )
             },
             modifier = Modifier
+                .testTag("tf_edit_profile_field_select_${name.withoutSpaces()}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick()
-                }
-                .testTag("tf_edit_profile_field_select_${name}"),
+                },
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_field_placeholder_${name}"),
+                    modifier = Modifier.testTag("txt_edit_profile_field_placeholder_${name.withoutSpaces()}"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1040,8 +1038,8 @@ private fun InputEditField(
     Column {
         Text(
             modifier = Modifier
-                .fillMaxWidth()
-                .testTag("txt_edit_profile_field_label_${name}"),
+                .testTag("txt_edit_profile_field_label_${name.withoutSpaces()}")
+                .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -1060,7 +1058,7 @@ private fun InputEditField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_field_${name}_placeholder"),
+                    modifier = Modifier.testTag("txt_edit_profile_field_${name.withoutSpaces()}_placeholder"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1076,7 +1074,7 @@ private fun InputEditField(
                 onDoneClick()
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
-            modifier = modifier.testTag("tf_edit_profile_field_input_${name}")
+            modifier = modifier.testTag("tf_edit_profile_field_input_${name.withoutSpaces()}")
         )
     }
 }
@@ -1144,8 +1142,8 @@ private fun LeaveProfile(
                     content = {
                         Text(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("txt_leave"),
+                                .testTag("txt_leave")
+                                .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
                             color = MaterialTheme.appColors.textDark,
                             style = MaterialTheme.appTypography.labelLarge,
@@ -1207,8 +1205,8 @@ private fun LeaveProfileLandscape(
                         Spacer(Modifier.height(20.dp))
                         Text(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("txt_leave_profile_dialog_title"),
+                                .testTag("txt_leave_profile_dialog_title")
+                                .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave_profile),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleLarge,
@@ -1217,8 +1215,8 @@ private fun LeaveProfileLandscape(
                         Spacer(Modifier.height(8.dp))
                         Text(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag("txt_leave_profile_dialog_description"),
+                                .testTag("txt_leave_profile_dialog_description")
+                                .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_changes_you_made),
                             color = MaterialTheme.appColors.textFieldText,
                             style = MaterialTheme.appTypography.titleSmall,

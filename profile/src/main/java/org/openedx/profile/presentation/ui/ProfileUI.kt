@@ -56,6 +56,7 @@ fun ProfileTopic(account: Account) {
                 account.username
             ),
             modifier = Modifier
+                .testTag("img_profile")
                 .border(
                     2.dp,
                     MaterialTheme.appColors.onSurface,
@@ -64,7 +65,6 @@ fun ProfileTopic(account: Account) {
                 .padding(2.dp)
                 .size(100.dp)
                 .clip(CircleShape)
-                .testTag("img_profile")
         )
         if (account.name.isNotEmpty()) {
             Spacer(modifier = Modifier.height(20.dp))

@@ -383,11 +383,11 @@ private fun CourseItem(
     val context = LocalContext.current
     Surface(
         modifier = Modifier
+            .testTag("btn_course_item")
             .height(142.dp)
             .fillMaxWidth()
             .clickable { onClick(enrolledCourse) }
-            .background(MaterialTheme.appColors.background)
-            .testTag("btn_course_item"),
+            .background(MaterialTheme.appColors.background),
     ) {
         Row(
             modifier = Modifier
@@ -465,8 +465,8 @@ private fun CourseItem(
                         ) {
                             Icon(
                                 modifier = Modifier
-                                    .size(15.dp)
-                                    .testTag("ic_course_item"),
+                                    .testTag("ic_course_item")
+                                    .size(15.dp),
                                 imageVector = Icons.Filled.ArrowForward,
                                 contentDescription = null,
                                 tint = MaterialTheme.appColors.primary
@@ -489,8 +489,8 @@ private fun Header() {
     )
     Text(
         modifier = Modifier
-            .padding(top = 4.dp)
-            .testTag("txt_courses_description"),
+            .testTag("txt_courses_description")
+            .padding(top = 4.dp),
         text = stringResource(id = R.string.dashboard_welcome_back),
         color = MaterialTheme.appColors.textPrimaryVariant,
         style = MaterialTheme.appTypography.titleSmall
@@ -515,8 +515,8 @@ private fun EmptyState() {
             Spacer(Modifier.height(16.dp))
             Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("txt_empty_state_title"),
+                    .testTag("txt_empty_state_title")
+                    .fillMaxWidth(),
                 text = stringResource(id = R.string.dashboard_its_empty),
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleMedium,
@@ -525,8 +525,8 @@ private fun EmptyState() {
             Spacer(Modifier.height(8.dp))
             Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("txt_empty_state_description"),
+                    .testTag("txt_empty_state_description")
+                    .fillMaxWidth(),
                 text = stringResource(id = R.string.dashboard_you_are_not_enrolled),
                 color = MaterialTheme.appColors.textPrimaryVariant,
                 style = MaterialTheme.appTypography.bodySmall,

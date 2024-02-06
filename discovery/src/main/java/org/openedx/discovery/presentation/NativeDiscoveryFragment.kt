@@ -370,8 +370,8 @@ internal fun DiscoveryScreen(
                                             )
                                             Text(
                                                 modifier = Modifier
-                                                    .padding(top = 4.dp)
-                                                    .testTag("txt_discovery_lets_find"),
+                                                    .testTag("txt_discovery_lets_find")
+                                                    .padding(top = 4.dp),
                                                 text = stringResource(id = R.string.discovery_lets_find),
                                                 color = MaterialTheme.appColors.textPrimary,
                                                 style = MaterialTheme.appTypography.titleSmall

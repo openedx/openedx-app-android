@@ -77,9 +77,9 @@ fun AppUpgradeRequiredScreen(
     ) {
         Text(
             modifier = Modifier
+                .testTag("txt_app_upgrade_deprecated")
                 .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 12.dp)
-                .testTag("txt_app_upgrade_deprecated"),
+                .padding(top = 10.dp, bottom = 12.dp),
             text = stringResource(id = R.string.core_deprecated_app_version),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleMedium,
@@ -119,12 +119,12 @@ fun AppUpgradeRecommendDialog(
     ) {
         Box(
             modifier = modifier
+                .testTag("btn_upgrade_dialog_not_now")
                 .fillMaxSize()
                 .padding(horizontal = 4.dp)
                 .noRippleClickable {
                     onNotNowClick()
-                }
-                .testTag("btn_upgrade_dialog_not_now"),
+                },
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -264,8 +264,8 @@ fun TransparentTextButton(
 ) {
     Button(
         modifier = Modifier
-            .height(42.dp)
-            .testTag("btn_upgrade_dialog_$text"),
+            .testTag("btn_upgrade_dialog_$text")
+            .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color.Transparent
         ),
@@ -289,8 +289,8 @@ fun DefaultTextButton(
 ) {
     Button(
         modifier = Modifier
-            .height(42.dp)
-            .testTag("btn_upgrade_dialog_$text"),
+            .testTag("btn_upgrade_dialog_$text")
+            .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.appColors.buttonBackground
         ),
@@ -319,12 +319,12 @@ fun AppUpgradeRecommendedBox(
 ) {
     Card(
         modifier = modifier
+            .testTag("btn_upgrade_box")
             .fillMaxWidth()
             .padding(20.dp)
             .clickable {
                 onClick()
-            }
-            .testTag("btn_upgrade_box"),
+            },
         shape = MaterialTheme.appShapes.cardShape,
         backgroundColor = MaterialTheme.appColors.primary
     ) {

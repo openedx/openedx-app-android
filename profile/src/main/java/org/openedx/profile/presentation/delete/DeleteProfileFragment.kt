@@ -219,8 +219,8 @@ fun DeleteProfileScreen(
                     Spacer(Modifier.height(32.dp))
                     Text(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("txt_delete_account_title"),
+                            .testTag("txt_delete_account_title")
+                            .fillMaxWidth(),
                         text = buildAnnotatedString {
                             append(stringResource(id = profileR.string.profile_you_want_to))
                             append(" ")
@@ -246,8 +246,8 @@ fun DeleteProfileScreen(
                     Spacer(Modifier.height(16.dp))
                     Text(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("txt_delete_account_description"),
+                            .testTag("txt_delete_account_description")
+                            .fillMaxWidth(),
                         text = stringResource(id = profileR.string.profile_confirm_action),
                         style = MaterialTheme.appTypography.labelLarge,
                         color = MaterialTheme.appColors.textSecondary,

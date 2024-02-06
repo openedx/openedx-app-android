@@ -286,9 +286,9 @@ private fun CourseSearchScreen(
                         }
                         Text(
                             modifier = Modifier
+                                .testTag("txt_search_title")
                                 .fillMaxWidth()
-                                .padding(horizontal = 56.dp)
-                                .testTag("txt_search_title"),
+                                .padding(horizontal = 56.dp),
                             text = stringResource(id = org.openedx.core.R.string.core_search),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleMedium,
@@ -352,8 +352,8 @@ private fun CourseSearchScreen(
                                     )
                                     Text(
                                         modifier = Modifier
-                                            .padding(top = 4.dp)
-                                            .testTag("txt_search_results_subtitle"),
+                                            .testTag("txt_search_results_subtitle")
+                                            .padding(top = 4.dp),
                                         text = typingText,
                                         color = MaterialTheme.appColors.textPrimary,
                                         style = MaterialTheme.appTypography.titleSmall

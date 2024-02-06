@@ -20,13 +20,10 @@
     <string name="core_label_expired_on">Термін дії курсу минув %1$s</string>
     <string name="core_password">Пароль</string>
     <string name="core_assessment_soon">незабаром</string>
-    <string name="video_quality_auto">Авто</string>
-    <string name="video_quality_auto_description">Рекомендовано</string>
-    <string name="video_quality_p360">360p</string>
-    <string name="video_quality_p360_description">Менше використання трафіку</string>
-    <string name="video_quality_p540">540p</string>
-    <string name="video_quality_p720">720p</string>
-    <string name="video_quality_p720_description">Найкраща якість</string>
+    <string name="core_video_quality_auto">Авто</string>
+    <string name="core_video_quality_auto_description">Рекомендовано</string>
+    <string name="core_video_quality_p360_description">Менше використання трафіку</string>
+    <string name="core_video_quality_p720_description">Найкраща якість</string>
     <string name="core_offline">Офлайн</string>
     <string name="core_dismiss">Закрити</string>
     <string name="core_reload">Перезавантажити</string>

@@ -175,13 +175,13 @@ private fun VideoSettingsScreen(
                 ) {
                     Row(
                         Modifier
+                            .testTag("btn_profile_wifi_only_download")
                             .fillMaxWidth()
                             .height(92.dp)
                             .noRippleClickable {
                                 wifiDownloadOnly = !wifiDownloadOnly
                                 wifiDownloadChanged(wifiDownloadOnly)
-                            }
-                            .testTag("btn_profile_wifi_only_download"),
+                            },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -216,12 +216,12 @@ private fun VideoSettingsScreen(
                     Divider()
                     Row(
                         Modifier
+                            .testTag("btn_profile_video_streaming_quality")
                             .fillMaxWidth()
                             .height(92.dp)
                             .clickable {
                                 videoDownloadQualityClick()
-                            }
-                            .testTag("btn_profile_video_streaming_quality"),
+                            },
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

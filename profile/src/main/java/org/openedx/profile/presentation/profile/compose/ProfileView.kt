@@ -161,8 +161,8 @@ internal fun ProfileView(
             ) {
                 Text(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("txt_profile_title"),
+                        .testTag("txt_profile_title")
+                        .fillMaxWidth(),
                     text = stringResource(id = R.string.core_profile),
                     color = MaterialTheme.appColors.textPrimary,
                     textAlign = TextAlign.Center,
@@ -171,9 +171,9 @@ internal fun ProfileView(
 
                 IconText(
                     modifier = Modifier
+                        .testTag("it_edit_account")
                         .height(48.dp)
-                        .padding(end = 24.dp)
-                        .testTag("it_edit_account"),
+                        .padding(end = 24.dp),
                     text = stringResource(org.openedx.profile.R.string.profile_edit),
                     painter = painterResource(id = R.drawable.core_ic_edit),
                     textStyle = MaterialTheme.appTypography.labelLarge,
@@ -378,11 +378,11 @@ private fun SupportInfoSection(
 private fun LogoutButton(onClick: () -> Unit) {
     Card(
         modifier = Modifier
+            .testTag("btn_logout")
             .fillMaxWidth()
             .clickable {
                 onClick()
-            }
-            .testTag("btn_logout"),
+            },
         shape = MaterialTheme.appShapes.cardShape,
         elevation = 0.dp,
         backgroundColor = MaterialTheme.appColors.cardViewBackground
@@ -439,8 +439,8 @@ private fun LogoutDialog(
                 ) {
                     IconButton(
                         modifier = Modifier
-                            .size(24.dp)
-                            .testTag("ib_close"),
+                            .testTag("ib_close")
+                            .size(24.dp),
                         onClick = onDismissRequest
                     ) {
                         Icon(
@@ -474,14 +474,14 @@ private fun LogoutDialog(
                     content = {
                         Box(
                             Modifier
-                                .fillMaxWidth()
-                                .testTag("btn_logout"),
+                                .testTag("btn_logout")
+                                .fillMaxWidth(),
                             contentAlignment = Alignment.CenterEnd
                         ) {
                             Text(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("txt_logout"),
+                                    .testTag("txt_logout")
+                                    .fillMaxWidth(),
                                 text = stringResource(id = org.openedx.profile.R.string.profile_logout),
                                 color = MaterialTheme.appColors.textDark,
                                 style = MaterialTheme.appTypography.labelLarge,
@@ -515,17 +515,17 @@ private fun ProfileInfoItem(
     }
     Row(
         Modifier
+            .testTag("btn_profile_info_item_$text")
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(20.dp)
-            .testTag("btn_profile_info_item_$text"),
+            .padding(20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             modifier = Modifier
-                .weight(1f)
-                .testTag("txt_profile_info_item_title_$text"),
+                .testTag("txt_profile_info_item_title_$text")
+                .weight(1f),
             text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -615,11 +615,11 @@ private fun AppVersionItemUpgradeRecommended(
 ) {
     Row(
         modifier = Modifier
+            .testTag("btn_upgrade_recommended")
             .fillMaxWidth()
             .clickable {
                 onClick()
-            }
-            .testTag("btn_upgrade_recommended"),
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -658,11 +658,11 @@ fun AppVersionItemUpgradeRequired(
 ) {
     Row(
         modifier = Modifier
+            .testTag("btn_upgrade_required")
             .fillMaxWidth()
             .clickable {
                 onClick()
-            }
-            .testTag("btn_upgrade_required"),
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -790,7 +790,7 @@ val mockAccount = Account(
     country = "Ukraine",
     isActive = true,
     profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = null,
+    yearOfBirth = 2000,
     levelOfEducation = "Bachelor",
     goals = "130",
     languageProficiencies = emptyList(),

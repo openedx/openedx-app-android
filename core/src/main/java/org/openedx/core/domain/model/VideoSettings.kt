@@ -17,10 +17,28 @@ enum class VideoQuality(
     val width: Int,
     val height: Int
 ) {
-    AUTO(R.string.video_quality_auto, R.string.video_quality_auto_description, 0, 0),
-    OPTION_360P(R.string.video_quality_p360, R.string.video_quality_p360_description, 640, 360),
-    OPTION_540P(R.string.video_quality_p540, 0, 960, 540),
-    OPTION_720P(R.string.video_quality_p720, R.string.video_quality_p720_description, 1280, 720);
-
-    val value: String = this.name.replace("OPTION_", "").lowercase()
+    AUTO(
+        titleResId = R.string.core_video_quality_auto,
+        desResId = R.string.core_video_quality_auto_description,
+        width = 0,
+        height = 0
+    ),
+    OPTION_360P(
+        titleResId = R.string.core_video_quality_p360,
+        desResId = R.string.core_video_quality_p360_description,
+        width = 640,
+        height = 360
+    ),
+    OPTION_540P(
+        titleResId = R.string.core_video_quality_p540,
+        desResId = 0,
+        width = 960,
+        height = 540
+    ),
+    OPTION_720P(
+        titleResId = R.string.core_video_quality_p720,
+        desResId = R.string.core_video_quality_p720_description,
+        width = 1280,
+        height = 720
+    );
 }

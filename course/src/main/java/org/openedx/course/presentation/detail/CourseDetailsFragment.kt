@@ -281,8 +281,8 @@ internal fun CourseDetailsScreen(
                                     Text(
                                         text = htmlBody,
                                         modifier = Modifier
-                                            .padding(all = 20.dp)
                                             .testTag("txt_course_description")
+                                            .padding(all = 20.dp),
                                     )
                                 } else {
                                     var webViewAlpha by remember { mutableStateOf(0f) }
