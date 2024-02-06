@@ -598,7 +598,7 @@ private fun AllVideosDownloadItem(
             onCheckedChange = {
                 if (!isChecked) {
                     if (
-                        allDownloadModulesState.allDownloadModelsSize > AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
+                        allDownloadModulesState.remainingDownloadModelsSize > AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
                     ) {
                         onShowDownloadConfirmationDialog()
                     } else {

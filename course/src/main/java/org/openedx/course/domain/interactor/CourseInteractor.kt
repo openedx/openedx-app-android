@@ -43,15 +43,13 @@ class CourseInteractor(
                         blocks.firstOrNull { it.descendants.contains(sequentialBlock.id) }
                     if (chapterBlock != null) {
                         resultBlocks.add(videoBlock)
-                        if (!resultBlocks.contains(verticalBlock)) {
+                        val verticalIndex = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
+                        if (verticalIndex == -1) {
                             resultBlocks.add(verticalBlock.copy(descendants = listOf(videoBlock.id)))
                         } else {
-                            val index = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
-                            if (index != -1) {
-                                val block = resultBlocks[index]
-                                resultBlocks[index] =
-                                    block.copy(descendants = block.descendants + videoBlock.id)
-                            }
+                            val block = resultBlocks[verticalIndex]
+                            resultBlocks[verticalIndex] =
+                                block.copy(descendants = block.descendants + videoBlock.id)
                         }
                         if (!resultBlocks.contains(sequentialBlock)) {
                             resultBlocks.add(sequentialBlock)

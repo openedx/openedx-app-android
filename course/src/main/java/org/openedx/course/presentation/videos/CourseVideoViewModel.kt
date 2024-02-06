@@ -127,7 +127,8 @@ class CourseVideoViewModel(
                         _uiState.value = state.copy(
                             allDownloadModulesState = state.allDownloadModulesState.copy(
                                 isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
-                                remainingDownloadModelsSize = remainingSize
+                                remainingDownloadModelsSize = remainingSize,
+                                allDownloadModelsSize = getAllDownloadModelsSize()
                             )
                         )
                     }
