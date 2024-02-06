@@ -35,7 +35,7 @@
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_navigation_course">Course</string>
-    <string name="course_navigation_video">Video</string>
+    <string name="course_navigation_videos">Videos</string>
     <string name="course_navigation_discussion">Discussion</string>
     <string name="course_navigation_handouts">Handouts</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
