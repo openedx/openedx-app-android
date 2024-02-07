@@ -73,11 +73,12 @@ class CourseDatesViewModel(
         }
     }
 
-    fun resetCourseDatesBanner() {
+    fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 getCourseDates()
+                onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -86,6 +87,7 @@ class CourseDatesViewModel(
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
+                onResetDates(false)
             }
         }
     }

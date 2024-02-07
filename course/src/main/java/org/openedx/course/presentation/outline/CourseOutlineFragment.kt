@@ -6,16 +6,41 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -29,6 +54,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -37,16 +63,28 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.*
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.TextIcon
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
+import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.outline.CourseOutlineFragment.Companion.getUnitBlockIcon
+import org.openedx.course.presentation.ui.CourseDatesBanner
+import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
@@ -60,6 +98,8 @@ class CourseOutlineFragment : Fragment() {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
+
+    private var snackBar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -153,10 +193,39 @@ class CourseOutlineFragment : Fragment() {
                                             .replace(Regex("\\s"), "_"), it.id
                             )
                         }
+                    },
+                    onResetDatesClick = {
+                        viewModel.resetCourseDatesBanner(onResetDates = {
+                            (parentFragment as CourseContainerFragment).updateCourseDates()
+                            showDatesUpdateSnackbar(it)
+                        })
                     }
                 )
             }
         }
+    }
+
+    override fun onDestroyView() {
+        snackBar?.dismiss()
+        super.onDestroyView()
+    }
+
+    private fun showDatesUpdateSnackbar(isSuccess: Boolean) {
+        val message = if (isSuccess) {
+            getString(R.string.core_dates_shift_dates_successfully_msg)
+        } else {
+            getString(R.string.core_dates_shift_dates_unsuccessful_msg)
+        }
+        snackBar = view?.let {
+            Snackbar.make(it, message, Snackbar.LENGTH_LONG).apply {
+                if (isSuccess) {
+                    setAction(R.string.core_dates_view_all_dates) {
+                        (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
+                    }
+                }
+            }
+        }
+        snackBar?.show()
     }
 
 
@@ -204,7 +273,8 @@ internal fun CourseOutlineScreen(
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
+    onResetDatesClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -291,9 +361,31 @@ internal fun CourseOutlineScreen(
                                         )
                                     }
                                 }
+                                item { Spacer(Modifier.height(28.dp)) }
+                                if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(all = 8.dp)
+                                        ) {
+                                            if (windowSize.isTablet) {
+                                                CourseDatesBannerTablet(
+                                                    modifier = Modifier.padding(bottom = 16.dp),
+                                                    banner = uiState.datesBannerInfo,
+                                                    resetDates = onResetDatesClick,
+                                                )
+                                            } else {
+                                                CourseDatesBanner(
+                                                    modifier = Modifier.padding(bottom = 16.dp),
+                                                    banner = uiState.datesBannerInfo,
+                                                    resetDates = onResetDatesClick,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                                 if (uiState.resumeComponent != null) {
                                     item {
-                                        Spacer(Modifier.height(28.dp))
                                         Box(listPadding) {
                                             if (windowSize.isTablet) {
                                                 ResumeCourseTablet(
@@ -503,7 +595,7 @@ private fun ResumeCourseTablet(
             }
         }
         OpenEdXButton(
-            width = Modifier.width(194.dp),
+            width = Modifier.width(210.dp),
             text = stringResource(id = org.openedx.course.R.string.course_resume),
             onClick = {
                 onResumeClick(block.id)
@@ -533,7 +625,14 @@ private fun CourseOutlineScreenPreview() {
                 mockChapterBlock,
                 mapOf(),
                 mapOf(),
-                mapOf()
+                mapOf(),
+                CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                )
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = true,
@@ -547,7 +646,8 @@ private fun CourseOutlineScreenPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onReloadClick = {},
-            onDownloadClick = {}
+            onDownloadClick = {},
+            onResetDatesClick = {},
         )
     }
 }
@@ -565,7 +665,14 @@ private fun CourseOutlineScreenTabletPreview() {
                 mockChapterBlock,
                 mapOf(),
                 mapOf(),
-                mapOf()
+                mapOf(),
+                CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                )
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = true,
@@ -579,7 +686,8 @@ private fun CourseOutlineScreenTabletPreview() {
             onSubSectionClick = {},
             onResumeClick = {},
             onReloadClick = {},
-            onDownloadClick = {}
+            onDownloadClick = {},
+            onResetDatesClick = {},
         )
     }
 }

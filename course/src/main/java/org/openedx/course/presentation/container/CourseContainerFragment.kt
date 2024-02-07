@@ -15,12 +15,14 @@ import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment
 import org.openedx.course.presentation.ui.CourseToolbar
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
+import org.openedx.course.presentation.container.CourseContainerTab as Tabs
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -93,11 +95,26 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.viewPager.isVisible = true
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         adapter = CourseContainerAdapter(this).apply {
-            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName))
-            addFragment(CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced))
-            addFragment(HandoutsFragment.newInstance(viewModel.courseId))
+            addFragment(
+                Tabs.COURSE,
+                CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                Tabs.VIDEOS,
+                CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                Tabs.DISCUSSION,
+                DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                Tabs.DATES,
+                CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced)
+            )
+            addFragment(
+                Tabs.HANDOUTS,
+                HandoutsFragment.newInstance(viewModel.courseId)
+            )
         }
         binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
         binding.viewPager.adapter = adapter
@@ -105,45 +122,18 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         if (viewModel.isCourseTopTabBarEnabled) {
             TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                 tab.text = getString(
-                    when (position) {
-                        0 -> R.string.course_navigation_course
-                        1 -> R.string.course_navigation_video
-                        2 -> R.string.course_navigation_discussion
-                        3 -> R.string.course_navigation_dates
-                        else -> R.string.course_navigation_handouts
-                    }
+                    Tabs.values().find { it.ordinal == position }?.titleResId
+                        ?: R.string.course_navigation_course
                 )
             }.attach()
             binding.tabLayout.isVisible = true
 
         } else {
             binding.viewPager.isUserInputEnabled = false
-            binding.bottomNavView.setOnItemSelectedListener {
-                when (it.itemId) {
-                    R.id.outline -> {
-                        viewModel.courseTabClickedEvent()
-                        binding.viewPager.setCurrentItem(0, false)
-                    }
-
-                    R.id.videos -> {
-                        viewModel.videoTabClickedEvent()
-                        binding.viewPager.setCurrentItem(1, false)
-                    }
-
-                    R.id.discussions -> {
-                        viewModel.discussionTabClickedEvent()
-                        binding.viewPager.setCurrentItem(2, false)
-                    }
-
-                    R.id.dates -> {
-                        viewModel.datesTabClickedEvent()
-                        binding.viewPager.setCurrentItem(3, false)
-                    }
-
-                    R.id.resources -> {
-                        viewModel.handoutsTabClickedEvent()
-                        binding.viewPager.setCurrentItem(4, false)
-                    }
+            binding.bottomNavView.setOnItemSelectedListener { menuItem ->
+                Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                    viewModel.courseContainerTabClickedEvent(tab)
+                    binding.viewPager.setCurrentItem(tab.ordinal, false)
                 }
                 true
             }
@@ -153,6 +143,18 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     fun updateCourseStructure(withSwipeRefresh: Boolean) {
         viewModel.updateData(withSwipeRefresh)
+    }
+
+    fun updateCourseDates() {
+        adapter?.getFragment(Tabs.DATES)?.let {
+            (it as CourseDatesFragment).updateData()
+        }
+    }
+
+    fun navigateToTab(tab: CourseContainerTab) {
+        adapter?.getFragment(tab)?.let {
+            binding.viewPager.setCurrentItem(tab.ordinal, true)
+        }
     }
 
     companion object {

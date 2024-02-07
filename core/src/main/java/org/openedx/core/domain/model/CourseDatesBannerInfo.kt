@@ -12,7 +12,7 @@ data class CourseDatesBannerInfo(
     private val missedGatedContent: Boolean,
     private val verifiedUpgradeLink: String,
     private val contentTypeGatingEnabled: Boolean,
-    private val hasEnded: Boolean
+    private val hasEnded: Boolean,
 ) {
     val bannerType by lazy { getCourseBannerType() }
 
@@ -23,6 +23,10 @@ data class CourseDatesBannerInfo(
         val instructorPacedAvailable = !isSelfPaced && bannerType == UPGRADE_TO_GRADED
 
         return selfPacedAvailable || instructorPacedAvailable
+    }
+
+    fun isBannerAvailableForDashboard(): Boolean {
+        return hasEnded.not() && bannerType == RESET_DATES
     }
 
     private fun getCourseBannerType(): CourseBannerType = when {

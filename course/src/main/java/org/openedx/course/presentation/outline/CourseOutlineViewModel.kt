@@ -13,6 +13,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
@@ -94,7 +95,8 @@ class CourseOutlineViewModel(
                         resumeComponent = state.resumeComponent,
                         courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
-                        subSectionsDownloadsCount = subSectionsDownloadsCount
+                        subSectionsDownloadsCount = subSectionsDownloadsCount,
+                        datesBannerInfo = state.datesBannerInfo,
                     )
                 }
             }
@@ -127,7 +129,7 @@ class CourseOutlineViewModel(
         getCourseDataInternal()
     }
 
-    fun getCourseData() {
+    private fun getCourseData() {
         _uiState.value = CourseOutlineUIState.Loading
         getCourseDataInternal()
     }
@@ -144,7 +146,8 @@ class CourseOutlineViewModel(
                 resumeComponent = state.resumeComponent,
                 courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
-                subSectionsDownloadsCount = subSectionsDownloadsCount
+                subSectionsDownloadsCount = subSectionsDownloadsCount,
+                datesBannerInfo = state.datesBannerInfo,
             )
 
             courseSectionsState[blockId] ?: false
@@ -165,6 +168,18 @@ class CourseOutlineViewModel(
                 } else {
                     CourseComponentStatus("")
                 }
+
+                val datesBannerInfo = if (networkConnection.isOnline()) {
+                    interactor.getDatesBannerInfo(courseId)
+                } else {
+                    CourseDatesBannerInfo(
+                        missedDeadlines = false,
+                        missedGatedContent = false,
+                        verifiedUpgradeLink = "",
+                        contentTypeGatingEnabled = false,
+                        hasEnded = false
+                    )
+                }
                 setBlocks(blocks)
                 courseSubSections.clear()
                 courseSubSectionUnit.clear()
@@ -180,7 +195,8 @@ class CourseOutlineViewModel(
                     resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
                     courseSubSections = courseSubSections,
                     courseSectionsState = courseSectionsState,
-                    subSectionsDownloadsCount = subSectionsDownloadsCount
+                    subSectionsDownloadsCount = subSectionsDownloadsCount,
+                    datesBannerInfo = datesBannerInfo,
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -234,6 +250,25 @@ class CourseOutlineViewModel(
         resumeSectionBlock =
             blocks.getSequentialBlocks().find { it.descendants.contains(resumeVerticalBlock?.id) }
         return resumeBlock
+    }
+
+    fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                interactor.resetCourseDates(courseId = courseId)
+                updateCourseData(false)
+                onResetDates(true)
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                }
+                onResetDates(false)
+            }
+        }
     }
 
     fun resumeCourseTappedEvent(blockId: String) {

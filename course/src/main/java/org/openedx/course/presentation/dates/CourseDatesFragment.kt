@@ -97,7 +97,9 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseDatesBanner
+import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.core.R as coreR
 
 class CourseDatesFragment : Fragment() {
@@ -153,11 +155,20 @@ class CourseDatesFragment : Fragment() {
                         }
                     },
                     onSyncDates = {
-                        viewModel.resetCourseDatesBanner()
+                        viewModel.resetCourseDatesBanner {
+                            if (it) {
+                                (parentFragment as CourseContainerFragment)
+                                    .updateCourseStructure(false)
+                            }
+                        }
                     },
                 )
             }
         }
+    }
+
+    fun updateData() {
+        viewModel.getCourseDates()
     }
 
     companion object {
@@ -264,11 +275,19 @@ internal fun CourseDatesScreen(
 
                                     if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
                                         item {
-                                            CourseDatesBanner(
-                                                modifier = Modifier.padding(bottom = 16.dp),
-                                                banner = courseBanner,
-                                                resetDates = onSyncDates
-                                            )
+                                            if (windowSize.isTablet) {
+                                                CourseDatesBannerTablet(
+                                                    modifier = Modifier.padding(bottom = 16.dp),
+                                                    banner = courseBanner,
+                                                    resetDates = onSyncDates,
+                                                )
+                                            } else {
+                                                CourseDatesBanner(
+                                                    modifier = Modifier.padding(bottom = 16.dp),
+                                                    banner = courseBanner,
+                                                    resetDates = onSyncDates
+                                                )
+                                            }
                                         }
                                     }
 
