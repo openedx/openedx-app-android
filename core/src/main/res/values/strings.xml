@@ -26,6 +26,8 @@
     <string name="core_password">Password</string>
     <string name="core_assessment_soon">Soon</string>
     <string name="core_offline">Offline</string>
+    <string name="core_warning">Warning</string>
+    <string name="core_accept">Accept</string>
     <string name="core_confirm">Confirm</string>
     <string name="core_dismiss">Dismiss</string>
     <string name="core_reload">Reload</string>

@@ -66,5 +66,6 @@
     <string name="course_download_queue_title">Downloads</string>
     <string name="course_download_big_files_confirmation_title">Download</string>
     <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
+    <string name="course_delete_downloads_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
 
 </resources>

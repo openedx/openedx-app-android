@@ -130,6 +130,7 @@ class CourseVideosFragment : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
+                    courseTitle = viewModel.courseTitle,
                     apiHostUrl = viewModel.apiHostUrl,
                     isCourseNestedListEnabled = viewModel.isCourseNestedListEnabled,
                     isCourseBannerEnabled = viewModel.isCourseBannerEnabled,
@@ -231,6 +232,7 @@ private fun CourseVideosScreen(
     windowSize: WindowSize,
     uiState: CourseVideosUIState,
     uiMessage: UIMessage?,
+    courseTitle: String,
     apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
     isCourseBannerEnabled: Boolean,
@@ -290,6 +292,10 @@ private fun CourseVideosScreen(
         }
 
         var isDownloadConfirmationShowed by rememberSaveable {
+            mutableStateOf(false)
+        }
+
+        var isDeleteDownloadsConfirmationShowed by rememberSaveable {
             mutableStateOf(false)
         }
 
@@ -364,7 +370,14 @@ private fun CourseVideosScreen(
                                                 onShowDownloadConfirmationDialog = {
                                                     isDownloadConfirmationShowed = true
                                                 },
-                                                onDownloadAllClick = onDownloadAllClick,
+                                                onDownloadAllClick = { isSwitched ->
+                                                    if (isSwitched) {
+                                                        isDeleteDownloadsConfirmationShowed = true
+
+                                                    } else {
+                                                        onDownloadAllClick(false)
+                                                    }
+                                                },
                                                 onDownloadQueueClick = onDownloadQueueClick,
                                                 onVideoDownloadQualityClick = onVideoDownloadQualityClick
                                             )
@@ -503,6 +516,48 @@ private fun CourseVideosScreen(
                         }
                     ) {
                         Text(text = stringResource(id = R.string.core_dismiss))
+                    }
+                }
+            )
+        }
+
+        if (isDeleteDownloadsConfirmationShowed) {
+            AlertDialog(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.core_warning)
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(
+                            id = org.openedx.course.R.string.course_delete_downloads_confirmation_text,
+                            courseTitle
+                        )
+                    )
+                },
+                onDismissRequest = {
+                    isDeleteDownloadsConfirmationShowed = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            isDeleteDownloadsConfirmationShowed = false
+                            onDownloadAllClick(true)
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.core_accept)
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            isDeleteDownloadsConfirmationShowed = false
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.core_cancel))
                     }
                 }
             )
@@ -687,6 +742,7 @@ private fun CourseVideosScreenPreview() {
                 mapOf(),
                 AllDownloadModulesState.default
             ),
+            courseTitle = "",
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
             isCourseBannerEnabled = true,
@@ -717,6 +773,7 @@ private fun CourseVideosScreenEmptyPreview() {
             uiState = CourseVideosUIState.Empty(
                 "This course does not include any videos."
             ),
+            courseTitle = "",
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
             isCourseBannerEnabled = true,
@@ -752,6 +809,7 @@ private fun CourseVideosScreenTabletPreview() {
                 mapOf(),
                 AllDownloadModulesState.default
             ),
+            courseTitle = "",
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
             isCourseBannerEnabled = true,
