@@ -301,6 +301,7 @@ val screenModule = module {
         DownloadQueueViewModel(
             get(),
             get(),
+            get(),
             get()
         )
     }

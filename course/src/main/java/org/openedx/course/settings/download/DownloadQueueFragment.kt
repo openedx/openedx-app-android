@@ -168,8 +168,17 @@ private fun DownloadQueueScreen(
                             Column(Modifier.fillMaxSize()) {
                                 LazyColumn {
                                     items(uiState.downloadingModels) { model ->
+                                        val progressValue =
+                                            if (model.id == uiState.currentProgressId)
+                                                uiState.currentProgressValue else 0
+                                        val progressSize =
+                                            if (model.id == uiState.currentProgressId)
+                                                uiState.currentProgressSize else 0
+
                                         OfflineQueueCard(
                                             downloadModel = model,
+                                            progressValue = progressValue,
+                                            progressSize = progressSize,
                                             onDownloadClick = onDownloadClick
                                         )
                                         Divider()
@@ -217,7 +226,10 @@ private fun DownloadQueueScreenPreview() {
                     downloadedState = DownloadedState.DOWNLOADING,
                     progress = 0f
                 )
-            )
+            ),
+            currentProgressId = "",
+            currentProgressValue = 0,
+            currentProgressSize = 1
         ),
         onBackClick = {},
         onDownloadClick = {}

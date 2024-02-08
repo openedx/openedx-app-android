@@ -93,10 +93,11 @@ class DownloadWorker(
                 ) {
                     lastUpdateTime = System.currentTimeMillis()
 
-                    launch {
-                        notifier.send(DownloadProgressChanged(value, size))
-                    }
                     currentDownload?.let {
+                        launch {
+                            notifier.send(DownloadProgressChanged(it.id, value, size))
+                        }
+
                         notificationManager.notify(
                             NOTIFICATION_ID,
                             notificationBuilder

@@ -8,11 +8,14 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.DownloadProgressChanged
 
 class DownloadQueueViewModel(
     downloadDao: DownloadDao,
     preferencesManager: CorePreferences,
-    private val workerController: DownloadWorkerController
+    private val workerController: DownloadWorkerController,
+    private val downloadNotifier: DownloadNotifier
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
 
     private val _uiState = MutableStateFlow<DownloadQueueUIState>(DownloadQueueUIState.Loading)
@@ -25,9 +28,34 @@ class DownloadQueueViewModel(
                     _uiState.value = DownloadQueueUIState.Empty
 
                 } else {
-                    _uiState.value = DownloadQueueUIState.Models(
-                        downloadingModels = models
-                    )
+                    if (_uiState.value is DownloadQueueUIState.Models) {
+                        val state = _uiState.value as DownloadQueueUIState.Models
+                        _uiState.value = state.copy(
+                            downloadingModels = models
+                        )
+                    } else {
+                        _uiState.value = DownloadQueueUIState.Models(
+                            downloadingModels = models,
+                            currentProgressId = "",
+                            currentProgressValue = 0L,
+                            currentProgressSize = 0L
+                        )
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            downloadNotifier.notifier.collect { event ->
+                if (event is DownloadProgressChanged) {
+                    if (_uiState.value is DownloadQueueUIState.Models) {
+                        val state = _uiState.value as DownloadQueueUIState.Models
+                        _uiState.value = state.copy(
+                            currentProgressId = event.id,
+                            currentProgressValue = event.value,
+                            currentProgressSize = event.size
+                        )
+                    }
                 }
             }
         }

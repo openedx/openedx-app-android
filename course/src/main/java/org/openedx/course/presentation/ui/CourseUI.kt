@@ -35,6 +35,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
@@ -86,6 +87,7 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
+import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.ui.BackBtn
@@ -296,6 +298,8 @@ fun CourseSectionCard(
 @Composable
 fun OfflineQueueCard(
     downloadModel: DownloadModel,
+    progressValue: Long,
+    progressSize: Long,
     onDownloadClick: (DownloadModel) -> Unit
 ) {
     val iconModifier = Modifier.size(24.dp)
@@ -303,26 +307,37 @@ fun OfflineQueueCard(
     Row(
         Modifier
             .fillMaxWidth()
-            .height(60.dp)
             .padding(vertical = 16.dp)
             .padding(start = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_course_chapter_icon),
-            contentDescription = null,
-            tint = MaterialTheme.appColors.onSurface
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            modifier = Modifier.weight(1f),
-            text = downloadModel.title,
-            style = MaterialTheme.appTypography.titleSmall,
-            color = MaterialTheme.appColors.textPrimary,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1
-        )
+        Column(modifier = Modifier
+            .weight(1f)) {
+            Text(
+                text = downloadModel.title,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+            Text(
+                text = downloadModel.size.toLong().toFileSize(),
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textSecondary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+
+            val progress = progressValue.toFloat() / progressSize
+
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                progress = progress
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Box(
             modifier = Modifier
