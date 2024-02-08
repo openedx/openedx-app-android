@@ -1,16 +1,15 @@
 package org.openedx.app.analytics
 
 import android.content.Context
-import android.os.Bundle
-import android.util.Log
 import org.openedx.app.BuildConfig
 import org.openedx.core.config.SegmentConfig
+import org.openedx.core.utils.Logger
 import com.segment.analytics.kotlin.android.Analytics as SegmentAnalyticsBuilder
 import com.segment.analytics.kotlin.core.Analytics as SegmentTracker
 
-
 class SegmentAnalytics(context: Context, config: SegmentConfig) : Analytics {
 
+    private val logger = Logger(this.javaClass.name)
     private var tracker: SegmentTracker
 
     init {
@@ -22,17 +21,21 @@ class SegmentAnalytics(context: Context, config: SegmentConfig) : Analytics {
             flushInterval = 30
         }
         SegmentTracker.debugLogsEnabled = BuildConfig.DEBUG
+        logger.d { "Segment Analytics Builder Initialised" }
     }
 
-    override fun logScreenEvent(screenName: String, bundle: Bundle) {
-        Log.d("Analytics", "Segment log Screen Event: $screenName + $bundle")
+    override fun logScreenEvent(screenName: String, params: Map<String, Any?>) {
+        logger.d { "Segment Analytics log Screen Event: $screenName + $params" }
+        tracker.screen(screenName, params)
     }
 
-    override fun logEvent(eventName: String, bundle: Bundle) {
-        Log.d("Analytics", "Segment log Event $eventName: $bundle")
+    override fun logEvent(eventName: String, params: Map<String, Any?>) {
+        logger.d { "Segment Analytics log Event $eventName: $params" }
+        tracker.track(eventName, params)
     }
 
     override fun logUserId(userId: Long) {
-        Log.d("Analytics", "Segment User Id log Event")
+        logger.d { "Segment Analytics User Id log Event: $userId" }
+        tracker.identify(userId.toString())
     }
 }
