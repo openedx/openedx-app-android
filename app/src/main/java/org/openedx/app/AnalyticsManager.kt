@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import org.openedx.app.analytics.Analytics
 import org.openedx.app.analytics.FirebaseAnalytics
+import org.openedx.app.analytics.SegmentAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.config.Config
 import org.openedx.course.presentation.CourseAnalytics
@@ -23,8 +24,12 @@ class AnalyticsManager(
 
     init {
         // Initialise all the analytics libraries here
-        if (config.getFirebaseConfig().projectId.isNotEmpty()) {
+        if (config.getFirebaseConfig().projectId.isNotBlank()) {
             addAnalyticsTracker(FirebaseAnalytics(context = context))
+        }
+        val segmentConfig = config.getSegmentConfig()
+        if (segmentConfig.enabled && segmentConfig.segmentWriteKey.isNotBlank()) {
+            addAnalyticsTracker(SegmentAnalytics(context = context, segmentConfig))
         }
     }
 

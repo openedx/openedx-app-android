@@ -57,6 +57,10 @@ class Config(context: Context) {
         return getObjectOrNewInstance(FIREBASE, FirebaseConfig::class.java)
     }
 
+    fun getSegmentConfig(): SegmentConfig {
+        return getObjectOrNewInstance(SEGMENT_IO, SegmentConfig::class.java)
+    }
+
     fun getFacebookConfig(): FacebookConfig {
         return getObjectOrNewInstance(FACEBOOK, FacebookConfig::class.java)
     }
@@ -148,6 +152,7 @@ class Config(context: Context) {
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
         private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
         private const val FIREBASE = "FIREBASE"
+        private const val SEGMENT_IO = "SEGMENT_IO"
         private const val FACEBOOK = "FACEBOOK"
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"

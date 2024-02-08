@@ -152,6 +152,9 @@ dependencies {
     //Play In-App Review
     api "com.google.android.play:review-ktx:$in_app_review"
 
+    // Segment Library
+    api "com.segment.analytics.kotlin:android:1.14.2"
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
