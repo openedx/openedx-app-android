@@ -39,8 +39,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
@@ -57,10 +59,13 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.OfflineQueueCard
+import org.openedx.discussion.presentation.search.DiscussionSearchThreadFragment
 
 class DownloadQueueFragment : Fragment() {
 
-    private val viewModel by viewModel<DownloadQueueViewModel>()
+    private val viewModel by viewModel<DownloadQueueViewModel> {
+        parametersOf(requireArguments().getStringArrayList(ARG_DESCENDANTS))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +94,17 @@ class DownloadQueueFragment : Fragment() {
                     }
                 )
             }
+        }
+    }
+
+    companion object {
+        private const val ARG_DESCENDANTS = "descendants"
+        fun newInstance(descendants: List<String>): DownloadQueueFragment {
+            val fragment = DownloadQueueFragment()
+            fragment.arguments = bundleOf(
+                ARG_DESCENDANTS to descendants
+            )
+            return fragment
         }
     }
 }

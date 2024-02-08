@@ -12,6 +12,7 @@ import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
 
 class DownloadQueueViewModel(
+    private val descendants: List<String>,
     downloadDao: DownloadDao,
     preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController,
@@ -24,18 +25,20 @@ class DownloadQueueViewModel(
     init {
         viewModelScope.launch {
             downloadingModelsFlow.collect { models ->
-                if (models.isEmpty()) {
+                val filteredModels =
+                    if (descendants.isEmpty()) models else models.filter { descendants.contains(it.id) }
+                if (filteredModels.isEmpty()) {
                     _uiState.value = DownloadQueueUIState.Empty
 
                 } else {
                     if (_uiState.value is DownloadQueueUIState.Models) {
                         val state = _uiState.value as DownloadQueueUIState.Models
                         _uiState.value = state.copy(
-                            downloadingModels = models
+                            downloadingModels = filteredModels
                         )
                     } else {
                         _uiState.value = DownloadQueueUIState.Models(
-                            downloadingModels = models,
+                            downloadingModels = filteredModels,
                             currentProgressId = "",
                             currentProgressValue = 0L,
                             currentProgressSize = 0L

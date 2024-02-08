@@ -74,8 +74,8 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId))
     }
 
-    override fun navigateToDownloadQueue(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, DownloadQueueFragment())
+    override fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String>) {
+        replaceFragmentWithBackStack(fm, DownloadQueueFragment.newInstance(descendants))
     }
 
     override fun navigateToRestorePassword(fm: FragmentManager) {

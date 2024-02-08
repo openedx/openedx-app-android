@@ -12,6 +12,7 @@ import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
+import org.openedx.core.presentation.settings.VideoQualityViewModel
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
@@ -53,7 +54,6 @@ import org.openedx.profile.presentation.anothers_account.AnothersProfileViewMode
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
-import org.openedx.core.presentation.settings.VideoQualityViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
@@ -297,8 +297,9 @@ val screenModule = module {
         )
     }
 
-    viewModel {
+    viewModel { (descendants: List<String>) ->
         DownloadQueueViewModel(
+            descendants,
             get(),
             get(),
             get(),

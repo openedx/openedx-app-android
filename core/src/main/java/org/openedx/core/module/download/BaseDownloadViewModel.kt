@@ -133,12 +133,10 @@ abstract class BaseDownloadViewModel(
     }
 
     open fun saveAllDownloadModels(folder: String) {
-        viewModelScope.launch {
-            downloadableChildrenMap.keys.forEach { id ->
-                allBlocks[id]?.let { block ->
-                    if (!isBlockDownloaded(block.id) && !isBlockDownloading(block.id)) {
-                        saveDownloadModels(folder, block.id)
-                    }
+        downloadableChildrenMap.keys.forEach { id ->
+            allBlocks[id]?.let { block ->
+                if (!isBlockDownloaded(block.id) && !isBlockDownloading(block.id)) {
+                    saveDownloadModels(folder, block.id)
                 }
             }
         }
@@ -214,6 +212,8 @@ abstract class BaseDownloadViewModel(
     }
 
     fun hasDownloadModelsInQueue() = downloadingModelsList.isNotEmpty()
+
+    fun getDownloadableChildren(id: String) = downloadableChildrenMap[id]
 
     open fun cancelWork(blockId: String) {
         viewModelScope.launch {

@@ -168,7 +168,10 @@ class CourseVideosFragment : Fragment() {
                     },
                     onDownloadClick = {
                         if (viewModel.isBlockDownloading(it.id)) {
-                            viewModel.cancelWork(it.id)
+                            router.navigateToDownloadQueue(
+                                fm = requireActivity().supportFragmentManager,
+                                viewModel.getDownloadableChildren(it.id) ?: arrayListOf()
+                            )
                         } else if (viewModel.isBlockDownloaded(it.id)) {
                             viewModel.removeDownloadedModels(it.id)
                         } else {

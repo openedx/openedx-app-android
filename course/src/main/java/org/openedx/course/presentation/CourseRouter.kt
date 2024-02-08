@@ -75,7 +75,7 @@ interface CourseRouter {
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?)
 
-    fun navigateToDownloadQueue(fm: FragmentManager)
+    fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
 }

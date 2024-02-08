@@ -312,8 +312,10 @@ fun OfflineQueueCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier
-            .weight(1f)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
             Text(
                 text = downloadModel.title,
                 style = MaterialTheme.appTypography.titleSmall,
@@ -830,10 +832,12 @@ fun CourseSubSectionItem(
                         IconButton(
                             modifier = iconModifier.padding(2.dp),
                             onClick = { onDownloadClick(block) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                                tint = MaterialTheme.appColors.error
+                            Text(
+                                modifier = Modifier
+                                    .padding(bottom = 4.dp),
+                                text = "i",
+                                style = MaterialTheme.appTypography.titleMedium,
+                                color = MaterialTheme.appColors.primary
                             )
                         }
                     }
