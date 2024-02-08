@@ -27,7 +27,7 @@ class AnalyticsManager(
         }
         val segmentConfig = config.getSegmentConfig()
         if (segmentConfig.enabled && segmentConfig.segmentWriteKey.isNotBlank()) {
-            addAnalyticsTracker(SegmentAnalytics(context = context, segmentConfig))
+            addAnalyticsTracker(SegmentAnalytics(context = context, config = config))
         }
     }
 

@@ -6,6 +6,9 @@ data class FirebaseConfig(
     @SerializedName("ENABLED")
     val enabled: Boolean = false,
 
+    @SerializedName("ANALYTICS_SOURCE")
+    val analyticsSource: AnalyticsSource = AnalyticsSource.NONE,
+
     @SerializedName("PROJECT_ID")
     val projectId: String = "",
 
@@ -17,4 +20,8 @@ data class FirebaseConfig(
 
     @SerializedName("GCM_SENDER_ID")
     val gcmSenderId: String = "",
-)
+) {
+    fun isSegmentAnalyticsSource(): Boolean {
+        return enabled && analyticsSource == AnalyticsSource.SEGMENT
+    }
+}
