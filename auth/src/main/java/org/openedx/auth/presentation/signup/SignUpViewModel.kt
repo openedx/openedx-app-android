@@ -96,7 +96,7 @@ class SignUpViewModel(
     fun register() {
         analytics.createAccountClickedEvent("")
         val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
-                mapOf("honor_code" to true.toString())
+                mapOf(ApiConstants.HONOR_CODE to true.toString())
         val resultMap = mapFields.toMutableMap()
         uiState.value.allFields.filter { !it.required }.forEach { (k, _) ->
             if (mapFields[k].isNullOrEmpty()) {
@@ -114,9 +114,9 @@ class SignUpViewModel(
                 } else {
                     val socialAuth = uiState.value.socialAuth
                     if (socialAuth?.accessToken != null) {
-                        resultMap["access_token"] = socialAuth.accessToken
-                        resultMap["provider"] = socialAuth.authType.postfix
-                        resultMap["client_id"] = config.getOAuthClientId()
+                        resultMap[ApiConstants.ACCESS_TOKEN] = socialAuth.accessToken
+                        resultMap[ApiConstants.PROVIDER] = socialAuth.authType.postfix
+                        resultMap[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
                     }
                     interactor.register(resultMap.toMap())
                     analytics.registrationSuccessEvent(socialAuth?.authType?.postfix.orEmpty())
@@ -229,10 +229,10 @@ class SignUpViewModel(
         }
     }
 
-    fun updateField(name: String, value: String) {
+    fun updateField(key: String, value: String) {
         _uiState.update {
             val updatedFields = uiState.value.allFields.toMutableList().map { field ->
-                if (field.name == name) {
+                if (field.name == key) {
                     field.copy(placeholder = value)
                 } else {
                     field

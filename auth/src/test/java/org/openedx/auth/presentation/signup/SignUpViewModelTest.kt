@@ -198,7 +198,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(false, viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.validationError)
         assertFalse(viewModel.uiState.value.successLogin)
         assertFalse(viewModel.uiState.value.isButtonLoading)
         assertEquals(noInternet, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
@@ -233,7 +233,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(false, viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.validationError)
         assertFalse(viewModel.uiState.value.successLogin)
         assertFalse(viewModel.uiState.value.isButtonLoading)
         assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
@@ -282,9 +282,9 @@ class SignUpViewModelTest {
         verify(exactly = 1) { analytics.registrationSuccessEvent(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(false, viewModel.uiState.value.validationError)
-        assertEquals(false, viewModel.uiState.value.isButtonLoading)
-        assertEquals(true, viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
+        assertTrue(viewModel.uiState.value.successLogin)
     }
 
     @Test

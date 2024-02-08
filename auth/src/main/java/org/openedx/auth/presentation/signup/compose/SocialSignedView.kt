@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.R as coreR
@@ -54,5 +55,7 @@ internal fun SocialSignedView(authType: AuthType) {
 @Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PreviewSocialSignedView() {
-    SocialSignedView(AuthType.GOOGLE)
+    OpenEdXTheme {
+        SocialSignedView(AuthType.GOOGLE)
+    }
 }

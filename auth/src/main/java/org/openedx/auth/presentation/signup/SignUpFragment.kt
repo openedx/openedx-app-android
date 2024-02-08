@@ -65,8 +65,8 @@ class SignUpFragment : Fragment() {
                                 )
                             }
                         },
-                        onFieldUpdated = { name, value ->
-                            viewModel.updateField(name, value)
+                        onFieldUpdated = { key, value ->
+                            viewModel.updateField(key, value)
                         }
                     )
 

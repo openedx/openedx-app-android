@@ -9,6 +9,12 @@ class OAuthHelper(
     private val googleAuthHelper: GoogleAuthHelper,
     private val microsoftAuthHelper: MicrosoftAuthHelper,
 ) {
+    /**
+     * SDK integration guides:
+     * https://developer.android.com/training/sign-in/credential-manager
+     * https://developers.facebook.com/docs/facebook-login/android/
+     * https://github.com/AzureAD/microsoft-authentication-library-for-android
+     */
     internal suspend fun socialAuth(fragment: Fragment, authType: AuthType): SocialAuthResponse? {
         return when (authType) {
             AuthType.PASSWORD -> null

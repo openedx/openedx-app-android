@@ -17,9 +17,13 @@ object ApiConstants {
     const val TOKEN_TYPE_JWT = "jwt"
     const val TOKEN_TYPE_REFRESH = "refresh_token"
 
-    const val NAME = "name"
+    const val ACCESS_TOKEN = "access_token"
+    const val CLIENT_ID = "client_id"
     const val EMAIL = "email"
+    const val HONOR_CODE = "honor_code"
+    const val NAME = "name"
     const val PASSWORD = "password"
+    const val PROVIDER = "provider"
 
     const val AUTH_TYPE_GOOGLE = "google-oauth2"
     const val AUTH_TYPE_FB = "facebook"
