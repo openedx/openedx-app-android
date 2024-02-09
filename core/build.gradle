@@ -156,6 +156,8 @@ dependencies {
     api "com.segment.analytics.kotlin:android:1.14.2"
     // Segment's Firebase integration
     api 'com.segment.analytics.kotlin.destinations:firebase:1.5.2'
+    // Braze SDK Integration
+    api "com.braze:braze-segment-kotlin:1.4.2"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

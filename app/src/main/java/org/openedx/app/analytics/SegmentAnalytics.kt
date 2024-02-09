@@ -1,6 +1,7 @@
 package org.openedx.app.analytics
 
 import android.content.Context
+import com.segment.analytics.kotlin.destinations.braze.BrazeDestination
 import com.segment.analytics.kotlin.destinations.firebase.FirebaseDestination
 import org.openedx.app.BuildConfig
 import org.openedx.core.config.Config
@@ -22,7 +23,13 @@ class SegmentAnalytics(context: Context, config: Config) : Analytics {
             flushInterval = 30
         }
         if (config.getFirebaseConfig().isSegmentAnalyticsSource()) {
-            tracker.add(FirebaseDestination(context = context))
+            tracker.add(plugin = FirebaseDestination(context = context))
+        }
+
+        if (config.getFirebaseConfig()
+                .isSegmentAnalyticsSource() && config.getBrazeConfig().isEnabled
+        ) {
+            tracker.add(plugin = BrazeDestination(context))
         }
         SegmentTracker.debugLogsEnabled = BuildConfig.DEBUG
         logger.d { "Segment Analytics Builder Initialised" }
