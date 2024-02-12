@@ -74,13 +74,11 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get(),
-            get(),
             courseId,
         )
     }
     viewModel { (courseId: String?) ->
-        SignUpViewModel(get(), get(), get(), get(), get(), courseId)
+        SignUpViewModel(get(), get(), get(), get(), get(), get(), get(), courseId)
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 

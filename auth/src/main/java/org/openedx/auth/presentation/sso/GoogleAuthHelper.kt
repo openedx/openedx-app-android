@@ -3,15 +3,19 @@ package org.openedx.auth.presentation.sso
 import android.accounts.Account
 import android.app.Activity
 import android.credentials.GetCredentialException
+import android.os.Bundle
 import androidx.annotation.WorkerThread
 import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import org.openedx.auth.data.model.AuthType
+import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.core.config.Config
 import org.openedx.core.utils.Logger
 
@@ -29,7 +33,7 @@ class GoogleAuthHelper(private val config: Config) {
         }.getOrNull()
     }
 
-    private suspend fun getCredentials(activityContext: Activity): String? {
+    private suspend fun getCredentials(activityContext: Activity): GoogleIdTokenCredential? {
         return runCatching {
             val credentialManager = CredentialManager.create(activityContext)
             val googleIdOption =
@@ -41,12 +45,12 @@ class GoogleAuthHelper(private val config: Config) {
                 request = request,
                 context = activityContext,
             )
-            getGoogleIdToken(result.credential)?.id
+            getGoogleIdToken(result.credential)
         }.onFailure {
             if (it is GetCredentialCancellationException &&
                 it.type == GetCredentialException.TYPE_USER_CANCELED
             ) {
-                return ""
+                return null
             }
             logger.e { "GetCredentials error: ${it.message}" }
         }.getOrNull()
@@ -55,10 +59,13 @@ class GoogleAuthHelper(private val config: Config) {
     private fun getGoogleIdToken(credential: Credential): GoogleIdTokenCredential? {
         return when (credential) {
             is GoogleIdTokenCredential -> {
-                try {
-                    GoogleIdTokenCredential.createFrom(credential.data)
-                } catch (e: GoogleIdTokenParsingException) {
-                    logger.e { "Token parsing exception: $e" }
+                parseToken(credential.data)
+            }
+
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    parseToken(credential.data)
+                } else {
                     null
                 }
             }
@@ -70,13 +77,28 @@ class GoogleAuthHelper(private val config: Config) {
         }
     }
 
+    private fun parseToken(data: Bundle): GoogleIdTokenCredential? =
+        try {
+            GoogleIdTokenCredential.createFrom(data)
+        } catch (e: GoogleIdTokenParsingException) {
+            logger.e { "Token parsing exception: $e" }
+            null
+        }
+
     @WorkerThread
-    suspend fun signIn(activityContext: Activity): String? {
-        return getCredentials(activityContext)?.let { token ->
-            if (token.isNotBlank()) {
-                getAuthToken(activityContext, token)
+    suspend fun socialAuth(activityContext: Activity): SocialAuthResponse? {
+        return getCredentials(activityContext)?.let { credentials ->
+            if (credentials.id.isNotBlank()) {
+                val token = getAuthToken(activityContext, credentials.id).orEmpty()
+                logger.d { token }
+                SocialAuthResponse(
+                    accessToken = token,
+                    name = credentials.displayName.orEmpty(),
+                    email = credentials.id,
+                    authType = AuthType.GOOGLE,
+                )
             } else {
-                ""
+                return null
             }
         }
     }

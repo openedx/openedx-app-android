@@ -8,7 +8,11 @@ import com.microsoft.identity.client.IAuthenticationResult
 import com.microsoft.identity.client.PublicClientApplication
 import com.microsoft.identity.client.exception.MsalException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.openedx.auth.data.model.AuthType
+import org.openedx.auth.domain.model.SocialAuthResponse
+import org.openedx.core.ApiConstants
 import org.openedx.core.R
+import org.openedx.core.extension.safeResume
 import org.openedx.core.utils.Logger
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -17,7 +21,7 @@ class MicrosoftAuthHelper {
     private val logger = Logger(TAG)
 
     @WorkerThread
-    suspend fun signIn(activityContext: Activity): String? =
+    suspend fun socialAuth(activityContext: Activity): SocialAuthResponse? =
         suspendCancellableCoroutine { continuation ->
             val clientApplication =
                 PublicClientApplication.createMultipleAccountPublicClientApplication(
@@ -29,7 +33,23 @@ class MicrosoftAuthHelper {
                 .withScopes(SCOPES)
                 .withCallback(object : AuthenticationCallback {
                     override fun onSuccess(authenticationResult: IAuthenticationResult?) {
-                        continuation.resume(authenticationResult?.accessToken)
+                        val claims = authenticationResult?.account?.claims
+                        val name =
+                            (claims?.getOrDefault(ApiConstants.NAME, "") as? String)
+                                .orEmpty()
+                        val email =
+                            (claims?.getOrDefault(ApiConstants.EMAIL, "") as? String)
+                                .orEmpty()
+                        continuation.safeResume(
+                            SocialAuthResponse(
+                                accessToken = authenticationResult?.accessToken.orEmpty(),
+                                name = name,
+                                email = email,
+                                authType = AuthType.MICROSOFT,
+                            )
+                        ) {
+                            continuation.cancel()
+                        }
                     }
 
                     override fun onError(exception: MsalException) {
@@ -39,7 +59,7 @@ class MicrosoftAuthHelper {
 
                     override fun onCancel() {
                         logger.d { "Microsoft auth canceled" }
-                        continuation.resume("")
+                        continuation.resume(SocialAuthResponse())
                     }
                 }).build()
             clientApplication.accounts.forEach {
@@ -50,6 +70,6 @@ class MicrosoftAuthHelper {
 
     private companion object {
         const val TAG = "MicrosoftAuthHelper"
-        val SCOPES = listOf("User.Read")
+        val SCOPES = listOf("User.Read", ApiConstants.EMAIL)
     }
 }

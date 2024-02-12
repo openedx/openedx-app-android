@@ -61,9 +61,9 @@ import org.openedx.core.ui.theme.appTypography
 @Composable
 fun RequiredFields(
     fields: List<RegistrationField>,
-    mapFields: MutableMap<String, String?>,
     showErrorMap: MutableMap<String, Boolean?>,
     selectableNamesMap: MutableMap<String, String?>,
+    onFieldUpdated: (String, String) -> Unit,
     onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit
 ) {
     fields.forEach { field ->
@@ -77,7 +77,7 @@ fun RequiredFields(
                         if (!isErrorShown) {
                             showErrorMap[serverName] = isErrorShown
                         }
-                        mapFields[serverName] = value
+                        onFieldUpdated(serverName, value)
                     }
                 )
             }
@@ -119,7 +119,7 @@ fun RequiredFields(
                         if (!isErrorShown) {
                             showErrorMap[serverName] = isErrorShown
                         }
-                        mapFields[serverName] = value
+                        onFieldUpdated(serverName, value)
                     }
                 )
             }
@@ -134,12 +134,12 @@ fun RequiredFields(
 @Composable
 fun OptionalFields(
     fields: List<RegistrationField>,
-    mapFields: MutableMap<String, String?>,
     showErrorMap: MutableMap<String, Boolean?>,
     selectableNamesMap: MutableMap<String, String?>,
-    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit
+    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit,
+    onFieldUpdated: (String, String) -> Unit,
 ) {
-    Column() {
+    Column {
         fields.forEach { field ->
             when (field.type) {
                 RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
@@ -153,8 +153,7 @@ fun OptionalFields(
                                 showErrorMap[serverName] =
                                     isErrorShown
                             }
-                            mapFields[serverName] =
-                                value
+                            onFieldUpdated(serverName, value)
                         }
                     )
                 }
@@ -197,11 +196,9 @@ fun OptionalFields(
                         registrationField = field,
                         onValueChanged = { serverName, value, isErrorShown ->
                             if (!isErrorShown) {
-                                showErrorMap[serverName] =
-                                    isErrorShown
+                                showErrorMap[serverName] = isErrorShown
                             }
-                            mapFields[serverName] =
-                                value
+                            onFieldUpdated(serverName, value)
                         }
                     )
                 }
@@ -277,7 +274,7 @@ fun InputRegistrationField(
     onValueChanged: (String, String, Boolean) -> Unit
 ) {
     var inputRegistrationFieldValue by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf(registrationField.placeholder)
     }
     val focusManager = LocalFocusManager.current
     val visualTransformation = if (registrationField.type == RegistrationFieldType.PASSWORD) {
@@ -539,15 +536,13 @@ fun InputRegistrationFieldPreview() {
 private fun OptionalFieldsPreview() {
     OpenEdXTheme {
         Column(Modifier.background(MaterialTheme.appColors.background)) {
+            val optionalField = field.copy(required = false)
             OptionalFields(
-                fields = listOf(field, field, field),
-                mapFields = SnapshotStateMap(),
+                fields = List(3) { optionalField },
                 showErrorMap = SnapshotStateMap(),
                 selectableNamesMap = SnapshotStateMap(),
-                onSelectClick = { _, _, _ ->
-
-                }
-
+                onSelectClick = { _, _, _ -> },
+                onFieldUpdated = { _, _ -> }
             )
         }
     }
@@ -561,12 +556,10 @@ private fun RequiredFieldsPreview() {
         Column(Modifier.background(MaterialTheme.appColors.background)) {
             RequiredFields(
                 fields = listOf(field, field, field),
-                mapFields = SnapshotStateMap(),
                 showErrorMap = SnapshotStateMap(),
                 selectableNamesMap = SnapshotStateMap(),
-                onSelectClick = { _, _, _ ->
-
-                }
+                onSelectClick = { _, _, _ -> },
+                onFieldUpdated = { _, _ -> }
             )
         }
     }

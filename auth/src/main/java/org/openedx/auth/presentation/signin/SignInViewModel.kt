@@ -1,6 +1,5 @@
 package org.openedx.auth.presentation.signin
 
-import android.app.Activity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,10 +13,9 @@ import kotlinx.coroutines.withContext
 import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.auth.presentation.sso.FacebookAuthHelper
-import org.openedx.auth.presentation.sso.GoogleAuthHelper
-import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
+import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
@@ -39,10 +37,8 @@ class SignInViewModel(
     private val validator: Validator,
     private val appUpgradeNotifier: AppUpgradeNotifier,
     private val analytics: AuthAnalytics,
-    private val facebookAuthHelper: FacebookAuthHelper,
-    private val googleAuthHelper: GoogleAuthHelper,
-    private val microsoftAuthHelper: MicrosoftAuthHelper,
-    val config: Config,
+    private val oAuthHelper: OAuthHelper,
+    config: Config,
     val courseId: String?,
 ) : BaseViewModel() {
 
@@ -114,44 +110,16 @@ class SignInViewModel(
         }
     }
 
-    fun signInGoogle(activityContext: Activity) {
+    fun socialAuth(fragment: Fragment, authType: AuthType) {
         _uiState.update { it.copy(showProgress = true) }
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 runCatching {
-                    googleAuthHelper.signIn(activityContext)
+                    oAuthHelper.socialAuth(fragment, authType)
                 }
             }
                 .getOrNull()
-                .checkToken(AuthType.GOOGLE)
-        }
-    }
-
-    fun signInFacebook(fragment: Fragment) {
-        _uiState.update { it.copy(showProgress = true) }
-        viewModelScope.launch {
-            runCatching {
-                facebookAuthHelper.signIn(fragment)
-            }.onFailure {
-                logger.e { "Facebook auth error: $it" }
-            }
-                .getOrNull()
-                .checkToken(AuthType.FACEBOOK)
-        }
-    }
-
-    fun signInMicrosoft(activityContext: Activity) {
-        _uiState.update { it.copy(showProgress = true) }
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    microsoftAuthHelper.signIn(activityContext)
-                }
-            }.onFailure {
-                logger.e { "Microsoft auth error: $it" }
-            }
-                .getOrNull()
-                .checkToken(AuthType.MICROSOFT)
+                .checkToken()
         }
     }
 
@@ -165,7 +133,7 @@ class SignInViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        facebookAuthHelper.clear()
+        oAuthHelper.clear()
     }
 
     private suspend fun exchangeToken(token: String, authType: AuthType) {
@@ -199,8 +167,8 @@ class SignInViewModel(
         }
     }
 
-    private suspend fun String?.checkToken(authType: AuthType) {
-        this?.let { token ->
+    private suspend fun SocialAuthResponse?.checkToken() {
+        this?.accessToken?.let { token ->
             if (token.isNotEmpty()) {
                 exchangeToken(token, authType)
             } else {

@@ -8,7 +8,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -16,6 +18,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,9 +27,14 @@ import org.junit.rules.TestRule
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
+import org.openedx.core.config.FacebookConfig
+import org.openedx.core.config.GoogleConfig
+import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
@@ -42,22 +51,25 @@ class SignUpViewModelTest {
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val preferencesManager = mockk<CorePreferences>()
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val oAuthHelper = mockk<OAuthHelper>()
 
     //region parameters
 
     private val parametersMap = mapOf(
         ApiConstants.EMAIL to "user@gmail.com",
-        ApiConstants.PASSWORD to "password123"
+        ApiConstants.PASSWORD to "password123",
+        "honor_code" to "true",
     )
 
     private val listOfFields = listOf(
         RegistrationField(
-            "",
+            ApiConstants.EMAIL,
             "",
             RegistrationFieldType.TEXT,
             "",
@@ -69,7 +81,7 @@ class SignUpViewModelTest {
         ),
 
         RegistrationField(
-            "",
+            ApiConstants.PASSWORD,
             "",
             RegistrationFieldType.TEXT,
             "",
@@ -95,6 +107,10 @@ class SignUpViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { config.isSocialAuthEnabled() } returns false
+        every { config.getFacebookConfig() } returns FacebookConfig()
+        every { config.getGoogleConfig() } returns GoogleConfig()
+        every { config.getMicrosoftConfig() } returns MicrosoftConfig()
     }
 
     @After
@@ -105,22 +121,30 @@ class SignUpViewModelTest {
     @Test
     fun `register has validation errors`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             parametersMap
         )
+        coEvery { interactor.getRegistrationFields() } returns listOfFields
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        viewModel.register(parametersMap)
+        viewModel.getRegistrationFields()
+        advanceUntilIdle()
+        parametersMap.forEach {
+            viewModel.updateField(it.key, it.value)
+        }
+        viewModel.register()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
@@ -129,23 +153,27 @@ class SignUpViewModelTest {
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(true, viewModel.validationError.value)
-        assert(viewModel.successLogin.value != true)
-        assert(viewModel.isButtonLoading.value != true)
-        assertEquals(null, viewModel.uiMessage.value)
+        assertEquals(true, viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
     }
 
     @Test
     fun `register no internet error`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
+        val deferred = async { viewModel.uiMessage.first() }
+
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws UnknownHostException()
+        coEvery { interactor.getRegistrationFields() } returns listOfFields
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
             interactor.login(
@@ -156,7 +184,12 @@ class SignUpViewModelTest {
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        viewModel.register(parametersMap)
+        viewModel.getRegistrationFields()
+        advanceUntilIdle()
+        parametersMap.forEach {
+            viewModel.updateField(it.key, it.value)
+        }
+        viewModel.register()
         advanceUntilIdle()
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
@@ -165,31 +198,33 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        assertEquals(false, viewModel.validationError.value)
-        assert(viewModel.successLogin.value != true)
-        assert(viewModel.isButtonLoading.value != true)
-        assertEquals(noInternet, message?.message)
+        assertFalse(viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
+        assertEquals(noInternet, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
     fun `something went wrong error`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
+        val deferred = async { viewModel.uiMessage.first() }
+
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws Exception()
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        viewModel.register(parametersMap)
+        viewModel.register()
         advanceUntilIdle()
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
@@ -198,23 +233,23 @@ class SignUpViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        assertEquals(false, viewModel.validationError.value)
-        assert(viewModel.successLogin.value != true)
-        assert(viewModel.isButtonLoading.value != true)
-        assertEquals(somethingWrong, message?.message)
+        assertFalse(viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.successLogin)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
+        assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
 
     @Test
     fun `success register`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
@@ -222,6 +257,7 @@ class SignUpViewModelTest {
         )
         every { analytics.createAccountClickedEvent(any()) } returns Unit
         every { analytics.registrationSuccessEvent(any()) } returns Unit
+        coEvery { interactor.getRegistrationFields() } returns listOfFields
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
             interactor.login(
@@ -231,7 +267,12 @@ class SignUpViewModelTest {
         } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
-        viewModel.register(parametersMap)
+        viewModel.getRegistrationFields()
+        advanceUntilIdle()
+        parametersMap.forEach {
+            viewModel.updateField(it.key, it.value)
+        }
+        viewModel.register()
         advanceUntilIdle()
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
@@ -241,64 +282,69 @@ class SignUpViewModelTest {
         verify(exactly = 1) { analytics.registrationSuccessEvent(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertEquals(false, viewModel.validationError.value)
-        assertEquals(false, viewModel.isButtonLoading.value)
-        assertEquals(null, viewModel.uiMessage.value)
-        assertEquals(true, viewModel.successLogin.value)
+        assertFalse(viewModel.uiState.value.validationError)
+        assertFalse(viewModel.uiState.value.isButtonLoading)
+        assertTrue(viewModel.uiState.value.successLogin)
     }
 
     @Test
     fun `getRegistrationFields no internet error`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
+        val deferred = async { viewModel.uiMessage.first() }
+
         coEvery { interactor.getRegistrationFields() } throws UnknownHostException()
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        assert(viewModel.uiState.value is SignUpUIState.Loading)
-        assertEquals(noInternet, message?.message)
+        assertTrue(viewModel.uiState.value.isLoading)
+        assertEquals(noInternet, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
     fun `getRegistrationFields unknown error`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
+        val deferred = async { viewModel.uiMessage.first() }
+
         coEvery { interactor.getRegistrationFields() } throws Exception()
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        assert(viewModel.uiState.value is SignUpUIState.Loading)
-        assertEquals(somethingWrong, message?.message)
+        assertTrue(viewModel.uiState.value.isLoading)
+        assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
     @Test
     fun `getRegistrationFields success`() = runTest {
         val viewModel = SignUpViewModel(
-            interactor,
-            resourceManager,
-            analytics,
-            preferencesManager,
-            appUpgradeNotifier,
+            interactor = interactor,
+            resourceManager = resourceManager,
+            analytics = analytics,
+            preferencesManager = preferencesManager,
+            appUpgradeNotifier = appUpgradeNotifier,
+            oAuthHelper = oAuthHelper,
+            config = config,
             courseId = "",
         )
         coEvery { interactor.getRegistrationFields() } returns listOfFields
@@ -309,7 +355,6 @@ class SignUpViewModelTest {
 
         //val fields = viewModel.uiState.value as? SignUpUIState.Fields
 
-        assert(viewModel.uiState.value is SignUpUIState.Fields)
-        assertEquals(null, viewModel.uiMessage.value)
+        assertFalse(viewModel.uiState.value.isLoading)
     }
 }
