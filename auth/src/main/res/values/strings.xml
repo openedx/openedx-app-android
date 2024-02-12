@@ -28,6 +28,9 @@
     <string name="auth_google" tools:ignore="ExtraTranslation">Sign in with Google</string>
     <string name="auth_facebook" tools:ignore="ExtraTranslation">Sign in with Facebook</string>
     <string name="auth_microsoft" tools:ignore="ExtraTranslation">Sign in with Microsoft</string>
+    <string name="auth_continue_google" tools:ignore="ExtraTranslation">Continue with Google</string>
+    <string name="auth_continue_facebook" tools:ignore="ExtraTranslation">Continue with Facebook</string>
+    <string name="auth_continue_microsoft" tools:ignore="ExtraTranslation">Continue with Microsoft</string>
     <string name="auth_social_signed_title" translatable="false">You\'ve successfully signed in with %s.</string>
     <string name="auth_social_signed_desc" translatable="false">We just need a little more information before you start learning with %s.</string>
 </resources>

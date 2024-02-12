@@ -1036,7 +1036,7 @@ fun OfflineModeDialog(
 @Composable
 fun OpenEdXButton(
     width: Modifier = Modifier.fillMaxWidth(),
-    text: String,
+    text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
     backgroundColor: Color = MaterialTheme.appColors.buttonBackground,

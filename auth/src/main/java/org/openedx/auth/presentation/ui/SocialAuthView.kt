@@ -35,6 +35,11 @@ internal fun SocialAuthView(
 ) {
     Column(modifier = modifier) {
         if (isGoogleAuthEnabled) {
+            val stringRes = if (isSignIn) {
+                R.string.auth_google
+            } else {
+                R.string.auth_continue_google
+            }
             OpenEdXOutlinedButton(
                 modifier = Modifier
                     .testTag("btn_google_auth")
@@ -57,18 +62,22 @@ internal fun SocialAuthView(
                         modifier = Modifier
                             .testTag("txt_google_auth")
                             .padding(start = 10.dp),
-                        text = stringResource(id = R.string.auth_google)
+                        text = stringResource(id = stringRes)
                     )
                 }
             }
         }
         if (isFacebookAuthEnabled) {
+            val stringRes = if (isSignIn) {
+                R.string.auth_facebook
+            } else {
+                R.string.auth_continue_facebook
+            }
             OpenEdXButton(
                 width = Modifier
                     .testTag("btn_facebook_auth")
                     .padding(top = 12.dp)
                     .fillMaxWidth(),
-                text = stringResource(id = R.string.auth_facebook),
                 backgroundColor = MaterialTheme.appColors.authFacebookButtonBackground,
                 onClick = {
                     onEvent(AuthType.FACEBOOK)
@@ -85,18 +94,22 @@ internal fun SocialAuthView(
                             .testTag("txt_facebook_auth")
                             .padding(start = 10.dp),
                         color = MaterialTheme.appColors.buttonText,
-                        text = stringResource(id = R.string.auth_facebook)
+                        text = stringResource(id = stringRes)
                     )
                 }
             }
         }
         if (isMicrosoftAuthEnabled) {
+            val stringRes = if (isSignIn) {
+                R.string.auth_microsoft
+            } else {
+                R.string.auth_continue_microsoft
+            }
             OpenEdXButton(
                 width = Modifier
                     .testTag("btn_microsoft_auth")
                     .padding(top = 12.dp)
                     .fillMaxWidth(),
-                text = stringResource(id = R.string.auth_microsoft),
                 backgroundColor = MaterialTheme.appColors.authMicrosoftButtonBackground,
                 onClick = {
                     onEvent(AuthType.MICROSOFT)
@@ -113,7 +126,7 @@ internal fun SocialAuthView(
                             .testTag("txt_microsoft_auth")
                             .padding(start = 10.dp),
                         color = MaterialTheme.appColors.buttonText,
-                        text = stringResource(id = R.string.auth_microsoft)
+                        text = stringResource(id = stringRes)
                     )
                 }
             }
@@ -126,6 +139,6 @@ internal fun SocialAuthView(
 @Composable
 private fun SocialAuthViewPreview() {
     OpenEdXTheme {
-        SocialAuthView {}
+        SocialAuthView() {}
     }
 }
