@@ -1,0 +1,59 @@
+API_HOST_URL: 'http://localhost:8000'
+APPLICATION_ID: 'org.openedx.app'
+ENVIRONMENT_DISPLAY_NAME: 'Localhost'
+URI_SCHEME: ''
+FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
+FAQ_URL: ''
+OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+
+# Keep empty to hide setting
+AGREEMENT_URLS:
+  PRIVACY_POLICY_URL: ''
+  COOKIE_POLICY_URL: ''
+  DATA_SELL_CONSENT_URL: ''
+  TOS_URL: ''
+  EULA_URL: ''
+  SUPPORTED_LANGUAGES: [ ] #en is defalut language
+
+DISCOVERY:
+  TYPE: 'native'
+  WEBVIEW:
+    BASE_URL: ''
+    COURSE_DETAIL_TEMPLATE: ''
+    PROGRAM_DETAIL_TEMPLATE: ''
+
+PROGRAM:
+  TYPE: 'native'
+  WEBVIEW:
+    PROGRAM_URL: ''
+    PROGRAM_DETAIL_URL_TEMPLATE: ''
+
+GOOGLE:
+  ENABLED: false
+  CLIENT_ID: ''
+
+MICROSOFT:
+  ENABLED: false
+  CLIENT_ID: ''
+  PACKAGE_SIGNATURE: ''
+
+FACEBOOK:
+  ENABLED: false
+  FACEBOOK_APP_ID: ''
+  CLIENT_TOKEN: ''
+
+#Platform names
+PLATFORM_NAME: "OpenEdX"
+PLATFORM_FULL_NAME: "OpenEdX"
+#tokenType enum accepts JWT and BEARER only
+TOKEN_TYPE: "JWT"
+#feature flag for activating What’s New feature
+WHATS_NEW_ENABLED: false
+#feature flag enable Social Login buttons
+SOCIAL_AUTH_ENABLED: false
+#Course navigation feature flags
+COURSE_NESTED_LIST_ENABLED: false
+COURSE_BANNER_ENABLED: true
+COURSE_TOP_TAB_BAR_ENABLED: false
+COURSE_UNIT_PROGRESS_ENABLED: false
+

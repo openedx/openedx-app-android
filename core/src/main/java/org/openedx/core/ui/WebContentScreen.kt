@@ -1,0 +1,213 @@
+package org.openedx.core.ui
+
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
+import org.openedx.core.extension.isEmailValid
+import org.openedx.core.extension.replaceLinkTags
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.EmailUtil
+import java.nio.charset.StandardCharsets
+
+@Composable
+fun WebContentScreen(
+    windowSize: WindowSize,
+    apiHostUrl: String? = null,
+    title: String,
+    onBackClick: () -> Unit,
+    htmlBody: String? = null,
+    contentUrl: String? = null,
+) {
+    val scaffoldState = rememberScaffoldState()
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 16.dp),
+        scaffoldState = scaffoldState,
+        backgroundColor = MaterialTheme.appColors.background
+    ) {
+
+        val screenWidth by remember(key1 = windowSize) {
+            mutableStateOf(
+                windowSize.windowSizeValue(
+                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                    compact = Modifier.fillMaxWidth()
+                )
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(it)
+                .statusBarsInset()
+                .displayCutoutForLandscape(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Column(screenWidth) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .zIndex(1f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    BackBtn {
+                        onBackClick()
+                    }
+
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 56.dp),
+                        text = title,
+                        color = MaterialTheme.appColors.textPrimary,
+                        style = MaterialTheme.appTypography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Surface(
+                    Modifier.fillMaxSize(),
+                    color = MaterialTheme.appColors.background
+                ) {
+                    if (htmlBody.isNullOrEmpty() && contentUrl.isNullOrEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.appColors.background)
+                                .zIndex(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                        }
+                    } else {
+                        var webViewAlpha by rememberSaveable { mutableFloatStateOf(0f) }
+                        Surface(
+                            Modifier
+                                .padding(horizontal = 16.dp, vertical = 24.dp)
+                                .alpha(webViewAlpha),
+                            color = MaterialTheme.appColors.background
+                        ) {
+                            WebViewContent(
+                                apiHostUrl = apiHostUrl,
+                                body = htmlBody,
+                                contentUrl = contentUrl,
+                                onWebPageLoaded = {
+                                    webViewAlpha = 1f
+                                })
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@SuppressLint("SetJavaScriptEnabled")
+private fun WebViewContent(
+    apiHostUrl: String? = null,
+    body: String? = null,
+    contentUrl: String? = null,
+    onWebPageLoaded: () -> Unit
+) {
+    val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
+    AndroidView(
+        factory = {
+            WebView(context).apply {
+                webViewClient = object : WebViewClient() {
+                    override fun onPageCommitVisible(view: WebView?, url: String?) {
+                        super.onPageCommitVisible(view, url)
+                        onWebPageLoaded()
+                    }
+
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): Boolean {
+                        val clickUrl = request?.url?.toString() ?: ""
+                        return if (clickUrl.isNotEmpty() &&
+                            (clickUrl.startsWith("http://") ||
+                                    clickUrl.startsWith("https://"))
+                        ) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                            true
+                        } else if (clickUrl.startsWith("mailto:")) {
+                            val email = clickUrl.replace("mailto:", "")
+                            if (email.isEmailValid()) {
+                                EmailUtil.sendEmailIntent(context, email, "", "")
+                                true
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        }
+                    }
+                }
+                with(settings) {
+                    javaScriptEnabled = true
+                    loadWithOverviewMode = true
+                    builtInZoomControls = false
+                    setSupportZoom(true)
+                    loadsImagesAutomatically = true
+                    domStorageEnabled = true
+                }
+                isVerticalScrollBarEnabled = false
+                isHorizontalScrollBarEnabled = false
+                body?.let {
+                    loadDataWithBaseURL(
+                        apiHostUrl,
+                        body.replaceLinkTags(isDarkTheme),
+                        "text/html",
+                        StandardCharsets.UTF_8.name(),
+                        null
+                    )
+                }
+                contentUrl?.let {
+                    loadUrl(it)
+                }
+            }
+        },
+    )
+}

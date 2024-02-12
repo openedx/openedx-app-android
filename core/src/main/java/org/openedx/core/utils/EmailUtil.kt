@@ -3,6 +3,7 @@ package org.openedx.core.utils
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import org.openedx.core.R
@@ -11,23 +12,24 @@ object EmailUtil {
 
     fun showFeedbackScreen(
         context: Context,
-        subject: String,
+        feedbackEmailAddress: String,
+        subject: String = context.getString(R.string.core_email_subject),
+        feedback: String = "",
         appVersion: String
     ) {
         val NEW_LINE = "\n"
-        val to = context.getString(R.string.feedback_email_address)
         val body = StringBuilder()
         with(body) {
+            append(feedback)
+            append(NEW_LINE)
+            append(NEW_LINE)
             append("${context.getString(R.string.core_android_os_version)} ${Build.VERSION.RELEASE}")
             append(NEW_LINE)
             append("${context.getString(R.string.core_app_version)} $appVersion")
             append(NEW_LINE)
             append("${context.getString(R.string.core_android_device_model)} ${Build.MODEL}")
-            append(NEW_LINE)
-            append(NEW_LINE)
-            append(context.getString(R.string.core_insert_feedback))
         }
-        sendEmailIntent(context, to, subject, body.toString())
+        sendEmailIntent(context, feedbackEmailAddress, subject, body.toString())
     }
 
     fun sendEmailIntent(
@@ -36,11 +38,12 @@ object EmailUtil {
         subject: String,
         email: String
     ) {
-        val emailIntent = Intent(Intent.ACTION_SEND)
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf(to))
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
-        emailIntent.putExtra(Intent.EXTRA_TEXT, email)
-        emailIntent.type = "plain/text"
+        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(to))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, email)
+        }
         try {
             emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context?.let {

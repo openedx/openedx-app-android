@@ -22,7 +22,9 @@ data class Block(
     val studentViewMultiDevice: Boolean,
     val blockCounts: BlockCounts,
     val descendants: List<String>,
+    val descendantsType: BlockType,
     val completion: Double,
+    val containsGatedContent: Boolean = false,
     val downloadModel: DownloadModel? = null
 ) {
     val isDownloadable: Boolean
@@ -35,6 +37,7 @@ data class Block(
             BlockType.VIDEO -> {
                 FileType.VIDEO
             }
+
             else -> {
                 FileType.UNKNOWN
             }
@@ -47,6 +50,40 @@ data class Block(
 
     fun isDownloaded() = downloadModel?.downloadedState == DownloadedState.DOWNLOADED
 
+    fun isGated() = containsGatedContent
+
+    fun isCompleted() = completion == 1.0
+
+    fun getFirstDescendantBlock(blocks: List<Block>): Block? {
+        if (blocks.isEmpty()) return null
+        descendants.forEach { descendant ->
+            blocks.find { it.id == descendant }?.let { descendantBlock ->
+                return descendantBlock
+            }
+        }
+        return null
+    }
+
+    fun getDownloadsCount(blocks: List<Block>): Int {
+        if (blocks.isEmpty()) return 0
+        var count = 0
+        descendants.forEach { id ->
+            blocks.find { it.id == id }?.let { descendantBlock ->
+                count += blocks.filter { descendantBlock.descendants.contains(it.id) && it.isDownloadable }.size
+            }
+        }
+        return count
+    }
+
+    val isVideoBlock get() = type == BlockType.VIDEO
+    val isDiscussionBlock get() = type == BlockType.DISCUSSION
+    val isHTMLBlock get() = type == BlockType.HTML
+    val isProblemBlock get() = type == BlockType.PROBLEM
+    val isOpenAssessmentBlock get() = type == BlockType.OPENASSESSMENT
+    val isDragAndDropBlock get() = type == BlockType.DRAG_AND_DROP_V2
+    val isWordCloudBlock get() = type == BlockType.WORD_CLOUD
+    val isLTIConsumerBlock get() = type == BlockType.LTI_CONSUMER
+    val isSurveyBlock get() = type == BlockType.SURVEY
 }
 
 data class StudentViewData(
@@ -54,7 +91,7 @@ data class StudentViewData(
     val duration: Any,
     val transcripts: HashMap<String, String>?,
     val encodedVideos: EncodedVideos?,
-    val topicId: String
+    val topicId: String,
 )
 
 data class EncodedVideos(
@@ -63,7 +100,7 @@ data class EncodedVideos(
     var fallback: VideoInfo?,
     var desktopMp4: VideoInfo?,
     var mobileHigh: VideoInfo?,
-    var mobileLow: VideoInfo?
+    var mobileLow: VideoInfo?,
 ) {
     val hasDownloadableVideo: Boolean
         get() = isPreferredVideoInfo(hls) ||
@@ -71,6 +108,21 @@ data class EncodedVideos(
                 isPreferredVideoInfo(desktopMp4) ||
                 isPreferredVideoInfo(mobileHigh) ||
                 isPreferredVideoInfo(mobileLow)
+
+    val hasNonYoutubeVideo: Boolean
+        get() = mobileHigh?.url != null
+                || mobileLow?.url != null
+                || desktopMp4?.url != null
+                || hls?.url != null
+                || fallback?.url != null
+
+    val videoUrl: String
+        get() = mobileHigh?.url
+            ?: mobileLow?.url
+            ?: desktopMp4?.url
+            ?: hls?.url
+            ?: fallback?.url
+            ?: ""
 
     fun getPreferredVideoInfoForDownloading(preferredVideoQuality: VideoQuality): VideoInfo? {
         var preferredVideoInfo = when (preferredVideoQuality) {
@@ -125,9 +177,9 @@ data class EncodedVideos(
 
 data class VideoInfo(
     val url: String,
-    val fileSize: Int
+    val fileSize: Int,
 )
 
 data class BlockCounts(
-    val video: Int
+    val video: Int,
 )

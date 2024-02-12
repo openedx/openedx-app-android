@@ -6,21 +6,46 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -28,14 +53,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.presentation.ui.LoginTextField
+import org.openedx.core.AppUpdateState
+import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.ui.*
+import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
+import org.openedx.core.ui.BackBtn
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.auth.R as authR
 
 class RestorePasswordFragment : Fragment() {
@@ -54,22 +90,33 @@ class RestorePasswordFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(RestorePasswordUIState.Initial)
                 val uiMessage by viewModel.uiMessage.observeAsState()
-                RestorePasswordScreen(
-                    windowSize = windowSize,
-                    uiState = uiState,
-                    uiMessage = uiMessage,
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStackImmediate()
-                    },
-                    onRestoreButtonClick = {
-                        viewModel.passwordReset(it)
-                    }
-                )
+                val appUpgradeEvent by viewModel.appUpgradeEventUIState.observeAsState(null)
+
+                if (appUpgradeEvent == null) {
+                    RestorePasswordScreen(
+                        windowSize = windowSize,
+                        uiState = uiState,
+                        uiMessage = uiMessage,
+                        onBackClick = {
+                            requireActivity().supportFragmentManager.popBackStackImmediate()
+                        },
+                        onRestoreButtonClick = {
+                            viewModel.passwordReset(it)
+                        }
+                    )
+                } else {
+                    AppUpgradeRequiredScreen(
+                        onUpdateClick = {
+                            AppUpdateState.openPlayMarket(requireContext())
+                        }
+                    )
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun RestorePasswordScreen(
     windowSize: WindowSize,
@@ -87,6 +134,9 @@ private fun RestorePasswordScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+            }
             .fillMaxSize()
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
@@ -158,6 +208,7 @@ private fun RestorePasswordScreen(
             ) {
                 Text(
                     modifier = Modifier
+                        .testTag("txt_screen_title")
                         .fillMaxWidth(),
                     text = stringResource(id = authR.string.auth_forgot_your_password),
                     color = Color.White,
@@ -174,8 +225,7 @@ private fun RestorePasswordScreen(
             }
 
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
@@ -191,11 +241,13 @@ private fun RestorePasswordScreen(
                             Column(
                                 Modifier
                                     .then(contentPaddings)
+                                    .displayCutoutForLandscape()
                                     .fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
                                     modifier = Modifier
+                                        .testTag("txt_forgot_password_title")
                                         .fillMaxWidth(),
                                     text = stringResource(id = authR.string.auth_forgot_your_password),
                                     style = MaterialTheme.appTypography.displaySmall,
@@ -204,6 +256,7 @@ private fun RestorePasswordScreen(
                                 Spacer(Modifier.height(2.dp))
                                 Text(
                                     modifier = Modifier
+                                        .testTag("txt_forgot_password_description")
                                         .fillMaxWidth(),
                                     text = stringResource(id = authR.string.auth_please_enter_your_log_in),
                                     style = MaterialTheme.appTypography.titleSmall,
@@ -212,6 +265,8 @@ private fun RestorePasswordScreen(
                                 Spacer(modifier = Modifier.height(32.dp))
                                 LoginTextField(
                                     modifier = Modifier.fillMaxWidth(),
+                                    title = stringResource(id = authR.string.auth_email),
+                                    description = stringResource(id = authR.string.auth_example_email),
                                     onValueChanged = {
                                         email = it
                                     },
@@ -234,7 +289,7 @@ private fun RestorePasswordScreen(
                                     }
                                 } else {
                                     OpenEdXButton(
-                                        width = buttonWidth,
+                                        width = buttonWidth.testTag("btn_reset_password"),
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
                                             onRestoreButtonClick(email)
@@ -243,10 +298,12 @@ private fun RestorePasswordScreen(
                                 }
                             }
                         }
+
                         is RestorePasswordUIState.Success -> {
                             Column(
                                 Modifier
                                     .then(contentPaddings)
+                                    .displayCutoutForLandscape()
                                     .fillMaxSize(),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -281,7 +338,7 @@ private fun RestorePasswordScreen(
                                 Spacer(Modifier.height(48.dp))
                                 OpenEdXButton(
                                     width = buttonWidth,
-                                    text = stringResource(id = authR.string.auth_sign_in),
+                                    text = stringResource(id = R.string.core_sign_in),
                                     onClick = {
                                         onBackClick()
                                     }

@@ -1,5 +1,8 @@
 package org.openedx.course.data.repository
 
+import kotlinx.coroutines.flow.map
+import okhttp3.ResponseBody
+import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.EnrollBody
@@ -9,8 +12,6 @@ import org.openedx.core.domain.model.*
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.course.data.storage.CourseDao
-import kotlinx.coroutines.flow.map
-import okhttp3.ResponseBody
 
 class CourseRepository(
     private val api: CourseApi,
@@ -21,7 +22,7 @@ class CourseRepository(
     private var courseStructure: CourseStructure? = null
 
     suspend fun getCourseDetail(id: String): Course {
-        val course = api.getCourseDetail(id)
+        val course = api.getCourseDetail(id, preferencesManager.user?.username)
         courseDao.updateCourseEntity(CourseEntity.createFrom(course))
         return course.mapToDomain()
     }
@@ -51,7 +52,7 @@ class CourseRepository(
     suspend fun preloadCourseStructure(courseId: String) {
         val response = api.getCourseStructure(
             "stale-if-error=0",
-            "v1",
+            "v3",
             preferencesManager.user?.username,
             courseId
         )
@@ -99,9 +100,17 @@ class CourseRepository(
         return api.markBlocksCompletion(blocksCompletionBody)
     }
 
+    suspend fun getCourseDates(courseId: String) =
+        api.getCourseDates(courseId).getCourseDatesResult()
+
+    suspend fun resetCourseDates(courseId: String) =
+        api.resetCourseDates(mapOf(ApiConstants.COURSE_KEY to courseId)).mapToDomain()
+
+    suspend fun getDatesBannerInfo(courseId: String) =
+        api.getDatesBannerInfo(courseId).mapToDomain()
+
     suspend fun getHandouts(courseId: String) = api.getHandouts(courseId).mapToDomain()
 
     suspend fun getAnnouncements(courseId: String) =
         api.getAnnouncements(courseId).map { it.mapToDomain() }
-
 }

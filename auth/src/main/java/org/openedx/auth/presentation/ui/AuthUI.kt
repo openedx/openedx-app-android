@@ -37,6 +37,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,9 +61,9 @@ import org.openedx.core.ui.theme.appTypography
 @Composable
 fun RequiredFields(
     fields: List<RegistrationField>,
-    mapFields: MutableMap<String, String?>,
     showErrorMap: MutableMap<String, Boolean?>,
     selectableNamesMap: MutableMap<String, String?>,
+    onFieldUpdated: (String, String) -> Unit,
     onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit
 ) {
     fields.forEach { field ->
@@ -76,7 +77,7 @@ fun RequiredFields(
                         if (!isErrorShown) {
                             showErrorMap[serverName] = isErrorShown
                         }
-                        mapFields[serverName] = value
+                        onFieldUpdated(serverName, value)
                     }
                 )
             }
@@ -85,6 +86,7 @@ fun RequiredFields(
                 val linkedText =
                     TextConverter.htmlTextToLinkedText(field.label)
                 HyperlinkText(
+                    modifier = Modifier.testTag("txt_${field.name}"),
                     fullText = linkedText.text,
                     hyperLinks = linkedText.links,
                     linkTextColor = MaterialTheme.appColors.primary
@@ -117,7 +119,7 @@ fun RequiredFields(
                         if (!isErrorShown) {
                             showErrorMap[serverName] = isErrorShown
                         }
-                        mapFields[serverName] = value
+                        onFieldUpdated(serverName, value)
                     }
                 )
             }
@@ -132,12 +134,12 @@ fun RequiredFields(
 @Composable
 fun OptionalFields(
     fields: List<RegistrationField>,
-    mapFields: MutableMap<String, String?>,
     showErrorMap: MutableMap<String, Boolean?>,
     selectableNamesMap: MutableMap<String, String?>,
-    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit
+    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit,
+    onFieldUpdated: (String, String) -> Unit,
 ) {
-    Column() {
+    Column {
         fields.forEach { field ->
             when (field.type) {
                 RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
@@ -151,8 +153,7 @@ fun OptionalFields(
                                 showErrorMap[serverName] =
                                     isErrorShown
                             }
-                            mapFields[serverName] =
-                                value
+                            onFieldUpdated(serverName, value)
                         }
                     )
                 }
@@ -195,11 +196,9 @@ fun OptionalFields(
                         registrationField = field,
                         onValueChanged = { serverName, value, isErrorShown ->
                             if (!isErrorShown) {
-                                showErrorMap[serverName] =
-                                    isErrorShown
+                                showErrorMap[serverName] = isErrorShown
                             }
-                            mapFields[serverName] =
-                                value
+                            onFieldUpdated(serverName, value)
                         }
                     )
                 }
@@ -214,6 +213,8 @@ fun OptionalFields(
 @Composable
 fun LoginTextField(
     modifier: Modifier = Modifier,
+    title: String,
+    description: String,
     onValueChanged: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) }
@@ -225,8 +226,10 @@ fun LoginTextField(
     }
     val focusManager = LocalFocusManager.current
     Text(
-        modifier = Modifier.fillMaxWidth(),
-        text = stringResource(id = R.string.auth_email),
+        modifier = Modifier
+            .testTag("txt_email_label")
+            .fillMaxWidth(),
+        text = title,
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
     )
@@ -244,7 +247,8 @@ fun LoginTextField(
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
             Text(
-                text = stringResource(id = R.string.auth_example_email),
+                modifier = Modifier.testTag("txt_email_placeholder"),
+                text = description,
                 color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
@@ -258,7 +262,7 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier
+        modifier = modifier.testTag("tf_email")
     )
 }
 
@@ -270,7 +274,7 @@ fun InputRegistrationField(
     onValueChanged: (String, String, Boolean) -> Unit
 ) {
     var inputRegistrationFieldValue by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf(registrationField.placeholder)
     }
     val focusManager = LocalFocusManager.current
     val visualTransformation = if (registrationField.type == RegistrationFieldType.PASSWORD) {
@@ -300,7 +304,9 @@ fun InputRegistrationField(
     }
     Column {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_${registrationField.name}_label")
+                .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -323,6 +329,7 @@ fun InputRegistrationField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
+                    modifier = modifier.testTag("txt_${registrationField.name}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -338,10 +345,11 @@ fun InputRegistrationField(
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
-            modifier = modifier
+            modifier = modifier.testTag("tf_${registrationField.name}")
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
+            modifier = Modifier.testTag("txt_${registrationField.name}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor
@@ -383,7 +391,9 @@ fun SelectableRegisterField(
             }
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_${registrationField.name}_label")
+                .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -404,12 +414,14 @@ fun SelectableRegisterField(
             textStyle = MaterialTheme.appTypography.bodyMedium,
             onValueChange = { },
             modifier = Modifier
+                .testTag("tf_${registrationField.name}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick(registrationField.name, registrationField.options)
                 },
             placeholder = {
                 Text(
+                    modifier = Modifier.testTag("txt_${registrationField.name}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -425,6 +437,7 @@ fun SelectableRegisterField(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
+            modifier = Modifier.testTag("txt_${registrationField.name}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor
@@ -434,6 +447,7 @@ fun SelectableRegisterField(
 
 @Composable
 fun ExpandableText(
+    modifier: Modifier = Modifier,
     isExpanded: Boolean,
     onClick: (Boolean) -> Unit
 ) {
@@ -457,7 +471,7 @@ fun ExpandableText(
     val icon = Icons.Filled.ChevronRight
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .noRippleClickable {
                 onClick(isExpanded)
@@ -522,15 +536,13 @@ fun InputRegistrationFieldPreview() {
 private fun OptionalFieldsPreview() {
     OpenEdXTheme {
         Column(Modifier.background(MaterialTheme.appColors.background)) {
+            val optionalField = field.copy(required = false)
             OptionalFields(
-                fields = listOf(field, field, field),
-                mapFields = SnapshotStateMap(),
+                fields = List(3) { optionalField },
                 showErrorMap = SnapshotStateMap(),
                 selectableNamesMap = SnapshotStateMap(),
-                onSelectClick = { _, _, _ ->
-
-                }
-
+                onSelectClick = { _, _, _ -> },
+                onFieldUpdated = { _, _ -> }
             )
         }
     }
@@ -544,12 +556,10 @@ private fun RequiredFieldsPreview() {
         Column(Modifier.background(MaterialTheme.appColors.background)) {
             RequiredFields(
                 fields = listOf(field, field, field),
-                mapFields = SnapshotStateMap(),
                 showErrorMap = SnapshotStateMap(),
                 selectableNamesMap = SnapshotStateMap(),
-                onSelectClick = { _, _, _ ->
-
-                }
+                onSelectClick = { _, _, _ -> },
+                onFieldUpdated = { _, _ -> }
             )
         }
     }

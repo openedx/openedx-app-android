@@ -3,18 +3,22 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
-    id "com.google.firebase.crashlytics"
+    id 'com.google.firebase.crashlytics'
 }
+
+def config = configHelper.fetchConfig()
+def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
+def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
 
 android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.openedx.app"
+        applicationId appId
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
         resourceConfigurations += ["en", "uk"]
 
@@ -36,10 +40,26 @@ android {
         }
     }
 
+    sourceSets {
+        prod {
+            res.srcDirs = ["src/$platformName/res"]
+        }
+        develop {
+            res.srcDirs = ["src/$platformName/res"]
+        }
+        stage {
+            res.srcDirs = ["src/$platformName/res"]
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
         }
     }
     compileOptions {
@@ -80,6 +100,7 @@ dependencies {
     implementation project(path: ':discovery')
     implementation project(path: ':profile')
     implementation project(path: ':discussion')
+    implementation project(path: ':whatsnew')
 
     kapt "androidx.room:room-compiler:$room_version"
 

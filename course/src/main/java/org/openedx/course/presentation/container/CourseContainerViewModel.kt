@@ -3,22 +3,26 @@ package org.openedx.course.presentation.container
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
-import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.config.Config
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.launch
+import java.util.Date
 
 class CourseContainerViewModel(
     val courseId: String,
+    var courseName: String,
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
@@ -26,8 +30,10 @@ class CourseContainerViewModel(
     private val analytics: CourseAnalytics
 ) : BaseViewModel() {
 
-    private val _dataReady = MutableLiveData<CoursewareAccess>()
-    val dataReady: LiveData<CoursewareAccess>
+    val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
+
+    private val _dataReady = MutableLiveData<Boolean?>()
+    val dataReady: LiveData<Boolean?>
         get() = _dataReady
 
     private val _errorMessage = SingleEventLiveData<String>()
@@ -38,7 +44,19 @@ class CourseContainerViewModel(
     val showProgress: LiveData<Boolean>
         get() = _showProgress
 
-    private var courseName = ""
+    private var _isSelfPaced: Boolean = true
+    val isSelfPaced: Boolean
+        get() = _isSelfPaced
+
+    init {
+        viewModelScope.launch {
+            notifier.notifier.collect { event ->
+                if (event is CourseCompletionSet) {
+                    updateData(false)
+                }
+            }
+        }
+    }
 
     fun preloadCourseStructure() {
         if (_dataReady.value != null) {
@@ -55,7 +73,10 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
-                _dataReady.value = courseStructure.coursewareAccess
+                _isSelfPaced = courseStructure.isSelfPaced
+                _dataReady.value = courseStructure.start?.let { start ->
+                    start < Date()
+                }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
                     _errorMessage.value =
@@ -88,20 +109,33 @@ class CourseContainerViewModel(
         }
     }
 
-    fun courseTabClickedEvent() {
+    fun courseContainerTabClickedEvent(tab: CourseContainerTab) {
+        when (tab) {
+            CourseContainerTab.COURSE -> courseTabClickedEvent()
+            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
+            CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
+            CourseContainerTab.DATES -> datesTabClickedEvent()
+            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
+        }
+    }
+
+    private fun courseTabClickedEvent() {
         analytics.courseTabClickedEvent(courseId, courseName)
     }
 
-    fun videoTabClickedEvent() {
+    private fun videoTabClickedEvent() {
         analytics.videoTabClickedEvent(courseId, courseName)
     }
 
-    fun discussionTabClickedEvent() {
+    private fun discussionTabClickedEvent() {
         analytics.discussionTabClickedEvent(courseId, courseName)
     }
 
-    fun handoutsTabClickedEvent() {
-        analytics.handoutsTabClickedEvent(courseId, courseName)
+    private fun datesTabClickedEvent() {
+        analytics.datesTabClickedEvent(courseId, courseName)
     }
 
+    private fun handoutsTabClickedEvent() {
+        analytics.handoutsTabClickedEvent(courseId, courseName)
+    }
 }

@@ -4,13 +4,18 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.extension.getSequentialBlocks
+import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
@@ -21,11 +26,11 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.launch
 import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
+    private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
@@ -35,6 +40,12 @@ class CourseOutlineViewModel(
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+
+    val apiHostUrl get() = config.getApiHostURL()
+
+    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
+
+    val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
 
     private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: LiveData<CourseOutlineUIState>
@@ -58,6 +69,10 @@ class CourseOutlineViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
+    private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
+    val courseSubSectionUnit = mutableMapOf<String, Block?>()
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -77,7 +92,11 @@ class CourseOutlineViewModel(
                     _uiState.value = CourseOutlineUIState.CourseData(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
-                        resumeBlock = state.resumeBlock
+                        resumeComponent = state.resumeComponent,
+                        courseSubSections = courseSubSections,
+                        courseSectionsState = state.courseSectionsState,
+                        subSectionsDownloadsCount = subSectionsDownloadsCount,
+                        datesBannerInfo = state.datesBannerInfo,
                     )
                 }
             }
@@ -110,9 +129,32 @@ class CourseOutlineViewModel(
         getCourseDataInternal()
     }
 
-    fun getCourseData() {
+    private fun getCourseData() {
         _uiState.value = CourseOutlineUIState.Loading
         getCourseDataInternal()
+    }
+
+    fun switchCourseSections(blockId: String): Boolean {
+        return if (_uiState.value is CourseOutlineUIState.CourseData) {
+            val state = _uiState.value as CourseOutlineUIState.CourseData
+            val courseSectionsState = state.courseSectionsState.toMutableMap()
+            courseSectionsState[blockId] = !(state.courseSectionsState[blockId] ?: false)
+
+            _uiState.value = CourseOutlineUIState.CourseData(
+                courseStructure = state.courseStructure,
+                downloadedState = state.downloadedState,
+                resumeComponent = state.resumeComponent,
+                courseSubSections = courseSubSections,
+                courseSectionsState = courseSectionsState,
+                subSectionsDownloadsCount = subSectionsDownloadsCount,
+                datesBannerInfo = state.datesBannerInfo,
+            )
+
+            courseSectionsState[blockId] ?: false
+
+        } else {
+            false
+        }
     }
 
     private fun getCourseDataInternal() {
@@ -126,14 +168,35 @@ class CourseOutlineViewModel(
                 } else {
                     CourseComponentStatus("")
                 }
+
+                val datesBannerInfo = if (networkConnection.isOnline()) {
+                    interactor.getDatesBannerInfo(courseId)
+                } else {
+                    CourseDatesBannerInfo(
+                        missedDeadlines = false,
+                        missedGatedContent = false,
+                        verifiedUpgradeLink = "",
+                        contentTypeGatingEnabled = false,
+                        hasEnded = false
+                    )
+                }
                 setBlocks(blocks)
+                courseSubSections.clear()
+                courseSubSectionUnit.clear()
                 courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
                 initDownloadModelsStatus()
+
+                val courseSectionsState =
+                    (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState.orEmpty()
 
                 _uiState.value = CourseOutlineUIState.CourseData(
                     courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
-                    resumeBlock = getResumeBlock(blocks, courseStatus.lastVisitedBlockId)
+                    resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
+                    courseSubSections = courseSubSections,
+                    courseSectionsState = courseSectionsState,
+                    subSectionsDownloadsCount = subSectionsDownloadsCount,
+                    datesBannerInfo = datesBannerInfo,
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -158,7 +221,17 @@ class CourseOutlineViewModel(
                 resultBlocks.add(block)
                 block.descendants.forEach { descendant ->
                     blocks.find { it.id == descendant }?.let { sequentialBlock ->
-                        resultBlocks.add(sequentialBlock)
+                        if (isCourseNestedListEnabled) {
+                            courseSubSections.getOrPut(block.id) { mutableListOf() }
+                                .add(sequentialBlock)
+                            courseSubSectionUnit[sequentialBlock.id] =
+                                sequentialBlock.getFirstDescendantBlock(blocks)
+                            subSectionsDownloadsCount[sequentialBlock.id] =
+                                sequentialBlock.getDownloadsCount(blocks)
+
+                        } else {
+                            resultBlocks.add(sequentialBlock)
+                        }
                         addDownloadableChildrenForSequentialBlock(sequentialBlock)
                     }
                 }
@@ -172,13 +245,30 @@ class CourseOutlineViewModel(
         continueBlockId: String
     ): Block? {
         val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
-        resumeVerticalBlock = blocks.find {
-            it.descendants.contains(resumeBlock?.id) && it.type == BlockType.VERTICAL
+        resumeVerticalBlock =
+            blocks.getVerticalBlocks().find { it.descendants.contains(resumeBlock?.id) }
+        resumeSectionBlock =
+            blocks.getSequentialBlocks().find { it.descendants.contains(resumeVerticalBlock?.id) }
+        return resumeBlock
+    }
+
+    fun resetCourseDatesBanner(onResetDates: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                interactor.resetCourseDates(courseId = courseId)
+                updateCourseData(false)
+                onResetDates(true)
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                }
+                onResetDates(false)
+            }
         }
-        resumeSectionBlock = blocks.find {
-            it.descendants.contains(resumeVerticalBlock?.id) && it.type == BlockType.SEQUENTIAL
-        }
-        return resumeVerticalBlock
     }
 
     fun resumeCourseTappedEvent(blockId: String) {
@@ -200,4 +290,10 @@ class CourseOutlineViewModel(
         }
     }
 
+    fun verticalClickedEvent(blockId: String, blockName: String) {
+        val currentState = uiState.value
+        if (currentState is CourseOutlineUIState.CourseData) {
+            analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+        }
+    }
 }

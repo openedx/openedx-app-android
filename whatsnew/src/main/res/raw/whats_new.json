@@ -1,0 +1,37 @@
+[
+  {
+    "version": "1.0",
+    "messages": [
+      {
+        "image": "screen_1",
+        "title": "Improved language support",
+        "message": "We have added more translations throughout the app so you can learn on edX your way!"
+      },
+      {
+        "image": "screen_2",
+        "title": "Download videos offline",
+        "message": "Easily download videos without having an internet connection, so you can keep learning when there isn’t a network around"
+      },
+      {
+        "image": "screen_2",
+        "title": "Reduced Network Usage",
+        "message": "Now you can download your content faster to get right into your next lesson!"
+      },
+      {
+        "image": "screen_3",
+        "title": "Learning Site Switching",
+        "message": "Switch more easily between multiple learning sites. Find the new options within account settings and easily manage your accounts"
+      }
+    ]
+  },
+  {
+    "version": "0.9",
+    "messages": [
+      {
+        "image": "screen_1",
+        "title": "Sync to calendar",
+        "message": "Never miss a deadline again—sync course dates to your phone's calendar to receive reminders!"
+      }
+    ]
+  }
+]

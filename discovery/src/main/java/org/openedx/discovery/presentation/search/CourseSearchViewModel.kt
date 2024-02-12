@@ -3,26 +3,33 @@ package org.openedx.discovery.presentation.search
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import org.openedx.core.BaseViewModel
-import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
-import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Course
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.system.ResourceManager
-import org.openedx.discovery.domain.interactor.DiscoveryInteractor
-import org.openedx.discovery.presentation.DiscoveryAnalytics
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.openedx.core.BaseViewModel
+import org.openedx.core.R
+import org.openedx.core.SingleEventLiveData
+import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.Course
+import org.openedx.core.extension.isInternetError
+import org.openedx.core.system.ResourceManager
+import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.presentation.DiscoveryAnalytics
 
 class CourseSearchViewModel(
+    private val config: Config,
+    private val corePreferences: CorePreferences,
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics
 ) : BaseViewModel() {
+
+    val apiHostUrl get() = config.getApiHostURL()
+    val isUserLoggedIn get() = corePreferences.user != null
 
     private val _uiState =
         MutableLiveData<CourseSearchUIState>(CourseSearchUIState.Courses(emptyList(), 0))

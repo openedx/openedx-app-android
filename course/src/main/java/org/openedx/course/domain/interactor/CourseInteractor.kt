@@ -3,17 +3,18 @@ package org.openedx.course.domain.interactor
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseStructure
+import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.course.data.repository.CourseRepository
 
 class CourseInteractor(
     private val repository: CourseRepository
-) {
+) : EnrollInCourseInteractor {
 
     suspend fun getCourseDetails(id: String) = repository.getCourseDetail(id)
 
     suspend fun getCourseDetailsFromCache(id: String) = repository.getCourseDetailFromCache(id)
 
-    suspend fun enrollInACourse(id: String) {
+    override suspend fun enrollInACourse(id: String) {
         repository.enrollInACourse(courseId = id)
     }
 
@@ -70,6 +71,12 @@ class CourseInteractor(
         repository.getEnrolledCourseFromCacheById(courseId)
 
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
+
+    suspend fun getCourseDates(courseId: String) = repository.getCourseDates(courseId)
+
+    suspend fun resetCourseDates(courseId: String) = repository.resetCourseDates(courseId)
+
+    suspend fun getDatesBannerInfo(courseId: String) = repository.getDatesBannerInfo(courseId)
 
     suspend fun getHandouts(courseId: String) = repository.getHandouts(courseId)
 

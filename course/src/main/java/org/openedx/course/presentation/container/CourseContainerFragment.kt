@@ -7,36 +7,38 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayoutMediator
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.container.CourseContainerTab
+import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
 import org.openedx.course.presentation.outline.CourseOutlineFragment
+import org.openedx.course.presentation.ui.CourseToolbar
 import org.openedx.course.presentation.videos.CourseVideosFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
+import org.openedx.course.presentation.container.CourseContainerTab as Tabs
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private val binding by viewBinding(FragmentCourseContainerBinding::bind)
     private val viewModel by viewModel<CourseContainerViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_TITLE, "")
+        )
     }
     private val router by inject<CourseRouter>()
 
-
     private var adapter: CourseContainerAdapter? = null
-
-    private var courseTitle = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        with(requireArguments()) {
-            courseTitle = getString(ARG_TITLE, "")
-        }
         viewModel.preloadCourseStructure()
     }
 
@@ -44,33 +46,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setupToolbar(viewModel.courseName)
         observe()
-
-        binding.bottomNavView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.outline -> {
-                    viewModel.courseTabClickedEvent()
-                    binding.viewPager.setCurrentItem(0, false)
-                }
-
-                R.id.videos -> {
-                    viewModel.videoTabClickedEvent()
-                    binding.viewPager.setCurrentItem(1, false)
-                }
-
-                R.id.discussions -> {
-                    viewModel.discussionTabClickedEvent()
-                    binding.viewPager.setCurrentItem(2, false)
-                }
-
-                R.id.resources -> {
-                    viewModel.handoutsTabClickedEvent()
-                    binding.viewPager.setCurrentItem(3, false)
-                }
-            }
-            true
-        }
     }
 
     override fun onDestroyView() {
@@ -79,20 +56,15 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun observe() {
-        viewModel.dataReady.observe(viewLifecycleOwner) { coursewareAccess ->
-            if (coursewareAccess != null) {
-                if (coursewareAccess.hasAccess) {
-                    binding.viewPager.isVisible = true
-                    binding.bottomNavView.isVisible = true
-                    initViewPager()
-                } else {
-                    router.navigateToNoAccess(
-                        requireActivity().supportFragmentManager,
-                        courseTitle,
-                        coursewareAccess,
-                        null
-                    )
-                }
+        viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
+            if (isReady == true) {
+                setupToolbar(viewModel.courseName)
+                initViewPager()
+            } else {
+                router.navigateToNoAccess(
+                    requireActivity().supportFragmentManager,
+                    viewModel.courseName
+                )
             }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) {
@@ -108,21 +80,81 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 
-    private fun initViewPager() {
-        binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        binding.viewPager.offscreenPageLimit = 4
-        adapter = CourseContainerAdapter(this).apply {
-            addFragment(CourseOutlineFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(CourseVideosFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(DiscussionTopicsFragment.newInstance(viewModel.courseId, courseTitle))
-            addFragment(HandoutsFragment.newInstance(viewModel.courseId))
+    private fun setupToolbar(courseName: String) {
+        binding.toolbar.setContent {
+            CourseToolbar(
+                title = courseName,
+                onBackClick = {
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+            )
         }
+    }
+
+    private fun initViewPager() {
+        binding.viewPager.isVisible = true
+        binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+        adapter = CourseContainerAdapter(this).apply {
+            addFragment(
+                Tabs.COURSE,
+                CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                Tabs.VIDEOS,
+                CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                Tabs.DISCUSSION,
+                DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName)
+            )
+            addFragment(
+                Tabs.DATES,
+                CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced)
+            )
+            addFragment(
+                Tabs.HANDOUTS,
+                HandoutsFragment.newInstance(viewModel.courseId)
+            )
+        }
+        binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
         binding.viewPager.adapter = adapter
-        binding.viewPager.isUserInputEnabled = false
+
+        if (viewModel.isCourseTopTabBarEnabled) {
+            TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+                tab.text = getString(
+                    Tabs.values().find { it.ordinal == position }?.titleResId
+                        ?: R.string.course_navigation_course
+                )
+            }.attach()
+            binding.tabLayout.isVisible = true
+
+        } else {
+            binding.viewPager.isUserInputEnabled = false
+            binding.bottomNavView.setOnItemSelectedListener { menuItem ->
+                Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                    viewModel.courseContainerTabClickedEvent(tab)
+                    binding.viewPager.setCurrentItem(tab.ordinal, false)
+                }
+                true
+            }
+            binding.bottomNavView.isVisible = true
+        }
     }
 
     fun updateCourseStructure(withSwipeRefresh: Boolean) {
         viewModel.updateData(withSwipeRefresh)
+    }
+
+    fun updateCourseDates() {
+        adapter?.getFragment(Tabs.DATES)?.let {
+            (it as CourseDatesFragment).updateData()
+        }
+    }
+
+    fun navigateToTab(tab: CourseContainerTab) {
+        adapter?.getFragment(tab)?.let {
+            binding.viewPager.setCurrentItem(tab.ordinal, true)
+        }
     }
 
     companion object {

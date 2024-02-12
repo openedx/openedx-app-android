@@ -19,7 +19,6 @@
     <string name="course_navigation_next">Далі</string>
     <string name="course_navigation_next_unit">Наступна одиниця</string>
     <string name="course_navigation_finish">Завершити</string>
-    <string name="course_video_rotate_for_fullscreen">Поверніть свій пристрій для перегляду цього відео на повний екран.</string>
     <string name="course_does_not_include_videos">Цей курс не містить відео.</string>
     <string name="course_resume_unit_title">Остання одиниця:</string>
     <string name="course_resume_unit_btn">Продовжити</string>
@@ -34,7 +33,6 @@
     <string name="course_back_to_outline">Повернутись до модуля</string>
     <string name="course_you_cant_enroll">Ви не можете записатися на цей курс, оскільки термін запису вже минув.</string>
     <string name="course_not_started">Цей курс ще не розпочався.</string>
-    <string name="course_access_expired">Ваш доступ до цього курсу закінчився.</string>
     <string name="course_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
     <string name="course_navigation_course">Курс</string>
     <string name="course_navigation_video">Відео</string>
@@ -46,6 +44,16 @@
     <string name="course_open_in_browser">Відкрити в браузері</string>
     <string name="course_subtitles">Субтитри</string>
     <string name="course_continue_with">Остання активність:</string>
-    <string name="course_continue">Продовжити</string>
+    <string name="course_resume">Продовжити</string>
     <string name="course_to_proceed">Щоб перейти до \"%s\", натисніть \"Наступний розділ\".</string>
+
+    <!-- Accessibility -->
+    <string name="course_accessibility_header_image_for">Заглавне зображення для курсу %1$s</string>
+    <string name="course_accessibility_play_video">Відтворити відео</string>
+    <string name="course_accessibility_video_player">Відеоплеєр</string>
+    <string name="course_accessibility_remove_course_section">Видалити секцію курсу</string>
+    <string name="course_accessibility_download_course_section">Завантажити секцію курсу</string>
+    <string name="course_accessibility_stop_downloading_course_section">Зупинити завантаження секції курсу</string>
+    <string name="course_accessibility_section_completed">Секція завершена</string>
+    <string name="course_accessibility_section_uncompleted">Секція не завершена</string>
 </resources>

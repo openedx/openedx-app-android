@@ -2,7 +2,6 @@ package org.openedx.course.presentation.unit.container
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import org.openedx.core.BlockType
 import org.openedx.core.FragmentViewType
 import org.openedx.core.domain.model.Block
 import org.openedx.course.presentation.unit.NotSupportedUnitFragment
@@ -14,8 +13,8 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
 
 class CourseUnitContainerAdapter(
     fragment: Fragment,
+    val blocks: List<Block>,
     private val viewModel: CourseUnitContainerViewModel,
-    private var blocks: List<Block>
 ) : FragmentStateAdapter(fragment) {
 
     override fun getItemCount(): Int = blocks.size
@@ -23,19 +22,9 @@ class CourseUnitContainerAdapter(
     override fun createFragment(position: Int): Fragment = unitBlockFragment(blocks[position])
 
     private fun unitBlockFragment(block: Block): Fragment {
-        return when (block.type) {
-            BlockType.HTML,
-            BlockType.PROBLEM,
-            BlockType.OPENASSESSMENT,
-            BlockType.DRAG_AND_DROP_V2,
-            BlockType.WORD_CLOUD,
-            BlockType.LTI_CONSUMER,
-            -> {
-                HtmlUnitFragment.newInstance(block.id, block.studentViewUrl)
-            }
-
-            BlockType.VIDEO -> {
-                val encodedVideos = block.studentViewData!!.encodedVideos!!
+        return when {
+            (block.isVideoBlock && block.studentViewData?.encodedVideos != null) -> {
+                val encodedVideos = block.studentViewData?.encodedVideos!!
                 val transcripts = block.studentViewData!!.transcripts
                 with(encodedVideos) {
                     var isDownloaded = false
@@ -76,7 +65,7 @@ class CourseUnitContainerAdapter(
                 }
             }
 
-            BlockType.DISCUSSION -> {
+            (block.isDiscussionBlock && block.studentViewData?.topicId.isNullOrEmpty().not()) -> {
                 DiscussionThreadsFragment.newInstance(
                     DiscussionTopicsFragment.TOPIC,
                     viewModel.courseId,
@@ -85,6 +74,23 @@ class CourseUnitContainerAdapter(
                     FragmentViewType.MAIN_CONTENT.name,
                     block.id
                 )
+            }
+
+            block.studentViewMultiDevice.not() -> {
+                NotSupportedUnitFragment.newInstance(
+                    block.id,
+                    block.lmsWebUrl
+                )
+            }
+
+            block.isHTMLBlock ||
+                    block.isProblemBlock ||
+                    block.isOpenAssessmentBlock ||
+                    block.isDragAndDropBlock ||
+                    block.isWordCloudBlock ||
+                    block.isLTIConsumerBlock ||
+                    block.isSurveyBlock -> {
+                HtmlUnitFragment.newInstance(block.id, block.studentViewUrl)
             }
 
             else -> {

@@ -1,24 +1,25 @@
 package org.openedx.core.data.api
 
-import org.openedx.core.data.model.*
 import okhttp3.ResponseBody
+import org.openedx.core.data.model.*
 import retrofit2.http.*
 
 interface CourseApi {
 
-    @GET("/mobile_api_extensions/v1/users/{username}/course_enrollments")
+    @GET("/api/mobile/v3/users/{username}/course_enrollments/")
     suspend fun getEnrolledCourses(
         @Header("Cache-Control") cacheControlHeaderParam: String? = null,
         @Path("username") username: String,
         @Query("org") org: String? = null,
         @Query("page") page: Int
-    ): DashboardCourseList
+    ): CourseEnrollments
 
-    @GET("/mobile_api_extensions/courses/v1/courses/")
+    @GET("/api/courses/v1/courses/")
     suspend fun getCourseList(
         @Query("search_term") searchQuery: String? = null,
         @Query("page") page: Int,
         @Query("mobile") mobile: Boolean,
+        @Query("mobile_search") mobileSearch: Boolean,
         @Query("username") username: String? = null,
         @Query("org") org: String? = null,
         @Query("permissions") permission: List<String> = listOf(
@@ -28,15 +29,14 @@ interface CourseApi {
         )
     ): CourseList
 
-    @GET("/mobile_api_extensions/v1/courses/{course_id}")
+    @GET("/api/courses/v1/courses/{course_id}")
     suspend fun getCourseDetail(
         @Path("course_id") courseId: String?,
-        @Query("username") username: String? = null,
-        @Query("is_enrolled") isEnrolled: Boolean = true,
+        @Query("username") username: String? = null
     ): CourseDetails
 
     @GET(
-        "/mobile_api_extensions/{api_version}/blocks/?" +
+        "/api/mobile/{api_version}/course_info/blocks/?" +
                 "depth=all&" +
                 "requested_fields=contains_gated_content,show_gated_sections,special_exam_info,graded,format,student_view_multi_device,due,completion&" +
                 "student_view_data=video,discussion&" +
@@ -64,6 +64,15 @@ interface CourseApi {
         @Body
         blocksCompletionBody: BlocksCompletionBody
     )
+
+    @GET("/api/course_home/v1/dates/{course_id}")
+    suspend fun getCourseDates(@Path("course_id") courseId: String): CourseDates
+
+    @POST("/api/course_experience/v1/reset_course_deadlines")
+    suspend fun resetCourseDates(@Body courseBody: Map<String, String>): ResetCourseDates
+
+    @GET("/api/course_experience/v1/course_deadlines_info/{course_id}")
+    suspend fun getDatesBannerInfo(@Path("course_id") courseId: String): CourseDatesBannerInfo
 
     @GET("/api/mobile/v1/course_info/{course_id}/handouts")
     suspend fun getHandouts(@Path("course_id") courseId: String): HandoutsModel

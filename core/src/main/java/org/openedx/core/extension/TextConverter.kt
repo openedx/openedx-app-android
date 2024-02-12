@@ -2,13 +2,17 @@ package org.openedx.core.extension
 
 import android.os.Parcelable
 import android.util.Patterns
-import org.openedx.core.BuildConfig
 import kotlinx.parcelize.Parcelize
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.openedx.core.config.Config
 
-object TextConverter {
+object TextConverter : KoinComponent {
+
+    private val config by inject<Config>()
 
     fun htmlTextToLinkedText(html: String): LinkedText {
         val doc: Document =
@@ -22,8 +26,8 @@ object TextConverter {
             } else {
                 link.attr("href")
             }
-            if (resultLink.isNotEmpty() && isLinkValid(org.openedx.core.BuildConfig.BASE_URL + resultLink)) {
-                linksMap[link.text()] = org.openedx.core.BuildConfig.BASE_URL + resultLink
+            if (resultLink.isNotEmpty() && isLinkValid(config.getApiHostURL() + resultLink)) {
+                linksMap[link.text()] = config.getApiHostURL() + resultLink
             }
         }
         return LinkedText(text, linksMap.toMap())
@@ -47,8 +51,8 @@ object TextConverter {
                     } else {
                         link.attr("href")
                     }
-                if (resultLink.isNotEmpty() && isLinkValid(org.openedx.core.BuildConfig.BASE_URL + resultLink)) {
-                    linksMap[link.text()] = org.openedx.core.BuildConfig.BASE_URL + resultLink
+                if (resultLink.isNotEmpty() && isLinkValid(config.getApiHostURL() + resultLink)) {
+                    linksMap[link.text()] = config.getApiHostURL() + resultLink
                 }
             }
         }

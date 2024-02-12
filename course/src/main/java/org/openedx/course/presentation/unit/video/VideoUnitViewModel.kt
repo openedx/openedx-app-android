@@ -4,21 +4,22 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.openedx.core.AppDataConstants
 import org.openedx.core.BaseViewModel
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSubtitleLanguageChanged
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import subtitleFile.TimedTextObject
 
-class VideoUnitViewModel(
+open class VideoUnitViewModel(
     val courseId: String,
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
@@ -28,10 +29,9 @@ class VideoUnitViewModel(
 
     var videoUrl = ""
     var transcripts = emptyMap<String, String>()
+    var isPlaying = false
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
-
-    var fullscreenHandled = false
 
     var isDownloaded = false
 
@@ -42,10 +42,6 @@ class VideoUnitViewModel(
     private val _isUpdated = MutableLiveData(true)
     val isUpdated: LiveData<Boolean>
         get() = _isUpdated
-
-    private val _isPopUpViewShow = MutableLiveData(true)
-    val isPopUpViewShow: LiveData<Boolean>
-        get() = _isPopUpViewShow
 
     private val _currentIndex = MutableStateFlow(0)
     val currentIndex = _currentIndex.asStateFlow()
@@ -61,13 +57,6 @@ class VideoUnitViewModel(
 
     private var isBlockAlreadyCompleted = false
 
-    init {
-        viewModelScope.launch {
-            delay(4000)
-            _isPopUpViewShow.value = false
-        }
-    }
-
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
@@ -76,6 +65,7 @@ class VideoUnitViewModel(
                     _isUpdated.value = false
                     _currentVideoTime.value = it.videoTime
                     _isUpdated.value = true
+                    isPlaying = it.isPlaying
                 } else if (it is CourseSubtitleLanguageChanged) {
                     transcriptLanguage = it.value
                     _transcriptObject.value = null
@@ -86,9 +76,9 @@ class VideoUnitViewModel(
     }
 
     fun downloadSubtitles() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             transcriptManager.downloadTranscriptsForVideo(getTranscriptUrl())?.let { result ->
-                _transcriptObject.value = result
+                _transcriptObject.postValue(result)
                 timeList = result.captions.values.toList()
                     .map { it.start.mseconds.toLong() }
             }
@@ -117,6 +107,7 @@ class VideoUnitViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false
                 }

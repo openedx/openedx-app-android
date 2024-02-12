@@ -1,6 +1,6 @@
 package org.openedx.core.domain.model
 
-import java.util.*
+import java.util.Date
 
 data class CourseStructure(
     val root: String,
@@ -13,7 +13,7 @@ data class CourseStructure(
     val startDisplay: String,
     val startType: String,
     val end: Date?,
-    val coursewareAccess: CoursewareAccess,
+    val coursewareAccess: CoursewareAccess?,
     val media: Media?,
     val certificate: Certificate?,
     val isSelfPaced: Boolean

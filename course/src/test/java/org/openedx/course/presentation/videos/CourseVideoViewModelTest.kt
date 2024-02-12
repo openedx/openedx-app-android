@@ -4,7 +4,20 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import io.mockk.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestRule
 import org.openedx.core.BlockType
+import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -18,18 +31,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TestRule
-import org.openedx.core.data.storage.CorePreferences
+import org.openedx.course.presentation.CourseAnalytics
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,9 +41,11 @@ class CourseVideoViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
+    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val notifier = spyk<CourseNotifier>()
+    private val analytics = mockk<CourseAnalytics>()
     private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
     private val downloadDao = mockk<DownloadDao>()
@@ -63,6 +67,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -78,6 +83,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         ),
         Block(
@@ -93,6 +99,7 @@ class CourseVideoViewModelTest {
             studentViewMultiDevice = false,
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
+            descendantsType = BlockType.HTML,
             completion = 0.0
         )
     )
@@ -130,6 +137,7 @@ class CourseVideoViewModelTest {
         every { resourceManager.getString(R.string.course_does_not_include_videos) } returns ""
         every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
         Dispatchers.setMain(dispatcher)
+        every { config.getApiHostURL() } returns "http://localhost:8000"
     }
 
     @After
@@ -139,16 +147,19 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos empty list`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure.copy(blockData = emptyList())
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
 
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -163,15 +174,18 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos success`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -187,6 +201,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("", false)) }
         every { downloadDao.readAllData() } returns flow {
@@ -197,11 +212,13 @@ class CourseVideoViewModelTest {
         }
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -221,13 +238,16 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `setIsUpdating success`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -241,13 +261,16 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -265,13 +288,16 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )
@@ -289,13 +315,16 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without conection`() = runTest {
+        every { config.isCourseNestedListEnabled() } returns false
         val viewModel = CourseVideoViewModel(
             "",
+            config,
             interactor,
             resourceManager,
             networkConnection,
             preferencesManager,
             notifier,
+            analytics,
             downloadDao,
             workerController
         )

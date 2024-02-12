@@ -2,13 +2,25 @@ package org.openedx.dashboard.presentation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertAny
+import androidx.compose.ui.test.hasAnyChild
+import androidx.compose.ui.test.hasProgressBarRangeInfo
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import org.openedx.core.domain.model.*
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
+import androidx.compose.ui.test.onChildren
 import org.junit.Rule
 import org.junit.Test
+import org.openedx.core.AppUpdateState
+import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.dashboard.presentation.dashboard.DashboardUIState
+import org.openedx.dashboard.presentation.dashboard.MyCoursesScreen
 import java.util.Date
 
 class MyCoursesScreenTest {
@@ -60,15 +72,17 @@ class MyCoursesScreenTest {
         composeTestRule.setContent {
             MyCoursesScreen(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-                DashboardUIState.Loading,
-                null,
+                apiHostUrl = "http://localhost:8000",
+                state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
+                uiMessage = null,
                 refreshing = false,
                 canLoadMore = false,
                 hasInternetConnection = true,
                 onReloadClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
-                onItemClick = {}
+                onItemClick = {},
+                appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             )
         }
 
@@ -90,15 +104,17 @@ class MyCoursesScreenTest {
         composeTestRule.setContent {
             MyCoursesScreen(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-                DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
-                null,
+                apiHostUrl = "http://localhost:8000",
+                state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
+                uiMessage = null,
                 refreshing = false,
                 canLoadMore = false,
                 hasInternetConnection = true,
                 onReloadClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
-                onItemClick = {}
+                onItemClick = {},
+                appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             )
         }
 
@@ -113,15 +129,17 @@ class MyCoursesScreenTest {
         composeTestRule.setContent {
             MyCoursesScreen(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-                DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
-                null,
+                apiHostUrl = "http://localhost:8000",
+                state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
+                uiMessage = null,
                 refreshing = true,
                 canLoadMore = false,
                 hasInternetConnection = true,
                 onReloadClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
-                onItemClick = {}
+                onItemClick = {},
+                appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             )
         }
 

@@ -3,12 +3,15 @@ package org.openedx.core.module
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.flow.first
+import org.koin.java.KoinJavaComponent.inject
 import org.openedx.core.R
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
@@ -16,9 +19,6 @@ import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.download.CurrentProgress
 import org.openedx.core.module.download.FileDownloader
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
-import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
 class DownloadWorker(
@@ -60,15 +60,20 @@ class DownloadWorker(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createChannel()
         }
+        val serviceType =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC else 0
+
         return ForegroundInfo(
             NOTIFICATION_ID,
             notificationBuilder
-                .setSmallIcon(R.drawable.core_ic_check)
+                .setSmallIcon(R.drawable.core_ic_check_in_box)
                 .setProgress(100, 0, false)
                 .setPriority(NotificationManager.IMPORTANCE_LOW)
                 .setContentText(context.getString(R.string.core_downloading_in_progress))
                 .setContentTitle("")
-                .build()
+                .build(),
+            serviceType
         )
     }
 
@@ -80,7 +85,7 @@ class DownloadWorker(
                         notificationManager.notify(
                             NOTIFICATION_ID,
                             notificationBuilder
-                                .setSmallIcon(R.drawable.core_ic_check)
+                                .setSmallIcon(R.drawable.core_ic_check_in_box)
                                 .setProgress(100, value.toInt(), false)
                                 .setPriority(NotificationManager.IMPORTANCE_LOW)
                                 .setContentText(context.getString(R.string.core_downloading_in_progress))

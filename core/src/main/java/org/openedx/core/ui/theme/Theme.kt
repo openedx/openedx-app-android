@@ -9,90 +9,127 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = AppColors(
     material = darkColors(
-        primary = Color(0xFF5478F9),
-        primaryVariant = Color(0xFF3700B3),
-        secondary = Color(0xFF03DAC6),
-        secondaryVariant = Color(0xFF373E4F),
-        background = Color(0xFF19212F),
-        surface = Color(0xFF273346),
-        error = Color(0xFFFF3D71),
-        onPrimary = Color.Black,
-        onSecondary = Color.Black,
-        onBackground = Color.White,
-        onSurface = Color.White,
-        onError = Color.Black
+        primary = dark_primary,
+        primaryVariant = dark_primary_variant,
+        secondary = dark_secondary,
+        secondaryVariant = dark_secondary_variant,
+        background = dark_background,
+        surface = dark_surface,
+        error = dark_error,
+        onPrimary = dark_onPrimary,
+        onSecondary = dark_onSecondary,
+        onBackground = dark_onBackground,
+        onSurface = dark_onSurface,
+        onError = dark_onError
     ),
-    textPrimary = Color.White,
-    textPrimaryVariant = Color(0xFF79889F),
-    textSecondary = Color(0xFFB3B3B3),
-    textDark = Color(0xFF19212F),
-    textAccent = Color(0xFF5478F9),
+    textPrimary = dark_text_primary,
+    textPrimaryVariant = dark_text_primary_variant,
+    textSecondary = dark_text_secondary,
+    textDark = dark_text_dark,
+    textAccent = dark_text_accent,
 
-    textFieldBackground = Color(0xFF273346),
-    textFieldBackgroundVariant = Color(0xFF273346),
-    textFieldBorder = Color(0xFF4E5A70),
-    textFieldText = Color.White,
-    textFieldHint = Color(0xFF79889F),
+    textFieldBackground = dark_text_field_background,
+    textFieldBackgroundVariant = dark_text_field_background_variant,
+    textFieldBorder = dark_text_field_border,
+    textFieldText = dark_text_field_text,
+    textFieldHint = dark_text_field_hint,
 
-    buttonBackground = Color(0xFF5478F9),
-    buttonSecondaryBackground = Color(0xFF79889F),
-    buttonText = Color.White,
+    buttonBackground = dark_button_background,
+    buttonSecondaryBackground = dark_button_secondary_background,
+    buttonText = dark_button_text,
 
-    cardViewBackground = Color(0xFF273346),
-    cardViewBorder = Color(0xFF4E5A70),
-    divider = Color(0xFF4E5A70),
+    cardViewBackground = dark_card_view_background,
+    cardViewBorder = dark_card_view_border,
+    divider = dark_divider,
 
-    certificateForeground = Color(0xD92EB865),
-    bottomSheetToggle = Color(0xFF4E5A70),
+    certificateForeground = dark_certificate_foreground,
+    bottomSheetToggle = dark_bottom_sheet_toggle,
 
-    warning = Color(0xFFFFC248),
-    info = Color(0xFF0095FF)
+    warning = dark_warning,
+    info = dark_info,
+
+    rateStars = dark_rate_stars,
+    inactiveButtonBackground = dark_inactive_button_background,
+    inactiveButtonText = dark_button_text,
+
+    accessGreen = dark_access_green,
+
+    datesSectionBarPastDue = dark_dates_section_bar_past_due,
+    datesSectionBarToday = dark_dates_section_bar_today,
+    datesSectionBarThisWeek = dark_dates_section_bar_this_week,
+    datesSectionBarNextWeek = dark_dates_section_bar_next_week,
+    datesSectionBarUpcoming = dark_dates_section_bar_upcoming,
+
+    authFacebookButtonBackground = dark_auth_facebook_button_background,
+    authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
+
+    componentHorizontalProgressCompleted = dark_component_horizontal_progress_completed,
+    componentHorizontalProgressSelected = dark_component_horizontal_progress_selected,
+    componentHorizontalProgressDefault = dark_component_horizontal_progress_default,
 )
 
 private val LightColorPalette = AppColors(
     material = lightColors(
-        primary = Color(0xFF3C68FF),
-        primaryVariant = Color(0x9ADEFAFF),
-        secondary = Color(0xFF94D3DD),
-        secondaryVariant = Color(0xFF94D3DD),
-        background = Color.White,
-        surface = Color(0xFFF7F7F8),
-        error = Color(0xFFFF3D71),
-        onPrimary = Color.White,
-        onSecondary = Color.Black,
-        onBackground = Color.Black,
-        onSurface = Color.Black,
-        onError = Color.White
+        primary = light_primary,
+        primaryVariant = light_primary_variant,
+        secondary = light_secondary,
+        secondaryVariant = light_secondary_variant,
+        background = light_background,
+        surface = light_surface,
+        error = light_error,
+        onPrimary = light_onPrimary,
+        onSecondary = light_onSecondary,
+        onBackground = light_onBackground,
+        onSurface = light_onSurface,
+        onError = light_onError
     ),
-    textPrimary = Color(0xFF212121),
-    textPrimaryVariant = Color(0xFF3D4964),
-    textSecondary = Color(0xFFB3B3B3),
-    textDark = Color(0xFF19212F),
-    textAccent = Color(0xFF3C68FF),
+    textPrimary = light_text_primary,
+    textPrimaryVariant = light_text_primary_variant,
+    textSecondary = light_text_secondary,
+    textDark = light_text_dark,
+    textAccent = light_text_accent,
 
-    textFieldBackground = Color(0xFFF7F7F8),
-    textFieldBackgroundVariant = Color.White,
-    textFieldBorder = Color(0xFF97A5BB),
-    textFieldText = Color(0xFF3D4964),
-    textFieldHint = Color(0xFF97A5BB),
+    textFieldBackground = light_text_field_background,
+    textFieldBackgroundVariant = light_text_field_background_variant,
+    textFieldBorder = light_text_field_border,
+    textFieldText = light_text_field_text,
+    textFieldHint = light_text_field_hint,
 
-    buttonBackground = Color(0xFF3C68FF),
-    buttonSecondaryBackground = Color(0xFF79889F),
-    buttonText = Color.White,
+    buttonBackground = light_button_background,
+    buttonSecondaryBackground = light_button_secondary_background,
+    buttonText = light_button_text,
 
-    cardViewBackground = Color(0xFFF9FAFB),
-    cardViewBorder = Color(0xFFCCD4E0),
-    divider = Color(0xFFCCD4E0),
+    cardViewBackground = light_card_view_background,
+    cardViewBorder = light_card_view_border,
+    divider = light_divider,
 
-    certificateForeground = Color(0xD94BD191),
-    bottomSheetToggle = Color(0xFF4E5A70),
+    certificateForeground = light_certificate_foreground,
+    bottomSheetToggle = light_bottom_sheet_toggle,
 
-    warning = Color(0xFFFFC94D),
-    info = Color(0xFF42AAFF)
+    warning = light_warning,
+    info = light_info,
+
+    rateStars = light_rate_stars,
+    inactiveButtonBackground = light_inactive_button_background,
+    inactiveButtonText = light_button_text,
+
+    accessGreen = light_access_green,
+
+    datesSectionBarPastDue = light_dates_section_bar_past_due,
+    datesSectionBarToday = light_dates_section_bar_today,
+    datesSectionBarThisWeek = light_dates_section_bar_this_week,
+    datesSectionBarNextWeek = light_dates_section_bar_next_week,
+    datesSectionBarUpcoming = light_dates_section_bar_upcoming,
+
+    authFacebookButtonBackground = light_auth_facebook_button_background,
+    authMicrosoftButtonBackground = light_auth_microsoft_button_background,
+
+    componentHorizontalProgressCompleted = light_component_horizontal_progress_completed,
+    componentHorizontalProgressSelected = light_component_horizontal_progress_selected,
+    componentHorizontalProgressDefault = light_component_horizontal_progress_default,
 )
 
 val MaterialTheme.appColors: AppColors

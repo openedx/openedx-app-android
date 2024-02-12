@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="auth_sign_in">Увійти</string>
     <string name="auth_sign_up">Зареєструватися</string>
-    <string name="auth_register">Зареєструватися</string>
-    <string name="auth_registration">Реєстрація</string>
     <string name="auth_forgot_password">Забули пароль?</string>
     <string name="auth_email">Електронна пошта</string>
     <string name="auth_invalid_email">Неправильна E-mail адреса</string>

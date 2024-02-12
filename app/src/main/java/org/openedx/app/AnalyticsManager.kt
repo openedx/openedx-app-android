@@ -3,25 +3,45 @@ package org.openedx.app
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.google.firebase.analytics.FirebaseAnalytics
+import org.openedx.app.analytics.Analytics
+import org.openedx.app.analytics.FirebaseAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.core.config.Config
 import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.dashboard.presentation.DashboardAnalytics
+import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.profile.presentation.ProfileAnalytics
 
-class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, AppAnalytics,
+class AnalyticsManager(
+    context: Context,
+    config: Config,
+) : DashboardAnalytics, AuthAnalytics, AppAnalytics,
     DiscoveryAnalytics, ProfileAnalytics, CourseAnalytics, DiscussionAnalytics {
 
-    private val analytics = FirebaseAnalytics.getInstance(context)
+    private val services: ArrayList<Analytics> = arrayListOf()
+
+    init {
+        // Initialise all the analytics libraries here
+        if (config.getFirebaseConfig().projectId.isNotEmpty()) {
+            addAnalyticsTracker(FirebaseAnalytics(context = context))
+        }
+    }
+
+    private fun addAnalyticsTracker(analytic: Analytics) {
+        services.add(analytic)
+    }
 
     private fun logEvent(event: Event, params: Bundle = bundleOf()) {
-        analytics.logEvent(event.eventName, params)
+        services.forEach { analytics ->
+            analytics.logEvent(event.eventName, params)
+        }
     }
 
     private fun setUserId(userId: Long) {
-        analytics.setUserId(userId.toString())
+        services.forEach { analytics ->
+            analytics.logUserId(userId)
+        }
     }
 
     override fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
@@ -143,8 +163,20 @@ class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, Ap
         logEvent(Event.PRIVACY_POLICY_CLICKED)
     }
 
+    override fun termsOfUseClickedEvent() {
+        logEvent(Event.TERMS_OF_USE_CLICKED)
+    }
+
     override fun cookiePolicyClickedEvent() {
         logEvent(Event.COOKIE_POLICY_CLICKED)
+    }
+
+    override fun dataSellClickedEvent() {
+        logEvent(Event.DATE_SELL_CLICKED)
+    }
+
+    override fun faqClickedEvent() {
+        logEvent(Event.FAQ_CLICKED)
     }
 
     override fun emailSupportClickedEvent() {
@@ -320,6 +352,15 @@ class AnalyticsManager(context: Context) : DashboardAnalytics, AuthAnalytics, Ap
         )
     }
 
+    override fun datesTabClickedEvent(courseId: String, courseName: String) {
+        logEvent(
+            Event.DATES_TAB_CLICKED, bundleOf(
+                Key.COURSE_ID.keyName to courseId,
+                Key.COURSE_NAME.keyName to courseName
+            )
+        )
+    }
+
     override fun handoutsTabClickedEvent(courseId: String, courseName: String) {
         logEvent(
             Event.HANDOUTS_TAB_CLICKED, bundleOf(
@@ -386,7 +427,10 @@ private enum class Event(val eventName: String) {
     PROFILE_DELETE_ACCOUNT_CLICKED("Profile_Delete_Account_Clicked"),
     PROFILE_VIDEO_SETTINGS_CLICKED("Profile_Video_settings_Clicked"),
     PRIVACY_POLICY_CLICKED("Privacy_Policy_Clicked"),
+    TERMS_OF_USE_CLICKED("Terms_Of_Use_Clicked"),
     COOKIE_POLICY_CLICKED("Cookie_Policy_Clicked"),
+    DATE_SELL_CLICKED("Data_Sell_Clicked"),
+    FAQ_CLICKED("FAQ_Clicked"),
     EMAIL_SUPPORT_CLICKED("Email_Support_Clicked"),
     COURSE_ENROLL_CLICKED("Course_Enroll_Clicked"),
     COURSE_ENROLL_SUCCESS("Course_Enroll_Success"),
@@ -402,6 +446,7 @@ private enum class Event(val eventName: String) {
     COURSE_TAB_CLICKED("Course_Outline_Course_tab_Clicked"),
     VIDEO_TAB_CLICKED("Course_Outline_Videos_tab_Clicked"),
     DISCUSSION_TAB_CLICKED("Course_Outline_Discussion_tab_Clicked"),
+    DATES_TAB_CLICKED("Course_Outline_Dates_tab_Clicked"),
     HANDOUTS_TAB_CLICKED("Course_Outline_Handouts_tab_Clicked"),
     DISCUSSION_ALL_POSTS_CLICKED("Discussion_All_Posts_Clicked"),
     DISCUSSION_FOLLOWING_CLICKED("Discussion_Following_Clicked"),

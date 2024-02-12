@@ -20,7 +20,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.config.Config
 import java.net.UnknownHostException
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseContainerViewModelTest {
@@ -31,6 +33,7 @@ class CourseContainerViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
     private val resourceManager = mockk<ResourceManager>()
+    private val config = mockk<Config>()
     private val interactor = mockk<CourseInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
     private val notifier = spyk<CourseNotifier>()
@@ -46,7 +49,7 @@ class CourseContainerViewModelTest {
         name = "Course name",
         number = "",
         org = "Org",
-        start = null,
+        start = Date(0),
         startDisplay = "",
         startType = "",
         end = null,
@@ -79,6 +82,8 @@ class CourseContainerViewModelTest {
     fun `preloadCourseStructure internet connection exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -102,6 +107,8 @@ class CourseContainerViewModelTest {
     fun `preloadCourseStructure unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -125,6 +132,8 @@ class CourseContainerViewModelTest {
     fun `preloadCourseStructure success with internet`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -148,6 +157,8 @@ class CourseContainerViewModelTest {
     fun `preloadCourseStructure success without internet`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -172,6 +183,8 @@ class CourseContainerViewModelTest {
     fun `updateData no internet connection exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -194,6 +207,8 @@ class CourseContainerViewModelTest {
     fun `updateData unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,
@@ -216,6 +231,8 @@ class CourseContainerViewModelTest {
     fun `updateData success`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
+            "",
+            config,
             interactor,
             resourceManager,
             notifier,

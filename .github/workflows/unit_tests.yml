@@ -36,7 +36,8 @@ jobs:
         uses: gradle/gradle-build-action@v2.6.1
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
-
+      - name: Generate mock files
+        run: ./gradlew generateMockedRawFile
       - name: Run unit tests
         run: ./gradlew testProdReleaseUnitTest $CI_GRADLE_ARG_PROPERTIES
 

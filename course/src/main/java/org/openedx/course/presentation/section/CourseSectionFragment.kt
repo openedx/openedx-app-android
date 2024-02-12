@@ -5,45 +5,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -53,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
@@ -60,23 +40,14 @@ import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.extension.serializable
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.BackBtn
-import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
-import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.statusBarsInset
+import org.openedx.core.ui.*
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
 import java.io.File
 
 class CourseSectionFragment : Fragment() {
@@ -86,15 +57,12 @@ class CourseSectionFragment : Fragment() {
     }
     private val router by inject<CourseRouter>()
 
-    private var title = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
-        val blockId = requireArguments().getString(ARG_BLOCK_ID, "")
-        viewModel.mode = requireArguments().serializable<CourseViewMode>(ARG_MODE)!!
-        title = requireArguments().getString(ARG_TITLE, "")
-        viewModel.getBlocks(blockId, viewModel.mode)
+        val subSectionId = requireArguments().getString(ARG_SUBSECTION_ID, "")
+        viewModel.mode = requireArguments().serializable(ARG_MODE)!!
+        viewModel.getBlocks(subSectionId, viewModel.mode)
     }
 
     override fun onCreateView(
@@ -112,7 +80,6 @@ class CourseSectionFragment : Fragment() {
                 CourseSectionScreen(
                     windowSize = windowSize,
                     uiState = uiState,
-                    title = title,
                     uiMessage = uiMessage,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
@@ -121,10 +88,9 @@ class CourseSectionFragment : Fragment() {
                         if (block.descendants.isNotEmpty()) {
                             viewModel.verticalClickedEvent(block.blockId, block.displayName)
                             router.navigateToCourseContainer(
-                                requireActivity().supportFragmentManager,
-                                block.id,
+                                fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
-                                courseName = block.displayName,
+                                unitId = block.id,
                                 mode = viewModel.mode
                             )
                         }
@@ -145,26 +111,43 @@ class CourseSectionFragment : Fragment() {
                         }
                     }
                 )
+
+                LaunchedEffect(rememberSaveable { true }) {
+                    val unitId = requireArguments().getString(ARG_UNIT_ID, "")
+                    if (unitId.isNotEmpty()) {
+                        router.navigateToCourseContainer(
+                            fm = requireActivity().supportFragmentManager,
+                            courseId = viewModel.courseId,
+                            unitId = unitId,
+                            componentId = requireArguments().getString(ARG_COMPONENT_ID, ""),
+                            mode = viewModel.mode
+                        )
+                        requireArguments().putString(ARG_UNIT_ID, "")
+                    }
+                }
             }
         }
     }
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_BLOCK_ID = "blockId"
-        private const val ARG_TITLE = "title"
+        private const val ARG_SUBSECTION_ID = "subSectionId"
+        private const val ARG_UNIT_ID = "unitId"
+        private const val ARG_COMPONENT_ID = "componentId"
         private const val ARG_MODE = "mode"
         fun newInstance(
             courseId: String,
-            blockId: String,
-            title: String,
+            subSectionId: String,
+            unitId: String?,
+            componentId: String?,
             mode: CourseViewMode,
         ): CourseSectionFragment {
             val fragment = CourseSectionFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_BLOCK_ID to blockId,
-                ARG_TITLE to title,
+                ARG_SUBSECTION_ID to subSectionId,
+                ARG_UNIT_ID to unitId,
+                ARG_COMPONENT_ID to componentId,
                 ARG_MODE to mode
             )
             return fragment
@@ -176,13 +159,17 @@ class CourseSectionFragment : Fragment() {
 private fun CourseSectionScreen(
     windowSize: WindowSize,
     uiState: CourseSectionUIState,
-    title: String,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
     onItemClick: (Block) -> Unit,
     onDownloadClick: (Block) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
+    val title = when (uiState) {
+        is CourseSectionUIState.Blocks -> uiState.sectionName
+        else -> ""
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -222,6 +209,7 @@ private fun CourseSectionScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .displayCutoutForLandscape()
                         .zIndex(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -288,12 +276,17 @@ private fun CourseSubsectionItem(
     onClick: (Block) -> Unit,
     onDownloadClick: (Block) -> Unit
 ) {
-    val icon =
-        if (block.completion == 1.0) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-            id = getUnitBlockIcon(block)
+    val completedIconPainter =
+        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+            R.drawable.ic_course_chapter_icon
         )
-    val iconColor =
-        if (block.completion == 1.0) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+    val completedIconColor =
+        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+    val completedIconDescription = if (block.isCompleted()) {
+        stringResource(id = R.string.course_accessibility_section_completed)
+    } else {
+        stringResource(id = R.string.course_accessibility_section_uncompleted)
+    }
 
     val iconModifier = Modifier.size(24.dp)
 
@@ -310,9 +303,9 @@ private fun CourseSubsectionItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Icon(
-                painter = icon,
-                contentDescription = null,
-                tint = iconColor
+                painter = completedIconPainter,
+                contentDescription = completedIconDescription,
+                tint = completedIconColor
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
@@ -330,16 +323,22 @@ private fun CourseSubsectionItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val iconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
                         painterResource(id = R.drawable.course_ic_remove_download)
                     } else {
                         painterResource(id = R.drawable.course_ic_start_download)
                     }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
-                            painter = iconPainter,
-                            contentDescription = null,
+                            painter = downloadIconPainter,
+                            contentDescription = downloadIconDescription,
                             tint = MaterialTheme.appColors.textPrimary
                         )
                     }
@@ -358,7 +357,7 @@ private fun CourseSubsectionItem(
                             onClick = { onDownloadClick(block) }) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }
@@ -373,7 +372,7 @@ private fun CourseSubsectionItem(
 }
 
 private fun getUnitBlockIcon(block: Block): Int {
-    return when (block.type) {
+    return when (block.descendantsType) {
         BlockType.VIDEO -> R.drawable.ic_course_video
         BlockType.PROBLEM -> R.drawable.ic_course_pen
         BlockType.DISCUSSION -> R.drawable.ic_course_discussion
@@ -397,9 +396,9 @@ private fun CourseSectionScreenPreview() {
                     mockBlock
                 ),
                 mapOf(),
-                ""
+                "",
+                "Course default"
             ),
-            "Course default",
             uiMessage = null,
             onBackClick = {},
             onItemClick = {},
@@ -423,9 +422,9 @@ private fun CourseSectionScreenTabletPreview() {
                     mockBlock
                 ),
                 mapOf(),
-                ""
+                "",
+                "Course default",
             ),
-            "Course default",
             uiMessage = null,
             onBackClick = {},
             onItemClick = {},
@@ -447,5 +446,7 @@ private val mockBlock = Block(
     studentViewMultiDevice = false,
     blockCounts = BlockCounts(0),
     descendants = emptyList(),
-    completion = 0.0
+    descendantsType = BlockType.HTML,
+    completion = 0.0,
+    containsGatedContent = false
 )

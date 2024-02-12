@@ -4,12 +4,24 @@ pluginManagement {
         google()
         mavenCentral()
     }
+    buildscript {
+        repositories {
+            mavenCentral()
+            maven {
+                url = uri("https://storage.googleapis.com/r8-releases/raw")
+            }
+        }
+        dependencies {
+            classpath("com.android.tools:r8:8.2.26")
+        }
+    }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven { url "https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1" }
     }
 }
 rootProject.name = "OpenEdX"
@@ -21,3 +33,4 @@ include ':dashboard'
 include ':discovery'
 include ':profile'
 include ':discussion'
+include ':whatsnew'

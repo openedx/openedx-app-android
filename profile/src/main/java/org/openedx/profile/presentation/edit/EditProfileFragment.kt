@@ -41,6 +41,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -77,6 +78,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -107,12 +109,12 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.profile.domain.model.Account
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.getFileName
 import org.openedx.core.extension.parcelable
+import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
@@ -121,6 +123,7 @@ import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberSaveableMap
@@ -132,6 +135,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
+import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -520,21 +524,34 @@ private fun EditProfileScreen(
             }
 
             if (leaveDialog) {
-                LeaveProfile(
-                    onDismissRequest = {
-                        onKeepEdit()
-                    },
-                    onLeaveClick = {
-                        onBackClick(false)
-                    }
-                )
+                val configuration = LocalConfiguration.current
+                if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT || windowSize.isTablet) {
+                    LeaveProfile(
+                        onDismissRequest = {
+                            onKeepEdit()
+                        },
+                        onLeaveClick = {
+                            onBackClick(false)
+                        }
+                    )
+                } else {
+                    LeaveProfileLandscape(
+                        onDismissRequest = {
+                            onKeepEdit()
+                        },
+                        onLeaveClick = {
+                            onBackClick(false)
+                        }
+                    )
+                }
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(paddingValues)
-                    .statusBarsInset(),
+                    .statusBarsInset()
+                    .displayCutoutForLandscape(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -605,7 +622,7 @@ private fun EditProfileScreen(
                                         .placeholder(R.drawable.core_ic_default_profile_picture)
                                         .build(),
                                     contentScale = ContentScale.Crop,
-                                    contentDescription = null,
+                                    contentDescription = stringResource(id = R.string.core_accessibility_user_profile_image, uiState.account.username),
                                     modifier = Modifier
                                         .border(
                                             2.dp,
@@ -1035,12 +1052,14 @@ private fun LeaveProfile(
     onDismissRequest: () -> Unit,
     onLeaveClick: () -> Unit,
 ) {
+    val scrollState = rememberScrollState()
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
         content = {
             Column(
                 Modifier
+                    .verticalScroll(scrollState)
                     .fillMaxWidth()
                     .background(
                         MaterialTheme.appColors.background,
@@ -1102,6 +1121,112 @@ private fun LeaveProfile(
         })
 }
 
+@Composable
+private fun LeaveProfileLandscape(
+    onDismissRequest: () -> Unit,
+    onLeaveClick: () -> Unit,
+) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false, usePlatformDefaultWidth = false),
+        content = {
+            Card(
+                modifier = Modifier
+                    .width(screenWidth * 0.7f)
+                    .clip(MaterialTheme.appShapes.courseImageShape),
+                backgroundColor = MaterialTheme.appColors.background,
+                shape = MaterialTheme.appShapes.courseImageShape
+            ) {
+                Row(
+                    Modifier
+                        .padding(horizontal = 40.dp)
+                        .padding(top = 48.dp, bottom = 38.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(100.dp),
+                            painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_save),
+                            contentDescription = null,
+                            tint = MaterialTheme.appColors.onBackground
+                        )
+                        Spacer(Modifier.height(20.dp))
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = org.openedx.profile.R.string.profile_leave_profile),
+                            color = MaterialTheme.appColors.textPrimary,
+                            style = MaterialTheme.appTypography.titleLarge,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = org.openedx.profile.R.string.profile_changes_you_made),
+                            color = MaterialTheme.appColors.textFieldText,
+                            style = MaterialTheme.appTypography.titleSmall,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(Modifier.width(42.dp))
+                    Column(
+                        Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OpenEdXButton(
+                            text = stringResource(id = org.openedx.profile.R.string.profile_leave),
+                            backgroundColor = MaterialTheme.appColors.warning,
+                            content = {
+                                AutoSizeText(
+                                    text = stringResource(id = org.openedx.profile.R.string.profile_leave),
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textDark
+                                )
+                            },
+                            onClick = onLeaveClick
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        OpenEdXOutlinedButton(
+                            borderColor = MaterialTheme.appColors.textPrimary,
+                            textColor = MaterialTheme.appColors.textPrimary,
+                            text = stringResource(id = org.openedx.profile.R.string.profile_keep_editing),
+                            onClick = onDismissRequest,
+                            content = {
+                                AutoSizeText(
+                                    text = stringResource(id = org.openedx.profile.R.string.profile_keep_editing),
+                                    style = MaterialTheme.appTypography.bodyMedium,
+                                    color = MaterialTheme.appColors.textPrimary
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        })
+}
+
+@Preview
+@Composable
+fun LeaveProfilePreview() {
+    LeaveProfile(
+        onDismissRequest = {},
+        onLeaveClick = {}
+    )
+}
+
+@Preview
+@Composable
+fun LeaveProfileLandscapePreview() {
+    LeaveProfileLandscape(
+        onDismissRequest = {},
+        onLeaveClick = {}
+    )
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)

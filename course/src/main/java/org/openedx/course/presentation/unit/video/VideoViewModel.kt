@@ -7,15 +7,19 @@ import org.openedx.course.data.repository.CourseRepository
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import kotlinx.coroutines.launch
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.CourseCompletionSet
 
 class VideoViewModel(
     private val courseId: String,
     private val courseRepository: CourseRepository,
-    private val notifier: CourseNotifier
+    private val notifier: CourseNotifier,
+    private val preferencesManager: CorePreferences
 ) : BaseViewModel() {
 
     var videoUrl = ""
     var currentVideoTime = 0L
+    var isPlaying: Boolean? = null
 
     private var isBlockAlreadyCompleted = false
 
@@ -23,7 +27,7 @@ class VideoViewModel(
     fun sendTime() {
         if (currentVideoTime != C.TIME_UNSET) {
             viewModelScope.launch {
-                notifier.send(CourseVideoPositionChanged(videoUrl, currentVideoTime))
+                notifier.send(CourseVideoPositionChanged(videoUrl, currentVideoTime, isPlaying ?: false))
             }
         }
     }
@@ -37,6 +41,7 @@ class VideoViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false
                 }
@@ -44,4 +49,5 @@ class VideoViewModel(
         }
     }
 
+    fun getVideoQuality() = preferencesManager.videoSettings.videoQuality
 }

@@ -4,10 +4,19 @@ import androidx.fragment.app.FragmentManager
 
 interface AuthRouter {
 
-    fun navigateToMain(fm: FragmentManager)
+    fun navigateToMain(fm: FragmentManager, courseId: String?)
 
-    fun navigateToSignUp(fm: FragmentManager)
+    fun navigateToSignIn(fm: FragmentManager, courseId: String?)
+
+    fun navigateToLogistration(fm: FragmentManager, courseId: String?)
+
+    fun navigateToSignUp(fm: FragmentManager, courseId: String?)
 
     fun navigateToRestorePassword(fm: FragmentManager)
 
+    fun navigateToWhatsNew(fm: FragmentManager, courseId: String? = null)
+
+    fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String)
+
+    fun clearBackStack(fm: FragmentManager)
 }

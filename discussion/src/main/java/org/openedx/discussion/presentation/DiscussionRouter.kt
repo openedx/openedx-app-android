@@ -37,4 +37,8 @@ interface DiscussionRouter {
         courseId: String
     )
 
+    fun navigateToAnothersProfile(
+        fm: FragmentManager,
+        username: String
+    )
 }

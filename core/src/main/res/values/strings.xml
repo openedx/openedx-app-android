@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name" translatable="false">OpenEdX</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">@string/platform_name</string>
 
     <string name="core_results">Results</string>
     <string name="core_error_invalid_grant">Invalid credentials</string>
@@ -8,6 +8,9 @@
     <string name="core_error_unknown_error">Something went wrong</string>
     <string name="core_error_try_again">Try again</string>
     <string name="core_privacy_policy">Privacy policy</string>
+    <string name="core_cookie_policy" translatable="false">Cookie policy</string>
+    <string name="core_data_sell" translatable="false">Do not sell my personal information</string>
+    <string name="core_faq" translatable="false">View FAQ</string>
     <string name="core_terms_of_use">Terms of use</string>
     <string name="core_profile">Profile</string>
     <string name="core_cancel">Cancel</string>
@@ -27,18 +30,83 @@
     <string name="core_reload">Reload</string>
     <string name="core_downloading_in_progress">Downloading in progress</string>
     <string name="auto_recommended_text">Auto (Recommended)</string>
-    <string name="video_quality_p360">360p (Smallest file size)</string>
+    <string name="video_quality_p360">360p (Lower data usage)</string>
     <string name="video_quality_p540">540p</string>
     <string name="video_quality_p720">720p (Best quality)</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
-    <string name="core_email_chooser_header">Send email using...</string>
+    <string name="core_email_chooser_header">Send email using…</string>
     <string name="core_email_client_not_present">No e-mail clients installed</string>
-    <string name="core_app_version">App Version: </string>
-    <string name="core_android_os_version">Android OS: </string>
-    <string name="core_android_device_model">Device Model: </string>
-    <string name="core_insert_feedback">Feedback: </string>
-    <string name="core_email_subject">Customer Feedback</string>
-
+    <string name="core_app_version" translatable="false">App version: </string>
+    <string name="core_android_os_version" translatable="false">OS version: </string>
+    <string name="core_android_device_model" translatable="false">Device model: </string>
+    <string name="core_email_subject" translatable="false">Feedback</string>
     <string name="core_date_format_MMMM_dd">MMMM dd</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
+    <string name="core_app_upgrade_title">App Update</string>
+    <string name="core_app_upgrade_dialog_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>
+    <string name="core_app_upgrade_box_description">New update available! Upgrade now to receive the latest features and fixes</string>
+    <string name="core_not_now">Not Now</string>
+    <string name="core_update">Update</string>
+    <string name="core_deprecated_app_version">Deprecated App Version</string>
+    <string name="core_account_settings">Account Settings</string>
+    <string name="core_app_update_required_title">App Update Required</string>
+    <string name="core_app_update_required_description">This version of the OpenEdX app is out-of-date. To continue learning and get the latest features and fixes, please upgrade to the latest version.</string>
+    <string name="core_why_do_you_need_update">Why do I need to update?</string>
+    <string name="core_version">Version: %1$s</string>
+    <string name="core_up_to_date">Up-to-date</string>
+    <string name="core_tap_to_update_to_version">Tap to update to version %1$s</string>
+    <string name="core_tap_to_install_required_app_update">Tap to install required app update</string>
+    <string name="core_submit">Submit</string>
+    <string name="core_rate_dialog_title">Enjoying %1$s?</string>
+    <string name="core_rate_dialog_description">Your feedback matters to us. Would you take a moment to rate the app by tapping a star below? Thanks for your support!</string>
+    <string name="core_feedback_dialog_title">Leave Us Feedback</string>
+    <string name="core_feedback_dialog_description">We’re sorry to hear your learning experience has had some issues. We appreciate all feedback.</string>
+    <string name="core_feedback_dialog_textfield_hint">What could have been better?</string>
+    <string name="core_share_feedback">Share Feedback</string>
+    <string name="core_thank_you">Thank You</string>
+    <string name="core_rate_us">Rate Us</string>
+    <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
+    <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
+    <string name="core_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
+    <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
+    <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
+    <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
+    <string name="core_leaving_the_app_message" tools:ignore="MissingTranslation">You are now leaving the %s app and opening a browser.</string>
+    <string name="core_enrollment_error" tools:ignore="MissingTranslation">Enrollment Error</string>
+    <string name="core_enrollment_error_message" tools:ignore="MissingTranslation">We are unable to enroll you in this course at this time using the %s mobile application. Please try again on your web browser.</string>
+
+
+    <!-- region: Course Date Sections -->
+    <string name="core_date_type_completed" tools:ignore="MissingTranslation">Completed</string>
+    <string name="core_date_type_past_due" tools:ignore="MissingTranslation">Past Due</string>
+    <string name="core_date_type_today" tools:ignore="MissingTranslation">Today</string>
+    <string name="core_date_type_this_week" tools:ignore="MissingTranslation">This Week</string>
+    <string name="core_date_type_next_week" tools:ignore="MissingTranslation">Next Week</string>
+    <string name="core_date_type_upcoming" tools:ignore="MissingTranslation">Upcoming</string>
+    <string name="core_date_type_none" tools:ignore="MissingTranslation">None</string>
+    <string name="core_date_format_today" tools:ignore="MissingTranslation">Today</string>
+    <string name="core_date_format_tomorrow" tools:ignore="MissingTranslation">Tomorrow</string>
+    <string name="core_date_format_yesterday" tools:ignore="MissingTranslation">Yesterday</string>
+    <string name="core_date_format_days_ago" tools:ignore="MissingTranslation">%1$s days ago</string>
+    <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">
+        <item quantity="one">%d Item Hidden</item>
+        <item quantity="other">%d Items Hidden</item>
+    </plurals>
+
+    <!--  Course Dates Banner  -->
+    <string name="core_dates_reset_dates_banner_button" tools:ignore="MissingTranslation">Shift due dates</string>
+    <string name="core_dates_reset_dates_banner_header" tools:ignore="MissingTranslation">Missed some deadlines?</string>
+    <string name="core_dates_reset_dates_banner_body" tools:ignore="MissingTranslation">Don\'t worry - shift our suggested schedule to complete past due assignments without losing any progress.</string>
+    <string name="core_dates_info_banner_body" tools:ignore="MissingTranslation">We built a suggested schedule to help you stay on track. But don’t worry – it’s flexible so you can learn at your own pace. If you happen to fall behind, you’ll be able to adjust the dates to keep yourself on track.</string>
+    <string name="core_dates_upgrade_to_graded_banner_body" tools:ignore="MissingTranslation">To complete graded assignments as part of this course, you can upgrade today.</string>
+    <string name="core_dates_upgrade_to_reset_banner_body" tools:ignore="MissingTranslation">You are auditing this course, which means that you are unable to participate in graded assignments. It looks like you missed some important deadlines based on our suggested schedule. To complete graded assignments as part of this course and shift the past due assignments into the future, you can upgrade today.</string>
+    <string name="core_dates_shift_dates_successfully_msg" tools:ignore="MissingTranslation">Your due dates have been successfully shifted to help you stay on track.</string>
+    <string name="core_dates_shift_dates_unsuccessful_msg" tools:ignore="MissingTranslation">Your dates could not be shifted. Please try again.</string>
+    <string name="core_dates_view_all_dates" tools:ignore="MissingTranslation"><u>View all dates</u></string>
+
+    <string name="core_register">Register</string>
+    <string name="core_sign_in">Sign in</string>
+
+    <!--    Accessibility-->
+    <string name="core_accessibility_user_profile_image">%1$s profile image</string>
 </resources>
