@@ -48,7 +48,7 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.extension.nonZero
-import org.openedx.core.extension.withoutSpaces
+import org.openedx.core.extension.tagId
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -182,7 +182,7 @@ private fun QualityOption(
 ) {
     Row(
         Modifier
-            .testTag("btn_video_quality_${title.withoutSpaces()}")
+            .testTag("btn_video_quality_${title.tagId()}")
             .fillMaxWidth()
             .height(90.dp)
             .clickable {
@@ -196,7 +196,7 @@ private fun QualityOption(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                modifier = Modifier.testTag("txt_video_quality_title_${title.withoutSpaces()}"),
+                modifier = Modifier.testTag("txt_video_quality_title_${title.tagId()}"),
                 text = title,
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleMedium
@@ -204,7 +204,7 @@ private fun QualityOption(
             if (description.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    modifier = Modifier.testTag("txt_video_quality_description_${title.withoutSpaces()}"),
+                    modifier = Modifier.testTag("txt_video_quality_description_${title.tagId()}"),
                     text = description,
                     color = MaterialTheme.appColors.textSecondary,
                     style = MaterialTheme.appTypography.labelMedium
@@ -213,7 +213,7 @@ private fun QualityOption(
         }
         if (selected) {
             Icon(
-                modifier = Modifier.testTag("ic_video_quality_selected_${title.withoutSpaces()}"),
+                modifier = Modifier.testTag("ic_video_quality_selected_${title.tagId()}"),
                 imageVector = Icons.Filled.Done,
                 tint = MaterialTheme.appColors.primary,
                 contentDescription = null

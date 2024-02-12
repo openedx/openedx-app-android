@@ -96,8 +96,8 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
+import org.openedx.core.extension.tagId
 import org.openedx.core.extension.toastMessage
-import org.openedx.core.extension.withoutSpaces
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -625,7 +625,7 @@ fun SheetContent(
             }) { item ->
                 Text(
                     modifier = Modifier
-                        .testTag("txt_${item.value.withoutSpaces()}_title")
+                        .testTag("txt_${item.value.tagId()}_title")
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
@@ -726,7 +726,7 @@ fun OpenEdXOutlinedTextField(
     Column {
         Text(
             modifier = Modifier
-                .testTag("txt_${title.withoutSpaces()}_label")
+                .testTag("txt_${title.tagId()}_label")
                 .fillMaxWidth(),
             text = buildAnnotatedString {
                 if (withRequiredMark) {
@@ -773,12 +773,12 @@ fun OpenEdXOutlinedTextField(
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
             isError = !errorText.isNullOrEmpty(),
-            modifier = modifier.testTag("tf_${title.withoutSpaces()}_input")
+            modifier = modifier.testTag("tf_${title.tagId()}_input")
         )
         if (!errorText.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                modifier = Modifier.testTag("txt_${title.withoutSpaces()}_error"),
+                modifier = Modifier.testTag("txt_${title.tagId()}_error"),
                 text = errorText,
                 style = MaterialTheme.appTypography.bodySmall,
                 color = MaterialTheme.appColors.error
@@ -907,7 +907,7 @@ fun IconText(
         Modifier
     } else {
         Modifier
-            .testTag("btn_${text.withoutSpaces()}")
+            .testTag("btn_${text.tagId()}")
             .noRippleClickable { onClick.invoke() }
     }
     Row(
@@ -917,14 +917,14 @@ fun IconText(
     ) {
         Icon(
             modifier = Modifier
-                .testTag("ic_${text.withoutSpaces()}")
+                .testTag("ic_${text.tagId()}")
                 .size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
         )
         Text(
-            modifier = Modifier.testTag("txt_${text.withoutSpaces()}"),
+            modifier = Modifier.testTag("txt_${text.tagId()}"),
             text = text,
             color = color,
             style = textStyle
@@ -945,7 +945,7 @@ fun IconText(
         Modifier
     } else {
         Modifier
-            .testTag("btn_${text.withoutSpaces()}")
+            .testTag("btn_${text.tagId()}")
             .noRippleClickable { onClick.invoke() }
     }
     Row(
@@ -955,14 +955,14 @@ fun IconText(
     ) {
         Icon(
             modifier = Modifier
-                .testTag("ic_${text.withoutSpaces()}")
+                .testTag("ic_${text.tagId()}")
                 .size((textStyle.fontSize.value + 4).dp),
             painter = painter,
             contentDescription = null,
             tint = color
         )
         Text(
-            modifier = Modifier.testTag("txt_${text.withoutSpaces()}"),
+            modifier = Modifier.testTag("txt_${text.tagId()}"),
             text = text,
             color = color,
             style = textStyle
@@ -1085,7 +1085,7 @@ fun OpenEdXButton(
 ) {
     Button(
         modifier = Modifier
-            .testTag("btn_${text.withoutSpaces()}")
+            .testTag("btn_${text.tagId()}")
             .then(width)
             .height(42.dp),
         shape = MaterialTheme.appShapes.buttonShape,
@@ -1097,7 +1097,7 @@ fun OpenEdXButton(
     ) {
         if (content == null) {
             Text(
-                modifier = Modifier.testTag("txt_${text.withoutSpaces()}"),
+                modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
                 color = MaterialTheme.appColors.buttonText,
                 style = MaterialTheme.appTypography.labelLarge
@@ -1120,7 +1120,7 @@ fun OpenEdXOutlinedButton(
 ) {
     OutlinedButton(
         modifier = Modifier
-            .testTag("btn_${text.withoutSpaces()}")
+            .testTag("btn_${text.tagId()}")
             .then(modifier)
             .height(42.dp),
         onClick = onClick,
@@ -1130,7 +1130,7 @@ fun OpenEdXOutlinedButton(
     ) {
         if (content == null) {
             Text(
-                modifier = Modifier.testTag("txt_${text.withoutSpaces()}"),
+                modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
                 style = MaterialTheme.appTypography.labelLarge,
                 color = textColor

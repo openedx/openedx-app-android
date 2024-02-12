@@ -50,7 +50,7 @@ import org.openedx.auth.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.extension.withoutSpaces
+import org.openedx.core.extension.tagId
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.noRippleClickable
@@ -87,7 +87,7 @@ fun RequiredFields(
                 val linkedText =
                     TextConverter.htmlTextToLinkedText(field.label)
                 HyperlinkText(
-                    modifier = Modifier.testTag("txt_${field.name.withoutSpaces()}"),
+                    modifier = Modifier.testTag("txt_${field.name.tagId()}"),
                     fullText = linkedText.text,
                     hyperLinks = linkedText.links,
                     linkTextColor = MaterialTheme.appColors.primary
@@ -306,7 +306,7 @@ fun InputRegistrationField(
     Column {
         Text(
             modifier = Modifier
-                .testTag("txt_${registrationField.name.withoutSpaces()}_label")
+                .testTag("txt_${registrationField.name.tagId()}_label")
                 .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
@@ -330,7 +330,7 @@ fun InputRegistrationField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
-                    modifier = modifier.testTag("txt_${registrationField.name.withoutSpaces()}_placeholder"),
+                    modifier = modifier.testTag("txt_${registrationField.name.tagId()}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -346,11 +346,11 @@ fun InputRegistrationField(
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
-            modifier = modifier.testTag("tf_${registrationField.name.withoutSpaces()}")
+            modifier = modifier.testTag("tf_${registrationField.name.tagId()}")
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            modifier = Modifier.testTag("txt_${registrationField.name.withoutSpaces()}_description"),
+            modifier = Modifier.testTag("txt_${registrationField.name.tagId()}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor
@@ -393,7 +393,7 @@ fun SelectableRegisterField(
     ) {
         Text(
             modifier = Modifier
-                .testTag("txt_${registrationField.name.withoutSpaces()}_label")
+                .testTag("txt_${registrationField.name.tagId()}_label")
                 .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
@@ -415,14 +415,14 @@ fun SelectableRegisterField(
             textStyle = MaterialTheme.appTypography.bodyMedium,
             onValueChange = { },
             modifier = Modifier
-                .testTag("tf_${registrationField.name.withoutSpaces()}")
+                .testTag("tf_${registrationField.name.tagId()}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick(registrationField.name, registrationField.options)
                 },
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_${registrationField.name.withoutSpaces()}_placeholder"),
+                    modifier = Modifier.testTag("txt_${registrationField.name.tagId()}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -438,7 +438,7 @@ fun SelectableRegisterField(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            modifier = Modifier.testTag("txt_${registrationField.name.withoutSpaces()}_description"),
+            modifier = Modifier.testTag("txt_${registrationField.name.tagId()}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor

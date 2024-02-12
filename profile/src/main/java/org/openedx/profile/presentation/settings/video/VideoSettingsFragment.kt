@@ -175,7 +175,7 @@ private fun VideoSettingsScreen(
                 ) {
                     Row(
                         Modifier
-                            .testTag("btn_profile_wifi_only_download")
+                            .testTag("btn_wifi_only")
                             .fillMaxWidth()
                             .height(92.dp)
                             .noRippleClickable {
@@ -187,21 +187,21 @@ private fun VideoSettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                modifier = Modifier.testTag("txt_profile_wifi_only_download_label"),
+                                modifier = Modifier.testTag("txt_wifi_only_label"),
                                 text = stringResource(id = profileR.string.profile_wifi_only_download),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                modifier = Modifier.testTag("txt_profile_wifi_only_download_description"),
+                                modifier = Modifier.testTag("txt_wifi_only_description"),
                                 text = stringResource(id = profileR.string.profile_only_download_when_wifi_turned_on),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
                         }
                         Switch(
-                            modifier = Modifier.testTag("sw_profile_wifi_only_download"),
+                            modifier = Modifier.testTag("sw_wifi_only"),
                             checked = wifiDownloadOnly,
                             onCheckedChange = {
                                 wifiDownloadOnly = !wifiDownloadOnly
@@ -216,7 +216,7 @@ private fun VideoSettingsScreen(
                     Divider()
                     Row(
                         Modifier
-                            .testTag("btn_profile_video_streaming_quality")
+                            .testTag("btn_video_quality")
                             .fillMaxWidth()
                             .height(92.dp)
                             .clickable {
@@ -227,14 +227,14 @@ private fun VideoSettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
-                                modifier = Modifier.testTag("txt_profile_video_streaming_quality_label"),
+                                modifier = Modifier.testTag("txt_video_quality_label"),
                                 text = stringResource(id = profileR.string.profile_video_streaming_quality),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                modifier = Modifier.testTag("txt_profile_video_streaming_quality_description"),
+                                modifier = Modifier.testTag("txt_video_quality_description"),
                                 text = stringResource(id = videoSettings.videoQuality.titleResId),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium

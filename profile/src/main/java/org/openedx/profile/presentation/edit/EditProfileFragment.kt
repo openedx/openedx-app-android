@@ -115,7 +115,7 @@ import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.getFileName
 import org.openedx.core.extension.parcelable
-import org.openedx.core.extension.withoutSpaces
+import org.openedx.core.extension.tagId
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -982,7 +982,7 @@ private fun SelectableField(
     Column {
         Text(
             modifier = Modifier
-                .testTag("txt_edit_profile_field_label_${name.withoutSpaces()}")
+                .testTag("txt_label_${name.tagId()}")
                 .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
@@ -1005,14 +1005,14 @@ private fun SelectableField(
                 )
             },
             modifier = Modifier
-                .testTag("tf_edit_profile_field_select_${name.withoutSpaces()}")
+                .testTag("tf_select_${name.tagId()}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick()
                 },
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_field_placeholder_${name.withoutSpaces()}"),
+                    modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1038,7 +1038,7 @@ private fun InputEditField(
     Column {
         Text(
             modifier = Modifier
-                .testTag("txt_edit_profile_field_label_${name.withoutSpaces()}")
+                .testTag("txt_label_${name.tagId()}")
                 .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
@@ -1058,7 +1058,7 @@ private fun InputEditField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_edit_profile_field_${name.withoutSpaces()}_placeholder"),
+                    modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1074,7 +1074,7 @@ private fun InputEditField(
                 onDoneClick()
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
-            modifier = modifier.testTag("tf_edit_profile_field_input_${name.withoutSpaces()}")
+            modifier = modifier.testTag("tf_input_${name.tagId()}")
         )
     }
 }
