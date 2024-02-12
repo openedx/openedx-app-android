@@ -30,6 +30,6 @@ fun String.replaceLinkTags(isDarkTheme: Boolean): String {
     return text
 }
 
-fun String.replaceSpaces(target: String = ""): String = this.replace(" ", target)
+fun String.replaceSpace(target: String = ""): String = this.replace(" ", target)
 
-fun String.tagId(): String = this.replaceSpaces("_").lowercase(Locale.getDefault())
+fun String.tagId(): String = this.replaceSpace("_").lowercase(Locale.getDefault())
