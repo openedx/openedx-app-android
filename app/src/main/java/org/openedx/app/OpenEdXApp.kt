@@ -26,15 +26,8 @@ class OpenEdXApp : Application() {
                 screenModule
             )
         }
-        val firebaseConfig = config.getFirebaseConfig()
-        if (firebaseConfig.enabled) {
-            val options = FirebaseOptions.Builder()
-                .setProjectId(firebaseConfig.projectId)
-                .setApplicationId(firebaseConfig.applicationId)
-                .setApiKey(firebaseConfig.apiKey)
-                .setGcmSenderId(firebaseConfig.gcmSenderId)
-                .build()
-            Firebase.initialize(this, options)
+        if (config.getFirebaseConfig().enabled) {
+            Firebase.initialize(this)
         }
     }
 

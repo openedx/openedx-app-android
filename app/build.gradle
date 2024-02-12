@@ -1,14 +1,19 @@
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'kotlin-parcelize'
-    id 'kotlin-kapt'
-    id 'com.google.firebase.crashlytics'
-}
-
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
 def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
+def firebaseConfig = config.get('FIREBASE')
+def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
+
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
+if (firebaseEnabled) {
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+
+    configHelper.generateGoogleServicesJson(appId)
+}
 
 android {
     compileSdk 34
@@ -57,8 +62,10 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-            firebaseCrashlytics {
-                mappingFileUploadEnabled false
+            if (firebaseEnabled) {
+                firebaseCrashlytics {
+                    mappingFileUploadEnabled false
+                }
             }
         }
     }

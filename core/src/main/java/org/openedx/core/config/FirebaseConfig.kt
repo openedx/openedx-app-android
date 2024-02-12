@@ -6,6 +6,9 @@ data class FirebaseConfig(
     @SerializedName("ENABLED")
     val enabled: Boolean = false,
 
+    @SerializedName("PROJECT_NUMBER")
+    val gcmSenderId: String = "",
+
     @SerializedName("PROJECT_ID")
     val projectId: String = "",
 
@@ -14,7 +17,4 @@ data class FirebaseConfig(
 
     @SerializedName("API_KEY")
     val apiKey: String = "",
-
-    @SerializedName("GCM_SENDER_ID")
-    val gcmSenderId: String = "",
 )
