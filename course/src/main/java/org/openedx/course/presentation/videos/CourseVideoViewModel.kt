@@ -88,22 +88,9 @@ class CourseVideoViewModel(
             downloadModelsStatusFlow.collect {
                 if (_uiState.value is CourseVideosUIState.CourseData) {
                     val state = _uiState.value as CourseVideosUIState.CourseData
-                    val isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading()
-                    val remainingSize = if (isAllBlocksDownloadedOrDownloading) {
-                        state.allDownloadModulesState.remainingDownloadModelsSize
-                    } else {
-                        getRemainingDownloadModelsSize()
-                    }
-
                     _uiState.value = state.copy(
                         downloadedState = it.toMap(),
-                        allDownloadModulesState = AllDownloadModulesState(
-                            isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
-                            remainingDownloadModelsCount = getRemainingDownloadModelsCount(),
-                            remainingDownloadModelsSize = remainingSize,
-                            allDownloadModelsCount = getAllDownloadModelsCount(),
-                            allDownloadModelsSize = getAllDownloadModelsSize()
-                        )
+                        downloadModelsSize = getDownloadModelsSize()
                     )
                 }
             }
@@ -116,21 +103,7 @@ class CourseVideoViewModel(
 
                     if (_uiState.value is CourseVideosUIState.CourseData) {
                         val state = _uiState.value as CourseVideosUIState.CourseData
-                        val isAllBlocksDownloadedOrDownloading =
-                            isAllBlocksDownloadedOrDownloading()
-                        val remainingSize = if (isAllBlocksDownloadedOrDownloading) {
-                            state.allDownloadModulesState.remainingDownloadModelsSize
-                        } else {
-                            getRemainingDownloadModelsSize()
-                        }
-
-                        _uiState.value = state.copy(
-                            allDownloadModulesState = state.allDownloadModulesState.copy(
-                                isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
-                                remainingDownloadModelsSize = remainingSize,
-                                allDownloadModelsSize = getAllDownloadModelsSize()
-                            )
-                        )
+                        _uiState.value = state.copy(downloadModelsSize = getDownloadModelsSize())
                     }
                 }
             }
@@ -140,16 +113,12 @@ class CourseVideoViewModel(
             downloadNotifier.notifier.collect { event ->
                 if (event is DownloadProgressChanged) {
                     if (_uiState.value is CourseVideosUIState.CourseData) {
-                        if (isAllBlocksDownloadedOrDownloading() &&
-                            getRemainingDownloadModelsCount() > 0
+                        val downloadModelsSize = getDownloadModelsSize()
+                        if (downloadModelsSize.isAllBlocksDownloadedOrDownloading &&
+                            downloadModelsSize.remainingCount > 0
                         ) {
-                            val remainingSize = getRemainingDownloadModelsSize() - event.value
                             val state = _uiState.value as CourseVideosUIState.CourseData
-                            _uiState.value = state.copy(
-                                allDownloadModulesState = state.allDownloadModulesState.copy(
-                                    remainingDownloadModelsSize = remainingSize
-                                )
-                            )
+                            _uiState.value = state.copy(downloadModelsSize = downloadModelsSize)
                         }
                     }
                 }
@@ -211,18 +180,10 @@ class CourseVideoViewModel(
                 val courseSectionsState =
                     (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
 
-                val allDownloadModulesState = AllDownloadModulesState(
-                    isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading(),
-                    remainingDownloadModelsCount = getRemainingDownloadModelsCount(),
-                    remainingDownloadModelsSize = getRemainingDownloadModelsSize(),
-                    allDownloadModelsCount = getAllDownloadModelsCount(),
-                    allDownloadModelsSize = getAllDownloadModelsSize()
-                )
-
                 _uiState.value =
                     CourseVideosUIState.CourseData(
                         courseStructure, getDownloadModelsStatus(), courseSubSections,
-                        courseSectionsState, subSectionsDownloadsCount, allDownloadModulesState
+                        courseSectionsState, subSectionsDownloadsCount, getDownloadModelsSize()
                     )
             }
         }

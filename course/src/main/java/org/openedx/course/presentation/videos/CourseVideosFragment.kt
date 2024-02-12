@@ -75,6 +75,7 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.toFileSize
+import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.ui.HandleUIMessage
@@ -365,10 +366,10 @@ private fun CourseVideosScreen(
                                         }
                                     }
 
-                                    if (uiState.allDownloadModulesState.allDownloadModelsCount > 0) {
+                                    if (uiState.downloadModelsSize.allCount > 0) {
                                         item {
                                             AllVideosDownloadItem(
-                                                allDownloadModulesState = uiState.allDownloadModulesState,
+                                                downloadModelsSize = uiState.downloadModelsSize,
                                                 videoSettings = videoSettings,
                                                 onShowDownloadConfirmationDialog = {
                                                     isDownloadConfirmationShowed = true
@@ -570,7 +571,7 @@ private fun CourseVideosScreen(
 
 @Composable
 private fun AllVideosDownloadItem(
-    allDownloadModulesState: AllDownloadModulesState,
+    downloadModelsSize: DownloadModelsSize,
     videoSettings: VideoSettings,
     onShowDownloadConfirmationDialog: () -> Unit,
     onDownloadAllClick: (Boolean) -> Unit,
@@ -578,11 +579,11 @@ private fun AllVideosDownloadItem(
     onVideoDownloadQualityClick: () -> Unit
 ) {
     val isDownloadingAllVideos =
-        allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
-                allDownloadModulesState.remainingDownloadModelsCount > 0
+        downloadModelsSize.isAllBlocksDownloadedOrDownloading &&
+                downloadModelsSize.remainingCount > 0
     val isDownloadedAllVideos =
-        allDownloadModulesState.isAllBlocksDownloadedOrDownloading &&
-                allDownloadModulesState.remainingDownloadModelsCount == 0
+        downloadModelsSize.isAllBlocksDownloadedOrDownloading &&
+                downloadModelsSize.remainingCount == 0
 
     val downloadVideoTitleRes = when {
         isDownloadingAllVideos -> R.string.core_video_downloading_to_device
@@ -593,14 +594,14 @@ private fun AllVideosDownloadItem(
         if (isDownloadedAllVideos) {
             stringResource(
                 id = R.string.core_video_downloaded_subtitle,
-                allDownloadModulesState.allDownloadModelsCount,
-                allDownloadModulesState.allDownloadModelsSize.toFileSize()
+                downloadModelsSize.allCount,
+                downloadModelsSize.allSize.toFileSize()
             )
         } else {
             stringResource(
                 id = R.string.core_video_remaining_to_download,
-                allDownloadModulesState.remainingDownloadModelsCount,
-                allDownloadModulesState.remainingDownloadModelsSize.toFileSize()
+                downloadModelsSize.remainingCount,
+                downloadModelsSize.remainingSize.toFileSize()
             )
         }
 
@@ -647,8 +648,7 @@ private fun AllVideosDownloadItem(
                 style = MaterialTheme.appTypography.labelMedium
             )
         }
-        val isChecked =
-            allDownloadModulesState.isAllBlocksDownloadedOrDownloading
+        val isChecked = downloadModelsSize.isAllBlocksDownloadedOrDownloading
         Switch(
             modifier = Modifier
                 .padding(end = 16.dp),
@@ -656,7 +656,7 @@ private fun AllVideosDownloadItem(
             onCheckedChange = {
                 if (!isChecked) {
                     if (
-                        allDownloadModulesState.remainingDownloadModelsSize > AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
+                        downloadModelsSize.remainingSize > AppDataConstants.DOWNLOADS_CONFIRMATION_SIZE
                     ) {
                         onShowDownloadConfirmationDialog()
                     } else {
@@ -674,9 +674,7 @@ private fun AllVideosDownloadItem(
         )
     }
     if (isDownloadingAllVideos) {
-        val progress =
-            allDownloadModulesState.remainingDownloadModelsSize.toFloat() /
-                    allDownloadModulesState.allDownloadModelsSize
+        val progress = downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
 
         LinearProgressIndicator(
             modifier = Modifier
@@ -743,7 +741,13 @@ private fun CourseVideosScreenPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                AllDownloadModulesState.default
+                DownloadModelsSize(
+                    isAllBlocksDownloadedOrDownloading = false,
+                    remainingCount = 0,
+                    remainingSize = 0,
+                    allCount = 0,
+                    allSize = 0
+                )
             ),
             courseTitle = "",
             apiHostUrl = "",
@@ -810,7 +814,13 @@ private fun CourseVideosScreenTabletPreview() {
                 mapOf(),
                 mapOf(),
                 mapOf(),
-                AllDownloadModulesState.default
+                DownloadModelsSize(
+                    isAllBlocksDownloadedOrDownloading = false,
+                    remainingCount = 0,
+                    remainingSize = 0,
+                    allCount = 0,
+                    allSize = 0
+                )
             ),
             courseTitle = "",
             apiHostUrl = "",

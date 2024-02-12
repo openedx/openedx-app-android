@@ -90,56 +90,51 @@ abstract class BaseDownloadViewModel(
         return blockDownloadingState == DownloadedState.DOWNLOADED
     }
 
-    fun isAllBlocksDownloadedOrDownloading(): Boolean {
-        downloadableChildrenMap.keys.forEach { id ->
-            if (!isBlockDownloaded(id) && !isBlockDownloading(id)) return false
-        }
-        return true
-    }
-
     open fun saveDownloadModels(folder: String, id: String) {
         viewModelScope.launch {
             val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
-            val downloadModels = mutableListOf<DownloadModel>()
-            for (blockId in saveBlocksIds) {
-                allBlocks[blockId]?.let { block ->
-                    val videoInfo =
-                        block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                            preferencesManager.videoSettings.videoDownloadQuality
-                        )
-                    val size = videoInfo?.fileSize ?: 0
-                    val url = videoInfo?.url ?: ""
-                    val extension = url.split('.').lastOrNull() ?: "mp4"
-                    val path =
-                        folder + File.separator + "${Sha1Util.SHA1(block.displayName)}.$extension"
-                    if (getDownloadModelList().find { it.id == blockId && it.downloadedState.isDownloaded } == null) {
-                        downloadModels.add(
-                            DownloadModel(
-                                block.id,
-                                block.displayName,
-                                size,
-                                path,
-                                url,
-                                block.downloadableType,
-                                DownloadedState.WAITING,
-                                null
-                            )
-                        )
-                    }
-                }
-            }
-            workerController.saveModels(*downloadModels.toTypedArray())
+            saveDownloadModels(folder, saveBlocksIds)
         }
     }
 
     open fun saveAllDownloadModels(folder: String) {
-        downloadableChildrenMap.keys.forEach { id ->
-            allBlocks[id]?.let { block ->
-                if (!isBlockDownloaded(block.id) && !isBlockDownloading(block.id)) {
-                    saveDownloadModels(folder, block.id)
+        viewModelScope.launch {
+            val saveBlocksIds = downloadableChildrenMap.values.flatten()
+            saveDownloadModels(folder, saveBlocksIds)
+        }
+    }
+
+    private suspend fun saveDownloadModels(folder: String, saveBlocksIds: List<String>) {
+        val downloadModels = mutableListOf<DownloadModel>()
+        val downloadModelList = getDownloadModelList()
+        for (blockId in saveBlocksIds) {
+            allBlocks[blockId]?.let { block ->
+                val videoInfo =
+                    block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
+                        preferencesManager.videoSettings.videoDownloadQuality
+                    )
+                val size = videoInfo?.fileSize ?: 0
+                val url = videoInfo?.url ?: ""
+                val extension = url.split('.').lastOrNull() ?: "mp4"
+                val path =
+                    folder + File.separator + "${Sha1Util.SHA1(block.displayName)}.$extension"
+                if (downloadModelList.find { it.id == blockId && it.downloadedState.isDownloaded } == null) {
+                    downloadModels.add(
+                        DownloadModel(
+                            block.id,
+                            block.displayName,
+                            size,
+                            path,
+                            url,
+                            block.downloadableType,
+                            DownloadedState.WAITING,
+                            null
+                        )
+                    )
                 }
             }
         }
+        workerController.saveModels(*downloadModels.toTypedArray())
     }
 
     fun removeDownloadedModels(id: String) {
@@ -167,48 +162,42 @@ abstract class BaseDownloadViewModel(
 
     fun getDownloadModelsStatus() = downloadModelsStatus.toMap()
 
-    fun getRemainingDownloadModelsCount(): Int {
-        return downloadableChildrenMap.keys
-            .filter { !isBlockDownloaded(it) }
-            .sumOf { downloadableChildrenMap[it]?.size ?: 0 }
-    }
+    fun getDownloadModelsSize(): DownloadModelsSize {
+        var isAllBlocksDownloadedOrDownloading = true
+        var remainingCount = 0
+        var remainingSize = 0L
+        var allCount = 0
+        var allSize = 0L
 
-    fun getRemainingDownloadModelsSize(): Long {
-        return downloadableChildrenMap.keys
-            .filter { !isBlockDownloaded(it) }
-            .sumOf { id ->
-                var size = 0L
-                downloadableChildrenMap[id]?.forEach { downloadableBlock ->
-                    val block = allBlocks[downloadableBlock]
-                    val videoInfo =
-                        block?.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                            preferencesManager.videoSettings.videoDownloadQuality
-                        )
-                    size += videoInfo?.fileSize ?: 0
-                }
-                size
+        downloadableChildrenMap.keys.forEach { id ->
+            val isBlockDownloaded = isBlockDownloaded(id)
+            if (!isBlockDownloaded && !isBlockDownloading(id)) {
+                isAllBlocksDownloadedOrDownloading = false
             }
-    }
 
-    fun getAllDownloadModelsCount(): Int {
-        return downloadableChildrenMap.values
-            .sumOf { it.size }
-    }
+            downloadableChildrenMap[id]?.forEach { downloadableBlock ->
+                val block = allBlocks[downloadableBlock]
+                val videoInfo =
+                    block?.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
+                        preferencesManager.videoSettings.videoDownloadQuality
+                    )
 
-    fun getAllDownloadModelsSize(): Long {
-        return downloadableChildrenMap.values
-            .sumOf { list ->
-                var size = 0L
-                list.forEach { downloadableBlock ->
-                    val block = allBlocks[downloadableBlock]
-                    val videoInfo =
-                        block?.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                            preferencesManager.videoSettings.videoDownloadQuality
-                        )
-                    size += videoInfo?.fileSize ?: 0
+                allCount++
+                allSize += videoInfo?.fileSize ?: 0
+
+                if (!isBlockDownloaded) {
+                    remainingCount++
+                    remainingSize += videoInfo?.fileSize ?: 0
                 }
-                size
             }
+        }
+        return DownloadModelsSize(
+            isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
+            remainingCount = remainingCount,
+            remainingSize = remainingSize,
+            allCount = allCount,
+            allSize = allSize
+        )
     }
 
     fun hasDownloadModelsInQueue() = downloadingModelsList.isNotEmpty()

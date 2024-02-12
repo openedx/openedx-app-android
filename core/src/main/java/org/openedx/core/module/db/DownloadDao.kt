@@ -18,4 +18,6 @@ interface DownloadDao {
     @Query("SELECT * FROM download_model")
     fun readAllData() : Flow<List<DownloadModelEntity>>
 
+    @Query("DELETE FROM download_model WHERE id in (:ids)")
+    suspend fun removeAllDownloadModels(ids: List<String>)
 }
