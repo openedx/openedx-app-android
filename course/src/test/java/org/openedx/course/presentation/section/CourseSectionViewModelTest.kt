@@ -260,7 +260,10 @@ class CourseSectionViewModelTest {
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
-        coEvery { workerController.saveModels(*anyVararg()) } returns Unit
+        coEvery { workerController.saveModels(any()) } returns Unit
+        coEvery { downloadDao.readAllData() } returns flow {
+            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+        }
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
@@ -283,7 +286,10 @@ class CourseSectionViewModelTest {
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
-        coEvery { workerController.saveModels(*anyVararg()) } returns Unit
+        coEvery { workerController.saveModels(any()) } returns Unit
+        coEvery { downloadDao.readAllData() } returns flow {
+            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+        }
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
@@ -307,7 +313,7 @@ class CourseSectionViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
         every { networkConnection.isOnline() } returns false
-        coEvery { workerController.saveModels(*anyVararg()) } returns Unit
+        coEvery { workerController.saveModels(any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
 

@@ -96,10 +96,8 @@ class CourseSectionFragment : Fragment() {
                         }
                     },
                     onDownloadClick = {
-                        if (viewModel.isBlockDownloading(it.id)) {
-                            viewModel.cancelWork(it.id)
-                        } else if (viewModel.isBlockDownloaded(it.id)) {
-                            viewModel.removeDownloadedModels(it.id)
+                        if (viewModel.isBlockDownloading(it.id) || viewModel.isBlockDownloaded(it.id)) {
+                            viewModel.removeDownloadModels(it.id)
                         } else {
                             viewModel.saveDownloadModels(
                                 requireContext().externalCacheDir.toString() +

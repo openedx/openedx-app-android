@@ -64,9 +64,9 @@ class DownloadQueueViewModel(
         }
     }
 
-    override fun cancelWork(blockId: String) {
+    override fun removeDownloadModels(blockId: String) {
         viewModelScope.launch {
-            workerController.cancelWork(*arrayOf(blockId))
+            workerController.removeModel(blockId)
         }
     }
 }

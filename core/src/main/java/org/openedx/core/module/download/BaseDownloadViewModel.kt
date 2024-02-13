@@ -1,5 +1,6 @@
 package org.openedx.core.module.download
 
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -57,20 +58,33 @@ abstract class BaseDownloadViewModel(
     }
 
     private suspend fun updateDownloadModelsStatus(models: List<DownloadModel>) {
+        val downloadModelMap = models.associateBy { it.id }
         for (item in downloadableChildrenMap) {
-            if (models.find { item.value.contains(it.id) && it.downloadedState.isWaitingOrDownloading } != null) {
-                downloadModelsStatus[item.key] = DownloadedState.DOWNLOADING
-            } else if (item.value.all { id -> models.find { it.id == id && it.downloadedState == DownloadedState.DOWNLOADED } != null }) {
-                downloadModelsStatus[item.key] = DownloadedState.DOWNLOADED
-            } else {
-                downloadModelsStatus[item.key] = DownloadedState.NOT_DOWNLOADED
+            var downloadingCount = 0
+            var downloadedCount = 0
+            item.value.forEach { blockId ->
+                val downloadModel = downloadModelMap[blockId]
+                if (downloadModel != null) {
+                    if (downloadModel.downloadedState.isWaitingOrDownloading) {
+                        downloadModelsStatus[blockId] = DownloadedState.DOWNLOADING
+                        downloadingCount++
+                    } else if (downloadModel.downloadedState.isDownloaded) {
+                        downloadModelsStatus[blockId] = DownloadedState.DOWNLOADED
+                        downloadedCount++
+                    }
+                } else {
+                    downloadModelsStatus[blockId] = DownloadedState.NOT_DOWNLOADED
+                }
+            }
+
+            downloadModelsStatus[item.key] = when {
+                downloadingCount > 0 -> DownloadedState.DOWNLOADING
+                downloadedCount == item.value.size -> DownloadedState.DOWNLOADED
+                else -> DownloadedState.NOT_DOWNLOADED
             }
         }
 
-        downloadingModelsList = models.filter {
-            it.downloadedState == DownloadedState.DOWNLOADING ||
-                    it.downloadedState == DownloadedState.WAITING
-        }
+        downloadingModelsList = models.filter { it.downloadedState.isWaitingOrDownloading }
         _downloadingModelsFlow.emit(downloadingModelsList)
     }
 
@@ -82,7 +96,7 @@ abstract class BaseDownloadViewModel(
 
     fun isBlockDownloading(id: String): Boolean {
         val blockDownloadingState = downloadModelsStatus[id]
-        return blockDownloadingState == DownloadedState.DOWNLOADING || blockDownloadingState == DownloadedState.WAITING
+        return blockDownloadingState?.isWaitingOrDownloading == true
     }
 
     fun isBlockDownloaded(id: String): Boolean {
@@ -134,30 +148,7 @@ abstract class BaseDownloadViewModel(
                 }
             }
         }
-        workerController.saveModels(*downloadModels.toTypedArray())
-    }
-
-    fun removeDownloadedModels(id: String) {
-        viewModelScope.launch {
-            val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
-            val downloaded =
-                getDownloadModelList().filter { saveBlocksIds.contains(it.id) && it.downloadedState.isDownloaded }
-            downloaded.forEach {
-                downloadDao.removeDownloadModel(it.id)
-            }
-        }
-    }
-
-    fun removeOrCancelAllDownloadModels() {
-        viewModelScope.launch {
-            downloadableChildrenMap.keys.forEach { id ->
-                if (isBlockDownloading(id)) {
-                    cancelWork(id)
-                } else {
-                    removeDownloadedModels(id)
-                }
-            }
-        }
+        workerController.saveModels(downloadModels)
     }
 
     fun getDownloadModelsStatus() = downloadModelsStatus.toMap()
@@ -170,8 +161,7 @@ abstract class BaseDownloadViewModel(
         var allSize = 0L
 
         downloadableChildrenMap.keys.forEach { id ->
-            val isBlockDownloaded = isBlockDownloaded(id)
-            if (!isBlockDownloaded && !isBlockDownloading(id)) {
+            if (!isBlockDownloaded(id) && !isBlockDownloading(id)) {
                 isAllBlocksDownloadedOrDownloading = false
             }
 
@@ -185,7 +175,7 @@ abstract class BaseDownloadViewModel(
                 allCount++
                 allSize += videoInfo?.fileSize ?: 0
 
-                if (!isBlockDownloaded) {
+                if (!isBlockDownloaded(downloadableBlock)) {
                     remainingCount++
                     remainingSize += videoInfo?.fileSize ?: 0
                 }
@@ -204,16 +194,20 @@ abstract class BaseDownloadViewModel(
 
     fun getDownloadableChildren(id: String) = downloadableChildrenMap[id]
 
-    open fun cancelWork(blockId: String) {
+    open fun removeDownloadModels(blockId: String) {
         viewModelScope.launch {
             val downloadableChildren = downloadableChildrenMap[blockId] ?: listOf()
-            val ids = getDownloadModelList().filter {
-                (it.downloadedState == DownloadedState.DOWNLOADING ||
-                        it.downloadedState == DownloadedState.WAITING) && downloadableChildren.contains(
-                    it.id
-                )
-            }.map { it.id }
-            workerController.cancelWork(*ids.toTypedArray())
+            workerController.removeModels(downloadableChildren)
+        }
+    }
+
+    fun removeAllDownloadModels() {
+        viewModelScope.launch {
+            val t = System.currentTimeMillis()
+            val downloadableChildren = downloadableChildrenMap.values.flatten()
+            workerController.removeModels(downloadableChildren)
+
+            Log.e("asd", "TIME1 " + (System.currentTimeMillis() - t))
         }
     }
 

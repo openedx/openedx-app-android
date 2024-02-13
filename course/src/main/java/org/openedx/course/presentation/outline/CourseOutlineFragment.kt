@@ -186,7 +186,7 @@ class CourseOutlineFragment : Fragment() {
                                 viewModel.getDownloadableChildren(it.id) ?: arrayListOf()
                             )
                         } else if (viewModel.isBlockDownloaded(it.id)) {
-                            viewModel.removeDownloadedModels(it.id)
+                            viewModel.removeDownloadModels(it.id)
                         } else {
                             viewModel.saveDownloadModels(
                                 requireContext().externalCacheDir.toString() +

@@ -59,7 +59,6 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.OfflineQueueCard
-import org.openedx.discussion.presentation.search.DiscussionSearchThreadFragment
 
 class DownloadQueueFragment : Fragment() {
 
@@ -90,7 +89,7 @@ class DownloadQueueFragment : Fragment() {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
                     onDownloadClick = {
-                        viewModel.cancelWork(it.id)
+                        viewModel.removeDownloadModels(it.id)
                     }
                 )
             }

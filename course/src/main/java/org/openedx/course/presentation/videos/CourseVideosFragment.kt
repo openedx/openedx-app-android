@@ -174,7 +174,7 @@ class CourseVideosFragment : Fragment() {
                                 viewModel.getDownloadableChildren(it.id) ?: arrayListOf()
                             )
                         } else if (viewModel.isBlockDownloaded(it.id)) {
-                            viewModel.removeDownloadedModels(it.id)
+                            viewModel.removeDownloadModels(it.id)
                         } else {
                             viewModel.saveDownloadModels(
                                 requireContext().externalCacheDir.toString() +
@@ -187,7 +187,7 @@ class CourseVideosFragment : Fragment() {
                     },
                     onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
                         if (isAllBlocksDownloadedOrDownloading) {
-                            viewModel.removeOrCancelAllDownloadModels()
+                            viewModel.removeAllDownloadModels()
                         } else {
                             viewModel.saveAllDownloadModels(
                                 requireContext().externalCacheDir.toString() +

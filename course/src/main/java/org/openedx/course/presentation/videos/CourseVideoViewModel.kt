@@ -87,10 +87,20 @@ class CourseVideoViewModel(
         viewModelScope.launch {
             downloadModelsStatusFlow.collect {
                 if (_uiState.value is CourseVideosUIState.CourseData) {
+                    val downloadModelsSize = getDownloadModelsSize()
                     val state = _uiState.value as CourseVideosUIState.CourseData
+                    val remainingSize =
+                        if (downloadModelsSize.isAllBlocksDownloadedOrDownloading) {
+                            state.downloadModelsSize.remainingSize
+                        } else {
+                            downloadModelsSize.remainingSize
+                        }
+
                     _uiState.value = state.copy(
                         downloadedState = it.toMap(),
-                        downloadModelsSize = getDownloadModelsSize()
+                        downloadModelsSize = getDownloadModelsSize().copy(
+                            remainingSize = remainingSize
+                        )
                     )
                 }
             }
@@ -102,8 +112,20 @@ class CourseVideoViewModel(
                     _videoSettings.value = preferencesManager.videoSettings
 
                     if (_uiState.value is CourseVideosUIState.CourseData) {
+                        val downloadModelsSize = getDownloadModelsSize()
                         val state = _uiState.value as CourseVideosUIState.CourseData
-                        _uiState.value = state.copy(downloadModelsSize = getDownloadModelsSize())
+                        val remainingSize =
+                            if (downloadModelsSize.isAllBlocksDownloadedOrDownloading) {
+                                state.downloadModelsSize.remainingSize
+                            } else {
+                                downloadModelsSize.remainingSize
+                            }
+
+                        _uiState.value = state.copy(
+                            downloadModelsSize = downloadModelsSize.copy(
+                                remainingSize = remainingSize
+                            )
+                        )
                     }
                 }
             }
@@ -118,7 +140,11 @@ class CourseVideoViewModel(
                             downloadModelsSize.remainingCount > 0
                         ) {
                             val state = _uiState.value as CourseVideosUIState.CourseData
-                            _uiState.value = state.copy(downloadModelsSize = downloadModelsSize)
+                            _uiState.value = state.copy(
+                                downloadModelsSize = downloadModelsSize.copy(
+                                    remainingSize = downloadModelsSize.remainingSize - event.value
+                                )
+                            )
                         }
                     }
                 }
