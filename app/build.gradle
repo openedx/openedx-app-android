@@ -12,7 +12,11 @@ if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
 
-    configHelper.generateGoogleServicesJson(appId)
+    tasks.register('generateGoogleServicesJson') {
+        configHelper.generateGoogleServicesJson(appId)
+    }
+
+    preBuild.dependsOn(generateGoogleServicesJson)
 }
 
 android {
