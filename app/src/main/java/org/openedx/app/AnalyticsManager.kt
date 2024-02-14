@@ -1,10 +1,9 @@
 package org.openedx.app
 
 import android.content.Context
-import android.os.Bundle
-import androidx.core.os.bundleOf
 import org.openedx.app.analytics.Analytics
 import org.openedx.app.analytics.FirebaseAnalytics
+import org.openedx.app.analytics.SegmentAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.config.Config
 import org.openedx.course.presentation.CourseAnalytics
@@ -16,15 +15,19 @@ import org.openedx.profile.presentation.ProfileAnalytics
 class AnalyticsManager(
     context: Context,
     config: Config,
-) : DashboardAnalytics, AuthAnalytics, AppAnalytics,
-    DiscoveryAnalytics, ProfileAnalytics, CourseAnalytics, DiscussionAnalytics {
+) : DashboardAnalytics, AuthAnalytics, AppAnalytics, DiscoveryAnalytics, ProfileAnalytics,
+    CourseAnalytics, DiscussionAnalytics {
 
     private val services: ArrayList<Analytics> = arrayListOf()
 
     init {
         // Initialise all the analytics libraries here
-        if (config.getFirebaseConfig().projectId.isNotEmpty()) {
+        if (config.getFirebaseConfig().projectId.isNotBlank()) {
             addAnalyticsTracker(FirebaseAnalytics(context = context))
+        }
+        val segmentConfig = config.getSegmentConfig()
+        if (segmentConfig.enabled && segmentConfig.segmentWriteKey.isNotBlank()) {
+            addAnalyticsTracker(SegmentAnalytics(context = context, config = config))
         }
     }
 
@@ -32,7 +35,7 @@ class AnalyticsManager(
         services.add(analytic)
     }
 
-    private fun logEvent(event: Event, params: Bundle = bundleOf()) {
+    private fun logEvent(event: Event, params: Map<String, Any?> = mapOf()) {
         services.forEach { analytics ->
             analytics.logEvent(event.eventName, params)
         }
@@ -45,22 +48,16 @@ class AnalyticsManager(
     }
 
     override fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.DASHBOARD_COURSE_CLICKED,
-            bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.DASHBOARD_COURSE_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun userLoginEvent(method: String) {
-        logEvent(
-            Event.USER_LOGIN,
-            bundleOf(
-                Key.METHOD.keyName to method
-            )
-        )
+        logEvent(Event.USER_LOGIN, buildMap {
+            put(Key.METHOD.keyName, method)
+        })
     }
 
     override fun signUpClickedEvent() {
@@ -68,17 +65,13 @@ class AnalyticsManager(
     }
 
     override fun createAccountClickedEvent(provider: String) {
-        logEvent(
-            Event.CREATE_ACCOUNT_CLICKED,
-            bundleOf(Key.PROVIDER.keyName to provider)
-        )
+        logEvent(Event.CREATE_ACCOUNT_CLICKED, buildMap {
+            put(Key.PROVIDER.keyName, provider)
+        })
     }
 
     override fun registrationSuccessEvent(provider: String) {
-        logEvent(
-            Event.REGISTRATION_SUCCESS,
-            bundleOf(Key.PROVIDER.keyName to provider)
-        )
+        logEvent(Event.REGISTRATION_SUCCESS, buildMap { put(Key.PROVIDER.keyName, provider) })
     }
 
     override fun forgotPasswordClickedEvent() {
@@ -86,19 +79,13 @@ class AnalyticsManager(
     }
 
     override fun resetPasswordClickedEvent(success: Boolean) {
-        logEvent(
-            Event.RESET_PASSWORD_CLICKED, bundleOf(
-                Key.SUCCESS.keyName to success
-            )
-        )
+        logEvent(Event.RESET_PASSWORD_CLICKED, buildMap { put(Key.SUCCESS.keyName, success) })
     }
 
     override fun logoutEvent(force: Boolean) {
-        logEvent(
-            Event.USER_LOGOUT, bundleOf(
-                Key.FORCE.keyName to force
-            )
-        )
+        logEvent(Event.USER_LOGOUT, buildMap {
+            put(Key.FORCE.keyName, force)
+        })
     }
 
     override fun discoveryTabClickedEvent() {
@@ -126,21 +113,17 @@ class AnalyticsManager(
     }
 
     override fun discoveryCourseSearchEvent(label: String, coursesCount: Int) {
-        logEvent(
-            Event.DISCOVERY_COURSE_SEARCH, bundleOf(
-                Key.LABEL.keyName to label,
-                Key.COURSE_COUNT.keyName to coursesCount
-            )
-        )
+        logEvent(Event.DISCOVERY_COURSE_SEARCH, buildMap {
+            put(Key.LABEL.keyName, label)
+            put(Key.COURSE_COUNT.keyName, coursesCount)
+        })
     }
 
     override fun discoveryCourseClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.DISCOVERY_COURSE_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.DISCOVERY_COURSE_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun profileEditClickedEvent() {
@@ -184,226 +167,166 @@ class AnalyticsManager(
     }
 
     override fun courseEnrollClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.COURSE_ENROLL_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-            )
-        )
+        logEvent(Event.COURSE_ENROLL_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun courseEnrollSuccessEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.COURSE_ENROLL_SUCCESS, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-            )
-        )
+        logEvent(Event.COURSE_ENROLL_SUCCESS, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun viewCourseClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.VIEW_COURSE_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-            )
-        )
+        logEvent(Event.VIEW_COURSE_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun resumeCourseTappedEvent(courseId: String, courseName: String, blockId: String) {
-        logEvent(
-            Event.RESUME_COURSE_TAPPED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId
-            )
-        )
+        logEvent(Event.RESUME_COURSE_TAPPED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+        })
     }
 
     override fun sequentialClickedEvent(
-        courseId: String,
-        courseName: String,
-        blockId: String,
-        blockName: String
+        courseId: String, courseName: String, blockId: String, blockName: String
     ) {
-        logEvent(
-            Event.SEQUENTIAL_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId,
-                Key.BLOCK_NAME.keyName to blockName,
-            )
-        )
+        logEvent(Event.SEQUENTIAL_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+            put(Key.BLOCK_NAME.keyName, blockName)
+        })
     }
 
     override fun verticalClickedEvent(
-        courseId: String,
-        courseName: String,
-        blockId: String,
-        blockName: String
+        courseId: String, courseName: String, blockId: String, blockName: String
     ) {
-        logEvent(
-            Event.VERTICAL_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId,
-                Key.BLOCK_NAME.keyName to blockName,
-            )
-        )
+        logEvent(Event.VERTICAL_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+            put(Key.BLOCK_NAME.keyName, blockName)
+        })
     }
 
     override fun nextBlockClickedEvent(
-        courseId: String,
-        courseName: String,
-        blockId: String,
-        blockName: String
+        courseId: String, courseName: String, blockId: String, blockName: String
     ) {
-        logEvent(
-            Event.NEXT_BLOCK_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId,
-                Key.BLOCK_NAME.keyName to blockName,
-            )
-        )
+        logEvent(Event.NEXT_BLOCK_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+            put(Key.BLOCK_NAME.keyName, blockName)
+        })
     }
 
     override fun prevBlockClickedEvent(
-        courseId: String,
-        courseName: String,
-        blockId: String,
-        blockName: String
+        courseId: String, courseName: String, blockId: String, blockName: String
     ) {
-        logEvent(
-            Event.PREV_BLOCK_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId,
-                Key.BLOCK_NAME.keyName to blockName,
-            )
-        )
+        logEvent(Event.PREV_BLOCK_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+            put(Key.BLOCK_NAME.keyName, blockName)
+        })
     }
 
     override fun finishVerticalClickedEvent(
-        courseId: String,
-        courseName: String,
-        blockId: String,
-        blockName: String
+        courseId: String, courseName: String, blockId: String, blockName: String
     ) {
-        logEvent(
-            Event.FINISH_VERTICAL_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId,
-                Key.BLOCK_NAME.keyName to blockName,
-            )
-        )
+        logEvent(Event.FINISH_VERTICAL_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+            put(Key.BLOCK_NAME.keyName, blockName)
+        })
     }
 
     override fun finishVerticalNextClickedEvent(
-        courseId: String,
-        courseName: String,
-        blockId: String,
-        blockName: String
+        courseId: String, courseName: String, blockId: String, blockName: String
     ) {
-        logEvent(
-            Event.FINISH_VERTICAL_NEXT_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.BLOCK_ID.keyName to blockId,
-                Key.BLOCK_NAME.keyName to blockName,
-            )
-        )
+        logEvent(Event.FINISH_VERTICAL_NEXT_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.BLOCK_ID.keyName, blockId)
+            put(Key.BLOCK_NAME.keyName, blockName)
+        })
     }
 
     override fun finishVerticalBackClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.FINISH_VERTICAL_BACK_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.FINISH_VERTICAL_BACK_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun courseTabClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.COURSE_TAB_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.COURSE_TAB_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun videoTabClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.VIDEO_TAB_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.VIDEO_TAB_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun discussionTabClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.DISCUSSION_TAB_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.DISCUSSION_TAB_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun datesTabClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.DATES_TAB_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.DATES_TAB_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun handoutsTabClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.HANDOUTS_TAB_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.HANDOUTS_TAB_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun discussionAllPostsClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.DISCUSSION_ALL_POSTS_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.DISCUSSION_ALL_POSTS_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun discussionFollowingClickedEvent(courseId: String, courseName: String) {
-        logEvent(
-            Event.DISCUSSION_FOLLOWING_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName
-            )
-        )
+        logEvent(Event.DISCUSSION_FOLLOWING_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+        })
     }
 
     override fun discussionTopicClickedEvent(
-        courseId: String,
-        courseName: String,
-        topicId: String,
-        topicName: String
+        courseId: String, courseName: String, topicId: String, topicName: String
     ) {
-        logEvent(
-            Event.DISCUSSION_TOPIC_CLICKED, bundleOf(
-                Key.COURSE_ID.keyName to courseId,
-                Key.COURSE_NAME.keyName to courseName,
-                Key.TOPIC_ID.keyName to topicId,
-                Key.TOPIC_NAME.keyName to topicName
-            )
-        )
+        logEvent(Event.DISCUSSION_TOPIC_CLICKED, buildMap {
+            put(Key.COURSE_ID.keyName, courseId)
+            put(Key.COURSE_NAME.keyName, courseName)
+            put(Key.TOPIC_ID.keyName, topicId)
+            put(Key.TOPIC_NAME.keyName, topicName)
+        })
     }
-
 }
 
 private enum class Event(val eventName: String) {
