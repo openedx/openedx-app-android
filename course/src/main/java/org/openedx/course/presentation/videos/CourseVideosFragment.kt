@@ -207,9 +207,13 @@ class CourseVideosFragment : Fragment() {
                         }
                     },
                     onVideoDownloadQualityClick = {
-                        router.navigateToVideoQuality(
-                            requireActivity().supportFragmentManager, VideoQualityType.Download
-                        )
+                        if (viewModel.hasDownloadModelsInQueue()) {
+                            viewModel.onChangingVideoQualityWhileDownloading()
+                        } else {
+                            router.navigateToVideoQuality(
+                                requireActivity().supportFragmentManager, VideoQualityType.Download
+                            )
+                        }
                     }
                 )
             }
@@ -304,6 +308,10 @@ private fun CourseVideosScreen(
 
         var isDeleteDownloadsConfirmationShowed by rememberSaveable {
             mutableStateOf(false)
+        }
+
+        var deleteDownloadBlock by rememberSaveable {
+            mutableStateOf<Block?>(null)
         }
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
@@ -427,7 +435,15 @@ private fun CourseVideosScreen(
                                                                     downloadedState = uiState.downloadedState[subSectionBlock.id],
                                                                     downloadsCount = downloadsCount,
                                                                     onClick = onSubSectionClick,
-                                                                    onDownloadClick = onDownloadClick
+                                                                    onDownloadClick = { block ->
+                                                                        if (uiState.downloadedState[block.id]?.isDownloaded == true) {
+                                                                            deleteDownloadBlock =
+                                                                                block
+
+                                                                        } else {
+                                                                            onDownloadClick(block)
+                                                                        }
+                                                                    }
                                                                 )
                                                                 Divider()
                                                             }
@@ -456,7 +472,14 @@ private fun CourseVideosScreen(
                                                     block = block,
                                                     downloadedState = uiState.downloadedState[block.id],
                                                     onItemClick = onItemClick,
-                                                    onDownloadClick = onDownloadClick
+                                                    onDownloadClick = { block ->
+                                                        if (uiState.downloadedState[block.id]?.isDownloaded == true) {
+                                                            deleteDownloadBlock = block
+
+                                                        } else {
+                                                            onDownloadClick(block)
+                                                        }
+                                                    }
                                                 )
                                                 Divider()
                                             }
@@ -529,6 +552,15 @@ private fun CourseVideosScreen(
         }
 
         if (isDeleteDownloadsConfirmationShowed) {
+            val downloadModelsSize =
+                (uiState as? CourseVideosUIState.CourseData)?.downloadModelsSize
+            val isDownloadedAllVideos =
+                downloadModelsSize?.isAllBlocksDownloadedOrDownloading == true &&
+                        downloadModelsSize.remainingCount == 0
+            val dialogTextId = if (isDownloadedAllVideos)
+                org.openedx.course.R.string.course_delete_downloads_confirmation_text else
+                org.openedx.course.R.string.course_delete_while_downloading_confirmation_text
+
             AlertDialog(
                 title = {
                     Text(
@@ -537,10 +569,7 @@ private fun CourseVideosScreen(
                 },
                 text = {
                     Text(
-                        text = stringResource(
-                            id = org.openedx.course.R.string.course_delete_downloads_confirmation_text,
-                            courseTitle
-                        )
+                        text = stringResource(id = dialogTextId, courseTitle)
                     )
                 },
                 onDismissRequest = {
@@ -554,7 +583,7 @@ private fun CourseVideosScreen(
                         }
                     ) {
                         Text(
-                            text = stringResource(id = R.string.core_accept)
+                            text = stringResource(id = R.string.core_delete)
                         )
                     }
                 },
@@ -562,6 +591,50 @@ private fun CourseVideosScreen(
                     TextButton(
                         onClick = {
                             isDeleteDownloadsConfirmationShowed = false
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.core_cancel))
+                    }
+                }
+            )
+        }
+
+        if (deleteDownloadBlock != null) {
+            AlertDialog(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.core_warning)
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(
+                            id = org.openedx.course.R.string.course_delete_download_confirmation_text,
+                            deleteDownloadBlock?.displayName ?: ""
+                        )
+                    )
+                },
+                onDismissRequest = {
+                    deleteDownloadBlock = null
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            deleteDownloadBlock?.let { block ->
+                                onDownloadClick(block)
+                            }
+                            deleteDownloadBlock = null
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.core_delete)
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            deleteDownloadBlock = null
                         }
                     ) {
                         Text(text = stringResource(id = R.string.core_cancel))

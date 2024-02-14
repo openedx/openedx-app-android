@@ -189,6 +189,12 @@ class CourseVideoViewModel(
         }
     }
 
+    fun onChangingVideoQualityWhileDownloading() {
+        _uiMessage.value = UIMessage.SnackBarMessage(
+            resourceManager.getString(R.string.course_change_quality_when_downloading)
+        )
+    }
+
     private fun sortBlocks(blocks: List<Block>): List<Block> {
         val resultBlocks = mutableListOf<Block>()
         if (blocks.isEmpty()) return emptyList()

@@ -50,6 +50,8 @@
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="course_you_are_already_enrolled" tools:ignore="MissingTranslation">You are already enrolled in this course.</string>
     <string name="course_discover" tools:ignore="MissingTranslation">Discover</string>
+    <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
+
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 
@@ -66,6 +68,8 @@
     <string name="course_download_queue_title">Downloads</string>
     <string name="course_download_big_files_confirmation_title">Download</string>
     <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
-    <string name="course_delete_downloads_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
+    <string name="course_delete_while_downloading_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
+    <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
+    <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
 
 </resources>
