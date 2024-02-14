@@ -134,10 +134,10 @@ class CourseSearchFragment : Fragment() {
                         )
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, null)
+                        router.navigateToSignUp(parentFragmentManager, null, null)
                     },
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, null)
+                        router.navigateToSignIn(parentFragmentManager, null, null)
                     },
                 )
             }

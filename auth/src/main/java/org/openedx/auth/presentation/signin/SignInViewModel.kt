@@ -40,6 +40,7 @@ class SignInViewModel(
     private val oAuthHelper: OAuthHelper,
     config: Config,
     val courseId: String?,
+    val infoType: String?,
 ) : BaseViewModel() {
 
     private val logger = Logger("SignInViewModel")

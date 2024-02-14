@@ -41,6 +41,7 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.auth.R
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.core.config.Config
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -53,6 +54,7 @@ import org.openedx.core.ui.theme.compose.LogistrationLogoView
 class LogistrationFragment : Fragment() {
 
     private val router: AuthRouter by inject()
+    private val config by inject<Config>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,15 +65,26 @@ class LogistrationFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val courseId = arguments?.getString(ARG_COURSE_ID, "")
+                val isDiscoveryTypeWebView = config.getDiscoveryConfig().isViewTypeWebView()
                 LogistrationScreen(
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, courseId)
+                        router.navigateToSignIn(parentFragmentManager, courseId, null)
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, courseId)
+                        router.navigateToSignUp(parentFragmentManager, courseId, null)
                     },
                     onSearchClick = { querySearch ->
-                        router.navigateToDiscoverCourses(parentFragmentManager, querySearch)
+                        if (isDiscoveryTypeWebView) {
+                            router.navigateToWebDiscoverCourses(
+                                parentFragmentManager,
+                                querySearch
+                            )
+                        } else {
+                            router.navigateToNativeDiscoverCourses(
+                                parentFragmentManager,
+                                querySearch
+                            )
+                        }
                     }
                 )
             }
@@ -153,6 +166,7 @@ private fun LogistrationScreen(
                         label = stringResource(id = R.string.pre_auth_search_hint),
                         requestFocus = false,
                         searchValue = textFieldValue,
+                        clearOnSubmit = true,
                         keyboardActions = {
                             focusManager.clearFocus()
                             onSearchClick(textFieldValue.text)

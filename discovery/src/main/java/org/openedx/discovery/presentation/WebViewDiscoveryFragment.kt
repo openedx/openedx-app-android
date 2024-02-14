@@ -40,14 +40,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
@@ -63,7 +66,9 @@ import org.openedx.core.R as CoreR
 
 class WebViewDiscoveryFragment : Fragment() {
 
-    private val viewModel by viewModel<WebViewDiscoveryViewModel>()
+    private val viewModel by viewModel<WebViewDiscoveryViewModel> {
+        parametersOf(requireArguments().getString(ARG_SEARCH_QUERY, ""))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,9 +82,9 @@ class WebViewDiscoveryFragment : Fragment() {
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
-
                 WebViewDiscoveryScreen(
                     windowSize = windowSize,
+                    isPreLogin = viewModel.isPreLogin,
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
@@ -116,9 +121,29 @@ class WebViewDiscoveryFragment : Fragment() {
 
                             else -> {}
                         }
+                    },
+                    onRegisterClick = {
+                        viewModel.navigateToSignUp(parentFragmentManager)
+                    },
+                    onSignInClick = {
+                        viewModel.navigateToSignIn(parentFragmentManager)
+                    },
+                    onBackClick = {
+                        requireActivity().supportFragmentManager.popBackStackImmediate()
                     }
                 )
             }
+        }
+    }
+
+    companion object {
+
+        private const val ARG_SEARCH_QUERY = "query_search"
+
+        fun newInstance(querySearch: String = ""): WebViewDiscoveryFragment {
+            val fragment = WebViewDiscoveryFragment()
+            fragment.arguments = bundleOf(ARG_SEARCH_QUERY to querySearch)
+            return fragment
         }
     }
 }
@@ -127,12 +152,16 @@ class WebViewDiscoveryFragment : Fragment() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
+    isPreLogin: Boolean,
     contentUrl: String,
     uriScheme: String,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
-    onUriClick: (String, WebViewLink.Authority) -> Unit
+    onUriClick: (String, WebViewLink.Authority) -> Unit,
+    onRegisterClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -141,7 +170,23 @@ private fun WebViewDiscoveryScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background
+        backgroundColor = MaterialTheme.appColors.background,
+        bottomBar = {
+            if (isPreLogin) {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 32.dp,
+                        )
+                ) {
+                    AuthButtonsPanel(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick
+                    )
+                }
+            }
+        }
     ) {
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -164,7 +209,11 @@ private fun WebViewDiscoveryScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Toolbar(label = stringResource(id = R.string.discovery_explore_the_catalog))
+            Toolbar(
+                label = stringResource(id = R.string.discovery_explore_the_catalog),
+                canShowBackBtn = isPreLogin,
+                onBackClick = onBackClick
+            )
 
             Surface {
                 Box(
@@ -286,11 +335,15 @@ private fun WebViewDiscoveryScreenPreview() {
         WebViewDiscoveryScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             contentUrl = "https://www.example.com/",
+            isPreLogin = false,
             uriScheme = "",
             hasInternetConnection = false,
             checkInternetConnection = {},
             onWebPageUpdated = {},
             onUriClick = { _, _ -> },
+            onRegisterClick = {},
+            onSignInClick = {},
+            onBackClick = {}
         )
     }
 }

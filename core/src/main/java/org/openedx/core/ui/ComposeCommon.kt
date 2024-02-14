@@ -1,8 +1,6 @@
 package org.openedx.core.ui
 
-import android.content.Context
 import android.os.Build.VERSION.SDK_INT
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -177,6 +175,7 @@ fun SearchBar(
     searchValue: TextFieldValue,
     requestFocus: Boolean = false,
     label: String = stringResource(id = R.string.core_search),
+    clearOnSubmit: Boolean = false,
     keyboardActions: () -> Unit,
     onValueChanged: (TextFieldValue) -> Unit = {},
     onClearValue: () -> Unit,
@@ -258,6 +257,10 @@ fun SearchBar(
         keyboardActions = KeyboardActions {
             keyboardController?.hide()
             keyboardActions()
+            if (clearOnSubmit) {
+                textFieldValue = TextFieldValue("")
+                onClearValue()
+            }
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         maxLines = 1

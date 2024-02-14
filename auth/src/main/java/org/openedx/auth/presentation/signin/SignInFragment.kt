@@ -26,7 +26,10 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 class SignInFragment : Fragment() {
 
     private val viewModel: SignInViewModel by viewModel {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, null))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_INFO_TYPE, "")
+        )
     }
     private val router: AuthRouter by inject()
     private val whatsNewGlobalManager by inject<WhatsNewGlobalManager>()
@@ -64,7 +67,7 @@ class SignInFragment : Fragment() {
 
                                 AuthEvent.RegisterClick -> {
                                     viewModel.signUpClickedEvent()
-                                    router.navigateToSignUp(parentFragmentManager, null)
+                                    router.navigateToSignUp(parentFragmentManager, null, null)
                                 }
 
                                 AuthEvent.BackClick -> {
@@ -79,9 +82,17 @@ class SignInFragment : Fragment() {
                         if (state.loginSuccess) {
                             router.clearBackStack(parentFragmentManager)
                             if (isNeedToShowWhatsNew) {
-                                router.navigateToWhatsNew(parentFragmentManager, viewModel.courseId)
+                                router.navigateToWhatsNew(
+                                    parentFragmentManager,
+                                    viewModel.courseId,
+                                    viewModel.infoType
+                                )
                             } else {
-                                router.navigateToMain(parentFragmentManager, viewModel.courseId)
+                                router.navigateToMain(
+                                    parentFragmentManager,
+                                    viewModel.courseId,
+                                    viewModel.infoType
+                                )
                             }
                         }
 
@@ -99,10 +110,12 @@ class SignInFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String?): SignInFragment {
+        private const val ARG_INFO_TYPE = "info_type"
+        fun newInstance(courseId: String?, infoType: String?): SignInFragment {
             val fragment = SignInFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_INFO_TYPE to infoType
             )
             return fragment
         }
