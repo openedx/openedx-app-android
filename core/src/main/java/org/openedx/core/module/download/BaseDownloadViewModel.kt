@@ -1,6 +1,5 @@
 package org.openedx.core.module.download
 
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -203,11 +202,8 @@ abstract class BaseDownloadViewModel(
 
     fun removeAllDownloadModels() {
         viewModelScope.launch {
-            val t = System.currentTimeMillis()
             val downloadableChildren = downloadableChildrenMap.values.flatten()
             workerController.removeModels(downloadableChildren)
-
-            Log.e("asd", "TIME1 " + (System.currentTimeMillis() - t))
         }
     }
 
