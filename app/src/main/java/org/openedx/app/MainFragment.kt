@@ -13,6 +13,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.adapter.MainNavigationFragmentAdapter
 import org.openedx.app.databinding.FragmentMainBinding
+import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.dashboard.presentation.dashboard.DashboardFragment
@@ -27,6 +28,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val analytics by inject<AppAnalytics>()
     private val viewModel by viewModel<MainViewModel>()
     private val router by inject<DiscoveryRouter>()
+    private val config by inject<Config>()
 
     private lateinit var adapter: MainNavigationFragmentAdapter
 
@@ -82,12 +84,19 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
 
         requireArguments().apply {
-            this.getString(ARG_COURSE_ID, null)?.let {
-                if (it.isNotBlank()) {
-                    router.navigateToCourseDetail(parentFragmentManager, it)
+            getString(ARG_COURSE_ID).takeIf { it.isNullOrBlank().not() }?.let { courseId ->
+                val infoType = getString(ARG_INFO_TYPE)
+
+                if (config.getDiscoveryConfig().isViewTypeWebView() && infoType != null) {
+                    router.navigateToCourseInfo(parentFragmentManager, courseId, infoType)
+                } else {
+                    router.navigateToCourseDetail(parentFragmentManager, courseId)
                 }
+
+                // Clear arguments after navigation
+                putString(ARG_COURSE_ID, "")
+                putString(ARG_INFO_TYPE, "")
             }
-            this.putString(ARG_COURSE_ID, null)
         }
     }
 
@@ -121,10 +130,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String? = null): MainFragment {
+        private const val ARG_INFO_TYPE = "info_type"
+        fun newInstance(courseId: String? = null, infoType: String? = null): MainFragment {
             val fragment = MainFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_INFO_TYPE to infoType
             )
             return fragment
         }

@@ -129,6 +129,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             parametersMap
@@ -169,6 +170,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         val deferred = async { viewModel.uiMessage.first() }
 
@@ -215,6 +217,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         val deferred = async { viewModel.uiMessage.first() }
 
@@ -251,6 +254,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             emptyMap()
@@ -298,6 +302,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         val deferred = async { viewModel.uiMessage.first() }
 
@@ -322,6 +327,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         val deferred = async { viewModel.uiMessage.first() }
 
@@ -346,6 +352,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.getRegistrationFields() } returns listOfFields
         viewModel.getRegistrationFields()

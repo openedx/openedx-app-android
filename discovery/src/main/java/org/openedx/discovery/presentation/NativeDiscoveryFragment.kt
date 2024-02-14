@@ -153,10 +153,10 @@ class NativeDiscoveryFragment : Fragment() {
                         )
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, null)
+                        router.navigateToSignUp(parentFragmentManager, null, null)
                     },
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, null)
+                        router.navigateToSignIn(parentFragmentManager, null, null)
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
@@ -175,7 +175,7 @@ class NativeDiscoveryFragment : Fragment() {
 
     companion object {
         private const val ARG_SEARCH_QUERY = "query_search"
-        fun newInstance(querySearch: String): NativeDiscoveryFragment {
+        fun newInstance(querySearch: String = ""): NativeDiscoveryFragment {
             val fragment = NativeDiscoveryFragment()
             fragment.arguments = bundleOf(
                 ARG_SEARCH_QUERY to querySearch

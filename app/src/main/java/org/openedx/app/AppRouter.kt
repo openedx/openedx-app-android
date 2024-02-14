@@ -28,6 +28,7 @@ import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
+import org.openedx.discovery.presentation.WebViewDiscoveryFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread
@@ -52,19 +53,19 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
-    override fun navigateToMain(fm: FragmentManager, courseId: String?) {
+    override fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance(courseId))
+            .replace(R.id.container, MainFragment.newInstance(courseId, infoType))
             .commit()
     }
 
-    override fun navigateToSignIn(fm: FragmentManager, courseId: String?) {
-        replaceFragmentWithBackStack(fm, SignInFragment.newInstance(courseId))
+    override fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?) {
+        replaceFragmentWithBackStack(fm, SignInFragment.newInstance(courseId, infoType))
     }
 
-    override fun navigateToSignUp(fm: FragmentManager, courseId: String?) {
-        replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId))
+    override fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?) {
+        replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
     }
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {
@@ -75,14 +76,18 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, RestorePasswordFragment())
     }
 
-    override fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String) {
+    override fun navigateToNativeDiscoverCourses(fm: FragmentManager, querySearch: String) {
         replaceFragmentWithBackStack(fm, NativeDiscoveryFragment.newInstance(querySearch))
     }
 
-    override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?) {
+    override fun navigateToWebDiscoverCourses(fm: FragmentManager, querySearch: String) {
+        replaceFragmentWithBackStack(fm, WebViewDiscoveryFragment.newInstance(querySearch))
+    }
+
+    override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?, infoType: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, WhatsNewFragment.newInstance(courseId))
+            .replace(R.id.container, WhatsNewFragment.newInstance(courseId, infoType))
             .commit()
     }
 

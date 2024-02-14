@@ -76,7 +76,10 @@ import org.openedx.whatsnew.presentation.ui.PageIndicator
 class WhatsNewFragment : Fragment() {
 
     private val viewModel: WhatsNewViewModel by viewModel {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, null))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, null),
+            requireArguments().getString(ARG_INFO_TYPE, null)
+        )
     }
     private val preferencesManager by inject<WhatsNewPreferences>()
     private val router by inject<WhatsNewRouter>()
@@ -98,7 +101,11 @@ class WhatsNewFragment : Fragment() {
                     onCloseClick = {
                         val versionName = appData.versionName
                         preferencesManager.lastWhatsNewVersion = versionName
-                        router.navigateToMain(parentFragmentManager, viewModel.courseId)
+                        router.navigateToMain(
+                            parentFragmentManager,
+                            viewModel.courseId,
+                            viewModel.infoType
+                        )
                     }
                 )
             }
@@ -107,10 +114,13 @@ class WhatsNewFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String? = null): WhatsNewFragment {
+        private const val ARG_INFO_TYPE = "info_type"
+
+        fun newInstance(courseId: String? = null, infoType: String? = null): WhatsNewFragment {
             val fragment = WhatsNewFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_INFO_TYPE to infoType
             )
             return fragment
         }

@@ -100,6 +100,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -127,6 +128,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -156,6 +158,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("acc@test.org", "")
 
@@ -184,6 +187,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -214,6 +218,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -245,6 +250,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -277,6 +283,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -309,6 +316,7 @@ class SignInViewModelTest {
             oAuthHelper = oAuthHelper,
             config = config,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
