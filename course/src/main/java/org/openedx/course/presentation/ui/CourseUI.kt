@@ -317,7 +317,7 @@ fun OfflineQueueCard(
                 .weight(1f)
         ) {
             Text(
-                text = downloadModel.title,
+                text = downloadModel.title.ifEmpty { stringResource(id = R.string.course_download_untitled) },
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textPrimary,
                 overflow = TextOverflow.Ellipsis,
