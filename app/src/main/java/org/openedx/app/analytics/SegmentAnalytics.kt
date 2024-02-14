@@ -11,7 +11,7 @@ import com.segment.analytics.kotlin.core.Analytics as SegmentTracker
 
 class SegmentAnalytics(context: Context, config: Config) : Analytics {
 
-    private val logger = Logger(this.javaClass.name)
+    private val logger = Logger(TAG)
     private var tracker: SegmentTracker
 
     init {
@@ -48,5 +48,9 @@ class SegmentAnalytics(context: Context, config: Config) : Analytics {
     override fun logUserId(userId: Long) {
         logger.d { "Segment Analytics User Id log Event: $userId" }
         tracker.identify(userId.toString())
+    }
+
+    private companion object {
+        const val TAG = "SegmentAnalytics"
     }
 }
