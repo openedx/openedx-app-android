@@ -4,12 +4,20 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -33,12 +41,11 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.ProfileNotifier
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import java.util.*
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CourseVideoViewModelTest {
@@ -52,7 +59,6 @@ class CourseVideoViewModelTest {
     private val interactor = mockk<CourseInteractor>()
     private val courseNotifier = spyk<CourseNotifier>()
     private val profileNotifier = spyk<ProfileNotifier>()
-    private val downloadNotifier = spyk<DownloadNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
@@ -178,7 +184,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController
@@ -208,7 +213,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController
@@ -244,7 +248,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController
@@ -276,7 +279,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController
@@ -302,7 +304,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController
@@ -332,7 +333,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController
@@ -365,7 +365,6 @@ class CourseVideoViewModelTest {
             preferencesManager,
             courseNotifier,
             profileNotifier,
-            downloadNotifier,
             analytics,
             downloadDao,
             workerController

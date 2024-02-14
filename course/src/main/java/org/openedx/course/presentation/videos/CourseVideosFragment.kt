@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -674,12 +677,17 @@ private fun AllVideosDownloadItem(
         )
     }
     if (isDownloadingAllVideos) {
-        val progress = downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+        val progress = 1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
 
+        val animatedProgress by animateFloatAsState(
+            targetValue = progress,
+            animationSpec = tween(durationMillis = 2000, easing = LinearEasing),
+            label = "ProgressAnimation"
+        )
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth(),
-            progress = 1 - progress
+            progress = animatedProgress
         )
     }
     Divider()

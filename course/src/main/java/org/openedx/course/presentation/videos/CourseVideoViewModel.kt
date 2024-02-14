@@ -20,8 +20,6 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.DownloadNotifier
-import org.openedx.core.system.notifier.DownloadProgressChanged
 import org.openedx.core.system.notifier.ProfileNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
@@ -37,7 +35,6 @@ class CourseVideoViewModel(
     private val preferencesManager: CorePreferences,
     private val courseNotifier: CourseNotifier,
     private val profileNotifier: ProfileNotifier,
-    private val downloadNotifier: DownloadNotifier,
     private val analytics: CourseAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
@@ -87,20 +84,10 @@ class CourseVideoViewModel(
         viewModelScope.launch {
             downloadModelsStatusFlow.collect {
                 if (_uiState.value is CourseVideosUIState.CourseData) {
-                    val downloadModelsSize = getDownloadModelsSize()
                     val state = _uiState.value as CourseVideosUIState.CourseData
-                    val remainingSize =
-                        if (downloadModelsSize.isAllBlocksDownloadedOrDownloading) {
-                            state.downloadModelsSize.remainingSize
-                        } else {
-                            downloadModelsSize.remainingSize
-                        }
-
                     _uiState.value = state.copy(
                         downloadedState = it.toMap(),
-                        downloadModelsSize = getDownloadModelsSize().copy(
-                            remainingSize = remainingSize
-                        )
+                        downloadModelsSize = getDownloadModelsSize()
                     )
                 }
             }
@@ -112,40 +99,10 @@ class CourseVideoViewModel(
                     _videoSettings.value = preferencesManager.videoSettings
 
                     if (_uiState.value is CourseVideosUIState.CourseData) {
-                        val downloadModelsSize = getDownloadModelsSize()
                         val state = _uiState.value as CourseVideosUIState.CourseData
-                        val remainingSize =
-                            if (downloadModelsSize.isAllBlocksDownloadedOrDownloading) {
-                                state.downloadModelsSize.remainingSize
-                            } else {
-                                downloadModelsSize.remainingSize
-                            }
-
                         _uiState.value = state.copy(
-                            downloadModelsSize = downloadModelsSize.copy(
-                                remainingSize = remainingSize
-                            )
+                            downloadModelsSize = getDownloadModelsSize()
                         )
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            downloadNotifier.notifier.collect { event ->
-                if (event is DownloadProgressChanged) {
-                    if (_uiState.value is CourseVideosUIState.CourseData) {
-                        val downloadModelsSize = getDownloadModelsSize()
-                        if (downloadModelsSize.isAllBlocksDownloadedOrDownloading &&
-                            downloadModelsSize.remainingCount > 0
-                        ) {
-                            val state = _uiState.value as CourseVideosUIState.CourseData
-                            _uiState.value = state.copy(
-                                downloadModelsSize = downloadModelsSize.copy(
-                                    remainingSize = downloadModelsSize.remainingSize - event.value
-                                )
-                            )
-                        }
                     }
                 }
             }
