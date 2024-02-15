@@ -49,7 +49,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.R
 import org.openedx.core.domain.model.VideoQuality
-import org.openedx.core.ui.BackBtn
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.tagId
 import org.openedx.core.ui.Toolbar
@@ -62,7 +61,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.profile.R
 
 class VideoQualityFragment : Fragment() {
 
@@ -173,20 +171,10 @@ private fun VideoQualityScreen(
             ) {
                 Toolbar(
                     modifier = topBarWidth,
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = title,
-                        color = MaterialTheme.appColors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.appTypography.titleMedium
-                    )
-                    BackBtn(Modifier.padding(start = 8.dp)) {
-                        onBackClick()
-                    }
-                }
+                    label = title,
+                    canShowBackBtn = true,
+                    onBackClick = onBackClick
+                )
 
                 Column(
                     modifier = Modifier
