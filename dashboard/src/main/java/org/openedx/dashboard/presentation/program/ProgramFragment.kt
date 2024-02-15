@@ -25,12 +25,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -207,6 +210,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun ProgramInfoScreen(
     windowSize: WindowSize,
@@ -235,7 +239,9 @@ private fun ProgramInfoScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTagsAsResourceId = true },
         backgroundColor = MaterialTheme.appColors.background
     ) {
         val modifierScreenWidth by remember(key1 = windowSize) {

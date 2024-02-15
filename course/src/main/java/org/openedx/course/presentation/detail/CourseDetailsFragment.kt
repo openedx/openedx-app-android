@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
@@ -26,8 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -149,6 +150,7 @@ class CourseDetailsFragment : Fragment() {
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun CourseDetailsScreen(
     windowSize: WindowSize,
@@ -174,7 +176,10 @@ internal fun CourseDetailsScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
@@ -224,27 +229,14 @@ internal fun CourseDetailsScreen(
             Column(
                 screenWidth
             ) {
-                Box(
-                    Modifier
+                Toolbar(
+                    modifier = Modifier
                         .fillMaxWidth()
                         .zIndex(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    BackBtn {
-                        onBackClick()
-                    }
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 56.dp),
-                        text = stringResource(id = courseR.string.course_details),
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                    label = stringResource(id = courseR.string.course_details),
+                    canShowBackBtn = true,
+                    onBackClick = onBackClick
+                )
                 Spacer(Modifier.height(6.dp))
                 Box(
                     Modifier
@@ -286,7 +278,12 @@ internal fun CourseDetailsScreen(
                                     )
                                 }
                                 if (isPreview) {
-                                    Text(htmlBody, Modifier.padding(all = 20.dp))
+                                    Text(
+                                        text = htmlBody,
+                                        modifier = Modifier
+                                            .testTag("txt_course_description")
+                                            .padding(all = 20.dp),
+                                    )
                                 } else {
                                     var webViewAlpha by remember { mutableStateOf(0f) }
                                     if (webViewAlpha == 0f) {
@@ -384,6 +381,7 @@ private fun CourseDetailNativeContent(
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
+                    modifier = Modifier.testTag("ib_play_video"),
                     onClick = {
                         uriHandler.openUri(course.media.courseVideo?.uri!!)
                     }
@@ -409,18 +407,21 @@ private fun CourseDetailNativeContent(
                 Spacer(Modifier.height(24.dp))
             }
             Text(
+                modifier = Modifier.testTag("txt_course_short_description"),
                 text = course.shortDescription,
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textPrimaryVariant
             )
             Spacer(Modifier.height(16.dp))
             Text(
+                modifier = Modifier.testTag("txt_course_name"),
                 text = course.name,
                 style = MaterialTheme.appTypography.titleLarge,
                 color = MaterialTheme.appColors.textPrimary
             )
             Spacer(Modifier.height(12.dp))
             Text(
+                modifier = Modifier.testTag("txt_course_org"),
                 text = course.org,
                 style = MaterialTheme.appTypography.labelMedium,
                 color = MaterialTheme.appColors.textAccent
@@ -473,18 +474,21 @@ private fun CourseDetailNativeContentLandscape(
         ) {
             Column {
                 Text(
+                    modifier = Modifier.testTag("txt_course_short_description"),
                     text = course.shortDescription,
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textPrimaryVariant
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_course_name"),
                     text = course.name,
                     style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textPrimary
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_course_org"),
                     text = course.org,
                     style = MaterialTheme.appTypography.labelMedium,
                     color = MaterialTheme.appColors.textAccent
@@ -516,6 +520,7 @@ private fun CourseDetailNativeContentLandscape(
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
                 IconButton(
+                    modifier = Modifier.testTag("ib_play_video"),
                     onClick = {
                         uriHandler.openUri(course.media.courseVideo?.uri!!)
                     }
@@ -572,6 +577,7 @@ private fun EnrollOverLabel() {
             )
             Spacer(Modifier.width(12.dp))
             Text(
+                modifier = Modifier.testTag("txt_enroll_error"),
                 text = stringResource(id = courseR.string.course_you_cant_enroll),
                 color = MaterialTheme.appColors.textPrimaryVariant,
                 style = MaterialTheme.appTypography.titleSmall

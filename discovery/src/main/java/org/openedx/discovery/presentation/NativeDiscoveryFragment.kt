@@ -40,10 +40,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -186,7 +190,7 @@ class NativeDiscoveryFragment : Fragment() {
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun DiscoveryScreen(
     windowSize: WindowSize,
@@ -222,7 +226,11 @@ internal fun DiscoveryScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
             if (!isUserLoggedIn) {
@@ -306,6 +314,7 @@ internal fun DiscoveryScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
+                    modifier = Modifier.testTag("txt_discovery_title"),
                     text = stringResource(id = R.string.discovery_Discovery),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleMedium
@@ -354,12 +363,15 @@ internal fun DiscoveryScreen(
                                     item {
                                         Column {
                                             Text(
+                                                modifier = Modifier.testTag("txt_discovery_new"),
                                                 text = stringResource(id = R.string.discovery_discovery_new),
                                                 color = MaterialTheme.appColors.textPrimary,
                                                 style = MaterialTheme.appTypography.displaySmall
                                             )
                                             Text(
-                                                modifier = Modifier.padding(top = 4.dp),
+                                                modifier = Modifier
+                                                    .testTag("txt_discovery_lets_find")
+                                                    .padding(top = 4.dp),
                                                 text = stringResource(id = R.string.discovery_lets_find),
                                                 color = MaterialTheme.appColors.textPrimary,
                                                 style = MaterialTheme.appTypography.titleSmall

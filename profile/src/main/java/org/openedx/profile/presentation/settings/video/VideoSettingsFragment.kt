@@ -6,31 +6,61 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.core.ui.*
+import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.presentation.ProfileRouter
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.profile.R as profileR
 
 class VideoSettingsFragment : Fragment() {
@@ -76,6 +106,7 @@ class VideoSettingsFragment : Fragment() {
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun VideoSettingsScreen(
     windowSize: WindowSize,
@@ -91,7 +122,11 @@ private fun VideoSettingsScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         scaffoldState = scaffoldState
     ) { paddingValues ->
 
@@ -127,23 +162,12 @@ private fun VideoSettingsScreen(
                     .displayCutoutForLandscape(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
+                Toolbar(
                     modifier = topBarWidth,
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        text = stringResource(id = org.openedx.profile.R.string.profile_video_settings),
-                        color = MaterialTheme.appColors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.appTypography.titleMedium
-                    )
-
-                    BackBtn(modifier = Modifier.padding(start = 8.dp)) {
-                        onBackClick()
-                    }
-                }
+                    label = stringResource(id = org.openedx.profile.R.string.profile_video_settings),
+                    canShowBackBtn = true,
+                    onBackClick = onBackClick
+                )
 
                 Column(
                     modifier = Modifier.then(contentWidth),
@@ -151,6 +175,7 @@ private fun VideoSettingsScreen(
                 ) {
                     Row(
                         Modifier
+                            .testTag("btn_wifi_only")
                             .fillMaxWidth()
                             .height(92.dp)
                             .noRippleClickable {
@@ -162,18 +187,21 @@ private fun VideoSettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
+                                modifier = Modifier.testTag("txt_wifi_only_label"),
                                 text = stringResource(id = profileR.string.profile_wifi_only_download),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
+                                modifier = Modifier.testTag("txt_wifi_only_description"),
                                 text = stringResource(id = profileR.string.profile_only_download_when_wifi_turned_on),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
                         }
                         Switch(
+                            modifier = Modifier.testTag("sw_wifi_only"),
                             checked = wifiDownloadOnly,
                             onCheckedChange = {
                                 wifiDownloadOnly = !wifiDownloadOnly
@@ -188,6 +216,7 @@ private fun VideoSettingsScreen(
                     Divider()
                     Row(
                         Modifier
+                            .testTag("btn_video_quality")
                             .fillMaxWidth()
                             .height(92.dp)
                             .clickable {
@@ -198,12 +227,14 @@ private fun VideoSettingsScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(
+                                modifier = Modifier.testTag("txt_video_quality_label"),
                                 text = stringResource(id = profileR.string.profile_video_streaming_quality),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
+                                modifier = Modifier.testTag("txt_video_quality_description"),
                                 text = stringResource(id = videoSettings.videoQuality.titleResId),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium

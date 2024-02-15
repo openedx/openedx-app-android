@@ -62,6 +62,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -155,18 +156,21 @@ fun CourseImageHeader(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
+                    modifier = Modifier.testTag("ic_congratulations"),
                     painter = painterResource(id = R.drawable.ic_course_completed_mark),
                     contentDescription = stringResource(id = R.string.course_congratulations),
                     tint = Color.White
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_congratulations"),
                     text = stringResource(id = R.string.course_congratulations),
                     style = MaterialTheme.appTypography.headlineMedium,
                     color = Color.White
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_course_passed"),
                     text = stringResource(id = R.string.course_passed),
                     style = MaterialTheme.appTypography.bodyMedium,
                     color = Color.White

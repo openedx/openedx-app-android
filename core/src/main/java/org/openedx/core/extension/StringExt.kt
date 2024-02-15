@@ -1,6 +1,7 @@
 package org.openedx.core.extension
 
 import android.util.Patterns
+import java.util.Locale
 import java.util.regex.Pattern
 
 
@@ -28,3 +29,7 @@ fun String.replaceLinkTags(isDarkTheme: Boolean): String {
     }
     return text
 }
+
+fun String.replaceSpace(target: String = ""): String = this.replace(" ", target)
+
+fun String.tagId(): String = this.replaceSpace("_").lowercase(Locale.getDefault())

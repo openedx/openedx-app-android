@@ -29,10 +29,13 @@
     <string name="core_dismiss">Dismiss</string>
     <string name="core_reload">Reload</string>
     <string name="core_downloading_in_progress">Downloading in progress</string>
-    <string name="auto_recommended_text">Auto (Recommended)</string>
-    <string name="video_quality_p360">360p (Lower data usage)</string>
-    <string name="video_quality_p540">540p</string>
-    <string name="video_quality_p720">720p (Best quality)</string>
+    <string name="core_video_quality_auto">Auto</string>
+    <string name="core_video_quality_auto_description">Recommended</string>
+    <string name="core_video_quality_p360" translatable="false">360p</string>
+    <string name="core_video_quality_p360_description">Lower data usage</string>
+    <string name="core_video_quality_p540" translatable="false">540p</string>
+    <string name="core_video_quality_p720">720p translatable="false"</string>
+    <string name="core_video_quality_p720_description">Best quality</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
     <string name="core_email_chooser_header">Send email using…</string>
     <string name="core_email_client_not_present">No e-mail clients installed</string>
