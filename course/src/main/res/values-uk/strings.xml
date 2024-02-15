@@ -36,7 +36,7 @@
     <string name="course_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
     <string name="course_navigation_course">Курс</string>
     <string name="course_navigation_videos">Відео</string>
-    <string name="course_navigation_discussion">Обговорення</string>
+    <string name="course_navigation_discussions">Обговорення</string>
     <string name="course_navigation_handouts">Матеріали</string>
     <string name="course_can_download_only_with_wifi">Ви можете завантажувати контент тільки через Wi-Fi</string>
     <string name="course_this_interactive_component">Ця інтерактивна компонента ще не доступна</string>
