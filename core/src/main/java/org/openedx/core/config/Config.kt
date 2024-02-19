@@ -47,6 +47,10 @@ class Config(context: Context) {
         return getString(FEEDBACK_EMAIL_ADDRESS, "")
     }
 
+    fun getPlatformName(): String {
+        return getString(PLATFORM_NAME, "")
+    }
+
     fun getAgreement(locale: String): AgreementUrls {
         val agreement =
             getObjectOrNewInstance(AGREEMENT_URLS, AgreementUrlsConfig::class.java).mapToDomain()
@@ -168,6 +172,7 @@ class Config(context: Context) {
         private const val COURSE_BANNER_ENABLED = "COURSE_BANNER_ENABLED"
         private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
+        private const val PLATFORM_NAME = "PLATFORM_NAME"
     }
 
     enum class ViewType {

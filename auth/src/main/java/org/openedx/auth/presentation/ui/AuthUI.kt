@@ -95,7 +95,9 @@ fun RequiredFields(
             }
 
             RegistrationFieldType.CHECKBOX -> {
-                //Text("checkbox")
+                CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                    onFieldUpdated(field.name, it.toString())
+                }
             }
 
             RegistrationFieldType.SELECT -> {
@@ -172,7 +174,9 @@ fun OptionalFields(
                 }
 
                 RegistrationFieldType.CHECKBOX -> {
-                    //Text("checkbox")
+                    CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                        onFieldUpdated(field.name, it.toString())
+                    }
                 }
 
                 RegistrationFieldType.SELECT -> {

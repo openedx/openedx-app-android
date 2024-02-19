@@ -23,6 +23,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.UIMessage
@@ -54,6 +55,7 @@ class SignInViewModelTest {
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val agreementProvider = mockk<AgreementProvider>()
     private val oAuthHelper = mockk<OAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
@@ -73,6 +75,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { agreementProvider.getAgreement(true) } returns null
         every { config.isPreLoginExperienceEnabled() } returns false
         every { config.isSocialAuthEnabled() } returns false
         every { config.getFacebookConfig() } returns FacebookConfig()
@@ -98,6 +101,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -126,6 +130,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -156,6 +161,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -185,6 +191,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -216,6 +223,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -248,6 +256,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -281,6 +290,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",
@@ -314,6 +324,7 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
             courseId = "",
             infoType = "",

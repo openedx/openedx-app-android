@@ -18,6 +18,7 @@ import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
@@ -155,6 +156,7 @@ val appModule = module {
     single<CourseAnalytics> { get<AnalyticsManager>() }
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
 
+    factory { AgreementProvider(get(), get()) }
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }

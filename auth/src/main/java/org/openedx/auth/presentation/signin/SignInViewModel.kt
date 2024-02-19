@@ -14,6 +14,7 @@ import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.BaseViewModel
@@ -38,6 +39,7 @@ class SignInViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
+    agreementProvider: AgreementProvider,
     config: Config,
     val courseId: String?,
     val infoType: String?,
@@ -52,6 +54,7 @@ class SignInViewModel(
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
+            agreement = agreementProvider.getAgreement(isSignIn = true),
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState

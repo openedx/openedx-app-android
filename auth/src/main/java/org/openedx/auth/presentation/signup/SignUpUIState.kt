@@ -6,6 +6,9 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 
 data class SignUpUIState(
     val allFields: List<RegistrationField> = emptyList(),
+    val requiredFields: List<RegistrationField> = emptyList(),
+    val optionalFields: List<RegistrationField> = emptyList(),
+    val agreementFields: List<RegistrationField> = emptyList(),
     val isFacebookAuthEnabled: Boolean = false,
     val isGoogleAuthEnabled: Boolean = false,
     val isMicrosoftAuthEnabled: Boolean = false,

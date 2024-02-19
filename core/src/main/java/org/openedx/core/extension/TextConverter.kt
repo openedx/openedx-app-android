@@ -21,13 +21,16 @@ object TextConverter : KoinComponent {
         val text = doc.text()
         val linksMap = mutableMapOf<String, String>()
         for (link in links) {
-            val resultLink = if (link.attr("href").isNotEmpty() && link.attr("href")[0] == '/') {
+            var resultLink = if (link.attr("href").isNotEmpty() && link.attr("href")[0] == '/') {
                 link.attr("href").substring(1)
             } else {
                 link.attr("href")
             }
-            if (resultLink.isNotEmpty() && isLinkValid(config.getApiHostURL() + resultLink)) {
-                linksMap[link.text()] = config.getApiHostURL() + resultLink
+            if (!resultLink.startsWith("http")) {
+                resultLink = config.getApiHostURL() + resultLink
+            }
+            if (resultLink.isNotEmpty() && isLinkValid(resultLink)) {
+                linksMap[link.text()] = resultLink
             }
         }
         return LinkedText(text, linksMap.toMap())

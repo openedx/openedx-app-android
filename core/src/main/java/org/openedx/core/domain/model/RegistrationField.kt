@@ -13,7 +13,8 @@ data class RegistrationField(
     val required: Boolean,
     val restrictions: Restrictions,
     val options: List<Option>,
-    val errorInstructions: String = ""
+    val errorInstructions: String = "",
+    val defaultValue: Boolean = false,
 ) {
 
     data class Restrictions(

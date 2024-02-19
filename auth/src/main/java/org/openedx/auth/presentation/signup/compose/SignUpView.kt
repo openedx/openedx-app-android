@@ -137,9 +137,6 @@ internal fun SignUpView(
 
     val isImeVisible by isImeVisibleState()
 
-    val fields = uiState.allFields.filter { it.required }
-    val optionalFields = uiState.allFields.filter { !it.required }
-
     LaunchedEffect(uiState.validationError) {
         if (uiState.validationError) {
             coroutine.launch {
@@ -294,7 +291,6 @@ internal fun SignUpView(
                         modifier = Modifier
                             .fillMaxHeight()
                             .background(MaterialTheme.appColors.background),
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (uiState.isLoading) {
@@ -350,7 +346,7 @@ internal fun SignUpView(
                                     }
                                 }
                                 RequiredFields(
-                                    fields = fields,
+                                    fields = uiState.requiredFields,
                                     showErrorMap = showErrorMap,
                                     selectableNamesMap = selectableNamesMap,
                                     onSelectClick = { serverName, field, list ->
@@ -369,7 +365,7 @@ internal fun SignUpView(
                                     },
                                     onFieldUpdated = onFieldUpdated
                                 )
-                                if (optionalFields.isNotEmpty()) {
+                                if (uiState.optionalFields.isNotEmpty()) {
                                     ExpandableText(
                                         modifier = Modifier.testTag("txt_optional_field"),
                                         isExpanded = showOptionalFields,
@@ -377,31 +373,51 @@ internal fun SignUpView(
                                             showOptionalFields = !showOptionalFields
                                         }
                                     )
-                                    Surface(color = MaterialTheme.appColors.background) {
-                                        AnimatedVisibility(visible = showOptionalFields) {
-                                            OptionalFields(
-                                                fields = optionalFields,
-                                                showErrorMap = showErrorMap,
-                                                selectableNamesMap = selectableNamesMap,
-                                                onSelectClick = { serverName, field, list ->
-                                                    keyboardController?.hide()
-                                                    serverFieldName.value =
-                                                        serverName
-                                                    expandedList = list
-                                                    coroutine.launch {
-                                                        if (bottomSheetScaffoldState.isVisible) {
-                                                            bottomSheetScaffoldState.hide()
-                                                        } else {
-                                                            bottomDialogTitle = field.label
-                                                            showErrorMap[field.name] = false
-                                                            bottomSheetScaffoldState.show()
-                                                        }
+                                    AnimatedVisibility(visible = showOptionalFields) {
+                                        OptionalFields(
+                                            fields = uiState.optionalFields,
+                                            showErrorMap = showErrorMap,
+                                            selectableNamesMap = selectableNamesMap,
+                                            onSelectClick = { serverName, field, list ->
+                                                keyboardController?.hide()
+                                                serverFieldName.value =
+                                                    serverName
+                                                expandedList = list
+                                                coroutine.launch {
+                                                    if (bottomSheetScaffoldState.isVisible) {
+                                                        bottomSheetScaffoldState.hide()
+                                                    } else {
+                                                        bottomDialogTitle = field.label
+                                                        showErrorMap[field.name] = false
+                                                        bottomSheetScaffoldState.show()
                                                     }
-                                                },
-                                                onFieldUpdated = onFieldUpdated,
-                                            )
-                                        }
+                                                }
+                                            },
+                                            onFieldUpdated = onFieldUpdated,
+                                        )
                                     }
+                                }
+                                if (uiState.agreementFields.isNotEmpty()) {
+                                    OptionalFields(
+                                        fields = uiState.agreementFields,
+                                        showErrorMap = showErrorMap,
+                                        selectableNamesMap = selectableNamesMap,
+                                        onSelectClick = { serverName, field, list ->
+                                            keyboardController?.hide()
+                                            serverFieldName.value = serverName
+                                            expandedList = list
+                                            coroutine.launch {
+                                                if (bottomSheetScaffoldState.isVisible) {
+                                                    bottomSheetScaffoldState.hide()
+                                                } else {
+                                                    bottomDialogTitle = field.label
+                                                    showErrorMap[field.name] = false
+                                                    bottomSheetScaffoldState.show()
+                                                }
+                                            }
+                                        },
+                                        onFieldUpdated = onFieldUpdated
+                                    )
                                 }
 
                                 if (uiState.isButtonLoading) {
@@ -472,7 +488,10 @@ private fun RegistrationScreenTabletPreview() {
         SignUpView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = SignUpUIState(
-                allFields = listOf(field, field, field.copy(required = false)),
+                allFields = listOf(field),
+                requiredFields = listOf(field, field),
+                optionalFields = listOf(field, field),
+                agreementFields = listOf(field),
             ),
             uiMessage = null,
             onBackClick = {},
