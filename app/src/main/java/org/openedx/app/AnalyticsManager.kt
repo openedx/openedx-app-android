@@ -22,7 +22,7 @@ class AnalyticsManager(
 
     init {
         // Initialise all the analytics libraries here
-        if (config.getFirebaseConfig().projectId.isNotBlank()) {
+        if (config.getFirebaseConfig().enabled) {
             addAnalyticsTracker(FirebaseAnalytics(context = context))
         }
         val segmentConfig = config.getSegmentConfig()

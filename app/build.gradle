@@ -17,6 +17,12 @@ if (firebaseEnabled) {
     }
 
     preBuild.dependsOn(generateGoogleServicesJson)
+} else {
+    tasks.register('removeGoogleServicesJson') {
+        configHelper.removeGoogleServicesJson()
+    }
+
+    preBuild.dependsOn(removeGoogleServicesJson)
 }
 
 android {

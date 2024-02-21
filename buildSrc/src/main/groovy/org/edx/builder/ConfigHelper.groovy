@@ -140,4 +140,12 @@ class ConfigHelper {
             it.write(new JsonBuilder(configJson).toPrettyString())
         }
     }
+
+    def removeGoogleServicesJson() {
+        def googleServicesJsonPath = projectDir.path + "/app/google-services.json"
+        def file = new File(googleServicesJsonPath)
+        if (file.exists()) {
+            file.delete()
+        }
+    }
 }
