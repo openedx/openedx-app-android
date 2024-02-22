@@ -217,36 +217,38 @@ private fun DownloadQueueScreen(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DownloadQueueScreenPreview() {
-    DownloadQueueScreen(
-        windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-        uiState = DownloadQueueUIState.Models(
-            listOf(
-                DownloadModel(
-                    id = "",
-                    title = "1",
-                    size = 0,
-                    path = "",
-                    url = "",
-                    type = FileType.VIDEO,
-                    downloadedState = DownloadedState.DOWNLOADING,
-                    progress = 0f
+    OpenEdXTheme {
+        DownloadQueueScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = DownloadQueueUIState.Models(
+                listOf(
+                    DownloadModel(
+                        id = "",
+                        title = "1",
+                        size = 0,
+                        path = "",
+                        url = "",
+                        type = FileType.VIDEO,
+                        downloadedState = DownloadedState.DOWNLOADING,
+                        progress = 0f
+                    ),
+                    DownloadModel(
+                        id = "",
+                        title = "2",
+                        size = 0,
+                        path = "",
+                        url = "",
+                        type = FileType.VIDEO,
+                        downloadedState = DownloadedState.DOWNLOADING,
+                        progress = 0f
+                    )
                 ),
-                DownloadModel(
-                    id = "",
-                    title = "2",
-                    size = 0,
-                    path = "",
-                    url = "",
-                    type = FileType.VIDEO,
-                    downloadedState = DownloadedState.DOWNLOADING,
-                    progress = 0f
-                )
+                currentProgressId = "",
+                currentProgressValue = 0,
+                currentProgressSize = 1
             ),
-            currentProgressId = "",
-            currentProgressValue = 0,
-            currentProgressSize = 1
-        ),
-        onBackClick = {},
-        onDownloadClick = {}
-    )
+            onBackClick = {},
+            onDownloadClick = {}
+        )
+    }
 }

@@ -1,3 +1,3 @@
 package org.openedx.core.system.notifier
 
-class VideoQualityChanged : ProfileEvent
+class VideoQualityChanged : VideoEvent

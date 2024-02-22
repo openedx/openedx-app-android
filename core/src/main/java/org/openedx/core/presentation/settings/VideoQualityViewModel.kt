@@ -7,12 +7,12 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.VideoQuality
-import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
 
 class VideoQualityViewModel(
     private val preferencesManager: CorePreferences,
-    private val notifier: ProfileNotifier,
+    private val notifier: VideoNotifier,
     private val qualityType: String
 ) : BaseViewModel() {
 

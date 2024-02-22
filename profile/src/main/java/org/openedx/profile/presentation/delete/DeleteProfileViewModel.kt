@@ -11,8 +11,8 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.core.system.notifier.AccountDeactivated
-import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.AccountDeactivated
+import org.openedx.profile.system.notifier.ProfileNotifier
 import kotlinx.coroutines.launch
 
 class DeleteProfileViewModel(

@@ -12,8 +12,8 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
-import org.openedx.core.system.notifier.AccountUpdated
-import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.AccountUpdated
+import org.openedx.profile.system.notifier.ProfileNotifier
 import kotlinx.coroutines.launch
 import java.io.File
 

@@ -82,7 +82,8 @@ class VideoQualityFragment : Fragment() {
 
                 val title = stringResource(
                     id = if (viewModel.getQualityType() == VideoQualityType.Streaming)
-                        R.string.core_video_streaming_quality else
+                        R.string.core_video_streaming_quality
+                    else
                         R.string.core_video_download_quality
                 )
                 val videoQuality by viewModel.videoQuality.observeAsState(viewModel.getCurrentVideoQuality())

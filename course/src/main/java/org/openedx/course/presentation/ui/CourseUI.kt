@@ -90,6 +90,7 @@ import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
@@ -1279,6 +1280,31 @@ private fun CourseDatesBannerTabletPreview() {
             banner = mockedCourseBannerInfo,
             resetDates = {}
         )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OfflineQueueCardPreview() {
+    OpenEdXTheme {
+        Surface(color = MaterialTheme.appColors.background) {
+            OfflineQueueCard(
+                downloadModel = DownloadModel(
+                    id = "",
+                    title = "Problems of society",
+                    size = 4000,
+                    path = "",
+                    url = "",
+                    type = FileType.VIDEO,
+                    downloadedState = DownloadedState.DOWNLOADING,
+                    progress = 0f
+                ),
+                progressValue = 10,
+                progressSize = 30,
+                onDownloadClick = {}
+            )
+        }
     }
 }
 

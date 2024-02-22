@@ -30,9 +30,9 @@ import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.core.system.notifier.AccountDeactivated
-import org.openedx.core.system.notifier.AccountUpdated
-import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.AccountDeactivated
+import org.openedx.profile.system.notifier.AccountUpdated
+import org.openedx.profile.system.notifier.ProfileNotifier
 
 class ProfileViewModel(
     private val appData: AppData,

@@ -20,7 +20,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -34,7 +34,7 @@ class CourseVideoViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val courseNotifier: CourseNotifier,
-    private val profileNotifier: ProfileNotifier,
+    private val videoNotifier: VideoNotifier,
     private val analytics: CourseAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
@@ -94,7 +94,7 @@ class CourseVideoViewModel(
         }
 
         viewModelScope.launch {
-            profileNotifier.notifier.collect { event ->
+            videoNotifier.notifier.collect { event ->
                 if (event is VideoQualityChanged) {
                     _videoSettings.value = preferencesManager.videoSettings
 

@@ -41,7 +41,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.ProfileNotifier
+import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -58,7 +58,7 @@ class CourseVideoViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val courseNotifier = spyk<CourseNotifier>()
-    private val profileNotifier = spyk<ProfileNotifier>()
+    private val videoNotifier = spyk<VideoNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
@@ -183,7 +183,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
@@ -212,7 +212,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
@@ -247,7 +247,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
@@ -278,7 +278,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
@@ -303,7 +303,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
@@ -332,7 +332,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
@@ -364,7 +364,7 @@ class CourseVideoViewModelTest {
             networkConnection,
             preferencesManager,
             courseNotifier,
-            profileNotifier,
+            videoNotifier,
             analytics,
             downloadDao,
             workerController
