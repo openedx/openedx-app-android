@@ -34,7 +34,7 @@ FIREBASE:
   CLOUD_MESSAGING_ENABLED: false
   PROJECT_NUMBER: ''
   PROJECT_ID: ''
-  APPLICATION_ID: ''
+  APPLICATION_ID: '' #App ID field from the Firebase console or mobilesdk_app_id from the google-services.json file.
   API_KEY: ''
 
 SEGMENT_IO:
