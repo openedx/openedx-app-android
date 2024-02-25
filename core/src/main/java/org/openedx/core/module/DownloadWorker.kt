@@ -10,7 +10,9 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 import org.openedx.core.R
 import org.openedx.core.module.db.DownloadDao
@@ -19,12 +21,14 @@ import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.download.CurrentProgress
 import org.openedx.core.module.download.FileDownloader
+import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.DownloadProgressChanged
 import java.io.File
 
 class DownloadWorker(
     val context: Context,
     parameters: WorkerParameters
-) : CoroutineWorker(context, parameters) {
+) : CoroutineWorker(context, parameters), CoroutineScope {
 
     private val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as
@@ -32,6 +36,7 @@ class DownloadWorker(
 
     private val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
 
+    private val notifier by inject<DownloadNotifier>(DownloadNotifier::class.java)
     private val downloadDao: DownloadDao by inject(DownloadDao::class.java)
 
     private var downloadEnqueue = listOf<DownloadModel>()
@@ -43,6 +48,7 @@ class DownloadWorker(
     )
 
     private var currentDownload: DownloadModel? = null
+    private var lastUpdateTime = 0L
 
     private val fileDownloader by inject<FileDownloader>(FileDownloader::class.java)
 
@@ -79,14 +85,24 @@ class DownloadWorker(
 
     private fun updateProgress() {
         fileDownloader.progressListener = object : CurrentProgress {
-            override fun progress(value: Long) {
-                if (!fileDownloader.isCanceled) {
+            override fun progress(value: Long, size: Long) {
+                val progress = 100 * value / size
+                // Update no more than 5 times per sec
+                if (!fileDownloader.isCanceled &&
+                    (System.currentTimeMillis() - lastUpdateTime > 200)
+                ) {
+                    lastUpdateTime = System.currentTimeMillis()
+
                     currentDownload?.let {
+                        launch {
+                            notifier.send(DownloadProgressChanged(it.id, value, size))
+                        }
+
                         notificationManager.notify(
                             NOTIFICATION_ID,
                             notificationBuilder
                                 .setSmallIcon(R.drawable.core_ic_check_in_box)
-                                .setProgress(100, value.toInt(), false)
+                                .setProgress(100, progress.toInt(), false)
                                 .setPriority(NotificationManager.IMPORTANCE_LOW)
                                 .setContentText(context.getString(R.string.core_downloading_in_progress))
                                 .setContentTitle(it.title)

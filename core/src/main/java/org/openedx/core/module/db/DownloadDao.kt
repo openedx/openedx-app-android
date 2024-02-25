@@ -10,7 +10,7 @@ interface DownloadDao {
     suspend fun removeDownloadModel(id: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDownloadModel(vararg downloadModelEntity: DownloadModelEntity)
+    suspend fun insertDownloadModel(downloadModelEntities: List<DownloadModelEntity>)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateDownloadModel(downloadModelEntity: DownloadModelEntity)
@@ -18,4 +18,9 @@ interface DownloadDao {
     @Query("SELECT * FROM download_model")
     fun readAllData() : Flow<List<DownloadModelEntity>>
 
+    @Query("SELECT * FROM download_model WHERE id in (:ids)")
+    fun readAllDataByIds(ids: List<String>) : Flow<List<DownloadModelEntity>>
+
+    @Query("DELETE FROM download_model WHERE id in (:ids)")
+    suspend fun removeAllDownloadModels(ids: List<String>)
 }

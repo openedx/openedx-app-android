@@ -12,6 +12,7 @@ import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
+import org.openedx.core.presentation.settings.VideoQualityViewModel
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
@@ -27,6 +28,7 @@ import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
+import org.openedx.course.settings.download.DownloadQueueViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.dashboard.DashboardViewModel
@@ -52,7 +54,6 @@ import org.openedx.profile.presentation.anothers_account.AnothersProfileViewMode
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
-import org.openedx.profile.presentation.settings.video.VideoQualityViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
@@ -120,7 +121,7 @@ val screenModule = module {
     }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get()) }
-    viewModel { VideoQualityViewModel(get(), get()) }
+    viewModel { (qualityType: String) -> VideoQualityViewModel(get(), get(), qualityType) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
 
@@ -210,6 +211,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -290,6 +292,16 @@ val screenModule = module {
         WhatsNewViewModel(
             courseId,
             infoType,
+            get()
+        )
+    }
+
+    viewModel { (descendants: List<String>) ->
+        DownloadQueueViewModel(
+            descendants,
+            get(),
+            get(),
+            get(),
             get()
         )
     }

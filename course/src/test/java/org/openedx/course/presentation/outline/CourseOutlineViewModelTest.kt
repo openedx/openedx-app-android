@@ -385,7 +385,7 @@ class CourseOutlineViewModelTest {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
-        coEvery { workerController.saveModels(*anyVararg()) } returns Unit
+        coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
@@ -418,7 +418,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
         coEvery { downloadDao.readAllData() } returns mockk()
-        coEvery { workerController.saveModels(*anyVararg()) } returns Unit
+        coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
         coEvery { interactor.getDatesBannerInfo(any()) } returns mockCourseDatesBannerInfo
@@ -448,7 +448,7 @@ class CourseOutlineViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
         every { networkConnection.isOnline() } returns false
-        coEvery { workerController.saveModels(*anyVararg()) } returns Unit
+        coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
 

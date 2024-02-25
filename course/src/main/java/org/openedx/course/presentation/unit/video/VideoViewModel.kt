@@ -49,5 +49,5 @@ class VideoViewModel(
         }
     }
 
-    fun getVideoQuality() = preferencesManager.videoSettings.videoQuality
+    fun getVideoQuality() = preferencesManager.videoSettings.videoStreamingQuality
 }

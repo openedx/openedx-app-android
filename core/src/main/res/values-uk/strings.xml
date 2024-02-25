@@ -65,4 +65,6 @@
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s зображення профілю</string>
+
+    <string name="core_video_streaming_quality">Якість транслювання відео</string>
 </resources>

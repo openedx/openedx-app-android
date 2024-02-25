@@ -35,6 +35,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
@@ -86,7 +87,10 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
+import org.openedx.core.extension.toFileSize
+import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
@@ -286,6 +290,77 @@ fun CourseSectionCard(
                 }
                 CardArrow(
                     degrees = 0f
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OfflineQueueCard(
+    downloadModel: DownloadModel,
+    progressValue: Long,
+    progressSize: Long,
+    onDownloadClick: (DownloadModel) -> Unit
+) {
+    val iconModifier = Modifier.size(24.dp)
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .padding(start = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            Text(
+                text = downloadModel.title.ifEmpty { stringResource(id = R.string.course_download_untitled) },
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+            Text(
+                text = downloadModel.size.toLong().toFileSize(),
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textSecondary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+
+            val progress = progressValue.toFloat() / progressSize
+
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                progress = progress
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Box(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(28.dp),
+                backgroundColor = Color.LightGray,
+                strokeWidth = 2.dp,
+                color = MaterialTheme.appColors.primary
+            )
+            IconButton(
+                modifier = iconModifier
+                    .padding(2.dp),
+                onClick = { onDownloadClick(downloadModel) }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                    tint = MaterialTheme.appColors.error
                 )
             }
         }
@@ -758,10 +833,12 @@ fun CourseSubSectionItem(
                         IconButton(
                             modifier = iconModifier.padding(2.dp),
                             onClick = { onDownloadClick(block) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                                tint = MaterialTheme.appColors.error
+                            Text(
+                                modifier = Modifier
+                                    .padding(bottom = 4.dp),
+                                text = "i",
+                                style = MaterialTheme.appTypography.titleMedium,
+                                color = MaterialTheme.appColors.primary
                             )
                         }
                     }
@@ -1203,6 +1280,31 @@ private fun CourseDatesBannerTabletPreview() {
             banner = mockedCourseBannerInfo,
             resetDates = {}
         )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OfflineQueueCardPreview() {
+    OpenEdXTheme {
+        Surface(color = MaterialTheme.appColors.background) {
+            OfflineQueueCard(
+                downloadModel = DownloadModel(
+                    id = "",
+                    title = "Problems of society",
+                    size = 4000,
+                    path = "",
+                    url = "",
+                    type = FileType.VIDEO,
+                    downloadedState = DownloadedState.DOWNLOADING,
+                    progress = 0f
+                ),
+                progressValue = 10,
+                progressSize = 30,
+                onDownloadClick = {}
+            )
+        }
     }
 }
 

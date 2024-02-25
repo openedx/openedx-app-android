@@ -173,3 +173,4 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 }
+

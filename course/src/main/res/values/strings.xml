@@ -35,8 +35,8 @@
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_navigation_course">Course</string>
-    <string name="course_navigation_video">Video</string>
-    <string name="course_navigation_discussion">Discussion</string>
+    <string name="course_navigation_videos">Videos</string>
+    <string name="course_navigation_discussions">Discussions</string>
     <string name="course_navigation_handouts">Handouts</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
     <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
@@ -50,6 +50,8 @@
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="course_you_are_already_enrolled" tools:ignore="MissingTranslation">You are already enrolled in this course.</string>
     <string name="course_discover" tools:ignore="MissingTranslation">Discover</string>
+    <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
+
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 
@@ -62,4 +64,13 @@
     <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
     <string name="course_accessibility_section_completed">Section completed</string>
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
+
+    <string name="course_download_queue_title">Downloads</string>
+    <string name="course_download_untitled">(Untitled)</string>
+    <string name="course_download_big_files_confirmation_title">Download</string>
+    <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
+    <string name="course_delete_while_downloading_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
+    <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
+    <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
+
 </resources>

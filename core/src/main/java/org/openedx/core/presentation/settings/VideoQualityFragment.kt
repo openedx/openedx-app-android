@@ -1,7 +1,6 @@
-package org.openedx.profile.presentation.settings.video
+package org.openedx.core.presentation.settings
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -44,8 +43,11 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import org.openedx.core.R
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.tagId
@@ -59,11 +61,14 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.profile.R as profileR
 
 class VideoQualityFragment : Fragment() {
 
-    private val viewModel by viewModel<VideoQualityViewModel>()
+    private val viewModel by viewModel<VideoQualityViewModel> {
+        parametersOf(
+            requireArguments().getString(ARG_QUALITY_TYPE, "")
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,13 +80,20 @@ class VideoQualityFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
 
-                val videoQuality by viewModel.videoQuality.observeAsState(viewModel.currentVideoQuality)
+                val title = stringResource(
+                    id = if (viewModel.getQualityType() == VideoQualityType.Streaming)
+                        R.string.core_video_streaming_quality
+                    else
+                        R.string.core_video_download_quality
+                )
+                val videoQuality by viewModel.videoQuality.observeAsState(viewModel.getCurrentVideoQuality())
 
                 VideoQualityScreen(
                     windowSize = windowSize,
+                    title = title,
                     selectedVideoQuality = videoQuality,
                     onQualityChanged = {
-                        viewModel.setVideoDownloadQuality(it)
+                        viewModel.setVideoQuality(it)
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
@@ -90,12 +102,27 @@ class VideoQualityFragment : Fragment() {
         }
     }
 
+    companion object {
+
+        private const val ARG_QUALITY_TYPE = "quality_type"
+
+        fun newInstance(
+            type: String,
+        ): VideoQualityFragment {
+            val fragment = VideoQualityFragment()
+            fragment.arguments = bundleOf(
+                ARG_QUALITY_TYPE to type
+            )
+            return fragment
+        }
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun VideoQualityScreen(
     windowSize: WindowSize,
+    title: String,
     selectedVideoQuality: VideoQuality,
     onQualityChanged: (VideoQuality) -> Unit,
     onBackClick: () -> Unit
@@ -145,7 +172,7 @@ private fun VideoQualityScreen(
             ) {
                 Toolbar(
                     modifier = topBarWidth,
-                    label = stringResource(id = profileR.string.profile_video_streaming_quality),
+                    label = title,
                     canShowBackBtn = true,
                     onBackClick = onBackClick
                 )
@@ -223,15 +250,17 @@ private fun QualityOption(
     Divider()
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_NO)
-@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun VideoQualityScreenPreview() {
     OpenEdXTheme {
         VideoQualityScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            title = "",
             selectedVideoQuality = VideoQuality.OPTION_720P,
             onQualityChanged = {},
             onBackClick = {})
     }
 }
+

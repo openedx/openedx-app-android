@@ -4,10 +4,11 @@ import org.openedx.core.R
 
 data class VideoSettings(
     val wifiDownloadOnly: Boolean,
-    val videoQuality: VideoQuality
+    val videoStreamingQuality: VideoQuality,
+    val videoDownloadQuality: VideoQuality
 ) {
     companion object {
-        val default = VideoSettings(true, VideoQuality.AUTO)
+        val default = VideoSettings(true, VideoQuality.AUTO, VideoQuality.AUTO)
     }
 }
 

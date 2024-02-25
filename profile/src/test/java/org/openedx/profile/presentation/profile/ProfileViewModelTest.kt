@@ -222,7 +222,7 @@ class ProfileViewModelTest {
             appUpgradeNotifier
         )
         coEvery { interactor.logout() } throws UnknownHostException()
-        coEvery { workerController.cancelWork() } returns Unit
+        coEvery { workerController.removeModels() } returns Unit
         every { analytics.logoutEvent(false) } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
@@ -252,7 +252,7 @@ class ProfileViewModelTest {
             appUpgradeNotifier
         )
         coEvery { interactor.logout() } throws Exception()
-        coEvery { workerController.cancelWork() } returns Unit
+        coEvery { workerController.removeModels() } returns Unit
         every { analytics.logoutEvent(false) } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
@@ -287,7 +287,7 @@ class ProfileViewModelTest {
         coEvery { interactor.getAccount() } returns mockk()
         every { analytics.logoutEvent(false) } returns Unit
         coEvery { interactor.logout() } returns Unit
-        coEvery { workerController.cancelWork() } returns Unit
+        coEvery { workerController.removeModels() } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()

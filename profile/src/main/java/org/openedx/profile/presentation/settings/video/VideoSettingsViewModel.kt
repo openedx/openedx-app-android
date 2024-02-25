@@ -4,17 +4,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.profile.system.notifier.ProfileNotifier
-import org.openedx.profile.system.notifier.VideoQualityChanged
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.core.system.notifier.VideoQualityChanged
 
 class VideoSettingsViewModel(
     private val preferencesManager: CorePreferences,
-    private val notifier: ProfileNotifier
+    private val notifier: VideoNotifier
 ) : BaseViewModel() {
 
     private val _videoSettings = MutableLiveData<VideoSettings>()

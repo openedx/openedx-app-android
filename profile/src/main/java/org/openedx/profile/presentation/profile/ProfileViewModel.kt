@@ -136,7 +136,7 @@ class ProfileViewModel(
     fun logout() {
         viewModelScope.launch {
             try {
-                workerController.cancelWork()
+                workerController.removeModels()
                 withContext(dispatcher) {
                     interactor.logout()
                 }
