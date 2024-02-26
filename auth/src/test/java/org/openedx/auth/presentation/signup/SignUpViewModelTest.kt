@@ -29,6 +29,7 @@ import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
@@ -46,7 +47,6 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import java.net.UnknownHostException
 
-
 @ExperimentalCoroutinesApi
 class SignUpViewModelTest {
 
@@ -62,6 +62,7 @@ class SignUpViewModelTest {
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
     private val agreementProvider = mockk<AgreementProvider>()
     private val oAuthHelper = mockk<OAuthHelper>()
+    private val router = mockk<AuthRouter>()
 
     //region parameters
 
@@ -117,6 +118,7 @@ class SignUpViewModelTest {
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { config.getMicrosoftConfig() } returns MicrosoftConfig()
     }
 
     @After
@@ -135,6 +137,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -177,6 +180,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -225,6 +229,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -251,7 +256,6 @@ class SignUpViewModelTest {
         assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
-
     @Test
     fun `success register`() = runTest {
         val viewModel = SignUpViewModel(
@@ -263,6 +267,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -312,6 +317,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -338,6 +344,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -364,6 +371,7 @@ class SignUpViewModelTest {
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )

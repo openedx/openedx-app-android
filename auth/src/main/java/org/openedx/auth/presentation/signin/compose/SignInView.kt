@@ -195,7 +195,10 @@ internal fun LoginScreen(
                                 modifier = Modifier.testTag("txt_${state.agreement.name}"),
                                 fullText = linkedText.text,
                                 hyperLinks = linkedText.links,
-                                linkTextColor = MaterialTheme.appColors.primary
+                                linkTextColor = MaterialTheme.appColors.primary,
+                                action = { link ->
+                                    onEvent(AuthEvent.OpenLink(linkedText.links, link))
+                                },
                             )
                         }
                     }
@@ -361,7 +364,6 @@ private fun SignInScreenPreview() {
         )
     }
 }
-
 
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)

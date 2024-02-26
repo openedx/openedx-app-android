@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
@@ -52,7 +53,7 @@ internal fun CheckboxField(
 @Preview(widthDp = 375, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CheckboxFieldPreview() {
-    MaterialTheme {
+    OpenEdXTheme {
         CheckboxField(
             text = "Test",
             defaultValue = true,

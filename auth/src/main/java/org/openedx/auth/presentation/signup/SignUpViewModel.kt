@@ -1,7 +1,7 @@
 package org.openedx.auth.presentation.signup
 
-import androidx.compose.ui.text.intl.Locale
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -17,6 +17,7 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.BaseViewModel
@@ -40,6 +41,7 @@ class SignUpViewModel(
     private val agreementProvider: AgreementProvider,
     private val oAuthHelper: OAuthHelper,
     private val config: Config,
+    private val router: AuthRouter,
     val courseId: String?,
     val infoType: String?,
 ) : BaseViewModel() {
@@ -73,9 +75,6 @@ class SignUpViewModel(
         viewModelScope.launch {
             try {
                 updateFields(interactor.getRegistrationFields())
-                _uiState.update { state ->
-                    state.copy(isLoading = false)
-                }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(
@@ -90,6 +89,10 @@ class SignUpViewModel(
                         )
                     )
                 }
+            } finally {
+                _uiState.update { state ->
+                    state.copy(isLoading = false)
+                }
             }
         }
     }
@@ -99,8 +102,20 @@ class SignUpViewModel(
         val requiredFields = mutableListOf<RegistrationField>()
         val optionalFields = mutableListOf<RegistrationField>()
         val agreementFields = mutableListOf<RegistrationField>()
-        val agreement = agreementProvider.getAgreement(isSignIn = false)
-        if (agreement != null) {
+        val agreementText = agreementProvider.getAgreement(isSignIn = false)
+        if (agreementText != null) {
+            val agreement = RegistrationField(
+                name = ApiConstants.RegistrationFields.HONOR_CODE,
+                label = agreementText,
+                type = RegistrationFieldType.PLAINTEXT,
+                placeholder = "",
+                instructions = "",
+                exposed = false,
+                required = false,
+                restrictions = RegistrationField.Restrictions(),
+                options = emptyList(),
+                errorInstructions = ""
+            )
             val honourCode = allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
             val marketingEmails = allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
             mutableAllFields.remove(honourCode)
@@ -265,5 +280,14 @@ class SignUpViewModel(
             }
         }
         updateFields(updatedFields)
+    }
+
+    fun openLink(fragmentManager: FragmentManager, links: Map<String, String>, link: String) {
+        links.forEach { (key, value) ->
+            if (value == link) {
+                router.navigateToWebContent(fragmentManager, key, value)
+                return
+            }
+        }
     }
 }

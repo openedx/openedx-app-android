@@ -395,6 +395,7 @@ fun HyperlinkText(
     linkTextFontWeight: FontWeight = FontWeight.Normal,
     linkTextDecoration: TextDecoration = TextDecoration.None,
     fontSize: TextUnit = TextUnit.Unspecified,
+    action: ((String) -> Unit)? = null,
 ) {
     val annotatedString = buildAnnotatedString {
         append(fullText)
@@ -447,7 +448,7 @@ fun HyperlinkText(
             annotatedString
                 .getStringAnnotations("URL", it, it)
                 .firstOrNull()?.let { stringAnnotation ->
-                    uriHandler.openUri(stringAnnotation.item)
+                    action?.invoke(stringAnnotation.item) ?: uriHandler.openUri(stringAnnotation.item)
                 }
         }
     )

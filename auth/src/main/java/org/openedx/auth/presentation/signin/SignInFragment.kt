@@ -11,14 +11,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.auth.data.model.AuthType
-import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.signin.compose.LoginScreen
 import org.openedx.core.AppUpdateState
-import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -31,8 +28,6 @@ class SignInFragment : Fragment() {
             requireArguments().getString(ARG_INFO_TYPE, "")
         )
     }
-    private val router: AuthRouter by inject()
-    private val whatsNewGlobalManager by inject<WhatsNewGlobalManager>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,41 +56,27 @@ class SignInFragment : Fragment() {
                                 )
 
                                 AuthEvent.ForgotPasswordClick -> {
-                                    viewModel.forgotPasswordClickedEvent()
-                                    router.navigateToRestorePassword(parentFragmentManager)
+                                    viewModel.forgotPasswordClickedEvent(parentFragmentManager)
                                 }
 
                                 AuthEvent.RegisterClick -> {
-                                    viewModel.signUpClickedEvent()
-                                    router.navigateToSignUp(parentFragmentManager, null, null)
+                                    viewModel.signUpClickedEvent(parentFragmentManager)
                                 }
 
                                 AuthEvent.BackClick -> {
                                     requireActivity().supportFragmentManager.popBackStackImmediate()
                                 }
+
+                                is AuthEvent.OpenLink -> viewModel.openLink(
+                                    parentFragmentManager,
+                                    event.links,
+                                    event.link
+                                )
                             }
                         },
                     )
                     LaunchedEffect(state.loginSuccess) {
-                        val isNeedToShowWhatsNew =
-                            whatsNewGlobalManager.shouldShowWhatsNew()
-                        if (state.loginSuccess) {
-                            router.clearBackStack(parentFragmentManager)
-                            if (isNeedToShowWhatsNew) {
-                                router.navigateToWhatsNew(
-                                    parentFragmentManager,
-                                    viewModel.courseId,
-                                    viewModel.infoType
-                                )
-                            } else {
-                                router.navigateToMain(
-                                    parentFragmentManager,
-                                    viewModel.courseId,
-                                    viewModel.infoType
-                                )
-                            }
-                        }
-
+                        viewModel.proceedWhatsNew(parentFragmentManager)
                     }
                 } else {
                     AppUpgradeRequiredScreen(
@@ -125,6 +106,7 @@ class SignInFragment : Fragment() {
 internal sealed interface AuthEvent {
     data class SignIn(val login: String, val password: String) : AuthEvent
     data class SocialSignIn(val authType: AuthType) : AuthEvent
+    data class OpenLink(val links: Map<String, String>, val link: String) : AuthEvent
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent

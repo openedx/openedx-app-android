@@ -97,6 +97,7 @@ internal fun SignUpView(
     onBackClick: () -> Unit,
     onFieldUpdated: (String, String) -> Unit,
     onRegisterClick: (authType: AuthType) -> Unit,
+    onHyperLinkClick: (Map<String, String>, String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
@@ -416,7 +417,10 @@ internal fun SignUpView(
                                                 }
                                             }
                                         },
-                                        onFieldUpdated = onFieldUpdated
+                                        onFieldUpdated = onFieldUpdated,
+                                        hyperLinkAction = { links, link ->
+                                            onHyperLinkClick(links, link)
+                                        },
                                     )
                                 }
 
@@ -476,6 +480,7 @@ private fun RegistrationScreenPreview() {
             onBackClick = {},
             onRegisterClick = {},
             onFieldUpdated = { _, _ -> },
+            onHyperLinkClick = { _, _ -> },
         )
     }
 }
@@ -497,6 +502,7 @@ private fun RegistrationScreenTabletPreview() {
             onBackClick = {},
             onRegisterClick = {},
             onFieldUpdated = { _, _ -> },
+            onHyperLinkClick = { _, _ -> },
         )
     }
 }
