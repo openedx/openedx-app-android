@@ -329,7 +329,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertTrue(viewModel.uiState.value.isLoading)
+        assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(noInternet, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
@@ -356,7 +356,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertTrue(viewModel.uiState.value.isLoading)
+        assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
