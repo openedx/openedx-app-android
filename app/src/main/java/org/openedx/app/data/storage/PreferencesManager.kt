@@ -6,14 +6,17 @@ import org.openedx.app.BuildConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
+import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
+import org.openedx.core.extension.replaceSpace
+import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,
-    WhatsNewPreferences, InAppReviewPreferences {
+    WhatsNewPreferences, InAppReviewPreferences, CoursePreferences {
 
     private val sharedPreferences =
         context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
@@ -113,6 +116,16 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             )
         }
 
+    override var appConfig: AppConfig
+        set(value) {
+            val appConfigJson = Gson().toJson(value)
+            saveString(APP_CONFIG, appConfigJson)
+        }
+        get() {
+            val appConfigString = getString(APP_CONFIG)
+            return Gson().fromJson(appConfigString, AppConfig::class.java)
+        }
+
     override var lastWhatsNewVersion: String
         set(value) {
             saveString(LAST_WHATS_NEW_VERSION, value)
@@ -133,12 +146,18 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
                 ?: InAppReviewPreferences.VersionName.default
         }
 
-
     override var wasPositiveRated: Boolean
         set(value) {
             saveBoolean(APP_WAS_POSITIVE_RATED, value)
         }
         get() = getBoolean(APP_WAS_POSITIVE_RATED)
+
+    override fun setCalendarSyncEventsDialogShown(courseName: String) {
+        saveBoolean(courseName.replaceSpace("_"), true)
+    }
+
+    override fun isCalendarSyncEventsDialogShown(courseName: String): Boolean =
+        getBoolean(courseName.replaceSpace("_"))
 
     companion object {
         private const val ACCESS_TOKEN = "access_token"
@@ -152,5 +171,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val VIDEO_SETTINGS_WIFI_DOWNLOAD_ONLY = "video_settings_wifi_download_only"
         private const val VIDEO_SETTINGS_STREAMING_QUALITY = "video_settings_streaming_quality"
         private const val VIDEO_SETTINGS_DOWNLOAD_QUALITY = "video_settings_download_quality"
+        private const val APP_CONFIG = "app_config"
     }
 }

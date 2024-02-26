@@ -305,3 +305,9 @@ fun Date.isTimeLessThan24Hours(): Boolean {
     val timeInMillis = (calendar.timeInMillis - TimeUtils.getCurrentTime()).unaryPlus()
     return timeInMillis < TimeUnit.DAYS.toMillis(1)
 }
+
+fun Date.toCalendar(): Calendar {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    return calendar
+}

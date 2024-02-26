@@ -15,6 +15,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -37,6 +38,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -46,6 +49,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -88,18 +92,20 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
+import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as coreR
 
 class CourseDatesFragment : Fragment() {
@@ -107,10 +113,17 @@ class CourseDatesFragment : Fragment() {
     private val viewModel by viewModel<CourseDatesViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_COURSE_NAME, ""),
             requireArguments().getBoolean(ARG_IS_SELF_PACED, true),
         )
     }
     private val router by inject<CourseRouter>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        viewModel.updateAndFetchCalendarSyncState()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -121,9 +134,10 @@ class CourseDatesFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                val uiState by viewModel.uiState.observeAsState()
+                val uiState by viewModel.uiState.observeAsState(DatesUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val refreshing by viewModel.updating.observeAsState(false)
+                val calendarSyncUIState by viewModel.calendarSyncUIState.collectAsState()
 
                 CourseDatesScreen(
                     windowSize = windowSize,
@@ -132,6 +146,7 @@ class CourseDatesFragment : Fragment() {
                     refreshing = refreshing,
                     isSelfPaced = viewModel.isSelfPaced,
                     hasInternetConnection = viewModel.hasInternetConnection,
+                    calendarSyncUIState = calendarSyncUIState,
                     onReloadClick = {
                         viewModel.getCourseDates()
                     },
@@ -162,6 +177,9 @@ class CourseDatesFragment : Fragment() {
                             }
                         }
                     },
+                    onCalendarSyncSwitch = { isChecked ->
+                        viewModel.handleCalendarSyncState(isChecked)
+                    },
                 )
             }
         }
@@ -173,15 +191,19 @@ class CourseDatesFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
+        private const val ARG_COURSE_NAME = "courseName"
         private const val ARG_IS_SELF_PACED = "selfPaced"
+
         fun newInstance(
             courseId: String,
+            courseName: String,
             isSelfPaced: Boolean,
         ): CourseDatesFragment {
             val fragment = CourseDatesFragment()
             fragment.arguments =
                 bundleOf(
                     ARG_COURSE_ID to courseId,
+                    ARG_COURSE_NAME to courseName,
                     ARG_IS_SELF_PACED to isSelfPaced,
                 )
             return fragment
@@ -193,15 +215,17 @@ class CourseDatesFragment : Fragment() {
 @Composable
 internal fun CourseDatesScreen(
     windowSize: WindowSize,
-    uiState: DatesUIState?,
+    uiState: DatesUIState,
     uiMessage: UIMessage?,
     refreshing: Boolean,
     isSelfPaced: Boolean,
     hasInternetConnection: Boolean,
+    calendarSyncUIState: CalendarSyncUIState,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     onItemClick: (String) -> Unit,
     onSyncDates: () -> Unit,
+    onCalendarSyncSwitch: (Boolean) -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -240,7 +264,6 @@ internal fun CourseDatesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .statusBarsInset()
                 .displayCutoutForLandscape(), contentAlignment = Alignment.TopCenter
         ) {
             Surface(
@@ -252,89 +275,98 @@ internal fun CourseDatesScreen(
                         .fillMaxWidth()
                         .pullRefresh(pullRefreshState)
                 ) {
-                    uiState?.let {
-                        when (uiState) {
-                            is DatesUIState.Loading -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                }
+                    when (uiState) {
+                        is DatesUIState.Loading -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
+                        }
 
-                            is DatesUIState.Dates -> {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    contentPadding = listBottomPadding
-                                ) {
-                                    val courseBanner = uiState.courseDatesResult.courseBanner
-                                    val datesSection = uiState.courseDatesResult.datesSection
+                        is DatesUIState.Dates -> {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                contentPadding = listBottomPadding
+                            ) {
+                                val courseBanner = uiState.courseDatesResult.courseBanner
+                                val datesSection = uiState.courseDatesResult.datesSection
 
-                                    if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
-                                        item {
-                                            if (windowSize.isTablet) {
-                                                CourseDatesBannerTablet(
-                                                    modifier = Modifier.padding(bottom = 16.dp),
-                                                    banner = courseBanner,
-                                                    resetDates = onSyncDates,
-                                                )
-                                            } else {
-                                                CourseDatesBanner(
-                                                    modifier = Modifier.padding(bottom = 16.dp),
-                                                    banner = courseBanner,
-                                                    resetDates = onSyncDates
-                                                )
-                                            }
+                                if (calendarSyncUIState.isCalendarSyncEnabled) {
+                                    item {
+                                        CalendarSyncCard(
+                                            modifier = Modifier.padding(top = 24.dp),
+                                            checked = calendarSyncUIState.isSynced,
+                                            onCalendarSync = onCalendarSyncSwitch
+                                        )
+                                    }
+                                }
+
+                                if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
+                                    item {
+                                        if (windowSize.isTablet) {
+                                            CourseDatesBannerTablet(
+                                                modifier = Modifier.padding(top = 16.dp),
+                                                banner = courseBanner,
+                                                resetDates = onSyncDates,
+                                            )
+                                        } else {
+                                            CourseDatesBanner(
+                                                modifier = Modifier.padding(top = 16.dp),
+                                                banner = courseBanner,
+                                                resetDates = onSyncDates
+                                            )
                                         }
                                     }
+                                }
 
-                                    // Handle DatesSection.COMPLETED separately
-                                    datesSection[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
+                                // Handle DatesSection.COMPLETED separately
+                                datesSection[DatesSection.COMPLETED]?.isNotEmptyThenLet { section ->
+                                    item {
+                                        ExpandableView(
+                                            sectionKey = DatesSection.COMPLETED,
+                                            sectionDates = section,
+                                            onItemClick = onItemClick,
+                                        )
+                                    }
+                                }
+
+                                // Handle other sections
+                                val sectionsKey =
+                                    datesSection.keys.minus(DatesSection.COMPLETED).toList()
+                                sectionsKey.forEach { sectionKey ->
+                                    datesSection[sectionKey]?.isNotEmptyThenLet { section ->
                                         item {
-                                            ExpandableView(
-                                                sectionKey = DatesSection.COMPLETED,
+                                            CourseDateBlockSection(
+                                                sectionKey = sectionKey,
                                                 sectionDates = section,
                                                 onItemClick = onItemClick,
                                             )
                                         }
                                     }
-
-                                    // Handle other sections
-                                    val sectionsKey =
-                                        datesSection.keys.minus(DatesSection.COMPLETED).toList()
-                                    sectionsKey.forEach { sectionKey ->
-                                        datesSection[sectionKey]?.isNotEmptyThenLet { section ->
-                                            item {
-                                                CourseDateBlockSection(
-                                                    sectionKey = sectionKey,
-                                                    sectionDates = section,
-                                                    onItemClick = onItemClick,
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            DatesUIState.Empty -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        text = stringResource(id = R.string.course_dates_unavailable_message),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.titleMedium,
-                                        textAlign = TextAlign.Center
-                                    )
                                 }
                             }
                         }
+
+                        DatesUIState.Empty -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(id = R.string.course_dates_unavailable_message),
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    style = MaterialTheme.appTypography.titleMedium,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
                     }
+
                     PullRefreshIndicator(
                         refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter)
                     )
@@ -354,6 +386,68 @@ internal fun CourseDatesScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CalendarSyncCard(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    onCalendarSync: (Boolean) -> Unit,
+) {
+    val cardModifier = modifier
+        .background(
+            MaterialTheme.appColors.cardViewBackground,
+            MaterialTheme.appShapes.material.medium
+        )
+        .border(
+            1.dp,
+            MaterialTheme.appColors.cardViewBorder,
+            MaterialTheme.appShapes.material.medium
+        )
+        .padding(16.dp)
+
+    Column(modifier = cardModifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.course_ic_calenday_sync),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .weight(1f),
+                text = stringResource(id = R.string.course_header_sync_to_calendar),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textDark
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = onCalendarSync,
+                modifier = Modifier.size(48.dp),
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.appColors.primary,
+                    checkedTrackColor = MaterialTheme.appColors.primary
+                )
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+                .height(40.dp),
+            text = stringResource(id = R.string.course_body_sync_to_calendar),
+            style = MaterialTheme.appTypography.bodyMedium,
+            color = MaterialTheme.appColors.textDark,
+        )
     }
 }
 
@@ -382,6 +476,7 @@ fun ExpandableView(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = 16.dp)
             .background(MaterialTheme.appColors.cardViewBackground, MaterialTheme.shapes.medium)
             .border(0.75.dp, MaterialTheme.appColors.cardViewBorder, MaterialTheme.shapes.medium)
     ) {
@@ -618,13 +713,15 @@ private fun CourseDatesScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
+            refreshing = false,
             isSelfPaced = true,
             hasInternetConnection = true,
-            refreshing = false,
-            onSwipeRefresh = {},
+            calendarSyncUIState = mockCalendarSyncUIState,
             onReloadClick = {},
+            onSwipeRefresh = {},
             onItemClick = {},
             onSyncDates = {},
+            onCalendarSyncSwitch = {},
         )
     }
 }
@@ -638,13 +735,15 @@ private fun CourseDatesScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
+            refreshing = false,
             isSelfPaced = true,
             hasInternetConnection = true,
-            refreshing = false,
-            onSwipeRefresh = {},
+            calendarSyncUIState = mockCalendarSyncUIState,
             onReloadClick = {},
+            onSwipeRefresh = {},
             onItemClick = {},
             onSyncDates = {},
+            onCalendarSyncSwitch = {},
         )
     }
 }
@@ -730,3 +829,9 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
             )
         )
     )
+
+val mockCalendarSyncUIState = CalendarSyncUIState(
+    isCalendarSyncEnabled = true,
+    isSynced = true,
+    checkForOutOfSync = AtomicReference()
+)
