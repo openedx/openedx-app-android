@@ -56,11 +56,11 @@ class SignInFragment : Fragment() {
                                 )
 
                                 AuthEvent.ForgotPasswordClick -> {
-                                    viewModel.forgotPasswordClickedEvent(parentFragmentManager)
+                                    viewModel.navigateToForgotPassword(parentFragmentManager)
                                 }
 
                                 AuthEvent.RegisterClick -> {
-                                    viewModel.signUpClickedEvent(parentFragmentManager)
+                                    viewModel.navigateToSignUp(parentFragmentManager)
                                 }
 
                                 AuthEvent.BackClick -> {

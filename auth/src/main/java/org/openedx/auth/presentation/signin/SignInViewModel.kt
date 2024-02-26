@@ -148,12 +148,12 @@ class SignInViewModel(
         }
     }
 
-    fun signUpClickedEvent(parentFragmentManager: FragmentManager) {
+    fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, null, null)
         analytics.signUpClickedEvent()
     }
 
-    fun forgotPasswordClickedEvent(parentFragmentManager: FragmentManager) {
+    fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {
         router.navigateToRestorePassword(parentFragmentManager)
         analytics.forgotPasswordClickedEvent()
     }
@@ -214,8 +214,7 @@ class SignInViewModel(
     }
 
     fun proceedWhatsNew(parentFragmentManager: FragmentManager) {
-        val isNeedToShowWhatsNew =
-            whatsNewGlobalManager.shouldShowWhatsNew()
+        val isNeedToShowWhatsNew = whatsNewGlobalManager.shouldShowWhatsNew()
         if (uiState.value.loginSuccess) {
             router.clearBackStack(parentFragmentManager)
             if (isNeedToShowWhatsNew) {
