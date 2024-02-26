@@ -4,6 +4,7 @@ import android.app.Application
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
+import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -29,6 +30,13 @@ class OpenEdXApp : Application() {
         if (config.getFirebaseConfig().enabled) {
             Firebase.initialize(this)
         }
-    }
 
+        if (config.getBranchConfig().enabled) {
+            if (BuildConfig.DEBUG) {
+                Branch.enableTestMode()
+                Branch.enableLogging()
+            }
+            Branch.getAutoInstance(this)
+        }
+    }
 }

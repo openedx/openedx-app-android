@@ -31,6 +31,8 @@ class AppViewModel(
 
     private var logoutHandledAt: Long = 0
 
+    val isBranchEnabled get() = config.getBranchConfig().enabled
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         setUserId()

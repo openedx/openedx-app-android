@@ -1,8 +1,10 @@
 package org.openedx.app
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +14,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.window.layout.WindowMetricsCalculator
+import io.branch.referral.Branch
+import io.branch.referral.Branch.BranchUniversalReferralInitListener
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
@@ -134,6 +138,43 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        if (viewModel.isBranchEnabled) {
+            val callback = BranchUniversalReferralInitListener { _, linkProperties, error ->
+                if (linkProperties != null) {
+                    Log.i(BRANCH_TAG, "Branch init complete.")
+                    Log.i(BRANCH_TAG, linkProperties.controlParams.toString())
+                } else if (error != null) {
+                    Log.e(BRANCH_TAG, "Branch init failed. Caused by -" + error.message)
+                }
+            }
+
+            Branch.sessionBuilder(this)
+                .withCallback(callback)
+                .withData(this.intent.data)
+                .init()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        this.intent = intent
+
+        if (viewModel.isBranchEnabled) {
+            if (intent?.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false) == true) {
+                Branch.sessionBuilder(this).withCallback { referringParams, error ->
+                    if (error != null) {
+                        Log.e(BRANCH_TAG, error.message)
+                    } else if (referringParams != null) {
+                        Log.i(BRANCH_TAG, referringParams.toString())
+                    }
+                }.reInit()
+            }
+        }
+    }
+
     private fun addFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .add(R.id.container, fragment)
@@ -173,5 +214,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         const val TOP_INSET = "topInset"
         const val BOTTOM_INSET = "bottomInset"
         const val CUTOUT_INSET = "cutoutInset"
+        const val BRANCH_TAG = "Branch"
+        const val BRANCH_FORCE_NEW_SESSION = "branch_force_new_session"
     }
 }

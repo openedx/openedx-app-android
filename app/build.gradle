@@ -46,12 +46,15 @@ android {
     productFlavors {
         prod {
             dimension 'env'
+            setupBranchConfigFields(it)
         }
         develop {
             dimension 'env'
+            setupBranchConfigFields(it)
         }
         stage {
             dimension 'env'
+            setupBranchConfigFields(it)
         }
     }
 
@@ -130,6 +133,11 @@ dependencies {
     // Braze SDK Integration
     implementation "com.braze:braze-segment-kotlin:1.4.2"
 
+    // Branch SDK Integration
+    implementation 'io.branch.sdk.android:library:5.9.0'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+    implementation "com.android.installreferrer:installreferrer:2.2"
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
@@ -139,4 +147,30 @@ dependencies {
     testImplementation "io.mockk:mockk-android:$mockk_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"
+}
+
+private def setupBranchConfigFields(buildType) {
+    def branchConfig = configHelper.fetchConfig().get("BRANCH")
+    def branchKey = ""
+    def branchUriScheme = ""
+    def branchHost = ""
+    def branchAlternateHost = ""
+
+    if (branchConfig && branchConfig.get("ENABLED")) {
+        branchKey = branchConfig.getOrDefault("KEY", "")
+        branchUriScheme = branchConfig.getOrDefault("URI_SCHEME", "")
+        branchHost = branchConfig.getOrDefault("HOST", "")
+        branchAlternateHost = branchConfig.getOrDefault("ALTERNATE_HOST", "")
+
+        // Validation: Throw exception if any field is empty
+        if (branchKey.isEmpty() || branchUriScheme.isEmpty() || branchHost.isEmpty() ||
+                branchAlternateHost.isEmpty()) {
+            throw new IllegalStateException("One or more Branch configuration fields are empty.")
+        }
+    }
+
+    buildType.resValue "string", "branch_key", branchKey
+    buildType.resValue "string", "branch_uri_scheme", branchUriScheme
+    buildType.resValue "string", "branch_host", branchHost
+    buildType.resValue "string", "branch_alternate_host", branchAlternateHost
 }
