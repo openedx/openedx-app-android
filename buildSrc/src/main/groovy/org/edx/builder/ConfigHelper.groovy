@@ -95,4 +95,57 @@ class ConfigHelper {
             it.write(new JsonBuilder(configJson).toPrettyString())
         }
     }
+
+    def generateGoogleServicesJson(applicationId) {
+        def config = fetchConfig()
+        def firebase = config.get("FIREBASE")
+        if (!firebase) {
+            return
+        }
+        if (!firebase.getOrDefault("ENABLED", false)) {
+            return
+        }
+
+        def googleServicesJsonPath = projectDir.path + "/app/"
+        new File(googleServicesJsonPath).mkdirs()
+
+        def projectInfo = [
+                project_number: firebase.getOrDefault("PROJECT_NUMBER", ""),
+                project_id    : firebase.getOrDefault("PROJECT_ID", ""),
+                storage_bucket: "${firebase.getOrDefault("PROJECT_ID", "")}.appspot.com"
+        ]
+        def clientInfo = [
+                mobilesdk_app_id   : firebase.getOrDefault("APPLICATION_ID", ""),
+                android_client_info: [
+                        package_name: applicationId
+                ]
+        ]
+        def client = [
+                client_info : clientInfo,
+                oauth_client: [],
+                api_key     : [[current_key: firebase.getOrDefault("API_KEY", "")]],
+                services    : [
+                        appinvite_service: [
+                                other_platform_oauth_client: []
+                        ]
+                ]
+        ]
+        def configJson = [
+                project_info         : projectInfo,
+                client               : [client],
+                configuration_version: "1"
+        ]
+
+        new FileWriter(googleServicesJsonPath + "/google-services.json").withWriter {
+            it.write(new JsonBuilder(configJson).toPrettyString())
+        }
+    }
+
+    def removeGoogleServicesJson() {
+        def googleServicesJsonPath = projectDir.path + "/app/google-services.json"
+        def file = new File(googleServicesJsonPath)
+        if (file.exists()) {
+            file.delete()
+        }
+    }
 }

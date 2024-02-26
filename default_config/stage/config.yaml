@@ -32,10 +32,10 @@ FIREBASE:
   ENABLED: false
   ANALYTICS_SOURCE: '' # segment | none
   CLOUD_MESSAGING_ENABLED: false
-  PROJECT_ID: ""
-  APPLICATION_ID: ""
-  API_KEY: ""
-  GCM_SENDER_ID: ""
+  PROJECT_NUMBER: ''
+  PROJECT_ID: ''
+  APPLICATION_ID: '' #App ID field from the Firebase console or mobilesdk_app_id from the google-services.json file.
+  API_KEY: ''
 
 SEGMENT_IO:
   ENABLED: false
