@@ -19,15 +19,13 @@ import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
-import org.openedx.core.ApiConstants
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.RegistrationField
-import org.openedx.core.domain.model.RegistrationFieldType
+import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
@@ -62,20 +60,7 @@ class SignInViewModel(
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
-            agreement = agreementProvider.getAgreement(isSignIn = true)?.let {
-                RegistrationField(
-                    name = ApiConstants.RegistrationFields.HONOR_CODE,
-                    label = it,
-                    type = RegistrationFieldType.PLAINTEXT,
-                    placeholder = "",
-                    instructions = "",
-                    exposed = false,
-                    required = false,
-                    restrictions = RegistrationField.Restrictions(),
-                    options = emptyList(),
-                    errorInstructions = ""
-                )
-            },
+            agreement = agreementProvider.getAgreement(isSignIn = true)?.createHonorCodeField(),
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState

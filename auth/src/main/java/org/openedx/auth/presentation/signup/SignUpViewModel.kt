@@ -26,6 +26,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
+import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
@@ -104,18 +105,6 @@ class SignUpViewModel(
         val agreementFields = mutableListOf<RegistrationField>()
         val agreementText = agreementProvider.getAgreement(isSignIn = false)
         if (agreementText != null) {
-            val agreement = RegistrationField(
-                name = ApiConstants.RegistrationFields.HONOR_CODE,
-                label = agreementText,
-                type = RegistrationFieldType.PLAINTEXT,
-                placeholder = "",
-                instructions = "",
-                exposed = false,
-                required = false,
-                restrictions = RegistrationField.Restrictions(),
-                options = emptyList(),
-                errorInstructions = ""
-            )
             val honourCode = allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
             val marketingEmails = allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
             mutableAllFields.remove(honourCode)
@@ -124,7 +113,7 @@ class SignUpViewModel(
             requiredFields.remove(marketingEmails)
             optionalFields.remove(marketingEmails)
             marketingEmails?.let { agreementFields.add(it) }
-            agreementFields.add(agreement)
+            agreementFields.add(agreementText.createHonorCodeField())
         } else {
             requiredFields.addAll(mutableAllFields.filter { it.required })
             optionalFields.addAll(mutableAllFields.filter { !it.required })

@@ -2,6 +2,7 @@ package org.openedx.core.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.openedx.core.ApiConstants
 
 data class RegistrationField(
     val name: String,
@@ -28,15 +29,27 @@ data class RegistrationField(
         val name: String,
         val default: String,
     ) : Parcelable
-
 }
 
-enum class RegistrationFieldType{
-    TEXT,EMAIL,CONFIRM_EMAIL, PASSWORD, SELECT, TEXTAREA, CHECKBOX, PLAINTEXT, UNKNOWN;
+fun String.createHonorCodeField() = RegistrationField(
+    name = ApiConstants.RegistrationFields.HONOR_CODE,
+    label = this,
+    type = RegistrationFieldType.PLAINTEXT,
+    placeholder = "",
+    instructions = "",
+    exposed = false,
+    required = false,
+    restrictions = RegistrationField.Restrictions(),
+    options = emptyList(),
+    errorInstructions = ""
+)
+
+enum class RegistrationFieldType {
+    TEXT, EMAIL, CONFIRM_EMAIL, PASSWORD, SELECT, TEXTAREA, CHECKBOX, PLAINTEXT, UNKNOWN;
 
     companion object {
         fun returnLocalTypeFromServerType(type: String?): RegistrationFieldType {
-            return when(type){
+            return when (type) {
                 "text" -> TEXT
                 "email" -> EMAIL
                 "confirm_email" -> CONFIRM_EMAIL
