@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +26,7 @@ import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
+import org.openedx.core.utils.Logger
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
@@ -48,6 +48,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
+
+    private val branchLogger = Logger(BRANCH_TAG)
 
     private var _insetTop = 0
     private var _insetBottom = 0
@@ -144,10 +146,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (viewModel.isBranchEnabled) {
             val callback = BranchUniversalReferralInitListener { _, linkProperties, error ->
                 if (linkProperties != null) {
-                    Log.i(BRANCH_TAG, "Branch init complete.")
-                    Log.i(BRANCH_TAG, linkProperties.controlParams.toString())
+                    branchLogger.i { "Branch init complete." }
+                    branchLogger.i { linkProperties.controlParams.toString() }
                 } else if (error != null) {
-                    Log.e(BRANCH_TAG, "Branch init failed. Caused by -" + error.message)
+                    branchLogger.e { "Branch init failed. Caused by -" + error.message }
                 }
             }
 
@@ -166,9 +168,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             if (intent?.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false) == true) {
                 Branch.sessionBuilder(this).withCallback { referringParams, error ->
                     if (error != null) {
-                        Log.e(BRANCH_TAG, error.message)
+                        branchLogger.e { error.message }
                     } else if (referringParams != null) {
-                        Log.i(BRANCH_TAG, referringParams.toString())
+                        branchLogger.i { referringParams.toString() }
                     }
                 }.reInit()
             }
