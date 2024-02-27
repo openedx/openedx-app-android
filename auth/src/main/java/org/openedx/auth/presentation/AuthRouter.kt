@@ -20,5 +20,7 @@ interface AuthRouter {
 
     fun navigateToNativeDiscoverCourses(fm: FragmentManager, querySearch: String)
 
+    fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
+
     fun clearBackStack(fm: FragmentManager)
 }

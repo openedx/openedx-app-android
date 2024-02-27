@@ -95,7 +95,9 @@ fun RequiredFields(
             }
 
             RegistrationFieldType.CHECKBOX -> {
-                //Text("checkbox")
+                CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                    onFieldUpdated(field.name, it.toString())
+                }
             }
 
             RegistrationFieldType.SELECT -> {
@@ -139,6 +141,7 @@ fun OptionalFields(
     selectableNamesMap: MutableMap<String, String?>,
     onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit,
     onFieldUpdated: (String, String) -> Unit,
+    hyperLinkAction: ((Map<String, String>, String) -> Unit)? = null,
 ) {
     Column {
         fields.forEach { field ->
@@ -167,12 +170,17 @@ fun OptionalFields(
                     HyperlinkText(
                         fullText = linkedText.text,
                         hyperLinks = linkedText.links,
-                        linkTextColor = MaterialTheme.appColors.primary
+                        linkTextColor = MaterialTheme.appColors.primary,
+                        action = {
+                            hyperLinkAction?.invoke(linkedText.links, it)
+                        },
                     )
                 }
 
                 RegistrationFieldType.CHECKBOX -> {
-                    //Text("checkbox")
+                    CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                        onFieldUpdated(field.name, it.toString())
+                    }
                 }
 
                 RegistrationFieldType.SELECT -> {

@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signin
 
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -14,7 +15,9 @@ import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
@@ -22,7 +25,9 @@ import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -38,6 +43,9 @@ class SignInViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
+    private val router: AuthRouter,
+    private val whatsNewGlobalManager: WhatsNewGlobalManager,
+    agreementProvider: AgreementProvider,
     config: Config,
     val courseId: String?,
     val infoType: String?,
@@ -52,6 +60,7 @@ class SignInViewModel(
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
+            agreement = agreementProvider.getAgreement(isSignIn = true)?.createHonorCodeField(),
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
@@ -124,11 +133,13 @@ class SignInViewModel(
         }
     }
 
-    fun signUpClickedEvent() {
+    fun navigateToSignUp(parentFragmentManager: FragmentManager) {
+        router.navigateToSignUp(parentFragmentManager, null, null)
         analytics.signUpClickedEvent()
     }
 
-    fun forgotPasswordClickedEvent() {
+    fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {
+        router.navigateToRestorePassword(parentFragmentManager)
         analytics.forgotPasswordClickedEvent()
     }
 
@@ -176,5 +187,34 @@ class SignInViewModel(
                 _uiState.update { it.copy(showProgress = false) }
             }
         } ?: onUnknownError()
+    }
+
+    fun openLink(fragmentManager: FragmentManager, links: Map<String, String>, link: String) {
+        links.forEach { (key, value) ->
+            if (value == link) {
+                router.navigateToWebContent(fragmentManager, key, value)
+                return
+            }
+        }
+    }
+
+    fun proceedWhatsNew(parentFragmentManager: FragmentManager) {
+        val isNeedToShowWhatsNew = whatsNewGlobalManager.shouldShowWhatsNew()
+        if (uiState.value.loginSuccess) {
+            router.clearBackStack(parentFragmentManager)
+            if (isNeedToShowWhatsNew) {
+                router.navigateToWhatsNew(
+                    parentFragmentManager,
+                    courseId,
+                    infoType
+                )
+            } else {
+                router.navigateToMain(
+                    parentFragmentManager,
+                    courseId,
+                    infoType
+                )
+            }
+        }
     }
 }

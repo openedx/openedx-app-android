@@ -59,8 +59,10 @@ import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.UIMessage
+import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -185,6 +187,20 @@ internal fun LoginScreen(
                             state,
                             onEvent,
                         )
+                        state.agreement?.let {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            val linkedText =
+                                TextConverter.htmlTextToLinkedText(state.agreement.label)
+                            HyperlinkText(
+                                modifier = Modifier.testTag("txt_${state.agreement.name}"),
+                                fullText = linkedText.text,
+                                hyperLinks = linkedText.links,
+                                linkTextColor = MaterialTheme.appColors.primary,
+                                action = { link ->
+                                    onEvent(AuthEvent.OpenLink(linkedText.links, link))
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -348,7 +364,6 @@ private fun SignInScreenPreview() {
         )
     }
 }
-
 
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)

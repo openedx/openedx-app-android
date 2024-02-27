@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signup
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.text.intl.Locale
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -26,7 +27,9 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
@@ -37,12 +40,12 @@ import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import java.net.UnknownHostException
-
 
 @ExperimentalCoroutinesApi
 class SignUpViewModelTest {
@@ -57,7 +60,9 @@ class SignUpViewModelTest {
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val agreementProvider = mockk<AgreementProvider>()
     private val oAuthHelper = mockk<OAuthHelper>()
+    private val router = mockk<AuthRouter>()
 
     //region parameters
 
@@ -107,9 +112,12 @@ class SignUpViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { agreementProvider.getAgreement(false) } returns null
         every { config.isSocialAuthEnabled() } returns false
+        every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
+        every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
     }
 
@@ -127,7 +135,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -168,7 +178,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -215,7 +227,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -242,7 +256,6 @@ class SignUpViewModelTest {
         assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
-
     @Test
     fun `success register`() = runTest {
         val viewModel = SignUpViewModel(
@@ -252,7 +265,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -300,7 +315,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -312,7 +329,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertTrue(viewModel.uiState.value.isLoading)
+        assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(noInternet, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
@@ -325,7 +342,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )
@@ -337,7 +356,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assertTrue(viewModel.uiState.value.isLoading)
+        assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
     }
 
@@ -350,7 +369,9 @@ class SignUpViewModelTest {
             preferencesManager = preferencesManager,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
             courseId = "",
             infoType = "",
         )

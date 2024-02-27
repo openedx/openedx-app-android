@@ -20,7 +20,6 @@ object ApiConstants {
     const val ACCESS_TOKEN = "access_token"
     const val CLIENT_ID = "client_id"
     const val EMAIL = "email"
-    const val HONOR_CODE = "honor_code"
     const val NAME = "name"
     const val PASSWORD = "password"
     const val PROVIDER = "provider"
@@ -30,4 +29,9 @@ object ApiConstants {
     const val AUTH_TYPE_MICROSOFT = "azuread-oauth2"
 
     const val COURSE_KEY = "course_key"
+
+    object RegistrationFields {
+        const val HONOR_CODE = "honor_code"
+        const val MARKETING_EMAILS = "marketing_emails_opt_in"
+    }
 }

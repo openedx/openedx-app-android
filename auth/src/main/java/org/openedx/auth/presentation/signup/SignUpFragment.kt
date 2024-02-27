@@ -70,6 +70,9 @@ class SignUpFragment : Fragment() {
                         },
                         onFieldUpdated = { key, value ->
                             viewModel.updateField(key, value)
+                        },
+                        onHyperLinkClick = { links, link ->
+                            viewModel.openLink(parentFragmentManager, links, link)
                         }
                     )
 
