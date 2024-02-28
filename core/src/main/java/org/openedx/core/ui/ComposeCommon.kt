@@ -152,7 +152,7 @@ fun Toolbar(
     canShowBackBtn: Boolean = false,
     onBackClick: () -> Unit = {}
 ) {
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
@@ -164,7 +164,8 @@ fun Toolbar(
         Text(
             modifier = Modifier
                 .testTag("txt_toolbar_title")
-                .align(Alignment.Center),
+                .align(Alignment.CenterVertically)
+                .padding(end = 16.dp),
             text = label,
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleMedium,
