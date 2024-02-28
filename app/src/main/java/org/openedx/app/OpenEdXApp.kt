@@ -1,7 +1,6 @@
 package org.openedx.app
 
 import android.app.Application
-import com.google.firebase.FirebaseOptions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
 import io.branch.referral.Branch
