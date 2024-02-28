@@ -59,6 +59,13 @@ FACEBOOK:
   FACEBOOK_APP_ID: ''
   CLIENT_TOKEN: ''
 
+BRANCH:
+  ENABLED: false
+  KEY: ''
+  URI_SCHEME: ''
+  HOST: ''
+  ALTERNATE_HOST: ''
+
 #Platform names
 PLATFORM_NAME: "OpenEdX"
 PLATFORM_FULL_NAME: "OpenEdX"
