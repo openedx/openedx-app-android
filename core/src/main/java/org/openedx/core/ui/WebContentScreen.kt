@@ -10,10 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
@@ -59,7 +57,7 @@ fun WebContentScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 16.dp)
+            .padding(bottom = 24.dp)
             .semantics {
                 testTagsAsResourceId = true
             },
@@ -97,7 +95,6 @@ fun WebContentScreen(
                         onBackClick = onBackClick
                     )
                 }
-                Spacer(Modifier.height(6.dp))
                 Surface(
                     Modifier.fillMaxSize(),
                     color = MaterialTheme.appColors.background
@@ -115,9 +112,7 @@ fun WebContentScreen(
                     } else {
                         var webViewAlpha by rememberSaveable { mutableFloatStateOf(0f) }
                         Surface(
-                            Modifier
-                                .padding(horizontal = 16.dp, vertical = 24.dp)
-                                .alpha(webViewAlpha),
+                            Modifier.alpha(webViewAlpha),
                             color = MaterialTheme.appColors.background
                         ) {
                             WebViewContent(
