@@ -202,5 +202,19 @@ private fun WebViewContent(
                 }
             }
         },
+        update = { webView ->
+            body?.let {
+                webView.loadDataWithBaseURL(
+                    apiHostUrl,
+                    body.replaceLinkTags(isDarkTheme),
+                    "text/html",
+                    StandardCharsets.UTF_8.name(),
+                    null
+                )
+            }
+            contentUrl?.let {
+                webView.loadUrl(it)
+            }
+        }
     )
 }
