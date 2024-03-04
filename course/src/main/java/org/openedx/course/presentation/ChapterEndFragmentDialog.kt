@@ -8,8 +8,21 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -37,7 +50,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
-import org.openedx.course.presentation.section.CourseSectionFragment
 
 class ChapterEndFragmentDialog : DialogFragment() {
 
@@ -72,10 +84,6 @@ class ChapterEndFragmentDialog : DialogFragment() {
                         onBackButtonClick = {
                             dismiss()
                             listener?.onDismiss()
-                            requireActivity().supportFragmentManager.popBackStack(
-                                CourseSectionFragment::class.java.simpleName,
-                                0
-                            )
                         },
                         onProceedButtonClick = {
                             dismiss()
@@ -92,10 +100,6 @@ class ChapterEndFragmentDialog : DialogFragment() {
                         onBackButtonClick = {
                             dismiss()
                             listener?.onDismiss()
-                            requireActivity().supportFragmentManager.popBackStack(
-                                CourseSectionFragment::class.java.simpleName,
-                                0
-                            )
                         },
                         onProceedButtonClick = {
                             dismiss()
@@ -108,6 +112,11 @@ class ChapterEndFragmentDialog : DialogFragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        listener = null
+        super.onDestroy()
     }
 
     companion object {
