@@ -14,7 +14,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.window.layout.WindowMetricsCalculator
 import io.branch.referral.Branch
-import io.branch.referral.Branch.BranchUniversalReferralInitListener
+import io.branch.referral.Branch.BranchReferralInitListener
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
@@ -144,10 +144,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         super.onStart()
 
         if (viewModel.isBranchEnabled) {
-            val callback = BranchUniversalReferralInitListener { _, linkProperties, error ->
+            val callback = BranchReferralInitListener { linkProperties, error ->
                 if (linkProperties != null) {
                     branchLogger.i { "Branch init complete." }
-                    branchLogger.i { linkProperties.controlParams.toString() }
+                    branchLogger.i { linkProperties.toString() }
                 } else if (error != null) {
                     branchLogger.e { "Branch init failed. Caused by -" + error.message }
                 }
