@@ -161,7 +161,10 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 }
             }
 
-            override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+            override fun onStateChange(
+                youTubePlayer: YouTubePlayer,
+                state: PlayerConstants.PlayerState
+            ) {
                 super.onStateChange(youTubePlayer, state)
                 viewModel.isPlaying = when (state) {
                     PlayerConstants.PlayerState.PLAYING -> true
@@ -191,11 +194,16 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
                 }
 
-                val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                if (viewModel.isPlaying) {
-                    youTubePlayer.loadVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
-                } else {
-                    youTubePlayer.cueVideo(videoId, viewModel.getCurrentVideoTime().toFloat() / 1000)
+                viewModel.videoUrl.split("watch?v=").getOrNull(1)?.let { videoId ->
+                    if (viewModel.isPlaying) {
+                        youTubePlayer.loadVideo(
+                            videoId, viewModel.getCurrentVideoTime().toFloat() / 1000
+                        )
+                    } else {
+                        youTubePlayer.cueVideo(
+                            videoId, viewModel.getCurrentVideoTime().toFloat() / 1000
+                        )
+                    }
                 }
                 youTubePlayer.addListener(youtubeTrackerListener)
             }
