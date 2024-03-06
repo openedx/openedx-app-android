@@ -80,9 +80,11 @@ class EncodedVideoUnitViewModel(
         initPlayer()
 
         val executor = Executors.newSingleThreadExecutor()
-        castContext = CastContext.getSharedInstance(context, executor).result
-        castContext?.let {
-            castPlayer = CastPlayer(it)
+        CastContext.getSharedInstance(context, executor).addOnCompleteListener {
+            it.result?.let { castContext ->
+                this.castContext = castContext
+                castPlayer = CastPlayer(castContext)
+            }
         }
     }
 
