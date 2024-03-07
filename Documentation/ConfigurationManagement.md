@@ -1,0 +1,97 @@
+# Configuration Management
+
+This documentation provides a comprehensive solution for integrating and managing configuration files in Open edX Android project.
+
+## Features
+- Parsing config.yaml files
+- Adding essential keys to `AndroidManifest.xml` (e.g. Microsoft keys)
+- Generating Android build config fields.
+- Generating config.json file to use the configuration fields at runtime.
+- Generating google-services.json with Firebase keys.
+
+Inside the `Config.kt`, parsing and populating relevant keys and classes are done, e.g. `AgreementUrlsConfig.kt` and `FirebaseConfig.kt`.
+
+## Getting Started
+
+### Configuration Setup
+
+Edit the `config_settings.yaml` in the `default_config` folder. It should contain data as follows:
+
+```yaml
+config_directory: '{path_to_config_folder}'
+config_mapping:
+  prod: 'prod'
+  stage: 'stage'
+  dev: 'dev'
+# These mappings are configurable, e.g. dev: 'prod_test'
+```
+
+- `config_directory` provides the path of the config directory.
+- `config_mappings` provides mappings that can be utilized to map the Android Build Variant to a defined folder within the config directory, and it will be referenced.
+
+### Configuration Files
+In the `default_config` folder, select your environment folder: prod, stage, dev or any other you have created.
+Open `config.yaml` and fill in the required fields.
+
+Example:
+
+```yaml
+API_HOST_URL: 'https://mylmsexample.com'
+APPLICATION_ID: 'org.openedx.app'
+ENVIRONMENT_DISPLAY_NAME: 'MyLMSExample'
+FEEDBACK_EMAIL_ADDRESS: 'support@mylmsexample.com'
+OAUTH_CLIENT_ID: 'YOUR_OAUTH_CLIENT_ID'
+
+PLATFORM_NAME: "MyLMS"
+TOKEN_TYPE: "JWT"
+
+FIREBASE:
+  ENABLED: false
+  ANALYTICS_SOURCE: ''
+  CLOUD_MESSAGING_ENABLED: false
+  PROJECT_NUMBER: ''
+  PROJECT_ID: ''
+  APPLICATION_ID: ''
+  API_KEY: ''
+
+MICROSOFT:
+  ENABLED: false
+  CLIENT_ID: 'microsoftClientID'
+```
+
+## Available Third-Party Services
+- **Firebase:** Analytics, Crashlytics, Cloud Messaging
+- **Google:** Sign in and Sign up via Google
+- **Microsoft:** Sign in and Sign up via Microsoft
+- **Facebook:** Sign in and Sign up via Facebook
+- **Branch:** Deeplinks
+- **Braze:** Could Messaging
+- **SegmentIO:** Analytics
+
+## Available Feature Flags
+- **WHATS_NEW_ENABLED:** Enables the "What's New" feature to present the latest changes to the user.
+- **SOCIAL_AUTH_ENABLED:** Enables SSO buttons on the SignIn and SignUp screens.
+- **COURSE_NESTED_LIST_ENABLED:** Enables an alternative visual representation for the course structure.
+- **COURSE_BANNER_ENABLED:** Enables the display of the course image on the Course Home screen.
+- **COURSE_TOP_TAB_BAR_ENABLED:** Enables an alternative navigation on the Course Home screen.
+- **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware. 
+
+## Future Support
+- To add config related to some other service, create a class, e.g. `ServiceNameConfig.kt`, to be able to populate related fields.
+- Create a `function` in the `Config.kt` to be able to parse and use the newly created service from the main Config.
+
+Example:
+
+```Kotlin
+fun getServiceNameConfig(): ServiceNameConfig {
+    return getObjectOrNewInstance(SERVICE_NAME_KEY, ServiceNameConfig::class.java)
+}
+```
+
+```yaml
+SERVICE_NAME:
+  ENABLED: false
+  KEY: ''
+```
+
+The `default_config` directory is added to the project to provide an idea of how to write config YAML files.

@@ -1,6 +1,6 @@
-# EducationX Android
+# Open edX Android
 
-Modern vision of the mobile application for the Open EdX platform from Raccoon Gang.
+Modern vision of the mobile application for the Open edX platform from Raccoon Gang.
 
 [Documentation](Documentation/Documentation.md)
 
@@ -14,17 +14,16 @@ Modern vision of the mobile application for the Open EdX platform from Raccoon G
 
 3. Choose ``openedx-app-android``.
 
-4. Configure the [config.yaml](default_config/dev/config.yaml) with URLs and OAuth credentials for your Open edX instance.
+4. Configure `config_settings.yaml` inside `default_config` and `config.yaml` inside sub direcroties to point to your Open edX configuration. [Configuration Docuementation](./Documentation/ConfigurationManagement.md)
 
 5. Select the build variant ``develop``, ``stage``, or ``prod``.
 
 6. Click the **Run** button.
 
-## API plugin
+## API
+This project targets on the latest Open edX release and rely on the relevant mobile APIs.
 
-This project uses custom APIs to improve performance and reduce the number of requests to the server.
-
-You can find the plugin with the API and installation guide [here](https://github.com/raccoongang/mobile-api-extensions).
+If your platform version is older than December 2023, please follow the instructions to use the [API Plugin](./Documentation/APIs_Compatibility.md).
 
 ## License
 
