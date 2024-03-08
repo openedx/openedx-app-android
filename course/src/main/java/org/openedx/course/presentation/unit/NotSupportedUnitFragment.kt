@@ -146,7 +146,7 @@ private fun NotSupportedUnitScreen(
                     }) {
                     Text(
                         text = stringResource(id = courseR.string.course_open_in_browser),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.onSecondary,
                         style = MaterialTheme.appTypography.labelLarge
                     )
                 }

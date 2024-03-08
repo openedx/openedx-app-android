@@ -230,7 +230,7 @@ fun OfflineQueueCard(
             Text(
                 text = downloadModel.size.toLong().toFileSize(),
                 style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.onBackground,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
@@ -263,7 +263,7 @@ fun OfflineQueueCard(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                    tint = MaterialTheme.appColors.error
+                    tint = MaterialTheme.appColors.onBackground
                 )
             }
         }
@@ -339,7 +339,7 @@ fun NavigationUnitsButtons(
                 colors = ButtonDefaults.outlinedButtonColors(
                     backgroundColor = MaterialTheme.appColors.background
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.secondary),
                 elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onPrevClick,
@@ -380,7 +380,7 @@ fun NavigationUnitsButtons(
             ) {
                 Text(
                     text = nextButtonText,
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.onSecondary,
                     style = MaterialTheme.appTypography.labelLarge
                 )
                 Spacer(Modifier.width(8.dp))
@@ -388,7 +388,7 @@ fun NavigationUnitsButtons(
                     modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
                     painter = nextButtonIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.buttonText
+                    tint = MaterialTheme.appColors.onSecondary
                 )
             }
         }
@@ -516,7 +516,11 @@ fun VideoSubtitles(
         val scaffoldState = rememberScaffoldState()
         val subtitles = timedTextObject.captions.values.toList()
         Scaffold(scaffoldState = scaffoldState) {
-            Column(Modifier.padding(it)) {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .background(color = MaterialTheme.appColors.background)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

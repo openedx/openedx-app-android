@@ -49,7 +49,7 @@ fun PageIndicator(
     numberOfPages: Int,
     modifier: Modifier = Modifier,
     selectedPage: Int = 0,
-    selectedColor: Color = MaterialTheme.appColors.info,
+    selectedColor: Color = MaterialTheme.appColors.primaryVariant,
     previousUnselectedColor: Color = MaterialTheme.appColors.cardViewBorder,
     nextUnselectedColor: Color = MaterialTheme.appColors.textFieldBorder,
     defaultRadius: Dp = 20.dp,
@@ -176,7 +176,7 @@ fun PrevButton(
         colors = ButtonDefaults.outlinedButtonColors(
             backgroundColor = MaterialTheme.appColors.background
         ),
-        border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
+        border = BorderStroke(1.dp, MaterialTheme.appColors.secondary),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
         onClick = onPrevClick,
@@ -193,7 +193,7 @@ fun PrevButton(
             Spacer(Modifier.width(8.dp))
             Text(
                 text = stringResource(R.string.whats_new_navigation_previous),
-                color = MaterialTheme.appColors.primary,
+                color = MaterialTheme.appColors.onBackground,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
@@ -231,14 +231,14 @@ fun NextFinishButton(
                     Text(
                         modifier = Modifier.testTag("txt_next"),
                         text = stringResource(id = R.string.whats_new_navigation_next),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.onSecondary,
                         style = MaterialTheme.appTypography.labelLarge
                     )
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(id = org.openedx.core.R.drawable.core_ic_forward),
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText
+                        tint = MaterialTheme.appColors.onSecondary
                     )
                 }
             } else {
@@ -249,14 +249,14 @@ fun NextFinishButton(
                     Text(
                         modifier = Modifier.testTag("txt_done"),
                         text = stringResource(id = R.string.whats_new_navigation_done),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.onSecondary,
                         style = MaterialTheme.appTypography.labelLarge
                     )
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(id = org.openedx.core.R.drawable.core_ic_check),
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText
+                        tint = MaterialTheme.appColors.onSecondary
                     )
                 }
             }

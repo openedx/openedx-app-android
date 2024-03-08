@@ -27,10 +27,12 @@ private val DarkColorPalette = AppColors(
     ),
     textPrimary = dark_text_primary,
     textPrimaryVariant = dark_text_primary_variant,
+    textPrimaryLight = dark_text_primary_light,
     textSecondary = dark_text_secondary,
     textDark = dark_text_dark,
     textAccent = dark_text_accent,
     textWarning = dark_text_warning,
+    textHyperLink = dark_text_hyper_link,
 
     textFieldBackground = dark_text_field_background,
     textFieldBackgroundVariant = dark_text_field_background_variant,
@@ -51,6 +53,10 @@ private val DarkColorPalette = AppColors(
 
     warning = dark_warning,
     info = dark_info,
+    info_variant = dark_info_variant,
+    onWarning = dark_onWarning,
+    onInfo = dark_onInfo,
+    buttonBorder = dark_button_border,
 
     rateStars = dark_rate_stars,
     inactiveButtonBackground = dark_inactive_button_background,
@@ -98,10 +104,12 @@ private val LightColorPalette = AppColors(
     ),
     textPrimary = light_text_primary,
     textPrimaryVariant = light_text_primary_variant,
+    textPrimaryLight = light_text_primary_light,
     textSecondary = light_text_secondary,
     textDark = light_text_dark,
     textAccent = light_text_accent,
     textWarning = light_text_warning,
+    textHyperLink = light_text_hyper_link,
 
     textFieldBackground = light_text_field_background,
     textFieldBackgroundVariant = light_text_field_background_variant,
@@ -122,6 +130,10 @@ private val LightColorPalette = AppColors(
 
     warning = light_warning,
     info = light_info,
+    info_variant = light_info_variant,
+    onWarning = light_onWarning,
+    onInfo = light_onInfo,
+    buttonBorder = light_button_border,
 
     rateStars = light_rate_stars,
     inactiveButtonBackground = light_inactive_button_background,

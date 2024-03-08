@@ -254,12 +254,11 @@ fun SearchBar(
             }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
-            focusedBorderColor = MaterialTheme.appColors.primary,
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            cursorColor = MaterialTheme.appColors.primary,
-            leadingIconColor = MaterialTheme.appColors.textPrimary
+            textColor = MaterialTheme.appColors.textFieldText,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.textFieldText,
+            leadingIconColor = MaterialTheme.appColors.textFieldText
         ),
         placeholder = {
             Text(
@@ -267,7 +266,7 @@ fun SearchBar(
                     .testTag("txt_search_placeholder")
                     .fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -276,7 +275,7 @@ fun SearchBar(
                 modifier = Modifier.padding(start = 16.dp),
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+                tint = if (isFocused) MaterialTheme.appColors.textFieldText else MaterialTheme.appColors.textFieldHint
             )
         },
         trailingIcon = {
@@ -346,18 +345,18 @@ fun SearchBarStateless(
             }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
-            focusedBorderColor = MaterialTheme.appColors.primary,
+            textColor = MaterialTheme.appColors.textFieldText,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            cursorColor = MaterialTheme.appColors.primary,
-            leadingIconColor = MaterialTheme.appColors.textPrimary
+            cursorColor = MaterialTheme.appColors.textFieldText,
+            leadingIconColor = MaterialTheme.appColors.textFieldText
         ),
         placeholder = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldText,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -366,7 +365,7 @@ fun SearchBarStateless(
                 modifier = Modifier.padding(start = 16.dp),
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+                tint = if (isFocused) MaterialTheme.appColors.textFieldText else MaterialTheme.appColors.textFieldHint
             )
         },
         trailingIcon = {
@@ -434,7 +433,7 @@ fun HyperlinkText(
         append(fullText)
         addStyle(
             style = SpanStyle(
-                color = MaterialTheme.appColors.textPrimary,
+                color = MaterialTheme.appColors.textPrimaryLight,
                 fontSize = fontSize
             ),
             start = 0,
@@ -450,7 +449,7 @@ fun HyperlinkText(
                     color = linkTextColor,
                     fontSize = fontSize,
                     fontWeight = linkTextFontWeight,
-                    textDecoration = linkTextDecoration
+                    textDecoration = linkTextDecoration,
                 ),
                 start = startIndex,
                 end = endIndex
@@ -635,7 +634,8 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = title
+            text = title,
+            color = MaterialTheme.appColors.onBackground
         )
         SearchBarStateless(
             modifier = Modifier
@@ -667,6 +667,7 @@ fun SheetContent(
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
+                    color = MaterialTheme.appColors.onBackground,
                     text = item.name,
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
@@ -1044,13 +1045,33 @@ fun OfflineModeDialog(
 }
 
 @Composable
+fun OpenEdXSecondaryButton(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    text: String = "",
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    content: (@Composable RowScope.() -> Unit)? = null
+) {
+    OpenEdXButton(
+        modifier = modifier,
+        text = text,
+        onClick = onClick,
+        enabled = enabled,
+        textColor = MaterialTheme.appColors.onSecondary,
+        backgroundColor = MaterialTheme.appColors.secondary,
+        content = content
+    )
+}
+
+@Composable
 fun OpenEdXButton(
     modifier: Modifier = Modifier.fillMaxWidth(),
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
-    backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null,
+    textColor: Color = MaterialTheme.appColors.onSecondary,
+    backgroundColor: Color = MaterialTheme.appColors.secondary,
+    content: (@Composable RowScope.() -> Unit)? = null
 ) {
     Button(
         modifier = Modifier
@@ -1068,7 +1089,7 @@ fun OpenEdXButton(
             Text(
                 modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
-                color = MaterialTheme.appColors.buttonText,
+                color = textColor,
                 style = MaterialTheme.appTypography.labelLarge
             )
         } else {
@@ -1078,12 +1099,33 @@ fun OpenEdXButton(
 }
 
 @Composable
+fun OpenEdXSecondaryOutlinedButton(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    text: String = "",
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    content: (@Composable RowScope.() -> Unit)? = null
+) {
+    OpenEdXOutlinedButton(
+        modifier = modifier,
+        text = text,
+        onClick = onClick,
+        enabled = enabled,
+        textColor = MaterialTheme.appColors.secondary,
+        backgroundColor = MaterialTheme.appColors.onSecondary,
+        borderColor = MaterialTheme.appColors.buttonBorder,
+        content = content
+    )
+}
+
+@Composable
 fun OpenEdXOutlinedButton(
     modifier: Modifier = Modifier.fillMaxWidth(),
     backgroundColor: Color = Color.Transparent,
     borderColor: Color,
     textColor: Color,
     text: String = "",
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -1093,6 +1135,7 @@ fun OpenEdXOutlinedButton(
             .then(modifier)
             .height(42.dp),
         onClick = onClick,
+        enabled = enabled,
         border = BorderStroke(1.dp, borderColor),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
@@ -1159,7 +1202,7 @@ fun ConnectionErrorView(
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
-        OpenEdXButton(
+        OpenEdXSecondaryButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = R.string.core_reload),
@@ -1174,7 +1217,7 @@ fun AuthButtonsPanel(
     onSignInClick: () -> Unit,
 ) {
     Row {
-        OpenEdXButton(
+        OpenEdXSecondaryButton(
             modifier = Modifier
                 .testTag("btn_register")
                 .width(0.dp)
@@ -1183,15 +1226,13 @@ fun AuthButtonsPanel(
             onClick = { onRegisterClick() }
         )
 
-        OpenEdXOutlinedButton(
+        OpenEdXSecondaryOutlinedButton(
             modifier = Modifier
                 .testTag("btn_sign_in")
                 .width(100.dp)
                 .padding(start = 16.dp),
             text = stringResource(id = R.string.core_sign_in),
-            onClick = { onSignInClick() },
-            borderColor = MaterialTheme.appColors.textFieldBorder,
-            textColor = MaterialTheme.appColors.primary
+            onClick = { onSignInClick() }
         )
     }
 }

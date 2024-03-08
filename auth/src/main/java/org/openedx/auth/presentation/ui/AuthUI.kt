@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
@@ -170,7 +171,8 @@ fun OptionalFields(
                     HyperlinkText(
                         fullText = linkedText.text,
                         hyperLinks = linkedText.links,
-                        linkTextColor = MaterialTheme.appColors.primary,
+                        linkTextColor = MaterialTheme.appColors.textHyperLink,
+                        linkTextDecoration = TextDecoration.Underline,
                         action = {
                             hyperLinkAction?.invoke(linkedText.links, it)
                         },
@@ -250,8 +252,10 @@ fun LoginTextField(
             onValueChanged(it.text.trim())
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground
+            textColor = MaterialTheme.appColors.textFieldText,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.textFieldText,
         ),
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
@@ -298,11 +302,11 @@ fun InputRegistrationField(
     }
     val isSingleLine = registrationField.type != RegistrationFieldType.TEXTAREA
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.primary
     } else if (isErrorShown) {
         MaterialTheme.appColors.error
     } else {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.textFieldHint
     }
     val helperText = if (registrationField.errorInstructions.isEmpty()) {
         registrationField.instructions
@@ -332,8 +336,11 @@ fun InputRegistrationField(
                 }
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground
+                cursorColor = MaterialTheme.appColors.textFieldText,
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
@@ -374,11 +381,11 @@ fun SelectableRegisterField(
     onClick: (String, List<RegistrationField.Option>) -> Unit
 ) {
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.primary
     } else if (isErrorShown) {
         MaterialTheme.appColors.error
     } else {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.textFieldHint
     }
     val helperText = if (registrationField.errorInstructions.isEmpty()) {
         registrationField.instructions

@@ -233,7 +233,7 @@ private fun QualityOption(
                 Text(
                     modifier = Modifier.testTag("txt_video_quality_description_${title.tagId()}"),
                     text = description,
-                    color = MaterialTheme.appColors.textSecondary,
+                    color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.labelMedium
                 )
             }

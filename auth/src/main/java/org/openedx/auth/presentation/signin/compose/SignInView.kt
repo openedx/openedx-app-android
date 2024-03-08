@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -63,7 +64,7 @@ import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HyperlinkText
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXSecondaryButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -195,7 +196,8 @@ internal fun LoginScreen(
                                 modifier = Modifier.testTag("txt_${state.agreement.name}"),
                                 fullText = linkedText.text,
                                 hyperLinks = linkedText.links,
-                                linkTextColor = MaterialTheme.appColors.primary,
+                                linkTextColor = MaterialTheme.appColors.textHyperLink,
+                                linkTextDecoration = TextDecoration.Underline,
                                 action = { link ->
                                     onEvent(AuthEvent.OpenLink(linkedText.links, link))
                                 },
@@ -264,7 +266,7 @@ private fun AuthForm(
                         onEvent(AuthEvent.ForgotPasswordClick)
                     },
                 text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.primary,
+                color = MaterialTheme.appColors.info_variant,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
@@ -272,7 +274,7 @@ private fun AuthForm(
         if (state.showProgress) {
             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
-            OpenEdXButton(
+            OpenEdXSecondaryButton(
                 modifier = buttonWidth.testTag("btn_sign_in"),
                 text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
@@ -323,8 +325,10 @@ private fun PasswordTextField(
             onValueChanged(it.text.trim())
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground
+            textColor = MaterialTheme.appColors.textFieldText,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.textFieldText,
         ),
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {

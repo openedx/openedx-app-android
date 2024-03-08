@@ -8,6 +8,8 @@ data class AppColors(
 
     val textPrimary: Color,
     val textPrimaryVariant: Color,
+    val textPrimaryLight: Color,
+    val textHyperLink: Color,
     val textSecondary: Color,
     val textDark: Color,
     val textAccent: Color,
@@ -31,6 +33,10 @@ data class AppColors(
     val bottomSheetToggle: Color,
     val warning: Color,
     val info: Color,
+    val info_variant: Color,
+    val onWarning: Color,
+    val onInfo: Color,
+    val buttonBorder: Color,
 
     val rateStars: Color,
     val inactiveButtonBackground: Color,

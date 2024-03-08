@@ -31,7 +31,7 @@ internal fun CheckboxField(
             checked = checkedState,
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.appColors.primary,
-                uncheckedColor = MaterialTheme.appColors.textFieldText
+                uncheckedColor = MaterialTheme.appColors.primary
             ),
             onCheckedChange = {
                 checkedState = it

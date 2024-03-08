@@ -197,7 +197,7 @@ private fun ChapterEndDialogScreen(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.course_section_finished, sectionName),
-                color = MaterialTheme.appColors.textFieldText,
+                color = MaterialTheme.appColors.onBackground,
                 style = MaterialTheme.appTypography.titleSmall,
                 textAlign = TextAlign.Center
             )
@@ -209,7 +209,7 @@ private fun ChapterEndDialogScreen(
                         TextIcon(
                             text = stringResource(id = R.string.course_next_section),
                             painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
-                            color = MaterialTheme.appColors.buttonText,
+                            color = MaterialTheme.appColors.onSecondary,
                             textStyle = MaterialTheme.appTypography.labelLarge,
                             iconModifier = Modifier.rotate(if (isVerticalNavigation) 90f else 0f)
                         )
@@ -220,14 +220,14 @@ private fun ChapterEndDialogScreen(
             }
             OpenEdXOutlinedButton(
                 borderColor = MaterialTheme.appColors.buttonBackground,
-                textColor = MaterialTheme.appColors.buttonBackground,
+                textColor = MaterialTheme.appColors.onBackground,
                 text = stringResource(id = R.string.course_back_to_outline),
                 onClick = onBackButtonClick,
                 content = {
                     AutoSizeText(
                         text = stringResource(id = R.string.course_back_to_outline),
                         style = MaterialTheme.appTypography.bodyMedium,
-                        color = MaterialTheme.appColors.buttonBackground
+                        color = MaterialTheme.appColors.onBackground
                     )
                 }
             )
@@ -309,7 +309,7 @@ private fun ChapterEndDialogScreenLandscape(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.course_section_finished, sectionName),
-                        color = MaterialTheme.appColors.textFieldText,
+                        color = MaterialTheme.appColors.onBackground,
                         style = MaterialTheme.appTypography.titleSmall,
                         textAlign = TextAlign.Center
                     )
@@ -326,7 +326,7 @@ private fun ChapterEndDialogScreenLandscape(
                                 TextIcon(
                                     text = stringResource(id = R.string.course_next_section),
                                     painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
-                                    color = MaterialTheme.appColors.buttonText,
+                                    color = MaterialTheme.appColors.onSecondary,
                                     textStyle = MaterialTheme.appTypography.labelLarge
                                 )
                             },
@@ -343,7 +343,7 @@ private fun ChapterEndDialogScreenLandscape(
                             AutoSizeText(
                                 text = stringResource(id = R.string.course_back_to_outline),
                                 style = MaterialTheme.appTypography.bodyMedium,
-                                color = MaterialTheme.appColors.buttonBackground
+                                color = MaterialTheme.appColors.onBackground
                             )
                         }
                     )

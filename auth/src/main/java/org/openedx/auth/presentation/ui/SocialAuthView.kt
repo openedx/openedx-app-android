@@ -45,9 +45,9 @@ internal fun SocialAuthView(
                     .testTag("btn_google_auth")
                     .padding(top = 24.dp)
                     .fillMaxWidth(),
-                backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.primary,
-                textColor = Color.Unspecified,
+                backgroundColor = MaterialTheme.appColors.buttonSecondaryBackground,
+                borderColor = MaterialTheme.appColors.textFieldBorder,
+                textColor = Color.Black,
                 onClick = {
                     onEvent(AuthType.GOOGLE)
                 }
@@ -62,6 +62,7 @@ internal fun SocialAuthView(
                         modifier = Modifier
                             .testTag("txt_google_auth")
                             .padding(start = 10.dp),
+                        color = Color.Black,
                         text = stringResource(id = stringRes)
                     )
                 }
@@ -87,13 +88,13 @@ internal fun SocialAuthView(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_auth_facebook),
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText,
+                        tint = MaterialTheme.appColors.onSecondary,
                     )
                     Text(
                         modifier = Modifier
                             .testTag("txt_facebook_auth")
                             .padding(start = 10.dp),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.onSecondary,
                         text = stringResource(id = stringRes)
                     )
                 }
@@ -125,7 +126,7 @@ internal fun SocialAuthView(
                         modifier = Modifier
                             .testTag("txt_microsoft_auth")
                             .padding(start = 10.dp),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.onSecondary,
                         text = stringResource(id = stringRes)
                     )
                 }
