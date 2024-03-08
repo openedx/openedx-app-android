@@ -562,7 +562,7 @@ private fun AllVideosDownloadItem(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = downloadVideoSubTitle,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldText,
                 style = MaterialTheme.appTypography.labelMedium
             )
         }
@@ -635,7 +635,7 @@ private fun AllVideosDownloadItem(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldText,
                 style = MaterialTheme.appTypography.labelMedium
             )
         }

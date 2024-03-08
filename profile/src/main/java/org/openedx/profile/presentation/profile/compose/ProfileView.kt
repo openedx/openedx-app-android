@@ -49,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -265,7 +264,7 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
             modifier = Modifier.testTag("txt_settings"),
             text = stringResource(id = org.openedx.profile.R.string.profile_settings),
             style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textSecondary
+            color = MaterialTheme.appColors.textFieldText
         )
         Spacer(modifier = Modifier.height(14.dp))
         Card(
@@ -295,7 +294,7 @@ private fun SupportInfoSection(
             modifier = Modifier.testTag("txt_support_info"),
             text = stringResource(id = org.openedx.profile.R.string.profile_support_info),
             style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textSecondary
+            color = MaterialTheme.appColors.textFieldText
         )
         Spacer(modifier = Modifier.height(14.dp))
         Card(
@@ -470,7 +469,7 @@ private fun LogoutDialog(
                 Spacer(Modifier.size(36.dp))
                 OpenEdXButton(
                     text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                    backgroundColor = MaterialTheme.appColors.warning,
+                    backgroundColor = MaterialTheme.appColors.textSecondary,
                     onClick = onLogoutClick,
                     content = {
                         Box(
@@ -484,7 +483,7 @@ private fun LogoutDialog(
                                     .testTag("txt_logout")
                                     .fillMaxWidth(),
                                 text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                                color = MaterialTheme.appColors.textDark,
+                                color = MaterialTheme.appColors.buttonText,
                                 style = MaterialTheme.appTypography.labelLarge,
                                 textAlign = TextAlign.Center
                             )
@@ -493,7 +492,7 @@ private fun LogoutDialog(
                                     .testTag("ic_logout"),
                                 painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_logout),
                                 contentDescription = null,
-                                tint = Color.Black
+                                tint = MaterialTheme.appColors.buttonText
                             )
                         }
                     }
@@ -601,7 +600,7 @@ private fun AppVersionItemAppToDate(versionName: String) {
             Text(
                 modifier = Modifier.testTag("txt_up_to_date"),
                 text = stringResource(id = R.string.core_up_to_date),
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldText,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }

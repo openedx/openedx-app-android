@@ -275,7 +275,7 @@ fun TransparentTextButton(
     ) {
         Text(
             modifier = Modifier.testTag("txt_secondary"),
-            color = MaterialTheme.appColors.textAccent,
+            color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.labelLarge,
             text = text
         )
@@ -292,7 +292,7 @@ fun DefaultTextButton(
             .testTag("btn_primary")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.appColors.buttonBackground
+            backgroundColor = MaterialTheme.appColors.textPrimary
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,

@@ -63,7 +63,7 @@ import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HyperlinkText
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXSecondaryButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -272,8 +272,8 @@ private fun AuthForm(
         if (state.showProgress) {
             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
-            OpenEdXButton(
-                width = buttonWidth.testTag("btn_sign_in"),
+            OpenEdXSecondaryButton(
+                modifier = buttonWidth.testTag("btn_sign_in"),
                 text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
                     onEvent(AuthEvent.SignIn(login = login, password = password))

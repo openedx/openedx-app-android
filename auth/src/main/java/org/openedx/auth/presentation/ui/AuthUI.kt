@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
@@ -171,6 +172,7 @@ fun OptionalFields(
                         fullText = linkedText.text,
                         hyperLinks = linkedText.links,
                         linkTextColor = MaterialTheme.appColors.primary,
+                        linkTextDecoration = TextDecoration.Underline,
                         action = {
                             hyperLinkAction?.invoke(linkedText.links, it)
                         },
@@ -298,11 +300,11 @@ fun InputRegistrationField(
     }
     val isSingleLine = registrationField.type != RegistrationFieldType.TEXTAREA
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.textFieldHint
     } else if (isErrorShown) {
         MaterialTheme.appColors.error
     } else {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.textFieldHint
     }
     val helperText = if (registrationField.errorInstructions.isEmpty()) {
         registrationField.instructions
@@ -374,11 +376,11 @@ fun SelectableRegisterField(
     onClick: (String, List<RegistrationField.Option>) -> Unit
 ) {
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.textFieldHint
     } else if (isErrorShown) {
         MaterialTheme.appColors.error
     } else {
-        MaterialTheme.appColors.textSecondary
+        MaterialTheme.appColors.textFieldHint
     }
     val helperText = if (registrationField.errorInstructions.isEmpty()) {
         registrationField.instructions

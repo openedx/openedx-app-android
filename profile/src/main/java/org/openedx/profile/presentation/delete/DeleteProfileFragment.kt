@@ -250,7 +250,7 @@ fun DeleteProfileScreen(
                             .fillMaxWidth(),
                         text = stringResource(id = profileR.string.profile_confirm_action),
                         style = MaterialTheme.appTypography.labelLarge,
-                        color = MaterialTheme.appColors.textSecondary,
+                        color = MaterialTheme.appColors.textFieldText,
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(40.dp))
