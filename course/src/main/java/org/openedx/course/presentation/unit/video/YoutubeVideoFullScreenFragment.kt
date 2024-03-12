@@ -21,6 +21,7 @@ import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
+import org.openedx.course.presentation.CourseAnalyticKey
 
 class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_full_screen) {
 
@@ -74,13 +75,13 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
 
             override fun onStateChange(
                 youTubePlayer: YouTubePlayer,
-                state: PlayerConstants.PlayerState
+                state: PlayerConstants.PlayerState,
             ) {
                 super.onStateChange(youTubePlayer, state)
                 if (state == PlayerConstants.PlayerState.ENDED) {
-                    viewModel.markBlockCompleted(blockId)
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticKey.YOUTUBE.key)
                 }
-                viewModel.isPlaying = when(state) {
+                viewModel.isPlaying = when (state) {
                     PlayerConstants.PlayerState.PLAYING -> true
                     PlayerConstants.PlayerState.PAUSED -> false
                     else -> return
@@ -92,7 +93,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 viewModel.currentVideoTime = (second * 1000f).toLong()
                 val completePercentage = second / youtubeTrackerListener.videoDuration
                 if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
-                    viewModel.markBlockCompleted(blockId)
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticKey.YOUTUBE.key)
                     isMarkBlockCompletedCalled = true
                 }
                 if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
@@ -105,7 +106,8 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
                 binding.youtubePlayerView.isVisible = true
-                val defPlayerUiController = DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
+                val defPlayerUiController =
+                    DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
                 defPlayerUiController.setFullScreenButtonClickListener {
                     parentFragmentManager.popBackStack()
                 }
@@ -142,7 +144,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             videoTime: Long,
             blockId: String,
             courseId: String,
-            isPlaying: Boolean
+            isPlaying: Boolean,
         ): YoutubeVideoFullScreenFragment {
             val fragment = YoutubeVideoFullScreenFragment()
             fragment.arguments = bundleOf(

@@ -28,6 +28,9 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
@@ -39,15 +42,16 @@ import org.openedx.core.R as CoreR
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
+    val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
-    private val analytics: CourseAnalytics,
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
+    private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
 
     val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
@@ -106,6 +110,7 @@ class CourseContainerViewModel(
     }
 
     fun preloadCourseStructure() {
+        courseDashboardViewed()
         if (_dataReady.value != null) {
             return
         }
@@ -212,10 +217,13 @@ class CourseContainerViewModel(
             updateCalendarSyncState()
 
             if (updatedEvent) {
+                logCalendarUpdateDatesSuccess()
                 setUiMessage(R.string.course_snackbar_course_calendar_updated)
             } else if (coursePreferences.isCalendarSyncEventsDialogShown(courseName)) {
+                logCalendarAddDatesSuccess()
                 setUiMessage(R.string.course_snackbar_course_calendar_added)
             } else {
+                logCalendarAddDatesSuccess()
                 coursePreferences.setCalendarSyncEventsDialogShown(courseName)
                 setCalendarSyncDialogType(CalendarSyncDialogType.EVENTS_DIALOG)
             }
@@ -256,6 +264,7 @@ class CourseContainerViewModel(
                 }
                 updateCalendarSyncState()
             }
+            logCalendarRemoveDatesSuccess()
             setUiMessage(R.string.course_snackbar_course_calendar_removed)
         }
     }
@@ -282,23 +291,145 @@ class CourseContainerViewModel(
                 (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
     }
 
+    private fun courseDashboardViewed(){
+        logCourseContainerEvent(CourseAnalyticEvent.DASHBOARD)
+    }
+
     private fun courseTabClickedEvent() {
-        analytics.courseTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticEvent.HOME_TAB)
     }
 
     private fun videoTabClickedEvent() {
-        analytics.videoTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticEvent.VIDEOS_TAB)
     }
 
     private fun discussionTabClickedEvent() {
-        analytics.discussionTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticEvent.DISCUSSION_TAB)
     }
 
     private fun datesTabClickedEvent() {
-        analytics.datesTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticEvent.DATES_TAB)
     }
 
     private fun handoutsTabClickedEvent() {
-        analytics.handoutsTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticEvent.HANDOUTS_TAB)
+    }
+
+    private fun logCourseContainerEvent(event: CourseAnalyticEvent) {
+        courseAnalytics.logEvent(
+            event = event.event,
+            params = buildMap {
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+            }
+        )
+    }
+
+    fun logCalendarPermissionAccess(isAllowed: Boolean) {
+        if (isAllowed) {
+            logCalendarSyncEvent(
+                CourseAnalyticEvent.DATES_CALENDAR_ACCESS_ALLOWED,
+                CourseAnalyticValue.DATES_CALENDAR_ACCESS_ALLOWED
+            )
+        } else {
+            logCalendarSyncEvent(
+                CourseAnalyticEvent.DATES_CALENDAR_ACCESS_DONT_ALLOW,
+                CourseAnalyticValue.DATES_CALENDAR_ACCESS_DONT_ALLOW
+            )
+        }
+    }
+
+    fun logCalendarAddDates() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_ADD_DATES,
+            CourseAnalyticValue.DATES_CALENDAR_ADD_DATES
+        )
+    }
+
+    fun logCalendarAddCancelled() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_ADD_CANCELLED,
+            CourseAnalyticValue.DATES_CALENDAR_ADD_CANCELLED
+        )
+    }
+
+    fun logCalendarRemoveDates() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_REMOVE_DATES,
+            CourseAnalyticValue.DATES_CALENDAR_REMOVE_DATES
+        )
+    }
+
+    fun logCalendarRemoveCancelled() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_REMOVE_CANCELLED,
+            CourseAnalyticValue.DATES_CALENDAR_REMOVE_CANCELLED
+        )
+    }
+
+    fun logCalendarAddedConfirmation() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_ADD_CONFIRMATION,
+            CourseAnalyticValue.DATES_CALENDAR_ADD_CONFIRMATION
+        )
+    }
+
+    fun logCalendarViewEvents() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_VIEW_EVENTS,
+            CourseAnalyticValue.DATES_CALENDAR_VIEW_EVENTS
+        )
+    }
+
+    fun logCalendarSyncUpdateDates() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_UPDATE_DATES,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_UPDATE_DATES
+        )
+    }
+
+    fun logCalendarSyncRemoveCalendar() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_REMOVE_CALENDAR,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_REMOVE_CALENDAR
+        )
+    }
+
+    private fun logCalendarAddDatesSuccess() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_ADD_DATES_SUCCESS,
+            CourseAnalyticValue.DATES_CALENDAR_ADD_DATES_SUCCESS
+        )
+    }
+
+    private fun logCalendarRemoveDatesSuccess() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_REMOVE_DATES_SUCCESS,
+            CourseAnalyticValue.DATES_CALENDAR_REMOVE_DATES_SUCCESS
+        )
+    }
+
+    private fun logCalendarUpdateDatesSuccess() {
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_UPDATE_DATES_SUCCESS,
+            CourseAnalyticValue.DATES_CALENDAR_UPDATE_DATES_SUCCESS
+        )
+    }
+
+    private fun logCalendarSyncEvent(
+        event: CourseAnalyticEvent,
+        value: CourseAnalyticValue,
+        param: Map<String, Any> = emptyMap(),
+    ) {
+        courseAnalytics.logEvent(
+            event = event.event,
+            params = buildMap {
+                put(CourseAnalyticKey.NAME.key, value.biValue)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(CourseAnalyticKey.PACING.key, isSelfPaced)
+                putAll(param)
+            }
+        )
     }
 }

@@ -18,6 +18,9 @@ import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.LogistrationAnalyticEvent
+import org.openedx.auth.presentation.LogistrationAnalyticKey
+import org.openedx.auth.presentation.LogistrationAnalyticValues
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.BaseViewModel
@@ -69,6 +72,10 @@ class SignUpViewModel(
 
     init {
         collectAppUpgradeEvent()
+        logEvent(
+            LogistrationAnalyticEvent.REGISTER_VIEWED,
+            LogistrationAnalyticValues.SCREEN_NAVIGATION
+        )
     }
 
     fun getRegistrationFields() {
@@ -105,8 +112,10 @@ class SignUpViewModel(
         val agreementFields = mutableListOf<RegistrationField>()
         val agreementText = agreementProvider.getAgreement(isSignIn = false)
         if (agreementText != null) {
-            val honourCode = allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
-            val marketingEmails = allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
+            val honourCode =
+                allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
+            val marketingEmails =
+                allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
             mutableAllFields.remove(honourCode)
             requiredFields.addAll(mutableAllFields.filter { it.required })
             optionalFields.addAll(mutableAllFields.filter { !it.required })
@@ -129,9 +138,12 @@ class SignUpViewModel(
     }
 
     fun register() {
-        analytics.createAccountClickedEvent("")
+        logEvent(
+            LogistrationAnalyticEvent.CREATE_ACCOUNT_CLICKED,
+            LogistrationAnalyticValues.CREATE_ACCOUNT_CLICKED
+        )
         val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
-            mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
+                mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
         val resultMap = mapFields.toMutableMap()
         uiState.value.allFields.filter { !it.required }.forEach { (k, _) ->
             if (mapFields[k].isNullOrEmpty()) {
@@ -154,7 +166,13 @@ class SignUpViewModel(
                         resultMap[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
                     }
                     interactor.register(resultMap.toMap())
-                    analytics.registrationSuccessEvent(socialAuth?.authType?.postfix.orEmpty())
+                    logEvent(
+                        LogistrationAnalyticEvent.REGISTER_SUCCESSFULLY,
+                        LogistrationAnalyticValues.REGISTER_SUCCESSFULLY,
+                        buildMap {
+                            put(LogistrationAnalyticKey.PROVIDER.key, socialAuth?.authType?.postfix.orEmpty())
+                        }
+                    )
                     if (socialAuth == null) {
                         interactor.login(
                             resultMap.getValue(ApiConstants.EMAIL),
@@ -226,7 +244,13 @@ class SignUpViewModel(
             updateFields(fields)
         }.onSuccess {
             setUserId()
-            analytics.userLoginEvent(socialAuth.authType.methodName)
+            logEvent(
+                LogistrationAnalyticEvent.SIGN_IN_SUCCESSFULLY,
+                LogistrationAnalyticValues.SIGN_IN_SUCCESSFULLY,
+                buildMap {
+                    put(LogistrationAnalyticKey.METHOD.key, socialAuth.authType.methodName)
+                }
+            )
             _uiState.update { it.copy(successLogin = true) }
             logger.d { "Social login (${socialAuth.authType.methodName}) success" }
         }
@@ -278,5 +302,16 @@ class SignUpViewModel(
                 return
             }
         }
+    }
+
+    private fun logEvent(
+        eventName: LogistrationAnalyticEvent,
+        biValue: LogistrationAnalyticValues,
+        params: Map<String, Any?> = emptyMap()
+    ) {
+        analytics.logEvent(eventName.event, buildMap {
+            put(LogistrationAnalyticKey.NAME.key, biValue.biValue)
+            putAll(params)
+        })
     }
 }

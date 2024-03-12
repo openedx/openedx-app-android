@@ -36,6 +36,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoUnitBinding
+import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
@@ -77,7 +78,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentYoutubeVideoUnitBinding.inflate(inflater, container, false)
         return binding.root
@@ -153,7 +154,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
                 val completePercentage = second / youtubeTrackerListener.videoDuration
                 if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
-                    viewModel.markBlockCompleted(blockId)
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticKey.YOUTUBE.key)
                     isMarkBlockCompletedCalled = true
                 }
                 if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
@@ -163,7 +164,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
             override fun onStateChange(
                 youTubePlayer: YouTubePlayer,
-                state: PlayerConstants.PlayerState
+                state: PlayerConstants.PlayerState,
             ) {
                 super.onStateChange(youTubePlayer, state)
                 viewModel.isPlaying = when (state) {
@@ -171,6 +172,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     PlayerConstants.PlayerState.PAUSED -> false
                     else -> return
                 }
+                viewModel.logPlayPauseEvent(
+                    viewModel.videoUrl,
+                    viewModel.isPlaying,
+                    viewModel.getCurrentVideoTime(),
+                    CourseAnalyticKey.YOUTUBE.key
+                )
             }
 
             override fun onReady(youTubePlayer: YouTubePlayer) {
@@ -206,6 +213,12 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                     }
                 }
                 youTubePlayer.addListener(youtubeTrackerListener)
+                viewModel.logLoadedCompletedEvent(
+                    viewModel.videoUrl,
+                    true,
+                    viewModel.getCurrentVideoTime(),
+                    CourseAnalyticKey.YOUTUBE.key
+                )
             }
         }
 
@@ -240,7 +253,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
             courseId: String,
             videoUrl: String,
             transcriptsUrl: Map<String, String>,
-            blockTitle: String
+            blockTitle: String,
         ): YoutubeVideoUnitFragment {
             val fragment = YoutubeVideoUnitFragment()
             fragment.arguments = bundleOf(

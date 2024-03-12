@@ -41,6 +41,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
+import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
@@ -69,7 +70,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 }
                 val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
                 if (completePercentage >= 0.8f) {
-                    viewModel.markBlockCompleted(viewModel.blockId)
+                    viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticKey.NATIVE.key)
                 }
             }
             handler.postDelayed(this, 200)
@@ -89,6 +90,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
         }
         viewModel.downloadSubtitles()
+        handler.removeCallbacks(videoTimeRunnable)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -174,8 +176,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
 
         viewModel.isVideoEnded.observe(viewLifecycleOwner) { isVideoEnded ->
-            if (isVideoEnded && !appReviewManager.isDialogShowed) {
-                appReviewManager.tryToOpenRateDialog()
+            if (isVideoEnded) {
+                handler.removeCallbacks(videoTimeRunnable)
+                if (appReviewManager.isDialogShowed) {
+                    appReviewManager.tryToOpenRateDialog()
+                }
             }
         }
     }
@@ -206,6 +211,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             viewModel.castPlayer?.setSessionAvailabilityListener(
                 object : SessionAvailabilityListener {
                     override fun onCastSessionAvailable() {
+                        viewModel.logCastConnection(true)
                         viewModel.isCastActive = true
                         viewModel.exoPlayer?.pause()
                         playerView.player = viewModel.castPlayer
@@ -218,6 +224,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     }
 
                     override fun onCastSessionUnavailable() {
+                        viewModel.logCastConnection(false)
                         viewModel.isCastActive = false
                         playerView.player = viewModel.exoPlayer
                         viewModel.exoPlayer?.seekTo(viewModel.castPlayer?.currentPosition ?: 0L)
@@ -270,7 +277,8 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
     private fun setPlayerMedia(mediaItem: MediaItem) {
         if (viewModel.videoUrl.endsWith(".m3u8")) {
             val factory = DefaultDataSource.Factory(requireContext())
-            val mediaSource: HlsMediaSource = HlsMediaSource.Factory(factory).createMediaSource(mediaItem)
+            val mediaSource: HlsMediaSource =
+                HlsMediaSource.Factory(factory).createMediaSource(mediaItem)
             viewModel.exoPlayer?.setMediaSource(mediaSource, viewModel.getCurrentVideoTime())
         } else {
             viewModel.getActivePlayer()?.setMediaItem(

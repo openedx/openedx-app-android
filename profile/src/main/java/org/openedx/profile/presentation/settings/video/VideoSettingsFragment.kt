@@ -48,8 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.presentation.settings.VideoQualityType
-import org.openedx.core.ui.BackBtn
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
@@ -78,7 +76,7 @@ class VideoSettingsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -97,14 +95,10 @@ class VideoSettingsFragment : Fragment() {
                         viewModel.setWifiDownloadOnly(it)
                     },
                     videoStreamingQualityClick = {
-                        router.navigateToVideoQuality(
-                            requireActivity().supportFragmentManager, VideoQualityType.Streaming
-                        )
+                        viewModel.navigateToVideoStreamingQuality(requireActivity().supportFragmentManager)
                     },
                     videoDownloadQualityClick = {
-                        router.navigateToVideoQuality(
-                            requireActivity().supportFragmentManager, VideoQualityType.Download
-                        )
+                        viewModel.navigateToVideoDownloadQuality(requireActivity().supportFragmentManager)
                     }
                 )
             }

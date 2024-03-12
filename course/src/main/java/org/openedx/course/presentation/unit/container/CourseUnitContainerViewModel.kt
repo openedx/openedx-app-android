@@ -22,6 +22,9 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
 
 class CourseUnitContainerViewModel(
@@ -29,7 +32,8 @@ class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
-    val courseId: String
+    val courseId: String,
+    val unitId: String
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
@@ -110,7 +114,7 @@ class CourseUnitContainerViewModel(
         }
     }
 
-    fun setupCurrentIndex(unitId: String, componentId: String = "") {
+    fun setupCurrentIndex(componentId: String = "") {
         if (currentSectionIndex != -1) {
             return
         }
@@ -246,6 +250,17 @@ class CourseUnitContainerViewModel(
 
     fun getSubSectionBlock(unitId: String): Block {
         return blocks.first { it.descendants.contains(unitId) }
+    }
+
+    fun courseUnitContainerShowedEvent() {
+        analytics.logEvent(
+            CourseAnalyticEvent.UNIT_DETAIL.event,
+            buildMap {
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.BLOCK_ID.key, unitId)
+                put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
+            })
     }
 
     fun nextBlockClickedEvent(blockId: String, blockName: String) {

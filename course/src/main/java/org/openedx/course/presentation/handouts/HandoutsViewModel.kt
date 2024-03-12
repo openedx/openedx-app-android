@@ -9,12 +9,17 @@ import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AnnouncementModel
 import org.openedx.core.domain.model.HandoutsModel
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticValue
+import org.openedx.course.presentation.CourseAnalytics
 
 class HandoutsViewModel(
     private val courseId: String,
     private val config: Config,
     private val handoutsType: String,
-    private val interactor: CourseInteractor
+    private val interactor: CourseInteractor,
+    private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -25,6 +30,11 @@ class HandoutsViewModel(
 
     init {
         getEnrolledCourse()
+        if (HandoutsType.valueOf(handoutsType) == HandoutsType.Handouts) {
+            logEvent(CourseAnalyticEvent.HANDOUTS)
+        } else {
+            logEvent(CourseAnalyticEvent.ANNOUNCEMENTS)
+        }
     }
 
     private fun getEnrolledCourse() {
@@ -93,5 +103,13 @@ class HandoutsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-
+    private fun logEvent(event: CourseAnalyticEvent) {
+        courseAnalytics.logEvent(
+            event = event.event,
+            params = buildMap {
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+            }
+        )
+    }
 }

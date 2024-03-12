@@ -15,6 +15,8 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.CourseBannerType
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
@@ -25,6 +27,10 @@ import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEven
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticValue
+import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -32,14 +38,16 @@ import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
     val courseId: String,
-    var courseName: String,
+    val courseName: String,
     val isSelfPaced: Boolean,
+    private val enrollmentMode: String,
     private val notifier: CourseNotifier,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
     private val corePreferences: CorePreferences,
+    private val courseAnalytics: CourseAnalytics,
     private val config: Config,
 ) : BaseViewModel() {
 
@@ -67,6 +75,8 @@ class CourseDatesViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    private var courseBannerType: CourseBannerType = CourseBannerType.BLANK
 
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
@@ -97,6 +107,7 @@ class CourseDatesViewModel(
                     _uiState.value = DatesUIState.Empty
                 } else {
                     _uiState.value = DatesUIState.Dates(datesResponse)
+                    courseBannerType = datesResponse.courseBanner.bannerType
                     checkIfCalendarOutOfDate()
                 }
             } catch (e: Exception) {
@@ -203,5 +214,99 @@ class CourseDatesViewModel(
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
         return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
                 (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
+    }
+
+    fun logPlsBannerViewed() {
+        logPLSBannerEvent(
+            CourseAnalyticEvent.PLS_BANNER_VIEWED,
+            CourseAnalyticValue.PLS_BANNER_VIEWED
+        )
+    }
+
+    fun logPlsShiftButtonClicked() {
+        logPLSBannerEvent(
+            CourseAnalyticEvent.PLS_SHIFT_BUTTON_TAPPED,
+            CourseAnalyticValue.PLS_SHIFT_BUTTON_TAPPED
+        )
+    }
+
+    fun logPlsShiftDates(isSuccess: Boolean) {
+        logPLSBannerEvent(
+            CourseAnalyticEvent.PLS_SHIFT_DATES,
+            CourseAnalyticValue.PLS_SHIFT_DATES,
+            isSuccess
+        )
+    }
+
+    fun logCourseComponentTapped(isSupported: Boolean, block: CourseDateBlock) {
+        val params = buildMap<String, Any> {
+            put(CourseAnalyticKey.BLOCK_ID.key, block.blockId)
+            put(CourseAnalyticKey.BLOCK_TYPE.key, block.dateType)
+            put(CourseAnalyticKey.LINK.key, block.link)
+        }
+
+        if (isSupported) {
+            logCalendarSyncEvent(
+                CourseAnalyticEvent.DATES_COURSE_COMPONENT_TAPPED,
+                CourseAnalyticValue.DATES_COURSE_COMPONENT_TAPPED,
+                params
+            )
+        } else {
+            logCalendarSyncEvent(
+                CourseAnalyticEvent.DATES_UNSUPPORTED_COMPONENT_TAPPED,
+                CourseAnalyticValue.DATES_UNSUPPORTED_COMPONENT_TAPPED,
+                params
+            )
+        }
+    }
+
+    fun logCalendarSyncToggle(isChecked: Boolean) {
+        if (isChecked) {
+            logCalendarSyncEvent(
+                CourseAnalyticEvent.DATES_CALENDAR_TOGGLE_ON,
+                CourseAnalyticValue.DATES_CALENDAR_TOGGLE_ON
+            )
+        } else {
+            logCalendarSyncEvent(
+                CourseAnalyticEvent.DATES_CALENDAR_TOGGLE_OFF,
+                CourseAnalyticValue.DATES_CALENDAR_TOGGLE_OFF
+            )
+        }
+    }
+
+    private fun logCalendarSyncEvent(
+        event: CourseAnalyticEvent,
+        value: CourseAnalyticValue,
+        param: Map<String, Any> = emptyMap(),
+    ) {
+        courseAnalytics.logEvent(
+            event = event.event,
+            params = buildMap {
+                put(CourseAnalyticKey.NAME.key, value.biValue)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(CourseAnalyticKey.PACING.key, isSelfPaced)
+                putAll(param)
+            }
+        )
+    }
+
+    private fun logPLSBannerEvent(
+        event: CourseAnalyticEvent,
+        value: CourseAnalyticValue,
+        isSuccess: Boolean? = null,
+    ) {
+        courseAnalytics.logEvent(
+            event = event.event,
+            params = buildMap {
+                put(CourseAnalyticKey.NAME.key, value.biValue)
+                put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticValue.COURSE_DATES)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(CourseAnalyticKey.BANNER_TYPE.key, courseBannerType.name)
+                put(CourseAnalyticKey.SCREEN_NAME.key, CourseAnalyticValue.COURSE_DATES)
+                isSuccess?.let { put(CourseAnalyticKey.SUCCESS.key, it) }
+            }
+        )
     }
 }

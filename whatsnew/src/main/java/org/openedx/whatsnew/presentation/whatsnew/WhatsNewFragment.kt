@@ -106,10 +106,12 @@ class WhatsNewFragment : Fragment() {
                             viewModel.courseId,
                             viewModel.infoType
                         )
+                        viewModel.logWhatsNewCompleted()
                     }
                 )
             }
         }
+        viewModel.logWhatsNewViewed()
     }
 
     companion object {

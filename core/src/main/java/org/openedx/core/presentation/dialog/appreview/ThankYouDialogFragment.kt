@@ -47,13 +47,16 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                 ThankYouDialog(
                     description = description,
                     showButtons = isFeedbackPositive.value,
-                    onNotNowClick = this@ThankYouDialogFragment::notNowClick,
+                    onNotNowClick = {
+                        this@ThankYouDialogFragment.notNowClick(AppReviewDialogType.THANK_YOU)
+                    },
                     onRateUsClick = this@ThankYouDialogFragment::openInAppReview
                 )
 
                 closeDialogDelay(isFeedbackPositive.value)
             }
         }
+        onThankYouDialogShowed()
     }
 
     private fun closeDialogDelay(isFeedbackPositive: Boolean) {
@@ -81,6 +84,10 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                 e.printStackTrace()
             }
         }
+    }
+
+    override fun dismiss() {
+        onDismiss(AppReviewDialogType.THANK_YOU)
     }
 
     companion object {

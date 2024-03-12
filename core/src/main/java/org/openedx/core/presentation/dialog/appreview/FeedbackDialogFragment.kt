@@ -33,13 +33,14 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
                 val feedback = rememberSaveable { mutableStateOf("") }
                 FeedbackDialog(
                     feedback = feedback,
-                    onNotNowClick = this@FeedbackDialogFragment::notNowClick,
+                    onNotNowClick = { this@FeedbackDialogFragment.notNowClick(AppReviewDialogType.FEEDBACK) },
                     onShareClick = {
                         onShareClick(feedback.value)
                     }
                 )
             }
         }
+        onFeedbackDialogShowed()
     }
 
     override fun onResume() {
@@ -51,6 +52,7 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     private fun onShareClick(feedback: String) {
+        onShareFeedbackClick()
         saveVersionName()
         wasShareClicked = true
         sendEmail(feedback)
@@ -73,6 +75,11 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
             requireActivity().supportFragmentManager,
             ThankYouDialogFragment::class.simpleName
         )
+    }
+
+
+    override fun dismiss() {
+        onDismiss(AppReviewDialogType.FEEDBACK)
     }
 
     companion object {

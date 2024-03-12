@@ -49,22 +49,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.fragmentHome -> {
-                    analytics.discoveryTabClickedEvent()
+                    viewModel.logDiscoveryTabClickedEvent()
                     binding.viewPager.setCurrentItem(0, false)
                 }
 
                 R.id.fragmentDashboard -> {
-                    analytics.dashboardTabClickedEvent()
+                    viewModel.logMyCoursesTabClickedEvent()
                     binding.viewPager.setCurrentItem(1, false)
                 }
 
                 R.id.fragmentPrograms -> {
-                    analytics.programsTabClickedEvent()
+                    viewModel.logMyProgramsTabClickedEvent()
                     binding.viewPager.setCurrentItem(2, false)
                 }
 
                 R.id.fragmentProfile -> {
-                    analytics.profileTabClickedEvent()
+                    viewModel.logProfileTabClickedEvent()
                     binding.viewPager.setCurrentItem(3, false)
                 }
             }

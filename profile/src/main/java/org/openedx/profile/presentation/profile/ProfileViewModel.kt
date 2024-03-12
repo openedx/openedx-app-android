@@ -28,6 +28,9 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
+import org.openedx.profile.presentation.ProfileAnalyticEvent
+import org.openedx.profile.presentation.ProfileAnalyticKey
+import org.openedx.profile.presentation.ProfileAnalyticValue
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountDeactivated
@@ -134,12 +137,18 @@ class ProfileViewModel(
     }
 
     fun logout() {
+        logProfileEvent(ProfileAnalyticEvent.LOGOUT_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.LOGOUT_CLICKED.biValue)
+        })
         viewModelScope.launch {
             try {
                 workerController.removeModels()
                 withContext(dispatcher) {
                     interactor.logout()
                 }
+                logProfileEvent(ProfileAnalyticEvent.LOGGED_OUT.event, buildMap {
+                    put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.LOGGED_OUT.biValue)
+                })
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -171,12 +180,16 @@ class ProfileViewModel(
                 data.account
             )
         }
-        analytics.profileEditClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.EDIT_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.EDIT_CLICKED.biValue)
+        })
     }
 
     fun profileVideoSettingsClicked(fragmentManager: FragmentManager) {
         router.navigateToVideoSettings(fragmentManager)
-        analytics.profileVideoSettingsClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.VIDEO_SETTING_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.VIDEO_SETTING_CLICKED.biValue)
+        })
     }
 
     fun privacyPolicyClicked(fragmentManager: FragmentManager) {
@@ -185,7 +198,9 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_privacy_policy),
             url = configuration.agreementUrls.privacyPolicyUrl,
         )
-        analytics.privacyPolicyClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.PRIVACY_POLICY_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.PRIVACY_POLICY_CLICKED.biValue)
+        })
     }
 
     fun cookiePolicyClicked(fragmentManager: FragmentManager) {
@@ -194,7 +209,9 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_cookie_policy),
             url = configuration.agreementUrls.cookiePolicyUrl,
         )
-        analytics.cookiePolicyClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.COOKIE_POLICY_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.COOKIE_POLICY_CLICKED.biValue)
+        })
     }
 
     fun dataSellClicked(fragmentManager: FragmentManager) {
@@ -203,11 +220,15 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_data_sell),
             url = configuration.agreementUrls.dataSellConsentUrl,
         )
-        analytics.dataSellClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.DATA_SELL_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.DATA_SELL_CLICKED.biValue)
+        })
     }
 
     fun faqClicked() {
-        analytics.faqClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.FAQ_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.FAQ_CLICKED.biValue)
+        })
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {
@@ -216,7 +237,9 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_terms_of_use),
             url = configuration.agreementUrls.tosUrl,
         )
-        analytics.termsOfUseClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.TERMS_OF_USE_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.TERMS_OF_USE_CLICKED.biValue)
+        })
     }
 
     fun emailSupportClicked(context: Context) {
@@ -225,7 +248,9 @@ class ProfileViewModel(
             feedbackEmailAddress = config.getFeedbackEmailAddress(),
             appVersion = appData.versionName
         )
-        analytics.emailSupportClickedEvent()
+        logProfileEvent(ProfileAnalyticEvent.CONTACT_SUPPORT_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.CONTACT_SUPPORT_CLICKED.biValue)
+        })
     }
 
     fun appVersionClickedEvent(context: Context) {
@@ -239,4 +264,10 @@ class ProfileViewModel(
         )
     }
 
+    private fun logProfileEvent(event: String, params: Map<String, Any?>) {
+        analytics.logEvent(event, buildMap {
+            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+            putAll(params)
+        })
+    }
 }

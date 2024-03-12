@@ -38,7 +38,7 @@ fun CalendarSyncDialog(
     syncDialogType: CalendarSyncDialogType,
     calendarTitle: String,
     syncDialogAction: (CalendarSyncDialogType) -> Unit,
-    dismissSyncDialog: () -> Unit,
+    dismissSyncDialog: (CalendarSyncDialogType) -> Unit,
 ) {
     when (syncDialogType) {
         CalendarSyncDialogType.SYNC_DIALOG,
@@ -51,7 +51,7 @@ fun CalendarSyncDialog(
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
                     positiveAction = { syncDialogAction(syncDialogType) }
                 ),
-                onDismiss = dismissSyncDialog,
+                onDismiss = { dismissSyncDialog(syncDialogType) },
             )
         }
 
@@ -71,7 +71,7 @@ fun CalendarSyncDialog(
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
                     positiveAction = { syncDialogAction(syncDialogType) }
                 ),
-                onDismiss = dismissSyncDialog
+                onDismiss = { dismissSyncDialog(syncDialogType) }
             )
         }
 
@@ -84,7 +84,7 @@ fun CalendarSyncDialog(
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
                     positiveAction = { syncDialogAction(syncDialogType) },
                 ),
-                onDismiss = dismissSyncDialog
+                onDismiss = { dismissSyncDialog(syncDialogType) }
             )
         }
 
@@ -98,7 +98,7 @@ fun CalendarSyncDialog(
                     positiveAction = { syncDialogAction(syncDialogType) },
                     negativeAction = { syncDialogAction(CalendarSyncDialogType.UN_SYNC_DIALOG) }
                 ),
-                onDismiss = dismissSyncDialog
+                onDismiss = { dismissSyncDialog(syncDialogType) }
             )
         }
 

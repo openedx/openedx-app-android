@@ -33,6 +33,7 @@ import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
+import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
@@ -64,6 +65,7 @@ import org.openedx.profile.system.notifier.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
+import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 
 val appModule = module {
 
@@ -168,6 +170,8 @@ val appModule = module {
     single<ProfileAnalytics> { get<AnalyticsManager>() }
     single<CourseAnalytics> { get<AnalyticsManager>() }
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
+    single<AppReviewAnalytics> { get<AnalyticsManager>() }
+    single<WhatsNewAnalytics> { get<AnalyticsManager>() }
 
     factory { AgreementProvider(get(), get()) }
     factory { FacebookAuthHelper() }

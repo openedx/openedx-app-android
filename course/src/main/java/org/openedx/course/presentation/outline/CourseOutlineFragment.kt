@@ -48,6 +48,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -70,6 +71,7 @@ import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -159,7 +161,7 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onSubSectionClick = { subSectionBlock ->
                         viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                            viewModel.verticalClickedEvent(unit.blockId, unit.displayName)
+                            viewModel.logUnitDetailViewedEvent(unit.blockId)
                             router.navigateToCourseContainer(
                                 requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
@@ -218,6 +220,10 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onViewDates = {
                         (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
+                    },
+                    onCertificateClick = {
+                        viewModel.viewCertificateTappedEvent()
+                        it.takeIfNotEmpty()?.let { AndroidUriHandler(requireContext()).openUri(it) }
                     }
                 )
             }
@@ -229,7 +235,7 @@ class CourseOutlineFragment : Fragment() {
         private const val ARG_TITLE = "title"
         fun newInstance(
             courseId: String,
-            title: String
+            title: String,
         ): CourseOutlineFragment {
             val fragment = CourseOutlineFragment()
             fragment.arguments = bundleOf(
@@ -271,6 +277,7 @@ internal fun CourseOutlineScreen(
     onDownloadClick: (Block) -> Unit,
     onResetDatesClick: () -> Unit,
     onViewDates: () -> Unit?,
+    onCertificateClick: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -364,6 +371,7 @@ internal fun CourseOutlineScreen(
                                             courseImage = uiState.courseStructure.media?.image?.large
                                                 ?: "",
                                             courseCertificate = uiState.courseStructure.certificate,
+                                            onCertificateClick = onCertificateClick,
                                             courseName = uiState.courseStructure.name
                                         )
                                     }
@@ -667,6 +675,7 @@ private fun CourseOutlineScreenPreview() {
             onDownloadClick = {},
             onResetDatesClick = {},
             onViewDates = {},
+            onCertificateClick = {},
         )
     }
 }
@@ -708,6 +717,7 @@ private fun CourseOutlineScreenTabletPreview() {
             onDownloadClick = {},
             onResetDatesClick = {},
             onViewDates = {},
+            onCertificateClick = {},
         )
     }
 }

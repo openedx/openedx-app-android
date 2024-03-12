@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.AppDataConstants
-import org.openedx.core.BaseViewModel
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
@@ -17,6 +16,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSubtitleLanguageChanged
 import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import org.openedx.course.data.repository.CourseRepository
+import org.openedx.course.presentation.CourseAnalytics
 import subtitleFile.TimedTextObject
 
 open class VideoUnitViewModel(
@@ -25,7 +25,8 @@ open class VideoUnitViewModel(
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val transcriptManager: TranscriptManager,
-) : BaseViewModel() {
+    private val courseAnalytics: CourseAnalytics,
+) : BaseVideoViewModel(courseId, courseAnalytics) {
 
     var videoUrl = ""
     var transcripts = emptyMap<String, String>()
@@ -98,7 +99,8 @@ open class VideoUnitViewModel(
     }
 
 
-    fun markBlockCompleted(blockId: String) {
+    open fun markBlockCompleted(blockId: String, medium: String) {
+        logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
         if (!isBlockAlreadyCompleted) {
             viewModelScope.launch {
                 try {
@@ -128,5 +130,4 @@ open class VideoUnitViewModel(
     }
 
     fun getCurrentVideoTime() = currentVideoTime.value ?: 0
-
 }

@@ -18,6 +18,7 @@ import org.openedx.dashboard.notifier.DashboardNotifier
 class MainViewModel(
     private val config: Config,
     private val notifier: DashboardNotifier,
+    private val analytics: AppAnalytics,
 ) : BaseViewModel() {
 
     private val _isBottomBarEnabled = MutableLiveData(true)
@@ -43,5 +44,28 @@ class MainViewModel(
 
     fun enableBottomBar(enable: Boolean) {
         _isBottomBarEnabled.value = enable
+    }
+
+    fun logDiscoveryTabClickedEvent() {
+        logEvent(AppAnalyticEvent.DISCOVER)
+    }
+
+    fun logMyCoursesTabClickedEvent() {
+        logEvent(AppAnalyticEvent.MY_COURSES)
+    }
+
+    fun logMyProgramsTabClickedEvent() {
+        logEvent(AppAnalyticEvent.MY_PROGRAMS)
+    }
+
+    fun logProfileTabClickedEvent() {
+        logEvent(AppAnalyticEvent.PROFILE)
+    }
+
+    private fun logEvent(event: AppAnalyticEvent) {
+        analytics.logEvent(event.event,
+            buildMap {
+                put(AppAnalyticKey.NAME.key, AppAnalyticValues.SCREEN_NAVIGATION.value)
+            })
     }
 }

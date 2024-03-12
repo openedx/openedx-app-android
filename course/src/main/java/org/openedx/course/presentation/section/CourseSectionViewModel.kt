@@ -22,6 +22,9 @@ import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
+import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticValue
 
 class CourseSectionViewModel(
     private val interactor: CourseInteractor,
@@ -141,10 +144,17 @@ class CourseSectionViewModel(
         }
     }
 
-    fun verticalClickedEvent(blockId: String, blockName: String) {
+    fun verticalClickedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseSectionUIState.Blocks) {
-            analytics.verticalClickedEvent(courseId, currentState.courseName, blockId, blockName)
+            analytics.logEvent(
+                CourseAnalyticEvent.UNIT_DETAIL.event,
+                buildMap {
+                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                    put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
+                })
         }
     }
 }

@@ -24,6 +24,7 @@ import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
 import org.openedx.course.presentation.unit.html.HtmlUnitViewModel
+import org.openedx.course.presentation.unit.video.BaseVideoViewModel
 import org.openedx.course.presentation.unit.video.EncodedVideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
@@ -60,7 +61,7 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 val screenModule = module {
 
     viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get()) }
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -84,7 +85,19 @@ val screenModule = module {
     }
 
     viewModel { (courseId: String?, infoType: String?) ->
-        SignUpViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), courseId, infoType)
+        SignUpViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            courseId,
+            infoType
+        )
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
@@ -123,7 +136,7 @@ val screenModule = module {
         )
     }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
-    viewModel { VideoSettingsViewModel(get(), get()) }
+    viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
     viewModel { (qualityType: String) -> VideoQualityViewModel(get(), get(), qualityType) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
@@ -155,10 +168,11 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String, courseTitle: String) ->
+    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
         CourseContainerViewModel(
             courseId,
             courseTitle,
+            enrollmentMode,
             get(),
             get(),
             get(),
@@ -197,13 +211,14 @@ val screenModule = module {
             courseId
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, unitId: String) ->
         CourseUnitContainerViewModel(
             get(),
             get(),
             get(),
             get(),
-            courseId
+            courseId,
+            unitId
         )
     }
     viewModel { (courseId: String) ->
@@ -221,8 +236,9 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get()) }
-    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
+    viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get()) }
+    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get(), get()) }
     viewModel { (courseId: String, blockId: String) ->
         EncodedVideoUnitViewModel(
             courseId,
@@ -232,14 +248,17 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
-    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean) ->
+    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean, enrollmentMode: String) ->
         CourseDatesViewModel(
             courseId,
             courseName,
             isSelfPaced,
+            enrollmentMode,
+            get(),
             get(),
             get(),
             get(),
@@ -254,7 +273,8 @@ val screenModule = module {
             courseId,
             get(),
             handoutsType,
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { CourseSearchViewModel(get(), get(), get(), get(), get()) }
@@ -303,7 +323,8 @@ val screenModule = module {
         WhatsNewViewModel(
             courseId,
             infoType,
-            get()
+            get(),
+            get(),
         )
     }
 

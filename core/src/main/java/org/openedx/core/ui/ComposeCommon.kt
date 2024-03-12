@@ -449,7 +449,8 @@ fun HyperlinkText(
             annotatedString
                 .getStringAnnotations("URL", it, it)
                 .firstOrNull()?.let { stringAnnotation ->
-                    action?.invoke(stringAnnotation.item) ?: uriHandler.openUri(stringAnnotation.item)
+                    action?.invoke(stringAnnotation.item)
+                        ?: uriHandler.openUri(stringAnnotation.item)
                 }
         }
     )

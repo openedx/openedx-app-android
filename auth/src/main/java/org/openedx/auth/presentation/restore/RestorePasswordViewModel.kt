@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.LogistrationAnalyticEvent
+import org.openedx.auth.presentation.LogistrationAnalyticKey
+import org.openedx.auth.presentation.LogistrationAnalyticValues
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -41,28 +44,29 @@ class RestorePasswordViewModel(
     }
 
     fun passwordReset(email: String) {
+        logResetPasswordClickedEvent()
         _uiState.value = RestorePasswordUIState.Loading
         viewModelScope.launch {
             try {
                 if (email.isNotEmpty() && email.isEmailValid()) {
                     if (interactor.passwordReset(email)) {
                         _uiState.value = RestorePasswordUIState.Success(email)
-                        analytics.resetPasswordClickedEvent(true)
+                        logResetPasswordEvent(true)
                     } else {
                         _uiState.value = RestorePasswordUIState.Initial
                         _uiMessage.value =
                             UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                        analytics.resetPasswordClickedEvent(false)
+                        logResetPasswordEvent(false)
                     }
                 } else {
                     _uiState.value = RestorePasswordUIState.Initial
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.auth.R.string.auth_invalid_email))
-                    analytics.resetPasswordClickedEvent(false)
+                    logResetPasswordEvent(false)
                 }
             } catch (e: Exception) {
                 _uiState.value = RestorePasswordUIState.Initial
-                analytics.resetPasswordClickedEvent(false)
+                logResetPasswordEvent(false)
                 if (e is EdxError.ValidationException) {
                     _uiMessage.value = UIMessage.SnackBarMessage(e.error)
                 } else if (e.isInternetError()) {
@@ -84,4 +88,22 @@ class RestorePasswordViewModel(
         }
     }
 
+    private fun logResetPasswordClickedEvent() {
+        analytics.logEvent(
+            LogistrationAnalyticEvent.RESET_PASSWORD_CLICKED.event,
+            buildMap {
+                put(LogistrationAnalyticKey.NAME.key, LogistrationAnalyticValues.RESET_PASSWORD_CLICKED.biValue)
+            }
+        )
+    }
+
+    private fun logResetPasswordEvent(success: Boolean) {
+        analytics.logEvent(
+            LogistrationAnalyticEvent.RESET_PASSWORD.event,
+            buildMap {
+                put(LogistrationAnalyticKey.NAME.key, LogistrationAnalyticValues.RESET_PASSWORD.biValue)
+                put(LogistrationAnalyticKey.SUCCESS.key, success)
+            }
+        )
+    }
 }

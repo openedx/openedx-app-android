@@ -4,17 +4,20 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.profile.domain.model.Account
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.Account
+import org.openedx.profile.presentation.ProfileAnalyticEvent
+import org.openedx.profile.presentation.ProfileAnalyticKey
+import org.openedx.profile.presentation.ProfileAnalyticValue
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
-import kotlinx.coroutines.launch
 import java.io.File
 
 class EditProfileViewModel(
@@ -22,7 +25,7 @@ class EditProfileViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val analytics: ProfileAnalytics,
-    account: Account
+    account: Account,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<EditProfileUIState>()
@@ -49,6 +52,13 @@ class EditProfileViewModel(
         set(value) {
             field = value
             _uiState.value = EditProfileUIState(account, isLimited = value)
+            logProfileEvent(ProfileAnalyticEvent.SWITCH_PROFILE.event, buildMap {
+                put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.SWITCH_PROFILE.biValue)
+                put(
+                    ProfileAnalyticKey.ACTION.key,
+                    if (isLimitedProfile) ProfileAnalyticKey.LIMITED_PROFILE else ProfileAnalyticKey.FULL_PROFILE
+                )
+            })
         }
 
     private val _showLeaveDialog = MutableLiveData<Boolean>()
@@ -117,6 +127,9 @@ class EditProfileViewModel(
     fun setImageUri(uri: Uri) {
         _selectedImageUri.value = uri
         _deleteImage.value = false
+        logProfileEvent(ProfileAnalyticEvent.SETUP_PICTURE.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.SETUP_PICTURE.biValue)
+        })
     }
 
     fun setShowLeaveDialog(value: Boolean) {
@@ -128,11 +141,30 @@ class EditProfileViewModel(
     }
 
     fun profileEditDoneClickedEvent() {
-        analytics.profileEditDoneClickedEvent()
+        logProfileEvent(
+            ProfileAnalyticEvent.EDIT_DONE_CLICKED.event,
+            buildMap {
+                put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.EDIT_DONE_CLICKED.biValue)
+            }
+        )
     }
 
     fun profileDeleteAccountClickedEvent() {
-        analytics.profileDeleteAccountClickedEvent()
+        logProfileEvent(
+            ProfileAnalyticEvent.DELETE_ACCOUNT_CLICKED.event,
+            buildMap {
+                put(
+                    ProfileAnalyticKey.NAME.key,
+                    ProfileAnalyticValue.DELETE_ACCOUNT_CLICKED.biValue
+                )
+            }
+        )
     }
 
+    private fun logProfileEvent(event: String, params: Map<String, Any?>) {
+        analytics.logEvent(event, buildMap {
+            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+            putAll(params)
+        })
+    }
 }

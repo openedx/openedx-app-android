@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -122,7 +121,8 @@ fun CourseImageHeader(
     apiHostUrl: String,
     courseImage: String?,
     courseCertificate: Certificate?,
-    courseName: String
+    onCertificateClick: (String) -> Unit = {},
+    courseName: String,
 ) {
     val configuration = LocalConfiguration.current
     val windowSize = rememberWindowSize()
@@ -132,7 +132,6 @@ fun CourseImageHeader(
         } else {
             ContentScale.Crop
         }
-    val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
@@ -190,8 +189,8 @@ fun CourseImageHeader(
                     textColor = MaterialTheme.appColors.buttonText,
                     text = stringResource(id = R.string.course_view_certificate),
                     onClick = {
-                        courseCertificate.certificateURL?.let {
-                            uriHandler.openUri(it)
+                        courseCertificate?.certificateURL?.let {
+                            onCertificateClick(it)
                         }
                     })
             }

@@ -57,12 +57,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     private var _binding: FragmentCourseUnitContainerBinding? = null
 
     private val viewModel by viewModel<CourseUnitContainerViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(UNIT_ID, "")
+        )
     }
 
     private val router by inject<CourseRouter>()
 
-    private var unitId: String = ""
     private var componentId: String = ""
 
     private lateinit var adapter: CourseUnitContainerAdapter
@@ -132,10 +134,10 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
-        unitId = requireArguments().getString(UNIT_ID, "")
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
         viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
-        viewModel.setupCurrentIndex(unitId, componentId)
+        viewModel.setupCurrentIndex(componentId)
+        viewModel.courseUnitContainerShowedEvent()
     }
 
     override fun onCreateView(
@@ -244,7 +246,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         if (viewModel.isCourseExpandableSectionsEnabled) {
             binding.subSectionUnitsTitle.setContent {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
-                val currentUnit = unitBlocks.firstOrNull { it.id == unitId }
+                val currentUnit = unitBlocks.firstOrNull { it.id == viewModel.unitId }
                 val unitName = currentUnit?.displayName ?: ""
                 val unitsListShowed by viewModel.unitsListShowed.observeAsState(false)
 
@@ -262,7 +264,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
             binding.subSectionUnitsList.setContent {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
-                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == unitId }
+                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == viewModel.unitId }
                 OpenEdXTheme {
                     SubSectionUnitsList(
                         unitBlocks = unitBlocks,

@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.media3.cast.CastPlayer
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.Clock
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -23,23 +24,27 @@ import org.openedx.core.module.TranscriptManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.data.repository.CourseRepository
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalytics
 import java.util.concurrent.Executors
 
 class EncodedVideoUnitViewModel(
     courseId: String,
     val blockId: String,
-    courseRepository: CourseRepository,
-    notifier: CourseNotifier,
-    networkConnection: NetworkConnection,
-    transcriptManager: TranscriptManager,
-    val preferencesManager: CorePreferences,
     private val context: Context,
+    private val courseRepository: CourseRepository,
+    private val notifier: CourseNotifier,
+    private val networkConnection: NetworkConnection,
+    private val transcriptManager: TranscriptManager,
+    private val preferencesManager: CorePreferences,
+    private val courseAnalytics: CourseAnalytics,
 ) : VideoUnitViewModel(
     courseId,
     courseRepository,
     notifier,
     networkConnection,
-    transcriptManager
+    transcriptManager,
+    courseAnalytics
 ) {
 
     private val _isVideoEnded = MutableLiveData(false)
@@ -65,8 +70,24 @@ class EncodedVideoUnitViewModel(
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
                 _isVideoEnded.value = true
-                markBlockCompleted(blockId)
+                markBlockCompleted(blockId, CourseAnalyticKey.NATIVE.key)
             }
+
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
+            logPlayPauseEvent(videoUrl, isPlaying, getCurrentVideoTime(), getPlayingMedium())
+        }
+
+        override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+            super.onPlaybackParametersChanged(playbackParameters)
+            logVideoSpeedEvent(
+                videoUrl,
+                playbackParameters.speed,
+                getCurrentVideoTime(),
+                getPlayingMedium()
+            )
         }
     }
 
@@ -139,7 +160,23 @@ class EncodedVideoUnitViewModel(
             DefaultBandwidthMeter.getSingletonInstance(context),
             DefaultAnalyticsCollector(Clock.DEFAULT)
         ).build()
+        logLoadedCompletedEvent(videoUrl, true, getCurrentVideoTime(), getPlayingMedium())
     }
 
     private fun getVideoQuality() = preferencesManager.videoSettings.videoStreamingQuality
+
+    override fun markBlockCompleted(blockId: String, medium: String) {
+        super.markBlockCompleted(
+            blockId,
+            getPlayingMedium()
+        )
+    }
+
+    private fun getPlayingMedium(): String {
+        return if (getActivePlayer() == castPlayer) {
+            CourseAnalyticKey.GOOGLE_CAST.key
+        } else {
+            CourseAnalyticKey.NATIVE.key
+        }
+    }
 }

@@ -29,6 +29,9 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
@@ -43,7 +46,7 @@ class CourseOutlineViewModel(
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
     downloadDao: DownloadDao,
-    workerController: DownloadWorkerController
+    workerController: DownloadWorkerController,
 ) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -256,7 +259,7 @@ class CourseOutlineViewModel(
 
     private fun getResumeBlock(
         blocks: List<Block>,
-        continueBlockId: String
+        continueBlockId: String,
     ): Block? {
         val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
         resumeVerticalBlock =
@@ -286,10 +289,26 @@ class CourseOutlineViewModel(
         }
     }
 
+    fun viewCertificateTappedEvent() {
+        analytics.logEvent(
+            CourseAnalyticEvent.VIEW_CERTIFICATE.event,
+            buildMap {
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.VIEW_CERTIFICATE.biValue)
+                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+            })
+    }
+
     fun resumeCourseTappedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
-            analytics.resumeCourseTappedEvent(courseId, currentState.courseStructure.name, blockId)
+            analytics.logEvent(
+                CourseAnalyticEvent.RESUME_COURSE_CLICKED.event,
+                buildMap {
+                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.RESUME_COURSE_CLICKED.biValue)
+                    put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
+                })
         }
     }
 
@@ -305,10 +324,17 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun verticalClickedEvent(blockId: String, blockName: String) {
+    fun logUnitDetailViewedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
-            analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+            analytics.logEvent(
+                CourseAnalyticEvent.UNIT_DETAIL.event,
+                buildMap {
+                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                    put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
+                })
         }
     }
 
