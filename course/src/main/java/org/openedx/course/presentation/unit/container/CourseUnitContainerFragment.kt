@@ -5,11 +5,16 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +42,12 @@ import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
-import org.openedx.course.presentation.ui.*
+import org.openedx.course.presentation.ui.CourseUnitToolbar
+import org.openedx.course.presentation.ui.HorizontalPageIndicator
+import org.openedx.course.presentation.ui.NavigationUnitsButtons
+import org.openedx.course.presentation.ui.SubSectionUnitsList
+import org.openedx.course.presentation.ui.SubSectionUnitsTitle
+import org.openedx.course.presentation.ui.VerticalPageIndicator
 
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
@@ -71,6 +81,53 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             }
         }
     }
+
+    private val dialogListener = object : DialogListener {
+        override fun <T> onClick(value: T) {
+            viewModel.proceedToNext()
+            val nextBlock = viewModel.getCurrentVerticalBlock()
+            nextBlock?.let {
+                viewModel.finishVerticalNextClickedEvent(
+                    it.blockId,
+                    it.displayName
+                )
+                if (it.type.isContainer()) {
+                    router.navigateToCourseContainer(
+                        fm = requireActivity().supportFragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = it.id,
+                        mode = requireArguments().serializable(ARG_MODE)!!
+                    )
+                }
+            }
+        }
+
+        override fun onDismiss() {
+            viewModel.finishVerticalBackClickedEvent()
+            navigateToParentFragment()
+        }
+    }
+
+    // Start workaround to fix an issue when onDestroy is not called after one fragment
+    // was replaced with another using the 'FragmentManager.replace()' function
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            navigateToParentFragment()
+        }
+    }
+
+    private fun navigateToParentFragment() {
+        activity?.supportFragmentManager?.let { fm ->
+            for (i in fm.backStackEntryCount - 1 downTo 0) {
+                val entryName = fm.getBackStackEntryAt(i).name
+                if (entryName != CourseUnitContainerFragment::class.simpleName) {
+                    fm.popBackStack(entryName, 0)
+                    return
+                }
+            }
+        }
+    }
+    // End workaround
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -179,7 +236,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             CourseUnitToolbar(
                 title = title,
                 onBackClick = {
-                    requireActivity().supportFragmentManager.popBackStack()
+                    navigateToParentFragment()
                 }
             )
         }
@@ -212,7 +269,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         selectedUnitIndex = selectedUnitIndex
                     ) { index, unit ->
                         if (index != selectedUnitIndex) {
-                            router.replaceCourseContainer(
+                            router.navigateToCourseContainer(
                                 fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
                                 unitId = unit.id,
@@ -231,6 +288,22 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         if (viewModel.unitsListShowed.value == true) handleUnitsClick()
+
+        val chapterEndDialogTag = ChapterEndFragmentDialog::class.simpleName
+        (requireActivity().supportFragmentManager
+            .findFragmentByTag(chapterEndDialogTag) as? ChapterEndFragmentDialog)?.let { fragment ->
+            fragment.listener = dialogListener
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
+    }
+
+    override fun onPause() {
+        onBackPressedCallback.remove()
+        super.onPause()
     }
 
     override fun onDestroyView() {
@@ -313,30 +386,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         it.displayName
                     )
                 }
-                dialog.listener = object : DialogListener {
-                    override fun <T> onClick(value: T) {
-                        viewModel.proceedToNext()
-                        val nextBlock = viewModel.getCurrentVerticalBlock()
-                        nextBlock?.let {
-                            viewModel.finishVerticalNextClickedEvent(
-                                it.blockId,
-                                it.displayName
-                            )
-                            if (it.type.isContainer()) {
-                                router.replaceCourseContainer(
-                                    fm = requireActivity().supportFragmentManager,
-                                    courseId = viewModel.courseId,
-                                    unitId = it.id,
-                                    mode = requireArguments().serializable(ARG_MODE)!!
-                                )
-                            }
-                        }
-                    }
-
-                    override fun onDismiss() {
-                        viewModel.finishVerticalBackClickedEvent()
-                    }
-                }
+                dialog.listener = dialogListener
                 dialog.show(
                     requireActivity().supportFragmentManager,
                     ChapterEndFragmentDialog::class.simpleName
