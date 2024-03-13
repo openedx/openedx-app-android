@@ -159,7 +159,6 @@ class ProfileViewModel(
                 }
             } finally {
                 cookieManager.clearWebViewCookie()
-                analytics.logoutEvent(false)
                 _successLogout.value = true
             }
         }

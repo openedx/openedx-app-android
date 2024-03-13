@@ -16,8 +16,8 @@ import org.openedx.course.presentation.CourseAnalytics
 
 class HandoutsViewModel(
     private val courseId: String,
+    val handoutsType: String,
     private val config: Config,
-    private val handoutsType: String,
     private val interactor: CourseInteractor,
     private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
@@ -30,11 +30,6 @@ class HandoutsViewModel(
 
     init {
         getEnrolledCourse()
-        if (HandoutsType.valueOf(handoutsType) == HandoutsType.Handouts) {
-            logEvent(CourseAnalyticEvent.HANDOUTS)
-        } else {
-            logEvent(CourseAnalyticEvent.ANNOUNCEMENTS)
-        }
     }
 
     private fun getEnrolledCourse() {
@@ -103,7 +98,7 @@ class HandoutsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-    private fun logEvent(event: CourseAnalyticEvent) {
+    fun logEvent(event: CourseAnalyticEvent) {
         courseAnalytics.logEvent(
             event = event.event,
             params = buildMap {

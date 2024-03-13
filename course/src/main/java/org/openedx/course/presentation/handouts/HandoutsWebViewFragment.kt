@@ -22,6 +22,7 @@ import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.course.presentation.CourseAnalyticEvent
 
 class HandoutsWebViewFragment : Fragment() {
 
@@ -59,6 +60,11 @@ class HandoutsWebViewFragment : Fragment() {
                         requireActivity().supportFragmentManager.popBackStack()
                     })
             }
+        }
+        if (HandoutsType.valueOf(viewModel.handoutsType) == HandoutsType.Handouts) {
+            viewModel.logEvent(CourseAnalyticEvent.HANDOUTS)
+        } else {
+            viewModel.logEvent(CourseAnalyticEvent.ANNOUNCEMENTS)
         }
     }
 

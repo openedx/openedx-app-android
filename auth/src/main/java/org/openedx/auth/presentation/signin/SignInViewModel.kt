@@ -78,10 +78,6 @@ class SignInViewModel(
 
     init {
         collectAppUpgradeEvent()
-        logEvent(
-            LogistrationAnalyticEvent.SIGN_IN_VIEWED,
-            LogistrationAnalyticValues.SCREEN_NAVIGATION
-        )
     }
 
     fun login(username: String, password: String) {

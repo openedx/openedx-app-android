@@ -127,9 +127,6 @@ class EditProfileViewModel(
     fun setImageUri(uri: Uri) {
         _selectedImageUri.value = uri
         _deleteImage.value = false
-        logProfileEvent(ProfileAnalyticEvent.SETUP_PICTURE.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.SETUP_PICTURE.biValue)
-        })
     }
 
     fun setShowLeaveDialog(value: Boolean) {

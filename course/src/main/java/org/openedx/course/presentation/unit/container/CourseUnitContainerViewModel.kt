@@ -28,12 +28,12 @@ import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
 
 class CourseUnitContainerViewModel(
+    val courseId: String,
+    val unitId: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
-    val courseId: String,
-    val unitId: String
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()

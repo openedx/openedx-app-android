@@ -4,14 +4,11 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.module.TranscriptManager
-import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseVideoPositionChanged
-import org.openedx.course.data.repository.CourseRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -21,6 +18,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.module.TranscriptManager
+import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseVideoPositionChanged
+import org.openedx.course.data.repository.CourseRepository
+import org.openedx.course.presentation.CourseAnalytics
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VideoUnitViewModelTest {
@@ -34,6 +37,7 @@ class VideoUnitViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val networkConnection = mockk<NetworkConnection>()
     private val transcriptManager = mockk<TranscriptManager>()
+    private val courseAnalytics = mockk<CourseAnalytics>()
 
 
     @Before
@@ -53,7 +57,8 @@ class VideoUnitViewModelTest {
             courseRepository,
             notifier,
             networkConnection,
-            transcriptManager
+            transcriptManager,
+            courseAnalytics
         )
         coEvery {
             courseRepository.markBlocksCompletion(
@@ -61,7 +66,8 @@ class VideoUnitViewModelTest {
                 any()
             )
         } throws Exception()
-        viewModel.markBlockCompleted("")
+        every { courseAnalytics.logEvent(any(), any()) } returns Unit
+        viewModel.markBlockCompleted("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) {
@@ -70,6 +76,7 @@ class VideoUnitViewModelTest {
                 any()
             )
         }
+        verify(exactly = 1) { courseAnalytics.logEvent(any(), any()) }
     }
 
     @Test
@@ -79,7 +86,8 @@ class VideoUnitViewModelTest {
             courseRepository,
             notifier,
             networkConnection,
-            transcriptManager
+            transcriptManager,
+            courseAnalytics,
         )
         coEvery {
             courseRepository.markBlocksCompletion(
@@ -87,7 +95,8 @@ class VideoUnitViewModelTest {
                 any()
             )
         } returns Unit
-        viewModel.markBlockCompleted("")
+        every { courseAnalytics.logEvent(any(), any()) } returns Unit
+        viewModel.markBlockCompleted("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) {
@@ -96,6 +105,7 @@ class VideoUnitViewModelTest {
                 any()
             )
         }
+        verify(exactly = 1) { courseAnalytics.logEvent(any(), any()) }
     }
 
     @Test
@@ -105,9 +115,18 @@ class VideoUnitViewModelTest {
             courseRepository,
             notifier,
             networkConnection,
-            transcriptManager
+            transcriptManager,
+            courseAnalytics,
         )
-        coEvery { notifier.notifier } returns flow { emit(CourseVideoPositionChanged("", 10, false)) }
+        coEvery { notifier.notifier } returns flow {
+            emit(
+                CourseVideoPositionChanged(
+                    "",
+                    10,
+                    false
+                )
+            )
+        }
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)

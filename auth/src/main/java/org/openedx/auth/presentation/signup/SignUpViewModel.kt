@@ -72,10 +72,6 @@ class SignUpViewModel(
 
     init {
         collectAppUpgradeEvent()
-        logEvent(
-            LogistrationAnalyticEvent.REGISTER_VIEWED,
-            LogistrationAnalyticValues.SCREEN_NAVIGATION
-        )
     }
 
     fun getRegistrationFields() {

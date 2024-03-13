@@ -224,7 +224,7 @@ class SignInViewModelTest {
     fun `login success`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { analytics.userLoginEvent(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         val viewModel = SignInViewModel(
@@ -247,7 +247,7 @@ class SignInViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
-        verify(exactly = 1) { analytics.userLoginEvent(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
         val uiState = viewModel.uiState.value

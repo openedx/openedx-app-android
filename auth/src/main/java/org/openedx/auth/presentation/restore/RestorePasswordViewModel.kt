@@ -44,7 +44,6 @@ class RestorePasswordViewModel(
     }
 
     fun passwordReset(email: String) {
-        logResetPasswordClickedEvent()
         _uiState.value = RestorePasswordUIState.Loading
         viewModelScope.launch {
             try {
@@ -88,7 +87,7 @@ class RestorePasswordViewModel(
         }
     }
 
-    private fun logResetPasswordClickedEvent() {
+    fun logResetPasswordClickedEvent() {
         analytics.logEvent(
             LogistrationAnalyticEvent.RESET_PASSWORD_CLICKED.event,
             buildMap {

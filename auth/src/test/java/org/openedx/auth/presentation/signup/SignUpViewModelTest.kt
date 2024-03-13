@@ -145,7 +145,7 @@ class SignUpViewModelTest {
             parametersMap
         )
         coEvery { interactor.getRegistrationFields() } returns listOfFields
-        every { analytics.createAccountClickedEvent(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
         every { preferencesManager.user } returns user
@@ -158,7 +158,7 @@ class SignUpViewModelTest {
         viewModel.register()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
-        verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
@@ -195,7 +195,7 @@ class SignUpViewModelTest {
                 parametersMap.getValue(ApiConstants.PASSWORD)
             )
         } returns Unit
-        every { analytics.createAccountClickedEvent(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.getRegistrationFields()
@@ -205,7 +205,7 @@ class SignUpViewModelTest {
         }
         viewModel.register()
         advanceUntilIdle()
-        verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
@@ -238,13 +238,13 @@ class SignUpViewModelTest {
         coEvery { interactor.validateRegistrationFields(parametersMap) } throws Exception()
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery { interactor.login("", "") } returns Unit
-        every { analytics.createAccountClickedEvent(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         viewModel.register()
         advanceUntilIdle()
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
-        verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -274,8 +274,8 @@ class SignUpViewModelTest {
         coEvery { interactor.validateRegistrationFields(parametersMap) } returns ValidationFields(
             emptyMap()
         )
-        every { analytics.createAccountClickedEvent(any()) } returns Unit
-        every { analytics.registrationSuccessEvent(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
+        coEvery { analytics.logEvent(any(), any()) } returns Unit
         coEvery { interactor.getRegistrationFields() } returns listOfFields
         coEvery { interactor.register(parametersMap) } returns Unit
         coEvery {
@@ -297,8 +297,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 1) { interactor.register(any()) }
         coVerify(exactly = 1) { interactor.login(any(), any()) }
-        verify(exactly = 1) { analytics.createAccountClickedEvent(any()) }
-        verify(exactly = 1) { analytics.registrationSuccessEvent(any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.validationError)

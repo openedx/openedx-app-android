@@ -1,12 +1,10 @@
 package org.openedx.profile.presentation
 
 interface ProfileAnalytics {
-    fun logoutEvent(force: Boolean)
     fun logEvent(event: String, params: Map<String, Any?>)
 }
 
 enum class ProfileAnalyticEvent(val event: String) {
-    SETUP_PICTURE("Profile:Setup Picture"),
     EDIT_CLICKED("Profile:Edit Clicked"),
     SWITCH_PROFILE("Profile:Switch Profile"),
     EDIT_DONE_CLICKED("Profile:Edit Done Clicked"),
@@ -26,7 +24,6 @@ enum class ProfileAnalyticEvent(val event: String) {
 }
 
 enum class ProfileAnalyticValue(val biValue: String) {
-    SETUP_PICTURE("edx.bi.app.profile.setphoto"),
     EDIT_CLICKED("edx.bi.app.profile.edit.clicked"),
     SWITCH_PROFILE("edx.bi.app.profile.switch_profile.clicked"),
     EDIT_DONE_CLICKED("edx.bi.app.profile.edit_done.clicked"),

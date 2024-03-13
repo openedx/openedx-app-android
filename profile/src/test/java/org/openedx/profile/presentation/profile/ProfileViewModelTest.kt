@@ -223,7 +223,7 @@ class ProfileViewModelTest {
         )
         coEvery { interactor.logout() } throws UnknownHostException()
         coEvery { workerController.removeModels() } returns Unit
-        every { analytics.logoutEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
@@ -253,7 +253,7 @@ class ProfileViewModelTest {
         )
         coEvery { interactor.logout() } throws Exception()
         coEvery { workerController.removeModels() } returns Unit
-        every { analytics.logoutEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
@@ -261,7 +261,7 @@ class ProfileViewModelTest {
         coVerify(exactly = 1) { interactor.logout() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
         verify(exactly = 1) { cookieManager.clearWebViewCookie() }
-        verify { analytics.logoutEvent(false) }
+        verify { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -285,14 +285,14 @@ class ProfileViewModelTest {
         )
         coEvery { interactor.getCachedAccount() } returns mockk()
         coEvery { interactor.getAccount() } returns mockk()
-        every { analytics.logoutEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { interactor.logout() } returns Unit
         coEvery { workerController.removeModels() } returns Unit
         every { cookieManager.clearWebViewCookie() } returns Unit
         viewModel.logout()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.logout() }
-        verify { analytics.logoutEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
         verify(exactly = 1) { cookieManager.clearWebViewCookie() }
 
