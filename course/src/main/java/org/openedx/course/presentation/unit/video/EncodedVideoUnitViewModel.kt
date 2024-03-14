@@ -50,7 +50,6 @@ class EncodedVideoUnitViewModel(
         private set
     var castPlayer: CastPlayer? = null
         private set
-    private var castContext: CastContext? = null
 
     var isCastActive = false
 
@@ -82,7 +81,6 @@ class EncodedVideoUnitViewModel(
         val executor = Executors.newSingleThreadExecutor()
         CastContext.getSharedInstance(context, executor).addOnCompleteListener {
             it.result?.let { castContext ->
-                this.castContext = castContext
                 castPlayer = CastPlayer(castContext)
             }
         }
