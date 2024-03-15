@@ -117,12 +117,18 @@ data class EncodedVideos(
                 || fallback?.url != null
 
     val videoUrl: String
-        get() = mobileHigh?.url
-            ?: mobileLow?.url
-            ?: desktopMp4?.url
+        get() = fallback?.url
             ?: hls?.url
-            ?: fallback?.url
+            ?: desktopMp4?.url
+            ?: mobileHigh?.url
+            ?: mobileLow?.url
             ?: ""
+
+    val hasVideoUrl: Boolean
+        get() = videoUrl.isNotEmpty()
+
+    val hasYoutubeUrl: Boolean
+        get() = youtube?.url?.isNotEmpty() == true
 
     fun getPreferredVideoInfoForDownloading(preferredVideoQuality: VideoQuality): VideoInfo? {
         var preferredVideoInfo = when (preferredVideoQuality) {
