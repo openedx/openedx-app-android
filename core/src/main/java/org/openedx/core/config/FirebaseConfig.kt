@@ -9,6 +9,9 @@ data class FirebaseConfig(
     @SerializedName("ANALYTICS_SOURCE")
     val analyticsSource: AnalyticsSource = AnalyticsSource.NONE,
 
+    @SerializedName("CLOUD_MESSAGING_ENABLED")
+    val isCloudMessagingEnabled: Boolean = false,
+
     @SerializedName("PROJECT_NUMBER")
     val projectNumber: String = "",
 
