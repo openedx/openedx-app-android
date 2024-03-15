@@ -124,6 +124,12 @@ data class EncodedVideos(
             ?: mobileLow?.url
             ?: ""
 
+    val hasVideoUrl: Boolean
+        get() = videoUrl.isNotEmpty()
+
+    val hasYoutubeUrl: Boolean
+        get() = youtube?.url?.isNotEmpty() == true
+
     fun getPreferredVideoInfoForDownloading(preferredVideoQuality: VideoQuality): VideoInfo? {
         var preferredVideoInfo = when (preferredVideoQuality) {
             VideoQuality.OPTION_360P -> mobileLow

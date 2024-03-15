@@ -24,8 +24,8 @@ class CourseUnitContainerAdapter(
     private fun unitBlockFragment(block: Block): Fragment {
         return when {
             (block.isVideoBlock &&
-                    (block.studentViewData?.encodedVideos?.videoUrl?.isEmpty() == false ||
-                            block.studentViewData?.encodedVideos?.youtube?.url?.isEmpty() == false)) -> {
+                    (block.studentViewData?.encodedVideos?.hasVideoUrl == true ||
+                            block.studentViewData?.encodedVideos?.hasYoutubeUrl == true)) -> {
                 val encodedVideos = block.studentViewData?.encodedVideos!!
                 val transcripts = block.studentViewData!!.transcripts
                 with(encodedVideos) {
