@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--  Primary 500 | Dark 500-->
+    <color name="background">#FF00262b</color>
+    <color name="primary">#FFFBFAF9</color>
+    <color name="splash">#00262B</color>
+</resources>
