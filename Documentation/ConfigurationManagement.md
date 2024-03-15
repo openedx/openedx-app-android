@@ -29,6 +29,8 @@ config_mapping:
 - `config_directory` provides the path of the config directory.
 - `config_mappings` provides mappings that can be utilized to map the Android Build Variant to a defined folder within the config directory, and it will be referenced.
 
+Note: You can specify `config_directory` to any folder outside the repository to store the configs as a separate project.
+
 ### Configuration Files
 In the `default_config` folder, select your environment folder: prod, stage, dev or any other you have created.
 Open `config.yaml` and fill in the required fields.
@@ -59,6 +61,20 @@ MICROSOFT:
   CLIENT_ID: 'microsoftClientID'
 ```
 
+Also, all envirenment folders contain a `file_mappings.yaml` file that points to the config files to be parsed.
+
+By modifying `file_mappings.yaml`, you can achieve splitting of the base `config.yaml` or add additional configuration files.
+
+Example:
+
+```yaml
+android:
+  files:
+    - auth_client.yaml
+    - config.yaml
+    - feature_flags.yaml
+```
+
 ## Available Third-Party Services
 - **Firebase:** Analytics, Crashlytics, Cloud Messaging
 - **Google:** Sign in and Sign up via Google
@@ -69,6 +85,7 @@ MICROSOFT:
 - **SegmentIO:** Analytics
 
 ## Available Feature Flags
+- **PRE_LOGIN_EXPERIENCE_ENABLED:** Enables the pre login courses discovery experience.
 - **WHATS_NEW_ENABLED:** Enables the "What's New" feature to present the latest changes to the user.
 - **SOCIAL_AUTH_ENABLED:** Enables SSO buttons on the SignIn and SignUp screens.
 - **COURSE_NESTED_LIST_ENABLED:** Enables an alternative visual representation for the course structure.

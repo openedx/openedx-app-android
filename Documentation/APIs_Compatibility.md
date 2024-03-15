@@ -8,4 +8,4 @@ If your platform version is older than December 2023, follow the instructions be
 
 1. Setup the [mobile-api-extensions](https://github.com/raccoongang/mobile-api-extensions) plugin to your platform.
 The Plugin contains extended Open edX APIs for mobile applications.
-2. Roll back the modifications that brought in the new APIs [3bca8bf](https://github.com/openedx/openedx-app-ios/commit/3bca8bfa994163635e1128f0404007c6d0d4761f).
+2. Roll back the modifications that brought in the new APIs [42f518a](https://github.com/openedx/openedx-app-android/commit/42f518a264d4300c8c2ca349072addd7d16ff91a).
