@@ -137,8 +137,8 @@ val screenModule = module {
     }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
-    viewModel { (qualityType: String) -> VideoQualityViewModel(get(), get(), qualityType) }
-    viewModel { DeleteProfileViewModel(get(), get(), get(), get()) }
+    viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
+    viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
 
     single { CourseRepository(get(), get(), get(), get()) }
@@ -195,11 +195,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String) ->
         CourseSectionViewModel(
+            courseId,
             get(),
             get(),
             get(),
@@ -208,7 +210,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            courseId
+            get(),
         )
     }
     viewModel { (courseId: String, unitId: String) ->
@@ -233,12 +235,22 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
     viewModel { (courseId: String) -> VideoViewModel(courseId, get(), get(), get(), get()) }
-    viewModel { (courseId: String) -> VideoUnitViewModel(courseId, get(), get(), get(), get(), get()) }
+    viewModel { (courseId: String) ->
+        VideoUnitViewModel(
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (courseId: String, blockId: String) ->
         EncodedVideoUnitViewModel(
             courseId,
@@ -334,7 +346,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }

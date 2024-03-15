@@ -98,9 +98,9 @@ class RestorePasswordViewModel(
 
     private fun logResetPasswordEvent(success: Boolean) {
         analytics.logEvent(
-            LogistrationAnalyticEvent.RESET_PASSWORD.event,
+            LogistrationAnalyticEvent.RESET_PASSWORD_SUCCESS.event,
             buildMap {
-                put(LogistrationAnalyticKey.NAME.key, LogistrationAnalyticValues.RESET_PASSWORD.biValue)
+                put(LogistrationAnalyticKey.NAME.key, LogistrationAnalyticValues.RESET_PASSWORD_SUCCESS.biValue)
                 put(LogistrationAnalyticKey.SUCCESS.key, success)
             }
         )

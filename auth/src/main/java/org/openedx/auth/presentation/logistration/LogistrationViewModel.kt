@@ -51,7 +51,7 @@ class LogistrationViewModel(
             logEvent(
                 LogistrationAnalyticEvent.DISCOVERY_COURSES_SEARCH,
                 LogistrationAnalyticValues.DISCOVERY_COURSES_SEARCH,
-                buildMap { put(LogistrationAnalyticKey.LABEL.key, querySearch) })
+                buildMap { put(LogistrationAnalyticKey.SEARCH_QUERY.key, querySearch) })
         } ?: logEvent(
             LogistrationAnalyticEvent.EXPLORE_ALL_COURSES,
             LogistrationAnalyticValues.EXPLORE_ALL_COURSES

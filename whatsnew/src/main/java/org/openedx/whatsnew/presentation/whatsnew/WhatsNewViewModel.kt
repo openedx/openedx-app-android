@@ -30,24 +30,21 @@ class WhatsNewViewModel(
     }
 
     fun logWhatsNewViewed() {
-        logEvent(WhatsNewAnalyticEvent.WHATS_NEW_VIEW, emptyMap())
+        logEvent(WhatsNewAnalyticEvent.WHATS_NEW_VIEW, WhatsNewAnalyticValue.WHATS_NEW_VIEW)
     }
 
     fun logWhatsNewCompleted() {
-        logEvent(WhatsNewAnalyticEvent.WHATS_NEW_COMPLETED, buildMap {
-            put(WhatsNewAnalyticKey.TOTAL_SCREENS.key, whatsNewItem.value?.messages?.size)
-        })
+        logEvent(WhatsNewAnalyticEvent.WHATS_NEW_DONE, WhatsNewAnalyticValue.WHATS_NEW_DONE)
     }
 
 
-    private fun logEvent(event: WhatsNewAnalyticEvent, params: Map<String, Any?>) {
+    private fun logEvent(event: WhatsNewAnalyticEvent, biValue: WhatsNewAnalyticValue) {
         analytics.logEvent(
             event.eventName,
             buildMap {
-                put(WhatsNewAnalyticKey.NAME.key, WhatsNewAnalyticValue.SCREEN_NAVIGATION.value)
-                put(WhatsNewAnalyticKey.CATEGORY.key, WhatsNewAnalyticValue.WHATS_NEW.value)
-                put(WhatsNewAnalyticKey.APP_VERSION.key, whatsNewItem.value?.version)
-                putAll(params)
+                put(WhatsNewAnalyticKey.NAME.key, biValue.value)
+                put(WhatsNewAnalyticKey.CATEGORY.key, WhatsNewAnalyticKey.WHATS_NEW.key)
+                put(WhatsNewAnalyticKey.TOTAL_SCREENS.key, whatsNewItem.value?.messages?.size)
             })
     }
 }

@@ -81,6 +81,10 @@ class SignInViewModel(
     }
 
     fun login(username: String, password: String) {
+        logEvent(
+            LogistrationAnalyticEvent.USER_SIGN_IN_CLICKED,
+            LogistrationAnalyticValues.USER_SIGN_IN_CLICKED
+        )
         if (!validator.isEmailOrUserNameValid(username)) {
             _uiMessage.value =
                 UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_email_username))
@@ -154,7 +158,7 @@ class SignInViewModel(
         router.navigateToRestorePassword(parentFragmentManager)
         logEvent(
             LogistrationAnalyticEvent.FORGOT_PASSWORD_CLICKED,
-            LogistrationAnalyticValues.SCREEN_NAVIGATION
+            LogistrationAnalyticValues.FORGOT_PASSWORD_CLICKED
         )
     }
 
@@ -236,7 +240,7 @@ class SignInViewModel(
     private fun logEvent(
         eventName: LogistrationAnalyticEvent,
         biValue: LogistrationAnalyticValues,
-        params: Map<String, Any?> = emptyMap()
+        params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(eventName.event, buildMap {
             put(LogistrationAnalyticKey.NAME.key, biValue.biValue)

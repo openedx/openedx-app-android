@@ -22,6 +22,7 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
@@ -45,9 +46,10 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
+    private val coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     val apiHostUrl get() = config.getApiHostURL()
 
@@ -330,7 +332,7 @@ class CourseOutlineViewModel(
             analytics.logEvent(
                 CourseAnalyticEvent.UNIT_DETAIL.event,
                 buildMap {
-                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
                     put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)

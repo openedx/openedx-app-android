@@ -98,11 +98,11 @@ class HandoutsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-    fun logEvent(event: CourseAnalyticEvent) {
+    fun logEvent(event: CourseAnalyticEvent, value: CourseAnalyticValue) {
         courseAnalytics.logEvent(
             event = event.event,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.NAME.key, value.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
             }
         )

@@ -8,6 +8,7 @@ interface AppAnalytics {
 
 
 enum class AppAnalyticEvent(val event: String) {
+    LAUNCH("Launch"),
     DISCOVER("MainDashboard:Discover"),
     MY_COURSES("MainDashboard:My Courses"),
     MY_PROGRAMS("MainDashboard:My Programs"),
@@ -15,7 +16,11 @@ enum class AppAnalyticEvent(val event: String) {
 }
 
 enum class AppAnalyticValues(val value: String) {
-    SCREEN_NAVIGATION("edx.bi.app.navigation.screen"),
+    LAUNCH("edx.bi.app.launch"),
+    DISCOVER("edx.bi.app.main_dashboard.discover"),
+    MY_COURSES("edx.bi.app.main_dashboard.my_courses"),
+    MY_PROGRAMS("edx.bi.app.main_dashboard.my_programs"),
+    PROFILE("edx.bi.app.main_dashboard.profile"),
 }
 
 enum class AppAnalyticKey(val key: String) {

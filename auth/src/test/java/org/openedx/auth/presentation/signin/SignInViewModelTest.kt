@@ -97,6 +97,7 @@ class SignInViewModelTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -115,6 +116,7 @@ class SignInViewModelTest {
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -128,6 +130,7 @@ class SignInViewModelTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -160,6 +163,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         val viewModel = SignInViewModel(
             interactor = interactor,
@@ -193,6 +197,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -212,6 +217,7 @@ class SignInViewModelTest {
 
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -224,9 +230,9 @@ class SignInViewModelTest {
     fun `login success`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { analytics.logEvent(any(), any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -247,8 +253,8 @@ class SignInViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
@@ -262,6 +268,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -283,6 +290,7 @@ class SignInViewModelTest {
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -298,6 +306,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -320,6 +329,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -334,6 +344,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -356,6 +367,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value

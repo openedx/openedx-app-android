@@ -22,21 +22,23 @@ import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import kotlinx.coroutines.launch
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalyticValue
 
 class CourseSectionViewModel(
+    val courseId: String,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
+    private val coreAnalytics: CoreAnalytics,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
-    val courseId: String
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     private val _uiState = MutableLiveData<CourseSectionUIState>(CourseSectionUIState.Loading)
     val uiState: LiveData<CourseSectionUIState>
@@ -150,7 +152,7 @@ class CourseSectionViewModel(
             analytics.logEvent(
                 CourseAnalyticEvent.UNIT_DETAIL.event,
                 buildMap {
-                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
                     put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)

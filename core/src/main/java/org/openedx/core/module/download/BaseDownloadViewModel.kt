@@ -15,13 +15,18 @@ import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.CoreAnalyticsEvent
+import org.openedx.core.presentation.CoreAnalyticsKey
+import org.openedx.core.presentation.CoreAnalyticsValue
 import org.openedx.core.utils.Sha1Util
 import java.io.File
 
 abstract class BaseDownloadViewModel(
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
-    private val workerController: DownloadWorkerController
+    private val workerController: DownloadWorkerController,
+    private val analytics: CoreAnalytics,
 ) : BaseViewModel() {
 
     private val allBlocks = hashMapOf<String, Block>()
@@ -235,4 +240,19 @@ abstract class BaseDownloadViewModel(
         }
     }
 
+    fun logBulkDownloadToggleEvent(toggle: Boolean) {
+        logEvent(CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE.event,
+            buildMap {
+                put(
+                    CoreAnalyticsKey.NAME.key,
+                    CoreAnalyticsValue.VIDEO_BULK_DOWNLOAD_TOGGLE.biValue
+                )
+                put(CoreAnalyticsKey.ACTION.key, toggle.toString())
+            }
+        )
+    }
+
+    private fun logEvent(event: String, params: Map<String, Any?>) {
+        analytics.logEvent(event, params)
+    }
 }

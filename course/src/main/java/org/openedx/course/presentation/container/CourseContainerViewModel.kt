@@ -292,34 +292,34 @@ class CourseContainerViewModel(
     }
 
     private fun courseDashboardViewed(){
-        logCourseContainerEvent(CourseAnalyticEvent.DASHBOARD)
+        logCourseContainerEvent(CourseAnalyticEvent.DASHBOARD, CourseAnalyticValue.DASHBOARD)
     }
 
     private fun courseTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.HOME_TAB)
+        logCourseContainerEvent(CourseAnalyticEvent.HOME_TAB, CourseAnalyticValue.HOME_TAB)
     }
 
     private fun videoTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.VIDEOS_TAB)
+        logCourseContainerEvent(CourseAnalyticEvent.VIDEOS_TAB, CourseAnalyticValue.VIDEOS_TAB)
     }
 
     private fun discussionTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.DISCUSSION_TAB)
+        logCourseContainerEvent(CourseAnalyticEvent.DISCUSSION_TAB, CourseAnalyticValue.DISCUSSION_TAB)
     }
 
     private fun datesTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.DATES_TAB)
+        logCourseContainerEvent(CourseAnalyticEvent.DATES_TAB, CourseAnalyticValue.DATES_TAB)
     }
 
     private fun handoutsTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.HANDOUTS_TAB)
+        logCourseContainerEvent(CourseAnalyticEvent.HANDOUTS_TAB, CourseAnalyticValue.HANDOUTS_TAB)
     }
 
-    private fun logCourseContainerEvent(event: CourseAnalyticEvent) {
+    private fun logCourseContainerEvent(event: CourseAnalyticEvent, biValue: CourseAnalyticValue) {
         courseAnalytics.logEvent(
             event = event.event,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.NAME.key, biValue.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
             }
         )

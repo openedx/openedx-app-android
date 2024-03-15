@@ -3,6 +3,7 @@ package org.openedx.profile.presentation.delete
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -11,15 +12,19 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.presentation.ProfileAnalyticEvent
+import org.openedx.profile.presentation.ProfileAnalyticKey
+import org.openedx.profile.presentation.ProfileAnalyticValue
+import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.ProfileNotifier
-import kotlinx.coroutines.launch
 
 class DeleteProfileViewModel(
     private val resourceManager: ResourceManager,
     private val interactor: ProfileInteractor,
     private val notifier: ProfileNotifier,
-    private val validator: Validator
+    private val validator: Validator,
+    private val analytics: ProfileAnalytics,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DeleteProfileFragmentUIState>()
@@ -42,6 +47,7 @@ class DeleteProfileViewModel(
             try {
                 interactor.deactivateAccount(password)
                 _uiState.value = DeleteProfileFragmentUIState.Success
+                logDeleteProfileEvent(true)
                 notifier.send(AccountDeactivated())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -56,7 +62,16 @@ class DeleteProfileViewModel(
                     _uiState.value =
                         DeleteProfileFragmentUIState.Error(resourceManager.getString(org.openedx.profile.R.string.profile_password_is_incorrect))
                 }
+                logDeleteProfileEvent(false)
             }
         }
+    }
+
+    private fun logDeleteProfileEvent(isSuccess: Boolean) {
+        analytics.logEvent(ProfileAnalyticEvent.DELETE_ACCOUNT_SUCCESS.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.DELETE_ACCOUNT_SUCCESS.biValue)
+            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+            put(ProfileAnalyticKey.SUCCESS.key, isSuccess)
+        })
     }
 }

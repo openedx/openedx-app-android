@@ -154,7 +154,7 @@ class CourseDetailsViewModel(
         analytics.logEvent(
             CourseAnalyticEvent.COURSE_INFO.event,
             buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_INFO.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
             }
         )

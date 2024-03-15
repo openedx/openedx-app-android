@@ -65,24 +65,12 @@ class VideoSettingsViewModel(
         router.navigateToVideoQuality(
             fragmentManager, VideoQualityType.Streaming
         )
-        logProfileEvent(ProfileAnalyticEvent.VIDEO_STREAMING_QUALITY_CLICKED.event, buildMap {
-            put(
-                ProfileAnalyticKey.NAME.key,
-                ProfileAnalyticValue.VIDEO_STREAMING_QUALITY_CLICKED.biValue
-            )
-        })
     }
 
     fun navigateToVideoDownloadQuality(fragmentManager: FragmentManager) {
         router.navigateToVideoQuality(
             fragmentManager, VideoQualityType.Download
         )
-        logProfileEvent(ProfileAnalyticEvent.VIDEO_DOWNLOAD_QUALITY_CLICKED.event, buildMap {
-            put(
-                ProfileAnalyticKey.NAME.key,
-                ProfileAnalyticValue.VIDEO_DOWNLOAD_QUALITY_CLICKED.biValue
-            )
-        })
     }
 
     private fun logProfileEvent(event: String, params: Map<String, Any?>) {

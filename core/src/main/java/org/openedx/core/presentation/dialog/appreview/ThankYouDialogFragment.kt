@@ -48,7 +48,7 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                     description = description,
                     showButtons = isFeedbackPositive.value,
                     onNotNowClick = {
-                        this@ThankYouDialogFragment.notNowClick(AppReviewDialogType.THANK_YOU)
+                        this@ThankYouDialogFragment.notNowClick()
                     },
                     onRateUsClick = this@ThankYouDialogFragment::openInAppReview
                 )
@@ -56,7 +56,6 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                 closeDialogDelay(isFeedbackPositive.value)
             }
         }
-        onThankYouDialogShowed()
     }
 
     private fun closeDialogDelay(isFeedbackPositive: Boolean) {
@@ -69,6 +68,7 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     private fun openInAppReview() {
+        onRateAppClick()
         val request = reviewManager.requestReviewFlow()
         request.addOnCompleteListener { task ->
             try {
@@ -87,7 +87,7 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     override fun dismiss() {
-        onDismiss(AppReviewDialogType.THANK_YOU)
+        onDismiss()
     }
 
     companion object {

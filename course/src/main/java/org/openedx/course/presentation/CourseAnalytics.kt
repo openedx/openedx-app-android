@@ -94,10 +94,19 @@ enum class CourseAnalyticEvent(val event: String) {
 
 enum class CourseAnalyticValue(val biValue: String) {
 
-    SCREEN_NAVIGATION("edx.bi.app.navigation.screen"),
-
     COURSE_ENROLL_CLICKED("edx.bi.app.course.enroll.clicked"),
     COURSE_ENROLL_SUCCESS("edx.bi.app.course.enroll.success"),
+    COURSE_INFO("edx.bi.app.course.info"),
+
+    DASHBOARD("edx.bi.app.course.dashboard"),
+    HOME_TAB("edx.bi.app.course.home_tab"),
+    VIDEOS_TAB(" edx.bi.app.course.video_tab"),
+    DISCUSSION_TAB("edx.bi.app.course.discussion_tab"),
+    DATES_TAB("edx.bi.app.course.dates_tab"),
+    HANDOUTS_TAB("edx.bi.app.course.handouts_tab"),
+    ANNOUNCEMENTS("edx.bi.app.course.announcements"),
+    HANDOUTS("edx.bi.app.course.handouts"),
+    UNIT_DETAIL("edx.bi.app.course.unit_detail"),
 
     VIEW_CERTIFICATE("edx.bi.app.course.view_certificate.clicked"),
     RESUME_COURSE_CLICKED("edx.bi.app.course.resume_course.clicked"),

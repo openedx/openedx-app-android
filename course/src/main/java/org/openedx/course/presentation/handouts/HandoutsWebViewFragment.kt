@@ -23,6 +23,7 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.presentation.CourseAnalyticEvent
+import org.openedx.course.presentation.CourseAnalyticValue
 
 class HandoutsWebViewFragment : Fragment() {
 
@@ -62,9 +63,9 @@ class HandoutsWebViewFragment : Fragment() {
             }
         }
         if (HandoutsType.valueOf(viewModel.handoutsType) == HandoutsType.Handouts) {
-            viewModel.logEvent(CourseAnalyticEvent.HANDOUTS)
+            viewModel.logEvent(CourseAnalyticEvent.HANDOUTS, CourseAnalyticValue.HANDOUTS)
         } else {
-            viewModel.logEvent(CourseAnalyticEvent.ANNOUNCEMENTS)
+            viewModel.logEvent(CourseAnalyticEvent.ANNOUNCEMENTS, CourseAnalyticValue.ANNOUNCEMENTS)
         }
     }
 

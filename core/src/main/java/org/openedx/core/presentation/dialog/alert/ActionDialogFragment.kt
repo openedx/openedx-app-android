@@ -31,6 +31,10 @@ import androidx.fragment.app.DialogFragment
 import org.koin.android.ext.android.inject
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.CoreAnalyticsEvent
+import org.openedx.core.presentation.CoreAnalyticsKey
+import org.openedx.core.presentation.CoreAnalyticsValue
 import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
 import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -42,6 +46,8 @@ import org.openedx.core.utils.UrlUtils
 class ActionDialogFragment : DialogFragment() {
 
     private val config by inject<Config>()
+    private val analytics: CoreAnalytics by inject()
+    private val url: String = requireArguments().getString(ARG_URL, "")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,19 +63,52 @@ class ActionDialogFragment : DialogFragment() {
                     title = requireArguments().getString(ARG_TITLE, ""),
                     message = requireArguments().getString(ARG_MESSAGE, ""),
                     onPositiveClick = {
+                        logDialogActionEvent(CoreAnalyticsKey.CANCEL.key)
                         dismiss()
                     },
                     onNegativeClick = {
                         UrlUtils.openInBrowser(
                             activity = context,
                             apiHostUrl = config.getApiHostURL(),
-                            url = requireArguments().getString(ARG_URL, ""),
+                            url = url,
                         )
+                        logDialogActionEvent(CoreAnalyticsKey.CONTINUE.key)
                         dismiss()
                     }
                 )
             }
         }
+        logDialogEvent(
+            event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT,
+            biValue = CoreAnalyticsValue.EXTERNAL_LINK_OPENING_ALERT
+        )
+    }
+
+    private fun logDialogActionEvent(action: String) {
+        logDialogEvent(
+            event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT_ACTION,
+            biValue = CoreAnalyticsValue.EXTERNAL_LINK_OPENING_ALERT_ACTION,
+            action = action
+        )
+    }
+
+    private fun logDialogEvent(
+        event: CoreAnalyticsEvent,
+        biValue: CoreAnalyticsValue,
+        action: String? = null,
+    ) {
+        analytics.logEvent(
+            event = event.event,
+            params = buildMap {
+                put(
+                    CoreAnalyticsKey.NAME.key,
+                    biValue.biValue
+                )
+                put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
+                put(CoreAnalyticsKey.URL.key, url)
+                action?.let { put(CoreAnalyticsKey.ALERT_ACTION.key, action) }
+            }
+        )
     }
 
     companion object {

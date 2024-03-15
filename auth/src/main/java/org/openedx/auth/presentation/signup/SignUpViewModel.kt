@@ -166,7 +166,7 @@ class SignUpViewModel(
                         LogistrationAnalyticEvent.REGISTER_SUCCESSFULLY,
                         LogistrationAnalyticValues.REGISTER_SUCCESSFULLY,
                         buildMap {
-                            put(LogistrationAnalyticKey.PROVIDER.key, socialAuth?.authType?.postfix.orEmpty())
+                            put(LogistrationAnalyticKey.PROVIDER.key, socialAuth?.authType?.methodName)
                         }
                     )
                     if (socialAuth == null) {

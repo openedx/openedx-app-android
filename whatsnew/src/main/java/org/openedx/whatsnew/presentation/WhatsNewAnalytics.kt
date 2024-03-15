@@ -5,18 +5,18 @@ interface WhatsNewAnalytics {
 }
 
 enum class WhatsNewAnalyticEvent(val eventName: String) {
-    WHATS_NEW_VIEW("WhatsNew:View"),
-    WHATS_NEW_COMPLETED("WhatsNew:Completed"),
+    WHATS_NEW_VIEW("WhatsNew:Pop up Viewed"),
+    WHATS_NEW_DONE("WhatsNew:Done"),
 }
 
 enum class WhatsNewAnalyticValue(val value: String) {
-    SCREEN_NAVIGATION("edx.bi.app.navigation.screen"),
-    WHATS_NEW("whats_new"),
+    WHATS_NEW_VIEW("edx.bi.app.whats_new.popup.viewed"),
+    WHATS_NEW_DONE("edx.bi.app.whats_new.done"),
 }
 
 enum class WhatsNewAnalyticKey(val key: String) {
     NAME("name"),
-    APP_VERSION("app_version"),
     CATEGORY("category"),
+    WHATS_NEW("whatsnew"),
     TOTAL_SCREENS("total_screens"),
 }

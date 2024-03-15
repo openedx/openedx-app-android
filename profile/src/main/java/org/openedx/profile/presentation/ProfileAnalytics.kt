@@ -16,9 +16,8 @@ enum class ProfileAnalyticEvent(val event: String) {
     COOKIE_POLICY_CLICKED("Profile:Cookie Policy Clicked"),
     DATA_SELL_CLICKED("Profile:Data Sell Clicked"),
     DELETE_ACCOUNT_CLICKED("Profile:Delete Account Clicked"),
+    DELETE_ACCOUNT_SUCCESS("Profile:Delete Account Success"),
     WIFI_TOGGLE("Profile:Wifi Toggle"),
-    VIDEO_STREAMING_QUALITY_CLICKED("Profile:Video Streaming Quality Clicked"),
-    VIDEO_DOWNLOAD_QUALITY_CLICKED("Profile:Video Download Quality Clicked"),
     LOGOUT_CLICKED("Profile:Logout Clicked"),
     LOGGED_OUT("Profile:Logged Out"),
 }
@@ -35,9 +34,8 @@ enum class ProfileAnalyticValue(val biValue: String) {
     COOKIE_POLICY_CLICKED("edx.bi.app.profile.cookie_policy.clicked"),
     DATA_SELL_CLICKED("edx.bi.app.profile.do_not_sell_data.clicked"),
     DELETE_ACCOUNT_CLICKED("edx.bi.app.profile.delete_account.clicked"),
+    DELETE_ACCOUNT_SUCCESS("edx.bi.app.profile.delete_account.success"),
     WIFI_TOGGLE("edx.bi.app.profile.wifi_toggle.action"),
-    VIDEO_STREAMING_QUALITY_CLICKED("edx.bi.app.profile.video_streaming_quality.clicked"),
-    VIDEO_DOWNLOAD_QUALITY_CLICKED("edx.bi.app.profile.video_download_quality.clicked"),
     LOGOUT_CLICKED("edx.bi.app.profile.logout.clicked"),
     LOGGED_OUT("edx.bi.app.user.logout"),
 }
@@ -51,4 +49,5 @@ enum class ProfileAnalyticKey(val key: String) {
     LIMITED_PROFILE("limited_profile"),
     ON("On"),
     OFF("Off"),
+    SUCCESS("Success"),
 }

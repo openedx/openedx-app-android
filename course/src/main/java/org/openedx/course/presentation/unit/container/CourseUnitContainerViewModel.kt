@@ -256,7 +256,7 @@ class CourseUnitContainerViewModel(
         analytics.logEvent(
             CourseAnalyticEvent.UNIT_DETAIL.event,
             buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.SCREEN_NAVIGATION.biValue)
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.BLOCK_ID.key, unitId)
                 put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)

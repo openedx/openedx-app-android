@@ -26,12 +26,8 @@ class RateDialogFragment : BaseAppReviewDialogFragment() {
                 val rating = rememberSaveable { mutableIntStateOf(0) }
                 RateDialog(
                     rating = rating,
-                    onNotNowClick = {
-                        notNowClick(AppReviewDialogType.RATE, rating.intValue)
-                    },
-                    onSubmitClick = {
-                        onSubmitClick(rating.intValue)
-                    }
+                    onNotNowClick = { notNowClick(rating.intValue) },
+                    onSubmitClick = { onSubmitClick(rating.intValue) }
                 )
             }
         }
@@ -48,7 +44,6 @@ class RateDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     private fun openFeedbackDialog() {
-        onSendFeedbackClick()
         val dialog = FeedbackDialogFragment.newInstance()
         dialog.show(
             requireActivity().supportFragmentManager,
@@ -67,7 +62,7 @@ class RateDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     override fun dismiss() {
-        onDismiss(AppReviewDialogType.RATE)
+        onDismiss()
     }
 
     companion object {
