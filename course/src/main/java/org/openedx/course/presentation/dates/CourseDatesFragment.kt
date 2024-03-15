@@ -156,16 +156,26 @@ class CourseDatesFragment : Fragment() {
                     onItemClick = { blockId ->
                         if (blockId.isNotEmpty()) {
                             viewModel.getVerticalBlock(blockId)?.let { verticalBlock ->
-                                viewModel.getSequentialBlock(verticalBlock.id)
-                                    ?.let { sequentialBlock ->
-                                        router.navigateToCourseSubsections(
-                                            fm = requireActivity().supportFragmentManager,
-                                            subSectionId = sequentialBlock.id,
-                                            courseId = viewModel.courseId,
-                                            unitId = verticalBlock.id,
-                                            mode = CourseViewMode.FULL
-                                        )
-                                    }
+                                if (viewModel.isCourseExpandableSectionsEnabled) {
+                                    router.navigateToCourseContainer(
+                                        fm = requireActivity().supportFragmentManager,
+                                        courseId = viewModel.courseId,
+                                        unitId = verticalBlock.id,
+                                        componentId = "",
+                                        mode = CourseViewMode.FULL
+                                    )
+                                } else {
+                                    viewModel.getSequentialBlock(verticalBlock.id)
+                                        ?.let { sequentialBlock ->
+                                            router.navigateToCourseSubsections(
+                                                fm = requireActivity().supportFragmentManager,
+                                                subSectionId = sequentialBlock.id,
+                                                courseId = viewModel.courseId,
+                                                unitId = verticalBlock.id,
+                                                mode = CourseViewMode.FULL
+                                            )
+                                        }
+                                }
                             }
                         }
                     },

@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.getSequentialBlocks
@@ -37,6 +38,7 @@ class CourseDatesViewModel(
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
     private val corePreferences: CorePreferences,
+    private val config: Config,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)
@@ -63,6 +65,8 @@ class CourseDatesViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
     init {
         getCourseDates()

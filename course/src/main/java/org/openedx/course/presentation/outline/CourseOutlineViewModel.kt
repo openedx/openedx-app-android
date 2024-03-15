@@ -73,6 +73,8 @@ class CourseOutlineViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
