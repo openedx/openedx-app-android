@@ -101,7 +101,6 @@ class RestorePasswordFragment : Fragment() {
                             requireActivity().supportFragmentManager.popBackStackImmediate()
                         },
                         onRestoreButtonClick = {
-                            viewModel.logResetPasswordClickedEvent()
                             viewModel.passwordReset(it)
                         }
                     )
