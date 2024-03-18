@@ -81,7 +81,7 @@ class RestorePasswordFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -101,7 +101,6 @@ class RestorePasswordFragment : Fragment() {
                             requireActivity().supportFragmentManager.popBackStackImmediate()
                         },
                         onRestoreButtonClick = {
-                            viewModel.logResetPasswordClickedEvent()
                             viewModel.passwordReset(it)
                         }
                     )
@@ -124,7 +123,7 @@ private fun RestorePasswordScreen(
     uiState: RestorePasswordUIState,
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
-    onRestoreButtonClick: (String) -> Unit
+    onRestoreButtonClick: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()

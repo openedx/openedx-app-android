@@ -77,7 +77,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(emptyEmail)
         advanceUntilIdle()
         coVerify(exactly = 0) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -95,7 +95,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(invalidEmail)
         advanceUntilIdle()
         coVerify(exactly = 0) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -113,7 +113,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -131,7 +131,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -149,7 +149,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -167,7 +167,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -186,7 +186,7 @@ class RestorePasswordViewModelTest {
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val state = viewModel.uiState.value as? RestorePasswordUIState.Success
