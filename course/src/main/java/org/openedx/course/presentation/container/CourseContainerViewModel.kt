@@ -30,10 +30,9 @@ import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CalendarSyncDialog
 import org.openedx.course.presentation.CalendarSyncSnackbar
-import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
-import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -294,37 +293,34 @@ class CourseContainerViewModel(
     }
 
     private fun courseDashboardViewed() {
-        logCourseContainerEvent(CourseAnalyticEvent.DASHBOARD, CourseAnalyticValue.DASHBOARD)
+        logCourseContainerEvent(CourseAnalyticsEvent.DASHBOARD)
     }
 
     private fun courseTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.HOME_TAB, CourseAnalyticValue.HOME_TAB)
+        logCourseContainerEvent(CourseAnalyticsEvent.HOME_TAB)
     }
 
     private fun videoTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.VIDEOS_TAB, CourseAnalyticValue.VIDEOS_TAB)
+        logCourseContainerEvent(CourseAnalyticsEvent.VIDEOS_TAB)
     }
 
     private fun discussionTabClickedEvent() {
-        logCourseContainerEvent(
-            CourseAnalyticEvent.DISCUSSION_TAB,
-            CourseAnalyticValue.DISCUSSION_TAB
-        )
+        logCourseContainerEvent(CourseAnalyticsEvent.DISCUSSION_TAB)
     }
 
     private fun datesTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.DATES_TAB, CourseAnalyticValue.DATES_TAB)
+        logCourseContainerEvent(CourseAnalyticsEvent.DATES_TAB)
     }
 
     private fun handoutsTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.HANDOUTS_TAB, CourseAnalyticValue.HANDOUTS_TAB)
+        logCourseContainerEvent(CourseAnalyticsEvent.HANDOUTS_TAB)
     }
 
-    private fun logCourseContainerEvent(event: CourseAnalyticEvent, biValue: CourseAnalyticValue) {
+    private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {
         courseAnalytics.logEvent(
-            event = event.event,
+            event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, biValue.biValue)
+                put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.COURSE_NAME.key, courseName)
             }
@@ -333,61 +329,54 @@ class CourseContainerViewModel(
 
     fun logCalendarPermissionAccess(isAllowed: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.PERMISSION.getBuildMap(isAllowed)
         )
     }
 
     fun logCalendarAddDates(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.ADD.getBuildMap(action)
         )
     }
 
     fun logCalendarRemoveDates(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.REMOVE.getBuildMap(action)
         )
     }
 
     fun logCalendarSyncedConfirmation(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.CONFIRMED.getBuildMap(action)
         )
     }
 
     fun logCalendarSyncUpdate(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.UPDATE.getBuildMap(action)
         )
     }
 
     private fun logCalendarSyncSnackbar(snackbar: CalendarSyncSnackbar) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_SNACKBAR,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_SNACKBAR,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_SNACKBAR,
             snackbar.getBuildMap()
         )
     }
 
     private fun logCalendarSyncEvent(
-        event: CourseAnalyticEvent,
-        value: CourseAnalyticValue,
+        event: CourseAnalyticsEvent,
         param: Map<String, Any> = emptyMap(),
     ) {
         courseAnalytics.logEvent(
-            event = event.event,
+            event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, value.biValue)
+                put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
                 put(CourseAnalyticKey.PACING.key, isSelfPaced)

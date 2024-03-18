@@ -7,11 +7,9 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.VideoQuality
-import org.openedx.core.extension.Quadruple
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.presentation.CoreAnalyticsValue
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
 
@@ -53,27 +51,19 @@ class VideoQualityViewModel(
     fun getQualityType() = VideoQualityType.valueOf(qualityType)
 
     private fun logVideoQualityChangedEvent(oldQuality: VideoQuality, newQuality: VideoQuality) {
-        val (event, biValue, oldValue, newValue) = if (getQualityType() == VideoQualityType.Streaming)
-            Quadruple(
-                CoreAnalyticsEvent.VIDEO_STREAMING_QUALITY_CHANGED.event,
-                CoreAnalyticsValue.VIDEO_STREAMING_QUALITY_CHANGED.biValue,
-                oldQuality.tagId,
-                newQuality.tagId,
-            )
-        else
-            Quadruple(
-                CoreAnalyticsEvent.VIDEO_DOWNLOAD_QUALITY_CHANGED.event,
-                CoreAnalyticsValue.VIDEO_DOWNLOAD_QUALITY_CHANGED.biValue,
-                oldQuality.tagId,
-                newQuality.tagId,
-            )
+        val event =
+            if (getQualityType() == VideoQualityType.Streaming)
+                CoreAnalyticsEvent.VIDEO_STREAMING_QUALITY_CHANGED
+            else
+                CoreAnalyticsEvent.VIDEO_DOWNLOAD_QUALITY_CHANGED
+
         analytics.logEvent(
-            event,
+            event.eventName,
             mapOf(
-                CoreAnalyticsKey.NAME.key to biValue,
+                CoreAnalyticsKey.NAME.key to event.biValue,
                 CoreAnalyticsKey.CATEGORY.key to CoreAnalyticsKey.PROFILE.key,
-                CoreAnalyticsKey.VALUE.key to newValue,
-                CoreAnalyticsKey.OLD_VALUE.key to oldValue,
+                CoreAnalyticsKey.VALUE.key to newQuality.tagId,
+                CoreAnalyticsKey.OLD_VALUE.key to oldQuality.tagId,
             )
         )
     }

@@ -22,10 +22,9 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
-import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 
 class CourseUnitContainerViewModel(
     val courseId: String,
@@ -254,9 +253,9 @@ class CourseUnitContainerViewModel(
 
     fun courseUnitContainerShowedEvent() {
         analytics.logEvent(
-            CourseAnalyticEvent.UNIT_DETAIL.event,
+            CourseAnalyticsEvent.UNIT_DETAIL.eventName,
             buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.COURSE_NAME.key, courseName)
                 put(CourseAnalyticKey.BLOCK_ID.key, unitId)

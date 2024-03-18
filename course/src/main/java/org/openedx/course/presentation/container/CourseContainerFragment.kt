@@ -221,10 +221,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                     viewModel.openCalendarApp()
                                 }
 
-                                CalendarSyncDialogType.LOADING_DIALOG,
-                                CalendarSyncDialogType.NONE,
-                                -> {
-                                }
+                                else -> {}
                             }
                         },
                         dismissSyncDialog = { dialog ->

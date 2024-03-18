@@ -34,7 +34,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.presentation.CoreAnalyticsValue
 import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
 import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -79,32 +78,24 @@ class ActionDialogFragment : DialogFragment() {
                 )
             }
         }
-        logDialogEvent(
-            event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT,
-            biValue = CoreAnalyticsValue.EXTERNAL_LINK_OPENING_ALERT
-        )
+        logDialogEvent(event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT)
     }
 
     private fun logDialogActionEvent(action: String) {
         logDialogEvent(
             event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT_ACTION,
-            biValue = CoreAnalyticsValue.EXTERNAL_LINK_OPENING_ALERT_ACTION,
             action = action
         )
     }
 
     private fun logDialogEvent(
         event: CoreAnalyticsEvent,
-        biValue: CoreAnalyticsValue,
         action: String? = null,
     ) {
         analytics.logEvent(
-            event = event.event,
+            event = event.eventName,
             params = buildMap {
-                put(
-                    CoreAnalyticsKey.NAME.key,
-                    biValue.biValue
-                )
+                put(CoreAnalyticsKey.NAME.key, event.biValue)
                 put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
                 put(CoreAnalyticsKey.URL.key, url)
                 put(CoreAnalyticsKey.SCREEN_NAME.key, screen)

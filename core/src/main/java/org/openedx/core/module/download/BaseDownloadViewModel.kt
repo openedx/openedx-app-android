@@ -18,12 +18,11 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.presentation.CoreAnalyticsValue
 import org.openedx.core.utils.Sha1Util
 import java.io.File
 
 abstract class BaseDownloadViewModel(
-    private val courseId:String,
+    private val courseId: String,
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController,
@@ -243,44 +242,38 @@ abstract class BaseDownloadViewModel(
     }
 
     fun logBulkDownloadToggleEvent(toggle: Boolean) {
-        logEvent(CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE.event,
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
             buildMap {
-                put(
-                    CoreAnalyticsKey.NAME.key,
-                    CoreAnalyticsValue.VIDEO_BULK_DOWNLOAD_TOGGLE.biValue
-                )
                 put(CoreAnalyticsKey.ACTION.key, toggle.toString())
             }
         )
     }
 
     fun logSubsectionDownloadEvent(subsectionId: String) {
-        logEvent(CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION.event,
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION,
             buildMap {
-                put(
-                    CoreAnalyticsKey.NAME.key,
-                    CoreAnalyticsValue.VIDEO_DOWNLOAD_SUBSECTION.biValue
-                )
-                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
                 put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
-            }
-        )
+            })
     }
 
-    fun logSubsectionDeleteEvent(subsectionId: String) {
-        logEvent(CoreAnalyticsEvent.VIDEO_DELETE_SUBSECTION.event,
+    private fun logSubsectionDeleteEvent(subsectionId: String) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_DELETE_SUBSECTION,
             buildMap {
-                put(
-                    CoreAnalyticsKey.NAME.key,
-                    CoreAnalyticsValue.VIDEO_DELETE_SUBSECTION.biValue
-                )
-                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
                 put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
-            }
-        )
+            })
     }
 
-    private fun logEvent(event: String, params: Map<String, Any?>) {
-        analytics.logEvent(event, params)
+    private fun logEvent(event: CoreAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(CoreAnalyticsKey.NAME.key, event.biValue)
+                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
+                putAll(param)
+            }
+        )
     }
 }

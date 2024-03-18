@@ -9,10 +9,9 @@ import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AnnouncementModel
 import org.openedx.core.domain.model.HandoutsModel
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
-import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 
 class HandoutsViewModel(
     private val courseId: String,
@@ -98,11 +97,11 @@ class HandoutsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-    fun logEvent(event: CourseAnalyticEvent, value: CourseAnalyticValue) {
+    fun logEvent(event: CourseAnalyticsEvent) {
         courseAnalytics.logEvent(
-            event = event.event,
+            event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, value.biValue)
+                put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
             }
         )

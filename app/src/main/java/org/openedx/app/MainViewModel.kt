@@ -47,25 +47,25 @@ class MainViewModel(
     }
 
     fun logDiscoveryTabClickedEvent() {
-        logEvent(AppAnalyticEvent.DISCOVER, AppAnalyticValues.DISCOVER)
+        logEvent(AppAnalyticsEvent.DISCOVER)
     }
 
     fun logMyCoursesTabClickedEvent() {
-        logEvent(AppAnalyticEvent.MY_COURSES, AppAnalyticValues.MY_COURSES)
+        logEvent(AppAnalyticsEvent.MY_COURSES)
     }
 
     fun logMyProgramsTabClickedEvent() {
-        logEvent(AppAnalyticEvent.MY_PROGRAMS, AppAnalyticValues.MY_PROGRAMS)
+        logEvent(AppAnalyticsEvent.MY_PROGRAMS)
     }
 
     fun logProfileTabClickedEvent() {
-        logEvent(AppAnalyticEvent.PROFILE, AppAnalyticValues.PROFILE)
+        logEvent(AppAnalyticsEvent.PROFILE)
     }
 
-    private fun logEvent(event: AppAnalyticEvent, biValue: AppAnalyticValues) {
-        analytics.logEvent(event.event,
+    private fun logEvent(event: AppAnalyticsEvent) {
+        analytics.logEvent(event.eventName,
             buildMap {
-                put(AppAnalyticKey.NAME.key, biValue.value)
+                put(AppAnalyticKey.NAME.key, event.biValue)
             })
     }
 }

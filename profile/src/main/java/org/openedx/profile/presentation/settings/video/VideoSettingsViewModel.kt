@@ -13,10 +13,9 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
-import org.openedx.profile.presentation.ProfileAnalyticEvent
 import org.openedx.profile.presentation.ProfileAnalyticKey
-import org.openedx.profile.presentation.ProfileAnalyticValue
 import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileRouter
 
 class VideoSettingsViewModel(
@@ -52,13 +51,14 @@ class VideoSettingsViewModel(
         val currentSettings = preferencesManager.videoSettings
         preferencesManager.videoSettings = currentSettings.copy(wifiDownloadOnly = value)
         _videoSettings.value = preferencesManager.videoSettings
-        logProfileEvent(ProfileAnalyticEvent.WIFI_TOGGLE.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.WIFI_TOGGLE.biValue)
-            put(
-                ProfileAnalyticKey.ACTION.key,
-                if (value) ProfileAnalyticKey.ON.key else ProfileAnalyticKey.OFF.key
-            )
-        })
+        logProfileEvent(
+            ProfileAnalyticsEvent.WIFI_TOGGLE,
+            buildMap {
+                put(
+                    ProfileAnalyticKey.ACTION.key,
+                    if (value) ProfileAnalyticKey.ON.key else ProfileAnalyticKey.OFF.key
+                )
+            })
     }
 
     fun navigateToVideoStreamingQuality(fragmentManager: FragmentManager) {
@@ -73,10 +73,16 @@ class VideoSettingsViewModel(
         )
     }
 
-    private fun logProfileEvent(event: String, params: Map<String, Any?>) {
-        analytics.logEvent(event, buildMap {
-            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
-            putAll(params)
-        })
+    private fun logProfileEvent(
+        event: ProfileAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(ProfileAnalyticKey.NAME.key, event.biValue)
+                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                putAll(params)
+            })
     }
 }

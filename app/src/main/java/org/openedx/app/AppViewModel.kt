@@ -52,18 +52,16 @@ class AppViewModel(
     }
 
     fun logAppLaunchEvent() {
-        logEvent(AppAnalyticEvent.LAUNCH, AppAnalyticValues.LAUNCH)
+        analytics.logEvent(
+            event = AppAnalyticsEvent.LAUNCH.eventName,
+            params = buildMap {
+                put(AppAnalyticKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
+            })
     }
 
     private fun setUserId() {
         preferencesManager.user?.let {
             analytics.setUserIdForSession(it.id)
         }
-    }
-
-    private fun logEvent(event: AppAnalyticEvent, biValue: AppAnalyticValues) {
-        analytics.logEvent(event.event, buildMap {
-            put(AppAnalyticKey.NAME.key, biValue.value)
-        })
     }
 }

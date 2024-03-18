@@ -5,10 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import org.openedx.core.BaseViewModel
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.domain.model.WhatsNewItem
-import org.openedx.whatsnew.presentation.WhatsNewAnalyticEvent
 import org.openedx.whatsnew.presentation.WhatsNewAnalyticKey
-import org.openedx.whatsnew.presentation.WhatsNewAnalyticValue
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
+import org.openedx.whatsnew.presentation.WhatsNewAnalyticsEvent
 
 class WhatsNewViewModel(
     val courseId: String?,
@@ -30,19 +29,18 @@ class WhatsNewViewModel(
     }
 
     fun logWhatsNewViewed() {
-        logEvent(WhatsNewAnalyticEvent.WHATS_NEW_VIEW, WhatsNewAnalyticValue.WHATS_NEW_VIEW)
+        logEvent(WhatsNewAnalyticsEvent.WHATS_NEW_VIEW)
     }
 
     fun logWhatsNewCompleted() {
-        logEvent(WhatsNewAnalyticEvent.WHATS_NEW_DONE, WhatsNewAnalyticValue.WHATS_NEW_DONE)
+        logEvent(WhatsNewAnalyticsEvent.WHATS_NEW_DONE)
     }
 
-
-    private fun logEvent(event: WhatsNewAnalyticEvent, biValue: WhatsNewAnalyticValue) {
+    private fun logEvent(event: WhatsNewAnalyticsEvent) {
         analytics.logEvent(
             event.eventName,
             buildMap {
-                put(WhatsNewAnalyticKey.NAME.key, biValue.value)
+                put(WhatsNewAnalyticKey.NAME.key, event.biValue)
                 put(WhatsNewAnalyticKey.CATEGORY.key, WhatsNewAnalyticKey.WHATS_NEW.key)
                 put(WhatsNewAnalyticKey.TOTAL_SCREENS.key, whatsNewItem.value?.messages?.size)
             })

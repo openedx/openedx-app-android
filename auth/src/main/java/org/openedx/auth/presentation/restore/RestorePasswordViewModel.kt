@@ -6,9 +6,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.auth.presentation.LogistrationAnalyticEvent
 import org.openedx.auth.presentation.LogistrationAnalyticKey
-import org.openedx.auth.presentation.LogistrationAnalyticValues
+import org.openedx.auth.presentation.LogistrationAnalyticsEvent
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -24,7 +23,7 @@ class RestorePasswordViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<RestorePasswordUIState>()
@@ -44,6 +43,7 @@ class RestorePasswordViewModel(
     }
 
     fun passwordReset(email: String) {
+        logEvent(LogistrationAnalyticsEvent.RESET_PASSWORD_CLICKED)
         _uiState.value = RestorePasswordUIState.Loading
         viewModelScope.launch {
             try {
@@ -87,22 +87,24 @@ class RestorePasswordViewModel(
         }
     }
 
-    fun logResetPasswordClickedEvent() {
-        analytics.logEvent(
-            LogistrationAnalyticEvent.RESET_PASSWORD_CLICKED.event,
+    private fun logResetPasswordEvent(success: Boolean) {
+        logEvent(
+            LogistrationAnalyticsEvent.RESET_PASSWORD_SUCCESS,
             buildMap {
-                put(LogistrationAnalyticKey.NAME.key, LogistrationAnalyticValues.RESET_PASSWORD_CLICKED.biValue)
+                put(LogistrationAnalyticKey.SUCCESS.key, success)
             }
         )
     }
 
-    private fun logResetPasswordEvent(success: Boolean) {
+    private fun logEvent(
+        event: LogistrationAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
         analytics.logEvent(
-            LogistrationAnalyticEvent.RESET_PASSWORD_SUCCESS.event,
-            buildMap {
-                put(LogistrationAnalyticKey.NAME.key, LogistrationAnalyticValues.RESET_PASSWORD_SUCCESS.biValue)
-                put(LogistrationAnalyticKey.SUCCESS.key, success)
-            }
-        )
+            event = event.eventName,
+            params = buildMap {
+                put(LogistrationAnalyticKey.NAME.key, event.biValue)
+                putAll(params)
+            })
     }
 }

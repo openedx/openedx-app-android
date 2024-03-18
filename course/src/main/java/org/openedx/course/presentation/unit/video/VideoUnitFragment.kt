@@ -42,6 +42,7 @@ import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
 import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
@@ -211,7 +212,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             viewModel.castPlayer?.setSessionAvailabilityListener(
                 object : SessionAvailabilityListener {
                     override fun onCastSessionAvailable() {
-                        viewModel.logCastConnection(true)
+                        viewModel.logCastConnection(CourseAnalyticsEvent.CAST_CONNECTED)
                         viewModel.isCastActive = true
                         viewModel.exoPlayer?.pause()
                         playerView.player = viewModel.castPlayer
@@ -224,7 +225,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                     }
 
                     override fun onCastSessionUnavailable() {
-                        viewModel.logCastConnection(false)
+                        viewModel.logCastConnection(CourseAnalyticsEvent.CAST_DISCONNECTED)
                         viewModel.isCastActive = false
                         playerView.player = viewModel.exoPlayer
                         viewModel.exoPlayer?.seekTo(viewModel.castPlayer?.currentPosition ?: 0L)

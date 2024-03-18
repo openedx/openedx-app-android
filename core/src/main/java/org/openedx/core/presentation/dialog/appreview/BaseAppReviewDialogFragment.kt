@@ -23,9 +23,9 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
 
     fun onRatingDialogShowed() {
         analytics.logEvent(
-            event = AppReviewEvent.RATING_DIALOG.event,
+            event = AppReviewAnalyticsEvent.RATING_DIALOG.eventName,
             params = buildMap {
-                put(AppReviewKey.NAME.key, AppReviewValue.RATING_DIALOG.biValue)
+                put(AppReviewKey.NAME.key, AppReviewAnalyticsEvent.RATING_DIALOG.biValue)
                 put(AppReviewKey.CATEGORY.key, AppReviewKey.APP_REVIEW.key)
             }
         )
@@ -59,9 +59,9 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
 
     private fun logDialogActionEvent(action: String, rating: Int = 0) {
         analytics.logEvent(
-            event = AppReviewEvent.RATING_DIALOG_ACTION.event,
+            event = AppReviewAnalyticsEvent.RATING_DIALOG_ACTION.eventName,
             params = buildMap {
-                put(AppReviewKey.NAME.key, AppReviewValue.RATING_DIALOG_ACTION.biValue)
+                put(AppReviewKey.NAME.key, AppReviewAnalyticsEvent.RATING_DIALOG_ACTION.biValue)
                 put(AppReviewKey.CATEGORY.key, AppReviewKey.APP_REVIEW.key)
                 put(AppReviewKey.ACTION.key, action)
                 rating.nonZero()?.let { put(AppReviewKey.RATING.key, it) }

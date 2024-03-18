@@ -27,10 +27,9 @@ import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEven
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
-import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -217,25 +216,15 @@ class CourseDatesViewModel(
     }
 
     fun logPlsBannerViewed() {
-        logPLSBannerEvent(
-            CourseAnalyticEvent.PLS_BANNER_VIEWED,
-            CourseAnalyticValue.PLS_BANNER_VIEWED
-        )
+        logPLSBannerEvent(CourseAnalyticsEvent.PLS_BANNER_VIEWED)
     }
 
     fun logPlsShiftButtonClicked() {
-        logPLSBannerEvent(
-            CourseAnalyticEvent.PLS_SHIFT_BUTTON_TAPPED,
-            CourseAnalyticValue.PLS_SHIFT_BUTTON_TAPPED
-        )
+        logPLSBannerEvent(CourseAnalyticsEvent.PLS_SHIFT_BUTTON_TAPPED)
     }
 
     fun logPlsShiftDates(isSuccess: Boolean) {
-        logPLSBannerEvent(
-            CourseAnalyticEvent.PLS_SHIFT_DATES,
-            CourseAnalyticValue.PLS_SHIFT_DATES,
-            isSuccess
-        )
+        logPLSBannerEvent(CourseAnalyticsEvent.PLS_SHIFT_DATES, isSuccess)
     }
 
     fun logCourseComponentTapped(isSupported: Boolean, block: CourseDateBlock) {
@@ -246,17 +235,12 @@ class CourseDatesViewModel(
             put(CourseAnalyticKey.SUPPORTED.key, isSupported)
         }
 
-        logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_COURSE_COMPONENT_TAPPED,
-            CourseAnalyticValue.DATES_COURSE_COMPONENT_TAPPED,
-            params
-        )
+        logCalendarSyncEvent(CourseAnalyticsEvent.DATES_COURSE_COMPONENT_TAPPED, params)
     }
 
     fun logCalendarSyncToggle(isChecked: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_TOGGLE,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_TOGGLE,
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_TOGGLE,
             buildMap {
                 put(
                     CourseAnalyticKey.ACTION.key,
@@ -267,14 +251,13 @@ class CourseDatesViewModel(
     }
 
     private fun logCalendarSyncEvent(
-        event: CourseAnalyticEvent,
-        value: CourseAnalyticValue,
+        event: CourseAnalyticsEvent,
         param: Map<String, Any> = emptyMap(),
     ) {
         courseAnalytics.logEvent(
-            event = event.event,
+            event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, value.biValue)
+                put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
                 put(CourseAnalyticKey.PACING.key, isSelfPaced)
@@ -284,19 +267,18 @@ class CourseDatesViewModel(
     }
 
     private fun logPLSBannerEvent(
-        event: CourseAnalyticEvent,
-        value: CourseAnalyticValue,
+        event: CourseAnalyticsEvent,
         isSuccess: Boolean? = null,
     ) {
         courseAnalytics.logEvent(
-            event = event.event,
+            event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, value.biValue)
-                put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticValue.COURSE_DATES)
+                put(CourseAnalyticKey.NAME.key, event.biValue)
+                put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.COURSE_DATES.key)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
                 put(CourseAnalyticKey.BANNER_TYPE.key, courseBannerType.name)
-                put(CourseAnalyticKey.SCREEN_NAME.key, CourseAnalyticValue.COURSE_DATES)
+                put(CourseAnalyticKey.SCREEN_NAME.key, CourseAnalyticKey.COURSE_DATES.key)
                 isSuccess?.let { put(CourseAnalyticKey.SUCCESS.key, it) }
             }
         )

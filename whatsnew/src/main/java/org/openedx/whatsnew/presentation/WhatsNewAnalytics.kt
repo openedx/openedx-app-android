@@ -4,14 +4,15 @@ interface WhatsNewAnalytics {
     fun logEvent(event: String, params: Map<String, Any?>)
 }
 
-enum class WhatsNewAnalyticEvent(val eventName: String) {
-    WHATS_NEW_VIEW("WhatsNew:Pop up Viewed"),
-    WHATS_NEW_DONE("WhatsNew:Done"),
-}
-
-enum class WhatsNewAnalyticValue(val value: String) {
-    WHATS_NEW_VIEW("edx.bi.app.whats_new.popup.viewed"),
-    WHATS_NEW_DONE("edx.bi.app.whats_new.done"),
+enum class WhatsNewAnalyticsEvent(val eventName: String, val biValue: String) {
+    WHATS_NEW_VIEW(
+        "WhatsNew:Pop up Viewed",
+        "edx.bi.app.whats_new.popup.viewed"
+    ),
+    WHATS_NEW_DONE(
+        "WhatsNew:Done",
+        "edx.bi.app.whats_new.done"
+    ),
 }
 
 enum class WhatsNewAnalyticKey(val key: String) {

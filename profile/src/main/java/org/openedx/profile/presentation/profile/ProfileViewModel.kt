@@ -28,10 +28,9 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
-import org.openedx.profile.presentation.ProfileAnalyticEvent
 import org.openedx.profile.presentation.ProfileAnalyticKey
-import org.openedx.profile.presentation.ProfileAnalyticValue
 import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
@@ -48,7 +47,7 @@ class ProfileViewModel(
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
     private val router: ProfileRouter,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
 ) : BaseViewModel() {
 
     private val _uiState: MutableStateFlow<ProfileUIState> =
@@ -137,18 +136,14 @@ class ProfileViewModel(
     }
 
     fun logout() {
-        logProfileEvent(ProfileAnalyticEvent.LOGOUT_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.LOGOUT_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.LOGOUT_CLICKED)
         viewModelScope.launch {
             try {
                 workerController.removeModels()
                 withContext(dispatcher) {
                     interactor.logout()
                 }
-                logProfileEvent(ProfileAnalyticEvent.LOGGED_OUT.event, buildMap {
-                    put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.LOGGED_OUT.biValue)
-                })
+                logProfileEvent(ProfileAnalyticsEvent.LOGGED_OUT)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -179,16 +174,12 @@ class ProfileViewModel(
                 data.account
             )
         }
-        logProfileEvent(ProfileAnalyticEvent.EDIT_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.EDIT_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.EDIT_CLICKED)
     }
 
     fun profileVideoSettingsClicked(fragmentManager: FragmentManager) {
         router.navigateToVideoSettings(fragmentManager)
-        logProfileEvent(ProfileAnalyticEvent.VIDEO_SETTING_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.VIDEO_SETTING_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.VIDEO_SETTING_CLICKED)
     }
 
     fun privacyPolicyClicked(fragmentManager: FragmentManager) {
@@ -197,9 +188,7 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_privacy_policy),
             url = configuration.agreementUrls.privacyPolicyUrl,
         )
-        logProfileEvent(ProfileAnalyticEvent.PRIVACY_POLICY_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.PRIVACY_POLICY_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.PRIVACY_POLICY_CLICKED)
     }
 
     fun cookiePolicyClicked(fragmentManager: FragmentManager) {
@@ -208,9 +197,7 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_cookie_policy),
             url = configuration.agreementUrls.cookiePolicyUrl,
         )
-        logProfileEvent(ProfileAnalyticEvent.COOKIE_POLICY_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.COOKIE_POLICY_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.COOKIE_POLICY_CLICKED)
     }
 
     fun dataSellClicked(fragmentManager: FragmentManager) {
@@ -219,15 +206,11 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_data_sell),
             url = configuration.agreementUrls.dataSellConsentUrl,
         )
-        logProfileEvent(ProfileAnalyticEvent.DATA_SELL_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.DATA_SELL_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.DATA_SELL_CLICKED)
     }
 
     fun faqClicked() {
-        logProfileEvent(ProfileAnalyticEvent.FAQ_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.FAQ_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.FAQ_CLICKED)
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {
@@ -236,9 +219,7 @@ class ProfileViewModel(
             title = resourceManager.getString(R.string.core_terms_of_use),
             url = configuration.agreementUrls.tosUrl,
         )
-        logProfileEvent(ProfileAnalyticEvent.TERMS_OF_USE_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.TERMS_OF_USE_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.TERMS_OF_USE_CLICKED)
     }
 
     fun emailSupportClicked(context: Context) {
@@ -247,9 +228,7 @@ class ProfileViewModel(
             feedbackEmailAddress = config.getFeedbackEmailAddress(),
             appVersion = appData.versionName
         )
-        logProfileEvent(ProfileAnalyticEvent.CONTACT_SUPPORT_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.CONTACT_SUPPORT_CLICKED.biValue)
-        })
+        logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
     }
 
     fun appVersionClickedEvent(context: Context) {
@@ -263,10 +242,12 @@ class ProfileViewModel(
         )
     }
 
-    private fun logProfileEvent(event: String, params: Map<String, Any?>) {
-        analytics.logEvent(event, buildMap {
-            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
-            putAll(params)
-        })
+    private fun logProfileEvent(event: ProfileAnalyticsEvent) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(ProfileAnalyticKey.NAME.key, event.biValue)
+                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+            })
     }
 }

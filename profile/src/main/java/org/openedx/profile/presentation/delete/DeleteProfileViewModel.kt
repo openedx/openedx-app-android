@@ -12,10 +12,9 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.profile.presentation.ProfileAnalyticEvent
 import org.openedx.profile.presentation.ProfileAnalyticKey
-import org.openedx.profile.presentation.ProfileAnalyticValue
 import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
@@ -68,18 +67,26 @@ class DeleteProfileViewModel(
         }
     }
 
-    private fun logDeleteProfileClickedEvent(){
-        analytics.logEvent(ProfileAnalyticEvent.USER_DELETE_ACCOUNT_CLICKED.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.USER_DELETE_ACCOUNT_CLICKED.biValue)
-            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
-        })
+    private fun logDeleteProfileClickedEvent() {
+        logEvent(ProfileAnalyticsEvent.USER_DELETE_ACCOUNT_CLICKED)
     }
 
     private fun logDeleteProfileEvent(isSuccess: Boolean) {
-        analytics.logEvent(ProfileAnalyticEvent.DELETE_ACCOUNT_SUCCESS.event, buildMap {
-            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.DELETE_ACCOUNT_SUCCESS.biValue)
-            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
-            put(ProfileAnalyticKey.SUCCESS.key, isSuccess)
-        })
+        logEvent(
+            ProfileAnalyticsEvent.DELETE_ACCOUNT_SUCCESS,
+            buildMap {
+                put(ProfileAnalyticKey.SUCCESS.key, isSuccess)
+            })
+    }
+
+    private fun logEvent(event: ProfileAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(ProfileAnalyticKey.NAME.key, event.biValue)
+                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                putAll(param)
+            }
+        )
     }
 }

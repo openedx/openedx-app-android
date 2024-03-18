@@ -12,10 +12,9 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.ProfileAnalyticEvent
 import org.openedx.profile.presentation.ProfileAnalyticKey
-import org.openedx.profile.presentation.ProfileAnalyticValue
 import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 import java.io.File
@@ -52,13 +51,14 @@ class EditProfileViewModel(
         set(value) {
             field = value
             _uiState.value = EditProfileUIState(account, isLimited = value)
-            logProfileEvent(ProfileAnalyticEvent.SWITCH_PROFILE.event, buildMap {
-                put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.SWITCH_PROFILE.biValue)
-                put(
-                    ProfileAnalyticKey.ACTION.key,
-                    if (isLimitedProfile) ProfileAnalyticKey.LIMITED_PROFILE else ProfileAnalyticKey.FULL_PROFILE
-                )
-            })
+            logProfileEvent(
+                ProfileAnalyticsEvent.SWITCH_PROFILE,
+                buildMap {
+                    put(
+                        ProfileAnalyticKey.ACTION.key,
+                        if (isLimitedProfile) ProfileAnalyticKey.LIMITED_PROFILE else ProfileAnalyticKey.FULL_PROFILE
+                    )
+                })
         }
 
     private val _showLeaveDialog = MutableLiveData<Boolean>()
@@ -138,30 +138,23 @@ class EditProfileViewModel(
     }
 
     fun profileEditDoneClickedEvent() {
-        logProfileEvent(
-            ProfileAnalyticEvent.EDIT_DONE_CLICKED.event,
-            buildMap {
-                put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.EDIT_DONE_CLICKED.biValue)
-            }
-        )
+        logProfileEvent(ProfileAnalyticsEvent.EDIT_DONE_CLICKED)
     }
 
     fun profileDeleteAccountClickedEvent() {
-        logProfileEvent(
-            ProfileAnalyticEvent.DELETE_ACCOUNT_CLICKED.event,
-            buildMap {
-                put(
-                    ProfileAnalyticKey.NAME.key,
-                    ProfileAnalyticValue.DELETE_ACCOUNT_CLICKED.biValue
-                )
-            }
-        )
+        logProfileEvent(ProfileAnalyticsEvent.DELETE_ACCOUNT_CLICKED)
     }
 
-    private fun logProfileEvent(event: String, params: Map<String, Any?>) {
-        analytics.logEvent(event, buildMap {
-            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
-            putAll(params)
-        })
+    private fun logProfileEvent(
+        event: ProfileAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(ProfileAnalyticKey.NAME.key, event.biValue)
+                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                putAll(params)
+            })
     }
 }

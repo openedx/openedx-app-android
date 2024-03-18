@@ -17,10 +17,9 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
-import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 
 class CourseDetailsViewModel(
     val courseId: String,
@@ -131,36 +130,28 @@ class CourseDetailsViewModel(
     }
 
     private fun courseEnrollClickedEvent(courseId: String, courseTitle: String) {
-        analytics.logEvent(
-            CourseAnalyticEvent.COURSE_ENROLL_CLICKED.event,
-            buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_ENROLL_CLICKED.biValue)
-                put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
-                put(CourseAnalyticKey.CONVERSION.key, courseId)
-            }
-        )
+        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId, courseTitle)
     }
 
     private fun courseEnrollSuccessEvent(courseId: String, courseTitle: String) {
-        analytics.logEvent(
-            CourseAnalyticEvent.COURSE_ENROLL_SUCCESS.event,
-            buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_ENROLL_SUCCESS.biValue)
-                put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
-                put(CourseAnalyticKey.CONVERSION.key, courseId)
-            }
-        )
+        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId, courseTitle)
     }
 
     fun viewCourseClickedEvent(courseId: String, courseTitle: String) {
+        logEvent(CourseAnalyticsEvent.COURSE_INFO, courseId, courseTitle)
+    }
+
+    private fun logEvent(
+        event: CourseAnalyticsEvent,
+        courseId: String, courseTitle: String,
+    ) {
         analytics.logEvent(
-            CourseAnalyticEvent.COURSE_INFO.event,
+            event.eventName,
             buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_INFO.biValue)
+                put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
+                put(CourseAnalyticKey.CONVERSION.key, courseId)
             }
         )
     }

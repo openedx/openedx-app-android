@@ -4,14 +4,15 @@ interface AppReviewAnalytics {
     fun logEvent(event: String, params: Map<String, Any?>)
 }
 
-enum class AppReviewEvent(val event: String) {
-    RATING_DIALOG("AppReviews:Rating Dialog Viewed"),
-    RATING_DIALOG_ACTION("AppReviews:Rating Dialog Action"),
-}
-
-enum class AppReviewValue(val biValue: String) {
-    RATING_DIALOG("edx.bi.app.app_reviews.rating_dialog.viewed"),
-    RATING_DIALOG_ACTION("edx.bi.app.app_reviews.rating_dialog.action"),
+enum class AppReviewAnalyticsEvent(val eventName: String, val biValue: String) {
+    RATING_DIALOG(
+        "AppReviews:Rating Dialog Viewed",
+        "edx.bi.app.app_reviews.rating_dialog.viewed"
+    ),
+    RATING_DIALOG_ACTION(
+        "AppReviews:Rating Dialog Action",
+        "edx.bi.app.app_reviews.rating_dialog.action"
+    ),
 }
 
 enum class AppReviewKey(val key: String) {

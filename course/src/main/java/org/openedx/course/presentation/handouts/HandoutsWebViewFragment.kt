@@ -22,8 +22,7 @@ import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.course.presentation.CourseAnalyticEvent
-import org.openedx.course.presentation.CourseAnalyticValue
+import org.openedx.course.presentation.CourseAnalyticsEvent
 
 class HandoutsWebViewFragment : Fragment() {
 
@@ -37,7 +36,7 @@ class HandoutsWebViewFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -63,9 +62,9 @@ class HandoutsWebViewFragment : Fragment() {
             }
         }
         if (HandoutsType.valueOf(viewModel.handoutsType) == HandoutsType.Handouts) {
-            viewModel.logEvent(CourseAnalyticEvent.HANDOUTS, CourseAnalyticValue.HANDOUTS)
+            viewModel.logEvent(CourseAnalyticsEvent.HANDOUTS)
         } else {
-            viewModel.logEvent(CourseAnalyticEvent.ANNOUNCEMENTS, CourseAnalyticValue.ANNOUNCEMENTS)
+            viewModel.logEvent(CourseAnalyticsEvent.ANNOUNCEMENTS)
         }
     }
 
@@ -77,7 +76,7 @@ class HandoutsWebViewFragment : Fragment() {
         fun newInstance(
             title: String,
             type: String,
-            courseId: String
+            courseId: String,
         ): HandoutsWebViewFragment {
             val fragment = HandoutsWebViewFragment()
             fragment.arguments = bundleOf(

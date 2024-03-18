@@ -30,10 +30,9 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
-import org.openedx.course.presentation.CourseAnalyticValue
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
 
@@ -49,7 +48,13 @@ class CourseOutlineViewModel(
     private val coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
-) : BaseDownloadViewModel(courseId, downloadDao, preferencesManager, workerController, coreAnalytics) {
+) : BaseDownloadViewModel(
+    courseId,
+    downloadDao,
+    preferencesManager,
+    workerController,
+    coreAnalytics
+) {
 
     val apiHostUrl get() = config.getApiHostURL()
 
@@ -294,9 +299,9 @@ class CourseOutlineViewModel(
 
     fun viewCertificateTappedEvent() {
         analytics.logEvent(
-            CourseAnalyticEvent.VIEW_CERTIFICATE.event,
+            CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
             buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.VIEW_CERTIFICATE.biValue)
+                put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
             })
     }
@@ -305,9 +310,12 @@ class CourseOutlineViewModel(
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
             analytics.logEvent(
-                CourseAnalyticEvent.RESUME_COURSE_CLICKED.event,
+                CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
                 buildMap {
-                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.RESUME_COURSE_CLICKED.biValue)
+                    put(
+                        CourseAnalyticKey.NAME.key,
+                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName
+                    )
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
@@ -331,9 +339,9 @@ class CourseOutlineViewModel(
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
             analytics.logEvent(
-                CourseAnalyticEvent.UNIT_DETAIL.event,
+                CourseAnalyticsEvent.UNIT_DETAIL.eventName,
                 buildMap {
-                    put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
+                    put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
