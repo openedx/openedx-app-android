@@ -49,7 +49,7 @@ class CourseOutlineViewModel(
     private val coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController, coreAnalytics) {
+) : BaseDownloadViewModel(courseId, downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     val apiHostUrl get() = config.getApiHostURL()
 
@@ -132,6 +132,7 @@ class CourseOutlineViewModel(
                     UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi))
             }
         } else {
+            logSubsectionDownloadEvent(id)
             super.saveDownloadModels(folder, id)
         }
     }
@@ -308,8 +309,8 @@ class CourseOutlineViewModel(
                 buildMap {
                     put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.RESUME_COURSE_CLICKED.biValue)
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
-                    put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
                 })
         }
     }
@@ -326,7 +327,7 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun logUnitDetailViewedEvent(blockId: String) {
+    fun logUnitDetailViewedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
             analytics.logEvent(
@@ -334,8 +335,9 @@ class CourseOutlineViewModel(
                 buildMap {
                     put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
-                    put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
+                    put(CourseAnalyticKey.BLOCK_NAME.key, blockName)
                 })
         }
     }

@@ -42,6 +42,7 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
+import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -159,6 +160,7 @@ class CourseInfoFragment : Fragment() {
                                         getString(CoreR.string.platform_name)
                                     ),
                                     url = param,
+                                    source = CoreAnalyticsScreen.COURSE_INFO.screenName
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     ActionDialogFragment::class.simpleName

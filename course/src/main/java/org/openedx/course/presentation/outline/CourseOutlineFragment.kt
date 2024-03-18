@@ -161,7 +161,7 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onSubSectionClick = { subSectionBlock ->
                         viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                            viewModel.logUnitDetailViewedEvent(unit.blockId)
+                            viewModel.logUnitDetailViewedEvent(unit.blockId, unit.displayName)
                             router.navigateToCourseContainer(
                                 requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,

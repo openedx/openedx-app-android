@@ -194,14 +194,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                         syncDialogAction = { dialog ->
                             when (dialog) {
                                 CalendarSyncDialogType.SYNC_DIALOG -> {
-                                    viewModel.logCalendarAddDates()
+                                    viewModel.logCalendarAddDates(true)
                                     viewModel.addOrUpdateEventsInCalendar(
                                         updatedEvent = false,
                                     )
                                 }
 
                                 CalendarSyncDialogType.UN_SYNC_DIALOG -> {
-                                    viewModel.logCalendarRemoveDates()
+                                    viewModel.logCalendarRemoveDates(true)
                                     viewModel.deleteCourseCalendar()
                                 }
 
@@ -210,38 +210,42 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 }
 
                                 CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
-                                    viewModel.logCalendarSyncUpdateDates()
+                                    viewModel.logCalendarSyncUpdate(true)
                                     viewModel.addOrUpdateEventsInCalendar(
                                         updatedEvent = true,
                                     )
                                 }
 
                                 CalendarSyncDialogType.EVENTS_DIALOG -> {
-                                    viewModel.logCalendarViewEvents()
+                                    viewModel.logCalendarSyncedConfirmation(true)
                                     viewModel.openCalendarApp()
                                 }
 
                                 CalendarSyncDialogType.LOADING_DIALOG,
-                                CalendarSyncDialogType.NONE -> {
+                                CalendarSyncDialogType.NONE,
+                                -> {
                                 }
                             }
                         },
                         dismissSyncDialog = { dialog ->
                             when (dialog) {
                                 CalendarSyncDialogType.SYNC_DIALOG ->
-                                    viewModel.logCalendarAddCancelled()
+                                    viewModel.logCalendarAddDates(false)
 
                                 CalendarSyncDialogType.UN_SYNC_DIALOG ->
-                                    viewModel.logCalendarRemoveCancelled()
+                                    viewModel.logCalendarRemoveDates(false)
 
                                 CalendarSyncDialogType.OUT_OF_SYNC_DIALOG ->
-                                    viewModel.logCalendarSyncRemoveCalendar()
+                                    viewModel.logCalendarSyncUpdate(false)
 
-                                CalendarSyncDialogType.EVENTS_DIALOG->
-                                    viewModel.logCalendarAddedConfirmation()
+                                CalendarSyncDialogType.EVENTS_DIALOG ->
+                                    viewModel.logCalendarSyncedConfirmation(false)
+
                                 CalendarSyncDialogType.LOADING_DIALOG,
                                 CalendarSyncDialogType.PERMISSION_DIALOG,
-                                CalendarSyncDialogType.NONE -> {}
+                                CalendarSyncDialogType.NONE,
+                                -> {
+                                }
                             }
 
                             viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
@@ -275,7 +279,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         fun newInstance(
             courseId: String,
             courseTitle: String,
-            enrollmentMode: String
+            enrollmentMode: String,
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(

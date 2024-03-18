@@ -23,6 +23,7 @@ import org.openedx.core.utils.Sha1Util
 import java.io.File
 
 abstract class BaseDownloadViewModel(
+    private val courseId:String,
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController,
@@ -199,6 +200,7 @@ abstract class BaseDownloadViewModel(
     fun getDownloadableChildren(id: String) = downloadableChildrenMap[id]
 
     open fun removeDownloadModels(blockId: String) {
+        logSubsectionDeleteEvent(blockId)
         viewModelScope.launch {
             val downloadableChildren = downloadableChildrenMap[blockId] ?: listOf()
             workerController.removeModels(downloadableChildren)
@@ -248,6 +250,32 @@ abstract class BaseDownloadViewModel(
                     CoreAnalyticsValue.VIDEO_BULK_DOWNLOAD_TOGGLE.biValue
                 )
                 put(CoreAnalyticsKey.ACTION.key, toggle.toString())
+            }
+        )
+    }
+
+    fun logSubsectionDownloadEvent(subsectionId: String) {
+        logEvent(CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION.event,
+            buildMap {
+                put(
+                    CoreAnalyticsKey.NAME.key,
+                    CoreAnalyticsValue.VIDEO_DOWNLOAD_SUBSECTION.biValue
+                )
+                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
+                put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+            }
+        )
+    }
+
+    fun logSubsectionDeleteEvent(subsectionId: String) {
+        logEvent(CoreAnalyticsEvent.VIDEO_DELETE_SUBSECTION.event,
+            buildMap {
+                put(
+                    CoreAnalyticsKey.NAME.key,
+                    CoreAnalyticsValue.VIDEO_DELETE_SUBSECTION.biValue
+                )
+                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
+                put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
             }
         )
     }

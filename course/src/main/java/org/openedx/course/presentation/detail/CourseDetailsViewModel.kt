@@ -81,18 +81,18 @@ class CourseDetailsViewModel(
         }
     }
 
-    fun enrollInACourse(id: String) {
+    fun enrollInACourse(id: String, title: String) {
         viewModelScope.launch {
             try {
                 val courseData = _uiState.value
                 if (courseData is CourseDetailsUIState.CourseData) {
-                    courseEnrollClickedEvent(id)
+                    courseEnrollClickedEvent(id, title)
                 }
                 interactor.enrollInACourse(id)
                 val course = interactor.getCourseDetails(id)
                 if (courseData is CourseDetailsUIState.CourseData) {
                     _uiState.value = courseData.copy(course = course)
-                    courseEnrollSuccessEvent(id)
+                    courseEnrollSuccessEvent(id, title)
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
@@ -130,32 +130,37 @@ class CourseDetailsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-    private fun courseEnrollClickedEvent(courseId: String) {
+    private fun courseEnrollClickedEvent(courseId: String, courseTitle: String) {
         analytics.logEvent(
             CourseAnalyticEvent.COURSE_ENROLL_CLICKED.event,
             buildMap {
                 put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_ENROLL_CLICKED.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
+                put(CourseAnalyticKey.CONVERSION.key, courseId)
             }
         )
     }
 
-    private fun courseEnrollSuccessEvent(courseId: String) {
+    private fun courseEnrollSuccessEvent(courseId: String, courseTitle: String) {
         analytics.logEvent(
             CourseAnalyticEvent.COURSE_ENROLL_SUCCESS.event,
             buildMap {
                 put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_ENROLL_SUCCESS.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
+                put(CourseAnalyticKey.CONVERSION.key, courseId)
             }
         )
     }
 
-    fun viewCourseClickedEvent(courseId: String) {
+    fun viewCourseClickedEvent(courseId: String, courseTitle: String) {
         analytics.logEvent(
             CourseAnalyticEvent.COURSE_INFO.event,
             buildMap {
                 put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.COURSE_INFO.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
             }
         )
     }

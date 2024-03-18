@@ -28,6 +28,8 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CalendarSyncDialog
+import org.openedx.course.presentation.CalendarSyncSnackbar
 import org.openedx.course.presentation.CourseAnalyticEvent
 import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalyticValue
@@ -217,13 +219,12 @@ class CourseContainerViewModel(
             updateCalendarSyncState()
 
             if (updatedEvent) {
-                logCalendarUpdateDatesSuccess()
+                logCalendarSyncSnackbar(CalendarSyncSnackbar.UPDATE)
                 setUiMessage(R.string.course_snackbar_course_calendar_updated)
             } else if (coursePreferences.isCalendarSyncEventsDialogShown(courseName)) {
-                logCalendarAddDatesSuccess()
+                logCalendarSyncSnackbar(CalendarSyncSnackbar.ADD)
                 setUiMessage(R.string.course_snackbar_course_calendar_added)
             } else {
-                logCalendarAddDatesSuccess()
                 coursePreferences.setCalendarSyncEventsDialogShown(courseName)
                 setCalendarSyncDialogType(CalendarSyncDialogType.EVENTS_DIALOG)
             }
@@ -263,8 +264,9 @@ class CourseContainerViewModel(
                     )
                 }
                 updateCalendarSyncState()
+
             }
-            logCalendarRemoveDatesSuccess()
+            logCalendarSyncSnackbar(CalendarSyncSnackbar.REMOVE)
             setUiMessage(R.string.course_snackbar_course_calendar_removed)
         }
     }
@@ -291,7 +293,7 @@ class CourseContainerViewModel(
                 (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
     }
 
-    private fun courseDashboardViewed(){
+    private fun courseDashboardViewed() {
         logCourseContainerEvent(CourseAnalyticEvent.DASHBOARD, CourseAnalyticValue.DASHBOARD)
     }
 
@@ -304,7 +306,10 @@ class CourseContainerViewModel(
     }
 
     private fun discussionTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticEvent.DISCUSSION_TAB, CourseAnalyticValue.DISCUSSION_TAB)
+        logCourseContainerEvent(
+            CourseAnalyticEvent.DISCUSSION_TAB,
+            CourseAnalyticValue.DISCUSSION_TAB
+        )
     }
 
     private fun datesTabClickedEvent() {
@@ -321,98 +326,56 @@ class CourseContainerViewModel(
             params = buildMap {
                 put(CourseAnalyticKey.NAME.key, biValue.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.COURSE_NAME.key, courseName)
             }
         )
     }
 
     fun logCalendarPermissionAccess(isAllowed: Boolean) {
-        if (isAllowed) {
-            logCalendarSyncEvent(
-                CourseAnalyticEvent.DATES_CALENDAR_ACCESS_ALLOWED,
-                CourseAnalyticValue.DATES_CALENDAR_ACCESS_ALLOWED
-            )
-        } else {
-            logCalendarSyncEvent(
-                CourseAnalyticEvent.DATES_CALENDAR_ACCESS_DONT_ALLOW,
-                CourseAnalyticValue.DATES_CALENDAR_ACCESS_DONT_ALLOW
-            )
-        }
-    }
-
-    fun logCalendarAddDates() {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_ADD_DATES,
-            CourseAnalyticValue.DATES_CALENDAR_ADD_DATES
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.PERMISSION.getBuildMap(isAllowed)
         )
     }
 
-    fun logCalendarAddCancelled() {
+    fun logCalendarAddDates(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_ADD_CANCELLED,
-            CourseAnalyticValue.DATES_CALENDAR_ADD_CANCELLED
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.ADD.getBuildMap(action)
         )
     }
 
-    fun logCalendarRemoveDates() {
+    fun logCalendarRemoveDates(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_REMOVE_DATES,
-            CourseAnalyticValue.DATES_CALENDAR_REMOVE_DATES
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.REMOVE.getBuildMap(action)
         )
     }
 
-    fun logCalendarRemoveCancelled() {
+    fun logCalendarSyncedConfirmation(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_REMOVE_CANCELLED,
-            CourseAnalyticValue.DATES_CALENDAR_REMOVE_CANCELLED
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.CONFIRMED.getBuildMap(action)
         )
     }
 
-    fun logCalendarAddedConfirmation() {
+    fun logCalendarSyncUpdate(action: Boolean) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_ADD_CONFIRMATION,
-            CourseAnalyticValue.DATES_CALENDAR_ADD_CONFIRMATION
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.UPDATE.getBuildMap(action)
         )
     }
 
-    fun logCalendarViewEvents() {
+    private fun logCalendarSyncSnackbar(snackbar: CalendarSyncSnackbar) {
         logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_VIEW_EVENTS,
-            CourseAnalyticValue.DATES_CALENDAR_VIEW_EVENTS
-        )
-    }
-
-    fun logCalendarSyncUpdateDates() {
-        logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_UPDATE_DATES,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_UPDATE_DATES
-        )
-    }
-
-    fun logCalendarSyncRemoveCalendar() {
-        logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_SYNC_REMOVE_CALENDAR,
-            CourseAnalyticValue.DATES_CALENDAR_SYNC_REMOVE_CALENDAR
-        )
-    }
-
-    private fun logCalendarAddDatesSuccess() {
-        logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_ADD_DATES_SUCCESS,
-            CourseAnalyticValue.DATES_CALENDAR_ADD_DATES_SUCCESS
-        )
-    }
-
-    private fun logCalendarRemoveDatesSuccess() {
-        logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_REMOVE_DATES_SUCCESS,
-            CourseAnalyticValue.DATES_CALENDAR_REMOVE_DATES_SUCCESS
-        )
-    }
-
-    private fun logCalendarUpdateDatesSuccess() {
-        logCalendarSyncEvent(
-            CourseAnalyticEvent.DATES_CALENDAR_UPDATE_DATES_SUCCESS,
-            CourseAnalyticValue.DATES_CALENDAR_UPDATE_DATES_SUCCESS
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_SNACKBAR,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_SNACKBAR,
+            snackbar.getBuildMap()
         )
     }
 

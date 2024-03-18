@@ -48,6 +48,7 @@ class ActionDialogFragment : DialogFragment() {
     private val config by inject<Config>()
     private val analytics: CoreAnalytics by inject()
     private val url: String = requireArguments().getString(ARG_URL, "")
+    private val screen: String = requireArguments().getString(ARG_SCREEN, "")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -106,7 +107,8 @@ class ActionDialogFragment : DialogFragment() {
                 )
                 put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
                 put(CoreAnalyticsKey.URL.key, url)
-                action?.let { put(CoreAnalyticsKey.ALERT_ACTION.key, action) }
+                put(CoreAnalyticsKey.SCREEN_NAME.key, screen)
+                action?.let { put(CoreAnalyticsKey.ACTION.key, action) }
             }
         )
     }
@@ -115,17 +117,20 @@ class ActionDialogFragment : DialogFragment() {
         private const val ARG_TITLE = "title"
         private const val ARG_MESSAGE = "message"
         private const val ARG_URL = "url"
+        private const val ARG_SCREEN = "screen"
 
         fun newInstance(
             title: String,
             message: String,
             url: String,
+            source: String,
         ): ActionDialogFragment {
             val fragment = ActionDialogFragment()
             fragment.arguments = bundleOf(
                 ARG_TITLE to title,
                 ARG_MESSAGE to message,
                 ARG_URL to url,
+                ARG_SCREEN to source
             )
             return fragment
         }

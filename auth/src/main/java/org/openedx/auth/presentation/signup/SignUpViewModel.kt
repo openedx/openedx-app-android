@@ -163,10 +163,10 @@ class SignUpViewModel(
                     }
                     interactor.register(resultMap.toMap())
                     logEvent(
-                        LogistrationAnalyticEvent.REGISTER_SUCCESSFULLY,
-                        LogistrationAnalyticValues.REGISTER_SUCCESSFULLY,
+                        LogistrationAnalyticEvent.REGISTER_SUCCESS,
+                        LogistrationAnalyticValues.REGISTER_SUCCESS,
                         buildMap {
-                            put(LogistrationAnalyticKey.PROVIDER.key, socialAuth?.authType?.methodName)
+                            put(LogistrationAnalyticKey.METHOD.key, socialAuth?.authType?.methodName?.lowercase())
                         }
                     )
                     if (socialAuth == null) {
@@ -241,10 +241,10 @@ class SignUpViewModel(
         }.onSuccess {
             setUserId()
             logEvent(
-                LogistrationAnalyticEvent.SIGN_IN_SUCCESSFULLY,
-                LogistrationAnalyticValues.SIGN_IN_SUCCESSFULLY,
+                LogistrationAnalyticEvent.SIGN_IN_SUCCESS,
+                LogistrationAnalyticValues.SIGN_IN_SUCCESS,
                 buildMap {
-                    put(LogistrationAnalyticKey.METHOD.key, socialAuth.authType.methodName)
+                    put(LogistrationAnalyticKey.METHOD.key, socialAuth.authType.methodName.lowercase())
                 }
             )
             _uiState.update { it.copy(successLogin = true) }

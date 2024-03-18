@@ -70,26 +70,13 @@ enum class CourseAnalyticEvent(val event: String) {
     CAST_DISCONNECTED("Cast:Disconnected"),
 
     DATES_COURSE_COMPONENT_TAPPED("Dates:Course Component Tapped"),
-    DATES_UNSUPPORTED_COMPONENT_TAPPED("Dates:Unsupported Component Tapped"),
     PLS_BANNER_VIEWED("PLS:Banner Viewed"),
     PLS_SHIFT_BUTTON_TAPPED("PLS:Shift Button Tapped"),
     PLS_SHIFT_DATES("PLS:Shift Dates"),
 
-    DATES_CALENDAR_TOGGLE_ON("Dates:Calendar Toggle On"),
-    DATES_CALENDAR_TOGGLE_OFF("Dates:Calendar Toggle Off"),
-    DATES_CALENDAR_ACCESS_ALLOWED("Dates:Calendar Access Allowed"),
-    DATES_CALENDAR_ACCESS_DONT_ALLOW("Dates:Calendar Access Don't Allow"),
-    DATES_CALENDAR_ADD_DATES("Dates:Calendar Add Dates"),
-    DATES_CALENDAR_ADD_CANCELLED("Dates:Calendar Add Cancelled"),
-    DATES_CALENDAR_REMOVE_DATES("Dates:Calendar Remove Dates"),
-    DATES_CALENDAR_REMOVE_CANCELLED("Dates:Calendar Remove Cancelled"),
-    DATES_CALENDAR_ADD_CONFIRMATION("Dates:Calendar Add Confirmation"),
-    DATES_CALENDAR_VIEW_EVENTS("Dates:Calendar View Events"),
-    DATES_CALENDAR_SYNC_UPDATE_DATES("Dates:Calendar Sync Update Dates"),
-    DATES_CALENDAR_SYNC_REMOVE_CALENDAR("Dates:Calendar Sync Remove Calendar"),
-    DATES_CALENDAR_ADD_DATES_SUCCESS("Dates:Calendar Add Dates Success"),
-    DATES_CALENDAR_REMOVE_DATES_SUCCESS("Dates:Calendar Remove Dates Success"),
-    DATES_CALENDAR_UPDATE_DATES_SUCCESS("Dates:Calendar Update Dates Success"),
+    DATES_CALENDAR_SYNC_TOGGLE("Dates:CalendarSync Toggle"),
+    DATES_CALENDAR_SYNC_DIALOG_ACTION("Dates:CalendarSync Dialog Action"),
+    DATES_CALENDAR_SYNC_SNACKBAR("Dates:CalendarSync Snackbar"),
 }
 
 enum class CourseAnalyticValue(val biValue: String) {
@@ -124,31 +111,20 @@ enum class CourseAnalyticValue(val biValue: String) {
 
     COURSE_DATES("course_dates"),
     DATES_COURSE_COMPONENT_TAPPED("edx.bi.app.coursedates.component.tapped"),
-    DATES_UNSUPPORTED_COMPONENT_TAPPED("edx.bi.app.coursedates.unsupported.component.tapped"),
     PLS_BANNER_VIEWED("edx.bi.app.coursedates.pls_banner.viewed"),
     PLS_SHIFT_BUTTON_TAPPED("edx.bi.app.coursedates.pls_banner.shift_button.tapped"),
     PLS_SHIFT_DATES("edx.bi.app.coursedates.pls_banner.shift_dates"),
 
-    DATES_CALENDAR_TOGGLE_ON("edx.bi.app.calendar.toggle_on"),
-    DATES_CALENDAR_TOGGLE_OFF("edx.bi.app.calendar.toggle_off"),
-    DATES_CALENDAR_ACCESS_ALLOWED("edx.bi.app.calendar.access_ok"),
-    DATES_CALENDAR_ACCESS_DONT_ALLOW("edx.bi.app.calendar.access_dont_allow"),
-    DATES_CALENDAR_ADD_DATES("edx.bi.app.calendar.add_ok"),
-    DATES_CALENDAR_ADD_CANCELLED("edx.bi.app.calendar.add_cancel"),
-    DATES_CALENDAR_REMOVE_DATES("edx.bi.app.calendar.remove_ok"),
-    DATES_CALENDAR_REMOVE_CANCELLED("edx.bi.app.calendar.remove_cancel"),
-    DATES_CALENDAR_ADD_CONFIRMATION("edx.bi.app.calendar.confirmation_done"),
-    DATES_CALENDAR_VIEW_EVENTS("edx.bi.app.calendar.confirmation_view_events"),
-    DATES_CALENDAR_SYNC_UPDATE_DATES("edx.bi.app.calendar.sync_update"),
-    DATES_CALENDAR_SYNC_REMOVE_CALENDAR("edx.bi.app.calendar.sync_remove"),
-    DATES_CALENDAR_ADD_DATES_SUCCESS("edx.bi.app.calendar.add_success"),
-    DATES_CALENDAR_REMOVE_DATES_SUCCESS("edx.bi.app.calendar.remove_success"),
-    DATES_CALENDAR_UPDATE_DATES_SUCCESS("edx.bi.app.calendar.update_success"),
+    DATES_CALENDAR_SYNC_TOGGLE("edx.bi.app.dates.calendar_sync.toggle"),
+    DATES_CALENDAR_SYNC_DIALOG_ACTION("edx.bi.app.dates.calendar_sync.dialog_action"),
+    DATES_CALENDAR_SYNC_SNACKBAR("edx.bi.app.dates.calendar_sync.snackbar"),
 }
 
 enum class CourseAnalyticKey(val key: String) {
     NAME("name"),
     COURSE_ID("course_id"),
+    COURSE_NAME("course_name"),
+    CONVERSION("conversion"),
     OPEN_IN_BROWSER("open_in_browser_url"),
     COMPONENT("component"),
     VIDEO_PLAYER("videoplayer"),
@@ -159,7 +135,9 @@ enum class CourseAnalyticKey(val key: String) {
     CATEGORY("category"),
     SUCCESS("success"),
     LINK("link"),
+    SUPPORTED("supported"),
     BLOCK_ID("block_id"),
+    BLOCK_NAME("block_name"),
     BLOCK_TYPE("block_type"),
     PLAY_MEDIUM("play_medium"),
     NATIVE("native"),
@@ -169,4 +147,40 @@ enum class CourseAnalyticKey(val key: String) {
     SKIP_INTERVAL("requested_skip_interval"),
     SPEED("speed"),
     NAVIGATION("navigation"),
+    DIALOG("dialog"),
+    ACTION("action"),
+    ON("on"),
+    OFF("off"),
+    SNACKBAR("snackbar"),
+}
+
+enum class CalendarSyncDialog(
+    val dialog: String,
+    val positiveAction: String,
+    val negativeAction: String,
+) {
+    PERMISSION("permission", "allow", "donot_allow"),
+    ADD("add", "ok", "cancel"),
+    REMOVE("remove", "ok", "cancel"),
+    UPDATE("update", "update", "remove"),
+    CONFIRMED("confirmed", "done", "view_event");
+
+    fun getBuildMap(action: Boolean): Map<String, Any> {
+        return buildMap {
+            put(CourseAnalyticKey.DIALOG.key, dialog)
+            put(CourseAnalyticKey.ACTION.key, if (action) positiveAction else negativeAction)
+        }
+    }
+}
+
+enum class CalendarSyncSnackbar(val snackbar: String) {
+    ADD("add"),
+    REMOVE("remove"),
+    UPDATE("update");
+
+    fun getBuildMap(): Map<String, Any> {
+        return buildMap {
+            put(CourseAnalyticKey.SNACKBAR.key, snackbar)
+        }
+    }
 }

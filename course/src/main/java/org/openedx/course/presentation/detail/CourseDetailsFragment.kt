@@ -160,6 +160,7 @@ class CourseDetailsFragment : Fragment() {
                                 currentState.course.isEnrolled -> {
                                     viewModel.viewCourseClickedEvent(
                                         currentState.course.courseId,
+                                        currentState.course.name,
                                     )
                                     router.navigateToCourseOutline(
                                         requireActivity().supportFragmentManager,
@@ -170,7 +171,7 @@ class CourseDetailsFragment : Fragment() {
                                 }
 
                                 else -> {
-                                    viewModel.enrollInACourse(currentState.course.courseId)
+                                    viewModel.enrollInACourse(currentState.course.courseId, currentState.course.name)
                                 }
                             }
                         }

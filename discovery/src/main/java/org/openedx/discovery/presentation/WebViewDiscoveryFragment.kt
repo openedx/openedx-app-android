@@ -50,6 +50,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -116,6 +117,7 @@ class WebViewDiscoveryFragment : Fragment() {
                                         getString(CoreR.string.platform_name)
                                     ),
                                     url = param,
+                                    source = CoreAnalyticsScreen.DISCOVERY.screenName
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     ActionDialogFragment::class.simpleName

@@ -19,7 +19,7 @@ class DownloadQueueViewModel(
     private val workerController: DownloadWorkerController,
     private val downloadNotifier: DownloadNotifier,
     private val coreAnalytics: CoreAnalytics,
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController, coreAnalytics) {
+) : BaseDownloadViewModel("", downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     private val _uiState = MutableStateFlow<DownloadQueueUIState>(DownloadQueueUIState.Loading)
     val uiState = _uiState.asStateFlow()

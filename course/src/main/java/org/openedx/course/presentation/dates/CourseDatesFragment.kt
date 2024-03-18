@@ -90,6 +90,7 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
+import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.HandleUIMessage
@@ -185,19 +186,20 @@ class CourseDatesFragment : Fragment() {
                                             )
                                         }
                                 }
-                                } ?: {
-                                viewModel.logCourseComponentTapped(false, block)
-                                ActionDialogFragment.newInstance(
-                                    title = getString(coreR.string.core_leaving_the_app),
-                                    message = getString(
-                                        coreR.string.core_leaving_the_app_message,
-                                        getString(coreR.string.platform_name)
-                                    ),
-                                    url = block.link,
-                                ).show(
-                                    requireActivity().supportFragmentManager,
-                                    ActionDialogFragment::class.simpleName
-                                )
+                                } ?: {    viewModel.logCourseComponentTapped(false, block)
+                                    ActionDialogFragment.newInstance(
+                                        title = getString(coreR.string.core_leaving_the_app),
+                                        message = getString(
+                                            coreR.string.core_leaving_the_app_message,
+                                            getString(coreR.string.platform_name)
+                                        ),
+                                        url = block.link,
+                                        source = CoreAnalyticsScreen.COURSE_DATES.screenName
+                                    ).show(
+                                        requireActivity().supportFragmentManager,
+                                        ActionDialogFragment::class.simpleName
+                                    )
+
                             }
                         }
                     },

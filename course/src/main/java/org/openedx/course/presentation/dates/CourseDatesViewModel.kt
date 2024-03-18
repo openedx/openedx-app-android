@@ -243,35 +243,27 @@ class CourseDatesViewModel(
             put(CourseAnalyticKey.BLOCK_ID.key, block.blockId)
             put(CourseAnalyticKey.BLOCK_TYPE.key, block.dateType)
             put(CourseAnalyticKey.LINK.key, block.link)
+            put(CourseAnalyticKey.SUPPORTED.key, isSupported)
         }
 
-        if (isSupported) {
-            logCalendarSyncEvent(
-                CourseAnalyticEvent.DATES_COURSE_COMPONENT_TAPPED,
-                CourseAnalyticValue.DATES_COURSE_COMPONENT_TAPPED,
-                params
-            )
-        } else {
-            logCalendarSyncEvent(
-                CourseAnalyticEvent.DATES_UNSUPPORTED_COMPONENT_TAPPED,
-                CourseAnalyticValue.DATES_UNSUPPORTED_COMPONENT_TAPPED,
-                params
-            )
-        }
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_COURSE_COMPONENT_TAPPED,
+            CourseAnalyticValue.DATES_COURSE_COMPONENT_TAPPED,
+            params
+        )
     }
 
     fun logCalendarSyncToggle(isChecked: Boolean) {
-        if (isChecked) {
-            logCalendarSyncEvent(
-                CourseAnalyticEvent.DATES_CALENDAR_TOGGLE_ON,
-                CourseAnalyticValue.DATES_CALENDAR_TOGGLE_ON
-            )
-        } else {
-            logCalendarSyncEvent(
-                CourseAnalyticEvent.DATES_CALENDAR_TOGGLE_OFF,
-                CourseAnalyticValue.DATES_CALENDAR_TOGGLE_OFF
-            )
-        }
+        logCalendarSyncEvent(
+            CourseAnalyticEvent.DATES_CALENDAR_SYNC_TOGGLE,
+            CourseAnalyticValue.DATES_CALENDAR_SYNC_TOGGLE,
+            buildMap {
+                put(
+                    CourseAnalyticKey.ACTION.key,
+                    if (isChecked) CourseAnalyticKey.ON.key else CourseAnalyticKey.OFF.key
+                )
+            }
+        )
     }
 
     private fun logCalendarSyncEvent(

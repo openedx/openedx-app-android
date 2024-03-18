@@ -103,10 +103,10 @@ class SignInViewModel(
                 _uiState.update { it.copy(loginSuccess = true) }
                 setUserId()
                 logEvent(
-                    LogistrationAnalyticEvent.SIGN_IN_SUCCESSFULLY,
-                    LogistrationAnalyticValues.SIGN_IN_SUCCESSFULLY,
+                    LogistrationAnalyticEvent.SIGN_IN_SUCCESS,
+                    LogistrationAnalyticValues.SIGN_IN_SUCCESS,
                     buildMap {
-                        put(LogistrationAnalyticKey.METHOD.key, AuthType.PASSWORD.methodName)
+                        put(LogistrationAnalyticKey.METHOD.key, AuthType.PASSWORD.methodName.lowercase())
                     }
                 )
             } catch (e: Exception) {

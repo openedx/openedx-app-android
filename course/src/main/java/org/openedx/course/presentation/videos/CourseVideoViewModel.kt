@@ -40,7 +40,7 @@ class CourseVideoViewModel(
     private val coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController, coreAnalytics) {
+) : BaseDownloadViewModel(courseId, downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     val apiHostUrl get() = config.getApiHostURL()
 

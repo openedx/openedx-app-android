@@ -38,7 +38,7 @@ class CourseSectionViewModel(
     private val coreAnalytics: CoreAnalytics,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController, coreAnalytics) {
+) : BaseDownloadViewModel(courseId, downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     private val _uiState = MutableLiveData<CourseSectionUIState>(CourseSectionUIState.Loading)
     val uiState: LiveData<CourseSectionUIState>

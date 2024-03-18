@@ -258,8 +258,8 @@ class CourseUnitContainerViewModel(
             buildMap {
                 put(CourseAnalyticKey.NAME.key, CourseAnalyticValue.UNIT_DETAIL.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticKey.COURSE_NAME.key, courseName)
                 put(CourseAnalyticKey.BLOCK_ID.key, unitId)
-                put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
             })
     }
 

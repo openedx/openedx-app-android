@@ -16,6 +16,7 @@ enum class ProfileAnalyticEvent(val event: String) {
     COOKIE_POLICY_CLICKED("Profile:Cookie Policy Clicked"),
     DATA_SELL_CLICKED("Profile:Data Sell Clicked"),
     DELETE_ACCOUNT_CLICKED("Profile:Delete Account Clicked"),
+    USER_DELETE_ACCOUNT_CLICKED("Profile:User Delete Account Success"),
     DELETE_ACCOUNT_SUCCESS("Profile:Delete Account Success"),
     WIFI_TOGGLE("Profile:Wifi Toggle"),
     LOGOUT_CLICKED("Profile:Logout Clicked"),
@@ -34,6 +35,7 @@ enum class ProfileAnalyticValue(val biValue: String) {
     COOKIE_POLICY_CLICKED("edx.bi.app.profile.cookie_policy.clicked"),
     DATA_SELL_CLICKED("edx.bi.app.profile.do_not_sell_data.clicked"),
     DELETE_ACCOUNT_CLICKED("edx.bi.app.profile.delete_account.clicked"),
+    USER_DELETE_ACCOUNT_CLICKED("edx.bi.app.profile.user.delete_account.clicked"),
     DELETE_ACCOUNT_SUCCESS("edx.bi.app.profile.delete_account.success"),
     WIFI_TOGGLE("edx.bi.app.profile.wifi_toggle.action"),
     LOGOUT_CLICKED("edx.bi.app.profile.logout.clicked"),
@@ -42,12 +44,12 @@ enum class ProfileAnalyticValue(val biValue: String) {
 
 enum class ProfileAnalyticKey(val key: String) {
     NAME("name"),
-    CATEGORY("Category"),
-    PROFILE("Profile"),
+    CATEGORY("category"),
+    PROFILE("profile"),
     ACTION("action"),
     FULL_PROFILE("full_profile"),
     LIMITED_PROFILE("limited_profile"),
-    ON("On"),
-    OFF("Off"),
-    SUCCESS("Success"),
+    ON("on"),
+    OFF("off"),
+    SUCCESS("success"),
 }

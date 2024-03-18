@@ -439,6 +439,7 @@ class CourseOutlineViewModelTest {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
@@ -460,6 +461,7 @@ class CourseOutlineViewModelTest {
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
+        verify(exactly = 1) { coreAnalytics.logEvent(any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
     }

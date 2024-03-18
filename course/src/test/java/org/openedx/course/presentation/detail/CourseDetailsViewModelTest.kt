@@ -210,7 +210,7 @@ class CourseDetailsViewModelTest {
         coEvery { interactor.getCourseDetails(any()) } returns mockCourse
         every { analytics.logEvent(any(), any()) } returns Unit
 
-        viewModel.enrollInACourse("")
+        viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
@@ -242,7 +242,7 @@ class CourseDetailsViewModelTest {
         every { analytics.logEvent(any(), any()) } returns Unit
 
 
-        viewModel.enrollInACourse("")
+        viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
@@ -275,7 +275,7 @@ class CourseDetailsViewModelTest {
 
 
         delay(200)
-        viewModel.enrollInACourse("")
+        viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }

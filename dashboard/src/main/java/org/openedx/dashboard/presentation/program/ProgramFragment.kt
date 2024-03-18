@@ -43,6 +43,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.toastMessage
+import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -170,6 +171,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                                         getString(coreR.string.platform_name)
                                     ),
                                     url = param,
+                                    source = CoreAnalyticsScreen.PROGRAM.screenName
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     ActionDialogFragment::class.simpleName

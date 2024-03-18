@@ -37,6 +37,7 @@ class DeleteProfileViewModel(
 
 
     fun deleteProfile(password: String) {
+        logDeleteProfileClickedEvent()
         if (!validator.isPasswordValid(password)) {
             _uiState.value =
                 DeleteProfileFragmentUIState.Error(resourceManager.getString(org.openedx.profile.R.string.profile_invalid_password))
@@ -65,6 +66,13 @@ class DeleteProfileViewModel(
                 logDeleteProfileEvent(false)
             }
         }
+    }
+
+    private fun logDeleteProfileClickedEvent(){
+        analytics.logEvent(ProfileAnalyticEvent.USER_DELETE_ACCOUNT_CLICKED.event, buildMap {
+            put(ProfileAnalyticKey.NAME.key, ProfileAnalyticValue.USER_DELETE_ACCOUNT_CLICKED.biValue)
+            put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+        })
     }
 
     private fun logDeleteProfileEvent(isSuccess: Boolean) {

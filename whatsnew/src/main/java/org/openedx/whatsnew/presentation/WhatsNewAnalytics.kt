@@ -17,6 +17,6 @@ enum class WhatsNewAnalyticValue(val value: String) {
 enum class WhatsNewAnalyticKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
-    WHATS_NEW("whatsnew"),
+    WHATS_NEW("whats_new"),
     TOTAL_SCREENS("total_screens"),
 }
