@@ -1,6 +1,8 @@
 package org.openedx.app
 
 import android.app.Application
+import com.braze.Braze
+import com.braze.configuration.BrazeConfig
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.initialize
 import io.branch.referral.Branch
@@ -36,6 +38,19 @@ class OpenEdXApp : Application() {
                 Branch.enableLogging()
             }
             Branch.getAutoInstance(this)
+        }
+
+        if (config.getBrazeConfig().isEnabled && config.getFirebaseConfig().enabled) {
+            val isCloudMessagingEnabled = config.getFirebaseConfig().isCloudMessagingEnabled &&
+                    config.getBrazeConfig().isPushNotificationsEnabled
+
+            val brazeConfig = BrazeConfig.Builder()
+                .setIsFirebaseCloudMessagingRegistrationEnabled(isCloudMessagingEnabled)
+                .setFirebaseCloudMessagingSenderIdKey(config.getFirebaseConfig().projectNumber)
+                .setHandlePushDeepLinksAutomatically(true)
+                .setIsFirebaseMessagingServiceOnNewTokenRegistrationEnabled(true)
+                .build()
+            Braze.configure(this, brazeConfig)
         }
     }
 }
