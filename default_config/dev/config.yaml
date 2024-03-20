@@ -1,10 +1,10 @@
-API_HOST_URL: 'http://localhost:8000'
+API_HOST_URL: 'https://lms-harrow-test.raccoongang.com'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
-OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+OAUTH_CLIENT_ID: 'eac4HOdF5pvSYTfixhCboYy3JCzqCnBtODeM0WbO'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:

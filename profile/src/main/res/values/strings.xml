@@ -14,7 +14,7 @@
     <string name="profile_edit">Edit</string>
     <string name="profile_save">Save</string>
     <string name="profile_delete_profile">Delete account</string>
-    <string name="profile_must_be_over">You must be over 13 years old to have a profile with full access to information</string>
+    <string name="profile_must_be_over">You must be over 13 years old to have a profile with full access to information.</string>
     <string name="profile_year">Year of birth</string>
     <string name="profile_location">Location</string>
     <string name="profile_about_me">About me</string>
@@ -25,7 +25,7 @@
     <string name="profile_delete_account">Delete account</string>
     <string name="profile_you_want_to">Are you sure you want to</string>
     <string name="profile_delete_your_account">delete your account?</string>
-    <string name="profile_confirm_action">To confirm this action you need to enter you account password</string>
+    <string name="profile_confirm_action">To confirm this action, please enter your account password.</string>
     <string name="profile_yes_delete_account">Yes, delete account</string>
     <string name="profile_back_to_profile">Back to profile</string>
     <string name="profile_password_is_incorrect">The password is incorrect. Please try again.</string>
@@ -38,9 +38,9 @@
     <string name="profile_video_settings">Video settings</string>
     <string name="profile_wifi_only_download">Wi-fi only download</string>
     <string name="profile_only_download_when_wifi_turned_on">Only download content when wi-fi is turned on</string>
-    <string name="profile_leave_profile">Leave profile?</string>
+    <string name="profile_leave_profile">Leave without saving?</string>
     <string name="profile_leave">Leave</string>
     <string name="profile_keep_editing">Keep editing</string>
-    <string name="profile_changes_you_made">Changes you have made may not be saved.</string>
+    <string name="profile_changes_you_made">Changes you have made will be discarded.</string>
 
 </resources>
