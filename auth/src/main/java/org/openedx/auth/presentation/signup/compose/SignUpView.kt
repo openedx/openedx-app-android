@@ -435,7 +435,7 @@ internal fun SignUpView(
                                     }
                                 } else {
                                     OpenEdXButton(
-                                        width = buttonWidth.testTag("btn_create_account"),
+                                        modifier = buttonWidth.testTag("btn_create_account"),
                                         text = stringResource(id = R.string.auth_create_account),
                                         onClick = {
                                             showErrorMap.clear()

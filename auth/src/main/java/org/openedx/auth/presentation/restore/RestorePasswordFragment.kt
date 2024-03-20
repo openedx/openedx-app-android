@@ -289,7 +289,7 @@ private fun RestorePasswordScreen(
                                     }
                                 } else {
                                     OpenEdXButton(
-                                        width = buttonWidth.testTag("btn_reset_password"),
+                                        modifier = buttonWidth.testTag("btn_reset_password"),
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
                                             onRestoreButtonClick(email)
@@ -337,7 +337,7 @@ private fun RestorePasswordScreen(
                                 )
                                 Spacer(Modifier.height(48.dp))
                                 OpenEdXButton(
-                                    width = buttonWidth,
+                                    modifier = buttonWidth,
                                     text = stringResource(id = R.string.core_sign_in),
                                     onClick = {
                                         onBackClick()

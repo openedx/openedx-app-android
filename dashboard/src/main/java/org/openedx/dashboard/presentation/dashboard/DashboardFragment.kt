@@ -515,16 +515,6 @@ private fun EmptyState() {
             Spacer(Modifier.height(16.dp))
             Text(
                 modifier = Modifier
-                    .testTag("txt_empty_state_title")
-                    .fillMaxWidth(),
-                text = stringResource(id = R.string.dashboard_its_empty),
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                modifier = Modifier
                     .testTag("txt_empty_state_description")
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.dashboard_you_are_not_enrolled),

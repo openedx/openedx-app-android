@@ -1149,7 +1149,7 @@ fun CourseDatesBannerTablet(
         }
         banner.bannerType.buttonResId.nonZero()?.let {
             OpenEdXButton(
-                width = Modifier.width(210.dp),
+                modifier = Modifier.width(210.dp),
                 text = stringResource(id = it),
                 onClick = resetDates,
             )

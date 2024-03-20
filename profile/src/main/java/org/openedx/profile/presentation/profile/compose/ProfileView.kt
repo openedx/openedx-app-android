@@ -81,6 +81,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.theme.light_text_dark
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.profile.ProfileUIState
@@ -484,7 +485,7 @@ private fun LogoutDialog(
                                     .testTag("txt_logout")
                                     .fillMaxWidth(),
                                 text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                                color = MaterialTheme.appColors.textDark,
+                                color = light_text_dark,
                                 style = MaterialTheme.appTypography.labelLarge,
                                 textAlign = TextAlign.Center
                             )

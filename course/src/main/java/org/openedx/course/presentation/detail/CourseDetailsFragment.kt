@@ -169,7 +169,7 @@ internal fun CourseDetailsScreen(
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
 
-    var isInternetConnectionShown by rememberSaveable {
+    val isInternetConnectionShown = rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -262,6 +262,8 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
                                         apiHostUrl = apiHostUrl,
+                                        hasInternetConnection = hasInternetConnection,
+                                        isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -271,6 +273,8 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
                                         apiHostUrl = apiHostUrl,
+                                        hasInternetConnection = hasInternetConnection,
+                                        isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -285,7 +289,7 @@ internal fun CourseDetailsScreen(
                                             .padding(all = 20.dp),
                                     )
                                 } else {
-                                    var webViewAlpha by remember { mutableStateOf(0f) }
+                                    var webViewAlpha by remember { mutableFloatStateOf(0f) }
                                     if (webViewAlpha == 0f) {
                                         Box(
                                             modifier = Modifier
@@ -315,16 +319,16 @@ internal fun CourseDetailsScreen(
                             }
                         }
                     }
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
+                    if (!isInternetConnectionShown.value && !hasInternetConnection) {
                         OfflineModeDialog(
                             Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.BottomCenter),
                             onDismissCLick = {
-                                isInternetConnectionShown = true
+                                isInternetConnectionShown.value = true
                             },
                             onReloadClick = {
-                                isInternetConnectionShown = true
+                                isInternetConnectionShown.value = true
                                 onReloadClick()
                             }
                         )
@@ -341,6 +345,8 @@ private fun CourseDetailNativeContent(
     windowSize: WindowSize,
     apiHostUrl: String,
     course: Course,
+    hasInternetConnection: Boolean,
+    isInternetConnectionShown: MutableState<Boolean>,
     onButtonClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -402,7 +408,11 @@ private fun CourseDetailNativeContent(
                 .padding(horizontal = contentHorizontalPadding)
         ) {
             val enrollmentEnd = course.enrollmentEnd
-            if (enrollmentEnd != null && Date() > enrollmentEnd) {
+            if (!hasInternetConnection) {
+                isInternetConnectionShown.value = true
+                NoInternetLabel()
+                Spacer(Modifier.height(24.dp))
+            } else if (enrollmentEnd != null && Date() > enrollmentEnd) {
                 EnrollOverLabel()
                 Spacer(Modifier.height(24.dp))
             }
@@ -429,7 +439,7 @@ private fun CourseDetailNativeContent(
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
                 Spacer(Modifier.height(32.dp))
                 OpenEdXButton(
-                    width = buttonWidth,
+                    modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick
                 )
@@ -444,6 +454,8 @@ private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
     apiHostUrl: String,
     course: Course,
+    hasInternetConnection: Boolean,
+    isInternetConnectionShown: MutableState<Boolean>,
     onButtonClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -496,12 +508,16 @@ private fun CourseDetailNativeContentLandscape(
                 Spacer(Modifier.height(42.dp))
             }
             val enrollmentEnd = course.enrollmentEnd
-            if (enrollmentEnd != null && Date() > enrollmentEnd) {
-                Spacer(Modifier.height(4.dp))
+            if (!hasInternetConnection) {
+                isInternetConnectionShown.value = true
+                NoInternetLabel()
+                Spacer(Modifier.height(24.dp))
+            } else if (enrollmentEnd != null && Date() > enrollmentEnd) {
                 EnrollOverLabel()
+                Spacer(Modifier.height(24.dp))
             } else {
                 OpenEdXButton(
-                    width = buttonWidth,
+                    modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick
                 )
@@ -579,6 +595,55 @@ private fun EnrollOverLabel() {
             Text(
                 modifier = Modifier.testTag("txt_enroll_error"),
                 text = stringResource(id = courseR.string.course_you_cant_enroll),
+                color = MaterialTheme.appColors.textPrimaryVariant,
+                style = MaterialTheme.appTypography.titleSmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoInternetLabel() {
+    val borderColor = if (!isSystemInDarkTheme()) {
+        MaterialTheme.appColors.cardViewBorder
+    } else {
+        MaterialTheme.appColors.surface
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .shadow(
+                0.dp,
+                MaterialTheme.appShapes.material.medium
+            )
+            .background(
+                MaterialTheme.appColors.surface,
+                MaterialTheme.appShapes.material.medium
+            )
+            .border(
+                1.dp,
+                borderColor,
+                MaterialTheme.appShapes.material.medium
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = org.openedx.core.R.drawable.core_ic_offline),
+                contentDescription = null,
+                tint = MaterialTheme.appColors.warning
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                modifier = Modifier.testTag("txt_enroll_internet_error"),
+                text = stringResource(id = courseR.string.course_no_internet_label),
                 color = MaterialTheme.appColors.textPrimaryVariant,
                 style = MaterialTheme.appTypography.titleSmall
             )

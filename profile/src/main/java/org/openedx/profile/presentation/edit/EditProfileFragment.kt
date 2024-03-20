@@ -135,6 +135,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.theme.light_text_dark
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.profile.R
@@ -763,6 +764,7 @@ private fun LimitedProfileDialog(
     modifier: Modifier,
     onCloseClick: () -> Unit
 ) {
+    val tint = light_text_dark
     Column(
         modifier
             .shadow(
@@ -784,14 +786,14 @@ private fun LimitedProfileDialog(
             Icon(
                 imageVector = Icons.Outlined.Report,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textDark
+                tint = tint
             )
             Text(
                 modifier = Modifier
                     .testTag("txt_edit_profile_limited_profile_message")
                     .weight(1f),
                 text = stringResource(id = R.string.profile_must_be_over),
-                color = MaterialTheme.appColors.textDark,
+                color = tint,
                 style = MaterialTheme.appTypography.labelLarge
             )
             Icon(
@@ -800,7 +802,7 @@ private fun LimitedProfileDialog(
                     .clickable { onCloseClick() },
                 imageVector = Icons.Filled.Close,
                 contentDescription = null,
-                tint = MaterialTheme.appColors.textDark
+                tint = tint
             )
         }
     }
@@ -1136,7 +1138,7 @@ private fun LeaveProfile(
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.textDark,
+                            color = light_text_dark,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )

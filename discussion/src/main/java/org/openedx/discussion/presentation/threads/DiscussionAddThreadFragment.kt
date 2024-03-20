@@ -385,7 +385,7 @@ private fun DiscussionAddThreadScreen(
                                     CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 } else {
                                     OpenEdXButton(
-                                        width = buttonWidth,
+                                        modifier = buttonWidth,
                                         text = stringResource(id = discussionR.string.discussion_create_post),
                                         onClick = {
                                             onPostDiscussionClick(

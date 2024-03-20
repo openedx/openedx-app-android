@@ -40,7 +40,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
@@ -1045,32 +1044,40 @@ fun OfflineModeDialog(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(vertical = 10.dp, horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                modifier = Modifier.testTag("txt_offline_label"),
+            IconText(
                 text = stringResource(id = R.string.core_offline),
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.textDark
+                painter = painterResource(id = R.drawable.core_ic_offline),
+                color = Color.Black,
+                textStyle = MaterialTheme.appTypography.titleSmall
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_dismiss")
-                        .clickable { onDismissCLick() },
-                    text = stringResource(id = R.string.core_dismiss),
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.primary
-                )
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_reload")
-                        .clickable { onReloadClick() },
-                    text = stringResource(id = R.string.core_reload),
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.primary
-                )
+            Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = {
+                        onReloadClick()
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(R.drawable.core_ic_reload),
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.primary
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = {
+                        onDismissCLick()
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(R.drawable.core_ic_close),
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
+                }
             }
         }
     }
@@ -1078,7 +1085,7 @@ fun OfflineModeDialog(
 
 @Composable
 fun OpenEdXButton(
-    width: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier.fillMaxWidth(),
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -1088,7 +1095,7 @@ fun OpenEdXButton(
     Button(
         modifier = Modifier
             .testTag("btn_${text.tagId()}")
-            .then(width)
+            .then(modifier)
             .height(42.dp),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
@@ -1171,23 +1178,29 @@ fun ConnectionErrorView(
     ) {
         Icon(
             modifier = Modifier.size(100.dp),
-            imageVector = Icons.Filled.Wifi,
+            painter = painterResource(id = R.drawable.core_no_internet_connection),
             contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
+        Spacer(Modifier.height(28.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(0.8f),
+            text = stringResource(id = R.string.core_not_internet_connection),
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.titleLarge,
+            textAlign = TextAlign.Center
+        )
         Spacer(Modifier.height(16.dp))
         Text(
-            modifier = Modifier
-                .testTag("txt_connection_error_label")
-                .fillMaxWidth(0.6f),
-            text = stringResource(id = R.string.core_not_connected_to_internet),
+            modifier = Modifier.fillMaxWidth(0.8f),
+            text = stringResource(id = R.string.core_not_internet_connection_description),
             color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium,
+            style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
         OpenEdXButton(
-            width = Modifier
+            modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = R.string.core_reload),
             onClick = onReloadClick
@@ -1202,7 +1215,7 @@ fun AuthButtonsPanel(
 ) {
     Row {
         OpenEdXButton(
-            width = Modifier
+            modifier = Modifier
                 .testTag("btn_register")
                 .width(0.dp)
                 .weight(1f),
