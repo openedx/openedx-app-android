@@ -23,11 +23,11 @@
     <string name="course_resume_unit_title">Остання одиниця:</string>
     <string name="course_resume_unit_btn">Продовжити</string>
     <string name="course_discussion">Обговорення</string>
-    <string name="course_handouts">Роздаткові матеріали</string>
+    <string name="course_more">Роздаткові матеріали</string>
     <string name="course_announcements">Оголошення</string>
     <string name="course_find_important_info">Знайдіть важливу інформацію про курс</string>
     <string name="course_latest_news">Будьте в курсі останніх новин</string>
-    <string name="course_good_work">Гарна робота!</string>
+    <string name="course_good_job">Гарна робота!</string>
     <string name="course_section_finished">Секція \"%s\" завершена.</string>
     <string name="course_next_section">Наступний розділ</string>
     <string name="course_back_to_outline">Повернутись до модуля</string>
@@ -37,7 +37,7 @@
     <string name="course_navigation_course">Курс</string>
     <string name="course_navigation_videos">Відео</string>
     <string name="course_navigation_discussions">Обговорення</string>
-    <string name="course_navigation_handouts">Матеріали</string>
+    <string name="course_navigation_more">Матеріали</string>
     <string name="course_can_download_only_with_wifi">Ви можете завантажувати контент тільки через Wi-Fi</string>
     <string name="course_this_interactive_component">Ця інтерактивна компонента ще не доступна</string>
     <string name="course_explore_other_parts">Досліджуйте інші частини цього курсу або перегляньте це на веб-сайті.</string>

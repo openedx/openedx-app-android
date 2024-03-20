@@ -53,7 +53,7 @@ class HandoutsFragment : Fragment() {
                         router.navigateToHandoutsWebView(
                             requireActivity().supportFragmentManager,
                             requireArguments().getString(ARG_COURSE_ID, ""),
-                            getString(courseR.string.course_handouts),
+                            getString(courseR.string.course_more),
                             HandoutsType.Handouts
                         )
                     },
@@ -122,7 +122,7 @@ private fun HandoutsScreen(
                 ) {
                     item {
                         HandoutsItem(
-                            title = stringResource(id = courseR.string.course_handouts),
+                            title = stringResource(id = courseR.string.course_more),
                             description = stringResource(id = courseR.string.course_find_important_info),
                             painter = painterResource(id = courseR.drawable.course_ic_handouts),
                             onClick = onHandoutsClick
