@@ -268,6 +268,7 @@ class CourseOutlineViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 updateCourseData(false)
+                _uiMessage.value = UIMessage.DatesShiftedSnackBar()
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -275,7 +276,7 @@ class CourseOutlineViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
                 }
                 onResetDates(false)
             }

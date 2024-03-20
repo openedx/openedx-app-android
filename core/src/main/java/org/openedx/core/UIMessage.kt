@@ -8,5 +8,7 @@ sealed class UIMessage {
         val duration: SnackbarDuration = SnackbarDuration.Long,
     ) : UIMessage()
 
+    class DatesShiftedSnackBar : UIMessage()
+
     class ToastMessage(val message: String) : UIMessage()
 }

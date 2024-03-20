@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
+import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.data.storage.CorePreferences
@@ -111,6 +112,7 @@ class CourseDatesViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 getCourseDates()
+                _uiMessage.value = UIMessage.DatesShiftedSnackBar()
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -118,7 +120,7 @@ class CourseDatesViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
                 }
                 onResetDates(false)
             }

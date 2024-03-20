@@ -37,6 +37,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarData
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
@@ -49,6 +53,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -86,6 +91,7 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.ui.DatesShiftedSnackBar
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
@@ -258,6 +264,12 @@ internal fun CourseDatesScreen(
             )
         }
 
+        val snackState = remember { SnackbarHostState() }
+        if (uiMessage is UIMessage.DatesShiftedSnackBar) {
+            LaunchedEffect(uiMessage) {
+                snackState.showSnackbar(message = "Dates Shifted", duration = SnackbarDuration.Long)
+            }
+        }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -383,6 +395,15 @@ internal fun CourseDatesScreen(
                                 onReloadClick()
                             })
                     }
+                }
+
+                SnackbarHost(
+                    modifier = Modifier.align(Alignment.BottomStart),
+                    hostState = snackState
+                ) { snackbarData: SnackbarData ->
+                    DatesShiftedSnackBar(onClose = {
+                        snackbarData.dismiss()
+                    })
                 }
             }
         }
