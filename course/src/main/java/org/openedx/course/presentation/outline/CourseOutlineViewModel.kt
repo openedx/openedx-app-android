@@ -45,7 +45,7 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
-    private val coreAnalytics: CoreAnalytics,
+    coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
 ) : BaseDownloadViewModel(
@@ -137,7 +137,6 @@ class CourseOutlineViewModel(
                     UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi))
             }
         } else {
-            logSubsectionDownloadEvent(id)
             super.saveDownloadModels(folder, id)
         }
     }
@@ -303,7 +302,8 @@ class CourseOutlineViewModel(
             buildMap {
                 put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
-            })
+            }
+        )
     }
 
     fun resumeCourseTappedEvent(blockId: String) {
@@ -314,12 +314,13 @@ class CourseOutlineViewModel(
                 buildMap {
                     put(
                         CourseAnalyticKey.NAME.key,
-                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName
+                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.biValue
                     )
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
-                })
+                }
+            )
         }
     }
 
@@ -346,7 +347,8 @@ class CourseOutlineViewModel(
                     put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
                     put(CourseAnalyticKey.BLOCK_NAME.key, blockName)
-                })
+                }
+            )
         }
     }
 

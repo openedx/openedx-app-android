@@ -56,7 +56,7 @@ class VideoSettingsViewModel(
             buildMap {
                 put(
                     ProfileAnalyticKey.ACTION.key,
-                    if (value) ProfileAnalyticKey.ON.key else ProfileAnalyticKey.OFF.key
+                    if (value) ProfileAnalyticKey.TRUE.key else ProfileAnalyticKey.FALSE.key
                 )
             })
     }
@@ -78,11 +78,12 @@ class VideoSettingsViewModel(
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
-            event.eventName,
-            buildMap {
+            event = event.eventName,
+            params = buildMap {
                 put(ProfileAnalyticKey.NAME.key, event.biValue)
                 put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
                 putAll(params)
-            })
+            }
+        )
     }
 }

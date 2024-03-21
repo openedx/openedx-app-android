@@ -223,7 +223,8 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onCertificateClick = {
                         viewModel.viewCertificateTappedEvent()
-                        it.takeIfNotEmpty()?.let { AndroidUriHandler(requireContext()).openUri(it) }
+                        it.takeIfNotEmpty()
+                            ?.let { url -> AndroidUriHandler(requireContext()).openUri(url) }
                     }
                 )
             }

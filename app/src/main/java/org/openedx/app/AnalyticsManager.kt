@@ -18,8 +18,9 @@ import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 class AnalyticsManager(
     context: Context,
     config: Config,
-) : DashboardAnalytics, AuthAnalytics, AppAnalytics, DiscoveryAnalytics,
-    CourseAnalytics, DiscussionAnalytics, AppReviewAnalytics, WhatsNewAnalytics, ProfileAnalytics, CoreAnalytics {
+) : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAnalytics, CourseAnalytics,
+    DashboardAnalytics, DiscoveryAnalytics, DiscussionAnalytics, ProfileAnalytics,
+    WhatsNewAnalytics {
 
     private val services: ArrayList<Analytics> = arrayListOf()
 

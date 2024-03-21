@@ -53,7 +53,7 @@ import org.openedx.core.ui.theme.compose.LogistrationLogoView
 class LogistrationFragment : Fragment() {
 
     private val viewModel: LogistrationViewModel by viewModel {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(arguments?.getString(ARG_COURSE_ID, "") ?: "")
     }
 
     override fun onCreateView(

@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.auth.presentation.LogistrationAnalyticKey
-import org.openedx.auth.presentation.LogistrationAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -43,7 +43,7 @@ class RestorePasswordViewModel(
     }
 
     fun passwordReset(email: String) {
-        logEvent(LogistrationAnalyticsEvent.RESET_PASSWORD_CLICKED)
+        logEvent(AuthAnalyticsEvent.RESET_PASSWORD_CLICKED)
         _uiState.value = RestorePasswordUIState.Loading
         viewModelScope.launch {
             try {
@@ -89,22 +89,23 @@ class RestorePasswordViewModel(
 
     private fun logResetPasswordEvent(success: Boolean) {
         logEvent(
-            LogistrationAnalyticsEvent.RESET_PASSWORD_SUCCESS,
-            buildMap {
-                put(LogistrationAnalyticKey.SUCCESS.key, success)
+            event = AuthAnalyticsEvent.RESET_PASSWORD_SUCCESS,
+            params = buildMap {
+                put(AuthAnalyticsKey.SUCCESS.key, success)
             }
         )
     }
 
     private fun logEvent(
-        event: LogistrationAnalyticsEvent,
+        event: AuthAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(LogistrationAnalyticKey.NAME.key, event.biValue)
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
-            })
+            }
+        )
     }
 }

@@ -90,7 +90,7 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "edx.bi.app.course.unit_detail"
     ),
     VIEW_CERTIFICATE(
-        "Course:View Certificate",
+        "Course:View Certificate Clicked",
         "edx.bi.app.course.view_certificate.clicked"
     ),
     RESUME_COURSE_CLICKED(
@@ -166,8 +166,8 @@ enum class CourseAnalyticKey(val key: String) {
     CONVERSION("conversion"),
     OPEN_IN_BROWSER("open_in_browser_url"),
     COMPONENT("component"),
-    VIDEO_PLAYER("videoplayer"),
-    ENROLLMENT_MODE("enrollment_mode"),
+    VIDEO_PLAYER("video_player"),
+    ENROLLMENT_MODE("mode"),
     PACING("pacing"),
     SCREEN_NAME("screen_name"),
     BANNER_TYPE("banner_type"),
@@ -196,8 +196,8 @@ enum class CourseAnalyticKey(val key: String) {
 
 enum class CalendarSyncDialog(
     val dialog: String,
-    val positiveAction: String,
-    val negativeAction: String,
+    private val positiveAction: String,
+    private val negativeAction: String,
 ) {
     PERMISSION("permission", "allow", "donot_allow"),
     ADD("add", "ok", "cancel"),
@@ -213,7 +213,7 @@ enum class CalendarSyncDialog(
     }
 }
 
-enum class CalendarSyncSnackbar(val snackbar: String) {
+enum class CalendarSyncSnackbar(private val snackbar: String) {
     ADD("add"),
     REMOVE("remove"),
     UPDATE("update");

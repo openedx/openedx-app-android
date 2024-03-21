@@ -17,9 +17,9 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.LogistrationAnalyticKey
-import org.openedx.auth.presentation.LogistrationAnalyticsEvent
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
@@ -80,7 +80,7 @@ class SignInViewModel(
     }
 
     fun login(username: String, password: String) {
-        logEvent(LogistrationAnalyticsEvent.USER_SIGN_IN_CLICKED)
+        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
         if (!validator.isEmailOrUserNameValid(username)) {
             _uiMessage.value =
                 UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_email_username))
@@ -99,10 +99,10 @@ class SignInViewModel(
                 _uiState.update { it.copy(loginSuccess = true) }
                 setUserId()
                 logEvent(
-                    LogistrationAnalyticsEvent.SIGN_IN_SUCCESS,
+                    AuthAnalyticsEvent.SIGN_IN_SUCCESS,
                     buildMap {
                         put(
-                            LogistrationAnalyticKey.METHOD.key,
+                            AuthAnalyticsKey.METHOD.key,
                             AuthType.PASSWORD.methodName.lowercase()
                         )
                     }
@@ -146,12 +146,12 @@ class SignInViewModel(
 
     fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, null, null)
-        logEvent(LogistrationAnalyticsEvent.REGISTER_CLICKED)
+        logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
     }
 
     fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {
         router.navigateToRestorePassword(parentFragmentManager)
-        logEvent(LogistrationAnalyticsEvent.FORGOT_PASSWORD_CLICKED)
+        logEvent(AuthAnalyticsEvent.FORGOT_PASSWORD_CLICKED)
     }
 
     override fun onCleared() {
@@ -229,14 +229,15 @@ class SignInViewModel(
     }
 
     private fun logEvent(
-        event: LogistrationAnalyticsEvent,
+        event: AuthAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(LogistrationAnalyticKey.NAME.key, event.biValue)
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
-            })
+            }
+        )
     }
 }

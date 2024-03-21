@@ -78,7 +78,8 @@ enum class ProfileAnalyticKey(val key: String) {
     ACTION("action"),
     FULL_PROFILE("full_profile"),
     LIMITED_PROFILE("limited_profile"),
-    ON("on"),
-    OFF("off"),
     SUCCESS("success"),
+    FORCE("force"),
+    TRUE("true"),
+    FALSE("false"),
 }

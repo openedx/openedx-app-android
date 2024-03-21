@@ -15,7 +15,7 @@ class VideoViewModel(
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
     private val preferencesManager: CorePreferences,
-    private val courseAnalytics: CourseAnalytics,
+    courseAnalytics: CourseAnalytics,
 ) : BaseVideoViewModel(courseId, courseAnalytics) {
 
     var videoUrl = ""

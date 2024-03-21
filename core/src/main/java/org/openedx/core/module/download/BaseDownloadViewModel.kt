@@ -111,6 +111,7 @@ abstract class BaseDownloadViewModel(
     open fun saveDownloadModels(folder: String, id: String) {
         viewModelScope.launch {
             val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
+            logSubsectionDownloadEvent(id, saveBlocksIds.size)
             saveDownloadModels(folder, saveBlocksIds)
         }
     }
@@ -199,9 +200,9 @@ abstract class BaseDownloadViewModel(
     fun getDownloadableChildren(id: String) = downloadableChildrenMap[id]
 
     open fun removeDownloadModels(blockId: String) {
-        logSubsectionDeleteEvent(blockId)
         viewModelScope.launch {
             val downloadableChildren = downloadableChildrenMap[blockId] ?: listOf()
+            logSubsectionDeleteEvent(blockId, downloadableChildren.size)
             workerController.removeModels(downloadableChildren)
         }
     }
@@ -245,24 +246,29 @@ abstract class BaseDownloadViewModel(
         logEvent(
             CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
             buildMap {
-                put(CoreAnalyticsKey.ACTION.key, toggle.toString())
+                put(
+                    CoreAnalyticsKey.ACTION.key,
+                    if (toggle) CoreAnalyticsKey.TRUE.key else CoreAnalyticsKey.FALSE.key
+                )
             }
         )
     }
 
-    fun logSubsectionDownloadEvent(subsectionId: String) {
+    private fun logSubsectionDownloadEvent(subsectionId: String, numberOfVideos: Int) {
         logEvent(
             CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION,
             buildMap {
                 put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+                put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
             })
     }
 
-    private fun logSubsectionDeleteEvent(subsectionId: String) {
+    private fun logSubsectionDeleteEvent(subsectionId: String, numberOfVideos: Int) {
         logEvent(
             CoreAnalyticsEvent.VIDEO_DELETE_SUBSECTION,
             buildMap {
                 put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+                put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
             })
     }
 
@@ -271,6 +277,7 @@ abstract class BaseDownloadViewModel(
             event.eventName,
             buildMap {
                 put(CoreAnalyticsKey.NAME.key, event.biValue)
+                put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.VIDEOS.key)
                 put(CoreAnalyticsKey.COURSE_ID.key, courseId)
                 putAll(param)
             }

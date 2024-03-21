@@ -17,9 +17,9 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.LogistrationAnalyticKey
-import org.openedx.auth.presentation.LogistrationAnalyticsEvent
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.BaseViewModel
@@ -133,7 +133,7 @@ class SignUpViewModel(
     }
 
     fun register() {
-        logEvent(LogistrationAnalyticsEvent.CREATE_ACCOUNT_CLICKED)
+        logEvent(AuthAnalyticsEvent.CREATE_ACCOUNT_CLICKED)
         val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
                 mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
         val resultMap = mapFields.toMutableMap()
@@ -159,11 +159,12 @@ class SignUpViewModel(
                     }
                     interactor.register(resultMap.toMap())
                     logEvent(
-                        LogistrationAnalyticsEvent.REGISTER_SUCCESS,
-                        buildMap {
+                        event = AuthAnalyticsEvent.REGISTER_SUCCESS,
+                        params = buildMap {
                             put(
-                                LogistrationAnalyticKey.METHOD.key,
-                                socialAuth?.authType?.methodName?.lowercase()
+                                AuthAnalyticsKey.METHOD.key,
+                                (socialAuth?.authType?.methodName
+                                    ?: AuthType.PASSWORD.methodName).lowercase()
                             )
                         }
                     )
@@ -239,10 +240,10 @@ class SignUpViewModel(
         }.onSuccess {
             setUserId()
             logEvent(
-                LogistrationAnalyticsEvent.SIGN_IN_SUCCESS,
+                AuthAnalyticsEvent.SIGN_IN_SUCCESS,
                 buildMap {
                     put(
-                        LogistrationAnalyticKey.METHOD.key,
+                        AuthAnalyticsKey.METHOD.key,
                         socialAuth.authType.methodName.lowercase()
                     )
                 }
@@ -301,14 +302,15 @@ class SignUpViewModel(
     }
 
     private fun logEvent(
-        event: LogistrationAnalyticsEvent,
+        event: AuthAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
-            event.eventName,
-            buildMap {
-                put(LogistrationAnalyticKey.NAME.key, event.biValue)
+            event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
-            })
+            }
+        )
     }
 }

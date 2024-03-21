@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.unit.video
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -28,16 +29,17 @@ import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalytics
 import java.util.concurrent.Executors
 
+@SuppressLint("StaticFieldLeak")
 class EncodedVideoUnitViewModel(
     courseId: String,
     val blockId: String,
     private val context: Context,
-    private val courseRepository: CourseRepository,
-    private val notifier: CourseNotifier,
-    private val networkConnection: NetworkConnection,
-    private val transcriptManager: TranscriptManager,
     private val preferencesManager: CorePreferences,
-    private val courseAnalytics: CourseAnalytics,
+    courseRepository: CourseRepository,
+    notifier: CourseNotifier,
+    networkConnection: NetworkConnection,
+    transcriptManager: TranscriptManager,
+    courseAnalytics: CourseAnalytics,
 ) : VideoUnitViewModel(
     courseId,
     courseRepository,
@@ -53,6 +55,8 @@ class EncodedVideoUnitViewModel(
 
     var exoPlayer: ExoPlayer? = null
         private set
+
+    @SuppressLint("UnsafeOptInUsageError")
     var castPlayer: CastPlayer? = null
         private set
 

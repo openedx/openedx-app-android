@@ -12,8 +12,8 @@ open class BaseVideoViewModel(
 
     fun logVideoSpeedEvent(videoUrl: String, speed: Float, currentVideoTime: Long, medium: String) {
         logVideoEvent(
-            CourseAnalyticsEvent.VIDEO_CHANGE_SPEED,
-            buildMap {
+            event = CourseAnalyticsEvent.VIDEO_CHANGE_SPEED,
+            params = buildMap {
                 put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
                 put(CourseAnalyticKey.SPEED.key, speed)
                 put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
@@ -29,8 +29,8 @@ open class BaseVideoViewModel(
         medium: String,
     ) {
         logVideoEvent(
-            CourseAnalyticsEvent.VIDEO_SEEKED,
-            buildMap {
+            event = CourseAnalyticsEvent.VIDEO_SEEKED,
+            params = buildMap {
                 put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
                 put(CourseAnalyticKey.SKIP_INTERVAL.key, duration)
                 put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
@@ -46,8 +46,8 @@ open class BaseVideoViewModel(
         medium: String,
     ) {
         logVideoEvent(
-            if (isLoaded) CourseAnalyticsEvent.VIDEO_LOADED else CourseAnalyticsEvent.VIDEO_COMPLETED,
-            buildMap {
+            event = if (isLoaded) CourseAnalyticsEvent.VIDEO_LOADED else CourseAnalyticsEvent.VIDEO_COMPLETED,
+            params = buildMap {
                 put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
                 put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
                 put(CourseAnalyticKey.PLAY_MEDIUM.key, medium)
@@ -62,8 +62,8 @@ open class BaseVideoViewModel(
         medium: String,
     ) {
         logVideoEvent(
-            if (isPlaying) CourseAnalyticsEvent.VIDEO_PLAYED else CourseAnalyticsEvent.VIDEO_PAUSED,
-            buildMap {
+            event = if (isPlaying) CourseAnalyticsEvent.VIDEO_PLAYED else CourseAnalyticsEvent.VIDEO_PAUSED,
+            params = buildMap {
                 put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
                 put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
                 put(CourseAnalyticKey.PLAY_MEDIUM.key, medium)
@@ -73,19 +73,20 @@ open class BaseVideoViewModel(
 
     private fun logVideoEvent(event: CourseAnalyticsEvent, params: Map<String, Any?>) {
         courseAnalytics.logEvent(
-            event.eventName,
-            buildMap {
+            event = event.eventName,
+            params = buildMap {
                 put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticKey.COMPONENT.key, CourseAnalyticKey.VIDEO_PLAYER.key)
                 putAll(params)
-            })
+            }
+        )
     }
 
     fun logCastConnection(event: CourseAnalyticsEvent) {
         courseAnalytics.logEvent(
             event = event.eventName,
-            buildMap {
+            params = buildMap {
                 put(CourseAnalyticKey.NAME.key, event.biValue)
                 put(CourseAnalyticKey.PLAY_MEDIUM.key, CourseAnalyticKey.GOOGLE_CAST.key)
             }

@@ -37,19 +37,22 @@ import org.openedx.core.R as CoreR
 fun CalendarSyncDialog(
     syncDialogType: CalendarSyncDialogType,
     calendarTitle: String,
-    syncDialogAction: (CalendarSyncDialogType) -> Unit,
+    syncDialogPosAction: (CalendarSyncDialogType) -> Unit,
+    syncDialogNegAction: (CalendarSyncDialogType) -> Unit,
     dismissSyncDialog: (CalendarSyncDialogType) -> Unit,
 ) {
     when (syncDialogType) {
         CalendarSyncDialogType.SYNC_DIALOG,
-        CalendarSyncDialogType.UN_SYNC_DIALOG -> {
+        CalendarSyncDialogType.UN_SYNC_DIALOG,
+        -> {
             CalendarAlertDialog(
                 dialogProperties = DialogProperties(
                     title = stringResource(syncDialogType.titleResId),
                     message = stringResource(syncDialogType.messageResId, calendarTitle),
                     positiveButton = stringResource(syncDialogType.positiveButtonResId),
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
-                    positiveAction = { syncDialogAction(syncDialogType) }
+                    positiveAction = { syncDialogPosAction(syncDialogType) },
+                    negativeAction = { syncDialogNegAction(syncDialogType) },
                 ),
                 onDismiss = { dismissSyncDialog(syncDialogType) },
             )
@@ -69,7 +72,8 @@ fun CalendarSyncDialog(
                     ),
                     positiveButton = stringResource(syncDialogType.positiveButtonResId),
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
-                    positiveAction = { syncDialogAction(syncDialogType) }
+                    positiveAction = { syncDialogPosAction(syncDialogType) },
+                    negativeAction = { syncDialogNegAction(syncDialogType) },
                 ),
                 onDismiss = { dismissSyncDialog(syncDialogType) }
             )
@@ -82,7 +86,8 @@ fun CalendarSyncDialog(
                     message = stringResource(syncDialogType.messageResId, calendarTitle),
                     positiveButton = stringResource(syncDialogType.positiveButtonResId),
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
-                    positiveAction = { syncDialogAction(syncDialogType) },
+                    positiveAction = { syncDialogPosAction(syncDialogType) },
+                    negativeAction = { syncDialogNegAction(syncDialogType) },
                 ),
                 onDismiss = { dismissSyncDialog(syncDialogType) }
             )
@@ -95,8 +100,8 @@ fun CalendarSyncDialog(
                     message = stringResource(syncDialogType.messageResId),
                     positiveButton = stringResource(syncDialogType.positiveButtonResId),
                     negativeButton = stringResource(syncDialogType.negativeButtonResId),
-                    positiveAction = { syncDialogAction(syncDialogType) },
-                    negativeAction = { syncDialogAction(CalendarSyncDialogType.UN_SYNC_DIALOG) }
+                    positiveAction = { syncDialogPosAction(syncDialogType) },
+                    negativeAction = { syncDialogNegAction(syncDialogType) },
                 ),
                 onDismiss = { dismissSyncDialog(syncDialogType) }
             )
@@ -211,13 +216,14 @@ private fun SyncDialog() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 private fun CalendarSyncDialogsPreview(
-    @PreviewParameter(CalendarSyncDialogTypeProvider::class) dialogType: CalendarSyncDialogType
+    @PreviewParameter(CalendarSyncDialogTypeProvider::class) dialogType: CalendarSyncDialogType,
 ) {
     OpenEdXTheme {
         CalendarSyncDialog(
             syncDialogType = dialogType,
             calendarTitle = "Hello to OpenEdx",
-            syncDialogAction = {},
+            syncDialogPosAction = {},
+            syncDialogNegAction = {},
             dismissSyncDialog = {},
         )
     }

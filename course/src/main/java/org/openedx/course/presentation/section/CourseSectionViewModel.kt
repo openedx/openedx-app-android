@@ -34,7 +34,7 @@ class CourseSectionViewModel(
     private val preferencesManager: CorePreferences,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
-    private val coreAnalytics: CoreAnalytics,
+    coreAnalytics: CoreAnalytics,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
 ) : BaseDownloadViewModel(
@@ -163,7 +163,8 @@ class CourseSectionViewModel(
                     put(CourseAnalyticKey.COURSE_ID.key, courseId)
                     put(CourseAnalyticKey.BLOCK_ID.key, blockId)
                     put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
-                })
+                }
+            )
         }
     }
 }

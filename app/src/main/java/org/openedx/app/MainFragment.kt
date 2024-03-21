@@ -25,7 +25,6 @@ import org.openedx.profile.presentation.profile.ProfileFragment
 class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val binding by viewBinding(FragmentMainBinding::bind)
-    private val analytics by inject<AppAnalytics>()
     private val viewModel by viewModel<MainViewModel>()
     private val router by inject<DiscoveryRouter>()
     private val config by inject<Config>()
@@ -70,6 +69,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
             true
         }
+        // Trigger Discovery tab click event for the first time
+        viewModel.logDiscoveryTabClickedEvent()
 
         viewModel.isBottomBarEnabled.observe(viewLifecycleOwner) { isBottomBarEnabled ->
             enableBottomBar(isBottomBarEnabled)

@@ -5,7 +5,7 @@ interface AuthAnalytics {
     fun logEvent(event: String, params: Map<String, Any?>)
 }
 
-enum class LogistrationAnalyticsEvent(val eventName: String, val biValue: String) {
+enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
     DISCOVERY_COURSES_SEARCH(
         "Logistration:Courses Search",
         "edx.bi.app.logistration.courses_search"
@@ -52,7 +52,7 @@ enum class LogistrationAnalyticsEvent(val eventName: String, val biValue: String
     ),
 }
 
-enum class LogistrationAnalyticKey(val key: String) {
+enum class AuthAnalyticsKey(val key: String) {
     NAME("name"),
     SEARCH_QUERY("search_query"),
     SUCCESS("success"),

@@ -39,6 +39,7 @@ enum class CoreAnalyticsKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
     DISCOVERY("discovery"),
+    VIDEOS("videos"),
     PROFILE("profile"),
     URL("url"),
     ACTION("action"),
@@ -49,6 +50,9 @@ enum class CoreAnalyticsKey(val key: String) {
     OLD_VALUE("old_value"),
     COURSE_ID("course_id"),
     BLOCK_ID("block_id"),
+    TRUE("true"),
+    FALSE("false"),
+    NUMBER_OF_VIDEOS("number_of_videos"),
 }
 
 enum class CoreAnalyticsScreen(val screenName: String) {

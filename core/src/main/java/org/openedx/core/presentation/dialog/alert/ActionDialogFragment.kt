@@ -46,8 +46,8 @@ class ActionDialogFragment : DialogFragment() {
 
     private val config by inject<Config>()
     private val analytics: CoreAnalytics by inject()
-    private val url: String = requireArguments().getString(ARG_URL, "")
-    private val screen: String = requireArguments().getString(ARG_SCREEN, "")
+    private lateinit var url: String
+    private lateinit var screen: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,6 +59,8 @@ class ActionDialogFragment : DialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                url = requireArguments().getString(ARG_URL, "")
+                screen = requireArguments().getString(ARG_SCREEN, "")
                 ActionDialog(
                     title = requireArguments().getString(ARG_TITLE, ""),
                     message = requireArguments().getString(ARG_MESSAGE, ""),

@@ -143,7 +143,12 @@ class ProfileViewModel(
                 withContext(dispatcher) {
                     interactor.logout()
                 }
-                logProfileEvent(ProfileAnalyticsEvent.LOGGED_OUT)
+                logProfileEvent(
+                    event = ProfileAnalyticsEvent.LOGGED_OUT,
+                    params = buildMap {
+                        put(ProfileAnalyticKey.FORCE.key, ProfileAnalyticKey.FALSE.key)
+                    }
+                )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.value =
@@ -242,12 +247,17 @@ class ProfileViewModel(
         )
     }
 
-    private fun logProfileEvent(event: ProfileAnalyticsEvent) {
+    private fun logProfileEvent(
+        event: ProfileAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
                 put(ProfileAnalyticKey.NAME.key, event.biValue)
                 put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
-            })
+                putAll(params)
+            }
+        )
     }
 }

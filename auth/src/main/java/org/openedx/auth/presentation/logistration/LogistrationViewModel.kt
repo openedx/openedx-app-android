@@ -2,9 +2,9 @@ package org.openedx.auth.presentation.logistration
 
 import androidx.fragment.app.FragmentManager
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.auth.presentation.LogistrationAnalyticKey
-import org.openedx.auth.presentation.LogistrationAnalyticsEvent
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.extension.takeIfNotEmpty
@@ -20,12 +20,12 @@ class LogistrationViewModel(
 
     fun navigateToSignIn(parentFragmentManager: FragmentManager) {
         router.navigateToSignIn(parentFragmentManager, courseId, null)
-        logEvent(LogistrationAnalyticsEvent.SIGN_IN_CLICKED)
+        logEvent(AuthAnalyticsEvent.SIGN_IN_CLICKED)
     }
 
     fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, courseId, null)
-        logEvent(LogistrationAnalyticsEvent.REGISTER_CLICKED)
+        logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
     }
 
     fun navigateToDiscovery(parentFragmentManager: FragmentManager, querySearch: String) {
@@ -42,22 +42,24 @@ class LogistrationViewModel(
         }
         querySearch.takeIfNotEmpty()?.let {
             logEvent(
-                LogistrationAnalyticsEvent.DISCOVERY_COURSES_SEARCH,
-                buildMap {
-                    put(LogistrationAnalyticKey.SEARCH_QUERY.key, querySearch)
-                })
-        } ?: logEvent(LogistrationAnalyticsEvent.EXPLORE_ALL_COURSES)
+                event = AuthAnalyticsEvent.DISCOVERY_COURSES_SEARCH,
+                params = buildMap {
+                    put(AuthAnalyticsKey.SEARCH_QUERY.key, querySearch)
+                }
+            )
+        } ?: logEvent(event = AuthAnalyticsEvent.EXPLORE_ALL_COURSES)
     }
 
     private fun logEvent(
-        event: LogistrationAnalyticsEvent,
+        event: AuthAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(LogistrationAnalyticKey.NAME.key, event.biValue)
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
-            })
+            }
+        )
     }
 }

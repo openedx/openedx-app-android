@@ -56,9 +56,11 @@ class EditProfileViewModel(
                 buildMap {
                     put(
                         ProfileAnalyticKey.ACTION.key,
-                        if (isLimitedProfile) ProfileAnalyticKey.LIMITED_PROFILE else ProfileAnalyticKey.FULL_PROFILE
+                        if (isLimitedProfile) ProfileAnalyticKey.LIMITED_PROFILE.key
+                        else ProfileAnalyticKey.FULL_PROFILE.key
                     )
-                })
+                }
+            )
         }
 
     private val _showLeaveDialog = MutableLiveData<Boolean>()
@@ -155,6 +157,7 @@ class EditProfileViewModel(
                 put(ProfileAnalyticKey.NAME.key, event.biValue)
                 put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
                 putAll(params)
-            })
+            }
+        )
     }
 }

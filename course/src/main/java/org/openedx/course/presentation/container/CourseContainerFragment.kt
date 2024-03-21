@@ -143,7 +143,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 HandoutsFragment.newInstance(viewModel.courseId)
             )
         }
-        binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
+        binding.viewPager.offscreenPageLimit = 1
         binding.viewPager.adapter = adapter
 
         if (viewModel.isCourseTopTabBarEnabled) {
@@ -165,6 +165,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 true
             }
             binding.bottomNavView.isVisible = true
+            viewModel.courseContainerTabClickedEvent(Tabs.COURSE)
         }
     }
 
@@ -191,7 +192,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     CalendarSyncDialog(
                         syncDialogType = syncState.dialogType,
                         calendarTitle = syncState.calendarTitle,
-                        syncDialogAction = { dialog ->
+                        syncDialogPosAction = { dialog ->
                             when (dialog) {
                                 CalendarSyncDialogType.SYNC_DIALOG -> {
                                     viewModel.logCalendarAddDates(true)
@@ -224,7 +225,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 else -> {}
                             }
                         },
-                        dismissSyncDialog = { dialog ->
+                        syncDialogNegAction = { dialog ->
                             when (dialog) {
                                 CalendarSyncDialogType.SYNC_DIALOG ->
                                     viewModel.logCalendarAddDates(false)
@@ -232,8 +233,10 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 CalendarSyncDialogType.UN_SYNC_DIALOG ->
                                     viewModel.logCalendarRemoveDates(false)
 
-                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG ->
+                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
                                     viewModel.logCalendarSyncUpdate(false)
+                                    viewModel.deleteCourseCalendar()
+                                }
 
                                 CalendarSyncDialogType.EVENTS_DIALOG ->
                                     viewModel.logCalendarSyncedConfirmation(false)
@@ -245,6 +248,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 }
                             }
 
+                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
+                        },
+                        dismissSyncDialog = {
                             viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
                         }
                     )

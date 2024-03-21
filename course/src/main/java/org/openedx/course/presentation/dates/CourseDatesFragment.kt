@@ -79,6 +79,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -204,7 +205,9 @@ class CourseDatesFragment : Fragment() {
                         }
                     },
                     onPLSBannerViewed = {
-                        viewModel.logPlsBannerViewed()
+                        if (isVisible()) {
+                            viewModel.logPlsBannerViewed()
+                        }
                     },
                     onSyncDates = {
                         viewModel.logPlsShiftButtonClicked()
@@ -217,7 +220,6 @@ class CourseDatesFragment : Fragment() {
                         }
                     },
                     onCalendarSyncSwitch = { isChecked ->
-                        viewModel.logCalendarSyncToggle(isChecked)
                         viewModel.handleCalendarSyncState(isChecked)
                     },
                 )
@@ -688,7 +690,7 @@ private fun CourseDateItem(
     dateBlock: CourseDateBlock,
     canShowDate: Boolean,
     isMiddleChild: Boolean,
-    onItemClick: (CourseDateBlock) -> Unit
+    onItemClick: (CourseDateBlock) -> Unit,
 ) {
     Column(
         modifier = Modifier

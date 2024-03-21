@@ -7,6 +7,7 @@ import org.openedx.app.AppViewModel
 import org.openedx.app.MainViewModel
 import org.openedx.auth.data.repository.AuthRepository
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.logistration.LogistrationViewModel
 import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
@@ -66,6 +67,16 @@ val screenModule = module {
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
     factory { Validator() }
+
+    viewModel { (courseId: String) ->
+        LogistrationViewModel(
+            courseId,
+            get(),
+            get(),
+            get(),
+        )
+    }
+
     viewModel { (courseId: String?, infoType: String?) ->
         SignInViewModel(
             get(),

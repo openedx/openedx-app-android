@@ -17,11 +17,11 @@ enum class AppAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
     MY_COURSES(
         "MainDashboard:My Courses",
-        "edx.bi.app.main_dashboard.my_courses"
+        "edx.bi.app.main_dashboard.my_course"
     ),
     MY_PROGRAMS(
         "MainDashboard:My Programs",
-        "edx.bi.app.main_dashboard.my_programs"
+        "edx.bi.app.main_dashboard.my_program"
     ),
     PROFILE(
         "MainDashboard:Profile",
