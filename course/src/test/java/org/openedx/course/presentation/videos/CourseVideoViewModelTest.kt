@@ -320,6 +320,7 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
@@ -353,6 +354,7 @@ class CourseVideoViewModelTest {
         coEvery { downloadDao.readAllData() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()

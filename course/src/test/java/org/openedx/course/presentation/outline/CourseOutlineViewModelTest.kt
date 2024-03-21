@@ -477,6 +477,7 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         val viewModel = CourseOutlineViewModel(
             "",
