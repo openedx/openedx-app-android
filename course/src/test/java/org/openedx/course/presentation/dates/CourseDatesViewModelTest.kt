@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.config.Config
 import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
@@ -54,6 +55,7 @@ class CourseDatesViewModelTest {
     private val calendarManager = mockk<CalendarManager>()
     private val networkConnection = mockk<NetworkConnection>()
     private val corePreferences = mockk<CorePreferences>()
+    private val config = mockk<Config>()
 
     private val openEdx = "OpenEdx"
     private val calendarTitle = "OpenEdx - Abc"
@@ -159,7 +161,8 @@ class CourseDatesViewModelTest {
             calendarManager,
             networkConnection,
             resourceManager,
-            corePreferences
+            corePreferences,
+            config
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
@@ -185,7 +188,8 @@ class CourseDatesViewModelTest {
             calendarManager,
             networkConnection,
             resourceManager,
-            corePreferences
+            corePreferences,
+            config
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws Exception()
@@ -211,7 +215,8 @@ class CourseDatesViewModelTest {
             calendarManager,
             networkConnection,
             resourceManager,
-            corePreferences
+            corePreferences,
+            config
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
@@ -236,7 +241,8 @@ class CourseDatesViewModelTest {
             calendarManager,
             networkConnection,
             resourceManager,
-            corePreferences
+            corePreferences,
+            config
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
