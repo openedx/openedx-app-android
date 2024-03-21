@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -241,6 +242,7 @@ internal fun DiscoveryScreen(
                             horizontal = 16.dp,
                             vertical = 32.dp,
                         )
+                        .navigationBarsPadding()
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
