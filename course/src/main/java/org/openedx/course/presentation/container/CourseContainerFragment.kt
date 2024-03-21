@@ -144,7 +144,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 HandoutsFragment.newInstance(viewModel.courseId)
             )
         }
-        binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
+        binding.viewPager.offscreenPageLimit = 1
         binding.viewPager.adapter = adapter
 
         if (viewModel.isCourseTopTabBarEnabled) {
@@ -176,6 +176,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 true
             }
             binding.bottomNavView.isVisible = true
+            viewModel.courseContainerTabClickedEvent(Tabs.COURSE)
         }
         viewModel.courseContainerTabClickedEvent(Tabs.entries[binding.viewPager.currentItem])
     }
