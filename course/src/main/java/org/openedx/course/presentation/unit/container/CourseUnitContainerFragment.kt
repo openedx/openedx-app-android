@@ -34,7 +34,6 @@ import org.openedx.core.BlockType
 import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
@@ -426,10 +425,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 hasPrevBlock = hasPrev
                 hasNextBlock = hasNext
             }
-            val windowSize = rememberWindowSize()
 
             NavigationUnitsButtons(
-                windowSize = windowSize,
                 hasPrevBlock = hasPrevBlock,
                 nextButtonText = nextButtonText,
                 hasNextBlock = hasNextBlock,

@@ -24,8 +24,11 @@ class HeadersInterceptor(
                     }
 
                     addHeader("Accept", "application/json")
+
+                    val httpAgent = System.getProperty("http.agent") ?: ""
                     addHeader(
-                        "User-Agent", System.getProperty("http.agent") + " " +
+                        "User-Agent",
+                        httpAgent + " " +
                                 context.getString(org.openedx.core.R.string.app_name) + "/" +
                                 BuildConfig.APPLICATION_ID + "/" +
                                 BuildConfig.VERSION_NAME

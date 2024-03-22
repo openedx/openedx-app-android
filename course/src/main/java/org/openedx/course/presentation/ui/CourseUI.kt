@@ -95,8 +95,6 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberWindowSize
@@ -438,7 +436,6 @@ fun VideoTitle(
 
 @Composable
 fun NavigationUnitsButtons(
-    windowSize: WindowSize,
     nextButtonText: String,
     hasPrevBlock: Boolean,
     hasNextBlock: Boolean,
@@ -1163,7 +1160,6 @@ fun CourseDatesBannerTablet(
 private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = true,
             isVerticalNavigation = true,
@@ -1178,7 +1174,6 @@ private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
 private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = false,
             isVerticalNavigation = true,
@@ -1193,7 +1188,6 @@ private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
 private fun NavigationUnitsButtonsWithFinishPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = false,
             isVerticalNavigation = true,
@@ -1208,7 +1202,6 @@ private fun NavigationUnitsButtonsWithFinishPreview() {
 private fun NavigationUnitsButtonsWithNextPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = true,
             isVerticalNavigation = true,

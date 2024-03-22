@@ -8,12 +8,27 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -94,7 +109,10 @@ fun ThreadMainItem(
                     .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                     .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                     .build(),
-                contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, thread.author),
+                contentDescription = stringResource(
+                    id = org.openedx.core.R.string.core_accessibility_user_profile_image,
+                    thread.author
+                ),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(MaterialTheme.appShapes.material.medium)
@@ -245,7 +263,10 @@ fun CommentItem(
                         .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .build(),
-                    contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, comment.author),
+                    contentDescription = stringResource(
+                        id = org.openedx.core.R.string.core_accessibility_user_profile_image,
+                        comment.author
+                    ),
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
@@ -395,7 +416,10 @@ fun CommentMainItem(
                         .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
                         .build(),
-                    contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_user_profile_image, comment.author),
+                    contentDescription = stringResource(
+                        id = org.openedx.core.R.string.core_accessibility_user_profile_image,
+                        comment.author
+                    ),
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
@@ -478,7 +502,7 @@ fun ThreadItem(
 ) {
     val icon = when (thread.type) {
         DiscussionType.DISCUSSION -> painterResource(id = R.drawable.discussion_ic_discussion)
-        DiscussionType.QUESTION -> rememberVectorPainter(image = Icons.Outlined.HelpOutline)
+        DiscussionType.QUESTION -> rememberVectorPainter(image = Icons.AutoMirrored.Outlined.HelpOutline)
     }
     val textType = when (thread.type) {
         DiscussionType.DISCUSSION -> stringResource(id = R.string.discussion_discussion)
@@ -504,7 +528,8 @@ fun ThreadItem(
                 text = textType,
                 painter = icon,
                 color = MaterialTheme.appColors.textPrimaryVariant,
-                textStyle = MaterialTheme.appTypography.labelSmall)
+                textStyle = MaterialTheme.appTypography.labelSmall
+            )
             if (thread.unreadCommentCount > 0 && !thread.read) {
                 Row(
                     modifier = Modifier,
@@ -562,7 +587,8 @@ fun ThreadItem(
             ),
             painter = painterResource(id = R.drawable.discussion_ic_responses),
             color = MaterialTheme.appColors.textAccent,
-            textStyle = MaterialTheme.appTypography.labelLarge)
+            textStyle = MaterialTheme.appTypography.labelLarge
+        )
     }
 
 }

@@ -31,10 +31,10 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -399,7 +399,7 @@ private fun LogoutButton(onClick: () -> Unit) {
                 color = MaterialTheme.appColors.error
             )
             Icon(
-                imageVector = Icons.Filled.ExitToApp,
+                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                 contentDescription = null,
                 tint = MaterialTheme.appColors.error
             )
@@ -510,9 +510,9 @@ private fun ProfileInfoItem(
     onClick: () -> Unit
 ) {
     val icon = if (external) {
-        Icons.Filled.OpenInNew
+        Icons.AutoMirrored.Filled.OpenInNew
     } else {
-        Icons.Filled.ArrowForwardIos
+        Icons.AutoMirrored.Filled.ArrowForwardIos
     }
     Row(
         Modifier
