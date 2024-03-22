@@ -94,7 +94,7 @@ fun ProfileInfoSection(account: Account) {
                 modifier = Modifier.testTag("txt_profile_info_label"),
                 text = stringResource(id = org.openedx.profile.R.string.profile_prof_info),
                 style = MaterialTheme.appTypography.labelLarge,
-                color = MaterialTheme.appColors.textSecondary
+                color = MaterialTheme.appColors.textFieldText
             )
             Spacer(modifier = Modifier.height(14.dp))
             Card(

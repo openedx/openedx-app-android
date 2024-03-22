@@ -50,6 +50,9 @@ private val DarkColorPalette = AppColors(
 
     warning = dark_warning,
     info = dark_info,
+    onWarning = dark_onWarning,
+    onInfo = dark_onInfo,
+    buttonBorder = dark_button_border,
 
     rateStars = dark_rate_stars,
     inactiveButtonBackground = dark_inactive_button_background,
@@ -112,6 +115,9 @@ private val LightColorPalette = AppColors(
 
     warning = light_warning,
     info = light_info,
+    onWarning = light_onWarning,
+    onInfo = light_onInfo,
+    buttonBorder = light_button_border,
 
     rateStars = light_rate_stars,
     inactiveButtonBackground = light_inactive_button_background,

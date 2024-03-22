@@ -611,7 +611,7 @@ private fun EditProfileScreen(
                             Text(
                                 modifier = Modifier.testTag("txt_edit_profile_type_label"),
                                 text = stringResource(if (uiState.isLimited) R.string.profile_limited_profile else R.string.profile_full_profile),
-                                color = MaterialTheme.appColors.textSecondary,
+                                color = MaterialTheme.appColors.textFieldText,
                                 style = MaterialTheme.appTypography.titleSmall
                             )
                             Spacer(modifier = Modifier.height(32.dp))
@@ -1138,14 +1138,14 @@ private fun LeaveProfile(
                 OpenEdXButton(
                     text = stringResource(id = R.string.profile_leave),
                     onClick = onLeaveClick,
-                    backgroundColor = MaterialTheme.appColors.warning,
+                    backgroundColor = MaterialTheme.appColors.primary,
                     content = {
                         Text(
                             modifier = Modifier
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.textDark,
+                            color = MaterialTheme.appColors.buttonText,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )
@@ -1153,7 +1153,7 @@ private fun LeaveProfile(
                 )
                 Spacer(Modifier.height(24.dp))
                 OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textPrimary,
+                    borderColor = MaterialTheme.appColors.textFieldBorder,
                     textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
@@ -1230,20 +1230,20 @@ private fun LeaveProfileLandscape(
                     ) {
                         OpenEdXButton(
                             text = stringResource(id = R.string.profile_leave),
-                            backgroundColor = MaterialTheme.appColors.warning,
+                            backgroundColor = MaterialTheme.appColors.primary,
                             content = {
                                 AutoSizeText(
                                     modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),
                                     text = stringResource(id = R.string.profile_leave),
                                     style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.textDark
+                                    color = MaterialTheme.appColors.buttonText
                                 )
                             },
                             onClick = onLeaveClick
                         )
                         Spacer(Modifier.height(16.dp))
                         OpenEdXOutlinedButton(
-                            borderColor = MaterialTheme.appColors.textPrimary,
+                            borderColor = MaterialTheme.appColors.textFieldBorder,
                             textColor = MaterialTheme.appColors.textPrimary,
                             text = stringResource(id = R.string.profile_keep_editing),
                             onClick = onDismissRequest,

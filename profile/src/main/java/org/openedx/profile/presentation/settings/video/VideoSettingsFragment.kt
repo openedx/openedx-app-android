@@ -204,7 +204,7 @@ private fun VideoSettingsScreen(
                             Text(
                                 modifier = Modifier.testTag("txt_wifi_only_description"),
                                 text = stringResource(id = R.string.profile_only_download_when_wifi_turned_on),
-                                color = MaterialTheme.appColors.textSecondary,
+                                color = MaterialTheme.appColors.textFieldText,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
                         }
@@ -241,7 +241,7 @@ private fun VideoSettingsScreen(
                             Spacer(Modifier.height(4.dp))
                             Text(
                                 text = stringResource(id = videoSettings.videoStreamingQuality.titleResId),
-                                color = MaterialTheme.appColors.textSecondary,
+                                color = MaterialTheme.appColors.textFieldText,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
                         }
@@ -272,7 +272,7 @@ private fun VideoSettingsScreen(
                             Spacer(Modifier.height(4.dp))
                             Text(
                                 text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
-                                color = MaterialTheme.appColors.textSecondary,
+                                color = MaterialTheme.appColors.textFieldText,
                                 style = MaterialTheme.appTypography.labelMedium
                             )
                         }

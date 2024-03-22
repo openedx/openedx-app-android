@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -143,7 +144,6 @@ private fun LogistrationScreen(
                 LogistrationLogoView()
                 Text(
                     text = stringResource(id = R.string.pre_auth_title),
-                    color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.headlineSmall,
                     modifier = Modifier
                         .testTag("txt_screen_title")
@@ -189,7 +189,8 @@ private fun LogistrationScreen(
                         },
                     text = stringResource(id = R.string.pre_auth_explore_all_courses),
                     color = MaterialTheme.appColors.primary,
-                    style = MaterialTheme.appTypography.labelLarge
+                    style = MaterialTheme.appTypography.labelLarge,
+                    textDecoration = TextDecoration.Underline
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

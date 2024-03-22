@@ -30,6 +30,9 @@ data class AppColors(
     val bottomSheetToggle: Color,
     val warning: Color,
     val info: Color,
+    val onWarning: Color,
+    val onInfo: Color,
+    val buttonBorder: Color,
 
     val rateStars: Color,
     val inactiveButtonBackground: Color,
