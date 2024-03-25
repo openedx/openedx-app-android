@@ -27,6 +27,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
@@ -268,7 +269,7 @@ class CourseOutlineViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 updateCourseData(false)
-                _uiMessage.value = UIMessage.DatesShiftedSnackBar()
+                _uiMessage.value = DatesShiftedSnackBar()
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {

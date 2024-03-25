@@ -22,6 +22,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
@@ -112,7 +113,7 @@ class CourseDatesViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 getCourseDates()
-                _uiMessage.value = UIMessage.DatesShiftedSnackBar()
+                _uiMessage.value = DatesShiftedSnackBar()
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {

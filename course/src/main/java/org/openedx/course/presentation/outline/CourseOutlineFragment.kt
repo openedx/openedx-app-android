@@ -83,6 +83,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.CourseContainerTab
@@ -304,7 +305,7 @@ internal fun CourseOutlineScreen(
         }
 
         val snackState = remember { SnackbarHostState() }
-        if (uiMessage is UIMessage.DatesShiftedSnackBar) {
+        if (uiMessage is DatesShiftedSnackBar) {
             val datesShiftedMessage =
                 stringResource(id = org.openedx.course.R.string.course_dates_shifted_message)
             LaunchedEffect(uiMessage) {
