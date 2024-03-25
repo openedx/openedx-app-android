@@ -177,11 +177,8 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         }
 
         viewModel.isVideoEnded.observe(viewLifecycleOwner) { isVideoEnded ->
-            if (isVideoEnded) {
-                handler.removeCallbacks(videoTimeRunnable)
-                if (appReviewManager.isDialogShowed) {
-                    appReviewManager.tryToOpenRateDialog()
-                }
+            if (isVideoEnded && !appReviewManager.isDialogShowed) {
+                appReviewManager.tryToOpenRateDialog()
             }
         }
     }

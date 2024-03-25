@@ -348,6 +348,9 @@ val screenModule = module {
             infoType,
             get(),
             get(),
+            get(),
+            get(),
+            get(),
         )
     }
 

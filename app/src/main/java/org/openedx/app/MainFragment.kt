@@ -69,8 +69,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
             true
         }
-        // Trigger Discovery tab click event for the first time
-        viewModel.logDiscoveryTabClickedEvent()
+        // Trigger click event for the first tab on initial load
+        binding.bottomNavView.selectedItemId = binding.bottomNavView.selectedItemId
 
         viewModel.isBottomBarEnabled.observe(viewLifecycleOwner) { isBottomBarEnabled ->
             enableBottomBar(isBottomBarEnabled)

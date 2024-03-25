@@ -9,6 +9,10 @@ enum class WhatsNewAnalyticsEvent(val eventName: String, val biValue: String) {
         "WhatsNew:Pop up Viewed",
         "edx.bi.app.whats_new.popup.viewed"
     ),
+    WHATS_NEW_CLOSE(
+        "WhatsNew:Close",
+        "edx.bi.app.whats_new.close"
+    ),
     WHATS_NEW_DONE(
         "WhatsNew:Done",
         "edx.bi.app.whats_new.done"
@@ -20,4 +24,5 @@ enum class WhatsNewAnalyticKey(val key: String) {
     CATEGORY("category"),
     WHATS_NEW("whats_new"),
     TOTAL_SCREENS("total_screens"),
+    CURRENTLY_VIEWED("currently_viewed"),
 }

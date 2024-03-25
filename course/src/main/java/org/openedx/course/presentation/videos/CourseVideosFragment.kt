@@ -112,7 +112,7 @@ class CourseVideosFragment : Fragment() {
                         }
                     },
                     onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
-                        viewModel.logBulkDownloadToggleEvent(isAllBlocksDownloadedOrDownloading)
+                        viewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
                         if (isAllBlocksDownloadedOrDownloading) {
                             viewModel.removeAllDownloadModels()
                         } else {

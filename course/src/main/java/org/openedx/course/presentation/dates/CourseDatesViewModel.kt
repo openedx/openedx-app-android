@@ -162,6 +162,7 @@ class CourseDatesViewModel(
     }
 
     fun handleCalendarSyncState(isChecked: Boolean) {
+        logCalendarSyncToggle(isChecked)
         setCalendarSyncDialogType(
             when {
                 isChecked && calendarManager.hasPermissions() -> CalendarSyncDialogType.SYNC_DIALOG
@@ -220,7 +221,7 @@ class CourseDatesViewModel(
     }
 
     fun logPlsShiftButtonClicked() {
-        logPLSBannerEvent(CourseAnalyticsEvent.PLS_SHIFT_BUTTON_TAPPED)
+        logPLSBannerEvent(CourseAnalyticsEvent.PLS_SHIFT_BUTTON_CLICKED)
     }
 
     fun logPlsShiftDates(isSuccess: Boolean) {
@@ -235,11 +236,11 @@ class CourseDatesViewModel(
             put(CourseAnalyticKey.SUPPORTED.key, isSupported)
         }
 
-        logCalendarSyncEvent(CourseAnalyticsEvent.DATES_COURSE_COMPONENT_TAPPED, params)
+        logDatesEvent(CourseAnalyticsEvent.DATES_COURSE_COMPONENT_CLICKED, params)
     }
 
-    fun logCalendarSyncToggle(isChecked: Boolean) {
-        logCalendarSyncEvent(
+    private fun logCalendarSyncToggle(isChecked: Boolean) {
+        logDatesEvent(
             CourseAnalyticsEvent.DATES_CALENDAR_SYNC_TOGGLE,
             buildMap {
                 put(
@@ -250,7 +251,7 @@ class CourseDatesViewModel(
         )
     }
 
-    private fun logCalendarSyncEvent(
+    private fun logDatesEvent(
         event: CourseAnalyticsEvent,
         param: Map<String, Any> = emptyMap(),
     ) {

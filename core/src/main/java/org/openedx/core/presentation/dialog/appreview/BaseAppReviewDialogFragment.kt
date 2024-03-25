@@ -34,27 +34,27 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
     fun notNowClick(rating: Int = 0) {
         saveVersionName()
         logDialogActionEvent(AppReviewKey.NOT_NOW.key, rating)
-        dismiss()
+        super.dismiss()
     }
 
     fun onSubmitRatingClick(rating: Int) {
         logDialogActionEvent(AppReviewKey.SUBMIT.key, rating)
-        dismiss()
+        super.dismiss()
     }
 
     fun onShareFeedbackClick() {
         logDialogActionEvent(AppReviewKey.SHARE_FEEDBACK.key)
-        dismiss()
+        super.dismiss()
     }
 
     fun onRateAppClick() {
         logDialogActionEvent(AppReviewKey.RATE_APP.key)
-        dismiss()
+        super.dismiss()
     }
 
     fun onDismiss() {
         logDialogActionEvent(AppReviewKey.DISMISSED.key)
-        dismiss()
+        super.dismiss()
     }
 
     private fun logDialogActionEvent(action: String, rating: Int = 0) {

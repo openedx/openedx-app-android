@@ -79,7 +79,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -167,6 +166,7 @@ class CourseDatesFragment : Fragment() {
                     onItemClick = { block ->
                         if (block.blockId.isNotEmpty()) {
                             viewModel.getVerticalBlock(block.blockId)?.let { verticalBlock ->
+                                viewModel.logCourseComponentTapped(true, block)
                                 if (viewModel.isCourseExpandableSectionsEnabled) {
                                     router.navigateToCourseContainer(
                                         fm = requireActivity().supportFragmentManager,
@@ -187,19 +187,20 @@ class CourseDatesFragment : Fragment() {
                                             )
                                         }
                                 }
-                                } ?: {    viewModel.logCourseComponentTapped(false, block)
-                                    ActionDialogFragment.newInstance(
-                                        title = getString(coreR.string.core_leaving_the_app),
-                                        message = getString(
-                                            coreR.string.core_leaving_the_app_message,
-                                            getString(coreR.string.platform_name)
-                                        ),
-                                        url = block.link,
-                                        source = CoreAnalyticsScreen.COURSE_DATES.screenName
-                                    ).show(
-                                        requireActivity().supportFragmentManager,
-                                        ActionDialogFragment::class.simpleName
-                                    )
+                            } ?: {
+                                viewModel.logCourseComponentTapped(false, block)
+                                ActionDialogFragment.newInstance(
+                                    title = getString(coreR.string.core_leaving_the_app),
+                                    message = getString(
+                                        coreR.string.core_leaving_the_app_message,
+                                        getString(coreR.string.platform_name)
+                                    ),
+                                    url = block.link,
+                                    source = CoreAnalyticsScreen.COURSE_DATES.screenName
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    ActionDialogFragment::class.simpleName
+                                )
 
                             }
                         }

@@ -78,9 +78,9 @@ class ActionDialogFragment : DialogFragment() {
                         dismiss()
                     }
                 )
+                logDialogEvent(event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT)
             }
         }
-        logDialogEvent(event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT)
     }
 
     private fun logDialogActionEvent(action: String) {

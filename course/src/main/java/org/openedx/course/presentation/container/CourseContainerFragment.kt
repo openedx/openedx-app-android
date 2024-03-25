@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -143,30 +144,40 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 HandoutsFragment.newInstance(viewModel.courseId)
             )
         }
-        binding.viewPager.offscreenPageLimit = 1
+        binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
         binding.viewPager.adapter = adapter
 
         if (viewModel.isCourseTopTabBarEnabled) {
             TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                 tab.text = getString(
-                    Tabs.values().find { it.ordinal == position }?.titleResId
+                    Tabs.entries.find { it.ordinal == position }?.titleResId
                         ?: R.string.course_navigation_course
                 )
             }.attach()
             binding.tabLayout.isVisible = true
+            binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    tab?.let {
+                        viewModel.courseContainerTabClickedEvent(Tabs.entries[it.position])
+                    }
+                }
 
+                override fun onTabUnselected(p0: TabLayout.Tab?) {}
+
+                override fun onTabReselected(p0: TabLayout.Tab?) {}
+            })
         } else {
             binding.viewPager.isUserInputEnabled = false
             binding.bottomNavView.setOnItemSelectedListener { menuItem ->
-                Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                Tabs.entries.find { menuItem.itemId == it.itemId }?.let { tab ->
                     viewModel.courseContainerTabClickedEvent(tab)
                     binding.viewPager.setCurrentItem(tab.ordinal, false)
                 }
                 true
             }
             binding.bottomNavView.isVisible = true
-            viewModel.courseContainerTabClickedEvent(Tabs.COURSE)
         }
+        viewModel.courseContainerTabClickedEvent(Tabs.entries[binding.viewPager.currentItem])
     }
 
     private fun setUpCourseCalendar() {

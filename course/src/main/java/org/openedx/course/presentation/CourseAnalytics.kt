@@ -129,17 +129,17 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "Cast:Disconnected",
         "edx.bi.app.cast.disconnected"
     ),
-    DATES_COURSE_COMPONENT_TAPPED(
-        "Dates:Course Component Tapped",
-        "edx.bi.app.coursedates.component.tapped"
+    DATES_COURSE_COMPONENT_CLICKED(
+        "Dates:Course Component Clicked",
+        "edx.bi.app.dates.component.clicked"
     ),
     PLS_BANNER_VIEWED(
         "PLS:Banner Viewed",
         "edx.bi.app.coursedates.pls_banner.viewed"
     ),
-    PLS_SHIFT_BUTTON_TAPPED(
-        "PLS:Shift Button Tapped",
-        "edx.bi.app.coursedates.pls_banner.shift_button.tapped"
+    PLS_SHIFT_BUTTON_CLICKED(
+        "PLS:Shift Button Clicked",
+        "edx.bi.app.dates.pls_banner.shift_dates.clicked"
     ),
     PLS_SHIFT_DATES(
         "PLS:Shift Dates",
@@ -203,7 +203,7 @@ enum class CalendarSyncDialog(
     ADD("add", "ok", "cancel"),
     REMOVE("remove", "ok", "cancel"),
     UPDATE("update", "update", "remove"),
-    CONFIRMED("confirmed", "done", "view_event");
+    CONFIRMED("confirmed", "view_event", "done");
 
     fun getBuildMap(action: Boolean): Map<String, Any> {
         return buildMap {
