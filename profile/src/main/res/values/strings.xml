@@ -7,7 +7,7 @@
     <string name="profile_bio">Bio: %1$s</string>
     <string name="profile_year_of_birth">Year of birth: %1$s</string>
     <string name="profile_logout_dialog_title">Log out?</string>
-    <string name="profile_logout_dialog_body">Are you sure you want to log out?</string>
+    <string name="profile_logout_dialog_body">Are you sure you want to logout?</string>
     <string name="profile_full_profile">Full profile</string>
     <string name="profile_limited_profile">Limited profile</string>
     <string name="profile_edit_profile">Edit profile</string>
