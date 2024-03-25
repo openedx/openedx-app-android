@@ -91,7 +91,6 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.DatesShiftedSnackBar
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
@@ -111,6 +110,7 @@ import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as coreR
 
@@ -266,8 +266,12 @@ internal fun CourseDatesScreen(
 
         val snackState = remember { SnackbarHostState() }
         if (uiMessage is UIMessage.DatesShiftedSnackBar) {
+            val datesShiftedMessage = stringResource(id = R.string.course_dates_shifted_message)
             LaunchedEffect(uiMessage) {
-                snackState.showSnackbar(message = "Dates Shifted", duration = SnackbarDuration.Long)
+                snackState.showSnackbar(
+                    message = datesShiftedMessage,
+                    duration = SnackbarDuration.Long
+                )
             }
         }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)

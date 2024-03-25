@@ -388,59 +388,6 @@ fun HandleUIMessage(
 }
 
 @Composable
-fun DatesShiftedSnackBar(
-    showAction: Boolean = false,
-    onViewDates: () -> Unit? = {},
-    onClose: () -> Unit? = {},
-) {
-    Snackbar(
-        modifier = Modifier.padding(16.dp),
-        backgroundColor = MaterialTheme.appColors.background
-    ) {
-        Column(modifier = Modifier.padding(4.dp)) {
-            Box {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterStart),
-                    text = stringResource(id = R.string.core_dates_shift_dates_successfully_title),
-                    color = MaterialTheme.appColors.textFieldText,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
-                IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = { onClose() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "close",
-                        tint = MaterialTheme.appColors.onBackground,
-                    )
-                }
-            }
-            Text(
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .fillMaxWidth(),
-                text = stringResource(id = R.string.core_dates_shift_dates_successfully_msg),
-                color = MaterialTheme.appColors.textFieldText,
-                style = MaterialTheme.appTypography.titleSmall,
-            )
-            if (showAction) {
-                OpenEdXOutlinedButton(
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .fillMaxWidth(),
-                    text = stringResource(id = R.string.core_dates_view_all_dates),
-                    backgroundColor = MaterialTheme.appColors.background,
-                    textColor = MaterialTheme.appColors.primary,
-                    borderColor = MaterialTheme.appColors.primary,
-                    onClick = {
-                        onViewDates()
-                    })
-            }
-        }
-    }
-}
-
-@Composable
 fun HyperlinkText(
     modifier: Modifier = Modifier,
     fullText: String,
@@ -503,8 +450,7 @@ fun HyperlinkText(
             annotatedString
                 .getStringAnnotations("URL", it, it)
                 .firstOrNull()?.let { stringAnnotation ->
-                    action?.invoke(stringAnnotation.item)
-                        ?: uriHandler.openUri(stringAnnotation.item)
+                    action?.invoke(stringAnnotation.item) ?: uriHandler.openUri(stringAnnotation.item)
                 }
         }
     )

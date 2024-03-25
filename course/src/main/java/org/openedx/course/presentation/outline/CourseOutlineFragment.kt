@@ -71,7 +71,6 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.ui.DatesShiftedSnackBar
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
@@ -94,6 +93,7 @@ import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.io.File
 import java.util.Date
 
@@ -305,8 +305,13 @@ internal fun CourseOutlineScreen(
 
         val snackState = remember { SnackbarHostState() }
         if (uiMessage is UIMessage.DatesShiftedSnackBar) {
+            val datesShiftedMessage =
+                stringResource(id = org.openedx.course.R.string.course_dates_shifted_message)
             LaunchedEffect(uiMessage) {
-                snackState.showSnackbar(message = "Dates Shifted", duration = SnackbarDuration.Long)
+                snackState.showSnackbar(
+                    message = datesShiftedMessage,
+                    duration = SnackbarDuration.Long
+                )
             }
         }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
