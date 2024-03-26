@@ -1,5 +1,6 @@
 package org.openedx.discussion.domain.model
 
+
 data class TopicsData(
     val coursewareTopics: List<Topic>,
     val nonCoursewareTopics: List<Topic>
