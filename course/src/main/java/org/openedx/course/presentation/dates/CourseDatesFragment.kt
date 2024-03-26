@@ -37,6 +37,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarData
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
@@ -49,6 +53,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -99,12 +104,14 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as coreR
 
@@ -268,6 +275,16 @@ internal fun CourseDatesScreen(
             )
         }
 
+        val snackState = remember { SnackbarHostState() }
+        if (uiMessage is DatesShiftedSnackBar) {
+            val datesShiftedMessage = stringResource(id = R.string.course_dates_shifted_message)
+            LaunchedEffect(uiMessage) {
+                snackState.showSnackbar(
+                    message = datesShiftedMessage,
+                    duration = SnackbarDuration.Long
+                )
+            }
+        }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -393,6 +410,15 @@ internal fun CourseDatesScreen(
                                 onReloadClick()
                             })
                     }
+                }
+
+                SnackbarHost(
+                    modifier = Modifier.align(Alignment.BottomStart),
+                    hostState = snackState
+                ) { snackbarData: SnackbarData ->
+                    DatesShiftedSnackBar(onClose = {
+                        snackbarData.dismiss()
+                    })
                 }
             }
         }
