@@ -68,7 +68,6 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     private fun openInAppReview() {
-        onRateAppClick()
         val request = reviewManager.requestReviewFlow()
         request.addOnCompleteListener { task ->
             try {
