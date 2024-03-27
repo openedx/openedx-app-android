@@ -6,7 +6,6 @@
     <string name="profile_logout">Log out</string>
     <string name="profile_bio">Bio: %1$s</string>
     <string name="profile_year_of_birth">Year of birth: %1$s</string>
-    <string name="profile_logout_dialog_title">Log out?</string>
     <string name="profile_logout_dialog_body">Are you sure you want to log out?</string>
     <string name="profile_full_profile">Full profile</string>
     <string name="profile_limited_profile">Limited profile</string>
@@ -21,7 +20,6 @@
     <string name="profile_spoken_language">Spoken language</string>
     <string name="profile_switch_to_full">Switch to full profile</string>
     <string name="profile_switch_to_limited">Switch to limited profile</string>
-    <string name="profile_oh_sorry">Oh, sorry</string>
     <string name="profile_delete_account">Delete account</string>
     <string name="profile_you_want_to">Are you sure you want to</string>
     <string name="profile_delete_your_account">delete your account?</string>

@@ -73,8 +73,8 @@
     <string name="core_rate_us">Rate Us</string>
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
-    <string name="core_not_internet_connection">No internet connection</string>
-    <string name="core_not_internet_connection_description">Please connect to the internet to view this content.</string>
+    <string name="core_no_internet_connection">No internet connection</string>
+    <string name="core_no_internet_connection_description">Please connect to the internet to view this content.</string>
     <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
     <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
     <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>

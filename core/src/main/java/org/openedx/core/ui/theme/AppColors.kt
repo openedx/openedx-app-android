@@ -11,6 +11,7 @@ data class AppColors(
     val textSecondary: Color,
     val textDark: Color,
     val textAccent: Color,
+    val textWarning: Color,
 
     val textFieldBackground: Color,
     val textFieldBackgroundVariant: Color,

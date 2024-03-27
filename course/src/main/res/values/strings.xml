@@ -23,7 +23,7 @@
     <string name="course_resume_unit_title">Last unit:</string>
     <string name="course_resume_unit_btn">Resume</string>
     <string name="course_discussion">Discussion</string>
-    <string name="course_more">More</string>
+    <string name="course_handouts">Handouts</string>
     <string name="course_announcements">Announcements</string>
     <string name="course_find_important_info">Find important course information</string>
     <string name="course_latest_news">Keep up with the latest news</string>
@@ -40,7 +40,7 @@
     <string name="course_navigation_discussions">Discussions</string>
     <string name="course_navigation_more">More</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
-    <string name="course_this_interactive_component">This interactive component isn\'t available on mobile</string>
+    <string name="course_this_interactive_component">This interactive component isn\'t available on mobile.</string>
     <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>

@@ -135,7 +135,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.theme.light_text_dark
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.profile.R
@@ -764,7 +763,7 @@ private fun LimitedProfileDialog(
     modifier: Modifier,
     onCloseClick: () -> Unit
 ) {
-    val tint = light_text_dark
+    val tint = MaterialTheme.appColors.textWarning
     Column(
         modifier
             .shadow(
@@ -1138,7 +1137,7 @@ private fun LeaveProfile(
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = light_text_dark,
+                            color = MaterialTheme.appColors.textWarning,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )

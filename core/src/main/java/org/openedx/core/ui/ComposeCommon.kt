@@ -1073,7 +1073,7 @@ fun OfflineModeDialog(
                     }) {
                     Icon(
                         modifier = Modifier.size(20.dp),
-                        painter = painterResource(R.drawable.core_ic_close),
+                        imageVector = Icons.Filled.Close,
                         contentDescription = null,
                         tint = Color.Black
                     )
@@ -1185,7 +1185,7 @@ fun ConnectionErrorView(
         Spacer(Modifier.height(28.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_not_internet_connection),
+            text = stringResource(id = R.string.core_no_internet_connection),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleLarge,
             textAlign = TextAlign.Center
@@ -1193,7 +1193,7 @@ fun ConnectionErrorView(
         Spacer(Modifier.height(16.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_not_internet_connection_description),
+            text = stringResource(id = R.string.core_no_internet_connection_description),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
