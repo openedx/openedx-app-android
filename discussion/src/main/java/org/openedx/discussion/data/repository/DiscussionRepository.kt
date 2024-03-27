@@ -2,22 +2,31 @@ package org.openedx.discussion.data.repository
 
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.ResourceManager
+import org.openedx.discussion.R
 import org.openedx.discussion.data.api.DiscussionApi
-import org.openedx.discussion.data.model.request.*
+import org.openedx.discussion.data.model.request.CommentBody
+import org.openedx.discussion.data.model.request.FollowBody
+import org.openedx.discussion.data.model.request.ReadBody
+import org.openedx.discussion.data.model.request.ReportBody
+import org.openedx.discussion.data.model.request.ThreadBody
+import org.openedx.discussion.data.model.request.VoteBody
 import org.openedx.discussion.domain.model.CommentsData
 import org.openedx.discussion.domain.model.ThreadsData
 import org.openedx.discussion.domain.model.Topic
 
 class DiscussionRepository(
     private val api: DiscussionApi,
-    private val preferencesManager: CorePreferences
-    ) {
+    private val preferencesManager: CorePreferences,
+    private val resourceManager: ResourceManager
+) {
 
     private val topics = mutableListOf<Topic>()
     private var currentCourseId = ""
 
     suspend fun getCourseTopics(courseId: String): List<Topic> {
         val topicsData = api.getCourseTopics(courseId).mapToDomain()
+        val defaultTopicName = resourceManager.getString(R.string.discussion_unnamed_subcategory)
         currentCourseId = courseId
         topics.clear()
         topics.addAll(topicsData.nonCoursewareTopics)
@@ -25,6 +34,11 @@ class DiscussionRepository(
             topics.add(it)
             if (it.children.isNotEmpty()) {
                 topics.addAll(it.children)
+            }
+        }
+        topics.forEachIndexed { index, topic ->
+            if (topic.name.isBlank()) {
+                topics[index] = topic.copy(name = defaultTopicName)
             }
         }
         return topics.toList()

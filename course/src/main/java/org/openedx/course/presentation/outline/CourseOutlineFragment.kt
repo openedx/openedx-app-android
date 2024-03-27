@@ -168,14 +168,24 @@ class CourseOutlineFragment : Fragment() {
                         viewModel.resumeSectionBlock?.let { subSection ->
                             viewModel.resumeCourseTappedEvent(subSection.id)
                             viewModel.resumeVerticalBlock?.let { unit ->
-                                router.navigateToCourseSubsections(
-                                    requireActivity().supportFragmentManager,
-                                    courseId = viewModel.courseId,
-                                    subSectionId = subSection.id,
-                                    mode = CourseViewMode.FULL,
-                                    unitId = unit.id,
-                                    componentId = componentId
-                                )
+                                if (viewModel.isCourseExpandableSectionsEnabled) {
+                                    router.navigateToCourseContainer(
+                                        fm = requireActivity().supportFragmentManager,
+                                        courseId = viewModel.courseId,
+                                        unitId = unit.id,
+                                        componentId = componentId,
+                                        mode = CourseViewMode.FULL
+                                    )
+                                } else {
+                                    router.navigateToCourseSubsections(
+                                        requireActivity().supportFragmentManager,
+                                        courseId = viewModel.courseId,
+                                        subSectionId = subSection.id,
+                                        mode = CourseViewMode.FULL,
+                                        unitId = unit.id,
+                                        componentId = componentId
+                                    )
+                                }
                             }
                         }
                     },

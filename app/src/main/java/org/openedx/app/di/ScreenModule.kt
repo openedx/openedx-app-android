@@ -246,6 +246,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->
@@ -259,7 +260,7 @@ val screenModule = module {
     viewModel { CourseSearchViewModel(get(), get(), get(), get(), get()) }
     viewModel { SelectDialogViewModel(get()) }
 
-    single { DiscussionRepository(get(), get()) }
+    single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
     viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), get(), courseId) }
     viewModel { (courseId: String, topicId: String, threadType: String) ->

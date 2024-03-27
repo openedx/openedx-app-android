@@ -34,6 +34,7 @@
     <string name="discussion_anonymous">anonymous</string>
     <string name="discussion_no_yet">No discussions yet</string>
     <string name="discussion_click_button_create_discussion">Click the button below to create your first discussion.</string>
+    <string name="discussion_unnamed_subcategory">Unnamed subcategory</string>
 
 
     <plurals name="discussion_votes">
