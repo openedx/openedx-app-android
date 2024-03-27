@@ -273,7 +273,7 @@ private fun AuthForm(
             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
             OpenEdXButton(
-                width = buttonWidth.testTag("btn_sign_in"),
+                modifier = buttonWidth.testTag("btn_sign_in"),
                 text = stringResource(id = coreR.string.core_sign_in),
                 onClick = {
                     onEvent(AuthEvent.SignIn(login = login, password = password))

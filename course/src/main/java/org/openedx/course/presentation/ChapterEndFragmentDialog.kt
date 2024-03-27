@@ -189,7 +189,7 @@ private fun ChapterEndDialogScreen(
             )
             Spacer(Modifier.height(36.dp))
             Text(
-                text = stringResource(id = R.string.course_good_work),
+                text = stringResource(id = R.string.course_good_job),
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleLarge
             )
@@ -300,7 +300,7 @@ private fun ChapterEndDialogScreenLandscape(
                     Spacer(Modifier.height(36.dp))
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.course_good_work),
+                        text = stringResource(id = R.string.course_good_job),
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleLarge,
                         textAlign = TextAlign.Center

@@ -74,7 +74,7 @@ internal fun SocialAuthView(
                 R.string.auth_continue_facebook
             }
             OpenEdXButton(
-                width = Modifier
+                modifier = Modifier
                     .testTag("btn_facebook_auth")
                     .padding(top = 12.dp)
                     .fillMaxWidth(),
@@ -106,7 +106,7 @@ internal fun SocialAuthView(
                 R.string.auth_continue_microsoft
             }
             OpenEdXButton(
-                width = Modifier
+                modifier = Modifier
                     .testTag("btn_microsoft_auth")
                     .padding(top = 12.dp)
                     .fillMaxWidth(),

@@ -613,7 +613,7 @@ private fun ResumeCourseTablet(
             }
         }
         OpenEdXButton(
-            width = Modifier.width(210.dp),
+            modifier = Modifier.width(210.dp),
             text = stringResource(id = org.openedx.course.R.string.course_resume),
             onClick = {
                 onResumeClick(block.id)

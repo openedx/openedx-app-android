@@ -2,7 +2,10 @@ package org.openedx.course.presentation.detail
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration.*
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,21 +13,56 @@ import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Report
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.*
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -44,17 +82,28 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.extension.isEmailValid
-import org.openedx.core.ui.*
+import org.openedx.core.ui.AuthButtonsPanel
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.isPreview
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseImageHeader
+import org.openedx.course.presentation.ui.WarningLabel
 import java.nio.charset.StandardCharsets
-import java.util.*
+import java.util.Date
 import org.openedx.course.R as courseR
 
 class CourseDetailsFragment : Fragment() {
@@ -169,7 +218,7 @@ internal fun CourseDetailsScreen(
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
 
-    var isInternetConnectionShown by rememberSaveable {
+    val isInternetConnectionShown = rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -262,6 +311,8 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContentLandscape(
                                         windowSize = windowSize,
                                         apiHostUrl = apiHostUrl,
+                                        hasInternetConnection = hasInternetConnection,
+                                        isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -271,6 +322,8 @@ internal fun CourseDetailsScreen(
                                     CourseDetailNativeContent(
                                         windowSize = windowSize,
                                         apiHostUrl = apiHostUrl,
+                                        hasInternetConnection = hasInternetConnection,
+                                        isInternetConnectionShown = isInternetConnectionShown,
                                         course = uiState.course,
                                         onButtonClick = {
                                             onButtonClick()
@@ -285,7 +338,7 @@ internal fun CourseDetailsScreen(
                                             .padding(all = 20.dp),
                                     )
                                 } else {
-                                    var webViewAlpha by remember { mutableStateOf(0f) }
+                                    var webViewAlpha by remember { mutableFloatStateOf(0f) }
                                     if (webViewAlpha == 0f) {
                                         Box(
                                             modifier = Modifier
@@ -315,16 +368,16 @@ internal fun CourseDetailsScreen(
                             }
                         }
                     }
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
+                    if (!isInternetConnectionShown.value && !hasInternetConnection) {
                         OfflineModeDialog(
                             Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.BottomCenter),
                             onDismissCLick = {
-                                isInternetConnectionShown = true
+                                isInternetConnectionShown.value = true
                             },
                             onReloadClick = {
-                                isInternetConnectionShown = true
+                                isInternetConnectionShown.value = true
                                 onReloadClick()
                             }
                         )
@@ -341,6 +394,8 @@ private fun CourseDetailNativeContent(
     windowSize: WindowSize,
     apiHostUrl: String,
     course: Course,
+    hasInternetConnection: Boolean,
+    isInternetConnectionShown: MutableState<Boolean>,
     onButtonClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -402,7 +457,11 @@ private fun CourseDetailNativeContent(
                 .padding(horizontal = contentHorizontalPadding)
         ) {
             val enrollmentEnd = course.enrollmentEnd
-            if (enrollmentEnd != null && Date() > enrollmentEnd) {
+            if (!hasInternetConnection) {
+                isInternetConnectionShown.value = true
+                NoInternetLabel()
+                Spacer(Modifier.height(24.dp))
+            } else if (enrollmentEnd != null && Date() > enrollmentEnd) {
                 EnrollOverLabel()
                 Spacer(Modifier.height(24.dp))
             }
@@ -429,7 +488,7 @@ private fun CourseDetailNativeContent(
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
                 Spacer(Modifier.height(32.dp))
                 OpenEdXButton(
-                    width = buttonWidth,
+                    modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick
                 )
@@ -444,6 +503,8 @@ private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
     apiHostUrl: String,
     course: Course,
+    hasInternetConnection: Boolean,
+    isInternetConnectionShown: MutableState<Boolean>,
     onButtonClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -496,12 +557,16 @@ private fun CourseDetailNativeContentLandscape(
                 Spacer(Modifier.height(42.dp))
             }
             val enrollmentEnd = course.enrollmentEnd
-            if (enrollmentEnd != null && Date() > enrollmentEnd) {
-                Spacer(Modifier.height(4.dp))
+            if (!hasInternetConnection) {
+                isInternetConnectionShown.value = true
+                NoInternetLabel()
+                Spacer(Modifier.height(24.dp))
+            } else if (enrollmentEnd != null && Date() > enrollmentEnd) {
                 EnrollOverLabel()
+                Spacer(Modifier.height(24.dp))
             } else {
                 OpenEdXButton(
-                    width = buttonWidth,
+                    modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick
                 )
@@ -539,51 +604,18 @@ private fun CourseDetailNativeContentLandscape(
 
 @Composable
 private fun EnrollOverLabel() {
-    val borderColor = if (!isSystemInDarkTheme()) {
-        MaterialTheme.appColors.cardViewBorder
-    } else {
-        MaterialTheme.appColors.surface
-    }
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .shadow(
-                0.dp,
-                MaterialTheme.appShapes.material.medium
-            )
-            .background(
-                MaterialTheme.appColors.surface,
-                MaterialTheme.appShapes.material.medium
-            )
-            .border(
-                1.dp,
-                borderColor,
-                MaterialTheme.appShapes.material.medium
-            )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Report,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.warning
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                modifier = Modifier.testTag("txt_enroll_error"),
-                text = stringResource(id = courseR.string.course_you_cant_enroll),
-                color = MaterialTheme.appColors.textPrimaryVariant,
-                style = MaterialTheme.appTypography.titleSmall
-            )
-        }
-    }
+    WarningLabel(
+        painter = rememberVectorPainter(Icons.Outlined.Report),
+        text = stringResource(id = courseR.string.course_you_cant_enroll)
+    )
+}
+
+@Composable
+private fun NoInternetLabel() {
+    WarningLabel(
+        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_offline),
+        text = stringResource(id = courseR.string.course_no_internet_label)
+    )
 }
 
 @Composable

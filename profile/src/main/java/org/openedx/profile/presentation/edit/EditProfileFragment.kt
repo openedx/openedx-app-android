@@ -763,6 +763,7 @@ private fun LimitedProfileDialog(
     modifier: Modifier,
     onCloseClick: () -> Unit
 ) {
+    val tint = MaterialTheme.appColors.textWarning
     Column(
         modifier
             .shadow(
@@ -774,43 +775,33 @@ private fun LimitedProfileDialog(
                 MaterialTheme.appShapes.material.medium
             )
     ) {
-        Column(
-            Modifier
+        Row(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.Report,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textDark
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_edit_profile_limited_profile_title")
-                        .weight(1f),
-                    text = stringResource(id = R.string.profile_oh_sorry),
-                    color = MaterialTheme.appColors.textDark,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
-                Icon(
-                    modifier = Modifier
-                        .testTag("ic_edit_profile_limited_profile_close")
-                        .clickable { onCloseClick() },
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textDark
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            Icon(
+                imageVector = Icons.Outlined.Report,
+                contentDescription = null,
+                tint = tint
+            )
             Text(
                 modifier = Modifier
                     .testTag("txt_edit_profile_limited_profile_message")
-                    .fillMaxWidth(),
+                    .weight(1f),
                 text = stringResource(id = R.string.profile_must_be_over),
-                color = MaterialTheme.appColors.textDark,
-                style = MaterialTheme.appTypography.bodyMedium
+                color = tint,
+                style = MaterialTheme.appTypography.labelLarge
+            )
+            Icon(
+                modifier = Modifier
+                    .testTag("ic_edit_profile_limited_profile_close")
+                    .clickable { onCloseClick() },
+                imageVector = Icons.Filled.Close,
+                contentDescription = null,
+                tint = tint
             )
         }
     }
@@ -1112,8 +1103,9 @@ private fun LeaveProfile(
             ) {
                 Icon(
                     modifier = Modifier
-                        .size(100.dp),
+                        .size(60.dp),
                     painter = painterResource(R.drawable.profile_ic_save),
+                    tint = MaterialTheme.appColors.textPrimary,
                     contentDescription = null
                 )
                 Spacer(Modifier.size(48.dp))
@@ -1145,7 +1137,7 @@ private fun LeaveProfile(
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.textDark,
+                            color = MaterialTheme.appColors.textWarning,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )

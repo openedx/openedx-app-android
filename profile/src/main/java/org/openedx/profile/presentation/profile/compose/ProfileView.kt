@@ -484,7 +484,7 @@ private fun LogoutDialog(
                                     .testTag("txt_logout")
                                     .fillMaxWidth(),
                                 text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                                color = MaterialTheme.appColors.textDark,
+                                color = MaterialTheme.appColors.textWarning,
                                 style = MaterialTheme.appTypography.labelLarge,
                                 textAlign = TextAlign.Center
                             )

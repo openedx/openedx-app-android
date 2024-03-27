@@ -30,6 +30,7 @@ private val DarkColorPalette = AppColors(
     textSecondary = dark_text_secondary,
     textDark = dark_text_dark,
     textAccent = dark_text_accent,
+    textWarning = dark_text_warning,
 
     textFieldBackground = dark_text_field_background,
     textFieldBackgroundVariant = dark_text_field_background_variant,
@@ -92,6 +93,7 @@ private val LightColorPalette = AppColors(
     textSecondary = light_text_secondary,
     textDark = light_text_dark,
     textAccent = light_text_accent,
+    textWarning = light_text_warning,
 
     textFieldBackground = light_text_field_background,
     textFieldBackgroundVariant = light_text_field_background_variant,

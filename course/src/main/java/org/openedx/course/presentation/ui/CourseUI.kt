@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -1150,7 +1153,7 @@ fun CourseDatesBannerTablet(
         }
         banner.bannerType.buttonResId.nonZero()?.let {
             OpenEdXButton(
-                width = Modifier.width(210.dp),
+                modifier = Modifier.width(210.dp),
                 text = stringResource(id = it),
                 onClick = resetDates,
             )
@@ -1208,6 +1211,70 @@ fun DatesShiftedSnackBar(
                     })
             }
         }
+    }
+}
+
+@Composable
+fun WarningLabel(
+    painter: Painter,
+    text: String
+) {
+    val borderColor = if (!isSystemInDarkTheme()) {
+        MaterialTheme.appColors.cardViewBorder
+    } else {
+        MaterialTheme.appColors.surface
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .shadow(
+                0.dp,
+                MaterialTheme.appShapes.material.medium
+            )
+            .background(
+                MaterialTheme.appColors.surface,
+                MaterialTheme.appShapes.material.medium
+            )
+            .border(
+                1.dp,
+                borderColor,
+                MaterialTheme.appShapes.material.medium
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                tint = MaterialTheme.appColors.warning
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                modifier = Modifier.testTag("txt_enroll_internet_error"),
+                text = text,
+                color = MaterialTheme.appColors.textPrimaryVariant,
+                style = MaterialTheme.appTypography.titleSmall
+            )
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun WarningLabelPreview() {
+    OpenEdXTheme {
+        WarningLabel(
+            painter = painterResource(id = org.openedx.core.R.drawable.core_ic_offline),
+            text = stringResource(id = R.string.course_no_internet_label)
+        )
     }
 }
 
