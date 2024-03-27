@@ -71,7 +71,7 @@ enum class ProfileAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
 }
 
-enum class ProfileAnalyticKey(val key: String) {
+enum class ProfileAnalyticsKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
     PROFILE("profile"),

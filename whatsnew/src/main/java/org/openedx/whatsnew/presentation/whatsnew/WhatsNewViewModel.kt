@@ -9,9 +9,9 @@ import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.domain.model.WhatsNewItem
-import org.openedx.whatsnew.presentation.WhatsNewAnalyticKey
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 import org.openedx.whatsnew.presentation.WhatsNewAnalyticsEvent
+import org.openedx.whatsnew.presentation.WhatsNewAnalyticsKey
 
 class WhatsNewViewModel(
     val courseId: String?,
@@ -61,11 +61,11 @@ class WhatsNewViewModel(
         analytics.logEvent(
             event.eventName,
             buildMap {
-                put(WhatsNewAnalyticKey.NAME.key, event.biValue)
-                put(WhatsNewAnalyticKey.CATEGORY.key, WhatsNewAnalyticKey.WHATS_NEW.key)
-                put(WhatsNewAnalyticKey.TOTAL_SCREENS.key, whatsNewItem.value?.messages?.size)
+                put(WhatsNewAnalyticsKey.NAME.key, event.biValue)
+                put(WhatsNewAnalyticsKey.CATEGORY.key, WhatsNewAnalyticsKey.WHATS_NEW.key)
+                put(WhatsNewAnalyticsKey.TOTAL_SCREENS.key, whatsNewItem.value?.messages?.size)
                 currentlyViewed?.let {
-                    put(WhatsNewAnalyticKey.CURRENTLY_VIEWED.key, it)
+                    put(WhatsNewAnalyticsKey.CURRENTLY_VIEWED.key, it)
                 }
             }
         )

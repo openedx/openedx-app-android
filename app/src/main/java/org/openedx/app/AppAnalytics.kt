@@ -29,6 +29,6 @@ enum class AppAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
 }
 
-enum class AppAnalyticKey(val key: String) {
+enum class AppAnalyticsKey(val key: String) {
     NAME("name"),
 }

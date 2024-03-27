@@ -1,9 +1,9 @@
 package org.openedx.course.presentation.unit.video
 
 import org.openedx.core.BaseViewModel
-import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 open class BaseVideoViewModel(
     private val courseId: String,
@@ -14,10 +14,10 @@ open class BaseVideoViewModel(
         logVideoEvent(
             event = CourseAnalyticsEvent.VIDEO_CHANGE_SPEED,
             params = buildMap {
-                put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
-                put(CourseAnalyticKey.SPEED.key, speed)
-                put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
-                put(CourseAnalyticKey.PLAY_MEDIUM.key, medium)
+                put(CourseAnalyticsKey.OPEN_IN_BROWSER.key, videoUrl)
+                put(CourseAnalyticsKey.SPEED.key, speed)
+                put(CourseAnalyticsKey.CURRENT_TIME.key, currentVideoTime)
+                put(CourseAnalyticsKey.PLAY_MEDIUM.key, medium)
             }
         )
     }
@@ -31,10 +31,10 @@ open class BaseVideoViewModel(
         logVideoEvent(
             event = CourseAnalyticsEvent.VIDEO_SEEKED,
             params = buildMap {
-                put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
-                put(CourseAnalyticKey.SKIP_INTERVAL.key, duration)
-                put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
-                put(CourseAnalyticKey.PLAY_MEDIUM.key, medium)
+                put(CourseAnalyticsKey.OPEN_IN_BROWSER.key, videoUrl)
+                put(CourseAnalyticsKey.SKIP_INTERVAL.key, duration)
+                put(CourseAnalyticsKey.CURRENT_TIME.key, currentVideoTime)
+                put(CourseAnalyticsKey.PLAY_MEDIUM.key, medium)
             }
         )
     }
@@ -48,9 +48,9 @@ open class BaseVideoViewModel(
         logVideoEvent(
             event = if (isLoaded) CourseAnalyticsEvent.VIDEO_LOADED else CourseAnalyticsEvent.VIDEO_COMPLETED,
             params = buildMap {
-                put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
-                put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
-                put(CourseAnalyticKey.PLAY_MEDIUM.key, medium)
+                put(CourseAnalyticsKey.OPEN_IN_BROWSER.key, videoUrl)
+                put(CourseAnalyticsKey.CURRENT_TIME.key, currentVideoTime)
+                put(CourseAnalyticsKey.PLAY_MEDIUM.key, medium)
             }
         )
     }
@@ -64,9 +64,9 @@ open class BaseVideoViewModel(
         logVideoEvent(
             event = if (isPlaying) CourseAnalyticsEvent.VIDEO_PLAYED else CourseAnalyticsEvent.VIDEO_PAUSED,
             params = buildMap {
-                put(CourseAnalyticKey.OPEN_IN_BROWSER.key, videoUrl)
-                put(CourseAnalyticKey.CURRENT_TIME.key, currentVideoTime)
-                put(CourseAnalyticKey.PLAY_MEDIUM.key, medium)
+                put(CourseAnalyticsKey.OPEN_IN_BROWSER.key, videoUrl)
+                put(CourseAnalyticsKey.CURRENT_TIME.key, currentVideoTime)
+                put(CourseAnalyticsKey.PLAY_MEDIUM.key, medium)
             }
         )
     }
@@ -75,9 +75,9 @@ open class BaseVideoViewModel(
         courseAnalytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, event.biValue)
-                put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticKey.COMPONENT.key, CourseAnalyticKey.VIDEO_PLAYER.key)
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.COMPONENT.key, CourseAnalyticsKey.VIDEO_PLAYER.key)
                 putAll(params)
             }
         )
@@ -87,8 +87,8 @@ open class BaseVideoViewModel(
         courseAnalytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, event.biValue)
-                put(CourseAnalyticKey.PLAY_MEDIUM.key, CourseAnalyticKey.GOOGLE_CAST.key)
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.PLAY_MEDIUM.key, CourseAnalyticsKey.GOOGLE_CAST.key)
             }
         )
     }

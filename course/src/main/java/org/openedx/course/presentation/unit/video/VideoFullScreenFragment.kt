@@ -32,7 +32,7 @@ import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
-import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
@@ -56,7 +56,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
                 if (!appReviewManager.isDialogShowed) {
                     appReviewManager.tryToOpenRateDialog()
                 }
-                viewModel.markBlockCompleted(blockId, CourseAnalyticKey.NATIVE.key)
+                viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
             }
         }
     }
@@ -138,14 +138,14 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
                         viewModel.videoUrl,
                         isPlaying,
                         viewModel.currentVideoTime,
-                        CourseAnalyticKey.NATIVE.key
+                        CourseAnalyticsKey.NATIVE.key
                     )
                 }
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     super.onPlaybackStateChanged(playbackState)
                     if (playbackState == Player.STATE_ENDED) {
-                        viewModel.markBlockCompleted(blockId, CourseAnalyticKey.NATIVE.key)
+                        viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
                     }
                 }
 
@@ -155,7 +155,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
                         viewModel.videoUrl,
                         playbackParameters.speed,
                         viewModel.currentVideoTime,
-                        CourseAnalyticKey.NATIVE.key
+                        CourseAnalyticsKey.NATIVE.key
                     )
                 }
             })
@@ -232,5 +232,4 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             return fragment
         }
     }
-
 }

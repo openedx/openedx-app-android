@@ -12,9 +12,9 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.ProfileAnalyticKey
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 import java.io.File
@@ -55,9 +55,9 @@ class EditProfileViewModel(
                 ProfileAnalyticsEvent.SWITCH_PROFILE,
                 buildMap {
                     put(
-                        ProfileAnalyticKey.ACTION.key,
-                        if (isLimitedProfile) ProfileAnalyticKey.LIMITED_PROFILE.key
-                        else ProfileAnalyticKey.FULL_PROFILE.key
+                        ProfileAnalyticsKey.ACTION.key,
+                        if (isLimitedProfile) ProfileAnalyticsKey.LIMITED_PROFILE.key
+                        else ProfileAnalyticsKey.FULL_PROFILE.key
                     )
                 }
             )
@@ -154,8 +154,8 @@ class EditProfileViewModel(
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(ProfileAnalyticKey.NAME.key, event.biValue)
-                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
                 putAll(params)
             }
         )

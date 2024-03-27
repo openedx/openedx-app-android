@@ -19,7 +19,7 @@ enum class WhatsNewAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
 }
 
-enum class WhatsNewAnalyticKey(val key: String) {
+enum class WhatsNewAnalyticsKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
     WHATS_NEW("whats_new"),

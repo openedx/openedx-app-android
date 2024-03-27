@@ -27,9 +27,9 @@ import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEven
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -230,10 +230,10 @@ class CourseDatesViewModel(
 
     fun logCourseComponentTapped(isSupported: Boolean, block: CourseDateBlock) {
         val params = buildMap<String, Any> {
-            put(CourseAnalyticKey.BLOCK_ID.key, block.blockId)
-            put(CourseAnalyticKey.BLOCK_TYPE.key, block.dateType)
-            put(CourseAnalyticKey.LINK.key, block.link)
-            put(CourseAnalyticKey.SUPPORTED.key, isSupported)
+            put(CourseAnalyticsKey.BLOCK_ID.key, block.blockId)
+            put(CourseAnalyticsKey.BLOCK_TYPE.key, block.dateType)
+            put(CourseAnalyticsKey.LINK.key, block.link)
+            put(CourseAnalyticsKey.SUPPORTED.key, isSupported)
         }
 
         logDatesEvent(CourseAnalyticsEvent.DATES_COURSE_COMPONENT_CLICKED, params)
@@ -244,8 +244,8 @@ class CourseDatesViewModel(
             CourseAnalyticsEvent.DATES_CALENDAR_SYNC_TOGGLE,
             buildMap {
                 put(
-                    CourseAnalyticKey.ACTION.key,
-                    if (isChecked) CourseAnalyticKey.ON.key else CourseAnalyticKey.OFF.key
+                    CourseAnalyticsKey.ACTION.key,
+                    if (isChecked) CourseAnalyticsKey.ON.key else CourseAnalyticsKey.OFF.key
                 )
             }
         )
@@ -258,10 +258,10 @@ class CourseDatesViewModel(
         courseAnalytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, event.biValue)
-                put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
-                put(CourseAnalyticKey.PACING.key, isSelfPaced)
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(CourseAnalyticsKey.PACING.key, isSelfPaced)
                 putAll(param)
             }
         )
@@ -274,13 +274,13 @@ class CourseDatesViewModel(
         courseAnalytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(CourseAnalyticKey.NAME.key, event.biValue)
-                put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.COURSE_DATES.key)
-                put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticKey.ENROLLMENT_MODE.key, enrollmentMode)
-                put(CourseAnalyticKey.BANNER_TYPE.key, courseBannerType.name)
-                put(CourseAnalyticKey.SCREEN_NAME.key, CourseAnalyticKey.COURSE_DATES.key)
-                isSuccess?.let { put(CourseAnalyticKey.SUCCESS.key, it) }
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.CATEGORY.key, CourseAnalyticsKey.COURSE_DATES.key)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(CourseAnalyticsKey.BANNER_TYPE.key, courseBannerType.name)
+                put(CourseAnalyticsKey.SCREEN_NAME.key, CourseAnalyticsKey.COURSE_DATES.key)
+                isSuccess?.let { put(CourseAnalyticsKey.SUCCESS.key, it) }
             }
         )
     }

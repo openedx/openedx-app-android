@@ -13,9 +13,9 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
-import org.openedx.profile.presentation.ProfileAnalyticKey
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.presentation.ProfileRouter
 
 class VideoSettingsViewModel(
@@ -55,10 +55,11 @@ class VideoSettingsViewModel(
             ProfileAnalyticsEvent.WIFI_TOGGLE,
             buildMap {
                 put(
-                    ProfileAnalyticKey.ACTION.key,
-                    if (value) ProfileAnalyticKey.TRUE.key else ProfileAnalyticKey.FALSE.key
+                    ProfileAnalyticsKey.ACTION.key,
+                    if (value) ProfileAnalyticsKey.TRUE.key else ProfileAnalyticsKey.FALSE.key
                 )
-            })
+            }
+        )
     }
 
     fun navigateToVideoStreamingQuality(fragmentManager: FragmentManager) {
@@ -80,8 +81,8 @@ class VideoSettingsViewModel(
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(ProfileAnalyticKey.NAME.key, event.biValue)
-                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
                 putAll(params)
             }
         )

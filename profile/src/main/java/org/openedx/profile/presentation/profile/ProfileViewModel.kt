@@ -28,9 +28,9 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
-import org.openedx.profile.presentation.ProfileAnalyticKey
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
@@ -146,7 +146,7 @@ class ProfileViewModel(
                 logProfileEvent(
                     event = ProfileAnalyticsEvent.LOGGED_OUT,
                     params = buildMap {
-                        put(ProfileAnalyticKey.FORCE.key, ProfileAnalyticKey.FALSE.key)
+                        put(ProfileAnalyticsKey.FORCE.key, ProfileAnalyticsKey.FALSE.key)
                     }
                 )
             } catch (e: Exception) {
@@ -254,8 +254,8 @@ class ProfileViewModel(
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(ProfileAnalyticKey.NAME.key, event.biValue)
-                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
                 putAll(params)
             }
         )

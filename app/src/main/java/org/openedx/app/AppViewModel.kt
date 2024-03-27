@@ -55,8 +55,9 @@ class AppViewModel(
         analytics.logEvent(
             event = AppAnalyticsEvent.LAUNCH.eventName,
             params = buildMap {
-                put(AppAnalyticKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
-            })
+                put(AppAnalyticsKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
+            }
+        )
     }
 
     private fun setUserId() {

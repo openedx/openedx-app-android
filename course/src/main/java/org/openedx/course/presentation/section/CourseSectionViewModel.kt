@@ -22,9 +22,9 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class CourseSectionViewModel(
     val courseId: String,
@@ -159,10 +159,10 @@ class CourseSectionViewModel(
             analytics.logEvent(
                 event = CourseAnalyticsEvent.UNIT_DETAIL.eventName,
                 params = buildMap {
-                    put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
-                    put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                    put(CourseAnalyticKey.BLOCK_ID.key, blockId)
-                    put(CourseAnalyticKey.CATEGORY.key, CourseAnalyticKey.NAVIGATION.key)
+                    put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.CATEGORY.key, CourseAnalyticsKey.NAVIGATION.key)
                 }
             )
         }

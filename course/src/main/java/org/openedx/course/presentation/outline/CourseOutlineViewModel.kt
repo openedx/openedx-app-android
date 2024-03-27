@@ -30,9 +30,9 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
 
@@ -300,8 +300,8 @@ class CourseOutlineViewModel(
         analytics.logEvent(
             CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
             buildMap {
-                put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
-                put(CourseAnalyticKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
             }
         )
     }
@@ -313,12 +313,12 @@ class CourseOutlineViewModel(
                 CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
                 buildMap {
                     put(
-                        CourseAnalyticKey.NAME.key,
+                        CourseAnalyticsKey.NAME.key,
                         CourseAnalyticsEvent.RESUME_COURSE_CLICKED.biValue
                     )
-                    put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                    put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
-                    put(CourseAnalyticKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
                 }
             )
         }
@@ -342,11 +342,11 @@ class CourseOutlineViewModel(
             analytics.logEvent(
                 CourseAnalyticsEvent.UNIT_DETAIL.eventName,
                 buildMap {
-                    put(CourseAnalyticKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
-                    put(CourseAnalyticKey.COURSE_ID.key, courseId)
-                    put(CourseAnalyticKey.COURSE_NAME.key, courseTitle)
-                    put(CourseAnalyticKey.BLOCK_ID.key, blockId)
-                    put(CourseAnalyticKey.BLOCK_NAME.key, blockName)
+                    put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.BLOCK_NAME.key, blockName)
                 }
             )
         }

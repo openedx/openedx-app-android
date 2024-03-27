@@ -41,8 +41,8 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
-import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
@@ -71,7 +71,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 }
                 val completePercentage = it.currentPosition.toDouble() / it.duration.toDouble()
                 if (completePercentage >= 0.8f) {
-                    viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticKey.NATIVE.key)
+                    viewModel.markBlockCompleted(viewModel.blockId, CourseAnalyticsKey.NATIVE.key)
                 }
             }
             handler.postDelayed(this, 200)

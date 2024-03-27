@@ -21,7 +21,7 @@ import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
-import org.openedx.course.presentation.CourseAnalyticKey
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_full_screen) {
 
@@ -79,7 +79,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             ) {
                 super.onStateChange(youTubePlayer, state)
                 if (state == PlayerConstants.PlayerState.ENDED) {
-                    viewModel.markBlockCompleted(blockId, CourseAnalyticKey.YOUTUBE.key)
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
                 }
                 viewModel.isPlaying = when (state) {
                     PlayerConstants.PlayerState.PLAYING -> true
@@ -93,7 +93,7 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
                 viewModel.currentVideoTime = (second * 1000f).toLong()
                 val completePercentage = second / youtubeTrackerListener.videoDuration
                 if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
-                    viewModel.markBlockCompleted(blockId, CourseAnalyticKey.YOUTUBE.key)
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
                     isMarkBlockCompletedCalled = true
                 }
                 if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {

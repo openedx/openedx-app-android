@@ -65,7 +65,8 @@ class MainViewModel(
     private fun logEvent(event: AppAnalyticsEvent) {
         analytics.logEvent(event.eventName,
             buildMap {
-                put(AppAnalyticKey.NAME.key, event.biValue)
-            })
+                put(AppAnalyticsKey.NAME.key, event.biValue)
+            }
+        )
     }
 }

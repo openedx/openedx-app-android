@@ -159,7 +159,7 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
 }
 
-enum class CourseAnalyticKey(val key: String) {
+enum class CourseAnalyticsKey(val key: String) {
     NAME("name"),
     COURSE_ID("course_id"),
     COURSE_NAME("course_name"),
@@ -207,8 +207,8 @@ enum class CalendarSyncDialog(
 
     fun getBuildMap(action: Boolean): Map<String, Any> {
         return buildMap {
-            put(CourseAnalyticKey.DIALOG.key, dialog)
-            put(CourseAnalyticKey.ACTION.key, if (action) positiveAction else negativeAction)
+            put(CourseAnalyticsKey.DIALOG.key, dialog)
+            put(CourseAnalyticsKey.ACTION.key, if (action) positiveAction else negativeAction)
         }
     }
 }
@@ -220,7 +220,7 @@ enum class CalendarSyncSnackbar(private val snackbar: String) {
 
     fun getBuildMap(): Map<String, Any> {
         return buildMap {
-            put(CourseAnalyticKey.SNACKBAR.key, snackbar)
+            put(CourseAnalyticsKey.SNACKBAR.key, snackbar)
         }
     }
 }

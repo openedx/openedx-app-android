@@ -25,35 +25,35 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
         analytics.logEvent(
             event = AppReviewAnalyticsEvent.RATING_DIALOG.eventName,
             params = buildMap {
-                put(AppReviewKey.NAME.key, AppReviewAnalyticsEvent.RATING_DIALOG.biValue)
-                put(AppReviewKey.CATEGORY.key, AppReviewKey.APP_REVIEW.key)
+                put(AppReviewAnalyticsKey.NAME.key, AppReviewAnalyticsEvent.RATING_DIALOG.biValue)
+                put(AppReviewAnalyticsKey.CATEGORY.key, AppReviewAnalyticsKey.APP_REVIEW.key)
             }
         )
     }
 
     fun notNowClick(rating: Int = 0) {
         saveVersionName()
-        logDialogActionEvent(AppReviewKey.NOT_NOW.key, rating)
+        logDialogActionEvent(AppReviewAnalyticsKey.NOT_NOW.key, rating)
         super.dismiss()
     }
 
     fun onSubmitRatingClick(rating: Int) {
-        logDialogActionEvent(AppReviewKey.SUBMIT.key, rating)
+        logDialogActionEvent(AppReviewAnalyticsKey.SUBMIT.key, rating)
         super.dismiss()
     }
 
     fun onShareFeedbackClick() {
-        logDialogActionEvent(AppReviewKey.SHARE_FEEDBACK.key)
+        logDialogActionEvent(AppReviewAnalyticsKey.SHARE_FEEDBACK.key)
         super.dismiss()
     }
 
     fun onRateAppClick() {
-        logDialogActionEvent(AppReviewKey.RATE_APP.key)
+        logDialogActionEvent(AppReviewAnalyticsKey.RATE_APP.key)
         super.dismiss()
     }
 
     fun onDismiss() {
-        logDialogActionEvent(AppReviewKey.DISMISSED.key)
+        logDialogActionEvent(AppReviewAnalyticsKey.DISMISSED.key)
         super.dismiss()
     }
 
@@ -61,10 +61,13 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
         analytics.logEvent(
             event = AppReviewAnalyticsEvent.RATING_DIALOG_ACTION.eventName,
             params = buildMap {
-                put(AppReviewKey.NAME.key, AppReviewAnalyticsEvent.RATING_DIALOG_ACTION.biValue)
-                put(AppReviewKey.CATEGORY.key, AppReviewKey.APP_REVIEW.key)
-                put(AppReviewKey.ACTION.key, action)
-                rating.nonZero()?.let { put(AppReviewKey.RATING.key, it) }
+                put(
+                    AppReviewAnalyticsKey.NAME.key,
+                    AppReviewAnalyticsEvent.RATING_DIALOG_ACTION.biValue
+                )
+                put(AppReviewAnalyticsKey.CATEGORY.key, AppReviewAnalyticsKey.APP_REVIEW.key)
+                put(AppReviewAnalyticsKey.ACTION.key, action)
+                rating.nonZero()?.let { put(AppReviewAnalyticsKey.RATING.key, it) }
             }
         )
     }

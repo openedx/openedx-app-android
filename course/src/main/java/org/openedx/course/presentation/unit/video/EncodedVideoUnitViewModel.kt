@@ -25,8 +25,8 @@ import org.openedx.core.module.TranscriptManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.data.repository.CourseRepository
-import org.openedx.course.presentation.CourseAnalyticKey
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsKey
 import java.util.concurrent.Executors
 
 @SuppressLint("StaticFieldLeak")
@@ -74,7 +74,7 @@ class EncodedVideoUnitViewModel(
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_ENDED) {
                 _isVideoEnded.value = true
-                markBlockCompleted(blockId, CourseAnalyticKey.NATIVE.key)
+                markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
             }
 
         }
@@ -178,9 +178,9 @@ class EncodedVideoUnitViewModel(
 
     private fun getPlayingMedium(): String {
         return if (getActivePlayer() == castPlayer) {
-            CourseAnalyticKey.GOOGLE_CAST.key
+            CourseAnalyticsKey.GOOGLE_CAST.key
         } else {
-            CourseAnalyticKey.NATIVE.key
+            CourseAnalyticsKey.NATIVE.key
         }
     }
 }

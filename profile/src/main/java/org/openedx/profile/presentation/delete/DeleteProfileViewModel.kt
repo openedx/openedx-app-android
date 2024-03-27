@@ -12,9 +12,9 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.profile.presentation.ProfileAnalyticKey
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
@@ -75,16 +75,17 @@ class DeleteProfileViewModel(
         logEvent(
             ProfileAnalyticsEvent.DELETE_ACCOUNT_SUCCESS,
             buildMap {
-                put(ProfileAnalyticKey.SUCCESS.key, isSuccess)
-            })
+                put(ProfileAnalyticsKey.SUCCESS.key, isSuccess)
+            }
+        )
     }
 
     private fun logEvent(event: ProfileAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {
         analytics.logEvent(
             event.eventName,
             buildMap {
-                put(ProfileAnalyticKey.NAME.key, event.biValue)
-                put(ProfileAnalyticKey.CATEGORY.key, ProfileAnalyticKey.PROFILE.key)
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
                 putAll(param)
             }
         )

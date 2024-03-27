@@ -15,7 +15,7 @@ enum class AppReviewAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
 }
 
-enum class AppReviewKey(val key: String) {
+enum class AppReviewAnalyticsKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
     RATING("rating"),
