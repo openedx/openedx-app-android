@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -14,6 +15,7 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -21,19 +23,27 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
-import kotlinx.coroutines.launch
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class CourseSectionViewModel(
+    val courseId: String,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
+    coreAnalytics: CoreAnalytics,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
-    val courseId: String
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+) : BaseDownloadViewModel(
+    courseId,
+    downloadDao,
+    preferencesManager,
+    workerController,
+    coreAnalytics
+) {
 
     private val _uiState = MutableLiveData<CourseSectionUIState>(CourseSectionUIState.Loading)
     val uiState: LiveData<CourseSectionUIState>
@@ -56,8 +66,10 @@ class CourseSectionViewModel(
                             sectionName = state.sectionName,
                             courseName = state.courseName,
                             blocks = ArrayList(list),
-                            downloadedState = downloadModels.toMap())
+                            downloadedState = downloadModels.toMap()
+                        )
                     }
+
                     else -> {}
                 }
             }
@@ -141,10 +153,18 @@ class CourseSectionViewModel(
         }
     }
 
-    fun verticalClickedEvent(blockId: String, blockName: String) {
+    fun verticalClickedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseSectionUIState.Blocks) {
-            analytics.verticalClickedEvent(courseId, currentState.courseName, blockId, blockName)
+            analytics.logEvent(
+                event = CourseAnalyticsEvent.UNIT_DETAIL.eventName,
+                params = buildMap {
+                    put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.CATEGORY.key, CourseAnalyticsKey.NAVIGATION.key)
+                }
+            )
         }
     }
 }

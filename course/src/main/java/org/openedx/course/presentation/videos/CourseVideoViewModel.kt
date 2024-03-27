@@ -16,6 +16,7 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -36,9 +37,16 @@ class CourseVideoViewModel(
     private val courseNotifier: CourseNotifier,
     private val videoNotifier: VideoNotifier,
     private val analytics: CourseAnalytics,
+    coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+) : BaseDownloadViewModel(
+    courseId,
+    downloadDao,
+    preferencesManager,
+    workerController,
+    coreAnalytics
+) {
 
     val apiHostUrl get() = config.getApiHostURL()
 

@@ -69,6 +69,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         installSplashScreen()
         binding = ActivityAppBinding.inflate(layoutInflater)
         lifecycle.addObserver(viewModel)
+        viewModel.logAppLaunchEvent()
         setContentView(binding.root)
         val container = binding.rootLayout
 

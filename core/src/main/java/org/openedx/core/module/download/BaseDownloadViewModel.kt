@@ -15,13 +15,18 @@ import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.CoreAnalyticsEvent
+import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.core.utils.Sha1Util
 import java.io.File
 
 abstract class BaseDownloadViewModel(
+    private val courseId: String,
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
-    private val workerController: DownloadWorkerController
+    private val workerController: DownloadWorkerController,
+    private val analytics: CoreAnalytics,
 ) : BaseViewModel() {
 
     private val allBlocks = hashMapOf<String, Block>()
@@ -106,6 +111,7 @@ abstract class BaseDownloadViewModel(
     open fun saveDownloadModels(folder: String, id: String) {
         viewModelScope.launch {
             val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
+            logSubsectionDownloadEvent(id, saveBlocksIds.size)
             saveDownloadModels(folder, saveBlocksIds)
         }
     }
@@ -196,6 +202,7 @@ abstract class BaseDownloadViewModel(
     open fun removeDownloadModels(blockId: String) {
         viewModelScope.launch {
             val downloadableChildren = downloadableChildrenMap[blockId] ?: listOf()
+            logSubsectionDeleteEvent(blockId, downloadableChildren.size)
             workerController.removeModels(downloadableChildren)
         }
     }
@@ -235,4 +242,45 @@ abstract class BaseDownloadViewModel(
         }
     }
 
+    fun logBulkDownloadToggleEvent(toggle: Boolean) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
+            buildMap {
+                put(
+                    CoreAnalyticsKey.ACTION.key,
+                    if (toggle) CoreAnalyticsKey.TRUE.key else CoreAnalyticsKey.FALSE.key
+                )
+            }
+        )
+    }
+
+    private fun logSubsectionDownloadEvent(subsectionId: String, numberOfVideos: Int) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION,
+            buildMap {
+                put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+                put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
+            })
+    }
+
+    private fun logSubsectionDeleteEvent(subsectionId: String, numberOfVideos: Int) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_DELETE_SUBSECTION,
+            buildMap {
+                put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+                put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
+            })
+    }
+
+    private fun logEvent(event: CoreAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(CoreAnalyticsKey.NAME.key, event.biValue)
+                put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.VIDEOS.key)
+                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
+                putAll(param)
+            }
+        )
+    }
 }

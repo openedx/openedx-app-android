@@ -8,6 +8,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
 
@@ -16,8 +17,9 @@ class DownloadQueueViewModel(
     downloadDao: DownloadDao,
     preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController,
-    private val downloadNotifier: DownloadNotifier
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+    private val downloadNotifier: DownloadNotifier,
+    coreAnalytics: CoreAnalytics,
+) : BaseDownloadViewModel("", downloadDao, preferencesManager, workerController, coreAnalytics) {
 
     private val _uiState = MutableStateFlow<DownloadQueueUIState>(DownloadQueueUIState.Loading)
     val uiState = _uiState.asStateFlow()

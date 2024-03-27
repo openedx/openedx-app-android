@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -21,7 +23,7 @@ class RestorePasswordViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<RestorePasswordUIState>()
@@ -41,28 +43,29 @@ class RestorePasswordViewModel(
     }
 
     fun passwordReset(email: String) {
+        logEvent(AuthAnalyticsEvent.RESET_PASSWORD_CLICKED)
         _uiState.value = RestorePasswordUIState.Loading
         viewModelScope.launch {
             try {
                 if (email.isNotEmpty() && email.isEmailValid()) {
                     if (interactor.passwordReset(email)) {
                         _uiState.value = RestorePasswordUIState.Success(email)
-                        analytics.resetPasswordClickedEvent(true)
+                        logResetPasswordEvent(true)
                     } else {
                         _uiState.value = RestorePasswordUIState.Initial
                         _uiMessage.value =
                             UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                        analytics.resetPasswordClickedEvent(false)
+                        logResetPasswordEvent(false)
                     }
                 } else {
                     _uiState.value = RestorePasswordUIState.Initial
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.auth.R.string.auth_invalid_email))
-                    analytics.resetPasswordClickedEvent(false)
+                    logResetPasswordEvent(false)
                 }
             } catch (e: Exception) {
                 _uiState.value = RestorePasswordUIState.Initial
-                analytics.resetPasswordClickedEvent(false)
+                logResetPasswordEvent(false)
                 if (e is EdxError.ValidationException) {
                     _uiMessage.value = UIMessage.SnackBarMessage(e.error)
                 } else if (e.isInternetError()) {
@@ -84,4 +87,25 @@ class RestorePasswordViewModel(
         }
     }
 
+    private fun logResetPasswordEvent(success: Boolean) {
+        logEvent(
+            event = AuthAnalyticsEvent.RESET_PASSWORD_SUCCESS,
+            params = buildMap {
+                put(AuthAnalyticsKey.SUCCESS.key, success)
+            }
+        )
+    }
+
+    private fun logEvent(
+        event: AuthAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
+    }
 }

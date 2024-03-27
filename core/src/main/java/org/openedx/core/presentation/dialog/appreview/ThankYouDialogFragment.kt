@@ -47,7 +47,9 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                 ThankYouDialog(
                     description = description,
                     showButtons = isFeedbackPositive.value,
-                    onNotNowClick = this@ThankYouDialogFragment::notNowClick,
+                    onNotNowClick = {
+                        this@ThankYouDialogFragment.notNowClick()
+                    },
                     onRateUsClick = this@ThankYouDialogFragment::openInAppReview
                 )
 
@@ -75,12 +77,16 @@ class ThankYouDialogFragment : BaseAppReviewDialogFragment() {
                     flow.addOnCompleteListener { _ ->
                         onPositiveRate()
                     }
-                    dismiss()
+                    onRateAppClick()
                 }
             } catch (e: ReviewException) {
                 e.printStackTrace()
             }
         }
+    }
+
+    override fun dismiss() {
+        onDismiss()
     }
 
     companion object {

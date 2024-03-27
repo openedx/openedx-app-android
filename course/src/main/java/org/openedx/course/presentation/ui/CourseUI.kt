@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -122,7 +121,8 @@ fun CourseImageHeader(
     apiHostUrl: String,
     courseImage: String?,
     courseCertificate: Certificate?,
-    courseName: String
+    onCertificateClick: (String) -> Unit = {},
+    courseName: String,
 ) {
     val configuration = LocalConfiguration.current
     val windowSize = rememberWindowSize()
@@ -132,7 +132,6 @@ fun CourseImageHeader(
         } else {
             ContentScale.Crop
         }
-    val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
@@ -191,7 +190,7 @@ fun CourseImageHeader(
                     text = stringResource(id = R.string.course_view_certificate),
                     onClick = {
                         courseCertificate.certificateURL?.let {
-                            uriHandler.openUri(it)
+                            onCertificateClick(it)
                         }
                     })
             }
@@ -578,6 +577,7 @@ fun HorizontalPageIndicator(
 
 @Composable
 fun VerticalPageIndicator(
+    modifier: Modifier = Modifier,
     numberOfPages: Int,
     selectedPage: Int = 0,
     selectedColor: Color = Color.White,
@@ -585,7 +585,6 @@ fun VerticalPageIndicator(
     defaultRadius: Dp = 8.dp,
     selectedLength: Dp = 25.dp,
     space: Dp = 4.dp,
-    modifier: Modifier = Modifier
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -1342,7 +1341,7 @@ private fun NavigationUnitsButtonsWithNextPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SequentialItemPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         Surface(color = MaterialTheme.appColors.background) {
             SequentialItem(block = mockChapterBlock, onClick = {})
         }

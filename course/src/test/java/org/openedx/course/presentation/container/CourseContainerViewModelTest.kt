@@ -6,6 +6,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
@@ -122,22 +123,25 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
@@ -150,22 +154,25 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
@@ -178,23 +185,26 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
         every { interactor.getCourseStructureFromCache() } returns courseStructure
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         assert(viewModel.errorMessage.value == null)
         assert(viewModel.showProgress.value == false)
@@ -206,24 +216,27 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.preloadCourseStructureFromCache(any()) } returns Unit
         every { interactor.getCourseStructureFromCache() } returns courseStructure
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 0) { interactor.preloadCourseStructure(any()) }
         coVerify(exactly = 1) { interactor.preloadCourseStructureFromCache(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         assert(viewModel.errorMessage.value == null)
         assert(viewModel.showProgress.value == false)
@@ -235,15 +248,16 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
@@ -262,15 +276,16 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
@@ -289,15 +304,16 @@ class CourseContainerViewModelTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
             resourceManager,
             notifier,
             networkConnection,
-            analytics,
             corePreferences,
             coursePreferences,
+            analytics,
         )
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit

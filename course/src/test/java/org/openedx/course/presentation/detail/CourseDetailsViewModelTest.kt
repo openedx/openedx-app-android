@@ -208,15 +208,13 @@ class CourseDetailsViewModelTest {
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockCourse
-        every { analytics.courseEnrollClickedEvent(any(), any()) } returns Unit
-        every { analytics.courseEnrollSuccessEvent(any(), any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
 
-        viewModel.enrollInACourse("")
+        viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
-        verify(exactly = 1) { analytics.courseEnrollClickedEvent(any(), any()) }
-        verify(exactly = 0) { analytics.courseEnrollSuccessEvent(any(), any()) }
+        verify { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -241,16 +239,14 @@ class CourseDetailsViewModelTest {
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockCourse
-        every { analytics.courseEnrollClickedEvent(any(), any()) } returns Unit
-        every { analytics.courseEnrollSuccessEvent(any(), any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
 
 
-        viewModel.enrollInACourse("")
+        viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
-        verify(exactly = 1) { analytics.courseEnrollClickedEvent(any(), any()) }
-        verify(exactly = 0) { analytics.courseEnrollSuccessEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -271,8 +267,7 @@ class CourseDetailsViewModelTest {
         )
         every { config.isPreLoginExperienceEnabled() } returns false
         every { preferencesManager.user } returns null
-        every { analytics.courseEnrollClickedEvent(any(), any()) } returns Unit
-        every { analytics.courseEnrollSuccessEvent(any(), any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         coEvery { interactor.enrollInACourse(any()) } returns Unit
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
@@ -280,12 +275,11 @@ class CourseDetailsViewModelTest {
 
 
         delay(200)
-        viewModel.enrollInACourse("")
+        viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
-        verify(exactly = 1) { analytics.courseEnrollClickedEvent(any(), any()) }
-        verify(exactly = 1) { analytics.courseEnrollSuccessEvent(any(), any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)

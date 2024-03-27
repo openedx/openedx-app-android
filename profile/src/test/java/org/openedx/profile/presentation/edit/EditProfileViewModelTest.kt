@@ -108,9 +108,11 @@ class EditProfileViewModelTest {
             EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(any<AccountUpdated>()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.updateAccount(emptyMap())
         advanceUntilIdle()
 
+        verify { analytics.logEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
 
         assert(viewModel.uiMessage.value == null)
@@ -164,10 +166,12 @@ class EditProfileViewModelTest {
         coEvery { interactor.setProfileImage(any(), any()) } returns Unit
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(any<AccountUpdated>()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
 
         viewModel.updateAccountAndImage(emptyMap(), file, "")
         advanceUntilIdle()
 
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
         coVerify(exactly = 1) { interactor.setProfileImage(any(), any()) }
 

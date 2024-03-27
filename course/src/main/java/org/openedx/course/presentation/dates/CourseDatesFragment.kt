@@ -90,7 +90,9 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
+import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
@@ -117,11 +119,12 @@ import org.openedx.core.R as coreR
 
 class CourseDatesFragment : Fragment() {
 
-    private val viewModel by viewModel<CourseDatesViewModel> {
+    val viewModel by viewModel<CourseDatesViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_COURSE_NAME, ""),
             requireArguments().getBoolean(ARG_IS_SELF_PACED, true),
+            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
         )
     }
     private val router by inject<CourseRouter>()
@@ -160,9 +163,10 @@ class CourseDatesFragment : Fragment() {
                     onSwipeRefresh = {
                         viewModel.getCourseDates(swipeToRefresh = true)
                     },
-                    onItemClick = { blockId ->
-                        if (blockId.isNotEmpty()) {
-                            viewModel.getVerticalBlock(blockId)?.let { verticalBlock ->
+                    onItemClick = { block ->
+                        if (block.blockId.isNotEmpty()) {
+                            viewModel.getVerticalBlock(block.blockId)?.let { verticalBlock ->
+                                viewModel.logCourseComponentTapped(true, block)
                                 if (viewModel.isCourseExpandableSectionsEnabled) {
                                     router.navigateToCourseContainer(
                                         fm = requireActivity().supportFragmentManager,
@@ -183,11 +187,33 @@ class CourseDatesFragment : Fragment() {
                                             )
                                         }
                                 }
+                            } ?: {
+                                viewModel.logCourseComponentTapped(false, block)
+                                ActionDialogFragment.newInstance(
+                                    title = getString(coreR.string.core_leaving_the_app),
+                                    message = getString(
+                                        coreR.string.core_leaving_the_app_message,
+                                        getString(coreR.string.platform_name)
+                                    ),
+                                    url = block.link,
+                                    source = CoreAnalyticsScreen.COURSE_DATES.screenName
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    ActionDialogFragment::class.simpleName
+                                )
+
                             }
                         }
                     },
+                    onPLSBannerViewed = {
+                        if (isResumed) {
+                            viewModel.logPlsBannerViewed()
+                        }
+                    },
                     onSyncDates = {
+                        viewModel.logPlsShiftButtonClicked()
                         viewModel.resetCourseDatesBanner {
+                            viewModel.logPlsShiftDates(it)
                             if (it) {
                                 (parentFragment as CourseContainerFragment)
                                     .updateCourseStructure(false)
@@ -210,11 +236,13 @@ class CourseDatesFragment : Fragment() {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_COURSE_NAME = "courseName"
         private const val ARG_IS_SELF_PACED = "selfPaced"
+        private const val ARG_ENROLLMENT_MODE = "enrollmentMode"
 
         fun newInstance(
             courseId: String,
             courseName: String,
             isSelfPaced: Boolean,
+            enrollmentMode: String,
         ): CourseDatesFragment {
             val fragment = CourseDatesFragment()
             fragment.arguments =
@@ -222,6 +250,7 @@ class CourseDatesFragment : Fragment() {
                     ARG_COURSE_ID to courseId,
                     ARG_COURSE_NAME to courseName,
                     ARG_IS_SELF_PACED to isSelfPaced,
+                    ARG_ENROLLMENT_MODE to enrollmentMode,
                 )
             return fragment
         }
@@ -240,7 +269,8 @@ internal fun CourseDatesScreen(
     calendarSyncUIState: CalendarSyncUIState,
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
-    onItemClick: (String) -> Unit,
+    onItemClick: (CourseDateBlock) -> Unit,
+    onPLSBannerViewed: () -> Unit,
     onSyncDates: () -> Unit,
     onCalendarSyncSwitch: (Boolean) -> Unit = {},
 ) {
@@ -334,6 +364,7 @@ internal fun CourseDatesScreen(
 
                                 if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
                                     item {
+                                        onPLSBannerViewed()
                                         if (windowSize.isTablet) {
                                             CourseDatesBannerTablet(
                                                 modifier = Modifier.padding(top = 16.dp),
@@ -491,7 +522,7 @@ fun CalendarSyncCard(
 fun ExpandableView(
     sectionKey: DatesSection = DatesSection.NONE,
     sectionDates: List<CourseDateBlock>,
-    onItemClick: (String) -> Unit,
+    onItemClick: (CourseDateBlock) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     // expandable view Animation
@@ -582,7 +613,7 @@ fun ExpandableView(
 private fun CourseDateBlockSection(
     sectionKey: DatesSection = DatesSection.NONE,
     sectionDates: List<CourseDateBlock>,
-    onItemClick: (String) -> Unit,
+    onItemClick: (CourseDateBlock) -> Unit,
 ) {
     Column(modifier = Modifier.padding(start = 8.dp)) {
         if (sectionKey != DatesSection.COMPLETED) {
@@ -635,7 +666,7 @@ private fun DateBullet(
 @Composable
 private fun DateBlock(
     dateBlocks: List<CourseDateBlock>,
-    onItemClick: (String) -> Unit,
+    onItemClick: (CourseDateBlock) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -660,7 +691,7 @@ private fun CourseDateItem(
     dateBlock: CourseDateBlock,
     canShowDate: Boolean,
     isMiddleChild: Boolean,
-    onItemClick: (String) -> Unit
+    onItemClick: (CourseDateBlock) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -688,7 +719,7 @@ private fun CourseDateItem(
                 .fillMaxWidth()
                 .padding(end = 4.dp)
                 .clickable(enabled = dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess,
-                    onClick = { onItemClick(dateBlock.blockId) })
+                    onClick = { onItemClick(dateBlock) })
         ) {
             dateBlock.dateType.drawableResId?.let { icon ->
                 Icon(
@@ -756,6 +787,7 @@ private fun CourseDatesScreenPreview() {
             onReloadClick = {},
             onSwipeRefresh = {},
             onItemClick = {},
+            onPLSBannerViewed = {},
             onSyncDates = {},
             onCalendarSyncSwitch = {},
         )
@@ -778,6 +810,7 @@ private fun CourseDatesScreenTabletPreview() {
             onReloadClick = {},
             onSwipeRefresh = {},
             onItemClick = {},
+            onPLSBannerViewed = {},
             onSyncDates = {},
             onCalendarSyncSwitch = {},
         )

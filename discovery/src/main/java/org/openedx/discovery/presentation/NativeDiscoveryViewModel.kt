@@ -27,7 +27,7 @@ class NativeDiscoveryViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
     private val appUpgradeNotifier: AppUpgradeNotifier,
-    private val corePreferences: CorePreferences
+    private val corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -182,5 +182,18 @@ class NativeDiscoveryViewModel(
 
     fun discoveryCourseClicked(courseId: String, courseName: String) {
         analytics.discoveryCourseClickedEvent(courseId, courseName)
+    }
+
+    fun courseDetailClickedEvent(courseId: String, courseTitle: String) {
+        val event = DiscoveryAnalyticsEvent.COURSE_INFO
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+                put(DiscoveryAnalyticsKey.COURSE_NAME.key, courseTitle)
+                put(DiscoveryAnalyticsKey.CATEGORY.key, DiscoveryAnalyticsKey.DISCOVERY.key)
+            }
+        )
     }
 }

@@ -18,6 +18,8 @@ import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class CourseDetailsViewModel(
     val courseId: String,
@@ -27,7 +29,7 @@ class CourseDetailsViewModel(
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
-    private val analytics: CourseAnalytics
+    private val analytics: CourseAnalytics,
 ) : BaseViewModel() {
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
@@ -78,18 +80,18 @@ class CourseDetailsViewModel(
         }
     }
 
-    fun enrollInACourse(id: String) {
+    fun enrollInACourse(id: String, title: String) {
         viewModelScope.launch {
             try {
                 val courseData = _uiState.value
                 if (courseData is CourseDetailsUIState.CourseData) {
-                    courseEnrollClickedEvent(id, courseData.course.name)
+                    courseEnrollClickedEvent(id, title)
                 }
                 interactor.enrollInACourse(id)
                 val course = interactor.getCourseDetails(id)
                 if (courseData is CourseDetailsUIState.CourseData) {
                     _uiState.value = courseData.copy(course = course)
-                    courseEnrollSuccessEvent(id, course.name)
+                    courseEnrollSuccessEvent(id, title)
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
@@ -127,15 +129,26 @@ class CourseDetailsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-    private fun courseEnrollClickedEvent(courseId: String, courseName: String) {
-        analytics.courseEnrollClickedEvent(courseId, courseName)
+    private fun courseEnrollClickedEvent(courseId: String, courseTitle: String) {
+        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId, courseTitle)
     }
 
-    private fun courseEnrollSuccessEvent(courseId: String, courseName: String) {
-        analytics.courseEnrollSuccessEvent(courseId, courseName)
+    private fun courseEnrollSuccessEvent(courseId: String, courseTitle: String) {
+        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId, courseTitle)
     }
 
-    fun viewCourseClickedEvent(courseId: String, courseName: String) {
-        analytics.viewCourseClickedEvent(courseId, courseName)
+    private fun logEvent(
+        event: CourseAnalyticsEvent,
+        courseId: String, courseTitle: String,
+    ) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                put(CourseAnalyticsKey.CONVERSION.key, courseId)
+            }
+        )
     }
 }

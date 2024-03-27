@@ -149,7 +149,7 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -165,7 +165,7 @@ fun Toolbar(
                 .fillMaxWidth()
                 .testTag("txt_toolbar_title")
                 .align(Alignment.Center)
-                .padding(start = 48.dp, end = 48.dp),
+                .padding(horizontal = 48.dp),
             text = label,
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleMedium,
@@ -449,7 +449,8 @@ fun HyperlinkText(
             annotatedString
                 .getStringAnnotations("URL", it, it)
                 .firstOrNull()?.let { stringAnnotation ->
-                    action?.invoke(stringAnnotation.item) ?: uriHandler.openUri(stringAnnotation.item)
+                    action?.invoke(stringAnnotation.item)
+                        ?: uriHandler.openUri(stringAnnotation.item)
                 }
         }
     )
@@ -586,7 +587,7 @@ fun SheetContent(
     expandedList: List<RegistrationField.Option>,
     onItemClick: (RegistrationField.Option) -> Unit,
     listState: LazyListState,
-    searchValueChanged: (String) -> Unit
+    searchValueChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -650,7 +651,7 @@ fun SheetContent(
     title: String = stringResource(id = R.string.core_select_value),
     expandedList: List<Pair<String, String>>,
     onItemClick: (Pair<String, String>) -> Unit,
-    searchValueChanged: (String) -> Unit
+    searchValueChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -827,7 +828,7 @@ fun DiscoveryCourseItem(
     apiHostUrl: String,
     course: Course,
     windowSize: WindowSize,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
 ) {
 
     val imageWidth by remember(key1 = windowSize) {
@@ -1091,7 +1092,7 @@ fun OpenEdXButton(
     onClick: () -> Unit,
     enabled: Boolean = true,
     backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null
+    content: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Button(
         modifier = Modifier
@@ -1126,7 +1127,7 @@ fun OpenEdXOutlinedButton(
     textColor: Color,
     text: String = "",
     onClick: () -> Unit,
-    content: (@Composable RowScope.() -> Unit)? = null
+    content: (@Composable RowScope.() -> Unit)? = null,
 ) {
     OutlinedButton(
         modifier = Modifier
@@ -1155,7 +1156,7 @@ fun OpenEdXOutlinedButton(
 fun BackBtn(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.appColors.primary,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     IconButton(modifier = modifier.testTag("ib_back"),
         onClick = { onBackClick() }) {
@@ -1170,7 +1171,7 @@ fun BackBtn(
 @Composable
 fun ConnectionErrorView(
     modifier: Modifier,
-    onReloadClick: () -> Unit
+    onReloadClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -1212,7 +1213,7 @@ fun ConnectionErrorView(
 @Composable
 fun AuthButtonsPanel(
     onRegisterClick: () -> Unit,
-    onSignInClick: () -> Unit
+    onSignInClick: () -> Unit,
 ) {
     Row {
         OpenEdXButton(

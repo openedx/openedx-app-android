@@ -42,6 +42,7 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
+import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.catalog.CatalogWebViewScreen
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -142,8 +143,17 @@ class CourseInfoFragment : Fragment() {
                     },
                     onUriClick = { param, type ->
                         when (type) {
-                            linkAuthority.PROGRAM_INFO,
+                            linkAuthority.PROGRAM_INFO -> {
+                                viewModel.programInfoClickedEvent(param)
+                                viewModel.infoCardClicked(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param,
+                                    infoType = type.name
+                                )
+                            }
+
                             linkAuthority.COURSE_INFO -> {
+                                viewModel.courseInfoClickedEvent(param)
                                 viewModel.infoCardClicked(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     pathId = param,
@@ -159,6 +169,7 @@ class CourseInfoFragment : Fragment() {
                                         getString(CoreR.string.platform_name)
                                     ),
                                     url = param,
+                                    source = CoreAnalyticsScreen.COURSE_INFO.screenName
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     ActionDialogFragment::class.simpleName
@@ -166,6 +177,7 @@ class CourseInfoFragment : Fragment() {
                             }
 
                             linkAuthority.ENROLL -> {
+                                viewModel.courseEnrollClickedEvent(param)
                                 if (uiState.isPreLogin) {
                                     viewModel.navigateToSignUp(
                                         fragmentManager = requireActivity().supportFragmentManager,

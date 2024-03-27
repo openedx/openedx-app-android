@@ -31,6 +31,9 @@ import androidx.fragment.app.DialogFragment
 import org.koin.android.ext.android.inject
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.CoreAnalyticsEvent
+import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
 import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -42,6 +45,9 @@ import org.openedx.core.utils.UrlUtils
 class ActionDialogFragment : DialogFragment() {
 
     private val config by inject<Config>()
+    private val analytics: CoreAnalytics by inject()
+    private lateinit var url: String
+    private lateinit var screen: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,40 +59,71 @@ class ActionDialogFragment : DialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                url = requireArguments().getString(ARG_URL, "")
+                screen = requireArguments().getString(ARG_SCREEN, "")
                 ActionDialog(
                     title = requireArguments().getString(ARG_TITLE, ""),
                     message = requireArguments().getString(ARG_MESSAGE, ""),
                     onPositiveClick = {
+                        logDialogActionEvent(CoreAnalyticsKey.CANCEL.key)
                         dismiss()
                     },
                     onNegativeClick = {
                         UrlUtils.openInBrowser(
                             activity = context,
                             apiHostUrl = config.getApiHostURL(),
-                            url = requireArguments().getString(ARG_URL, ""),
+                            url = url,
                         )
+                        logDialogActionEvent(CoreAnalyticsKey.CONTINUE.key)
                         dismiss()
                     }
                 )
+                logDialogEvent(event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT)
             }
         }
+    }
+
+    private fun logDialogActionEvent(action: String) {
+        logDialogEvent(
+            event = CoreAnalyticsEvent.EXTERNAL_LINK_OPENING_ALERT_ACTION,
+            action = action
+        )
+    }
+
+    private fun logDialogEvent(
+        event: CoreAnalyticsEvent,
+        action: String? = null,
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(CoreAnalyticsKey.NAME.key, event.biValue)
+                put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
+                put(CoreAnalyticsKey.URL.key, url)
+                put(CoreAnalyticsKey.SCREEN_NAME.key, screen)
+                action?.let { put(CoreAnalyticsKey.ACTION.key, action) }
+            }
+        )
     }
 
     companion object {
         private const val ARG_TITLE = "title"
         private const val ARG_MESSAGE = "message"
         private const val ARG_URL = "url"
+        private const val ARG_SCREEN = "screen"
 
         fun newInstance(
             title: String,
             message: String,
             url: String,
+            source: String,
         ): ActionDialogFragment {
             val fragment = ActionDialogFragment()
             fragment.arguments = bundleOf(
                 ARG_TITLE to title,
                 ARG_MESSAGE to message,
                 ARG_URL to url,
+                ARG_SCREEN to source
             )
             return fragment
         }

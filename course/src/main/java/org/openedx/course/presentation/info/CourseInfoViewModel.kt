@@ -14,6 +14,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -21,20 +22,24 @@ import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 
 class CourseInfoViewModel(
+    val pathId: String,
+    val infoType: String,
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val router: CourseRouter,
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val resourceManager: ResourceManager,
+    private val analytics: CourseAnalytics,
     corePreferences: CorePreferences,
-    val pathId: String,
-    val infoType: String,
 ) : BaseViewModel() {
 
     private val _uiState =
@@ -89,6 +94,7 @@ class CourseInfoViewModel(
                 }
 
                 interactor.enrollInACourse(courseId)
+                courseEnrollSuccessEvent(courseId)
                 notifier.send(CourseDashboardUpdate())
                 _uiState.update { it.copy(enrollmentSuccess = AtomicReference(courseId)) }
             } catch (e: Exception) {
@@ -108,7 +114,8 @@ class CourseInfoViewModel(
             router.navigateToCourseOutline(
                 fm = fragmentManager,
                 courseId = courseId,
-                courseTitle = ""
+                courseTitle = "",
+                enrollmentMode = ""
             )
         }
     }
@@ -129,6 +136,37 @@ class CourseInfoViewModel(
 
     fun navigateToSignIn(fragmentManager: FragmentManager, courseId: String, infoType: String) {
         router.navigateToSignIn(fragmentManager, courseId, infoType)
+    }
+
+    fun courseInfoClickedEvent(courseId: String) {
+        logEvent(CourseAnalyticsEvent.COURSE_INFO, courseId)
+    }
+
+    fun programInfoClickedEvent(courseId: String) {
+        logEvent(CourseAnalyticsEvent.PROGRAM_INFO, courseId)
+    }
+
+    fun courseEnrollClickedEvent(courseId: String) {
+        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId)
+    }
+
+    private fun courseEnrollSuccessEvent(courseId: String) {
+        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId)
+    }
+
+    private fun logEvent(
+        event: CourseAnalyticsEvent,
+        courseId: String,
+    ) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
+                put(CourseAnalyticsKey.CONVERSION.key, courseId)
+            }
+        )
     }
 
     companion object {

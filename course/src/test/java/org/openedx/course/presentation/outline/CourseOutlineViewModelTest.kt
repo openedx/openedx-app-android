@@ -46,6 +46,7 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -72,6 +73,7 @@ class CourseOutlineViewModelTest {
     private val downloadDao = mockk<DownloadDao>()
     private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<CourseAnalytics>()
+    private val coreAnalytics = mockk<CoreAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -226,8 +228,9 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
         )
 
         advanceUntilIdle()
@@ -255,6 +258,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -295,6 +299,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -334,6 +339,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -373,6 +379,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -399,6 +406,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -431,6 +439,7 @@ class CourseOutlineViewModelTest {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
@@ -445,12 +454,14 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
+        verify(exactly = 1) { coreAnalytics.logEvent(any(), any()) }
 
         assert(viewModel.uiMessage.value == null)
     }
@@ -466,6 +477,7 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -476,6 +488,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -505,6 +518,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )

@@ -17,6 +17,8 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
@@ -105,8 +107,10 @@ class SignUpViewModel(
         val agreementFields = mutableListOf<RegistrationField>()
         val agreementText = agreementProvider.getAgreement(isSignIn = false)
         if (agreementText != null) {
-            val honourCode = allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
-            val marketingEmails = allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
+            val honourCode =
+                allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
+            val marketingEmails =
+                allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
             mutableAllFields.remove(honourCode)
             requiredFields.addAll(mutableAllFields.filter { it.required })
             optionalFields.addAll(mutableAllFields.filter { !it.required })
@@ -129,9 +133,9 @@ class SignUpViewModel(
     }
 
     fun register() {
-        analytics.createAccountClickedEvent("")
+        logEvent(AuthAnalyticsEvent.CREATE_ACCOUNT_CLICKED)
         val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
-            mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
+                mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
         val resultMap = mapFields.toMutableMap()
         uiState.value.allFields.filter { !it.required }.forEach { (k, _) ->
             if (mapFields[k].isNullOrEmpty()) {
@@ -154,7 +158,16 @@ class SignUpViewModel(
                         resultMap[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
                     }
                     interactor.register(resultMap.toMap())
-                    analytics.registrationSuccessEvent(socialAuth?.authType?.postfix.orEmpty())
+                    logEvent(
+                        event = AuthAnalyticsEvent.REGISTER_SUCCESS,
+                        params = buildMap {
+                            put(
+                                AuthAnalyticsKey.METHOD.key,
+                                (socialAuth?.authType?.methodName
+                                    ?: AuthType.PASSWORD.methodName).lowercase()
+                            )
+                        }
+                    )
                     if (socialAuth == null) {
                         interactor.login(
                             resultMap.getValue(ApiConstants.EMAIL),
@@ -226,7 +239,15 @@ class SignUpViewModel(
             updateFields(fields)
         }.onSuccess {
             setUserId()
-            analytics.userLoginEvent(socialAuth.authType.methodName)
+            logEvent(
+                AuthAnalyticsEvent.SIGN_IN_SUCCESS,
+                buildMap {
+                    put(
+                        AuthAnalyticsKey.METHOD.key,
+                        socialAuth.authType.methodName.lowercase()
+                    )
+                }
+            )
             _uiState.update { it.copy(successLogin = true) }
             logger.d { "Social login (${socialAuth.authType.methodName}) success" }
         }
@@ -278,5 +299,18 @@ class SignUpViewModel(
                 return
             }
         }
+    }
+
+    private fun logEvent(
+        event: AuthAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
     }
 }

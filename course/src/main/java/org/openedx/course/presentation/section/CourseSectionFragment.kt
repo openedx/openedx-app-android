@@ -86,7 +86,7 @@ class CourseSectionFragment : Fragment() {
                     },
                     onItemClick = { block ->
                         if (block.descendants.isNotEmpty()) {
-                            viewModel.verticalClickedEvent(block.blockId, block.displayName)
+                            viewModel.verticalClickedEvent(block.blockId)
                             router.navigateToCourseContainer(
                                 fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,

@@ -22,6 +22,7 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
@@ -30,6 +31,8 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
 
@@ -42,9 +45,16 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
+    coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
-    workerController: DownloadWorkerController
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+    workerController: DownloadWorkerController,
+) : BaseDownloadViewModel(
+    courseId,
+    downloadDao,
+    preferencesManager,
+    workerController,
+    coreAnalytics
+) {
 
     val apiHostUrl get() = config.getApiHostURL()
 
@@ -256,7 +266,7 @@ class CourseOutlineViewModel(
 
     private fun getResumeBlock(
         blocks: List<Block>,
-        continueBlockId: String
+        continueBlockId: String,
     ): Block? {
         val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
         resumeVerticalBlock =
@@ -286,10 +296,31 @@ class CourseOutlineViewModel(
         }
     }
 
+    fun viewCertificateTappedEvent() {
+        analytics.logEvent(
+            CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
+            buildMap {
+                put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+            }
+        )
+    }
+
     fun resumeCourseTappedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
-            analytics.resumeCourseTappedEvent(courseId, currentState.courseStructure.name, blockId)
+            analytics.logEvent(
+                CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
         }
     }
 
@@ -305,10 +336,19 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun verticalClickedEvent(blockId: String, blockName: String) {
+    fun logUnitDetailViewedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
-            analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+            analytics.logEvent(
+                CourseAnalyticsEvent.UNIT_DETAIL.eventName,
+                buildMap {
+                    put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.BLOCK_NAME.key, blockName)
+                }
+            )
         }
     }
 

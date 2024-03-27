@@ -90,7 +90,8 @@ class ProgramViewModel(
             router.navigateToCourseOutline(
                 fm = fragmentManager,
                 courseId = courseId,
-                courseTitle = ""
+                courseTitle = "",
+                enrollmentMode = ""
             )
         }
     }

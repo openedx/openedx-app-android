@@ -38,6 +38,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import java.net.UnknownHostException
 import java.util.Date
@@ -55,6 +56,7 @@ class CourseDatesViewModelTest {
     private val calendarManager = mockk<CalendarManager>()
     private val networkConnection = mockk<NetworkConnection>()
     private val corePreferences = mockk<CorePreferences>()
+    private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
 
     private val openEdx = "OpenEdx"
@@ -156,12 +158,14 @@ class CourseDatesViewModelTest {
             "",
             "",
             true,
+            "",
             notifier,
             interactor,
             calendarManager,
             networkConnection,
             resourceManager,
             corePreferences,
+            analytics,
             config
         )
         every { networkConnection.isOnline() } returns true
@@ -183,12 +187,14 @@ class CourseDatesViewModelTest {
             "",
             "",
             true,
+            "",
             notifier,
             interactor,
             calendarManager,
             networkConnection,
             resourceManager,
             corePreferences,
+            analytics,
             config
         )
         every { networkConnection.isOnline() } returns true
@@ -210,12 +216,14 @@ class CourseDatesViewModelTest {
             "",
             "",
             true,
+            "",
             notifier,
             interactor,
             calendarManager,
             networkConnection,
             resourceManager,
             corePreferences,
+            analytics,
             config
         )
         every { networkConnection.isOnline() } returns true
@@ -236,12 +244,14 @@ class CourseDatesViewModelTest {
             "",
             "",
             true,
+            "",
             notifier,
             interactor,
             calendarManager,
             networkConnection,
             resourceManager,
             corePreferences,
+            analytics,
             config
         )
         every { networkConnection.isOnline() } returns true

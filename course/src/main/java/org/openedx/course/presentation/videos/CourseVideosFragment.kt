@@ -112,6 +112,7 @@ class CourseVideosFragment : Fragment() {
                         }
                     },
                     onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
+                        viewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
                         if (isAllBlocksDownloadedOrDownloading) {
                             viewModel.removeAllDownloadModels()
                         } else {
@@ -148,7 +149,7 @@ class CourseVideosFragment : Fragment() {
         private const val ARG_TITLE = "title"
         fun newInstance(
             courseId: String,
-            title: String
+            title: String,
         ): CourseVideosFragment {
             val fragment = CourseVideosFragment()
             fragment.arguments = bundleOf(

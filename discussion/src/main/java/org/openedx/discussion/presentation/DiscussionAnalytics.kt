@@ -9,4 +9,6 @@ interface DiscussionAnalytics {
         topicId: String,
         topicName: String
     )
+
+    fun logEvent(event: String, params: Map<String, Any?>)
 }

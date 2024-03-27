@@ -151,6 +151,7 @@ class NativeDiscoveryFragment : Fragment() {
                     },
                     onItemClick = { course ->
                         viewModel.discoveryCourseClicked(course.id, course.name)
+                        viewModel.courseDetailClickedEvent(course.id, course.name)
                         router.navigateToCourseDetail(
                             requireActivity().supportFragmentManager,
                             course.id

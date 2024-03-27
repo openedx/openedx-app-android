@@ -8,11 +8,12 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.UrlUtils
 
 class WebViewDiscoveryViewModel(
+    private val querySearch: String,
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
     private val router: DiscoveryRouter,
-    private val querySearch: String,
+    private val analytics: DiscoveryAnalytics,
 ) : BaseViewModel() {
 
     val uriScheme: String get() = config.getUriScheme()
@@ -58,5 +59,27 @@ class WebViewDiscoveryViewModel(
 
     fun navigateToSignIn(fragmentManager: FragmentManager) {
         router.navigateToSignIn(fragmentManager, null, null)
+    }
+
+    fun courseInfoClickedEvent(courseId: String) {
+        logEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
+    }
+
+    fun programInfoClickedEvent(courseId: String) {
+        logEvent(DiscoveryAnalyticsEvent.PROGRAM_INFO, courseId)
+    }
+
+    private fun logEvent(
+        event: DiscoveryAnalyticsEvent,
+        courseId: String,
+    ) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+                put(DiscoveryAnalyticsKey.CATEGORY.key, DiscoveryAnalyticsKey.DISCOVERY.key)
+            }
+        )
     }
 }

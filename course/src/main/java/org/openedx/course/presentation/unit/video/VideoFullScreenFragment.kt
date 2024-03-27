@@ -9,13 +9,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.Clock
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
-import org.koin.android.ext.android.inject
 import androidx.media3.exoplayer.analytics.DefaultAnalyticsCollector
 import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -23,6 +23,7 @@ import androidx.media3.exoplayer.trackselection.AdaptiveTrackSelection
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import androidx.media3.extractor.DefaultExtractorsFactory
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.domain.model.VideoQuality
@@ -31,6 +32,7 @@ import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
@@ -54,7 +56,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
                 if (!appReviewManager.isDialogShowed) {
                     appReviewManager.tryToOpenRateDialog()
                 }
-                viewModel.markBlockCompleted(blockId)
+                viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
             }
         }
     }
@@ -130,11 +132,31 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             }
 
             exoPlayer?.addListener(object : Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+                    viewModel.logPlayPauseEvent(
+                        viewModel.videoUrl,
+                        isPlaying,
+                        viewModel.currentVideoTime,
+                        CourseAnalyticsKey.NATIVE.key
+                    )
+                }
+
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     super.onPlaybackStateChanged(playbackState)
                     if (playbackState == Player.STATE_ENDED) {
-                        viewModel.markBlockCompleted(blockId)
+                        viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
                     }
+                }
+
+                override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                    super.onPlaybackParametersChanged(playbackParameters)
+                    viewModel.logVideoSpeedEvent(
+                        viewModel.videoUrl,
+                        playbackParameters.speed,
+                        viewModel.currentVideoTime,
+                        CourseAnalyticsKey.NATIVE.key
+                    )
                 }
             })
         }
@@ -144,7 +166,8 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
     private fun setPlayerMedia(mediaItem: MediaItem) {
         if (viewModel.videoUrl.endsWith(".m3u8")) {
             val factory = DefaultDataSource.Factory(requireContext())
-            val mediaSource: HlsMediaSource = HlsMediaSource.Factory(factory).createMediaSource(mediaItem)
+            val mediaSource: HlsMediaSource =
+                HlsMediaSource.Factory(factory).createMediaSource(mediaItem)
             exoPlayer?.setMediaSource(mediaSource, viewModel.currentVideoTime)
         } else {
             exoPlayer?.setMediaItem(
@@ -196,7 +219,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             videoTime: Long,
             blockId: String,
             courseId: String,
-            isPlaying: Boolean
+            isPlaying: Boolean,
         ): VideoFullScreenFragment {
             val fragment = VideoFullScreenFragment()
             fragment.arguments = bundleOf(
@@ -209,5 +232,4 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             return fragment
         }
     }
-
 }

@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import org.openedx.core.ui.theme.OpenEdXTheme
 
-class RateDialogFragment: BaseAppReviewDialogFragment() {
+class RateDialogFragment : BaseAppReviewDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -26,17 +26,16 @@ class RateDialogFragment: BaseAppReviewDialogFragment() {
                 val rating = rememberSaveable { mutableIntStateOf(0) }
                 RateDialog(
                     rating = rating,
-                    onNotNowClick = this@RateDialogFragment::notNowClick,
-                    onSubmitClick = {
-                        onSubmitClick(rating.intValue)
-                    }
+                    onNotNowClick = { notNowClick(rating.intValue) },
+                    onSubmitClick = { onSubmitClick(rating.intValue) }
                 )
             }
         }
+        onRatingDialogShowed()
     }
 
     private fun onSubmitClick(rating: Int) {
-        dismiss()
+        onSubmitRatingClick(rating)
         if (rating > 3) {
             openThankYouDialog()
         } else {
@@ -60,6 +59,10 @@ class RateDialogFragment: BaseAppReviewDialogFragment() {
             requireActivity().supportFragmentManager,
             ThankYouDialogFragment::class.simpleName
         )
+    }
+
+    override fun dismiss() {
+        onDismiss()
     }
 
     companion object {

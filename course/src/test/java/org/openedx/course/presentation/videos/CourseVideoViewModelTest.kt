@@ -37,6 +37,7 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -60,6 +61,7 @@ class CourseVideoViewModelTest {
     private val courseNotifier = spyk<CourseNotifier>()
     private val videoNotifier = spyk<VideoNotifier>()
     private val analytics = mockk<CourseAnalytics>()
+    private val coreAnalytics = mockk<CoreAnalytics>()
     private val preferencesManager = mockk<CorePreferences>()
     private val networkConnection = mockk<NetworkConnection>()
     private val downloadDao = mockk<DownloadDao>()
@@ -185,6 +187,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -214,6 +217,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -249,6 +253,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -280,6 +285,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -305,6 +311,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -313,6 +320,7 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
@@ -334,6 +342,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )
@@ -345,6 +354,7 @@ class CourseVideoViewModelTest {
         coEvery { downloadDao.readAllData() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
+        every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
@@ -366,6 +376,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            coreAnalytics,
             downloadDao,
             workerController
         )

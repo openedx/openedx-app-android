@@ -134,11 +134,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToCourseOutline(
         fm: FragmentManager,
         courseId: String,
-        courseTitle: String
+        courseTitle: String,
+        enrollmentMode: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle)
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
         )
     }
 

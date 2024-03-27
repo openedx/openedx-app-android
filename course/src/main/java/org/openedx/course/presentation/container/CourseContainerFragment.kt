@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -39,7 +40,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private val viewModel by viewModel<CourseContainerViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_TITLE, "")
+            requireArguments().getString(ARG_TITLE, ""),
+            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
         )
     }
     private val router by inject<CourseRouter>()
@@ -49,6 +51,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted ->
+        viewModel.logCalendarPermissionAccess(!isGranted.containsValue(false))
         if (!isGranted.containsValue(false)) {
             viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.SYNC_DIALOG)
         }
@@ -132,7 +135,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 CourseDatesFragment.newInstance(
                     viewModel.courseId,
                     viewModel.courseName,
-                    viewModel.isSelfPaced
+                    viewModel.isSelfPaced,
+                    viewModel.enrollmentMode,
                 )
             )
             addFragment(
@@ -146,16 +150,26 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         if (viewModel.isCourseTopTabBarEnabled) {
             TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                 tab.text = getString(
-                    Tabs.values().find { it.ordinal == position }?.titleResId
+                    Tabs.entries.find { it.ordinal == position }?.titleResId
                         ?: R.string.course_navigation_course
                 )
             }.attach()
             binding.tabLayout.isVisible = true
+            binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    tab?.let {
+                        viewModel.courseContainerTabClickedEvent(Tabs.entries[it.position])
+                    }
+                }
 
+                override fun onTabUnselected(p0: TabLayout.Tab?) {}
+
+                override fun onTabReselected(p0: TabLayout.Tab?) {}
+            })
         } else {
             binding.viewPager.isUserInputEnabled = false
             binding.bottomNavView.setOnItemSelectedListener { menuItem ->
-                Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                Tabs.entries.find { menuItem.itemId == it.itemId }?.let { tab ->
                     viewModel.courseContainerTabClickedEvent(tab)
                     binding.viewPager.setCurrentItem(tab.ordinal, false)
                 }
@@ -163,6 +177,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             }
             binding.bottomNavView.isVisible = true
         }
+        viewModel.courseContainerTabClickedEvent(Tabs.entries[binding.viewPager.currentItem])
     }
 
     private fun setUpCourseCalendar() {
@@ -188,15 +203,17 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     CalendarSyncDialog(
                         syncDialogType = syncState.dialogType,
                         calendarTitle = syncState.calendarTitle,
-                        syncDialogAction = { dialog ->
+                        syncDialogPosAction = { dialog ->
                             when (dialog) {
                                 CalendarSyncDialogType.SYNC_DIALOG -> {
+                                    viewModel.logCalendarAddDates(true)
                                     viewModel.addOrUpdateEventsInCalendar(
                                         updatedEvent = false,
                                     )
                                 }
 
                                 CalendarSyncDialogType.UN_SYNC_DIALOG -> {
+                                    viewModel.logCalendarRemoveDates(true)
                                     viewModel.deleteCourseCalendar()
                                 }
 
@@ -205,19 +222,44 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 }
 
                                 CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
+                                    viewModel.logCalendarSyncUpdate(true)
                                     viewModel.addOrUpdateEventsInCalendar(
                                         updatedEvent = true,
                                     )
                                 }
 
                                 CalendarSyncDialogType.EVENTS_DIALOG -> {
+                                    viewModel.logCalendarSyncedConfirmation(true)
                                     viewModel.openCalendarApp()
                                 }
 
+                                else -> {}
+                            }
+                        },
+                        syncDialogNegAction = { dialog ->
+                            when (dialog) {
+                                CalendarSyncDialogType.SYNC_DIALOG ->
+                                    viewModel.logCalendarAddDates(false)
+
+                                CalendarSyncDialogType.UN_SYNC_DIALOG ->
+                                    viewModel.logCalendarRemoveDates(false)
+
+                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
+                                    viewModel.logCalendarSyncUpdate(false)
+                                    viewModel.deleteCourseCalendar()
+                                }
+
+                                CalendarSyncDialogType.EVENTS_DIALOG ->
+                                    viewModel.logCalendarSyncedConfirmation(false)
+
                                 CalendarSyncDialogType.LOADING_DIALOG,
-                                CalendarSyncDialogType.NONE -> {
+                                CalendarSyncDialogType.PERMISSION_DIALOG,
+                                CalendarSyncDialogType.NONE,
+                                -> {
                                 }
                             }
+
+                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
                         },
                         dismissSyncDialog = {
                             viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
@@ -247,14 +289,17 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
+        private const val ARG_ENROLLMENT_MODE = "enrollmentMode"
         fun newInstance(
             courseId: String,
-            courseTitle: String
+            courseTitle: String,
+            enrollmentMode: String,
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_TITLE to courseTitle
+                ARG_TITLE to courseTitle,
+                ARG_ENROLLMENT_MODE to enrollmentMode
             )
             return fragment
         }

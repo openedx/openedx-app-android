@@ -28,7 +28,11 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CalendarSyncDialog
+import org.openedx.course.presentation.CalendarSyncSnackbar
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -39,15 +43,16 @@ import org.openedx.core.R as CoreR
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
+    val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
     private val notifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
-    private val analytics: CourseAnalytics,
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
+    private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
 
     val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
@@ -106,6 +111,7 @@ class CourseContainerViewModel(
     }
 
     fun preloadCourseStructure() {
+        courseDashboardViewed()
         if (_dataReady.value != null) {
             return
         }
@@ -212,8 +218,10 @@ class CourseContainerViewModel(
             updateCalendarSyncState()
 
             if (updatedEvent) {
+                logCalendarSyncSnackbar(CalendarSyncSnackbar.UPDATE)
                 setUiMessage(R.string.course_snackbar_course_calendar_updated)
             } else if (coursePreferences.isCalendarSyncEventsDialogShown(courseName)) {
+                logCalendarSyncSnackbar(CalendarSyncSnackbar.ADD)
                 setUiMessage(R.string.course_snackbar_course_calendar_added)
             } else {
                 coursePreferences.setCalendarSyncEventsDialogShown(courseName)
@@ -255,7 +263,9 @@ class CourseContainerViewModel(
                     )
                 }
                 updateCalendarSyncState()
+
             }
+            logCalendarSyncSnackbar(CalendarSyncSnackbar.REMOVE)
             setUiMessage(R.string.course_snackbar_course_calendar_removed)
         }
     }
@@ -282,23 +292,96 @@ class CourseContainerViewModel(
                 (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
     }
 
+    private fun courseDashboardViewed() {
+        logCourseContainerEvent(CourseAnalyticsEvent.DASHBOARD)
+    }
+
     private fun courseTabClickedEvent() {
-        analytics.courseTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticsEvent.HOME_TAB)
     }
 
     private fun videoTabClickedEvent() {
-        analytics.videoTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticsEvent.VIDEOS_TAB)
     }
 
     private fun discussionTabClickedEvent() {
-        analytics.discussionTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticsEvent.DISCUSSION_TAB)
     }
 
     private fun datesTabClickedEvent() {
-        analytics.datesTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticsEvent.DATES_TAB)
     }
 
     private fun handoutsTabClickedEvent() {
-        analytics.handoutsTabClickedEvent(courseId, courseName)
+        logCourseContainerEvent(CourseAnalyticsEvent.HANDOUTS_TAB)
+    }
+
+    private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {
+        courseAnalytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.COURSE_NAME.key, courseName)
+            }
+        )
+    }
+
+    fun logCalendarPermissionAccess(isAllowed: Boolean) {
+        logCalendarSyncEvent(
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.PERMISSION.getBuildMap(isAllowed)
+        )
+    }
+
+    fun logCalendarAddDates(action: Boolean) {
+        logCalendarSyncEvent(
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.ADD.getBuildMap(action)
+        )
+    }
+
+    fun logCalendarRemoveDates(action: Boolean) {
+        logCalendarSyncEvent(
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.REMOVE.getBuildMap(action)
+        )
+    }
+
+    fun logCalendarSyncedConfirmation(action: Boolean) {
+        logCalendarSyncEvent(
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.CONFIRMED.getBuildMap(action)
+        )
+    }
+
+    fun logCalendarSyncUpdate(action: Boolean) {
+        logCalendarSyncEvent(
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
+            CalendarSyncDialog.UPDATE.getBuildMap(action)
+        )
+    }
+
+    private fun logCalendarSyncSnackbar(snackbar: CalendarSyncSnackbar) {
+        logCalendarSyncEvent(
+            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_SNACKBAR,
+            snackbar.getBuildMap()
+        )
+    }
+
+    private fun logCalendarSyncEvent(
+        event: CourseAnalyticsEvent,
+        param: Map<String, Any> = emptyMap(),
+    ) {
+        courseAnalytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(CourseAnalyticsKey.PACING.key, isSelfPaced)
+                putAll(param)
+            }
+        )
     }
 }

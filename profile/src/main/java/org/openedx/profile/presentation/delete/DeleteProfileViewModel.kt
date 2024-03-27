@@ -3,6 +3,7 @@ package org.openedx.profile.presentation.delete
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -11,15 +12,18 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.ProfileNotifier
-import kotlinx.coroutines.launch
 
 class DeleteProfileViewModel(
     private val resourceManager: ResourceManager,
     private val interactor: ProfileInteractor,
     private val notifier: ProfileNotifier,
-    private val validator: Validator
+    private val validator: Validator,
+    private val analytics: ProfileAnalytics,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DeleteProfileFragmentUIState>()
@@ -32,6 +36,7 @@ class DeleteProfileViewModel(
 
 
     fun deleteProfile(password: String) {
+        logDeleteProfileClickedEvent()
         if (!validator.isPasswordValid(password)) {
             _uiState.value =
                 DeleteProfileFragmentUIState.Error(resourceManager.getString(org.openedx.profile.R.string.profile_invalid_password))
@@ -42,6 +47,7 @@ class DeleteProfileViewModel(
             try {
                 interactor.deactivateAccount(password)
                 _uiState.value = DeleteProfileFragmentUIState.Success
+                logDeleteProfileEvent(true)
                 notifier.send(AccountDeactivated())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -56,7 +62,32 @@ class DeleteProfileViewModel(
                     _uiState.value =
                         DeleteProfileFragmentUIState.Error(resourceManager.getString(org.openedx.profile.R.string.profile_password_is_incorrect))
                 }
+                logDeleteProfileEvent(false)
             }
         }
+    }
+
+    private fun logDeleteProfileClickedEvent() {
+        logEvent(ProfileAnalyticsEvent.USER_DELETE_ACCOUNT_CLICKED)
+    }
+
+    private fun logDeleteProfileEvent(isSuccess: Boolean) {
+        logEvent(
+            ProfileAnalyticsEvent.DELETE_ACCOUNT_SUCCESS,
+            buildMap {
+                put(ProfileAnalyticsKey.SUCCESS.key, isSuccess)
+            }
+        )
+    }
+
+    private fun logEvent(event: ProfileAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
+                putAll(param)
+            }
+        )
     }
 }

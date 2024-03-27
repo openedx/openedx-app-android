@@ -38,10 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.auth.R
-import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.config.Config
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -53,8 +52,9 @@ import org.openedx.core.ui.theme.compose.LogistrationLogoView
 
 class LogistrationFragment : Fragment() {
 
-    private val router: AuthRouter by inject()
-    private val config by inject<Config>()
+    private val viewModel: LogistrationViewModel by viewModel {
+        parametersOf(arguments?.getString(ARG_COURSE_ID, "") ?: "")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,27 +64,15 @@ class LogistrationFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val courseId = arguments?.getString(ARG_COURSE_ID, "")
-                val isDiscoveryTypeWebView = config.getDiscoveryConfig().isViewTypeWebView()
                 LogistrationScreen(
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, courseId, null)
+                        viewModel.navigateToSignIn(parentFragmentManager)
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, courseId, null)
+                        viewModel.navigateToSignUp(parentFragmentManager)
                     },
                     onSearchClick = { querySearch ->
-                        if (isDiscoveryTypeWebView) {
-                            router.navigateToWebDiscoverCourses(
-                                parentFragmentManager,
-                                querySearch
-                            )
-                        } else {
-                            router.navigateToNativeDiscoverCourses(
-                                parentFragmentManager,
-                                querySearch
-                            )
-                        }
+                        viewModel.navigateToDiscovery(parentFragmentManager, querySearch)
                     }
                 )
             }
