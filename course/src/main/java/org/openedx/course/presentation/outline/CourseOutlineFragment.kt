@@ -28,6 +28,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarData
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -35,6 +39,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +59,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -79,6 +83,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.CourseContainerTab
@@ -89,6 +94,7 @@ import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.io.File
 import java.util.Date
 
@@ -98,8 +104,6 @@ class CourseOutlineFragment : Fragment() {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
-
-    private var snackBar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -210,37 +214,15 @@ class CourseOutlineFragment : Fragment() {
                     onResetDatesClick = {
                         viewModel.resetCourseDatesBanner(onResetDates = {
                             (parentFragment as CourseContainerFragment).updateCourseDates()
-                            showDatesUpdateSnackbar(it)
                         })
+                    },
+                    onViewDates = {
+                        (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
                     }
                 )
             }
         }
     }
-
-    override fun onDestroyView() {
-        snackBar?.dismiss()
-        super.onDestroyView()
-    }
-
-    private fun showDatesUpdateSnackbar(isSuccess: Boolean) {
-        val message = if (isSuccess) {
-            getString(R.string.core_dates_shift_dates_successfully_msg)
-        } else {
-            getString(R.string.core_dates_shift_dates_unsuccessful_msg)
-        }
-        snackBar = view?.let {
-            Snackbar.make(it, message, Snackbar.LENGTH_LONG).apply {
-                if (isSuccess) {
-                    setAction(R.string.core_dates_view_all_dates) {
-                        (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
-                    }
-                }
-            }
-        }
-        snackBar?.show()
-    }
-
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
@@ -288,6 +270,7 @@ internal fun CourseOutlineScreen(
     onResumeClick: (String) -> Unit,
     onDownloadClick: (Block) -> Unit,
     onResetDatesClick: () -> Unit,
+    onViewDates: () -> Unit?,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -331,6 +314,17 @@ internal fun CourseOutlineScreen(
             )
         }
 
+        val snackState = remember { SnackbarHostState() }
+        if (uiMessage is DatesShiftedSnackBar) {
+            val datesShiftedMessage =
+                stringResource(id = org.openedx.course.R.string.course_dates_shifted_message)
+            LaunchedEffect(uiMessage) {
+                snackState.showSnackbar(
+                    message = datesShiftedMessage,
+                    duration = SnackbarDuration.Long
+                )
+            }
+        }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -512,6 +506,17 @@ internal fun CourseOutlineScreen(
                         )
                     }
                 }
+
+                SnackbarHost(
+                    modifier = Modifier.align(Alignment.BottomStart),
+                    hostState = snackState
+                ) { snackbarData: SnackbarData ->
+                    DatesShiftedSnackBar(showAction = true,
+                        onViewDates = onViewDates,
+                        onClose = {
+                            snackbarData.dismiss()
+                        })
+                }
             }
         }
     }
@@ -661,6 +666,7 @@ private fun CourseOutlineScreenPreview() {
             onReloadClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
+            onViewDates = {},
         )
     }
 }
@@ -701,6 +707,7 @@ private fun CourseOutlineScreenTabletPreview() {
             onReloadClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
+            onViewDates = {},
         )
     }
 }

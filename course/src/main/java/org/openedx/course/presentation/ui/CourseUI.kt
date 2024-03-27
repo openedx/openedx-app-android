@@ -40,6 +40,7 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -113,7 +114,7 @@ import org.openedx.course.presentation.outline.CourseOutlineFragment
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
-import org.openedx.course.R as courseR
+import org.openedx.core.R as coreR
 
 @Composable
 fun CourseImageHeader(
@@ -141,8 +142,8 @@ fun CourseImageHeader(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl)
-                .error(org.openedx.core.R.drawable.core_no_image_course)
-                .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                .error(coreR.drawable.core_no_image_course)
+                .placeholder(coreR.drawable.core_no_image_course)
                 .build(),
             contentDescription = stringResource(
                 id = R.string.course_accessibility_header_image_for,
@@ -450,9 +451,9 @@ fun NavigationUnitsButtons(
     onNextClick: () -> Unit
 ) {
     val nextButtonIcon = if (hasNextBlock) {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_down)
+        painterResource(id = coreR.drawable.core_ic_down)
     } else {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_check_in_box)
+        painterResource(id = coreR.drawable.core_ic_check_in_box)
     }
 
     val subModifier =
@@ -499,7 +500,7 @@ fun NavigationUnitsButtons(
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         modifier = Modifier.rotate(if (isVerticalNavigation) 0f else -90f),
-                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_up),
+                        painter = painterResource(id = coreR.drawable.core_ic_up),
                         contentDescription = null,
                         tint = MaterialTheme.appColors.primary
                     )
@@ -666,7 +667,7 @@ fun VideoSubtitles(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = stringResource(id = courseR.string.course_subtitles),
+                        text = stringResource(id = R.string.course_subtitles),
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium
                     )
@@ -676,7 +677,7 @@ fun VideoSubtitles(
                                 onSettingsClick()
                             },
                             text = subtitleLanguage,
-                            painter = painterResource(id = courseR.drawable.course_ic_cc),
+                            painter = painterResource(id = R.drawable.course_ic_cc),
                             color = MaterialTheme.appColors.textAccent,
                             textStyle = MaterialTheme.appTypography.labelLarge
                         )
@@ -1161,6 +1162,59 @@ fun CourseDatesBannerTablet(
 }
 
 @Composable
+fun DatesShiftedSnackBar(
+    showAction: Boolean = false,
+    onViewDates: () -> Unit? = {},
+    onClose: () -> Unit? = {},
+) {
+    Snackbar(
+        modifier = Modifier.padding(16.dp),
+        backgroundColor = MaterialTheme.appColors.background
+    ) {
+        Column(modifier = Modifier.padding(4.dp)) {
+            Box {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterStart),
+                    text = stringResource(id = coreR.string.core_dates_shift_dates_successfully_title),
+                    color = MaterialTheme.appColors.textFieldText,
+                    style = MaterialTheme.appTypography.titleMedium
+                )
+                IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = { onClose() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "close",
+                        tint = MaterialTheme.appColors.onBackground,
+                    )
+                }
+            }
+            Text(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(),
+                text = stringResource(id = coreR.string.core_dates_shift_dates_successfully_msg),
+                color = MaterialTheme.appColors.textFieldText,
+                style = MaterialTheme.appTypography.titleSmall,
+            )
+            if (showAction) {
+                OpenEdXOutlinedButton(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .fillMaxWidth(),
+                    text = stringResource(id = coreR.string.core_dates_view_all_dates),
+                    backgroundColor = MaterialTheme.appColors.background,
+                    textColor = MaterialTheme.appColors.primary,
+                    borderColor = MaterialTheme.appColors.primary,
+                    onClick = {
+                        onViewDates()
+                    })
+            }
+        }
+    }
+}
+
+@Composable
 fun WarningLabel(
     painter: Painter,
     text: String
@@ -1219,7 +1273,7 @@ private fun WarningLabelPreview() {
     OpenEdXTheme {
         WarningLabel(
             painter = painterResource(id = org.openedx.core.R.drawable.core_ic_offline),
-            text = stringResource(id = courseR.string.course_no_internet_label)
+            text = stringResource(id = R.string.course_no_internet_label)
         )
     }
 }

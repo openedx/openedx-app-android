@@ -2,7 +2,7 @@ package org.openedx.core
 
 import androidx.compose.material.SnackbarDuration
 
-sealed class UIMessage {
+open class UIMessage {
     class SnackBarMessage(
         val message: String,
         val duration: SnackbarDuration = SnackbarDuration.Long,
