@@ -206,7 +206,7 @@ class CourseDatesFragment : Fragment() {
                         }
                     },
                     onPLSBannerViewed = {
-                        if (isVisible()) {
+                        if (isResumed) {
                             viewModel.logPlsBannerViewed()
                         }
                     },
