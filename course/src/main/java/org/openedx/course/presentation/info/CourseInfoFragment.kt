@@ -143,8 +143,17 @@ class CourseInfoFragment : Fragment() {
                     },
                     onUriClick = { param, type ->
                         when (type) {
-                            linkAuthority.PROGRAM_INFO,
+                            linkAuthority.PROGRAM_INFO -> {
+                                viewModel.programInfoClickedEvent(param)
+                                viewModel.infoCardClicked(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param,
+                                    infoType = type.name
+                                )
+                            }
+
                             linkAuthority.COURSE_INFO -> {
+                                viewModel.courseInfoClickedEvent(param)
                                 viewModel.infoCardClicked(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     pathId = param,
@@ -168,6 +177,7 @@ class CourseInfoFragment : Fragment() {
                             }
 
                             linkAuthority.ENROLL -> {
+                                viewModel.courseEnrollClickedEvent(param)
                                 if (uiState.isPreLogin) {
                                     viewModel.navigateToSignUp(
                                         fragmentManager = requireActivity().supportFragmentManager,

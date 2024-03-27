@@ -137,10 +137,6 @@ class CourseDetailsViewModel(
         logEvent(CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId, courseTitle)
     }
 
-    fun viewCourseClickedEvent(courseId: String, courseTitle: String) {
-        logEvent(CourseAnalyticsEvent.COURSE_INFO, courseId, courseTitle)
-    }
-
     private fun logEvent(
         event: CourseAnalyticsEvent,
         courseId: String, courseTitle: String,

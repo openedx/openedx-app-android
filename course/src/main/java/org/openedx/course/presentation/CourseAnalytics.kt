@@ -51,7 +51,11 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
     COURSE_INFO(
         "Discovery:Course Info",
-        "edx.bi.app.course.info"
+        "edx.bi.app.discovery.course_info"
+    ),
+    PROGRAM_INFO(
+        "Discovery:Program Info",
+        "edx.bi.app.discovery.program_info"
     ),
     DASHBOARD(
         "Course:Dashboard",

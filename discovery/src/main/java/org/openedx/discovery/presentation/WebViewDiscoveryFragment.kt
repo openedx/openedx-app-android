@@ -100,8 +100,17 @@ class WebViewDiscoveryFragment : Fragment() {
                     },
                     onUriClick = { param, authority ->
                         when (authority) {
-                            WebViewLink.Authority.COURSE_INFO,
+                            WebViewLink.Authority.COURSE_INFO -> {
+                                viewModel.courseInfoClickedEvent(param)
+                                viewModel.infoCardClicked(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param,
+                                    infoType = authority.name
+                                )
+                            }
+
                             WebViewLink.Authority.PROGRAM_INFO -> {
+                                viewModel.programInfoClickedEvent(param)
                                 viewModel.infoCardClicked(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     pathId = param,

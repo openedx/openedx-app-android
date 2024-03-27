@@ -121,11 +121,12 @@ val screenModule = module {
     viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (querySearch: String) ->
         WebViewDiscoveryViewModel(
+            querySearch,
             get(),
             get(),
             get(),
             get(),
-            querySearch
+            get(),
         )
     }
 
@@ -156,15 +157,16 @@ val screenModule = module {
     factory { CourseInteractor(get()) }
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
             pathId,
-            infoType
+            infoType,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String) ->
