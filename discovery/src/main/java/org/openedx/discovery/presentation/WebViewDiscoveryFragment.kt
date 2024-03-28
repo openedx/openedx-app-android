@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
@@ -198,6 +199,7 @@ private fun WebViewDiscoveryScreen(
                             horizontal = 16.dp,
                             vertical = 32.dp,
                         )
+                        .navigationBarsPadding()
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
@@ -221,7 +223,7 @@ private fun WebViewDiscoveryScreen(
         }
 
         Column(
-            modifier = modifierScreenWidth
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
                 .statusBarsInset()
@@ -236,8 +238,8 @@ private fun WebViewDiscoveryScreen(
 
             Surface {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = modifierScreenWidth
+                        .fillMaxHeight()
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
