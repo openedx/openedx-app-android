@@ -85,6 +85,7 @@ android {
     buildFeatures {
         viewBinding true
         compose true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "$compose_compiler_version"

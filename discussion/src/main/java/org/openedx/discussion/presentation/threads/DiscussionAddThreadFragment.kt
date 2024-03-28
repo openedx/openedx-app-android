@@ -423,7 +423,7 @@ private fun Tabs(
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(20))
             .border(1.dp, MaterialTheme.appColors.cardViewBorder, RoundedCornerShape(20)),
-        indicator = { tabPositions: List<TabPosition> ->
+        indicator = { _ ->
             Box {}
         }
     ) {
