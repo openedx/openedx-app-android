@@ -1058,7 +1058,7 @@ fun SubSectionUnitsList(
 
 @Composable
 fun CourseDatesBanner(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     banner: CourseDatesBannerInfo,
     resetDates: () -> Unit,
 ) {
@@ -1104,7 +1104,7 @@ fun CourseDatesBanner(
 
 @Composable
 fun CourseDatesBannerTablet(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     banner: CourseDatesBannerInfo,
     resetDates: () -> Unit,
 ) {

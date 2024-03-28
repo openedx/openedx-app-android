@@ -377,7 +377,6 @@ internal fun CourseOutlineScreen(
                                         )
                                     }
                                 }
-                                item { Spacer(Modifier.height(28.dp)) }
                                 if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
                                     item {
                                         Box(
@@ -386,13 +385,11 @@ internal fun CourseOutlineScreen(
                                         ) {
                                             if (windowSize.isTablet) {
                                                 CourseDatesBannerTablet(
-                                                    modifier = Modifier.padding(bottom = 16.dp),
                                                     banner = uiState.datesBannerInfo,
                                                     resetDates = onResetDatesClick,
                                                 )
                                             } else {
                                                 CourseDatesBanner(
-                                                    modifier = Modifier.padding(bottom = 16.dp),
                                                     banner = uiState.datesBannerInfo,
                                                     resetDates = onResetDatesClick,
                                                 )
@@ -405,11 +402,13 @@ internal fun CourseOutlineScreen(
                                         Box(listPadding) {
                                             if (windowSize.isTablet) {
                                                 ResumeCourseTablet(
+                                                    modifier = Modifier.padding(vertical = 16.dp),
                                                     block = uiState.resumeComponent,
                                                     onResumeClick = onResumeClick
                                                 )
                                             } else {
                                                 ResumeCourse(
+                                                    modifier = Modifier.padding(vertical = 16.dp),
                                                     block = uiState.resumeComponent,
                                                     onResumeClick = onResumeClick
                                                 )
@@ -419,9 +418,6 @@ internal fun CourseOutlineScreen(
                                 }
 
                                 if (isCourseNestedListEnabled) {
-                                    item {
-                                        Spacer(Modifier.height(16.dp))
-                                    }
                                     uiState.courseStructure.blockData.forEach { section ->
                                         val courseSubSections =
                                             uiState.courseSubSections[section.id]
@@ -533,11 +529,12 @@ internal fun CourseOutlineScreen(
 
 @Composable
 private fun ResumeCourse(
+    modifier: Modifier = Modifier,
     block: Block,
     onResumeClick: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Text(
             text = stringResource(id = org.openedx.course.R.string.course_continue_with),
@@ -584,11 +581,12 @@ private fun ResumeCourse(
 
 @Composable
 private fun ResumeCourseTablet(
+    modifier: Modifier = Modifier,
     block: Block,
     onResumeClick: (String) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
@@ -728,7 +726,7 @@ private fun CourseOutlineScreenTabletPreview() {
 @Composable
 private fun ResumeCoursePreview() {
     OpenEdXTheme {
-        ResumeCourse(mockChapterBlock) {}
+        ResumeCourse(block = mockChapterBlock) {}
     }
 }
 
