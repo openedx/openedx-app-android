@@ -9,6 +9,7 @@
     <string name="discussion_most_activity">Most activity</string>
     <string name="discussion_most_votes">Most votes</string>
     <string name="discussion_create_post">Create discussion</string>
+    <string name="discussion_create_question">Create question</string>
     <string name="discussion_add_response">Add a response</string>
     <string name="discussion_last_post">Last post: %1$s</string>
     <string name="discussion_follow">Follow</string>
