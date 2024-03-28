@@ -197,9 +197,10 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseOutlineViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -236,9 +237,10 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseVideoViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -277,11 +279,9 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean, enrollmentMode: String) ->
+    viewModel { (courseId: String, enrollmentMode: String) ->
         CourseDatesViewModel(
             courseId,
-            courseName,
-            isSelfPaced,
             enrollmentMode,
             get(),
             get(),

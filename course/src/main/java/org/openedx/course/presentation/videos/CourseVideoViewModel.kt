@@ -3,11 +3,13 @@ package org.openedx.course.presentation.videos
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -29,6 +31,7 @@ import org.openedx.course.presentation.CourseAnalytics
 
 class CourseVideoViewModel(
     val courseId: String,
+    val courseTitle: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -58,15 +61,13 @@ class CourseVideoViewModel(
     val uiState: LiveData<CourseVideosUIState>
         get() = _uiState
 
-    var courseTitle = ""
-
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     private val _videoSettings = MutableStateFlow(VideoSettings.default)
     val videoSettings = _videoSettings.asStateFlow()
@@ -126,8 +127,9 @@ class CourseVideoViewModel(
             if (networkConnection.isWifiConnected()) {
                 super.saveDownloadModels(folder, id)
             } else {
-                _uiMessage.value =
-                    UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
+                viewModelScope.launch {
+                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi)))
+                }
             }
         } else {
             super.saveDownloadModels(folder, id)
@@ -136,8 +138,9 @@ class CourseVideoViewModel(
 
     override fun saveAllDownloadModels(folder: String) {
         if (preferencesManager.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected()) {
-            _uiMessage.value =
-                UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
+            viewModelScope.launch {
+                _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi)))
+            }
             return
         }
 
@@ -198,9 +201,9 @@ class CourseVideoViewModel(
     }
 
     fun onChangingVideoQualityWhileDownloading() {
-        _uiMessage.value = UIMessage.SnackBarMessage(
-            resourceManager.getString(R.string.course_change_quality_when_downloading)
-        )
+        viewModelScope.launch {
+            _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.course_change_quality_when_downloading)))
+        }
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {

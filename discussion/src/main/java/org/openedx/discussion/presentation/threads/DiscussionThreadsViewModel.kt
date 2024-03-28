@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -11,11 +12,10 @@ import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
+import org.openedx.discussion.presentation.topics.DiscussionTopic
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import kotlinx.coroutines.launch
 
 class DiscussionThreadsViewModel(
     private val interactor: DiscussionInteractor,
@@ -101,15 +101,15 @@ class DiscussionThreadsViewModel(
         }
         lastOrderBy = orderBy
         when (threadType) {
-            DiscussionTopicsFragment.ALL_POSTS -> {
+            DiscussionTopic.ALL_POSTS -> {
                 getAllThreads(orderBy)
             }
 
-            DiscussionTopicsFragment.FOLLOWING_POSTS -> {
+            DiscussionTopic.FOLLOWING_POSTS -> {
                 getFollowingThreads(orderBy)
             }
 
-            DiscussionTopicsFragment.TOPIC -> {
+            DiscussionTopic.TOPIC -> {
                 getThreads(
                     topicId,
                     orderBy
@@ -129,15 +129,15 @@ class DiscussionThreadsViewModel(
             filter
         }
         when (threadType) {
-            DiscussionTopicsFragment.ALL_POSTS -> {
+            DiscussionTopic.ALL_POSTS -> {
                 getAllThreads(lastOrderBy)
             }
 
-            DiscussionTopicsFragment.FOLLOWING_POSTS -> {
+            DiscussionTopic.FOLLOWING_POSTS -> {
                 getFollowingThreads(lastOrderBy)
             }
 
-            DiscussionTopicsFragment.TOPIC -> {
+            DiscussionTopic.TOPIC -> {
                 getThreads(
                     topicId,
                     lastOrderBy

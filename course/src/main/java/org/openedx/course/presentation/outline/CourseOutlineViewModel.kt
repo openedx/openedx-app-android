@@ -4,10 +4,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -38,6 +40,7 @@ import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
+    val courseTitle: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -66,15 +69,13 @@ class CourseOutlineViewModel(
     val uiState: LiveData<CourseOutlineUIState>
         get() = _uiState
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
-
-    var courseTitle = ""
 
     var resumeSectionBlock: Block? = null
         private set
@@ -133,8 +134,9 @@ class CourseOutlineViewModel(
             if (networkConnection.isWifiConnected()) {
                 super.saveDownloadModels(folder, id)
             } else {
-                _uiMessage.value =
-                    UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi))
+                viewModelScope.launch {
+                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi)))
+                }
             }
         } else {
             super.saveDownloadModels(folder, id)
@@ -224,13 +226,9 @@ class CourseOutlineViewModel(
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value = UIMessage.SnackBarMessage(
-                        resourceManager.getString(R.string.core_error_no_connection)
-                    )
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value = UIMessage.SnackBarMessage(
-                        resourceManager.getString(R.string.core_error_unknown_error)
-                    )
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
             _isUpdating.value = false
@@ -281,15 +279,13 @@ class CourseOutlineViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 updateCourseData(false)
-                _uiMessage.value = DatesShiftedSnackBar()
+                _uiMessage.emit(DatesShiftedSnackBar())
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)))
                 }
                 onResetDates(false)
             }

@@ -50,6 +50,11 @@ val light_component_horizontal_progress_completed_and_selected = Color(0xFF30a17
 val light_component_horizontal_progress_completed = Color(0xFFbbe6d7)
 val light_component_horizontal_progress_selected = Color(0xFFF0CB00)
 val light_component_horizontal_progress_default = Color(0xFFD6D3D1)
+val light_navigation_btn_background = Color.White
+val light_navigation_btn_unselected_content = light_primary
+val light_course_home_header_shade_primary = Color.White
+val light_course_home_header_shade_secondary = Color(0xFFBABABA)
+val light_course_home_back_btn_background = Color.Black
 
 
 val dark_primary = Color(0xFF5478F9)
@@ -100,3 +105,8 @@ val dark_component_horizontal_progress_completed_and_selected = Color(0xFF30a171
 val dark_component_horizontal_progress_completed = Color(0xFFbbe6d7)
 val dark_component_horizontal_progress_selected = Color(0xFFF0CB00)
 val dark_component_horizontal_progress_default = Color(0xFFD6D3D1)
+val dark_navigation_btn_background = Color(0xFF273346)
+val dark_navigation_btn_unselected_content = Color.White
+val dark_course_home_header_shade_primary = Color(0xFF273346)
+val dark_course_home_header_shade_secondary = Color(0xFF999999)
+val dark_course_home_back_btn_background = Color.White

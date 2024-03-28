@@ -3,14 +3,16 @@ package org.openedx.course.presentation.dates
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -37,8 +39,6 @@ import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
     val courseId: String,
-    val courseName: String,
-    val isSelfPaced: Boolean,
     private val enrollmentMode: String,
     private val notifier: CourseNotifier,
     private val interactor: CourseInteractor,
@@ -50,13 +50,16 @@ class CourseDatesViewModel(
     private val config: Config,
 ) : BaseViewModel() {
 
+    var courseName = ""
+    var isSelfPaced = true
+
     private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)
     val uiState: LiveData<DatesUIState>
         get() = _uiState
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     private val _calendarSyncUIState = MutableStateFlow(
         CalendarSyncUIState(
@@ -111,11 +114,9 @@ class CourseDatesViewModel(
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
             }
             _updating.value = false
@@ -127,15 +128,13 @@ class CourseDatesViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 getCourseDates()
-                _uiMessage.value = DatesShiftedSnackBar()
+                _uiMessage.emit(DatesShiftedSnackBar())
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)))
                 }
                 onResetDates(false)
             }

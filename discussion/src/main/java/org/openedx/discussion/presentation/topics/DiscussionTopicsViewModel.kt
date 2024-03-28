@@ -3,17 +3,16 @@ package org.openedx.discussion.presentation.topics
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
-import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment.Companion.ALL_POSTS
-import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment.Companion.FOLLOWING_POSTS
-import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment.Companion.TOPIC
 import kotlinx.coroutines.launch
 
 class DiscussionTopicsViewModel(
@@ -27,32 +26,30 @@ class DiscussionTopicsViewModel(
     val uiState: LiveData<DiscussionTopicsUIState>
         get() = _uiState
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
+    private val _isUpdating = MutableSharedFlow<Boolean>()
+    val isUpdating: SharedFlow<Boolean>
+        get() = _isUpdating.asSharedFlow()
 
     var courseName = ""
 
     fun updateCourseTopics() {
         viewModelScope.launch {
             try {
-                _isUpdating.value = true
+                _isUpdating.emit(true)
                 val response = interactor.getCourseTopics(courseId)
                 _uiState.value = DiscussionTopicsUIState.Topics(response)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
-            _isUpdating.value = false
+            _isUpdating.emit(false)
         }
     }
 
@@ -68,11 +65,9 @@ class DiscussionTopicsViewModel(
                 _uiState.value = DiscussionTopicsUIState.Topics(response)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
         }
@@ -80,15 +75,15 @@ class DiscussionTopicsViewModel(
 
     fun discussionClickedEvent(action: String, data: String, title: String) {
         when (action) {
-            ALL_POSTS -> {
+            DiscussionTopic.ALL_POSTS -> {
                 analytics.discussionAllPostsClickedEvent(courseId, courseName)
             }
 
-            FOLLOWING_POSTS -> {
+            DiscussionTopic.FOLLOWING_POSTS -> {
                 analytics.discussionFollowingClickedEvent(courseId, courseName)
             }
 
-            TOPIC -> {
+            DiscussionTopic.TOPIC -> {
                 analytics.discussionTopicClickedEvent(courseId, courseName, data, title)
             }
         }

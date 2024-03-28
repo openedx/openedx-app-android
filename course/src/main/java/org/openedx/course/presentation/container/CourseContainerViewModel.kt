@@ -55,6 +55,8 @@ class CourseContainerViewModel(
     private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
 
+    var org: String = ""
+    var image: String = ""
     val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
 
     private val _dataReady = MutableLiveData<Boolean?>()
@@ -126,6 +128,8 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
+                org = courseStructure.org
+                image = courseStructure.media?.image?.large ?: ""
                 _isSelfPaced = courseStructure.isSelfPaced
                 _dataReady.value = courseStructure.start?.let { start ->
                     start < Date()
@@ -162,15 +166,17 @@ class CourseContainerViewModel(
         }
     }
 
-    fun courseContainerTabClickedEvent(tab: CourseContainerTab) {
-        when (tab) {
-            CourseContainerTab.COURSE -> courseTabClickedEvent()
-            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
-            CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
-            CourseContainerTab.DATES -> datesTabClickedEvent()
-            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
-        }
-    }
+    //TODO
+//    fun courseContainerTabClickedEvent(tab: CourseContainerTab) {
+//        when (tab) {
+//            CourseContainerTab.COURSE -> courseTabClickedEvent()
+//            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
+//            CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
+//            CourseContainerTab.DATES -> datesTabClickedEvent()
+//            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
+//        }
+//    }
+
 
     fun setCalendarSyncDialogType(dialogType: CalendarSyncDialogType) {
         val currentState = _calendarSyncUIState.value
