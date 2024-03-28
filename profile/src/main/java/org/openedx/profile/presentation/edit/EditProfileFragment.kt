@@ -650,7 +650,13 @@ private fun EditProfileScreen(
                                         .size(32.dp)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.appColors.primary)
-                                        .padding(5.dp),
+                                        .padding(5.dp)
+                                        .clickable {
+                                            isOpenChangeImageDialogState = true
+                                            if (!uiState.account.isOlderThanMinAge()) {
+                                                openWarningMessageDialog = true
+                                            }
+                                        },
                                     painter = painterResource(id = R.drawable.profile_ic_edit_image),
                                     contentDescription = null,
                                     tint = Color.White
