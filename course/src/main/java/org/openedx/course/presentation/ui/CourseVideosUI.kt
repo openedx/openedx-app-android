@@ -21,10 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -38,9 +39,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Videocam
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -79,7 +77,6 @@ import org.openedx.course.R
 import org.openedx.course.presentation.videos.CourseVideosUIState
 import java.util.Date
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseVideosScreen(
     windowSize: WindowSize,
@@ -89,10 +86,8 @@ fun CourseVideosScreen(
     apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
     isCourseBannerEnabled: Boolean,
-    isUpdating: Boolean,
     hasInternetConnection: Boolean,
     videoSettings: VideoSettings,
-    onSwipeRefresh: () -> Unit,
     onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
@@ -103,9 +98,6 @@ fun CourseVideosScreen(
     onVideoDownloadQualityClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = isUpdating, onRefresh = { onSwipeRefresh() })
-
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
@@ -169,7 +161,7 @@ fun CourseVideosScreen(
                 modifier = screenWidth,
                 color = MaterialTheme.appColors.background
             ) {
-                Box(Modifier.pullRefresh(pullRefreshState)) {
+                Box {
                     Column(
                         Modifier
                             .fillMaxSize()
@@ -177,7 +169,9 @@ fun CourseVideosScreen(
                         when (uiState) {
                             is CourseVideosUIState.Empty -> {
                                 Box(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState()),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -187,15 +181,6 @@ fun CourseVideosScreen(
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier.padding(horizontal = 40.dp)
                                     )
-                                }
-                            }
-
-                            is CourseVideosUIState.Loading -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 }
                             }
 
@@ -329,13 +314,10 @@ fun CourseVideosScreen(
                                     }
                                 }
                             }
+
+                            CourseVideosUIState.Loading -> {}
                         }
                     }
-                    PullRefreshIndicator(
-                        isUpdating,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
                     if (!isInternetConnectionShown && !hasInternetConnection) {
                         OfflineModeDialog(
                             Modifier
@@ -680,9 +662,7 @@ private fun CourseVideosScreenPreview() {
             onExpandClick = { },
             onSubSectionClick = { },
             hasInternetConnection = true,
-            isUpdating = false,
             videoSettings = VideoSettings.default,
-            onSwipeRefresh = {},
             onReloadClick = {},
             onDownloadClick = {},
             onDownloadAllClick = {},
@@ -710,10 +690,8 @@ private fun CourseVideosScreenEmptyPreview() {
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
-            onSwipeRefresh = {},
             onReloadClick = {},
             hasInternetConnection = true,
-            isUpdating = false,
             videoSettings = VideoSettings.default,
             onDownloadClick = {},
             onDownloadAllClick = {},
@@ -752,9 +730,7 @@ private fun CourseVideosScreenTabletPreview() {
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
-            onSwipeRefresh = {},
             onReloadClick = {},
-            isUpdating = false,
             hasInternetConnection = true,
             videoSettings = VideoSettings.default,
             onDownloadClick = {},

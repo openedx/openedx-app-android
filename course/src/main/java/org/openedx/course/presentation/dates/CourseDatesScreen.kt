@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -45,9 +43,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -99,27 +94,21 @@ import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as coreR
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun CourseDatesScreen(
     windowSize: WindowSize,
     uiState: DatesUIState,
     uiMessage: UIMessage?,
-    refreshing: Boolean,
     isSelfPaced: Boolean,
     hasInternetConnection: Boolean,
     calendarSyncUIState: CalendarSyncUIState,
     onReloadClick: () -> Unit,
-    onSwipeRefresh: () -> Unit,
     onItemClick: (CourseDateBlock) -> Unit,
     onPLSBannerViewed: () -> Unit,
     onSyncDates: () -> Unit,
     onCalendarSyncSwitch: (Boolean) -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
-
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
@@ -172,18 +161,8 @@ internal fun CourseDatesScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .pullRefresh(pullRefreshState)
                 ) {
                     when (uiState) {
-                        is DatesUIState.Loading -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-
                         is DatesUIState.Dates -> {
                             LazyColumn(
                                 modifier = Modifier
@@ -265,11 +244,9 @@ internal fun CourseDatesScreen(
                                 )
                             }
                         }
-                    }
 
-                    PullRefreshIndicator(
-                        refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter)
-                    )
+                        DatesUIState.Loading -> {}
+                    }
                     if (!isInternetConnectionShown && !hasInternetConnection) {
                         OfflineModeDialog(
                             Modifier
@@ -622,12 +599,10 @@ private fun CourseDatesScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
-            refreshing = false,
             isSelfPaced = true,
             hasInternetConnection = true,
             calendarSyncUIState = mockCalendarSyncUIState,
             onReloadClick = {},
-            onSwipeRefresh = {},
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
@@ -645,12 +620,10 @@ private fun CourseDatesScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
-            refreshing = false,
             isSelfPaced = true,
             hasInternetConnection = true,
             calendarSyncUIState = mockCalendarSyncUIState,
             onReloadClick = {},
-            onSwipeRefresh = {},
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -31,9 +30,6 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -98,10 +94,8 @@ internal fun CourseOutlineScreen(
     isCourseNestedListEnabled: Boolean,
     isCourseBannerEnabled: Boolean,
     uiMessage: UIMessage?,
-    refreshing: Boolean,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
-    onSwipeRefresh: () -> Unit,
     onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
@@ -112,9 +106,6 @@ internal fun CourseOutlineScreen(
     onCertificateClick: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
-
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
@@ -177,17 +168,8 @@ internal fun CourseOutlineScreen(
                 modifier = screenWidth,
                 color = MaterialTheme.appColors.background
             ) {
-                Box(Modifier.pullRefresh(pullRefreshState)) {
+                Box {
                     when (uiState) {
-                        is CourseOutlineUIState.Loading -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-
                         is CourseOutlineUIState.CourseData -> {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
@@ -325,12 +307,9 @@ internal fun CourseOutlineScreen(
                                 }
                             }
                         }
+
+                        CourseOutlineUIState.Loading -> {}
                     }
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
                     if (!isInternetConnectionShown && !hasInternetConnection) {
                         OfflineModeDialog(
                             Modifier
@@ -496,9 +475,7 @@ private fun CourseOutlineScreenPreview() {
             isCourseNestedListEnabled = true,
             isCourseBannerEnabled = true,
             uiMessage = null,
-            refreshing = false,
             hasInternetConnection = true,
-            onSwipeRefresh = {},
             onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
@@ -538,9 +515,7 @@ private fun CourseOutlineScreenTabletPreview() {
             isCourseNestedListEnabled = true,
             isCourseBannerEnabled = true,
             uiMessage = null,
-            refreshing = false,
             hasInternetConnection = true,
-            onSwipeRefresh = {},
             onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},

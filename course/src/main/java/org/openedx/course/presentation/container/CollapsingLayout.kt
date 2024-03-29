@@ -1,5 +1,13 @@
 package org.openedx.course.presentation.container
 
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Picture
+import android.os.Build
+import android.renderscript.Allocation
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,7 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,13 +36,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -43,6 +57,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.appColors
 import kotlin.math.roundToInt
 
@@ -58,21 +74,29 @@ internal fun CollapsingLayout(
 ) {
     val localDensity = LocalDensity.current
     var expandedTopHeight by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     var collapsedTopHeight by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     var navigationHeight by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     var offset by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     var backgroundImageHeight by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
-    val factor = ((-expandedTopHeight - offset - navigationHeight) / (-expandedTopHeight - navigationHeight))
+    val picture = remember { Picture() }
+    val windowSize = rememberWindowSize()
+    val configuration = LocalConfiguration.current
+    val imageHeight = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        100
+    } else {
+        200
+    }
+    val factor = (-imageHeight - offset) / -imageHeight
     val alpha = if (factor.isNaN() || factor < 0) 0f else factor
     val blurImagePadding = 40.dp
     val toolbarOffset = with(localDensity) { (offset + backgroundImageHeight - blurImagePadding.toPx()).roundToInt() }
@@ -88,6 +112,17 @@ internal fun CollapsingLayout(
     } else {
         imageStartY
     }
+    val backBtnStartPadding = if (!windowSize.isTablet) {
+        0.dp
+    } else {
+        60.dp
+    }
+    val imageModel = ImageRequest.Builder(LocalContext.current)
+        .data(imageUrl)
+        .error(org.openedx.core.R.drawable.core_no_image_course)
+        .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+        .allowHardware(false)
+        .build()
 
     fun calculateOffset(delta: Float): Offset {
         val oldOffset = offset
@@ -127,15 +162,11 @@ internal fun CollapsingLayout(
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(imageHeight.dp)
                 .onSizeChanged { size ->
                     backgroundImageHeight = size.height.toFloat()
                 },
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .error(org.openedx.core.R.drawable.core_no_image_course)
-                .placeholder(org.openedx.core.R.drawable.core_no_image_course)
-                .build(),
+            model = imageModel,
             contentDescription = null,
             contentScale = ContentScale.Crop
         )
@@ -145,6 +176,24 @@ internal fun CollapsingLayout(
                 .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
                 .background(Color.White)
                 .blur(100.dp)
+                .drawWithCache {
+                    val width = this.size.width.toInt()
+                    val height = this.size.height.toInt()
+                    onDrawWithContent {
+                        val pictureCanvas =
+                            androidx.compose.ui.graphics.Canvas(
+                                picture.beginRecording(
+                                    width,
+                                    height
+                                )
+                            )
+                        draw(this, this.layoutDirection, pictureCanvas, this.size) {
+                            this@onDrawWithContent.drawContent()
+                        }
+                        picture.endRecording()
+                        drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
+                    }
+                }
         ) {
             Box(
                 modifier = Modifier
@@ -158,11 +207,7 @@ internal fun CollapsingLayout(
                     .fillMaxWidth()
                     .height(blurImagePadding)
                     .align(Alignment.TopCenter),
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .error(org.openedx.core.R.drawable.core_no_image_course)
-                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
-                    .build(),
+                model = imageModel,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alignment = PixelAlignment(0f, blurImageAlignment),
@@ -173,6 +218,15 @@ internal fun CollapsingLayout(
                     .fillMaxWidth()
                     .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } * 0.1f)
                     .align(Alignment.BottomCenter)
+            )
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && picture.width > 0 && picture.height > 0) {
+            LegacyBlurImage(
+                modifier = Modifier
+                    .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) },
+                bitmap = createBitmapFromPicture(picture),
+                blurRadio = 25f
             )
         }
 
@@ -195,7 +249,8 @@ internal fun CollapsingLayout(
         ) {
             Icon(
                 modifier = Modifier
-                    .padding(top = 12.dp)
+                    .statusBarsInset()
+                    .padding(top = 12.dp, start = backBtnStartPadding)
                     .clip(CircleShape)
                     .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(alpha / 2))
                     .clickable {
@@ -234,6 +289,53 @@ internal fun CollapsingLayout(
             content = bodyContent,
         )
     }
+}
+
+private fun createBitmapFromPicture(picture: Picture): Bitmap {
+    val bitmap = Bitmap.createBitmap(
+        picture.width,
+        picture.height,
+        Bitmap.Config.ARGB_8888
+    )
+
+    val canvas = android.graphics.Canvas(bitmap)
+    canvas.drawColor(android.graphics.Color.WHITE)
+    canvas.drawPicture(picture)
+    return bitmap
+}
+
+@Composable
+fun BlurImage(
+    bitmap: Bitmap,
+    modifier: Modifier = Modifier.fillMaxSize(),
+) {
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun LegacyBlurImage(
+    bitmap: Bitmap,
+    blurRadio: Float,
+    modifier: Modifier = Modifier.fillMaxSize()
+) {
+    val renderScript = RenderScript.create(LocalContext.current)
+    val bitmapAlloc = Allocation.createFromBitmap(renderScript, bitmap)
+    ScriptIntrinsicBlur.create(renderScript, bitmapAlloc.element).apply {
+        setRadius(blurRadio)
+        setInput(bitmapAlloc)
+        repeat(5) {
+            forEach(bitmapAlloc)
+        }
+    }
+    bitmapAlloc.copyTo(bitmap)
+    renderScript.destroy()
+
+    BlurImage(bitmap, modifier)
 }
 
 @Immutable

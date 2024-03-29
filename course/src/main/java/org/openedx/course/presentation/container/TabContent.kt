@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
 
@@ -46,14 +47,20 @@ fun Tabs(pagerState: PagerState) {
         stringResource(id = R.string.course_navigation_videos) to rememberVectorPainter(Icons.Rounded.PlayCircleFilled),
         stringResource(id = R.string.course_navigation_dates) to rememberVectorPainter(Icons.Default.CalendarMonth),
         stringResource(id = R.string.course_navigation_discussions) to rememberVectorPainter(Icons.AutoMirrored.Filled.Chat),
-        stringResource(id = R.string.course_handouts) to rememberVectorPainter(Icons.AutoMirrored.Filled.TextSnippet)
+        stringResource(id = R.string.course_navigation_more) to rememberVectorPainter(Icons.AutoMirrored.Filled.TextSnippet)
     )
 
     val scope = rememberCoroutineScope()
+    val windowSize = rememberWindowSize()
+    val horizontalPadding = if (!windowSize.isTablet){
+        12.dp
+    } else {
+        98.dp
+    }
     LazyRow(
         modifier = Modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(12.dp),
+        contentPadding = PaddingValues(vertical = 12.dp, horizontal = horizontalPadding),
     ) {
         itemsIndexed(list) { index, item ->
             val backgroundColor = if (pagerState.currentPage == index) {

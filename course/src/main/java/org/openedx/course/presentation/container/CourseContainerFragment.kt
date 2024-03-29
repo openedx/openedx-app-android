@@ -5,13 +5,19 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AndroidUriHandler
@@ -19,7 +25,9 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -32,7 +40,6 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
@@ -72,13 +79,17 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private val discussionTopicsViewModel by viewModel<DiscussionTopicsViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_TITLE, "")
+        )
     }
 
     private val courseDatesViewModel by viewModel<CourseDatesViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
+            requireArguments().getString(ARG_ENROLLMENT_MODE, ""),
+            requireArguments().getString(ARG_TITLE, "")
         )
     }
 
@@ -114,7 +125,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar()
+        setupCollapsingLayout()
         if (viewModel.calendarSyncUIState.value.isCalendarSyncEnabled) {
             setUpCourseCalendar()
         }
@@ -129,12 +140,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private fun observe() {
         viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
             if (isReady == true) {
-                setupToolbar()
-
-                discussionTopicsViewModel.courseName = viewModel.courseName
-                discussionTopicsViewModel.getCourseTopics()
-
-                courseDatesViewModel.courseName = viewModel.courseName
+                setupCollapsingLayout()
                 courseDatesViewModel.isSelfPaced = viewModel.isSelfPaced
                 courseDatesViewModel.updateAndFetchCalendarSyncState()
             } else {
@@ -152,401 +158,414 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             snackBar?.show()
 
         }
-        viewModel.showProgress.observe(viewLifecycleOwner) {
-            binding.progressBar.isVisible = it
+        lifecycleScope.launch {
+            viewModel.showProgress.collect {
+                binding.progressBar.isVisible = it
+            }
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
-    private fun setupToolbar() {
-        binding.toolbar.setContent {
-            OpenEdXTheme {
-                val pagerState = rememberPagerState(pageCount = { 5 })
-                val windowSize = rememberWindowSize()
-                CollapsingLayout(
-                    modifier = Modifier
-                        .statusBarsInset()
-                        .fillMaxWidth(),
-                    imageUrl = viewModel.image,
-                    expandedTop = {
-                        ExpandedHeaderContent(
-                            courseTitle = viewModel.courseName,
-                            org = viewModel.org
-                        )
-                    },
-                    collapsedTop = {
-                        CollapsedHeaderContent(
-                            courseTitle = viewModel.courseName
-                        )
-                    },
-                    navigation = {
-                        Tabs(pagerState = pagerState)
-                    },
-                    onBackClick = {
-                        requireActivity().supportFragmentManager.popBackStack()
-                    },
-                    bodyContent = {
-                        HorizontalPager(
-                            modifier = Modifier.background(Color.White),
-                            state = pagerState
-                        ) { page ->
-                            when (page) {
-                                0 -> {
-                                    val uiState by courseOutlineViewModel.uiState.observeAsState(CourseOutlineUIState.Loading)
-                                    val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
-                                    val refreshing by courseOutlineViewModel.isUpdating.observeAsState(false)
+    private fun onRefresh(currentPage: Int) {
+        when(currentPage) {
+            0 -> {
+                courseOutlineViewModel.setIsUpdating()
+                updateCourseStructure(true)
+            }
+            1 -> {
+                courseVideoViewModel.setIsUpdating()
+                updateCourseStructure(true)
+            }
+            2 -> {
+                courseDatesViewModel.getCourseDates(swipeToRefresh = true)
+            }
+            3 -> {
+                discussionTopicsViewModel.updateCourseTopics()
+            }
+        }
+    }
 
-                                    CourseOutlineScreen(
-                                        windowSize = windowSize,
-                                        uiState = uiState,
-                                        apiHostUrl = courseOutlineViewModel.apiHostUrl,
-                                        isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
-                                        isCourseBannerEnabled = courseOutlineViewModel.isCourseBannerEnabled,
-                                        uiMessage = uiMessage,
-                                        refreshing = refreshing,
-                                        onSwipeRefresh = {
-                                            courseOutlineViewModel.setIsUpdating()
-                                            updateCourseStructure(true)
-                                        },
-                                        hasInternetConnection = courseOutlineViewModel.hasInternetConnection,
-                                        onReloadClick = {
-                                            updateCourseStructure(false)
-                                        },
-                                        onItemClick = { block ->
-                                            courseOutlineViewModel.sequentialClickedEvent(
-                                                block.blockId,
-                                                block.displayName
-                                            )
-                                            courseRouter.navigateToCourseSubsections(
-                                                fm = requireActivity().supportFragmentManager,
-                                                courseId = courseOutlineViewModel.courseId,
-                                                subSectionId = block.id,
-                                                mode = CourseViewMode.FULL
-                                            )
-                                        },
-                                        onExpandClick = { block ->
-                                            if (courseOutlineViewModel.switchCourseSections(block.id)) {
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+    private fun setupCollapsingLayout() {
+        binding.composeCollapsingLayout.setContent {
+            OpenEdXTheme {
+                val refreshing by viewModel.showProgress.collectAsState(true)
+                val pagerState = rememberPagerState(pageCount = { 5 })
+                val pullRefreshState = rememberPullRefreshState(
+                    refreshing = refreshing,
+                    onRefresh = { onRefresh(pagerState.currentPage) }
+                )
+                val windowSize = rememberWindowSize()
+                Box {
+                    CollapsingLayout(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .pullRefresh(pullRefreshState),
+                        imageUrl = viewModel.image,
+                        expandedTop = {
+                            ExpandedHeaderContent(
+                                courseTitle = viewModel.courseName,
+                                org = viewModel.org
+                            )
+                        },
+                        collapsedTop = {
+                            CollapsedHeaderContent(
+                                courseTitle = viewModel.courseName
+                            )
+                        },
+                        navigation = {
+                            Tabs(pagerState = pagerState)
+                        },
+                        onBackClick = {
+                            requireActivity().supportFragmentManager.popBackStack()
+                        },
+                        bodyContent = {
+                            HorizontalPager(
+                                modifier = Modifier.background(Color.White),
+                                state = pagerState
+                            ) { page ->
+                                when (page) {
+                                    0 -> {
+                                        val uiState by courseOutlineViewModel.uiState.observeAsState(CourseOutlineUIState.Loading)
+                                        val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
+
+                                        CourseOutlineScreen(
+                                            windowSize = windowSize,
+                                            uiState = uiState,
+                                            apiHostUrl = courseOutlineViewModel.apiHostUrl,
+                                            isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
+                                            isCourseBannerEnabled = courseOutlineViewModel.isCourseBannerEnabled,
+                                            uiMessage = uiMessage,
+                                            hasInternetConnection = courseOutlineViewModel.hasInternetConnection,
+                                            onReloadClick = {
+                                                updateCourseStructure(false)
+                                            },
+                                            onItemClick = { block ->
                                                 courseOutlineViewModel.sequentialClickedEvent(
                                                     block.blockId,
                                                     block.displayName
                                                 )
-                                            }
-                                        },
-                                        onSubSectionClick = { subSectionBlock ->
-                                            courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                                                courseOutlineViewModel.logUnitDetailViewedEvent(
-                                                    unit.blockId,
-                                                    unit.displayName
-                                                )
-                                                courseRouter.navigateToCourseContainer(
-                                                    requireActivity().supportFragmentManager,
+                                                courseRouter.navigateToCourseSubsections(
+                                                    fm = requireActivity().supportFragmentManager,
                                                     courseId = courseOutlineViewModel.courseId,
-                                                    unitId = unit.id,
+                                                    subSectionId = block.id,
                                                     mode = CourseViewMode.FULL
                                                 )
-                                            }
-                                        },
-                                        onResumeClick = { componentId ->
-                                            courseOutlineViewModel.resumeSectionBlock?.let { subSection ->
-                                                courseOutlineViewModel.resumeCourseTappedEvent(subSection.id)
-                                                courseOutlineViewModel.resumeVerticalBlock?.let { unit ->
-                                                    if (courseOutlineViewModel.isCourseExpandableSectionsEnabled) {
-                                                        courseRouter.navigateToCourseContainer(
-                                                            fm = requireActivity().supportFragmentManager,
-                                                            courseId = courseOutlineViewModel.courseId,
-                                                            unitId = unit.id,
-                                                            componentId = componentId,
-                                                            mode = CourseViewMode.FULL
-                                                        )
-                                                    } else {
-                                                        courseRouter.navigateToCourseSubsections(
-                                                            requireActivity().supportFragmentManager,
-                                                            courseId = courseOutlineViewModel.courseId,
-                                                            subSectionId = subSection.id,
-                                                            mode = CourseViewMode.FULL,
-                                                            unitId = unit.id,
-                                                            componentId = componentId
-                                                        )
-                                                    }
+                                            },
+                                            onExpandClick = { block ->
+                                                if (courseOutlineViewModel.switchCourseSections(block.id)) {
+                                                    courseOutlineViewModel.sequentialClickedEvent(
+                                                        block.blockId,
+                                                        block.displayName
+                                                    )
                                                 }
-                                            }
-                                        },
-                                        onDownloadClick = {
-                                            if (courseOutlineViewModel.isBlockDownloading(it.id)) {
-                                                courseRouter.navigateToDownloadQueue(
-                                                    fm = requireActivity().supportFragmentManager,
-                                                    courseOutlineViewModel.getDownloadableChildren(it.id)
-                                                        ?: arrayListOf()
-                                                )
-                                            } else if (courseOutlineViewModel.isBlockDownloaded(it.id)) {
-                                                courseOutlineViewModel.removeDownloadModels(it.id)
-                                            } else {
-                                                courseOutlineViewModel.saveDownloadModels(
-                                                    requireContext().externalCacheDir.toString() +
-                                                            File.separator +
-                                                            requireContext()
-                                                                .getString(org.openedx.core.R.string.app_name)
-                                                                .replace(Regex("\\s"), "_"), it.id
-                                                )
-                                            }
-                                        },
-                                        onResetDatesClick = {
-                                            courseOutlineViewModel.resetCourseDatesBanner(onResetDates = {
-                                                updateCourseDates()
-                                            })
-                                        },
-                                        onViewDates = {
-                                            runBlocking {
-                                                pagerState.animateScrollToPage(4)
-                                            }
-                                        },
-                                        onCertificateClick = {
-                                            courseOutlineViewModel.viewCertificateTappedEvent()
-                                            it.takeIfNotEmpty()
-                                                ?.let { url -> AndroidUriHandler(requireContext()).openUri(url) }
-                                        }
-                                    )
-                                }
-
-                                1 -> {
-                                    val uiState by courseVideoViewModel.uiState.observeAsState(CourseVideosUIState.Loading)
-                                    val uiMessage by courseVideoViewModel.uiMessage.collectAsState(null)
-                                    val isUpdating by courseVideoViewModel.isUpdating.observeAsState(false)
-                                    val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
-
-                                    CourseVideosScreen(
-                                        windowSize = windowSize,
-                                        uiState = uiState,
-                                        uiMessage = uiMessage,
-                                        courseTitle = courseVideoViewModel.courseTitle,
-                                        apiHostUrl = courseVideoViewModel.apiHostUrl,
-                                        isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
-                                        isCourseBannerEnabled = courseVideoViewModel.isCourseBannerEnabled,
-                                        hasInternetConnection = courseVideoViewModel.hasInternetConnection,
-                                        isUpdating = isUpdating,
-                                        videoSettings = videoSettings,
-                                        onSwipeRefresh = {
-                                            courseVideoViewModel.setIsUpdating()
-                                            updateCourseStructure(true)
-                                        },
-                                        onReloadClick = {
-                                            updateCourseStructure(false)
-                                        },
-                                        onItemClick = { block ->
-                                            courseRouter.navigateToCourseSubsections(
-                                                fm = requireActivity().supportFragmentManager,
-                                                courseId = courseVideoViewModel.courseId,
-                                                subSectionId = block.id,
-                                                mode = CourseViewMode.VIDEOS
-                                            )
-                                        },
-                                        onExpandClick = { block ->
-                                            courseVideoViewModel.switchCourseSections(block.id)
-                                        },
-                                        onSubSectionClick = { subSectionBlock ->
-                                            courseVideoViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                                                courseVideoViewModel.sequentialClickedEvent(
-                                                    unit.blockId,
-                                                    unit.displayName
-                                                )
-                                                courseRouter.navigateToCourseContainer(
-                                                    fm = requireActivity().supportFragmentManager,
-                                                    courseId = courseVideoViewModel.courseId,
-                                                    unitId = unit.id,
-                                                    mode = CourseViewMode.VIDEOS
-                                                )
-                                            }
-                                        },
-                                        onDownloadClick = {
-                                            if (courseVideoViewModel.isBlockDownloading(it.id)) {
-                                                courseRouter.navigateToDownloadQueue(
-                                                    fm = requireActivity().supportFragmentManager,
-                                                    courseVideoViewModel.getDownloadableChildren(it.id) ?: arrayListOf()
-                                                )
-                                            } else if (courseVideoViewModel.isBlockDownloaded(it.id)) {
-                                                courseVideoViewModel.removeDownloadModels(it.id)
-                                            } else {
-                                                courseVideoViewModel.saveDownloadModels(
-                                                    requireContext().externalCacheDir.toString() +
-                                                            File.separator +
-                                                            requireContext()
-                                                                .getString(org.openedx.core.R.string.app_name)
-                                                                .replace(Regex("\\s"), "_"), it.id
-                                                )
-                                            }
-                                        },
-                                        onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
-                                            courseVideoViewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
-                                            if (isAllBlocksDownloadedOrDownloading) {
-                                                courseVideoViewModel.removeAllDownloadModels()
-                                            } else {
-                                                courseVideoViewModel.saveAllDownloadModels(
-                                                    requireContext().externalCacheDir.toString() +
-                                                            File.separator +
-                                                            requireContext()
-                                                                .getString(org.openedx.core.R.string.app_name)
-                                                                .replace(Regex("\\s"), "_")
-                                                )
-                                            }
-                                        },
-                                        onDownloadQueueClick = {
-                                            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
-                                                courseRouter.navigateToDownloadQueue(fm = requireActivity().supportFragmentManager)
-                                            }
-                                        },
-                                        onVideoDownloadQualityClick = {
-                                            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
-                                                courseVideoViewModel.onChangingVideoQualityWhileDownloading()
-                                            } else {
-                                                courseRouter.navigateToVideoQuality(
-                                                    requireActivity().supportFragmentManager, VideoQualityType.Download
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-
-                                2 -> {
-                                    val uiState by courseDatesViewModel.uiState.observeAsState(DatesUIState.Loading)
-                                    val uiMessage by courseDatesViewModel.uiMessage.collectAsState(null)
-                                    val refreshing by courseDatesViewModel.updating.observeAsState(false)
-                                    val calendarSyncUIState by courseDatesViewModel.calendarSyncUIState.collectAsState()
-
-                                    CourseDatesScreen(
-                                        windowSize = windowSize,
-                                        uiState = uiState,
-                                        uiMessage = uiMessage,
-                                        refreshing = refreshing,
-                                        isSelfPaced = courseDatesViewModel.isSelfPaced,
-                                        hasInternetConnection = courseDatesViewModel.hasInternetConnection,
-                                        calendarSyncUIState = calendarSyncUIState,
-                                        onReloadClick = {
-                                            courseDatesViewModel.getCourseDates()
-                                        },
-                                        onSwipeRefresh = {
-                                            courseDatesViewModel.getCourseDates(swipeToRefresh = true)
-                                        },
-                                        onItemClick = { block ->
-                                            if (block.blockId.isNotEmpty()) {
-                                                courseDatesViewModel.getVerticalBlock(block.blockId)
-                                                    ?.let { verticalBlock ->
-                                                        courseDatesViewModel.logCourseComponentTapped(true, block)
-                                                        if (courseDatesViewModel.isCourseExpandableSectionsEnabled) {
+                                            },
+                                            onSubSectionClick = { subSectionBlock ->
+                                                courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                                                    courseOutlineViewModel.logUnitDetailViewedEvent(
+                                                        unit.blockId,
+                                                        unit.displayName
+                                                    )
+                                                    courseRouter.navigateToCourseContainer(
+                                                        requireActivity().supportFragmentManager,
+                                                        courseId = courseOutlineViewModel.courseId,
+                                                        unitId = unit.id,
+                                                        mode = CourseViewMode.FULL
+                                                    )
+                                                }
+                                            },
+                                            onResumeClick = { componentId ->
+                                                courseOutlineViewModel.resumeSectionBlock?.let { subSection ->
+                                                    courseOutlineViewModel.resumeCourseTappedEvent(subSection.id)
+                                                    courseOutlineViewModel.resumeVerticalBlock?.let { unit ->
+                                                        if (courseOutlineViewModel.isCourseExpandableSectionsEnabled) {
                                                             courseRouter.navigateToCourseContainer(
                                                                 fm = requireActivity().supportFragmentManager,
-                                                                courseId = courseDatesViewModel.courseId,
-                                                                unitId = verticalBlock.id,
-                                                                componentId = "",
+                                                                courseId = courseOutlineViewModel.courseId,
+                                                                unitId = unit.id,
+                                                                componentId = componentId,
                                                                 mode = CourseViewMode.FULL
                                                             )
                                                         } else {
-                                                            courseDatesViewModel.getSequentialBlock(verticalBlock.id)
-                                                                ?.let { sequentialBlock ->
-                                                                    courseRouter.navigateToCourseSubsections(
-                                                                        fm = requireActivity().supportFragmentManager,
-                                                                        subSectionId = sequentialBlock.id,
-                                                                        courseId = courseDatesViewModel.courseId,
-                                                                        unitId = verticalBlock.id,
-                                                                        mode = CourseViewMode.FULL
-                                                                    )
-                                                                }
+                                                            courseRouter.navigateToCourseSubsections(
+                                                                requireActivity().supportFragmentManager,
+                                                                courseId = courseOutlineViewModel.courseId,
+                                                                subSectionId = subSection.id,
+                                                                mode = CourseViewMode.FULL,
+                                                                unitId = unit.id,
+                                                                componentId = componentId
+                                                            )
                                                         }
-                                                    } ?: {
-                                                    courseDatesViewModel.logCourseComponentTapped(false, block)
-                                                    ActionDialogFragment.newInstance(
-                                                        title = getString(org.openedx.core.R.string.core_leaving_the_app),
-                                                        message = getString(
-                                                            org.openedx.core.R.string.core_leaving_the_app_message,
-                                                            getString(org.openedx.core.R.string.platform_name)
-                                                        ),
-                                                        url = block.link,
-                                                        source = CoreAnalyticsScreen.COURSE_DATES.screenName
-                                                    ).show(
-                                                        requireActivity().supportFragmentManager,
-                                                        ActionDialogFragment::class.simpleName
+                                                    }
+                                                }
+                                            },
+                                            onDownloadClick = {
+                                                if (courseOutlineViewModel.isBlockDownloading(it.id)) {
+                                                    courseRouter.navigateToDownloadQueue(
+                                                        fm = requireActivity().supportFragmentManager,
+                                                        courseOutlineViewModel.getDownloadableChildren(it.id)
+                                                            ?: arrayListOf()
                                                     )
+                                                } else if (courseOutlineViewModel.isBlockDownloaded(it.id)) {
+                                                    courseOutlineViewModel.removeDownloadModels(it.id)
+                                                } else {
+                                                    courseOutlineViewModel.saveDownloadModels(
+                                                        requireContext().externalCacheDir.toString() +
+                                                                File.separator +
+                                                                requireContext()
+                                                                    .getString(org.openedx.core.R.string.app_name)
+                                                                    .replace(Regex("\\s"), "_"), it.id
+                                                    )
+                                                }
+                                            },
+                                            onResetDatesClick = {
+                                                courseOutlineViewModel.resetCourseDatesBanner(onResetDates = {
+                                                    updateCourseDates()
+                                                })
+                                            },
+                                            onViewDates = {
+                                                runBlocking {
+                                                    pagerState.animateScrollToPage(4)
+                                                }
+                                            },
+                                            onCertificateClick = {
+                                                courseOutlineViewModel.viewCertificateTappedEvent()
+                                                it.takeIfNotEmpty()
+                                                    ?.let { url -> AndroidUriHandler(requireContext()).openUri(url) }
+                                            }
+                                        )
+                                    }
 
+                                    1 -> {
+                                        val uiState by courseVideoViewModel.uiState.observeAsState(CourseVideosUIState.Loading)
+                                        val uiMessage by courseVideoViewModel.uiMessage.collectAsState(null)
+                                        val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
+
+                                        CourseVideosScreen(
+                                            windowSize = windowSize,
+                                            uiState = uiState,
+                                            uiMessage = uiMessage,
+                                            courseTitle = courseVideoViewModel.courseTitle,
+                                            apiHostUrl = courseVideoViewModel.apiHostUrl,
+                                            isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
+                                            isCourseBannerEnabled = courseVideoViewModel.isCourseBannerEnabled,
+                                            hasInternetConnection = courseVideoViewModel.hasInternetConnection,
+                                            videoSettings = videoSettings,
+                                            onReloadClick = {
+                                                updateCourseStructure(false)
+                                            },
+                                            onItemClick = { block ->
+                                                courseRouter.navigateToCourseSubsections(
+                                                    fm = requireActivity().supportFragmentManager,
+                                                    courseId = courseVideoViewModel.courseId,
+                                                    subSectionId = block.id,
+                                                    mode = CourseViewMode.VIDEOS
+                                                )
+                                            },
+                                            onExpandClick = { block ->
+                                                courseVideoViewModel.switchCourseSections(block.id)
+                                            },
+                                            onSubSectionClick = { subSectionBlock ->
+                                                courseVideoViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                                                    courseVideoViewModel.sequentialClickedEvent(
+                                                        unit.blockId,
+                                                        unit.displayName
+                                                    )
+                                                    courseRouter.navigateToCourseContainer(
+                                                        fm = requireActivity().supportFragmentManager,
+                                                        courseId = courseVideoViewModel.courseId,
+                                                        unitId = unit.id,
+                                                        mode = CourseViewMode.VIDEOS
+                                                    )
+                                                }
+                                            },
+                                            onDownloadClick = {
+                                                if (courseVideoViewModel.isBlockDownloading(it.id)) {
+                                                    courseRouter.navigateToDownloadQueue(
+                                                        fm = requireActivity().supportFragmentManager,
+                                                        courseVideoViewModel.getDownloadableChildren(it.id)
+                                                            ?: arrayListOf()
+                                                    )
+                                                } else if (courseVideoViewModel.isBlockDownloaded(it.id)) {
+                                                    courseVideoViewModel.removeDownloadModels(it.id)
+                                                } else {
+                                                    courseVideoViewModel.saveDownloadModels(
+                                                        requireContext().externalCacheDir.toString() +
+                                                                File.separator +
+                                                                requireContext()
+                                                                    .getString(org.openedx.core.R.string.app_name)
+                                                                    .replace(Regex("\\s"), "_"), it.id
+                                                    )
+                                                }
+                                            },
+                                            onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
+                                                courseVideoViewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
+                                                if (isAllBlocksDownloadedOrDownloading) {
+                                                    courseVideoViewModel.removeAllDownloadModels()
+                                                } else {
+                                                    courseVideoViewModel.saveAllDownloadModels(
+                                                        requireContext().externalCacheDir.toString() +
+                                                                File.separator +
+                                                                requireContext()
+                                                                    .getString(org.openedx.core.R.string.app_name)
+                                                                    .replace(Regex("\\s"), "_")
+                                                    )
+                                                }
+                                            },
+                                            onDownloadQueueClick = {
+                                                if (courseVideoViewModel.hasDownloadModelsInQueue()) {
+                                                    courseRouter.navigateToDownloadQueue(fm = requireActivity().supportFragmentManager)
+                                                }
+                                            },
+                                            onVideoDownloadQualityClick = {
+                                                if (courseVideoViewModel.hasDownloadModelsInQueue()) {
+                                                    courseVideoViewModel.onChangingVideoQualityWhileDownloading()
+                                                } else {
+                                                    courseRouter.navigateToVideoQuality(
+                                                        requireActivity().supportFragmentManager,
+                                                        VideoQualityType.Download
+                                                    )
                                                 }
                                             }
-                                        },
-                                        onPLSBannerViewed = {
-                                            if (isResumed) {
-                                                courseDatesViewModel.logPlsBannerViewed()
-                                            }
-                                        },
-                                        onSyncDates = {
-                                            courseDatesViewModel.logPlsShiftButtonClicked()
-                                            courseDatesViewModel.resetCourseDatesBanner {
-                                                courseDatesViewModel.logPlsShiftDates(it)
-                                                if (it) {
-                                                    updateCourseStructure(false)
+                                        )
+                                    }
+
+                                    2 -> {
+                                        val uiState by courseDatesViewModel.uiState.observeAsState(DatesUIState.Loading)
+                                        val uiMessage by courseDatesViewModel.uiMessage.collectAsState(null)
+                                        val calendarSyncUIState by courseDatesViewModel.calendarSyncUIState.collectAsState()
+
+                                        CourseDatesScreen(
+                                            windowSize = windowSize,
+                                            uiState = uiState,
+                                            uiMessage = uiMessage,
+                                            isSelfPaced = courseDatesViewModel.isSelfPaced,
+                                            hasInternetConnection = courseDatesViewModel.hasInternetConnection,
+                                            calendarSyncUIState = calendarSyncUIState,
+                                            onReloadClick = {
+                                                courseDatesViewModel.getCourseDates()
+                                            },
+                                            onItemClick = { block ->
+                                                if (block.blockId.isNotEmpty()) {
+                                                    courseDatesViewModel.getVerticalBlock(block.blockId)
+                                                        ?.let { verticalBlock ->
+                                                            courseDatesViewModel.logCourseComponentTapped(true, block)
+                                                            if (courseDatesViewModel.isCourseExpandableSectionsEnabled) {
+                                                                courseRouter.navigateToCourseContainer(
+                                                                    fm = requireActivity().supportFragmentManager,
+                                                                    courseId = courseDatesViewModel.courseId,
+                                                                    unitId = verticalBlock.id,
+                                                                    componentId = "",
+                                                                    mode = CourseViewMode.FULL
+                                                                )
+                                                            } else {
+                                                                courseDatesViewModel.getSequentialBlock(verticalBlock.id)
+                                                                    ?.let { sequentialBlock ->
+                                                                        courseRouter.navigateToCourseSubsections(
+                                                                            fm = requireActivity().supportFragmentManager,
+                                                                            subSectionId = sequentialBlock.id,
+                                                                            courseId = courseDatesViewModel.courseId,
+                                                                            unitId = verticalBlock.id,
+                                                                            mode = CourseViewMode.FULL
+                                                                        )
+                                                                    }
+                                                            }
+                                                        } ?: {
+                                                        courseDatesViewModel.logCourseComponentTapped(false, block)
+                                                        ActionDialogFragment.newInstance(
+                                                            title = getString(org.openedx.core.R.string.core_leaving_the_app),
+                                                            message = getString(
+                                                                org.openedx.core.R.string.core_leaving_the_app_message,
+                                                                getString(org.openedx.core.R.string.platform_name)
+                                                            ),
+                                                            url = block.link,
+                                                            source = CoreAnalyticsScreen.COURSE_DATES.screenName
+                                                        ).show(
+                                                            requireActivity().supportFragmentManager,
+                                                            ActionDialogFragment::class.simpleName
+                                                        )
+
+                                                    }
                                                 }
+                                            },
+                                            onPLSBannerViewed = {
+                                                if (isResumed) {
+                                                    courseDatesViewModel.logPlsBannerViewed()
+                                                }
+                                            },
+                                            onSyncDates = {
+                                                courseDatesViewModel.logPlsShiftButtonClicked()
+                                                courseDatesViewModel.resetCourseDatesBanner {
+                                                    courseDatesViewModel.logPlsShiftDates(it)
+                                                    if (it) {
+                                                        updateCourseStructure(false)
+                                                    }
+                                                }
+                                            },
+                                            onCalendarSyncSwitch = { isChecked ->
+                                                courseDatesViewModel.handleCalendarSyncState(isChecked)
+                                            },
+                                        )
+                                    }
+
+                                    3 -> {
+                                        val uiState by discussionTopicsViewModel.uiState.observeAsState(DiscussionTopicsUIState.Loading)
+                                        val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
+
+                                        DiscussionTopicsScreen(
+                                            windowSize = windowSize,
+                                            uiState = uiState,
+                                            uiMessage = uiMessage,
+
+                                            onItemClick = { action, data, title ->
+                                                discussionTopicsViewModel.discussionClickedEvent(action, data, title)
+                                                discussionRouter.navigateToDiscussionThread(
+                                                    requireActivity().supportFragmentManager,
+                                                    action,
+                                                    discussionTopicsViewModel.courseId,
+                                                    data,
+                                                    title,
+                                                    FragmentViewType.FULL_CONTENT
+                                                )
+                                            },
+                                            onSearchClick = {
+                                                discussionRouter.navigateToSearchThread(
+                                                    requireActivity().supportFragmentManager,
+                                                    discussionTopicsViewModel.courseId
+                                                )
                                             }
-                                        },
-                                        onCalendarSyncSwitch = { isChecked ->
-                                            courseDatesViewModel.handleCalendarSyncState(isChecked)
-                                        },
-                                    )
-                                }
+                                        )
+                                    }
 
-                                3 -> {
-                                    val uiState by discussionTopicsViewModel.uiState.observeAsState(
-                                        DiscussionTopicsUIState.Loading
-                                    )
-                                    val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
-                                    val refreshing by discussionTopicsViewModel.isUpdating.collectAsState(false)
-                                    DiscussionTopicsScreen(
-                                        windowSize = windowSize,
-                                        uiState = uiState,
-                                        uiMessage = uiMessage,
-                                        refreshing = refreshing,
-                                        onSwipeRefresh = {
-                                            discussionTopicsViewModel.updateCourseTopics()
-                                        },
-                                        onItemClick = { action, data, title ->
-                                            discussionTopicsViewModel.discussionClickedEvent(action, data, title)
-                                            discussionRouter.navigateToDiscussionThread(
-                                                requireActivity().supportFragmentManager,
-                                                action,
-                                                discussionTopicsViewModel.courseId,
-                                                data,
-                                                title,
-                                                FragmentViewType.FULL_CONTENT
-                                            )
-                                        },
-                                        onSearchClick = {
-                                            discussionRouter.navigateToSearchThread(
-                                                requireActivity().supportFragmentManager,
-                                                discussionTopicsViewModel.courseId
-                                            )
-                                        }
-                                    )
-                                }
-
-                                4 -> {
-                                    HandoutsScreen(
-                                        windowSize = windowSize,
-                                        onHandoutsClick = {
-                                            courseRouter.navigateToHandoutsWebView(
-                                                requireActivity().supportFragmentManager,
-                                                requireArguments().getString(ARG_COURSE_ID, ""),
-                                                getString(R.string.course_handouts),
-                                                HandoutsType.Handouts
-                                            )
-                                        },
-                                        onAnnouncementsClick = {
-                                            courseRouter.navigateToHandoutsWebView(
-                                                requireActivity().supportFragmentManager,
-                                                requireArguments().getString(ARG_COURSE_ID, ""),
-                                                getString(R.string.course_announcements),
-                                                HandoutsType.Announcements
-                                            )
-                                        })
+                                    4 -> {
+                                        HandoutsScreen(
+                                            windowSize = windowSize,
+                                            onHandoutsClick = {
+                                                courseRouter.navigateToHandoutsWebView(
+                                                    requireActivity().supportFragmentManager,
+                                                    requireArguments().getString(ARG_COURSE_ID, ""),
+                                                    getString(R.string.course_handouts),
+                                                    HandoutsType.Handouts
+                                                )
+                                            },
+                                            onAnnouncementsClick = {
+                                                courseRouter.navigateToHandoutsWebView(
+                                                    requireActivity().supportFragmentManager,
+                                                    requireArguments().getString(ARG_COURSE_ID, ""),
+                                                    getString(R.string.course_announcements),
+                                                    HandoutsType.Announcements
+                                                )
+                                            })
+                                    }
                                 }
                             }
                         }
-                    }
-                )
+                    )
+                    PullRefreshIndicator(
+                        refreshing,
+                        pullRefreshState,
+                        Modifier.align(Alignment.TopCenter)
+                    )
+                }
             }
         }
     }

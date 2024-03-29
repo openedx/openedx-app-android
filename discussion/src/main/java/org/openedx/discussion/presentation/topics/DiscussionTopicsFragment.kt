@@ -2,13 +2,25 @@ package org.openedx.discussion.presentation.topics
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,11 +35,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.UIMessage
-import org.openedx.core.ui.*
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.StaticSearchBar
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
@@ -39,21 +57,16 @@ object DiscussionTopic {
     const val FOLLOWING_POSTS = "Following"
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DiscussionTopicsScreen(
     windowSize: WindowSize,
     uiState: DiscussionTopicsUIState,
     uiMessage: UIMessage?,
-    refreshing: Boolean,
     onSearchClick: () -> Unit,
-    onSwipeRefresh: () -> Unit,
     onItemClick: (String, String, String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -122,7 +135,7 @@ fun DiscussionTopicsScreen(
                     color = MaterialTheme.appColors.background,
                     shape = MaterialTheme.appShapes.screenBackgroundShape
                 ) {
-                    Box(Modifier.pullRefresh(pullRefreshState)) {
+                    Box {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -203,21 +216,9 @@ fun DiscussionTopicsScreen(
                                     }
                                 }
 
-                                DiscussionTopicsUIState.Loading -> {
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize(), contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                    }
-                                }
+                                DiscussionTopicsUIState.Loading -> {}
                             }
                         }
-                        PullRefreshIndicator(
-                            refreshing,
-                            pullRefreshState,
-                            Modifier.align(Alignment.TopCenter)
-                        )
                     }
                 }
             }
@@ -237,9 +238,7 @@ private fun DiscussionTopicsScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
-            refreshing = false,
             onItemClick = { _, _, _ -> },
-            onSwipeRefresh = {},
             onSearchClick = {}
         )
     }
@@ -254,9 +253,7 @@ private fun DiscussionTopicsScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
-            refreshing = false,
             onItemClick = { _, _, _ -> },
-            onSwipeRefresh = {},
             onSearchClick = {}
         )
     }

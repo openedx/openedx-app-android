@@ -11,6 +11,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
@@ -20,10 +22,16 @@ internal fun ExpandedHeaderContent(
     org: String,
     courseTitle: String
 ) {
+    val windowSize = rememberWindowSize()
+    val horizontalPadding = if (!windowSize.isTablet){
+        24.dp
+    } else {
+        98.dp
+    }
     Column(
         modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .padding(horizontal = horizontalPadding, vertical = 8.dp)
     ) {
         Text(
             modifier = Modifier
@@ -50,6 +58,7 @@ internal fun CollapsedHeaderContent(
     Text(
         modifier = modifier
             .fillMaxWidth()
+            .statusBarsInset()
             .padding(top = 4.dp),
         text = courseTitle,
         color = MaterialTheme.appColors.textDark,

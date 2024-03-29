@@ -39,6 +39,7 @@ import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
     val courseId: String,
+    var courseName: String,
     private val enrollmentMode: String,
     private val notifier: CourseNotifier,
     private val interactor: CourseInteractor,
@@ -50,7 +51,6 @@ class CourseDatesViewModel(
     private val config: Config,
 ) : BaseViewModel() {
 
-    var courseName = ""
     var isSelfPaced = true
 
     private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)

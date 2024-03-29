@@ -6,22 +6,11 @@
     android:background="@color/background">
 
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/toolbar"
+        android:id="@+id/composeCollapsingLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/background"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:tabMode="scrollable"
-        app:tabTextAppearance="@style/TabLayoutTextAppearance" />
 
     <ProgressBar
         android:id="@+id/progressBar"

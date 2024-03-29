@@ -19,7 +19,8 @@ class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
-    val courseId: String
+    val courseId: String,
+    val courseName: String,
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DiscussionTopicsUIState>()
@@ -34,7 +35,9 @@ class DiscussionTopicsViewModel(
     val isUpdating: SharedFlow<Boolean>
         get() = _isUpdating.asSharedFlow()
 
-    var courseName = ""
+    init {
+        getCourseTopics()
+    }
 
     fun updateCourseTopics() {
         viewModelScope.launch {
@@ -53,7 +56,7 @@ class DiscussionTopicsViewModel(
         }
     }
 
-    fun getCourseTopics() {
+    private fun getCourseTopics() {
         _uiState.value = DiscussionTopicsUIState.Loading
         getCourseTopicsInternal()
     }

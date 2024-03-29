@@ -67,9 +67,9 @@ class CourseContainerViewModel(
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
-    private val _showProgress = MutableLiveData<Boolean>()
-    val showProgress: LiveData<Boolean>
-        get() = _showProgress
+    private val _showProgress = MutableStateFlow(true)
+    val showProgress: StateFlow<Boolean> =
+        _showProgress.asStateFlow()
 
     private var _isSelfPaced: Boolean = true
     val isSelfPaced: Boolean
@@ -129,7 +129,9 @@ class CourseContainerViewModel(
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
                 org = courseStructure.org
-                image = courseStructure.media?.image?.large ?: ""
+                courseStructure.media?.image?.large?.let {
+                image = config.getApiHostURL() + it
+                }
                 _isSelfPaced = courseStructure.isSelfPaced
                 _dataReady.value = courseStructure.start?.let { start ->
                     start < Date()

@@ -54,7 +54,7 @@ val light_navigation_btn_background = Color.White
 val light_navigation_btn_unselected_content = light_primary
 val light_course_home_header_shade_primary = Color.White
 val light_course_home_header_shade_secondary = Color(0xFFBABABA)
-val light_course_home_back_btn_background = Color.Black
+val light_course_home_back_btn_background = Color.White
 
 
 val dark_primary = Color(0xFF5478F9)
@@ -109,4 +109,4 @@ val dark_navigation_btn_background = Color(0xFF273346)
 val dark_navigation_btn_unselected_content = Color.White
 val dark_course_home_header_shade_primary = Color(0xFF273346)
 val dark_course_home_header_shade_secondary = Color(0xFF999999)
-val dark_course_home_back_btn_background = Color.White
+val dark_course_home_back_btn_background = Color.Black
