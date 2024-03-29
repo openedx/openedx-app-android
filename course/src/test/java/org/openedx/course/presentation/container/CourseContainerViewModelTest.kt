@@ -36,6 +36,7 @@ import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import java.net.UnknownHostException
 import java.util.Date
@@ -136,12 +137,12 @@ class CourseContainerViewModelTest {
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
-        every { analytics.logEvent(any(), any()) } returns Unit
+        every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
@@ -167,12 +168,12 @@ class CourseContainerViewModelTest {
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
-        every { analytics.logEvent(any(), any()) } returns Unit
+        every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
@@ -199,12 +200,12 @@ class CourseContainerViewModelTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
         every { interactor.getCourseStructureFromCache() } returns courseStructure
-        every { analytics.logEvent(any(), any()) } returns Unit
+        every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         assert(viewModel.errorMessage.value == null)
         assert(viewModel.showProgress.value == false)
@@ -325,5 +326,4 @@ class CourseContainerViewModelTest {
         assert(viewModel.errorMessage.value == null)
         assert(viewModel.showProgress.value == false)
     }
-
 }
