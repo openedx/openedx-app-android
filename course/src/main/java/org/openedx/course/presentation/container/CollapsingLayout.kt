@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.draw
@@ -165,17 +166,7 @@ internal fun CollapsingLayout(
                 .height(imageHeight.dp)
                 .onSizeChanged { size ->
                     backgroundImageHeight = size.height.toFloat()
-                },
-            model = imageModel,
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
-
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
-                .background(Color.White)
-                .blur(100.dp)
+                }
                 .drawWithCache {
                     val width = this.size.width.toInt()
                     val height = this.size.height.toInt()
@@ -193,40 +184,90 @@ internal fun CollapsingLayout(
                         picture.endRecording()
                         drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
                     }
-                }
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.appColors.courseHomeHeaderShadePrimary)
-                    .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
-                    .align(Alignment.Center)
-            )
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(blurImagePadding)
-                    .align(Alignment.TopCenter),
-                model = imageModel,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                alignment = PixelAlignment(0f, blurImageAlignment),
-            )
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.appColors.courseHomeHeaderShadeSecondary)
-                    .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } * 0.1f)
-                    .align(Alignment.BottomCenter)
-            )
-        }
+                },
+            model = imageModel,
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && picture.width > 0 && picture.height > 0) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
+                    .background(Color.White)
+                    .blur(100.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.appColors.courseHomeHeaderShadePrimary)
+                        .fillMaxWidth()
+                        .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
+                        .align(Alignment.Center)
+                )
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(blurImagePadding)
+                        .align(Alignment.TopCenter),
+                    model = imageModel,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    alignment = PixelAlignment(0f, blurImageAlignment),
+                )
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.appColors.courseHomeHeaderShadeSecondary)
+                        .fillMaxWidth()
+                        .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } * 0.1f)
+                        .align(Alignment.BottomCenter)
+                )
+            }
+        } else if (picture.width > 0 && picture.height > 0) {
+            //TODO Change color
+            val backgroundColor = MaterialTheme.appColors.cardViewBackground
             LegacyBlurImage(
                 modifier = Modifier
-                    .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) },
+                    .fillMaxWidth()
+                    .height(imageHeight.dp),
                 bitmap = createBitmapFromPicture(picture),
                 blurRadio = 25f
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } )
+                    .offset { IntOffset(x = 0, y = backgroundImageHeight.roundToInt()) }
+                    .background(backgroundColor)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(backgroundColor, Color.Transparent),
+                            startY = 500f,
+                            endY = 400f
+                        )
+                    ),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = with(localDensity) { (offset + backgroundImageHeight - blurImagePadding.toPx()).roundToInt() })
+                    }
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(backgroundColor, Color.Transparent),
+                            startY = 400f,
+                            endY = 0f
+                        )
+                    ),
             )
         }
 
@@ -328,9 +369,7 @@ private fun LegacyBlurImage(
     ScriptIntrinsicBlur.create(renderScript, bitmapAlloc.element).apply {
         setRadius(blurRadio)
         setInput(bitmapAlloc)
-        repeat(5) {
-            forEach(bitmapAlloc)
-        }
+        forEach(bitmapAlloc)
     }
     bitmapAlloc.copyTo(bitmap)
     renderScript.destroy()
