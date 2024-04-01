@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -85,14 +84,12 @@ fun getUnitBlockIcon(block: Block): Int {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
     apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
-    isCourseBannerEnabled: Boolean,
     uiMessage: UIMessage?,
     hasInternetConnection: Boolean,
     onReloadClick: () -> Unit,
@@ -175,20 +172,18 @@ internal fun CourseOutlineScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = listBottomPadding
                             ) {
-                                if (isCourseBannerEnabled) {
-                                    item {
-                                        CourseImageHeader(
-                                            modifier = Modifier
-                                                .aspectRatio(1.86f)
-                                                .padding(6.dp),
-                                            apiHostUrl = apiHostUrl,
-                                            courseImage = uiState.courseStructure.media?.image?.large
-                                                ?: "",
-                                            courseCertificate = uiState.courseStructure.certificate,
-                                            onCertificateClick = onCertificateClick,
-                                            courseName = uiState.courseStructure.name
-                                        )
-                                    }
+                                item {
+                                    CourseImageHeader(
+                                        modifier = Modifier
+                                            .aspectRatio(1.86f)
+                                            .padding(6.dp),
+                                        apiHostUrl = apiHostUrl,
+                                        courseImage = uiState.courseStructure.media?.image?.large
+                                            ?: "",
+                                        courseCertificate = uiState.courseStructure.certificate,
+                                        onCertificateClick = onCertificateClick,
+                                        courseName = uiState.courseStructure.name
+                                    )
                                 }
                                 item { Spacer(Modifier.height(28.dp)) }
                                 if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
@@ -473,7 +468,6 @@ private fun CourseOutlineScreenPreview() {
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = true,
-            isCourseBannerEnabled = true,
             uiMessage = null,
             hasInternetConnection = true,
             onItemClick = {},
@@ -513,7 +507,6 @@ private fun CourseOutlineScreenTabletPreview() {
             ),
             apiHostUrl = "",
             isCourseNestedListEnabled = true,
-            isCourseBannerEnabled = true,
             uiMessage = null,
             hasInternetConnection = true,
             onItemClick = {},

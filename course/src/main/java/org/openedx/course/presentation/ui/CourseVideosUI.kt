@@ -85,7 +85,6 @@ fun CourseVideosScreen(
     courseTitle: String,
     apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
-    isCourseBannerEnabled: Boolean,
     hasInternetConnection: Boolean,
     videoSettings: VideoSettings,
     onItemClick: (Block) -> Unit,
@@ -189,19 +188,17 @@ fun CourseVideosScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
                                 ) {
-                                    if (isCourseBannerEnabled) {
-                                        item {
-                                            CourseImageHeader(
-                                                modifier = Modifier
-                                                    .aspectRatio(1.86f)
-                                                    .padding(6.dp),
-                                                apiHostUrl = apiHostUrl,
-                                                courseImage = uiState.courseStructure.media?.image?.large
-                                                    ?: "",
-                                                courseCertificate = uiState.courseStructure.certificate,
-                                                courseName = uiState.courseStructure.name
-                                            )
-                                        }
+                                    item {
+                                        CourseImageHeader(
+                                            modifier = Modifier
+                                                .aspectRatio(1.86f)
+                                                .padding(6.dp),
+                                            apiHostUrl = apiHostUrl,
+                                            courseImage = uiState.courseStructure.media?.image?.large
+                                                ?: "",
+                                            courseCertificate = uiState.courseStructure.certificate,
+                                            courseName = uiState.courseStructure.name
+                                        )
                                     }
 
                                     if (uiState.downloadModelsSize.allCount > 0) {
@@ -657,7 +654,6 @@ private fun CourseVideosScreenPreview() {
             courseTitle = "",
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
-            isCourseBannerEnabled = true,
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
@@ -686,7 +682,6 @@ private fun CourseVideosScreenEmptyPreview() {
             courseTitle = "",
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
-            isCourseBannerEnabled = true,
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
@@ -726,7 +721,6 @@ private fun CourseVideosScreenTabletPreview() {
             courseTitle = "",
             apiHostUrl = "",
             isCourseNestedListEnabled = false,
-            isCourseBannerEnabled = true,
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },

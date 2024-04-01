@@ -141,6 +141,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
             if (isReady == true) {
                 setupCollapsingLayout()
+                courseOutlineViewModel.getCourseData()
                 courseDatesViewModel.isSelfPaced = viewModel.isSelfPaced
                 courseDatesViewModel.updateAndFetchCalendarSyncState()
             } else {
@@ -233,7 +234,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             uiState = uiState,
                                             apiHostUrl = courseOutlineViewModel.apiHostUrl,
                                             isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
-                                            isCourseBannerEnabled = courseOutlineViewModel.isCourseBannerEnabled,
                                             uiMessage = uiMessage,
                                             hasInternetConnection = courseOutlineViewModel.hasInternetConnection,
                                             onReloadClick = {
@@ -347,7 +347,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             courseTitle = courseVideoViewModel.courseTitle,
                                             apiHostUrl = courseVideoViewModel.apiHostUrl,
                                             isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
-                                            isCourseBannerEnabled = courseVideoViewModel.isCourseBannerEnabled,
                                             hasInternetConnection = courseVideoViewModel.hasInternetConnection,
                                             videoSettings = videoSettings,
                                             onReloadClick = {

@@ -57,7 +57,6 @@ class CourseContainerViewModel(
 
     var org: String = ""
     var image: String = ""
-    val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
 
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>

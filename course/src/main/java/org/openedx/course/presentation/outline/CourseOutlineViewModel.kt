@@ -63,8 +63,6 @@ class CourseOutlineViewModel(
 
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
-    val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
-
     private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: LiveData<CourseOutlineUIState>
         get() = _uiState
@@ -121,10 +119,6 @@ class CourseOutlineViewModel(
         }
     }
 
-    init {
-        getCourseData()
-    }
-
     fun setIsUpdating() {
         _isUpdating.value = true
     }
@@ -148,7 +142,7 @@ class CourseOutlineViewModel(
         getCourseDataInternal()
     }
 
-    private fun getCourseData() {
+    fun getCourseData() {
         _uiState.value = CourseOutlineUIState.Loading
         getCourseDataInternal()
     }

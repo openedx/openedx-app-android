@@ -55,8 +55,6 @@ class CourseVideoViewModel(
 
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
-    val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
-
     private val _uiState = MutableLiveData<CourseVideosUIState>()
     val uiState: LiveData<CourseVideosUIState>
         get() = _uiState
