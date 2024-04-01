@@ -1,7 +1,8 @@
-package org.openedx.course.presentation.info
+package org.openedx.discovery.presentation.info
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openedx.core.BaseViewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
@@ -19,13 +21,13 @@ import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.R
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.course.presentation.CourseAnalyticsEvent
-import org.openedx.course.presentation.CourseAnalyticsKey
-import org.openedx.course.presentation.CourseRouter
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.discovery.R
+import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.presentation.DiscoveryAnalytics
+import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
+import org.openedx.discovery.presentation.DiscoveryAnalyticsKey
+import org.openedx.discovery.presentation.DiscoveryRouter
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 
@@ -34,11 +36,11 @@ class CourseInfoViewModel(
     val infoType: String,
     private val config: Config,
     private val networkConnection: NetworkConnection,
-    private val router: CourseRouter,
-    private val interactor: CourseInteractor,
-    private val notifier: CourseNotifier,
+    private val router: DiscoveryRouter,
+    private val interactor: DiscoveryInteractor,
+    private val notifier: DiscoveryNotifier,
     private val resourceManager: ResourceManager,
-    private val analytics: CourseAnalytics,
+    private val analytics: DiscoveryAnalytics,
     corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
@@ -83,11 +85,13 @@ class CourseInfoViewModel(
         viewModelScope.launch {
             _showAlert.emit(false)
             try {
-                val isCourseEnrolled = interactor.getEnrolledCourseFromCacheById(courseId) != null
+                val isCourseEnrolled = withContext(Dispatchers.IO) {
+                    interactor.getCourseDetails(courseId)
+                }.isEnrolled
 
                 if (isCourseEnrolled) {
                     _uiMessage.emit(
-                        UIMessage.ToastMessage(resourceManager.getString(R.string.course_you_are_already_enrolled))
+                        UIMessage.ToastMessage(resourceManager.getString(R.string.discovery_you_are_already_enrolled))
                     )
                     _uiState.update { it.copy(enrollmentSuccess = AtomicReference(courseId)) }
                     return@launch
@@ -96,6 +100,9 @@ class CourseInfoViewModel(
                 interactor.enrollInACourse(courseId)
                 courseEnrollSuccessEvent(courseId)
                 notifier.send(CourseDashboardUpdate())
+                _uiMessage.emit(
+                    UIMessage.ToastMessage(resourceManager.getString(R.string.discovery_enrolled_successfully))
+                )
                 _uiState.update { it.copy(enrollmentSuccess = AtomicReference(courseId)) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -139,32 +146,32 @@ class CourseInfoViewModel(
     }
 
     fun courseInfoClickedEvent(courseId: String) {
-        logEvent(CourseAnalyticsEvent.COURSE_INFO, courseId)
+        logEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
     }
 
     fun programInfoClickedEvent(courseId: String) {
-        logEvent(CourseAnalyticsEvent.PROGRAM_INFO, courseId)
+        logEvent(DiscoveryAnalyticsEvent.PROGRAM_INFO, courseId)
     }
 
     fun courseEnrollClickedEvent(courseId: String) {
-        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId)
+        logEvent(DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId)
     }
 
     private fun courseEnrollSuccessEvent(courseId: String) {
-        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId)
+        logEvent(DiscoveryAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId)
     }
 
     private fun logEvent(
-        event: CourseAnalyticsEvent,
+        event: DiscoveryAnalyticsEvent,
         courseId: String,
     ) {
         analytics.logEvent(
             event.eventName,
             buildMap {
-                put(CourseAnalyticsKey.NAME.key, event.biValue)
-                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
-                put(CourseAnalyticsKey.CONVERSION.key, courseId)
+                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+                put(DiscoveryAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
+                put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
             }
         )
     }

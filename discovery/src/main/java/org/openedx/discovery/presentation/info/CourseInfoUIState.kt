@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.info
+package org.openedx.discovery.presentation.info
 
 import java.util.concurrent.atomic.AtomicReference
 

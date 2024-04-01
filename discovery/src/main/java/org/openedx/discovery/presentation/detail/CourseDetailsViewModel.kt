@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.detail
+package org.openedx.discovery.presentation.detail
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,21 +15,21 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.course.presentation.CourseAnalyticsEvent
-import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.presentation.DiscoveryAnalytics
+import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
+import org.openedx.discovery.presentation.DiscoveryAnalyticsKey
 
 class CourseDetailsViewModel(
     val courseId: String,
     private val config: Config,
     private val corePreferences: CorePreferences,
     private val networkConnection: NetworkConnection,
-    private val interactor: CourseInteractor,
+    private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier,
-    private val analytics: CourseAnalytics,
+    private val notifier: DiscoveryNotifier,
+    private val analytics: DiscoveryAnalytics,
 ) : BaseViewModel() {
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
@@ -130,24 +130,24 @@ class CourseDetailsViewModel(
     }
 
     private fun courseEnrollClickedEvent(courseId: String, courseTitle: String) {
-        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId, courseTitle)
+        logEvent(DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED, courseId, courseTitle)
     }
 
     private fun courseEnrollSuccessEvent(courseId: String, courseTitle: String) {
-        logEvent(CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId, courseTitle)
+        logEvent(DiscoveryAnalyticsEvent.COURSE_ENROLL_SUCCESS, courseId, courseTitle)
     }
 
     private fun logEvent(
-        event: CourseAnalyticsEvent,
+        event: DiscoveryAnalyticsEvent,
         courseId: String, courseTitle: String,
     ) {
         analytics.logEvent(
             event.eventName,
             buildMap {
-                put(CourseAnalyticsKey.NAME.key, event.biValue)
-                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
-                put(CourseAnalyticsKey.CONVERSION.key, courseId)
+                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+                put(DiscoveryAnalyticsKey.COURSE_NAME.key, courseTitle)
+                put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
             }
         )
     }

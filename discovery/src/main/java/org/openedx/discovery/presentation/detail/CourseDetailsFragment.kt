@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.detail
+package org.openedx.discovery.presentation.detail
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -14,6 +14,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,8 +57,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -75,6 +81,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -82,6 +90,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.extension.isEmailValid
+import org.openedx.core.extension.isLinkValid
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -95,23 +104,22 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
-import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.presentation.ui.CourseImageHeader
-import org.openedx.course.presentation.ui.WarningLabel
+import org.openedx.discovery.R
+import org.openedx.discovery.presentation.DiscoveryRouter
 import java.nio.charset.StandardCharsets
 import java.util.Date
-import org.openedx.course.R as courseR
+import org.openedx.core.R as CoreR
 
 class CourseDetailsFragment : Fragment() {
 
     private val viewModel by viewModel<CourseDetailsViewModel> {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
-    private val router by inject<CourseRouter>()
+    private val router by inject<DiscoveryRouter>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -167,7 +175,10 @@ class CourseDetailsFragment : Fragment() {
                                 }
 
                                 else -> {
-                                    viewModel.enrollInACourse(currentState.course.courseId, currentState.course.name)
+                                    viewModel.enrollInACourse(
+                                        currentState.course.courseId,
+                                        currentState.course.name
+                                    )
                                 }
                             }
                         }
@@ -279,7 +290,7 @@ internal fun CourseDetailsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .zIndex(1f),
-                    label = stringResource(id = courseR.string.course_details),
+                    label = stringResource(id = R.string.discovery_course_details),
                     canShowBackBtn = true,
                     onBackClick = onBackClick
                 )
@@ -354,7 +365,7 @@ internal fun CourseDetailsScreen(
                                         color = MaterialTheme.appColors.background
                                     ) {
                                         CourseDescription(
-                                            paddingModifier = webViewPadding,
+                                            modifier = webViewPadding,
                                             apiHostUrl = apiHostUrl,
                                             body = htmlBody,
                                             onWebPageLoaded = {
@@ -415,20 +426,19 @@ private fun CourseDetailNativeContent(
     }
 
     val buttonText = if (course.isEnrolled) {
-        stringResource(id = R.string.course_view_course)
+        stringResource(id = R.string.discovery_view_course)
     } else {
-        stringResource(id = R.string.course_enroll_now)
+        stringResource(id = R.string.discovery_enroll_now)
     }
 
     Column {
         Box(contentAlignment = Alignment.Center) {
-            CourseImageHeader(
+            ImageHeader(
                 modifier = Modifier
                     .aspectRatio(1.86f)
                     .padding(6.dp),
                 apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
-                courseCertificate = null,
                 courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
@@ -440,8 +450,8 @@ private fun CourseDetailNativeContent(
                 ) {
                     Icon(
                         modifier = Modifier.size(40.dp),
-                        painter = painterResource(courseR.drawable.course_ic_play),
-                        contentDescription = stringResource(id = R.string.course_accessibility_play_video),
+                        painter = painterResource(R.drawable.discovery_ic_play),
+                        contentDescription = stringResource(id = R.string.discovery_accessibility_play_video),
                         tint = Color.LightGray
                     )
                 }
@@ -515,9 +525,9 @@ private fun CourseDetailNativeContentLandscape(
     }
 
     val buttonText = if (course.isEnrolled) {
-        stringResource(id = R.string.course_view_course)
+        stringResource(id = R.string.discovery_view_course)
     } else {
-        stringResource(id = R.string.course_enroll_now)
+        stringResource(id = R.string.discovery_enroll_now)
     }
 
     Row(
@@ -571,13 +581,12 @@ private fun CourseDetailNativeContentLandscape(
         }
         Spacer(Modifier.width(24.dp))
         Box(contentAlignment = Alignment.Center) {
-            CourseImageHeader(
+            ImageHeader(
                 modifier = Modifier
                     .width(263.dp)
                     .height(200.dp),
                 apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
-                courseCertificate = null,
                 courseName = course.name
             )
             if (!course.media.courseVideo?.uri.isNullOrEmpty()) {
@@ -589,7 +598,7 @@ private fun CourseDetailNativeContentLandscape(
                 ) {
                     Icon(
                         modifier = Modifier.size(40.dp),
-                        painter = painterResource(courseR.drawable.course_ic_play),
+                        painter = painterResource(R.drawable.discovery_ic_play),
                         contentDescription = null,
                         tint = Color.LightGray
                     )
@@ -600,31 +609,122 @@ private fun CourseDetailNativeContentLandscape(
 }
 
 @Composable
+private fun ImageHeader(
+    modifier: Modifier,
+    apiHostUrl: String,
+    courseImage: String?,
+    courseName: String,
+) {
+    val configuration = LocalConfiguration.current
+    val windowSize = rememberWindowSize()
+    val contentScale =
+        if (!windowSize.isTablet && configuration.orientation == ORIENTATION_LANDSCAPE) {
+            ContentScale.Fit
+        } else {
+            ContentScale.Crop
+        }
+    val imageUrl = if (courseImage?.isLinkValid() == true) {
+        courseImage
+    } else {
+        apiHostUrl.dropLast(1) + courseImage
+    }
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .error(CoreR.drawable.core_no_image_course)
+                .placeholder(CoreR.drawable.core_no_image_course)
+                .build(),
+            contentDescription = stringResource(
+                id = CoreR.string.core_accessibility_header_image_for,
+                courseName
+            ),
+            contentScale = contentScale,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(MaterialTheme.appShapes.cardShape)
+        )
+    }
+}
+
+@Composable
+private fun WarningLabel(
+    painter: Painter,
+    text: String
+) {
+    val borderColor = if (!isSystemInDarkTheme()) {
+        MaterialTheme.appColors.cardViewBorder
+    } else {
+        MaterialTheme.appColors.surface
+    }
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .shadow(
+                0.dp,
+                MaterialTheme.appShapes.material.medium
+            )
+            .background(
+                MaterialTheme.appColors.surface,
+                MaterialTheme.appShapes.material.medium
+            )
+            .border(
+                1.dp,
+                borderColor,
+                MaterialTheme.appShapes.material.medium
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 12.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painter,
+                contentDescription = null,
+                tint = MaterialTheme.appColors.warning
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                modifier = Modifier.testTag("txt_enroll_internet_error"),
+                text = text,
+                color = MaterialTheme.appColors.textPrimaryVariant,
+                style = MaterialTheme.appTypography.titleSmall
+            )
+        }
+    }
+}
+
+@Composable
 private fun EnrollOverLabel() {
     WarningLabel(
         painter = rememberVectorPainter(Icons.Outlined.Report),
-        text = stringResource(id = courseR.string.course_you_cant_enroll)
+        text = stringResource(id = R.string.discovery_you_cant_enroll)
     )
 }
 
 @Composable
 private fun NoInternetLabel() {
     WarningLabel(
-        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_offline),
-        text = stringResource(id = courseR.string.course_no_internet_label)
+        painter = painterResource(id = CoreR.drawable.core_ic_offline),
+        text = stringResource(id = R.string.discovery_no_internet_label)
     )
 }
 
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
 private fun CourseDescription(
-    paddingModifier: Modifier,
+    modifier: Modifier,
     apiHostUrl: String,
     body: String,
     onWebPageLoaded: () -> Unit
 ) {
     val context = LocalContext.current
-    AndroidView(modifier = Modifier.then(paddingModifier), factory = {
+    AndroidView(modifier = Modifier.then(modifier), factory = {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
                 override fun onPageCommitVisible(view: WebView?, url: String?) {

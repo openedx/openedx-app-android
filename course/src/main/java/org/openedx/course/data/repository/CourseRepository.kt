@@ -6,7 +6,6 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.EnrollBody
-import org.openedx.core.data.model.room.CourseEntity
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.*
 import org.openedx.core.exception.NoCachedDataException
@@ -20,16 +19,6 @@ class CourseRepository(
     private val preferencesManager: CorePreferences,
 ) {
     private var courseStructure: CourseStructure? = null
-
-    suspend fun getCourseDetail(id: String): Course {
-        val course = api.getCourseDetail(id, preferencesManager.user?.username)
-        courseDao.updateCourseEntity(CourseEntity.createFrom(course))
-        return course.mapToDomain()
-    }
-
-    suspend fun getCourseDetailFromCache(id: String): Course? {
-        return courseDao.getCourseById(id)?.mapToDomain()
-    }
 
     suspend fun removeDownloadModel(id: String) {
         downloadDao.removeDownloadModel(id)
@@ -78,11 +67,6 @@ class CourseRepository(
         } else {
             throw IllegalStateException("Course structure is empty")
         }
-    }
-
-    suspend fun getEnrolledCourseFromCacheById(courseId: String): EnrolledCourse? {
-        val course = courseDao.getEnrolledCourseById(courseId)
-        return course?.mapToDomain()
     }
 
     suspend fun getCourseStatus(courseId: String): CourseComponentStatus {

@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.detail
+package org.openedx.discovery.presentation.detail
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
@@ -30,10 +30,10 @@ import org.openedx.core.domain.model.Media
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.presentation.DiscoveryAnalytics
+import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -47,10 +47,10 @@ class CourseDetailsViewModelTest {
     private val config = mockk<Config>()
     private val preferencesManager = mockk<CorePreferences>()
     private val resourceManager = mockk<ResourceManager>()
-    private val interactor = mockk<CourseInteractor>()
+    private val interactor = mockk<DiscoveryInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
-    private val notifier = spyk<CourseNotifier>()
-    private val analytics = mockk<CourseAnalytics>()
+    private val notifier = spyk<DiscoveryNotifier>()
+    private val analytics = mockk<DiscoveryAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -242,7 +242,7 @@ class CourseDetailsViewModelTest {
         coEvery { interactor.getCourseDetails(any()) } returns mockCourse
         every {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
                 any()
             )
         } returns Unit
@@ -254,7 +254,7 @@ class CourseDetailsViewModelTest {
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
         verify(exactly = 1) {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
                 any()
             )
         }
@@ -280,13 +280,13 @@ class CourseDetailsViewModelTest {
         every { preferencesManager.user } returns null
         every {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
                 any()
             )
         } returns Unit
         every {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS.eventName,
+                DiscoveryAnalyticsEvent.COURSE_ENROLL_SUCCESS.eventName,
                 any()
             )
         } returns Unit
@@ -303,13 +303,13 @@ class CourseDetailsViewModelTest {
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
         verify(exactly = 1) {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                DiscoveryAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
                 any()
             )
         }
         verify(exactly = 1) {
             analytics.logEvent(
-                CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS.eventName,
+                DiscoveryAnalyticsEvent.COURSE_ENROLL_SUCCESS.eventName,
                 any()
             )
         }

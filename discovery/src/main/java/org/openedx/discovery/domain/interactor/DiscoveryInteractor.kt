@@ -6,6 +6,14 @@ import org.openedx.discovery.data.repository.DiscoveryRepository
 
 class DiscoveryInteractor(private val repository: DiscoveryRepository) {
 
+    suspend fun getCourseDetails(id: String) = repository.getCourseDetail(id)
+
+    suspend fun getCourseDetailsFromCache(id: String) = repository.getCourseDetailFromCache(id)
+
+    suspend fun enrollInACourse(id: String) {
+        repository.enrollInACourse(courseId = id)
+    }
+
     suspend fun getCoursesList(
         username: String?,
         organization: String?,

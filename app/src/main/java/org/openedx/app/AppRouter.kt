@@ -18,10 +18,8 @@ import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
-import org.openedx.course.presentation.detail.CourseDetailsFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
-import org.openedx.course.presentation.info.CourseInfoFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
@@ -32,6 +30,8 @@ import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.WebViewDiscoveryFragment
+import org.openedx.discovery.presentation.detail.CourseDetailsFragment
+import org.openedx.discovery.presentation.info.CourseInfoFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread

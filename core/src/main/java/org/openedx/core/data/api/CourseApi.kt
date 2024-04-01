@@ -14,27 +14,6 @@ interface CourseApi {
         @Query("page") page: Int
     ): CourseEnrollments
 
-    @GET("/api/courses/v1/courses/")
-    suspend fun getCourseList(
-        @Query("search_term") searchQuery: String? = null,
-        @Query("page") page: Int,
-        @Query("mobile") mobile: Boolean,
-        @Query("mobile_search") mobileSearch: Boolean,
-        @Query("username") username: String? = null,
-        @Query("org") org: String? = null,
-        @Query("permissions") permission: List<String> = listOf(
-            "enroll",
-            "see_in_catalog",
-            "see_about_page"
-        )
-    ): CourseList
-
-    @GET("/api/courses/v1/courses/{course_id}")
-    suspend fun getCourseDetail(
-        @Path("course_id") courseId: String?,
-        @Query("username") username: String? = null
-    ): CourseDetails
-
     @GET(
         "/api/mobile/{api_version}/course_info/blocks/?" +
                 "depth=all&" +

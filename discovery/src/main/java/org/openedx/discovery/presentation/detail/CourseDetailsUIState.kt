@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.detail
+package org.openedx.discovery.presentation.detail
 
 import org.openedx.core.domain.model.Course
 

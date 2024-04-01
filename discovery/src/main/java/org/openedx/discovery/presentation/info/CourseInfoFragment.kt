@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.info
+package org.openedx.discovery.presentation.info
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -59,7 +59,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.course.R
+import org.openedx.discovery.R
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
@@ -277,7 +277,7 @@ private fun CourseInfoScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Toolbar(
-                label = stringResource(id = R.string.course_discover),
+                label = stringResource(id = R.string.discovery_Discovery),
                 canShowBackBtn = true,
                 onBackClick = onBackClick
             )
