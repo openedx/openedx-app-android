@@ -33,6 +33,7 @@ import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -239,14 +240,24 @@ class CourseDetailsViewModelTest {
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockCourse
-        every { analytics.logEvent(any(), any()) } returns Unit
+        every {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                any()
+            )
+        } returns Unit
 
 
         viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                any()
+            )
+        }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -267,7 +278,18 @@ class CourseDetailsViewModelTest {
         )
         every { config.isPreLoginExperienceEnabled() } returns false
         every { preferencesManager.user } returns null
-        every { analytics.logEvent(any(), any()) } returns Unit
+        every {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                any()
+            )
+        } returns Unit
+        every {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS.eventName,
+                any()
+            )
+        } returns Unit
         coEvery { interactor.enrollInACourse(any()) } returns Unit
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
@@ -279,7 +301,18 @@ class CourseDetailsViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.enrollInACourse(any()) }
-        verify(exactly = 2) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_ENROLL_CLICKED.eventName,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            analytics.logEvent(
+                CourseAnalyticsEvent.COURSE_ENROLL_SUCCESS.eventName,
+                any()
+            )
+        }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseDetailsUIState.CourseData)
@@ -318,5 +351,4 @@ class CourseDetailsViewModelTest {
         val count = overview.contains("black")
         assert(!count)
     }
-
 }
