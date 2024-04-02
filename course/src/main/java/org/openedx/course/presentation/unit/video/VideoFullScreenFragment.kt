@@ -127,7 +127,7 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
             exoPlayer?.prepare()
             exoPlayer?.playWhenReady = viewModel.isPlaying ?: false
 
-            playerView.setFullscreenButtonClickListener { isFullScreen ->
+            playerView.setFullscreenButtonClickListener { _ ->
                 requireActivity().supportFragmentManager.popBackStackImmediate()
             }
 

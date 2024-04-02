@@ -47,6 +47,7 @@ import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -439,7 +440,12 @@ class CourseOutlineViewModelTest {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
-        every { coreAnalytics.logEvent(any(), any()) } returns Unit
+        every {
+            coreAnalytics.logEvent(
+                CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION.eventName,
+                any()
+            )
+        } returns Unit
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
@@ -461,7 +467,12 @@ class CourseOutlineViewModelTest {
 
         viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
-        verify(exactly = 1) { coreAnalytics.logEvent(any(), any()) }
+        verify(exactly = 1) {
+            coreAnalytics.logEvent(
+                CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION.eventName,
+                any()
+            )
+        }
 
         assert(viewModel.uiMessage.value == null)
     }
@@ -530,5 +541,4 @@ class CourseOutlineViewModelTest {
         assert(viewModel.uiMessage.value != null)
         assert(!viewModel.hasInternetConnection)
     }
-
 }

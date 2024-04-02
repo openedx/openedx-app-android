@@ -3,8 +3,7 @@ package org.openedx.app
 import android.app.Application
 import com.braze.Braze
 import com.braze.configuration.BrazeConfig
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.initialize
+import com.google.firebase.FirebaseApp
 import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -29,7 +28,7 @@ class OpenEdXApp : Application() {
             )
         }
         if (config.getFirebaseConfig().enabled) {
-            Firebase.initialize(this)
+            FirebaseApp.initializeApp(this)
         }
 
         if (config.getBranchConfig().enabled) {

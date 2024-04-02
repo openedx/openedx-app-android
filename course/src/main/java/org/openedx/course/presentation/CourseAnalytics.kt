@@ -139,7 +139,7 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
     PLS_BANNER_VIEWED(
         "PLS:Banner Viewed",
-        "edx.bi.app.coursedates.pls_banner.viewed"
+        "edx.bi.app.dates.pls_banner.viewed"
     ),
     PLS_SHIFT_BUTTON_CLICKED(
         "PLS:Shift Button Clicked",
@@ -147,7 +147,7 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
     ),
     PLS_SHIFT_DATES(
         "PLS:Shift Dates",
-        "edx.bi.app.coursedates.pls_banner.shift_dates"
+        "edx.bi.app.dates.pls_banner.shift_dates"
     ),
     DATES_CALENDAR_SYNC_TOGGLE(
         "Dates:CalendarSync Toggle",

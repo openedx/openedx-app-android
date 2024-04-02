@@ -114,7 +114,7 @@ class TranscriptManager(
 
     private fun getTranscriptDir(): File? {
         val externalAppDir: File = FileUtil.getExternalAppDir(context)
-        if (externalAppDir != null) {
+        if (externalAppDir.exists()) {
             val videosDir = File(externalAppDir, Directories.VIDEOS.name)
             val transcriptDir = File(videosDir, Directories.SUBTITLES.name)
             transcriptDir.mkdirs()

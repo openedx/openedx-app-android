@@ -301,7 +301,7 @@ private fun DiscussionResponsesScreen(
                                                     .padding(horizontal = 8.dp, vertical = 16.dp),
                                                 internalPadding = internalPadding,
                                                 comment = uiState.mainComment,
-                                                onClick = { action, commentId, bool ->
+                                                onClick = { action, _, bool ->
                                                     onItemClick(
                                                         action,
                                                         uiState.mainComment.id,

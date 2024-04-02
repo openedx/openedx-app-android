@@ -27,8 +27,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -62,6 +62,7 @@ import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment
+import org.openedx.core.R as CoreR
 
 @Composable
 fun ThreadMainItem(
@@ -73,7 +74,7 @@ fun ThreadMainItem(
     val profileImageUrl = if (thread.users?.get(thread.author)?.image?.hasImage == true) {
         thread.users[thread.author]?.image?.imageUrlFull
     } else {
-        org.openedx.core.R.drawable.core_ic_default_profile_picture
+        CoreR.drawable.core_ic_default_profile_picture
     }
 
     val votePainter = if (thread.voted) {
@@ -106,11 +107,11 @@ fun ThreadMainItem(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(profileImageUrl)
-                    .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
-                    .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                    .error(CoreR.drawable.core_ic_default_profile_picture)
+                    .placeholder(CoreR.drawable.core_ic_default_profile_picture)
                     .build(),
                 contentDescription = stringResource(
-                    id = org.openedx.core.R.string.core_accessibility_user_profile_image,
+                    id = CoreR.string.core_accessibility_user_profile_image,
                     thread.author
                 ),
                 modifier = Modifier
@@ -209,7 +210,7 @@ fun CommentItem(
     } else if (comment.users?.get(comment.author)?.image?.hasImage == true) {
         comment.users[comment.author]?.image?.imageUrlFull
     } else {
-        org.openedx.core.R.drawable.core_ic_default_profile_picture
+        CoreR.drawable.core_ic_default_profile_picture
     }
 
     val reportText = if (comment.abuseFlagged) {
@@ -260,11 +261,11 @@ fun CommentItem(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(profileImageUrl)
-                        .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
-                        .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                        .error(CoreR.drawable.core_ic_default_profile_picture)
+                        .placeholder(CoreR.drawable.core_ic_default_profile_picture)
                         .build(),
                     contentDescription = stringResource(
-                        id = org.openedx.core.R.string.core_accessibility_user_profile_image,
+                        id = CoreR.string.core_accessibility_user_profile_image,
                         comment.author
                     ),
                     modifier = Modifier
@@ -370,7 +371,7 @@ fun CommentMainItem(
     } else if (comment.users?.get(comment.author)?.image?.hasImage == true) {
         comment.users[comment.author]?.image?.imageUrlFull
     } else {
-        org.openedx.core.R.drawable.core_ic_default_profile_picture
+        CoreR.drawable.core_ic_default_profile_picture
     }
 
     val reportText = if (comment.abuseFlagged) {
@@ -413,11 +414,11 @@ fun CommentMainItem(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(profileImageUrl)
-                        .error(org.openedx.core.R.drawable.core_ic_default_profile_picture)
-                        .placeholder(org.openedx.core.R.drawable.core_ic_default_profile_picture)
+                        .error(CoreR.drawable.core_ic_default_profile_picture)
+                        .placeholder(CoreR.drawable.core_ic_default_profile_picture)
                         .build(),
                     contentDescription = stringResource(
-                        id = org.openedx.core.R.string.core_accessibility_user_profile_image,
+                        id = CoreR.string.core_accessibility_user_profile_image,
                         comment.author
                     ),
                     modifier = Modifier
@@ -502,7 +503,7 @@ fun ThreadItem(
 ) {
     val icon = when (thread.type) {
         DiscussionType.DISCUSSION -> painterResource(id = R.drawable.discussion_ic_discussion)
-        DiscussionType.QUESTION -> rememberVectorPainter(image = Icons.Outlined.HelpOutline)
+        DiscussionType.QUESTION -> rememberVectorPainter(image = Icons.AutoMirrored.Outlined.HelpOutline)
     }
     val textType = when (thread.type) {
         DiscussionType.DISCUSSION -> stringResource(id = R.string.discussion_discussion)
