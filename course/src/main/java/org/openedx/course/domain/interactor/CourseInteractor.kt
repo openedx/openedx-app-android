@@ -3,16 +3,11 @@ package org.openedx.course.domain.interactor
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.course.data.repository.CourseRepository
 
 class CourseInteractor(
     private val repository: CourseRepository
-) : EnrollInCourseInteractor {
-
-    override suspend fun enrollInACourse(id: String) {
-        repository.enrollInACourse(courseId = id)
-    }
+) {
 
     suspend fun preloadCourseStructure(courseId: String) =
         repository.preloadCourseStructure(courseId)

@@ -26,12 +26,12 @@ import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.WebViewDiscoveryFragment
 import org.openedx.discovery.presentation.detail.CourseDetailsFragment
 import org.openedx.discovery.presentation.info.CourseInfoFragment
+import org.openedx.discovery.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread
@@ -143,7 +143,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         )
     }
 
-    override fun navigateToProgramInfo(fm: FragmentManager, pathId: String) {
+    override fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String) {
         replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
     }
 

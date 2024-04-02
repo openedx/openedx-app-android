@@ -1,11 +1,9 @@
 package org.openedx.course.data.repository
 
 import kotlinx.coroutines.flow.map
-import okhttp3.ResponseBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
-import org.openedx.core.data.model.EnrollBody
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.*
 import org.openedx.core.exception.NoCachedDataException
@@ -26,16 +24,6 @@ class CourseRepository(
 
     fun getDownloadModels() = downloadDao.readAllData().map { list ->
         list.map { it.mapToDomain() }
-    }
-
-    suspend fun enrollInACourse(courseId: String): ResponseBody {
-        val enrollBody = EnrollBody(
-            EnrollBody.CourseDetails(
-                courseId = courseId,
-                emailOptIn = preferencesManager.user?.email
-            )
-        )
-        return api.enrollInACourse(enrollBody)
     }
 
     suspend fun preloadCourseStructure(courseId: String) {

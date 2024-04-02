@@ -13,6 +13,7 @@
     <string name="discovery_no_internet_label">To enroll in this course, please make sure you are connected to the internet.</string>
     <string name="discovery_enrolled_successfully">You have been successfully enrolled in this course.</string>
     <string name="discovery_you_are_already_enrolled">You are already enrolled in this course.</string>
+    <string name="discovery_programs" tools:ignore="MissingTranslation">Programs</string>
 
     <plurals name="discovery_found_courses">
         <item quantity="zero">Found %s courses on your request</item>

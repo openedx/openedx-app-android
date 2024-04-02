@@ -29,7 +29,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
-import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
@@ -48,11 +47,9 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.course.data.storage.CoursePreferences
-import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarManager
-import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
@@ -96,7 +93,6 @@ val appModule = module {
     single { ProfileNotifier() }
     single { AppUpgradeNotifier() }
     single { DownloadNotifier() }
-    single { DashboardNotifier() }
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
 
@@ -182,6 +178,4 @@ val appModule = module {
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
     factory { OAuthHelper(get(), get(), get()) }
-
-    factory<EnrollInCourseInteractor> { CourseInteractor(get()) }
 }

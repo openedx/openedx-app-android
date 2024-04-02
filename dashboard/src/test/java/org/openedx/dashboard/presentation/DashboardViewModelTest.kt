@@ -8,13 +8,16 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -30,9 +33,8 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
-import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.notifier.DashboardNotifier
 import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
 import org.openedx.dashboard.presentation.dashboard.DashboardUIState
 import org.openedx.dashboard.presentation.dashboard.DashboardViewModel
@@ -50,8 +52,7 @@ class DashboardViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<DashboardInteractor>()
     private val networkConnection = mockk<NetworkConnection>()
-    private val courseNotifier = mockk<CourseNotifier>()
-    private val dashboardNotifier = spyk<DashboardNotifier>()
+    private val discoveryNotifier = mockk<DiscoveryNotifier>()
     private val analytics = mockk<DashboardAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
 
@@ -79,7 +80,15 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses no internet connection`() = runTest {
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
         advanceUntilIdle()
@@ -95,7 +104,15 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses unknown error`() = runTest {
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
         advanceUntilIdle()
@@ -111,7 +128,15 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses from network`() = runTest {
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
@@ -127,7 +152,15 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses from network with next page`() = runTest {
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(
             Pagination(
@@ -153,7 +186,15 @@ class DashboardViewModelTest {
     fun `getCourses from cache`() = runTest {
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
 
         advanceUntilIdle()
 
@@ -169,7 +210,15 @@ class DashboardViewModelTest {
     fun `updateCourses no internet error`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
 
         coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
         viewModel.updateCourses()
@@ -189,7 +238,15 @@ class DashboardViewModelTest {
     fun `updateCourses unknown exception`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
 
         coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
         viewModel.updateCourses()
@@ -209,7 +266,15 @@ class DashboardViewModelTest {
     fun `updateCourses success`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
 
         viewModel.updateCourses()
         advanceUntilIdle()
@@ -226,8 +291,23 @@ class DashboardViewModelTest {
     @Test
     fun `updateCourses success with next page`() = runTest {
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(Pagination(10,"2",2,""))
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(
+            Pagination(
+                10,
+                "2",
+                2,
+                ""
+            )
+        )
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
 
         viewModel.updateCourses()
         advanceUntilIdle()
@@ -243,8 +323,16 @@ class DashboardViewModelTest {
 
     @Test
     fun `CourseDashboardUpdate notifier test`() = runTest {
-        coEvery { courseNotifier.notifier } returns flow { emit(CourseDashboardUpdate()) }
-        val viewModel = DashboardViewModel(config, networkConnection, interactor, resourceManager, courseNotifier, dashboardNotifier, analytics, appUpgradeNotifier)
+        coEvery { discoveryNotifier.notifier } returns flow { emit(CourseDashboardUpdate()) }
+        val viewModel = DashboardViewModel(
+            config,
+            networkConnection,
+            interactor,
+            resourceManager,
+            discoveryNotifier,
+            analytics,
+            appUpgradeNotifier
+        )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

@@ -1,8 +1,20 @@
 package org.openedx.core.data.api
 
-import okhttp3.ResponseBody
-import org.openedx.core.data.model.*
-import retrofit2.http.*
+import org.openedx.core.data.model.AnnouncementModel
+import org.openedx.core.data.model.BlocksCompletionBody
+import org.openedx.core.data.model.CourseComponentStatus
+import org.openedx.core.data.model.CourseDates
+import org.openedx.core.data.model.CourseDatesBannerInfo
+import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.model.CourseStructureModel
+import org.openedx.core.data.model.HandoutsModel
+import org.openedx.core.data.model.ResetCourseDates
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface CourseApi {
 
@@ -28,9 +40,6 @@ interface CourseApi {
         @Query("username") username: String?,
         @Query("course_id") courseId: String,
     ): CourseStructureModel
-
-    @POST("/api/enrollment/v1/enrollment")
-    suspend fun enrollInACourse(@Body enrollBody: EnrollBody): ResponseBody
 
     @GET("/api/mobile/v1/users/{username}/course_status_info/{course_id}")
     suspend fun getCourseStatus(

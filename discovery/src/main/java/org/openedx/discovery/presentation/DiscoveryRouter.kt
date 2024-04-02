@@ -21,4 +21,6 @@ interface DiscoveryRouter {
     fun navigateToSignUp(fm: FragmentManager, courseId: String? = null, infoType: String? = null)
 
     fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?)
+
+    fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String)
 }

@@ -1,10 +1,10 @@
-package org.openedx.dashboard.presentation.program
+package org.openedx.discovery.presentation.program
 
 import org.openedx.core.UIMessage
 
 sealed class ProgramUIState {
-    object Loading : ProgramUIState()
-    object Loaded : ProgramUIState()
+    data object Loading : ProgramUIState()
+    data object Loaded : ProgramUIState()
 
     class CourseEnrolled(val courseId: String, val isEnrolled: Boolean) : ProgramUIState()
 

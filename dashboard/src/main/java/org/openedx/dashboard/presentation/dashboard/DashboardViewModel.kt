@@ -4,9 +4,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
@@ -22,8 +19,6 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.notifier.DashboardEvent
-import org.openedx.dashboard.notifier.DashboardNotifier
 
 
 class DashboardViewModel(
@@ -32,7 +27,6 @@ class DashboardViewModel(
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
-    private val dashboardNotifier: DashboardNotifier,
     private val analytics: DashboardAnalytics,
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
@@ -75,11 +69,6 @@ class DashboardViewModel(
                 }
             }
         }
-        dashboardNotifier.notifier.onEach {
-            if (it is DashboardEvent.UpdateEnrolledCourses) {
-                updateCourses()
-            }
-        }.distinctUntilChanged().launchIn(viewModelScope)
     }
 
     init {

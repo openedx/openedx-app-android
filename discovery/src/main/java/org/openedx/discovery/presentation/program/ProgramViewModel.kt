@@ -1,4 +1,4 @@
-package org.openedx.dashboard.presentation.program
+package org.openedx.discovery.presentation.program
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
@@ -12,22 +12,23 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
-import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.dashboard.notifier.DashboardEvent
-import org.openedx.dashboard.notifier.DashboardNotifier
-import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.NavigationToDiscovery
+import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.presentation.DiscoveryRouter
 
 class ProgramViewModel(
     private val config: Config,
     private val networkConnection: NetworkConnection,
-    private val router: DashboardRouter,
-    private val notifier: DashboardNotifier,
+    private val router: DiscoveryRouter,
+    private val notifier: DiscoveryNotifier,
     private val edxCookieManager: AppCookieManager,
     private val resourceManager: ResourceManager,
-    private val courseInteractor: EnrollInCourseInteractor
+    private val interactor: DiscoveryInteractor,
 ) : BaseViewModel() {
     val uriScheme: String get() = config.getUriScheme()
 
@@ -52,9 +53,9 @@ class ProgramViewModel(
         showLoading(true)
         viewModelScope.launch {
             try {
-                courseInteractor.enrollInACourse(courseId)
+                interactor.enrollInACourse(courseId)
                 _uiState.emit(ProgramUIState.CourseEnrolled(courseId, true))
-                notifier.send(DashboardEvent.UpdateEnrolledCourses)
+                notifier.send(CourseDashboardUpdate())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiState.emit(
@@ -71,7 +72,7 @@ class ProgramViewModel(
 
     fun onProgramCardClick(fragmentManager: FragmentManager, pathId: String) {
         if (pathId.isNotEmpty()) {
-            router.navigateToProgramInfo(fm = fragmentManager, pathId = pathId)
+            router.navigateToEnrolledProgramInfo(fm = fragmentManager, pathId = pathId)
         }
     }
 
@@ -97,7 +98,7 @@ class ProgramViewModel(
     }
 
     fun navigateToDiscovery() {
-        viewModelScope.launch { notifier.send(DashboardEvent.NavigationToDiscovery) }
+        viewModelScope.launch { notifier.send(NavigationToDiscovery()) }
     }
 
     fun refreshCookie() {

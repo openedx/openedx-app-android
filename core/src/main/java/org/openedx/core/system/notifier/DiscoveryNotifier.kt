@@ -11,4 +11,5 @@ class DiscoveryNotifier {
     val notifier: Flow<DiscoveryEvent> = channel.asSharedFlow()
 
     suspend fun send(event: CourseDashboardUpdate) = channel.emit(event)
+    suspend fun send(event: NavigationToDiscovery) = channel.emit(event)
 }

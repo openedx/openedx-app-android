@@ -1,4 +1,4 @@
-package org.openedx.dashboard.presentation.program
+package org.openedx.discovery.presentation.program
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -59,7 +59,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.dashboard.R
+import org.openedx.discovery.R
 import org.openedx.core.R as coreR
 import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
 
@@ -100,7 +100,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     courseId = courseId,
                                 )
-                                context.toastMessage(getString(R.string.dashboard_enrolled_successfully))
+                                context.toastMessage(getString(R.string.discovery_enrolled_successfully))
                             } else {
                                 InfoDialogFragment.newInstance(
                                     title = getString(coreR.string.core_enrollment_error),
@@ -268,7 +268,7 @@ private fun ProgramInfoScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Toolbar(
-                label = stringResource(id = R.string.dashboard_programs),
+                label = stringResource(id = R.string.discovery_programs),
                 canShowBackBtn = canShowBackBtn,
                 onBackClick = onBackClick
             )
