@@ -72,10 +72,9 @@ private val DarkColorPalette = AppColors(
     componentHorizontalProgressSelected = dark_component_horizontal_progress_selected,
     componentHorizontalProgressDefault = dark_component_horizontal_progress_default,
 
-    navigationBtnBackground = dark_navigation_btn_background,
-    navigationBtnUnselectedContent = dark_navigation_btn_unselected_content,
-    courseHomeHeaderShadePrimary = dark_course_home_header_shade_primary,
-    courseHomeHeaderShadeSecondary = dark_course_home_header_shade_secondary,
+    tabUnselectedBtnBackground = dark_tab_unselected_btn_background,
+    tabUnselectedBtnContent = dark_tab_unselected_btn_content,
+    courseHomeHeaderShade = dark_course_home_header_shade,
     courseHomeBackBtnBackground = dark_course_home_back_btn_background
 )
 
@@ -141,10 +140,9 @@ private val LightColorPalette = AppColors(
     componentHorizontalProgressSelected = light_component_horizontal_progress_selected,
     componentHorizontalProgressDefault = light_component_horizontal_progress_default,
 
-    navigationBtnBackground = light_navigation_btn_background,
-    navigationBtnUnselectedContent = light_navigation_btn_unselected_content,
-    courseHomeHeaderShadePrimary = light_course_home_header_shade_primary,
-    courseHomeHeaderShadeSecondary = light_course_home_header_shade_secondary,
+    tabUnselectedBtnBackground = light_tab_unselected_btn_background,
+    tabUnselectedBtnContent = light_tab_unselected_btn_content,
+    courseHomeHeaderShade = light_course_home_header_shade,
     courseHomeBackBtnBackground = light_course_home_back_btn_background
 )
 

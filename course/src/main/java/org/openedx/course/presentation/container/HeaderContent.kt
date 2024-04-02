@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.core.ui.rememberWindowSize
-import org.openedx.core.ui.statusBarsInset
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
@@ -23,7 +23,7 @@ internal fun ExpandedHeaderContent(
     courseTitle: String
 ) {
     val windowSize = rememberWindowSize()
-    val horizontalPadding = if (!windowSize.isTablet){
+    val horizontalPadding = if (!windowSize.isTablet) {
         24.dp
     } else {
         98.dp
@@ -58,8 +58,7 @@ internal fun CollapsedHeaderContent(
     Text(
         modifier = modifier
             .fillMaxWidth()
-            .statusBarsInset()
-            .padding(top = 4.dp),
+            .padding(bottom = 3.dp),
         text = courseTitle,
         color = MaterialTheme.appColors.textDark,
         overflow = TextOverflow.Ellipsis,
@@ -70,19 +69,23 @@ internal fun CollapsedHeaderContent(
 
 @Preview(showBackground = true, device = Devices.PIXEL)
 @Composable
-fun ExpandedHeaderContentPreview() {
-    ExpandedHeaderContent(
-        modifier = Modifier.fillMaxWidth(),
-        org = "organization",
-        courseTitle = "Course title"
-    )
+private fun ExpandedHeaderContentPreview() {
+    OpenEdXTheme {
+        ExpandedHeaderContent(
+            modifier = Modifier.fillMaxWidth(),
+            org = "organization",
+            courseTitle = "Course title"
+        )
+    }
 }
 
 @Preview(showBackground = true, device = Devices.PIXEL)
 @Composable
-fun CollapsedHeaderContentPreview() {
-    CollapsedHeaderContent(
-        modifier = Modifier.fillMaxWidth(),
-        courseTitle = "Course title"
-    )
+private fun CollapsedHeaderContentPreview() {
+    OpenEdXTheme {
+        CollapsedHeaderContent(
+            modifier = Modifier.fillMaxWidth(),
+            courseTitle = "Course title"
+        )
+    }
 }

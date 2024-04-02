@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -188,19 +187,6 @@ fun CourseVideosScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = listBottomPadding
                                 ) {
-                                    item {
-                                        CourseImageHeader(
-                                            modifier = Modifier
-                                                .aspectRatio(1.86f)
-                                                .padding(6.dp),
-                                            apiHostUrl = apiHostUrl,
-                                            courseImage = uiState.courseStructure.media?.image?.large
-                                                ?: "",
-                                            courseCertificate = uiState.courseStructure.certificate,
-                                            courseName = uiState.courseStructure.name
-                                        )
-                                    }
-
                                     if (uiState.downloadModelsSize.allCount > 0) {
                                         item {
                                             AllVideosDownloadItem(

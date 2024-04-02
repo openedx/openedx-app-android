@@ -1,9 +1,18 @@
 package org.openedx.course.presentation.container
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.os.Build
+import android.renderscript.Allocation
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import coil.ImageLoader
+import coil.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,8 +64,7 @@ class CourseContainerViewModel(
     private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
 
-    var org: String = ""
-    var image: String = ""
+    var organization: String = ""
 
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>
@@ -90,6 +98,9 @@ class CourseContainerViewModel(
     val calendarSyncUIState: StateFlow<CalendarSyncUIState> =
         _calendarSyncUIState.asStateFlow()
 
+    private var _courseImage = MutableStateFlow(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
+    val courseImage: StateFlow<Bitmap> = _courseImage.asStateFlow()
+
     init {
         viewModelScope.launch {
             notifier.notifier.collect { event ->
@@ -111,7 +122,7 @@ class CourseContainerViewModel(
         }
     }
 
-    fun preloadCourseStructure() {
+    fun preloadCourseStructure(context: Context) {
         courseDashboardViewed()
         if (_dataReady.value != null) {
             return
@@ -127,11 +138,12 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
-                org = courseStructure.org
-                courseStructure.media?.image?.large?.let {
-                image = config.getApiHostURL() + it
-                }
+                organization = courseStructure.org
                 _isSelfPaced = courseStructure.isSelfPaced
+                loadCourseImage(
+                    context = context,
+                    imageUrl = config.getApiHostURL() + courseStructure.media?.image?.large
+                )
                 _dataReady.value = courseStructure.start?.let { start ->
                     start < Date()
                 }
@@ -167,16 +179,15 @@ class CourseContainerViewModel(
         }
     }
 
-    //TODO
-//    fun courseContainerTabClickedEvent(tab: CourseContainerTab) {
-//        when (tab) {
-//            CourseContainerTab.COURSE -> courseTabClickedEvent()
-//            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
-//            CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
-//            CourseContainerTab.DATES -> datesTabClickedEvent()
-//            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
-//        }
-//    }
+    fun courseContainerTabClickedEvent(index: Int) {
+        when (index) {
+            0 -> courseTabClickedEvent()
+            1 -> videoTabClickedEvent()
+            2 -> discussionTabClickedEvent()
+            3 -> datesTabClickedEvent()
+            4 -> handoutsTabClickedEvent()
+        }
+    }
 
 
     fun setCalendarSyncDialogType(dialogType: CalendarSyncDialogType) {
@@ -297,6 +308,53 @@ class CourseContainerViewModel(
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
         return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
                 (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
+    }
+
+    private fun loadCourseImage(context: Context, imageUrl: String) {
+        val loader = ImageLoader(context)
+        val request = ImageRequest.Builder(context)
+            .data(imageUrl)
+            .target { result ->
+                viewModelScope.launch {
+                    val bitmap = (result as BitmapDrawable).bitmap
+                    _courseImage.emit(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            bitmap
+                        } else {
+                            blurBitmap(context, bitmap, 10f)
+                        }
+                    )
+                }
+            }
+            .error(org.openedx.core.R.drawable.core_no_image_course)
+            .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+            .allowHardware(false)
+            .build()
+        loader.enqueue(request)
+    }
+
+    private fun blurBitmap(
+        context: Context,
+        bitmap: Bitmap,
+        blurRadio: Float
+    ): Bitmap {
+        val renderScript = RenderScript.create(context)
+        val bitmapAlloc = Allocation.createFromBitmap(renderScript, bitmap)
+        ScriptIntrinsicBlur.create(renderScript, bitmapAlloc.element).apply {
+            setRadius(blurRadio)
+            setInput(bitmapAlloc)
+            repeat(3) {
+                forEach(bitmapAlloc)
+            }
+        }
+        val newBitmap: Bitmap = Bitmap.createBitmap(
+            bitmap.width,
+            bitmap.height,
+            Bitmap.Config.ARGB_8888
+        )
+        bitmapAlloc.copyTo(newBitmap)
+        renderScript.destroy()
+        return newBitmap
     }
 
     private fun courseDashboardViewed() {

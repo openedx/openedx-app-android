@@ -118,7 +118,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.preloadCourseStructure()
+        viewModel.preloadCourseStructure(requireContext())
     }
 
     private var snackBar: Snackbar? = null
@@ -154,7 +154,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         viewModel.errorMessage.observe(viewLifecycleOwner) {
             snackBar = Snackbar.make(binding.root, it, Snackbar.LENGTH_INDEFINITE)
                 .setAction(org.openedx.core.R.string.core_error_try_again) {
-                    viewModel.preloadCourseStructure()
+                    viewModel.preloadCourseStructure(requireContext())
                 }
             snackBar?.show()
 
@@ -190,6 +190,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         binding.composeCollapsingLayout.setContent {
             OpenEdXTheme {
                 val refreshing by viewModel.showProgress.collectAsState(true)
+                val courseImage by viewModel.courseImage.collectAsState()
                 val pagerState = rememberPagerState(pageCount = { 5 })
                 val pullRefreshState = rememberPullRefreshState(
                     refreshing = refreshing,
@@ -201,11 +202,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .pullRefresh(pullRefreshState),
-                        imageUrl = viewModel.image,
+                        courseImage = courseImage,
                         expandedTop = {
                             ExpandedHeaderContent(
                                 courseTitle = viewModel.courseName,
-                                org = viewModel.org
+                                org = viewModel.organization
                             )
                         },
                         collapsedTop = {
@@ -214,7 +215,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                             )
                         },
                         navigation = {
-                            Tabs(pagerState = pagerState)
+                            Tabs(pagerState = pagerState, viewModel::courseContainerTabClickedEvent)
                         },
                         onBackClick = {
                             requireActivity().supportFragmentManager.popBackStack()

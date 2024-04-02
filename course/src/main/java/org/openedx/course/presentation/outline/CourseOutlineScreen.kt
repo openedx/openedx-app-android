@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -69,7 +68,6 @@ import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
-import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
@@ -172,20 +170,6 @@ internal fun CourseOutlineScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = listBottomPadding
                             ) {
-                                item {
-                                    CourseImageHeader(
-                                        modifier = Modifier
-                                            .aspectRatio(1.86f)
-                                            .padding(6.dp),
-                                        apiHostUrl = apiHostUrl,
-                                        courseImage = uiState.courseStructure.media?.image?.large
-                                            ?: "",
-                                        courseCertificate = uiState.courseStructure.certificate,
-                                        onCertificateClick = onCertificateClick,
-                                        courseName = uiState.courseStructure.name
-                                    )
-                                }
-                                item { Spacer(Modifier.height(28.dp)) }
                                 if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
                                     item {
                                         Box(

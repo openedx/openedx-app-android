@@ -41,7 +41,10 @@ import org.openedx.course.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Tabs(pagerState: PagerState) {
+fun Tabs(
+    pagerState: PagerState,
+    onPageChange: (Int) -> Unit
+) {
     val list = listOf(
         stringResource(id = R.string.course_navigation_course) to rememberVectorPainter(Icons.Default.Home),
         stringResource(id = R.string.course_navigation_videos) to rememberVectorPainter(Icons.Rounded.PlayCircleFilled),
@@ -66,12 +69,12 @@ fun Tabs(pagerState: PagerState) {
             val backgroundColor = if (pagerState.currentPage == index) {
                 MaterialTheme.appColors.primary
             } else {
-                MaterialTheme.appColors.navigationBtnBackground
+                MaterialTheme.appColors.tabUnselectedBtnBackground
             }
             val contentColor = if (pagerState.currentPage == index) {
                 Color.White
             } else {
-                MaterialTheme.appColors.navigationBtnUnselectedContent
+                MaterialTheme.appColors.tabUnselectedBtnContent
             }
             val border = if (isSystemInDarkTheme()) {
                 Modifier
@@ -90,6 +93,7 @@ fun Tabs(pagerState: PagerState) {
                     .clickable {
                         scope.launch {
                             pagerState.animateScrollToPage(index)
+                            onPageChange(index)
                         }
                     }
                         then (border)

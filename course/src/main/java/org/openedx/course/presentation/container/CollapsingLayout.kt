@@ -2,11 +2,7 @@ package org.openedx.course.presentation.container
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Picture
 import android.os.Build
-import android.renderscript.Allocation
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicBlur
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,28 +32,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.draw
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.appColors
@@ -65,7 +55,7 @@ import kotlin.math.roundToInt
 
 @Composable
 internal fun CollapsingLayout(
-    imageUrl: String,
+    courseImage: Bitmap,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
@@ -89,14 +79,9 @@ internal fun CollapsingLayout(
     var backgroundImageHeight by remember {
         mutableFloatStateOf(0f)
     }
-    val picture = remember { Picture() }
     val windowSize = rememberWindowSize()
     val configuration = LocalConfiguration.current
-    val imageHeight = if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        100
-    } else {
-        200
-    }
+    val imageHeight = 200
     val factor = (-imageHeight - offset) / -imageHeight
     val alpha = if (factor.isNaN() || factor < 0) 0f else factor
     val blurImagePadding = 40.dp
@@ -118,12 +103,6 @@ internal fun CollapsingLayout(
     } else {
         60.dp
     }
-    val imageModel = ImageRequest.Builder(LocalContext.current)
-        .data(imageUrl)
-        .error(org.openedx.core.R.drawable.core_no_image_course)
-        .placeholder(org.openedx.core.R.drawable.core_no_image_course)
-        .allowHardware(false)
-        .build()
 
     fun calculateOffset(delta: Float): Offset {
         val oldOffset = offset
@@ -160,221 +139,274 @@ internal fun CollapsingLayout(
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(imageHeight.dp)
-                .onSizeChanged { size ->
-                    backgroundImageHeight = size.height.toFloat()
+        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Box(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .blur(100.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(MaterialTheme.appColors.surface)
+                            .fillMaxWidth()
+                            .height(with(localDensity) { (collapsedTopHeight + navigationHeight).toDp() } + blurImagePadding)
+                            .align(Alignment.Center)
+                    )
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(blurImagePadding)
+                            .align(Alignment.TopCenter),
+                        bitmap = courseImage.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.Center,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(MaterialTheme.appColors.courseHomeHeaderShade)
+                            .fillMaxWidth()
+                            .height(with(localDensity) { (collapsedTopHeight + navigationHeight).toDp() } * 0.1f)
+                            .align(Alignment.BottomCenter)
+                    )
                 }
-                .drawWithCache {
-                    val width = this.size.width.toInt()
-                    val height = this.size.height.toInt()
-                    onDrawWithContent {
-                        val pictureCanvas =
-                            androidx.compose.ui.graphics.Canvas(
-                                picture.beginRecording(
-                                    width,
-                                    height
-                                )
-                            )
-                        draw(this, this.layoutDirection, pictureCanvas, this.size) {
-                            this@onDrawWithContent.drawContent()
-                        }
-                        picture.endRecording()
-                        drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
-                    }
-                },
-            model = imageModel,
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
-                    .background(Color.White)
-                    .blur(100.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.appColors.courseHomeHeaderShadePrimary)
-                        .fillMaxWidth()
-                        .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
-                        .align(Alignment.Center)
-                )
-                AsyncImage(
+            } else {
+                val backgroundColor = MaterialTheme.appColors.background
+                Image(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(blurImagePadding)
-                        .align(Alignment.TopCenter),
-                    model = imageModel,
+                        .height(imageHeight.dp)
+                        .onSizeChanged { size ->
+                            backgroundImageHeight = size.height.toFloat()
+                        },
+                    bitmap = courseImage.asImageBitmap(),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = PixelAlignment(0f, blurImageAlignment),
+                    contentScale = ContentScale.Crop
                 )
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.appColors.courseHomeHeaderShadeSecondary)
                         .fillMaxWidth()
-                        .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } * 0.1f)
-                        .align(Alignment.BottomCenter)
+                        .height(with(localDensity) { (collapsedTopHeight + navigationHeight).toDp() })
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(backgroundColor, Color.Transparent),
+                                startY = 400f,
+                                endY = 0f
+                            )
+                        ),
                 )
             }
-        } else if (picture.width > 0 && picture.height > 0) {
-            //TODO Change color
-            val backgroundColor = MaterialTheme.appColors.cardViewBackground
-            LegacyBlurImage(
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(imageHeight.dp),
-                bitmap = createBitmapFromPicture(picture),
-                blurRadio = 25f
-            )
+                    .displayCutoutForLandscape()
+                    .padding(horizontal = 12.dp)
+                    .onSizeChanged { size ->
+                        collapsedTopHeight = size.height.toFloat()
+                    },
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .statusBarsInset()
+                        .padding(top = 12.dp, start = backBtnStartPadding)
+                        .clip(CircleShape)
+                        .clickable {
+                            onBackClick()
+                        },
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    tint = MaterialTheme.appColors.textPrimary,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    content = collapsedTop,
+                )
+            }
+
+
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } )
-                    .offset { IntOffset(x = 0, y = backgroundImageHeight.roundToInt()) }
-                    .background(backgroundColor)
+                    .displayCutoutForLandscape()
+                    .offset { IntOffset(x = 0, y = (collapsedTopHeight).roundToInt()) }
+                    .onSizeChanged { size ->
+                        navigationHeight = size.height.toFloat()
+                    },
+                content = navigation,
             )
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(backgroundColor, Color.Transparent),
-                            startY = 500f,
-                            endY = 400f
-                        )
-                    ),
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
                     .offset {
                         IntOffset(
                             x = 0,
-                            y = with(localDensity) { (offset + backgroundImageHeight - blurImagePadding.toPx()).roundToInt() })
-                    }
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(backgroundColor, Color.Transparent),
-                            startY = 400f,
-                            endY = 0f
+                            y = (collapsedTopHeight + navigationHeight).roundToInt()
                         )
-                    ),
+                    }
+                    .padding(bottom = with(localDensity) { (collapsedTopHeight + navigationHeight).toDp() }),
+                content = bodyContent,
             )
-        }
-
-        Box(
-            modifier = Modifier
-                .onSizeChanged { size ->
-                    expandedTopHeight = size.height.toFloat()
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .onSizeChanged { size ->
+                            backgroundImageHeight = size.height.toFloat()
+                        },
+                    bitmap = courseImage.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(x = 0, y = toolbarBackgroundOffset) }
+                        .background(Color.White)
+                        .blur(100.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(MaterialTheme.appColors.surface)
+                            .fillMaxWidth()
+                            .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
+                            .align(Alignment.Center)
+                    )
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(blurImagePadding)
+                            .align(Alignment.TopCenter),
+                        bitmap = courseImage.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = PixelAlignment(0f, blurImageAlignment),
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(MaterialTheme.appColors.courseHomeHeaderShade)
+                            .fillMaxWidth()
+                            .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } * 0.1f)
+                            .align(Alignment.BottomCenter)
+                    )
                 }
-                .offset { IntOffset(x = 0, y = (offset + backgroundImageHeight).roundToInt()) }
-                .alpha(alpha),
-            content = expandedTop,
-        )
+            } else {
+                val backgroundColor = MaterialTheme.appColors.background
+                Image(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .onSizeChanged { size ->
+                            backgroundImageHeight = size.height.toFloat()
+                        },
+                    bitmap = courseImage.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() })
+                        .offset { IntOffset(x = 0, y = backgroundImageHeight.roundToInt()) }
+                        .background(backgroundColor)
+                )
 
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .onSizeChanged { size ->
-                    collapsedTopHeight = size.height.toFloat()
-                }
-        ) {
-            Icon(
-                modifier = Modifier
-                    .statusBarsInset()
-                    .padding(top = 12.dp, start = backBtnStartPadding)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(alpha / 2))
-                    .clickable {
-                        onBackClick()
-                    },
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                tint = MaterialTheme.appColors.textPrimary,
-                contentDescription = null
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(imageHeight.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(backgroundColor, Color.Transparent),
+                                startY = 500f,
+                                endY = 400f
+                            )
+                        ),
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
+                        .offset {
+                            IntOffset(
+                                x = 0,
+                                y = with(localDensity) { (offset + backgroundImageHeight - blurImagePadding.toPx()).roundToInt() })
+                        }
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(backgroundColor, Color.Transparent),
+                                startY = 400f,
+                                endY = 0f
+                            )
+                        ),
+                )
+            }
+
             Box(
                 modifier = Modifier
-                    .padding(top = 12.dp)
-                    .alpha(1 - alpha),
-                content = collapsedTop,
+                    .onSizeChanged { size ->
+                        expandedTopHeight = size.height.toFloat()
+                    }
+                    .offset { IntOffset(x = 0, y = (offset + backgroundImageHeight).roundToInt()) }
+                    .alpha(alpha),
+                content = expandedTop,
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .onSizeChanged { size ->
+                        collapsedTopHeight = size.height.toFloat()
+                    },
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .statusBarsInset()
+                        .padding(top = 12.dp, start = backBtnStartPadding)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(alpha / 2))
+                        .clickable {
+                            onBackClick()
+                        },
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    tint = MaterialTheme.appColors.textPrimary,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .alpha(1 - alpha),
+                    content = collapsedTop,
+                )
+            }
+
+
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(x = 0, y = (offset + backgroundImageHeight + expandedTopHeight).roundToInt()) }
+                    .onSizeChanged { size ->
+                        navigationHeight = size.height.toFloat()
+                    },
+                content = navigation,
+            )
+
+            Box(
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = (expandedTopHeight + offset + backgroundImageHeight + navigationHeight).roundToInt()
+                        )
+                    }
+                    .padding(bottom = with(localDensity) { (collapsedTopHeight + navigationHeight).toDp() }),
+                content = bodyContent,
             )
         }
-
-
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(x = 0, y = (offset + backgroundImageHeight + expandedTopHeight).roundToInt()) }
-                .onSizeChanged { size ->
-                    navigationHeight = size.height.toFloat()
-                },
-            content = navigation,
-        )
-
-        Box(
-            modifier = Modifier.offset {
-                IntOffset(
-                    x = 0,
-                    y = (expandedTopHeight + offset + backgroundImageHeight + navigationHeight).roundToInt()
-                )
-            },
-            content = bodyContent,
-        )
     }
-}
-
-private fun createBitmapFromPicture(picture: Picture): Bitmap {
-    val bitmap = Bitmap.createBitmap(
-        picture.width,
-        picture.height,
-        Bitmap.Config.ARGB_8888
-    )
-
-    val canvas = android.graphics.Canvas(bitmap)
-    canvas.drawColor(android.graphics.Color.WHITE)
-    canvas.drawPicture(picture)
-    return bitmap
-}
-
-@Composable
-fun BlurImage(
-    bitmap: Bitmap,
-    modifier: Modifier = Modifier.fillMaxSize(),
-) {
-    Image(
-        bitmap = bitmap.asImageBitmap(),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun LegacyBlurImage(
-    bitmap: Bitmap,
-    blurRadio: Float,
-    modifier: Modifier = Modifier.fillMaxSize()
-) {
-    val renderScript = RenderScript.create(LocalContext.current)
-    val bitmapAlloc = Allocation.createFromBitmap(renderScript, bitmap)
-    ScriptIntrinsicBlur.create(renderScript, bitmapAlloc.element).apply {
-        setRadius(blurRadio)
-        setInput(bitmapAlloc)
-        forEach(bitmapAlloc)
-    }
-    bitmapAlloc.copyTo(bitmap)
-    renderScript.destroy()
-
-    BlurImage(bitmap, modifier)
 }
 
 @Immutable
