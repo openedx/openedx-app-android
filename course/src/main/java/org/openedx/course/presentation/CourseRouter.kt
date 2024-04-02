@@ -59,16 +59,6 @@ interface CourseRouter {
         fm: FragmentManager, courseId: String, title: String, type: HandoutsType
     )
 
-    fun navigateToCourseInfo(
-        fm: FragmentManager,
-        courseId: String,
-        infoType: String,
-    )
-
-    fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?)
-
-    fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?)
-
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)

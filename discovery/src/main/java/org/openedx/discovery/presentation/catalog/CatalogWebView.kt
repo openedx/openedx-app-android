@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.catalog
+package org.openedx.discovery.presentation.catalog
 
 import android.annotation.SuppressLint
 import android.webkit.WebResourceRequest
@@ -6,8 +6,7 @@ import android.webkit.WebView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.openedx.core.system.DefaultWebViewClient
-import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
+import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
 @Composable

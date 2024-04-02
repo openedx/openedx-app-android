@@ -35,9 +35,6 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
-import org.openedx.dashboard.presentation.dashboard.DashboardUIState
-import org.openedx.dashboard.presentation.dashboard.DashboardViewModel
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)

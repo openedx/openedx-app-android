@@ -1,9 +1,9 @@
 package org.openedx.discovery.data.api
 
 import okhttp3.ResponseBody
-import org.openedx.core.data.model.CourseDetails
-import org.openedx.core.data.model.CourseList
 import org.openedx.core.data.model.EnrollBody
+import org.openedx.discovery.data.model.CourseDetails
+import org.openedx.discovery.data.model.CourseList
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

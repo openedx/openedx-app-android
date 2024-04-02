@@ -34,3 +34,9 @@ enum class DiscoveryAnalyticsKey(val key: String) {
     CONVERSION("conversion"),
     DISCOVERY("discovery"),
 }
+
+enum class DiscoveryAnalyticsScreen(val screenName: String) {
+    DISCOVERY("Discovery"),
+    PROGRAM("Program"),
+    COURSE_INFO("Course Info"),
+}

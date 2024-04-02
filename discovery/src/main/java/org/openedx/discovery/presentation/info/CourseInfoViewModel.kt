@@ -17,7 +17,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -28,6 +27,7 @@ import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import org.openedx.discovery.presentation.DiscoveryAnalyticsKey
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.catalog.WebViewLink
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 

@@ -1,9 +1,9 @@
-package org.openedx.core.data.model
+package org.openedx.discovery.data.model
 
 import com.google.gson.annotations.SerializedName
-import org.openedx.core.domain.model.Course
+import org.openedx.core.data.model.Media
 import org.openedx.core.utils.TimeUtils
-import java.util.*
+import org.openedx.discovery.domain.model.Course
 
 data class CourseDetails(
     @SerializedName("blocks_url")

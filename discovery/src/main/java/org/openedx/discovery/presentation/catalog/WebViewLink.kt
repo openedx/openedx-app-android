@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.catalog
+package org.openedx.discovery.presentation.catalog
 
 import android.net.Uri
 import org.openedx.core.extension.getQueryParams
@@ -41,7 +41,7 @@ class WebViewLink(
             }
 
             // Validate the Uri authority
-            val uriAuthority = Authority.values().find { it.key == uri.authority } ?: return null
+            val uriAuthority = Authority.entries.find { it.key == uri.authority } ?: return null
 
             // Parse the Uri params
             val params = uri.getQueryParams()

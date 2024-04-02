@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import org.openedx.core.data.model.room.CourseEntity
+import org.openedx.discovery.data.model.room.CourseEntity
 
 @Dao
 interface DiscoveryDao {
@@ -23,6 +23,6 @@ interface DiscoveryDao {
     suspend fun clearCachedData()
 
     @Query("SELECT * FROM course_discovery_table")
-    suspend fun readAllData() : List<CourseEntity>
+    suspend fun readAllData(): List<CourseEntity>
 
 }

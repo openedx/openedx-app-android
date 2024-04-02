@@ -14,8 +14,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,12 +55,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -81,16 +75,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.extension.isEmailValid
-import org.openedx.core.extension.isLinkValid
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -104,12 +94,14 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
 import org.openedx.discovery.R
+import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.ui.ImageHeader
+import org.openedx.discovery.presentation.ui.WarningLabel
 import java.nio.charset.StandardCharsets
 import java.util.Date
 import org.openedx.core.R as CoreR
@@ -604,97 +596,6 @@ private fun CourseDetailNativeContentLandscape(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun ImageHeader(
-    modifier: Modifier,
-    apiHostUrl: String,
-    courseImage: String?,
-    courseName: String,
-) {
-    val configuration = LocalConfiguration.current
-    val windowSize = rememberWindowSize()
-    val contentScale =
-        if (!windowSize.isTablet && configuration.orientation == ORIENTATION_LANDSCAPE) {
-            ContentScale.Fit
-        } else {
-            ContentScale.Crop
-        }
-    val imageUrl = if (courseImage?.isLinkValid() == true) {
-        courseImage
-    } else {
-        apiHostUrl.dropLast(1) + courseImage
-    }
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .error(CoreR.drawable.core_no_image_course)
-                .placeholder(CoreR.drawable.core_no_image_course)
-                .build(),
-            contentDescription = stringResource(
-                id = CoreR.string.core_accessibility_header_image_for,
-                courseName
-            ),
-            contentScale = contentScale,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(MaterialTheme.appShapes.cardShape)
-        )
-    }
-}
-
-@Composable
-private fun WarningLabel(
-    painter: Painter,
-    text: String
-) {
-    val borderColor = if (!isSystemInDarkTheme()) {
-        MaterialTheme.appColors.cardViewBorder
-    } else {
-        MaterialTheme.appColors.surface
-    }
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .shadow(
-                0.dp,
-                MaterialTheme.appShapes.material.medium
-            )
-            .background(
-                MaterialTheme.appColors.surface,
-                MaterialTheme.appShapes.material.medium
-            )
-            .border(
-                1.dp,
-                borderColor,
-                MaterialTheme.appShapes.material.medium
-            )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painter,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.warning
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                modifier = Modifier.testTag("txt_enroll_internet_error"),
-                text = text,
-                color = MaterialTheme.appColors.textPrimaryVariant,
-                style = MaterialTheme.appTypography.titleSmall
-            )
         }
     }
 }

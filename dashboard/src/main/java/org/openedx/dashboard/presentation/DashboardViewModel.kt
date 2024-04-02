@@ -1,4 +1,4 @@
-package org.openedx.dashboard.presentation.dashboard
+package org.openedx.dashboard.presentation
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData

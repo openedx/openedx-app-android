@@ -1,4 +1,4 @@
-package org.openedx.dashboard.presentation.dashboard
+package org.openedx.dashboard.presentation
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -95,7 +95,6 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
-import org.openedx.dashboard.presentation.DashboardRouter
 import java.util.Date
 
 class DashboardFragment : Fragment() {

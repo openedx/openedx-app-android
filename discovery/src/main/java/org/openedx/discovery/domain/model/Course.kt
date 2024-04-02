@@ -1,5 +1,6 @@
-package org.openedx.core.domain.model
+package org.openedx.discovery.domain.model
 
+import org.openedx.core.domain.model.Media
 import java.util.Date
 
 
@@ -23,6 +24,6 @@ data class Course(
     val end: String,
     val startDisplay: String,
     val startType: String,
-    val overview : String,
+    val overview: String,
     val isEnrolled: Boolean
 )

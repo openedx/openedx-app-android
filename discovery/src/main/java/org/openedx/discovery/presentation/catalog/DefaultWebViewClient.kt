@@ -1,4 +1,4 @@
-package org.openedx.core.system
+package org.openedx.discovery.presentation.catalog
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,7 +8,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import org.openedx.core.extension.isEmailValid
-import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.utils.EmailUtil
 
 open class DefaultWebViewClient(

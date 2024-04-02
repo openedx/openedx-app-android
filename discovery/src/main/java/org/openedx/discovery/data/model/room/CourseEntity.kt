@@ -1,12 +1,13 @@
-package org.openedx.core.data.model.room
+package org.openedx.discovery.data.model.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.openedx.core.data.model.CourseDetails
-import org.openedx.core.domain.model.Course
+import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.utils.TimeUtils
+import org.openedx.discovery.data.model.CourseDetails
+import org.openedx.discovery.domain.model.Course
 
 @Entity(tableName = "course_discovery_table")
 data class CourseEntity(
@@ -110,5 +111,4 @@ data class CourseEntity(
             }
         }
     }
-
 }

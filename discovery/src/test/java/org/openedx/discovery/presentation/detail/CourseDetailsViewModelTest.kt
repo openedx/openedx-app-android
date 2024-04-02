@@ -25,13 +25,13 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import java.net.UnknownHostException

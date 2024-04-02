@@ -42,9 +42,6 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
-import org.openedx.core.presentation.CoreAnalyticsScreen
-import org.openedx.core.presentation.catalog.CatalogWebViewScreen
-import org.openedx.core.presentation.catalog.WebViewLink
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.AuthButtonsPanel
@@ -60,9 +57,12 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
+import org.openedx.discovery.presentation.DiscoveryAnalyticsScreen
+import org.openedx.discovery.presentation.catalog.CatalogWebViewScreen
+import org.openedx.discovery.presentation.catalog.WebViewLink
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
-import org.openedx.core.presentation.catalog.WebViewLink.Authority as linkAuthority
+import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 class CourseInfoFragment : Fragment() {
 
@@ -169,7 +169,7 @@ class CourseInfoFragment : Fragment() {
                                         getString(CoreR.string.platform_name)
                                     ),
                                     url = param,
-                                    source = CoreAnalyticsScreen.COURSE_INFO.screenName
+                                    source = DiscoveryAnalyticsScreen.COURSE_INFO.screenName
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     ActionDialogFragment::class.simpleName

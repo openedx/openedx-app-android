@@ -2,12 +2,12 @@ package org.openedx.discovery.data.repository
 
 import okhttp3.ResponseBody
 import org.openedx.core.data.model.EnrollBody
-import org.openedx.core.data.model.room.CourseEntity
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.Course
-import org.openedx.core.domain.model.CourseList
 import org.openedx.discovery.data.api.DiscoveryApi
+import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
+import org.openedx.discovery.domain.model.Course
+import org.openedx.discovery.domain.model.CourseList
 
 
 class DiscoveryRepository(
