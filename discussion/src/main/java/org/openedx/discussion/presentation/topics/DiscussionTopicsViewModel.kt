@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -13,7 +14,6 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
-import kotlinx.coroutines.launch
 
 class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
@@ -56,7 +56,7 @@ class DiscussionTopicsViewModel(
         }
     }
 
-    private fun getCourseTopics() {
+    fun getCourseTopics() {
         _uiState.value = DiscussionTopicsUIState.Loading
         getCourseTopicsInternal()
     }

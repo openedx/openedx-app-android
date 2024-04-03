@@ -1,24 +1,32 @@
 package org.openedx.discussion.presentation.topics
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.system.ResourceManager
-import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.presentation.DiscussionAnalytics
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.R
+import org.openedx.core.UIMessage
+import org.openedx.core.system.ResourceManager
+import org.openedx.discussion.domain.interactor.DiscussionInteractor
+import org.openedx.discussion.presentation.DiscussionAnalytics
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -49,92 +57,126 @@ class DiscussionTopicsViewModelTest {
     }
 
     @Test
-    fun `getCourseTopics no internet exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
+    fun `getCourseTopics no internet exception`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"", "")
 
         coEvery { interactor.getCourseTopics(any()) } throws UnknownHostException()
-        viewModel.getCourseTopics()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseTopics(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
+        assertEquals(noInternet, message.await()?.message)
         assert(viewModel.uiState.value is DiscussionTopicsUIState.Loading)
     }
 
     @Test
-    fun `getCourseTopics unknown exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
+    fun `getCourseTopics unknown exception`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"", "")
 
         coEvery { interactor.getCourseTopics(any()) } throws Exception()
-        viewModel.getCourseTopics()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseTopics(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
+        assertEquals(somethingWrong,  message.await()?.message)
         assert(viewModel.uiState.value is DiscussionTopicsUIState.Loading)
     }
 
     @Test
-    fun `getCourseTopics success`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
+    fun `getCourseTopics success`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"", "")
 
         coEvery { interactor.getCourseTopics(any()) } returns mockk()
-        viewModel.getCourseTopics()
         advanceUntilIdle()
-
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         coVerify(exactly = 1) { interactor.getCourseTopics(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is DiscussionTopicsUIState.Topics)
     }
 
     @Test
-    fun `updateCourseTopics no internet exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
+    fun `updateCourseTopics no internet exception`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"", "")
 
         coEvery { interactor.getCourseTopics(any()) } throws UnknownHostException()
-        viewModel.updateCourseTopics()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
+        val isUpdating = async {
+            withTimeoutOrNull(5000) {
+                viewModel.isUpdating.first()
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseTopics(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
-        assert(viewModel.isUpdating.value == false)
+        assertEquals(noInternet,  message.await()?.message)
+        assert(!(isUpdating.await() ?: false))
     }
 
     @Test
-    fun `updateCourseTopics unknown exception`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
+    fun `updateCourseTopics unknown exception`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"", "")
 
         coEvery { interactor.getCourseTopics(any()) } throws Exception()
-        viewModel.updateCourseTopics()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
+        val isUpdating = async {
+            withTimeoutOrNull(5000) {
+                viewModel.isUpdating.first()
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseTopics(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
-        assert(viewModel.isUpdating.value == false)
+        assertEquals(somethingWrong,  message.await()?.message)
+        assert(!(isUpdating.await() ?: false))
     }
 
     @Test
-    fun `updateCourseTopics success`() = runTest {
-        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"")
+    fun `updateCourseTopics success`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = DiscussionTopicsViewModel(interactor, resourceManager, analytics,"", "")
 
         coEvery { interactor.getCourseTopics(any()) } returns mockk()
-        viewModel.updateCourseTopics()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
+        val isUpdating = async {
+            withTimeoutOrNull(5000) {
+                viewModel.isUpdating.first()
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseTopics(any()) }
 
-        assert(viewModel.uiMessage.value == null)
+        assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is DiscussionTopicsUIState.Topics)
-        assert(viewModel.isUpdating.value == false)
+        assert(!(isUpdating.await() ?: false))
     }
 
 }

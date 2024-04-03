@@ -4,6 +4,26 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Pagination
@@ -12,22 +32,10 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.domain.model.ThreadsData
-import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
+import org.openedx.discussion.presentation.topics.DiscussionTopic
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TestRule
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -119,7 +127,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.ALL_POSTS
+            DiscussionTopic.ALL_POSTS
         )
         advanceUntilIdle()
 
@@ -139,7 +147,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.ALL_POSTS
+            DiscussionTopic.ALL_POSTS
         )
         coEvery { interactor.getAllThreads(any(), any(), any(), any()) } throws Exception()
         advanceUntilIdle()
@@ -170,7 +178,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.ALL_POSTS
+            DiscussionTopic.ALL_POSTS
         )
         advanceUntilIdle()
 
@@ -198,7 +206,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.FOLLOWING_POSTS
+            DiscussionTopic.FOLLOWING_POSTS
         )
         advanceUntilIdle()
 
@@ -218,7 +226,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.FOLLOWING_POSTS
+            DiscussionTopic.FOLLOWING_POSTS
         )
         coEvery {
             interactor.getFollowingThreads(
@@ -273,7 +281,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.FOLLOWING_POSTS
+            DiscussionTopic.FOLLOWING_POSTS
         )
         advanceUntilIdle()
 
@@ -301,7 +309,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         advanceUntilIdle()
 
@@ -321,7 +329,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } throws Exception()
         advanceUntilIdle()
@@ -352,7 +360,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         advanceUntilIdle()
 
@@ -371,7 +379,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } returns ThreadsData(
             threads,
@@ -391,7 +399,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } returns ThreadsData(
             threads,
@@ -411,7 +419,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } returns ThreadsData(
             threads,
@@ -441,7 +449,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
         viewModel.updateThread("")
         advanceUntilIdle()
@@ -477,7 +485,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
 
 
@@ -516,7 +524,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopicsFragment.TOPIC
+            DiscussionTopic.TOPIC
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
