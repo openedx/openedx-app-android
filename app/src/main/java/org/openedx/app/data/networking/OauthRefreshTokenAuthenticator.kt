@@ -68,10 +68,12 @@ class OauthRefreshTokenAuthenticator(
             return null
         }
 
-        val errorCode = getErrorCode(response.peekBody(200).string())
+        val errorCode = getErrorCode(response.peekBody(Long.MAX_VALUE).string())
         if (errorCode != null) {
             when (errorCode) {
-                TOKEN_EXPIRED_ERROR_MESSAGE, JWT_TOKEN_EXPIRED -> {
+                TOKEN_EXPIRED_ERROR_MESSAGE,
+                JWT_TOKEN_EXPIRED,
+                -> {
                     try {
                         val newAuth = refreshAccessToken(refreshToken)
                         if (newAuth != null) {
@@ -98,7 +100,10 @@ class OauthRefreshTokenAuthenticator(
                     }
                 }
 
-                TOKEN_NONEXISTENT_ERROR_MESSAGE, TOKEN_INVALID_GRANT_ERROR_MESSAGE, JWT_INVALID_TOKEN -> {
+                TOKEN_NONEXISTENT_ERROR_MESSAGE,
+                TOKEN_INVALID_GRANT_ERROR_MESSAGE,
+                JWT_INVALID_TOKEN,
+                -> {
                     // Retry request with the current access_token if the original access_token used in
                     // request does not match the current access_token. This case can occur when
                     // asynchronous calls are made and are attempting to refresh the access_token where
@@ -118,7 +123,10 @@ class OauthRefreshTokenAuthenticator(
                     }
                 }
 
-                DISABLED_USER_ERROR_MESSAGE, JWT_DISABLED_USER_ERROR_MESSAGE -> {
+                DISABLED_USER_ERROR_MESSAGE,
+                JWT_DISABLED_USER_ERROR_MESSAGE,
+                JWT_USER_EMAIL_MISMATCH,
+                -> {
                     runBlocking {
                         appNotifier.send(LogoutEvent())
                     }
@@ -241,6 +249,8 @@ class OauthRefreshTokenAuthenticator(
         private const val JWT_TOKEN_EXPIRED = "Token has expired."
         private const val JWT_INVALID_TOKEN = "Invalid token."
         private const val JWT_DISABLED_USER_ERROR_MESSAGE = "User account is disabled."
+        private const val JWT_USER_EMAIL_MISMATCH =
+            "Failing JWT authentication due to jwt user email mismatch with lms user email."
 
         private const val FIELD_ERROR_CODE = "error_code"
         private const val FIELD_DETAIL = "detail"
