@@ -118,7 +118,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.preloadCourseStructure(requireContext())
+        viewModel.preloadCourseStructure()
     }
 
     private var snackBar: Snackbar? = null
@@ -154,7 +154,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         viewModel.errorMessage.observe(viewLifecycleOwner) {
             snackBar = Snackbar.make(binding.root, it, Snackbar.LENGTH_INDEFINITE)
                 .setAction(org.openedx.core.R.string.core_error_try_again) {
-                    viewModel.preloadCourseStructure(requireContext())
+                    viewModel.preloadCourseStructure()
                 }
             snackBar?.show()
 
