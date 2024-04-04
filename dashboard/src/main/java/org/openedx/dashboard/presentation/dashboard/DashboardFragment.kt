@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +30,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -81,7 +83,6 @@ import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -155,6 +156,9 @@ class DashboardFragment : Fragment() {
                             AppUpdateState.openPlayMarket(requireContext())
                         },
                     ),
+                    onSettingsClick = {
+                        router.navigateToSettings(requireActivity().supportFragmentManager)
+                    }
                 )
             }
         }
@@ -174,6 +178,7 @@ internal fun MyCoursesScreen(
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
+    onSettingsClick: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
@@ -241,7 +246,34 @@ internal fun MyCoursesScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Toolbar(label = stringResource(id = R.string.dashboard_title))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .testTag("txt_dashboard_title"),
+                    text = stringResource(id = R.string.dashboard_title),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.titleMedium
+                )
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .offset(x = 12.dp),
+                    onClick = { onSettingsClick() }
+                ) {
+                    Icon(
+                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_settings),
+                        tint = MaterialTheme.appColors.primary,
+                        contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_settings)
+                    )
+                }
+            }
 
             Surface(
                 color = MaterialTheme.appColors.background,
@@ -566,6 +598,7 @@ private fun MyCoursesScreenDay() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
+            onSettingsClick = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -597,6 +630,7 @@ private fun MyCoursesScreenTabletPreview() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
+            onSettingsClick = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }

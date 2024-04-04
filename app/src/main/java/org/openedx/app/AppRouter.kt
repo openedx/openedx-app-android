@@ -48,6 +48,7 @@ import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
+import org.openedx.settings.presentation.whatsnew.SettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
@@ -356,6 +357,13 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
                 replaceFragment(fm, SignInFragment())
             }
         }
+    }
+
+    override fun navigateToSettings(fm: FragmentManager) {
+        replaceFragmentWithBackStack(
+            fm,
+            SettingsFragment()
+        )
     }
     //endregion
 

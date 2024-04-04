@@ -125,6 +125,7 @@ dependencies {
     implementation project(path: ':profile')
     implementation project(path: ':discussion')
     implementation project(path: ':whatsnew')
+    implementation project(path: ':settings')
 
     kapt "androidx.room:room-compiler:$room_version"
 

@@ -57,6 +57,7 @@ import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
+import org.openedx.settings.presentation.whatsnew.SettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
@@ -369,4 +370,6 @@ val screenModule = module {
     viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
+
+    viewModel { SettingsViewModel() }
 }

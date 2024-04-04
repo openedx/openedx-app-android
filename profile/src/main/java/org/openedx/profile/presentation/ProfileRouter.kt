@@ -17,4 +17,6 @@ interface ProfileRouter {
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
     fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
+
+    fun navigateToSettings(fm: FragmentManager)
 }

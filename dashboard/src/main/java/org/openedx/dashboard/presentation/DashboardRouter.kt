@@ -18,4 +18,6 @@ interface DashboardRouter {
     )
 
     fun navigateToCourseInfo(fm: FragmentManager, courseId: String, infoType: String)
+
+    fun navigateToSettings(fm: FragmentManager)
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -22,6 +23,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -45,9 +48,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -165,7 +170,11 @@ class NativeDiscoveryFragment : Fragment() {
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
-                    })
+                    },
+                    onSettingsClick = {
+                        router.navigateToSettings(requireActivity().supportFragmentManager)
+                    }
+                )
                 LaunchedEffect(uiState) {
                     if (querySearch.isNotEmpty()) {
                         router.navigateToCourseSearch(
@@ -212,6 +221,7 @@ internal fun DiscoveryScreen(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
     onBackClick: () -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -309,17 +319,37 @@ internal fun DiscoveryScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 10.dp),
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    modifier = Modifier.testTag("txt_discovery_title"),
-                    text = stringResource(id = R.string.discovery_Discovery),
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                            .testTag("txt_discovery_title"),
+                        text = stringResource(id = R.string.discovery_Discovery),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.appColors.textPrimary,
+                        style = MaterialTheme.appTypography.titleMedium
+                    )
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .offset(x = 12.dp),
+                        onClick = { onSettingsClick() }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = org.openedx.core.R.drawable.core_ic_settings),
+                            tint = MaterialTheme.appColors.primary,
+                            contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_settings)
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 StaticSearchBar(
                     modifier = Modifier
@@ -512,6 +542,7 @@ private fun DiscoveryScreenPreview() {
             onSignInClick = {},
             onRegisterClick = {},
             onBackClick = {},
+            onSettingsClick = {},
             canShowBackButton = false
         )
     }
@@ -552,6 +583,7 @@ private fun DiscoveryScreenTabletPreview() {
             onSignInClick = {},
             onRegisterClick = {},
             onBackClick = {},
+            onSettingsClick = {},
             canShowBackButton = false
         )
     }

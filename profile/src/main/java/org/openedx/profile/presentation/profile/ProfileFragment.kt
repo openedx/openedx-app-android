@@ -10,15 +10,18 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.profile.compose.ProfileView
 import org.openedx.profile.presentation.profile.compose.ProfileViewAction
 
 class ProfileFragment : Fragment() {
 
     private val viewModel: ProfileViewModel by viewModel()
+    private val router by inject<ProfileRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +49,9 @@ class ProfileFragment : Fragment() {
                     uiMessage = uiMessage,
                     refreshing = refreshing,
                     appUpgradeEvent = appUpgradeEvent,
+                    onSettingsClick = {
+                        router.navigateToSettings(requireActivity().supportFragmentManager)
+                    },
                     onAction = { action ->
                         when (action) {
                             ProfileViewAction.AppVersionClick -> {

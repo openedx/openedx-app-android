@@ -71,8 +71,8 @@ import org.openedx.core.extension.tagId
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -97,6 +97,7 @@ internal fun ProfileView(
     refreshing: Boolean,
     appUpgradeEvent: AppUpgradeEvent?,
     onAction: (ProfileViewAction) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
@@ -170,21 +171,20 @@ internal fun ProfileView(
                     style = MaterialTheme.appTypography.titleMedium
                 )
 
-                IconText(
+                IconButton(
                     modifier = Modifier
-                        .testTag("it_edit_account")
-                        .height(48.dp)
-                        .padding(end = 24.dp),
-                    text = stringResource(org.openedx.profile.R.string.profile_edit),
-                    painter = painterResource(id = R.drawable.core_ic_edit),
-                    textStyle = MaterialTheme.appTypography.labelLarge,
-                    color = MaterialTheme.appColors.primary,
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 12.dp),
                     onClick = {
-                        if (uiState is ProfileUIState.Data) {
-                            onAction(ProfileViewAction.EditAccountClick)
-                        }
+                        onSettingsClick()
                     }
-                )
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.core_ic_settings),
+                        tint = MaterialTheme.appColors.primary,
+                        contentDescription = stringResource(id = R.string.core_accessibility_settings)
+                    )
+                }
             }
             Surface(
                 color = MaterialTheme.appColors.background
@@ -221,6 +221,18 @@ internal fun ProfileView(
                                     Spacer(modifier = Modifier.height(36.dp))
 
                                     ProfileInfoSection(uiState.account)
+
+
+                                    OpenEdXOutlinedButton(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        text = stringResource(id = org.openedx.profile.R.string.profile_edit_profile),
+                                        onClick = {
+                                            onAction(ProfileViewAction.EditAccountClick)
+                                        },
+                                        borderColor = MaterialTheme.appColors.buttonBackground,
+                                        textColor = MaterialTheme.appColors.textAccent
+                                    )
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -757,6 +769,7 @@ private fun ProfileScreenPreview() {
             uiMessage = null,
             refreshing = false,
             onAction = {},
+            onSettingsClick = {},
             appUpgradeEvent = null,
         )
     }
@@ -774,6 +787,7 @@ private fun ProfileScreenTabletPreview() {
             uiMessage = null,
             refreshing = false,
             onAction = {},
+            onSettingsClick = {},
             appUpgradeEvent = null,
         )
     }
