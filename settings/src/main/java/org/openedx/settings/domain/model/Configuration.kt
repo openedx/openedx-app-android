@@ -1,4 +1,4 @@
-package org.openedx.profile.domain.model
+package org.openedx.settings.domain.model
 
 import org.openedx.core.domain.model.AgreementUrls
 

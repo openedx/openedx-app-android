@@ -56,8 +56,10 @@ import org.openedx.profile.presentation.anothers_account.AnothersProfileViewMode
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
-import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
-import org.openedx.settings.presentation.whatsnew.SettingsViewModel
+import org.openedx.settings.data.repository.SettingsRepository
+import org.openedx.settings.domain.interactor.SettingsInteractor
+import org.openedx.settings.presentation.settings.SettingsViewModel
+import org.openedx.settings.presentation.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
@@ -371,5 +373,7 @@ val screenModule = module {
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    viewModel { SettingsViewModel() }
+    factory { SettingsRepository(get(), get(), get(), get()) }
+    factory { SettingsInteractor(get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }

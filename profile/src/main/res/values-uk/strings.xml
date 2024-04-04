@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="profile_contact_support">Зв\'язатися з підтримкою</string>
     <string name="profile_prof_info">Інформація про профіль</string>
-    <string name="profile_support_info">Інформація про підтримку</string>
-    <string name="profile_logout">Вийти</string>
     <string name="profile_bio">Біо: %1$s</string>
     <string name="profile_year_of_birth">Рік народження: %1$s</string>
-    <string name="profile_logout_dialog_body">Ви впевнені, що хочете вийти з профілю?</string>
     <string name="profile_full_profile">Повний профіль</string>
     <string name="profile_limited_profile">Обмежений профіль</string>
     <string name="profile_edit_profile">Редагувати профіль</string>
@@ -25,9 +21,6 @@
     <string name="profile_select_from_gallery">Вибрати з галереї</string>
     <string name="profile_remove_photo">Видалити фото</string>
     <string name="profile_settings">Налаштування</string>
-    <string name="profile_video_settings">Налаштування відео</string>
-    <string name="profile_wifi_only_download">Завантаження тільки через Wi-Fi</string>
-    <string name="profile_only_download_when_wifi_turned_on">Завантажуйте вміст лише тоді, коли ввімкнено wi-fi</string>
     <string name="profile_delete_account">Видалити акаунт</string>
     <string name="profile_you_want_to">Ви впевнені, що бажаєте</string>
     <string name="profile_delete_your_account">видалити свій акаунт?</string>

@@ -1,7 +1,6 @@
 package org.openedx.profile.presentation.profile
 
 import android.content.Context
-import androidx.compose.ui.text.intl.Locale
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -27,7 +26,6 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.profile.domain.model.Configuration
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
@@ -72,14 +70,6 @@ class ProfileViewModel(
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
-    private val configuration
-        get() = Configuration(
-            agreementUrls = config.getAgreement(Locale.current.language),
-            faqUrl = config.getFaqUrl(),
-            supportEmail = config.getFeedbackEmailAddress(),
-            versionName = appData.versionName,
-        )
-
     init {
         getAccount()
         collectAppUpgradeEvent()
@@ -107,14 +97,12 @@ class ProfileViewModel(
                     _uiState.value = ProfileUIState.Loading
                 } else {
                     _uiState.value = ProfileUIState.Data(
-                        account = cachedAccount,
-                        configuration = configuration,
+                        account = cachedAccount
                     )
                 }
                 val account = interactor.getAccount()
                 _uiState.value = ProfileUIState.Data(
-                    account = account,
-                    configuration = configuration,
+                    account = account
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -182,49 +170,8 @@ class ProfileViewModel(
         logProfileEvent(ProfileAnalyticsEvent.EDIT_CLICKED)
     }
 
-    fun profileVideoSettingsClicked(fragmentManager: FragmentManager) {
-        router.navigateToVideoSettings(fragmentManager)
-        logProfileEvent(ProfileAnalyticsEvent.VIDEO_SETTING_CLICKED)
-    }
-
-    fun privacyPolicyClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
-            fm = fragmentManager,
-            title = resourceManager.getString(R.string.core_privacy_policy),
-            url = configuration.agreementUrls.privacyPolicyUrl,
-        )
-        logProfileEvent(ProfileAnalyticsEvent.PRIVACY_POLICY_CLICKED)
-    }
-
-    fun cookiePolicyClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
-            fm = fragmentManager,
-            title = resourceManager.getString(R.string.core_cookie_policy),
-            url = configuration.agreementUrls.cookiePolicyUrl,
-        )
-        logProfileEvent(ProfileAnalyticsEvent.COOKIE_POLICY_CLICKED)
-    }
-
-    fun dataSellClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
-            fm = fragmentManager,
-            title = resourceManager.getString(R.string.core_data_sell),
-            url = configuration.agreementUrls.dataSellConsentUrl,
-        )
-        logProfileEvent(ProfileAnalyticsEvent.DATA_SELL_CLICKED)
-    }
-
     fun faqClicked() {
         logProfileEvent(ProfileAnalyticsEvent.FAQ_CLICKED)
-    }
-
-    fun termsOfUseClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
-            fm = fragmentManager,
-            title = resourceManager.getString(R.string.core_terms_of_use),
-            url = configuration.agreementUrls.tosUrl,
-        )
-        logProfileEvent(ProfileAnalyticsEvent.TERMS_OF_USE_CLICKED)
     }
 
     fun emailSupportClicked(context: Context) {
@@ -238,13 +185,6 @@ class ProfileViewModel(
 
     fun appVersionClickedEvent(context: Context) {
         AppUpdateState.openPlayMarket(context)
-    }
-
-    fun restartApp(fragmentManager: FragmentManager) {
-        router.restartApp(
-            fragmentManager,
-            isLogistrationEnabled
-        )
     }
 
     private fun logProfileEvent(

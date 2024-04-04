@@ -47,13 +47,14 @@ import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
-import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
-import org.openedx.settings.presentation.whatsnew.SettingsFragment
+import org.openedx.settings.SettingsRouter
+import org.openedx.settings.presentation.settings.SettingsFragment
+import org.openedx.settings.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
+    ProfileRouter, AppUpgradeRouter, WhatsNewRouter, SettingsRouter {
 
     //region AuthRouter
     override fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?) {
@@ -329,34 +330,8 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, EditProfileFragment.newInstance(account))
     }
 
-    override fun navigateToVideoSettings(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, VideoSettingsFragment())
-    }
-
-    override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
-        replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
-    }
-
     override fun navigateToDeleteAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, DeleteProfileFragment())
-    }
-
-    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
-        replaceFragmentWithBackStack(
-            fm,
-            WebContentFragment.newInstance(title = title, url = url)
-        )
-    }
-
-    override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
-        fm.apply {
-            clearBackStack(this)
-            if (isLogistrationEnabled) {
-                replaceFragment(fm, LogistrationFragment())
-            } else {
-                replaceFragment(fm, SignInFragment())
-            }
-        }
     }
 
     override fun navigateToSettings(fm: FragmentManager) {
@@ -392,4 +367,33 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             .replace(R.id.container, ProfileFragment())
             .commit()
     }
+    //endregion
+
+    //Settings
+    override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
+        fm.apply {
+            clearBackStack(this)
+            if (isLogistrationEnabled) {
+                replaceFragment(fm, LogistrationFragment())
+            } else {
+                replaceFragment(fm, SignInFragment())
+            }
+        }
+    }
+
+    override fun navigateToVideoSettings(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, VideoSettingsFragment())
+    }
+
+    override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
+        replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
+    }
+
+    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
+        replaceFragmentWithBackStack(
+            fm,
+            WebContentFragment.newInstance(title = title, url = url)
+        )
+    }
+    //endregion
 }

@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.settings.video
+package org.openedx.settings.presentation.video
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.ui.Toolbar
@@ -60,13 +59,11 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.profile.R
-import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.settings.R
 
 class VideoSettingsFragment : Fragment() {
 
     private val viewModel by viewModel<VideoSettingsViewModel>()
-    private val router by inject<ProfileRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -166,7 +163,7 @@ private fun VideoSettingsScreen(
             ) {
                 Toolbar(
                     modifier = topBarWidth,
-                    label = stringResource(id = org.openedx.profile.R.string.profile_video_settings),
+                    label = stringResource(id = R.string.settings_video_settings),
                     canShowBackBtn = true,
                     onBackClick = onBackClick
                 )
@@ -190,14 +187,14 @@ private fun VideoSettingsScreen(
                         Column(Modifier.weight(1f)) {
                             Text(
                                 modifier = Modifier.testTag("txt_wifi_only_label"),
-                                text = stringResource(id = R.string.profile_wifi_only_download),
+                                text = stringResource(id = R.string.settings_wifi_only_download),
                                 color = MaterialTheme.appColors.textPrimary,
                                 style = MaterialTheme.appTypography.titleMedium
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
                                 modifier = Modifier.testTag("txt_wifi_only_description"),
-                                text = stringResource(id = R.string.profile_only_download_when_wifi_turned_on),
+                                text = stringResource(id = R.string.settings_only_download_when_wifi_turned_on),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.labelMedium
                             )

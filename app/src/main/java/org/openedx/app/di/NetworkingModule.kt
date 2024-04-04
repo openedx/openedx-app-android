@@ -14,6 +14,7 @@ import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.profile.data.api.ProfileApi
+import org.openedx.settings.data.api.SettingsApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -50,6 +51,7 @@ val networkingModule = module {
     single { provideApi<CookiesApi>(get()) }
     single { provideApi<CourseApi>(get()) }
     single { provideApi<ProfileApi>(get()) }
+    single { provideApi<SettingsApi>(get()) }
     single { provideApi<DiscussionApi>(get()) }
 }
 
