@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,6 +54,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
@@ -118,7 +118,7 @@ internal fun CollapsingLayout(
         val newOffset =
             (oldOffset + delta).coerceIn(-expandedTopHeight - backgroundImageHeight + collapsedTopHeight, 0f)
         coroutineScope.launch {
-            offset.animateTo(newOffset, tween(0))
+            offset.snapTo(newOffset)
         }
         return Offset(0f, newOffset - oldOffset)
     }
@@ -160,25 +160,26 @@ internal fun CollapsingLayout(
                             val yEnd = change.position.y
                             val yDelta = yEnd - yStart
                             val scrollDown = yDelta > 0
-                            val collapsedOffset = -expandedTopHeight - backgroundImageHeight + collapsedTopHeight
+                            val collapsedOffset =
+                                -expandedTopHeight - backgroundImageHeight + collapsedTopHeight
                             val expandedOffset = 0f
-                            if (scrollDown) {
-                                if (offset.value > -backgroundImageHeight * 0.85) {
-                                    launch {
-                                        offset.animateTo(expandedOffset)
-                                    }
-                                } else {
-                                    launch {
-                                        offset.animateTo(collapsedOffset)
-                                    }
+
+                            launch {
+                                // Handle Fling, offset.animateTo does not work if the value changes faster than 10ms
+                                if (change.uptimeMillis - change.previousUptimeMillis <= 15) {
+                                    delay(10)
                                 }
-                            } else {
-                                if (offset.value < -backgroundImageHeight * 0.15) {
-                                    launch {
+
+                                if (scrollDown) {
+                                    if (offset.value > -backgroundImageHeight * 0.85) {
+                                        offset.animateTo(expandedOffset)
+                                    } else {
                                         offset.animateTo(collapsedOffset)
                                     }
                                 } else {
-                                    launch {
+                                    if (offset.value < -backgroundImageHeight * 0.15) {
+                                        offset.animateTo(collapsedOffset)
+                                    } else {
                                         offset.animateTo(expandedOffset)
                                     }
                                 }
