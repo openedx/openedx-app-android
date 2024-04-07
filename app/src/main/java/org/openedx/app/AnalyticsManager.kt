@@ -9,7 +9,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.course.presentation.CourseAnalytics
-import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
+import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.profile.presentation.ProfileAnalytics

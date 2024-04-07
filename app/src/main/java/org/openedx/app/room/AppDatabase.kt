@@ -3,7 +3,6 @@ package org.openedx.app.room
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import org.openedx.core.data.model.room.CourseEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
 import org.openedx.core.module.db.DownloadDao
@@ -12,6 +11,7 @@ import org.openedx.course.data.storage.CourseConverter
 import org.openedx.course.data.storage.CourseDao
 import org.openedx.dashboard.data.DashboardDao
 import org.openedx.discovery.data.converter.DiscoveryConverter
+import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
 
 const val DATABASE_VERSION = 1
