@@ -12,7 +12,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -34,12 +33,9 @@ import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.manage_account.ManageAccountUIState
-import org.openedx.profile.presentation.manage_account.ManageAccountViewModel
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 import java.net.UnknownHostException
@@ -60,7 +56,6 @@ class ProfileViewModelTest {
     private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<ProfileAnalytics>()
     private val router = mockk<ProfileRouter>()
-    private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
 
     private val appData = AppData(
         versionName = "1.0.0",
@@ -93,7 +88,6 @@ class ProfileViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { appUpgradeNotifier.notifier } returns emptyFlow()
         every { config.isPreLoginExperienceEnabled() } returns false
         every { config.getFeedbackEmailAddress() } returns ""
         every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
@@ -107,8 +101,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `getAccount no internetConnection and cache is null`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -117,25 +110,22 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.getCachedAccount() } returns null
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(viewModel.uiState.value is ManageAccountUIState.Loading)
+        assert(viewModel.uiState.value is ProfileUIState.Loading)
         assertEquals(noInternet, message?.message)
     }
 
     @Test
     fun `getAccount no internetConnection and cache is not null`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -144,25 +134,22 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.getCachedAccount() } returns account
         coEvery { interactor.getAccount() } throws UnknownHostException()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(viewModel.uiState.value is ManageAccountUIState.Data)
+        assert(viewModel.uiState.value is ProfileUIState.Data)
         assertEquals(noInternet, message?.message)
     }
 
     @Test
     fun `getAccount unknown exception`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -171,25 +158,22 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.getCachedAccount() } returns null
         coEvery { interactor.getAccount() } throws Exception()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(viewModel.uiState.value is ManageAccountUIState.Loading)
+        assert(viewModel.uiState.value is ProfileUIState.Loading)
         assertEquals(somethingWrong, message?.message)
     }
 
     @Test
     fun `getAccount success`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -198,24 +182,21 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.getCachedAccount() } returns null
         coEvery { interactor.getAccount() } returns account
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getAccount() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assert(viewModel.uiState.value is ManageAccountUIState.Data)
+        assert(viewModel.uiState.value is ProfileUIState.Data)
         assert(viewModel.uiMessage.value == null)
     }
 
     @Test
     fun `logout no internet connection`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -224,8 +205,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.logout() } throws UnknownHostException()
         coEvery { workerController.removeModels() } returns Unit
@@ -235,7 +215,6 @@ class ProfileViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.logout() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -244,8 +223,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `logout unknown exception`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -254,8 +232,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.logout() } throws Exception()
         coEvery { workerController.removeModels() } returns Unit
@@ -265,7 +242,6 @@ class ProfileViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.logout() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
         verify(exactly = 1) { cookieManager.clearWebViewCookie() }
         verify { analytics.logEvent(any(), any()) }
 
@@ -276,8 +252,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `logout success`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -286,8 +261,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.getCachedAccount() } returns mockk()
         coEvery { interactor.getAccount() } returns mockk()
@@ -299,7 +273,6 @@ class ProfileViewModelTest {
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.logout() }
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
         verify(exactly = 1) { cookieManager.clearWebViewCookie() }
 
         assert(viewModel.uiMessage.value == null)
@@ -308,8 +281,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `AccountUpdated notifier test`() = runTest {
-        val viewModel = ManageAccountViewModel(
-            appData,
+        val viewModel = ProfileViewModel(
             config,
             interactor,
             resourceManager,
@@ -318,8 +290,7 @@ class ProfileViewModelTest {
             cookieManager,
             workerController,
             analytics,
-            router,
-            appUpgradeNotifier
+            router
         )
         coEvery { interactor.getCachedAccount() } returns null
         every { notifier.notifier } returns flow { emit(AccountUpdated()) }
@@ -331,6 +302,5 @@ class ProfileViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 2) { interactor.getAccount() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
     }
 }

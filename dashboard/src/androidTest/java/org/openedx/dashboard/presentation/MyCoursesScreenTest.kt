@@ -81,6 +81,7 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
+                onSettingsClick = {}
             )
         }
 
@@ -113,6 +114,7 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
+                onSettingsClick = {}
             )
         }
 
@@ -138,6 +140,7 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
+                onSettingsClick = {}
             )
         }
 
