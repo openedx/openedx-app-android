@@ -31,13 +31,17 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AndroidUriHandler
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
@@ -53,6 +58,8 @@ import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.extension.takeIfNotEmpty
+import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
@@ -65,12 +72,14 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.DatesShiftedSnackBar
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
+import java.io.File
 import java.util.Date
 
 fun getUnitBlockIcon(block: Block): Int {
@@ -83,10 +92,118 @@ fun getUnitBlockIcon(block: Block): Int {
 }
 
 @Composable
+fun CourseOutlineScreen(
+    windowSize: WindowSize,
+    courseOutlineViewModel: CourseOutlineViewModel,
+    courseRouter: CourseRouter,
+    fragmentManager: FragmentManager,
+    onReloadClick: () -> Unit,
+    onResetDatesClick: () -> Unit,
+    onViewDates: () -> Unit
+) {
+    val uiState by courseOutlineViewModel.uiState.observeAsState(CourseOutlineUIState.Loading)
+    val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
+    val context = LocalContext.current
+
+    CourseOutlineScreen(
+        windowSize = windowSize,
+        uiState = uiState,
+        isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
+        uiMessage = uiMessage,
+        hasInternetConnection = courseOutlineViewModel.hasInternetConnection,
+        onReloadClick = onReloadClick,
+        onItemClick = { block ->
+            courseOutlineViewModel.sequentialClickedEvent(
+                block.blockId,
+                block.displayName
+            )
+            courseRouter.navigateToCourseSubsections(
+                fm = fragmentManager,
+                courseId = courseOutlineViewModel.courseId,
+                subSectionId = block.id,
+                mode = CourseViewMode.FULL
+            )
+        },
+        onExpandClick = { block ->
+            if (courseOutlineViewModel.switchCourseSections(block.id)) {
+                courseOutlineViewModel.sequentialClickedEvent(
+                    block.blockId,
+                    block.displayName
+                )
+            }
+        },
+        onSubSectionClick = { subSectionBlock ->
+            courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                courseOutlineViewModel.logUnitDetailViewedEvent(
+                    unit.blockId,
+                    unit.displayName
+                )
+                courseRouter.navigateToCourseContainer(
+                    fragmentManager,
+                    courseId = courseOutlineViewModel.courseId,
+                    unitId = unit.id,
+                    mode = CourseViewMode.FULL
+                )
+            }
+        },
+        onResumeClick = { componentId ->
+            courseOutlineViewModel.resumeSectionBlock?.let { subSection ->
+                courseOutlineViewModel.resumeCourseTappedEvent(subSection.id)
+                courseOutlineViewModel.resumeVerticalBlock?.let { unit ->
+                    if (courseOutlineViewModel.isCourseExpandableSectionsEnabled) {
+                        courseRouter.navigateToCourseContainer(
+                            fm = fragmentManager,
+                            courseId = courseOutlineViewModel.courseId,
+                            unitId = unit.id,
+                            componentId = componentId,
+                            mode = CourseViewMode.FULL
+                        )
+                    } else {
+                        courseRouter.navigateToCourseSubsections(
+                            fragmentManager,
+                            courseId = courseOutlineViewModel.courseId,
+                            subSectionId = subSection.id,
+                            mode = CourseViewMode.FULL,
+                            unitId = unit.id,
+                            componentId = componentId
+                        )
+                    }
+                }
+            }
+        },
+        onDownloadClick = {
+            if (courseOutlineViewModel.isBlockDownloading(it.id)) {
+                courseRouter.navigateToDownloadQueue(
+                    fm = fragmentManager,
+                    courseOutlineViewModel.getDownloadableChildren(it.id)
+                        ?: arrayListOf()
+                )
+            } else if (courseOutlineViewModel.isBlockDownloaded(it.id)) {
+                courseOutlineViewModel.removeDownloadModels(it.id)
+            } else {
+                courseOutlineViewModel.saveDownloadModels(
+                    context.externalCacheDir.toString() +
+                            File.separator +
+                            context
+                                .getString(R.string.app_name)
+                                .replace(Regex("\\s"), "_"), it.id
+                )
+            }
+        },
+        onResetDatesClick = onResetDatesClick,
+        onViewDates = onViewDates,
+        onCertificateClick = {
+            courseOutlineViewModel.viewCertificateTappedEvent()
+            it.takeIfNotEmpty()
+                ?.let { url -> AndroidUriHandler(context).openUri(url) }
+        }
+    )
+}
+
+@Composable
 internal fun CourseOutlineScreen(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
-    apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
     uiMessage: UIMessage?,
     hasInternetConnection: Boolean,
@@ -449,7 +566,6 @@ private fun CourseOutlineScreenPreview() {
                     hasEnded = false
                 )
             ),
-            apiHostUrl = "",
             isCourseNestedListEnabled = true,
             uiMessage = null,
             hasInternetConnection = true,
@@ -488,7 +604,6 @@ private fun CourseOutlineScreenTabletPreview() {
                     hasEnded = false
                 )
             ),
-            apiHostUrl = "",
             isCourseNestedListEnabled = true,
             uiMessage = null,
             hasInternetConnection = true,

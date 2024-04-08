@@ -46,7 +46,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -66,6 +68,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
 import org.openedx.core.UIMessage
 import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
@@ -73,6 +76,9 @@ import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotEmptyThenLet
+import org.openedx.core.presentation.CoreAnalyticsScreen
+import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
@@ -87,12 +93,100 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as coreR
+
+@Composable
+fun CourseDatesScreen(
+    windowSize: WindowSize,
+    courseDatesViewModel: CourseDatesViewModel,
+    courseRouter: CourseRouter,
+    fragmentManager: FragmentManager,
+    isFragmentResumed: Boolean,
+    updateCourseStructure: () -> Unit
+) {
+    val uiState by courseDatesViewModel.uiState.observeAsState(DatesUIState.Loading)
+    val uiMessage by courseDatesViewModel.uiMessage.collectAsState(null)
+    val calendarSyncUIState by courseDatesViewModel.calendarSyncUIState.collectAsState()
+    val context = LocalContext.current
+
+    CourseDatesScreen(
+        windowSize = windowSize,
+        uiState = uiState,
+        uiMessage = uiMessage,
+        isSelfPaced = courseDatesViewModel.isSelfPaced,
+        hasInternetConnection = courseDatesViewModel.hasInternetConnection,
+        calendarSyncUIState = calendarSyncUIState,
+        onReloadClick = {
+            courseDatesViewModel.getCourseDates()
+        },
+        onItemClick = { block ->
+            if (block.blockId.isNotEmpty()) {
+                courseDatesViewModel.getVerticalBlock(block.blockId)
+                    ?.let { verticalBlock ->
+                        courseDatesViewModel.logCourseComponentTapped(true, block)
+                        if (courseDatesViewModel.isCourseExpandableSectionsEnabled) {
+                            courseRouter.navigateToCourseContainer(
+                                fm = fragmentManager,
+                                courseId = courseDatesViewModel.courseId,
+                                unitId = verticalBlock.id,
+                                componentId = "",
+                                mode = CourseViewMode.FULL
+                            )
+                        } else {
+                            courseDatesViewModel.getSequentialBlock(verticalBlock.id)
+                                ?.let { sequentialBlock ->
+                                    courseRouter.navigateToCourseSubsections(
+                                        fm = fragmentManager,
+                                        subSectionId = sequentialBlock.id,
+                                        courseId = courseDatesViewModel.courseId,
+                                        unitId = verticalBlock.id,
+                                        mode = CourseViewMode.FULL
+                                    )
+                                }
+                        }
+                    } ?: {
+                    courseDatesViewModel.logCourseComponentTapped(false, block)
+                    ActionDialogFragment.newInstance(
+                        title = context.getString(org.openedx.core.R.string.core_leaving_the_app),
+                        message = context.getString(
+                            org.openedx.core.R.string.core_leaving_the_app_message,
+                            context.getString(org.openedx.core.R.string.platform_name)
+                        ),
+                        url = block.link,
+                        source = CoreAnalyticsScreen.COURSE_DATES.screenName
+                    ).show(
+                        fragmentManager,
+                        ActionDialogFragment::class.simpleName
+                    )
+
+                }
+            }
+        },
+        onPLSBannerViewed = {
+            if (isFragmentResumed) {
+                courseDatesViewModel.logPlsBannerViewed()
+            }
+        },
+        onSyncDates = {
+            courseDatesViewModel.logPlsShiftButtonClicked()
+            courseDatesViewModel.resetCourseDatesBanner {
+                courseDatesViewModel.logPlsShiftDates(it)
+                if (it) {
+                    updateCourseStructure()
+                }
+            }
+        },
+        onCalendarSyncSwitch = { isChecked ->
+            courseDatesViewModel.handleCalendarSyncState(isChecked)
+        },
+    )
+}
 
 @Composable
 internal fun CourseDatesScreen(

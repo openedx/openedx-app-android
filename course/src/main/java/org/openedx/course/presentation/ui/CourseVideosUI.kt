@@ -40,19 +40,23 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
 import org.openedx.core.AppDataConstants
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
@@ -63,6 +67,8 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
+import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
@@ -73,8 +79,109 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
+import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.presentation.videos.CourseVideosUIState
+import java.io.File
 import java.util.Date
+
+@Composable
+fun CourseVideosScreen(
+    windowSize: WindowSize,
+    courseVideoViewModel: CourseVideoViewModel,
+    fragmentManager: FragmentManager,
+    courseRouter: CourseRouter,
+    onReloadClick: () -> Unit
+) {
+    val uiState by courseVideoViewModel.uiState.observeAsState(CourseVideosUIState.Loading)
+    val uiMessage by courseVideoViewModel.uiMessage.collectAsState(null)
+    val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
+    val context = LocalContext.current
+
+    CourseVideosScreen(
+        windowSize = windowSize,
+        uiState = uiState,
+        uiMessage = uiMessage,
+        courseTitle = courseVideoViewModel.courseTitle,
+        isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
+        hasInternetConnection = courseVideoViewModel.hasInternetConnection,
+        videoSettings = videoSettings,
+        onReloadClick = onReloadClick,
+        onItemClick = { block ->
+            courseRouter.navigateToCourseSubsections(
+                fm = fragmentManager,
+                courseId = courseVideoViewModel.courseId,
+                subSectionId = block.id,
+                mode = CourseViewMode.VIDEOS
+            )
+        },
+        onExpandClick = { block ->
+            courseVideoViewModel.switchCourseSections(block.id)
+        },
+        onSubSectionClick = { subSectionBlock ->
+            courseVideoViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                courseVideoViewModel.sequentialClickedEvent(
+                    unit.blockId,
+                    unit.displayName
+                )
+                courseRouter.navigateToCourseContainer(
+                    fm = fragmentManager,
+                    courseId = courseVideoViewModel.courseId,
+                    unitId = unit.id,
+                    mode = CourseViewMode.VIDEOS
+                )
+            }
+        },
+        onDownloadClick = {
+            if (courseVideoViewModel.isBlockDownloading(it.id)) {
+                courseRouter.navigateToDownloadQueue(
+                    fm = fragmentManager,
+                    courseVideoViewModel.getDownloadableChildren(it.id)
+                        ?: arrayListOf()
+                )
+            } else if (courseVideoViewModel.isBlockDownloaded(it.id)) {
+                courseVideoViewModel.removeDownloadModels(it.id)
+            } else {
+                courseVideoViewModel.saveDownloadModels(
+                    context.externalCacheDir.toString() +
+                            File.separator +
+                            context
+                                .getString(org.openedx.core.R.string.app_name)
+                                .replace(Regex("\\s"), "_"), it.id
+                )
+            }
+        },
+        onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
+            courseVideoViewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
+            if (isAllBlocksDownloadedOrDownloading) {
+                courseVideoViewModel.removeAllDownloadModels()
+            } else {
+                courseVideoViewModel.saveAllDownloadModels(
+                    context.externalCacheDir.toString() +
+                            File.separator +
+                            context
+                                .getString(org.openedx.core.R.string.app_name)
+                                .replace(Regex("\\s"), "_")
+                )
+            }
+        },
+        onDownloadQueueClick = {
+            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
+                courseRouter.navigateToDownloadQueue(fm = fragmentManager)
+            }
+        },
+        onVideoDownloadQualityClick = {
+            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
+                courseVideoViewModel.onChangingVideoQualityWhileDownloading()
+            } else {
+                courseRouter.navigateToVideoQuality(
+                    fragmentManager,
+                    VideoQualityType.Download
+                )
+            }
+        }
+    )
+}
 
 @Composable
 fun CourseVideosScreen(
@@ -82,7 +189,6 @@ fun CourseVideosScreen(
     uiState: CourseVideosUIState,
     uiMessage: UIMessage?,
     courseTitle: String,
-    apiHostUrl: String,
     isCourseNestedListEnabled: Boolean,
     hasInternetConnection: Boolean,
     videoSettings: VideoSettings,
@@ -638,7 +744,6 @@ private fun CourseVideosScreenPreview() {
                 )
             ),
             courseTitle = "",
-            apiHostUrl = "",
             isCourseNestedListEnabled = false,
             onItemClick = { },
             onExpandClick = { },
@@ -666,7 +771,6 @@ private fun CourseVideosScreenEmptyPreview() {
                 "This course does not include any videos."
             ),
             courseTitle = "",
-            apiHostUrl = "",
             isCourseNestedListEnabled = false,
             onItemClick = { },
             onExpandClick = { },
@@ -705,7 +809,6 @@ private fun CourseVideosScreenTabletPreview() {
                 )
             ),
             courseTitle = "",
-            apiHostUrl = "",
             isCourseNestedListEnabled = false,
             onItemClick = { },
             onExpandClick = { },

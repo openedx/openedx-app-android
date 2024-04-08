@@ -138,6 +138,7 @@ class CourseContainerViewModel(
                 _isSelfPaced = courseStructure.isSelfPaced
                 imageProcessor.loadImage(
                     imageUrl = config.getApiHostURL() + courseStructure.media?.image?.large,
+                    defaultImage = CoreR.drawable.core_no_image_course,
                     onComplete = { drawable ->
                         val bitmap = (drawable as BitmapDrawable).bitmap.apply {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {

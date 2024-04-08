@@ -117,7 +117,7 @@ class CourseContainerViewModelTest {
         every { notifier.notifier } returns emptyFlow()
         every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
         every { config.getApiHostURL() } returns "baseUrl"
-        every { imageProcessor.loadImage(any(), any()) } returns Unit
+        every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
         every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
     }
 

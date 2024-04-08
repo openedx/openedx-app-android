@@ -6,19 +6,20 @@ import android.graphics.drawable.Drawable
 import android.renderscript.Allocation
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
+import androidx.annotation.DrawableRes
 import coil.ImageLoader
 import coil.request.ImageRequest
 
 class ImageProcessor(private val context: Context) {
-    fun loadImage(imageUrl: String, onComplete: (result: Drawable) -> Unit) {
+    fun loadImage(imageUrl: String, @DrawableRes defaultImage: Int, onComplete: (result: Drawable) -> Unit) {
         val loader = ImageLoader(context)
         val request = ImageRequest.Builder(context)
             .data(imageUrl)
             .target { result ->
                 onComplete(result)
             }
-            .error(R.drawable.core_no_image_course)
-            .placeholder(R.drawable.core_no_image_course)
+            .error(defaultImage)
+            .placeholder(defaultImage)
             .allowHardware(false)
             .build()
         loader.enqueue(request)

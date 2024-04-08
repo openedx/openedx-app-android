@@ -41,7 +41,7 @@ import org.openedx.course.R
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Tabs(
+fun CourseHomeTabs(
     pagerState: PagerState,
     onPageChange: (Int) -> Unit
 ) {
