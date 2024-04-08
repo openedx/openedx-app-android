@@ -40,9 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -59,9 +57,12 @@ import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.settingsHeaderBackground
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -105,15 +106,16 @@ internal fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .paint(
-                painter = painterResource(id = org.openedx.settings.R.drawable.settings_header_background),
-                contentScale = ContentScale.FillWidth,
-                alignment = Alignment.TopCenter
-            )
+            .displayCutoutForLandscape()
+            .settingsHeaderBackground()
+            .statusBarsInset()
     ) {
-        SettingsTitle(
+        Toolbar(
             modifier = topBarWidth,
-            title = stringResource(id = R.string.core_settings),
+            label = stringResource(id = R.string.core_settings),
+            canShowBackBtn = true,
+            titleTint = Color.White,
+            iconTint = Color.White,
             onBackClick = onBackClick
         )
 
@@ -167,6 +169,14 @@ internal fun SettingsScreen(
                                         .verticalScroll(rememberScrollState()),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+                                    Spacer(Modifier.height(30.dp))
+
+                                    ManageAccountSection(onManageAccountClick =  {
+                                        onAction(SettingsScreenAction.ManageAccount)
+                                    })
+
+                                    Spacer(modifier = Modifier.height(24.dp))
+
                                     SettingsSection(onVideoSettingsClick = {
                                         onAction(SettingsScreenAction.VideoSettingsClick)
                                     })
@@ -216,6 +226,25 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
                 SettingsItem(
                     text = stringResource(id = org.openedx.settings.R.string.settings_video_settings),
                     onClick = onVideoSettingsClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ManageAccountSection(onManageAccountClick: () -> Unit) {
+    Column {
+        Card(
+            modifier = Modifier,
+            shape = MaterialTheme.appShapes.cardShape,
+            elevation = 0.dp,
+            backgroundColor = MaterialTheme.appColors.cardViewBackground
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                SettingsItem(
+                    text = stringResource(id = R.string.core_manage_account),
+                    onClick = onManageAccountClick
                 )
             }
         }

@@ -146,6 +146,8 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
+    titleTint: Color = MaterialTheme.appColors.textPrimary,
+    iconTint: Color = MaterialTheme.appColors.textPrimary,
     onBackClick: () -> Unit = {},
 ) {
     Box(
@@ -154,7 +156,10 @@ fun Toolbar(
             .height(48.dp),
     ) {
         if (canShowBackBtn) {
-            BackBtn(onBackClick = onBackClick)
+            BackBtn(
+                tint = iconTint,
+                onBackClick = onBackClick
+            )
         }
 
         Text(
@@ -164,7 +169,7 @@ fun Toolbar(
                 .align(Alignment.Center)
                 .padding(horizontal = 48.dp),
             text = label,
-            color = MaterialTheme.appColors.textPrimary,
+            color = titleTint,
             style = MaterialTheme.appTypography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

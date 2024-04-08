@@ -56,10 +56,6 @@ class SettingsViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
-
     private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent?>()
     val appUpgradeEvent: LiveData<AppUpgradeEvent?>
         get() = _appUpgradeEvent
@@ -115,7 +111,7 @@ class SettingsViewModel(
         }
     }
 
-    fun profileVideoSettingsClicked(fragmentManager: FragmentManager) {
+    fun videoSettingsClicked(fragmentManager: FragmentManager) {
         router.navigateToVideoSettings(fragmentManager)
         logProfileEvent(SettingsAnalyticsEvent.VIDEO_SETTING_CLICKED)
     }
@@ -171,6 +167,10 @@ class SettingsViewModel(
 
     fun appVersionClickedEvent(context: Context) {
         AppUpdateState.openPlayMarket(context)
+    }
+
+    fun manageAccountClicked(fragmentManager: FragmentManager) {
+        router.navigateToManageAccount(fragmentManager)
     }
 
     fun restartApp(fragmentManager: FragmentManager) {

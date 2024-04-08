@@ -1,11 +1,11 @@
-package org.openedx.profile.presentation.profile
+package org.openedx.profile.presentation.manage_account
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +14,6 @@ import kotlinx.coroutines.withContext
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.system.AppCookieManager
@@ -28,21 +27,19 @@ import org.openedx.profile.system.notifier.AccountDeactivated
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
-class ProfileViewModel(
-    private val config: Config,
+class ManageAccountViewModel(
     private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
-    private val dispatcher: CoroutineDispatcher,
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
     private val router: ProfileRouter
 ) : BaseViewModel() {
 
-    private val _uiState: MutableStateFlow<ProfileUIState> =
-        MutableStateFlow(ProfileUIState.Loading)
-    internal val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<ManageAccountUIState> =
+        MutableStateFlow(ManageAccountUIState.Loading)
+    internal val uiState: StateFlow<ManageAccountUIState> = _uiState.asStateFlow()
 
     private val _successLogout = MutableLiveData<Boolean>()
     val successLogout: LiveData<Boolean>
@@ -55,9 +52,6 @@ class ProfileViewModel(
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
-
-    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
-
     init {
         getAccount()
     }
@@ -76,19 +70,19 @@ class ProfileViewModel(
     }
 
     private fun getAccount() {
-        _uiState.value = ProfileUIState.Loading
+        _uiState.value = ManageAccountUIState.Loading
         viewModelScope.launch {
             try {
                 val cachedAccount = interactor.getCachedAccount()
                 if (cachedAccount == null) {
-                    _uiState.value = ProfileUIState.Loading
+                    _uiState.value = ManageAccountUIState.Loading
                 } else {
-                    _uiState.value = ProfileUIState.Data(
+                    _uiState.value = ManageAccountUIState.Data(
                         account = cachedAccount
                     )
                 }
                 val account = interactor.getAccount()
-                _uiState.value = ProfileUIState.Data(
+                _uiState.value = ManageAccountUIState.Data(
                     account = account
                 )
             } catch (e: Exception) {
@@ -115,7 +109,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             try {
                 workerController.removeModels()
-                withContext(dispatcher) {
+                withContext(Dispatchers.IO) {
                     interactor.logout()
                 }
                 logProfileEvent(
@@ -140,13 +134,17 @@ class ProfileViewModel(
     }
 
     fun profileEditClicked(fragmentManager: FragmentManager) {
-        (uiState.value as? ProfileUIState.Data)?.let { data ->
+        (uiState.value as? ManageAccountUIState.Data)?.let { data ->
             router.navigateToEditProfile(
                 fragmentManager,
                 data.account
             )
         }
         logProfileEvent(ProfileAnalyticsEvent.EDIT_CLICKED)
+    }
+
+    fun profileDeleteAccountClickedEvent() {
+        logProfileEvent(ProfileAnalyticsEvent.DELETE_ACCOUNT_CLICKED)
     }
 
     private fun logProfileEvent(

@@ -46,6 +46,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
+import org.openedx.profile.presentation.manage_account.ManageAccountFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 import org.openedx.settings.SettingsRouter
 import org.openedx.settings.presentation.settings.SettingsFragment
@@ -394,6 +395,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             fm,
             WebContentFragment.newInstance(title = title, url = url)
         )
+    }
+
+    override fun navigateToManageAccount(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, ManageAccountFragment())
     }
     //endregion
 }

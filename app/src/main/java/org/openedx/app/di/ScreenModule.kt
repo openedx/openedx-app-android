@@ -55,6 +55,7 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
+import org.openedx.profile.presentation.manage_account.ManageAccountViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.settings.data.repository.SettingsRepository
 import org.openedx.settings.domain.interactor.SettingsInteractor
@@ -137,7 +138,6 @@ val screenModule = module {
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(
-            appData = get(),
             config = get(),
             interactor = get(),
             resourceManager = get(),
@@ -146,7 +146,6 @@ val screenModule = module {
             cookieManager = get(),
             workerController = get(),
             analytics = get(),
-            appUpgradeNotifier = get(),
             router = get(),
         )
     }
@@ -376,4 +375,5 @@ val screenModule = module {
     factory { SettingsRepository(get(), get(), get(), get()) }
     factory { SettingsInteractor(get()) }
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ManageAccountViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }

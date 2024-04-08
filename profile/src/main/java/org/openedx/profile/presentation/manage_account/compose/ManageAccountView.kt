@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.profile.compose
+package org.openedx.profile.presentation.manage_account.compose
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -36,12 +35,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -52,35 +51,37 @@ import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.profile.ProfileUIState
-import org.openedx.profile.presentation.ui.ProfileInfoSection
+import org.openedx.profile.presentation.manage_account.ManageAccountUIState
 import org.openedx.profile.presentation.ui.ProfileTopic
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
-internal fun ProfileView(
+internal fun ManageAccountView(
     windowSize: WindowSize,
-    uiState: ProfileUIState,
+    uiState: ManageAccountUIState,
     uiMessage: UIMessage?,
     refreshing: Boolean,
-    onAction: (ProfileViewAction) -> Unit,
-    onSettingsClick: () -> Unit
+    onAction: (ManageAccountViewAction) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
-        onRefresh = { onAction(ProfileViewAction.SwipeRefresh) })
+        onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) })
 
     Scaffold(
         modifier = Modifier
@@ -117,41 +118,29 @@ internal fun ProfileView(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .statusBarsInset()
-                .displayCutoutForLandscape(),
+                .displayCutoutForLandscape()
+                .settingsHeaderBackground()
+                .statusBarsInset(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = topBarWidth,
                 contentAlignment = Alignment.CenterEnd
             ) {
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_profile_title")
-                        .fillMaxWidth(),
-                    text = stringResource(id = R.string.core_profile),
-                    color = MaterialTheme.appColors.textPrimary,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
-
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 12.dp),
-                    onClick = {
-                        onSettingsClick()
+                Toolbar(
+                    modifier = topBarWidth,
+                    label = stringResource(id = R.string.core_manage_account),
+                    canShowBackBtn = true,
+                    titleTint = Color.White,
+                    iconTint = Color.White,
+                    onBackClick = {
+                        onAction(ManageAccountViewAction.BackClick)
                     }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.core_ic_settings),
-                        tint = MaterialTheme.appColors.primary,
-                        contentDescription = stringResource(id = R.string.core_accessibility_settings)
-                    )
-                }
+                )
             }
             Surface(
-                color = MaterialTheme.appColors.background
+                color = MaterialTheme.appColors.background,
+                shape = MaterialTheme.appShapes.screenBackgroundShape,
             ) {
                 Box(
                     modifier = Modifier.pullRefresh(pullRefreshState),
@@ -163,7 +152,7 @@ internal fun ProfileView(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         when (uiState) {
-                            is ProfileUIState.Loading -> {
+                            is ManageAccountUIState.Loading -> {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
@@ -172,7 +161,7 @@ internal fun ProfileView(
                                 }
                             }
 
-                            is ProfileUIState.Data -> {
+                            is ManageAccountUIState.Data -> {
                                 Column(
                                     Modifier
                                         .fillMaxHeight()
@@ -183,17 +172,25 @@ internal fun ProfileView(
                                 ) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     ProfileTopic(uiState.account)
-                                    ProfileInfoSection(uiState.account)
                                     OpenEdXOutlinedButton(
                                         modifier = Modifier
                                             .fillMaxWidth(),
                                         text = stringResource(id = org.openedx.profile.R.string.profile_edit_profile),
                                         onClick = {
-                                            onAction(ProfileViewAction.EditAccountClick)
+                                            onAction(ManageAccountViewAction.EditAccountClick)
                                         },
                                         borderColor = MaterialTheme.appColors.buttonBackground,
                                         textColor = MaterialTheme.appColors.textAccent
                                     )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    IconText(
+                                        text = stringResource(id = org.openedx.profile.R.string.profile_delete_profile),
+                                        painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_trash),
+                                        textStyle = MaterialTheme.appTypography.labelLarge,
+                                        color = MaterialTheme.appColors.error,
+                                        onClick = {
+                                            onAction(ManageAccountViewAction.DeleteAccount)
+                                        })
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
@@ -227,7 +224,7 @@ private fun AppVersionItem(
             }
 
             is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                org.openedx.profile.presentation.manage_account.compose.AppVersionItemUpgradeRequired(
+                AppVersionItemUpgradeRequired(
                     versionName = versionName,
                     onClick = onClick
                 )
@@ -414,13 +411,12 @@ fun AppVersionItemUpgradeRequiredPreview() {
 @Composable
 private fun ProfileScreenPreview() {
     OpenEdXTheme {
-        ProfileView(
+        ManageAccountView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = mockUiState,
             uiMessage = null,
             refreshing = false,
-            onAction = {},
-            onSettingsClick = {},
+            onAction = {}
         )
     }
 }
@@ -431,13 +427,12 @@ private fun ProfileScreenPreview() {
 @Composable
 private fun ProfileScreenTabletPreview() {
     OpenEdXTheme {
-        ProfileView(
+        ManageAccountView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = mockUiState,
             uiMessage = null,
             refreshing = false,
-            onAction = {},
-            onSettingsClick = {},
+            onAction = {}
         )
     }
 }
@@ -465,11 +460,13 @@ val mockAccount = Account(
     accountPrivacy = Account.Privacy.ALL_USERS
 )
 
-private val mockUiState = ProfileUIState.Data(
-    account = org.openedx.profile.presentation.manage_account.compose.mockAccount
+private val mockUiState = ManageAccountUIState.Data(
+    account = mockAccount
 )
 
-internal interface ProfileViewAction {
-    object EditAccountClick : ProfileViewAction
-    object SwipeRefresh : ProfileViewAction
+internal interface ManageAccountViewAction {
+    object EditAccountClick : ManageAccountViewAction
+    object SwipeRefresh : ManageAccountViewAction
+    object DeleteAccount : ManageAccountViewAction
+    object BackClick : ManageAccountViewAction
 }

@@ -14,7 +14,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -34,6 +38,8 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.profile.presentation.manage_account.ManageAccountUIState
+import org.openedx.profile.presentation.manage_account.ManageAccountViewModel
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 import java.net.UnknownHostException
@@ -101,7 +107,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `getAccount no internetConnection and cache is null`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -122,13 +128,13 @@ class ProfileViewModelTest {
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(viewModel.uiState.value is ProfileUIState.Loading)
+        assert(viewModel.uiState.value is ManageAccountUIState.Loading)
         assertEquals(noInternet, message?.message)
     }
 
     @Test
     fun `getAccount no internetConnection and cache is not null`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -149,13 +155,13 @@ class ProfileViewModelTest {
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(viewModel.uiState.value is ProfileUIState.Data)
+        assert(viewModel.uiState.value is ManageAccountUIState.Data)
         assertEquals(noInternet, message?.message)
     }
 
     @Test
     fun `getAccount unknown exception`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -176,13 +182,13 @@ class ProfileViewModelTest {
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assert(viewModel.uiState.value is ProfileUIState.Loading)
+        assert(viewModel.uiState.value is ManageAccountUIState.Loading)
         assertEquals(somethingWrong, message?.message)
     }
 
     @Test
     fun `getAccount success`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -202,13 +208,13 @@ class ProfileViewModelTest {
         coVerify(exactly = 1) { interactor.getAccount() }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
-        assert(viewModel.uiState.value is ProfileUIState.Data)
+        assert(viewModel.uiState.value is ManageAccountUIState.Data)
         assert(viewModel.uiMessage.value == null)
     }
 
     @Test
     fun `logout no internet connection`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -238,7 +244,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `logout unknown exception`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -270,7 +276,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `logout success`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,
@@ -302,7 +308,7 @@ class ProfileViewModelTest {
 
     @Test
     fun `AccountUpdated notifier test`() = runTest {
-        val viewModel = ProfileViewModel(
+        val viewModel = ManageAccountViewModel(
             appData,
             config,
             interactor,

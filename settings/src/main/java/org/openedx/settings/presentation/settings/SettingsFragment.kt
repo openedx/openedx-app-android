@@ -51,19 +51,19 @@ class SettingsFragment : Fragment() {
 
                             SettingsScreenAction.PrivacyPolicyClick -> {
                                 viewModel.privacyPolicyClicked(
-                                    requireParentFragment().parentFragmentManager
+                                    requireActivity().supportFragmentManager
                                 )
                             }
 
                             SettingsScreenAction.CookiePolicyClick -> {
                                 viewModel.cookiePolicyClicked(
-                                    requireParentFragment().parentFragmentManager
+                                    requireActivity().supportFragmentManager
                                 )
                             }
 
                             SettingsScreenAction.DataSellClick -> {
                                 viewModel.dataSellClicked(
-                                    requireParentFragment().parentFragmentManager
+                                    requireActivity().supportFragmentManager
                                 )
                             }
 
@@ -75,13 +75,19 @@ class SettingsFragment : Fragment() {
 
                             SettingsScreenAction.TermsClick -> {
                                 viewModel.termsOfUseClicked(
-                                    requireParentFragment().parentFragmentManager
+                                    requireActivity().supportFragmentManager
                                 )
                             }
 
                             SettingsScreenAction.VideoSettingsClick -> {
-                                viewModel.profileVideoSettingsClicked(
-                                    requireParentFragment().parentFragmentManager
+                                viewModel.videoSettingsClicked(
+                                    requireActivity().supportFragmentManager
+                                )
+                            }
+
+                            SettingsScreenAction.ManageAccount -> {
+                                viewModel.manageAccountClicked(
+                                    requireActivity().supportFragmentManager
                                 )
                             }
                         }
@@ -109,5 +115,6 @@ internal interface SettingsScreenAction {
     object TermsClick : SettingsScreenAction
     object SupportClick : SettingsScreenAction
     object VideoSettingsClick : SettingsScreenAction
+    object ManageAccount : SettingsScreenAction
 }
 

@@ -30,7 +30,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.profile.compose.mockAccount
+import org.openedx.profile.presentation.manage_account.compose.mockAccount
 
 @Composable
 fun ProfileTopic(account: Account) {

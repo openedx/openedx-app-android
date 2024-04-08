@@ -8,4 +8,5 @@ interface SettingsRouter {
     fun navigateToVideoSettings(fm: FragmentManager)
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
+    fun navigateToManageAccount(fm: FragmentManager)
 }

@@ -5,6 +5,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
@@ -54,9 +57,11 @@ import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.settings.R
@@ -157,19 +162,25 @@ private fun VideoSettingsScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .statusBarsInset()
-                    .displayCutoutForLandscape(),
+                    .displayCutoutForLandscape()
+                    .settingsHeaderBackground()
+                    .statusBarsInset(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Toolbar(
                     modifier = topBarWidth,
                     label = stringResource(id = R.string.settings_video_settings),
                     canShowBackBtn = true,
+                    titleTint = Color.White,
+                    iconTint = Color.White,
                     onBackClick = onBackClick
                 )
 
                 Column(
-                    modifier = Modifier.then(contentWidth),
+                    modifier = Modifier
+                        .clip(MaterialTheme.appShapes.screenBackgroundShape)
+                        .background(MaterialTheme.appColors.background)
+                        .then(contentWidth),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
@@ -177,6 +188,7 @@ private fun VideoSettingsScreen(
                             .testTag("btn_wifi_only")
                             .fillMaxWidth()
                             .height(92.dp)
+                            .padding(top = 8.dp)
                             .noRippleClickable {
                                 wifiDownloadOnly = !wifiDownloadOnly
                                 wifiDownloadChanged(wifiDownloadOnly)

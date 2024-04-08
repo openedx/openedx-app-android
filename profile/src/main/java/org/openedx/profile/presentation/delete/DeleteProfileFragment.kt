@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
@@ -65,9 +68,11 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.presentation.ProfileRouter
@@ -193,19 +198,24 @@ fun DeleteProfileScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .statusBarsInset()
-                    .displayCutoutForLandscape(),
+                    .displayCutoutForLandscape()
+                    .settingsHeaderBackground()
+                    .statusBarsInset(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Toolbar(
                     modifier = topBarWidth,
                     label = stringResource(id = profileR.string.profile_delete_account),
+                    titleTint = Color.White,
+                    iconTint = Color.White,
                     canShowBackBtn = true,
                     onBackClick = onBackClick
                 )
                 Column(
                     Modifier
                         .fillMaxHeight()
+                        .clip(MaterialTheme.appShapes.screenBackgroundShape)
+                        .background(MaterialTheme.appColors.background)
                         .then(contentWidth)
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally
