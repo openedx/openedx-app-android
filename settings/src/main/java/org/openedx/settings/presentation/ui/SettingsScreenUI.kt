@@ -106,8 +106,8 @@ internal fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .displayCutoutForLandscape()
             .settingsHeaderBackground()
+            .displayCutoutForLandscape()
             .statusBarsInset()
     ) {
         Toolbar(
@@ -132,14 +132,11 @@ internal fun SettingsScreen(
         }
 
         Column(
-            modifier = Modifier
-                .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .displayCutoutForLandscape(),
+                    .fillMaxSize(),
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
                 color = MaterialTheme.appColors.background
             ) {

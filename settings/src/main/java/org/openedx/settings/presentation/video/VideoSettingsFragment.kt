@@ -162,8 +162,8 @@ private fun VideoSettingsScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .displayCutoutForLandscape()
                     .settingsHeaderBackground()
+                    .displayCutoutForLandscape()
                     .statusBarsInset(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -179,6 +179,7 @@ private fun VideoSettingsScreen(
                 Column(
                     modifier = Modifier
                         .clip(MaterialTheme.appShapes.screenBackgroundShape)
+                        .fillMaxSize()
                         .background(MaterialTheme.appColors.background)
                         .then(contentWidth),
                     horizontalAlignment = Alignment.CenterHorizontally

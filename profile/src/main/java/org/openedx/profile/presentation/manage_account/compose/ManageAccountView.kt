@@ -1,29 +1,23 @@
 package org.openedx.profile.presentation.manage_account.compose
 
 import android.content.res.Configuration
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -36,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -48,8 +41,6 @@ import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
-import org.openedx.core.presentation.global.AppData
-import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -118,8 +109,8 @@ internal fun ManageAccountView(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .displayCutoutForLandscape()
                 .settingsHeaderBackground()
+                .displayCutoutForLandscape()
                 .statusBarsInset(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -148,7 +139,8 @@ internal fun ManageAccountView(
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .displayCutoutForLandscape(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         when (uiState) {
@@ -207,209 +199,12 @@ internal fun ManageAccountView(
     }
 }
 
-@Composable
-private fun AppVersionItem(
-    versionName: String,
-    appUpgradeEvent: AppUpgradeEvent?,
-    onClick: () -> Unit
-) {
-    Box(modifier = Modifier.padding(20.dp)) {
-        when (appUpgradeEvent) {
-            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                AppVersionItemUpgradeRecommended(
-                    versionName = versionName,
-                    appUpgradeEvent = appUpgradeEvent,
-                    onClick = onClick
-                )
-            }
-
-            is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                AppVersionItemUpgradeRequired(
-                    versionName = versionName,
-                    onClick = onClick
-                )
-            }
-
-            else -> {
-                AppVersionItemAppToDate(
-                    versionName = versionName
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AppVersionItemAppToDate(versionName: String) {
-    Column(
-        Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            modifier = Modifier.testTag("txt_app_version_code"),
-            text = stringResource(id = R.string.core_version, versionName),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = MaterialTheme.appColors.textPrimary
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                modifier = Modifier.size(
-                    (MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp
-                ),
-                painter = painterResource(id = R.drawable.core_ic_check),
-                contentDescription = null,
-                tint = MaterialTheme.appColors.accessGreen
-            )
-            Text(
-                modifier = Modifier.testTag("txt_up_to_date"),
-                text = stringResource(id = R.string.core_up_to_date),
-                color = MaterialTheme.appColors.textSecondary,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        }
-    }
-}
-
-@Composable
-private fun AppVersionItemUpgradeRecommended(
-    versionName: String,
-    appUpgradeEvent: AppUpgradeEvent.UpgradeRecommendedEvent,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .testTag("btn_upgrade_recommended")
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                modifier = Modifier.testTag("txt_app_version_code"),
-                text = stringResource(id = R.string.core_version, versionName),
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.textPrimary
-            )
-            Text(
-                modifier = Modifier.testTag("txt_upgrade_recommended"),
-                text = stringResource(
-                    id = R.string.core_tap_to_update_to_version,
-                    appUpgradeEvent.newVersionName
-                ),
-                color = MaterialTheme.appColors.textAccent,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        }
-        Icon(
-            modifier = Modifier.size(28.dp),
-            painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
-            tint = MaterialTheme.appColors.primary,
-            contentDescription = null
-        )
-    }
-}
-
-@Composable
-fun AppVersionItemUpgradeRequired(
-    versionName: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .testTag("btn_upgrade_required")
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size((MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
-                    painter = painterResource(id = R.drawable.core_ic_warning),
-                    contentDescription = null
-                )
-                Text(
-                    modifier = Modifier.testTag("txt_app_version_code"),
-                    text = stringResource(id = R.string.core_version, versionName),
-                    style = MaterialTheme.appTypography.titleMedium,
-                    color = MaterialTheme.appColors.textPrimary
-                )
-            }
-            Text(
-                modifier = Modifier.testTag("txt_upgrade_required"),
-                text = stringResource(id = R.string.core_tap_to_install_required_app_update),
-                color = MaterialTheme.appColors.textAccent,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        }
-        Icon(
-            modifier = Modifier.size(28.dp),
-            painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
-            tint = MaterialTheme.appColors.primary,
-            contentDescription = null
-        )
-    }
-}
-
-@Preview
-@Composable
-fun AppVersionItemAppToDatePreview() {
-    OpenEdXTheme {
-        AppVersionItem(
-            versionName = mockAppData.versionName,
-            appUpgradeEvent = null,
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-fun AppVersionItemUpgradeRecommendedPreview() {
-    OpenEdXTheme {
-        AppVersionItem(
-            versionName = mockAppData.versionName,
-            appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-fun AppVersionItemUpgradeRequiredPreview() {
-    OpenEdXTheme {
-        AppVersionItem(
-            versionName = mockAppData.versionName,
-            appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
-            onClick = {}
-        )
-    }
-}
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun ProfileScreenPreview() {
+private fun ManageAccountViewPreview() {
     OpenEdXTheme {
         ManageAccountView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
@@ -425,7 +220,7 @@ private fun ProfileScreenPreview() {
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun ProfileScreenTabletPreview() {
+private fun ManageAccountViewTabletPreview() {
     OpenEdXTheme {
         ManageAccountView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
@@ -436,10 +231,6 @@ private fun ProfileScreenTabletPreview() {
         )
     }
 }
-
-private val mockAppData = AppData(
-    versionName = "1.0.0",
-)
 
 val mockAccount = Account(
     username = "thom84",

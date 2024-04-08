@@ -60,7 +60,7 @@ class SettingsViewModel(
     val appUpgradeEvent: LiveData<AppUpgradeEvent?>
         get() = _appUpgradeEvent
 
-    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
+    private val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
     private val configuration
         get() = Configuration(

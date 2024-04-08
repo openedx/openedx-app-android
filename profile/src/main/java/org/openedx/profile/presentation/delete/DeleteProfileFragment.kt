@@ -198,8 +198,8 @@ fun DeleteProfileScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .displayCutoutForLandscape()
                     .settingsHeaderBackground()
+                    .displayCutoutForLandscape()
                     .statusBarsInset(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
