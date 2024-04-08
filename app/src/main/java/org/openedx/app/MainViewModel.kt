@@ -12,12 +12,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
-import org.openedx.dashboard.notifier.DashboardEvent
-import org.openedx.dashboard.notifier.DashboardNotifier
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.NavigationToDiscovery
 
 class MainViewModel(
     private val config: Config,
-    private val notifier: DashboardNotifier,
+    private val notifier: DiscoveryNotifier,
     private val analytics: AppAnalytics,
 ) : BaseViewModel() {
 
@@ -36,7 +36,7 @@ class MainViewModel(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         notifier.notifier.onEach {
-            if (it is DashboardEvent.NavigationToDiscovery) {
+            if (it is NavigationToDiscovery) {
                 _navigateToDiscovery.emit(true)
             }
         }.distinctUntilChanged().launchIn(viewModelScope)

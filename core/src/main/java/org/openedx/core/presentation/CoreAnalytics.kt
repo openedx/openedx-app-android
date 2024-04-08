@@ -56,8 +56,5 @@ enum class CoreAnalyticsKey(val key: String) {
 }
 
 enum class CoreAnalyticsScreen(val screenName: String) {
-    DISCOVERY("Discovery"),
-    PROGRAM("Program"),
-    COURSE_INFO("Course Info"),
     COURSE_DATES("Course Dates"),
 }

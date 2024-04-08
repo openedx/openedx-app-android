@@ -18,9 +18,7 @@ import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
-import org.openedx.course.presentation.detail.CourseDetailsViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
-import org.openedx.course.presentation.info.CourseInfoViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
@@ -33,12 +31,14 @@ import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.dashboard.DashboardViewModel
-import org.openedx.dashboard.presentation.program.ProgramViewModel
+import org.openedx.dashboard.presentation.DashboardViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
 import org.openedx.discovery.presentation.WebViewDiscoveryViewModel
+import org.openedx.discovery.presentation.detail.CourseDetailsViewModel
+import org.openedx.discovery.presentation.info.CourseInfoViewModel
+import org.openedx.discovery.presentation.program.ProgramViewModel
 import org.openedx.discovery.presentation.search.CourseSearchViewModel
 import org.openedx.discussion.data.repository.DiscussionRepository
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
@@ -114,9 +114,9 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory { DiscoveryRepository(get(), get()) }
+    factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
     viewModel { NativeDiscoveryViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { (querySearch: String) ->

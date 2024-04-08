@@ -19,8 +19,6 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
-import org.openedx.dashboard.presentation.dashboard.DashboardUIState
-import org.openedx.dashboard.presentation.dashboard.MyCoursesScreen
 import java.util.Date
 
 class MyCoursesScreenTest {

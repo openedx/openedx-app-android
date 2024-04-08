@@ -41,22 +41,6 @@ interface CourseAnalytics {
 }
 
 enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
-    COURSE_ENROLL_CLICKED(
-        "Discovery:Course Enroll Clicked",
-        "edx.bi.app.course.enroll.clicked"
-    ),
-    COURSE_ENROLL_SUCCESS(
-        "Discovery:Course Enroll Success",
-        "edx.bi.app.course.enroll.success"
-    ),
-    COURSE_INFO(
-        "Discovery:Course Info",
-        "edx.bi.app.discovery.course_info"
-    ),
-    PROGRAM_INFO(
-        "Discovery:Program Info",
-        "edx.bi.app.discovery.program_info"
-    ),
     DASHBOARD(
         "Course:Dashboard",
         "edx.bi.app.course.dashboard"
@@ -167,7 +151,6 @@ enum class CourseAnalyticsKey(val key: String) {
     NAME("name"),
     COURSE_ID("course_id"),
     COURSE_NAME("course_name"),
-    CONVERSION("conversion"),
     OPEN_IN_BROWSER("open_in_browser_url"),
     COMPONENT("component"),
     VIDEO_PLAYER("video_player"),
