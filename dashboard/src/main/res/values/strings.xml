@@ -2,8 +2,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="dashboard_title">Dashboard</string>
     <string name="dashboard_courses">Courses</string>
-    <string name="dashboard_programs" tools:ignore="MissingTranslation">Programs</string>
     <string name="dashboard_welcome_back">Welcome back. Let\'s keep learning.</string>
     <string name="dashboard_you_are_not_enrolled">You are not enrolled in any courses yet.</string>
-    <string name="dashboard_enrolled_successfully" tools:ignore="MissingTranslation">You have been successfully enrolled in this course.</string>
 </resources>

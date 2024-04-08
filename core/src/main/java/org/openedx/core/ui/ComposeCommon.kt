@@ -34,7 +34,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -89,10 +88,8 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import coil.request.ImageRequest
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
 import org.openedx.core.extension.tagId
@@ -821,80 +818,6 @@ fun AutoSizeText(
             }
         }
     )
-}
-
-@Composable
-fun DiscoveryCourseItem(
-    apiHostUrl: String,
-    course: Course,
-    windowSize: WindowSize,
-    onClick: (String) -> Unit,
-) {
-
-    val imageWidth by remember(key1 = windowSize) {
-        mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = 170.dp,
-                compact = 105.dp
-            )
-        )
-    }
-
-    val imageUrl = apiHostUrl.dropLast(1) + course.media.courseImage?.uri
-    Surface(
-        modifier = Modifier
-            .testTag("btn_course_card")
-            .fillMaxWidth()
-            .height(140.dp)
-            .clickable { onClick(course.courseId) }
-            .background(MaterialTheme.appColors.background),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.appColors.background),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .error(R.drawable.core_no_image_course)
-                    .placeholder(R.drawable.core_no_image_course)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .width(imageWidth)
-                    .height(105.dp)
-                    .clip(MaterialTheme.appShapes.courseImageShape)
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(105.dp),
-            ) {
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_course_org")
-                        .padding(top = 12.dp),
-                    text = course.org, color = MaterialTheme.appColors.textFieldHint,
-                    style = MaterialTheme.appTypography.labelMedium
-                )
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_course_title")
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    text = course.name,
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleSmall,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
 }
 
 @Composable

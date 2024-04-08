@@ -1,12 +1,9 @@
 package org.openedx.course.data.repository
 
 import kotlinx.coroutines.flow.map
-import okhttp3.ResponseBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
-import org.openedx.core.data.model.EnrollBody
-import org.openedx.core.data.model.room.CourseEntity
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.*
 import org.openedx.core.exception.NoCachedDataException
@@ -21,32 +18,12 @@ class CourseRepository(
 ) {
     private var courseStructure: CourseStructure? = null
 
-    suspend fun getCourseDetail(id: String): Course {
-        val course = api.getCourseDetail(id, preferencesManager.user?.username)
-        courseDao.updateCourseEntity(CourseEntity.createFrom(course))
-        return course.mapToDomain()
-    }
-
-    suspend fun getCourseDetailFromCache(id: String): Course? {
-        return courseDao.getCourseById(id)?.mapToDomain()
-    }
-
     suspend fun removeDownloadModel(id: String) {
         downloadDao.removeDownloadModel(id)
     }
 
     fun getDownloadModels() = downloadDao.readAllData().map { list ->
         list.map { it.mapToDomain() }
-    }
-
-    suspend fun enrollInACourse(courseId: String): ResponseBody {
-        val enrollBody = EnrollBody(
-            EnrollBody.CourseDetails(
-                courseId = courseId,
-                emailOptIn = preferencesManager.user?.email
-            )
-        )
-        return api.enrollInACourse(enrollBody)
     }
 
     suspend fun preloadCourseStructure(courseId: String) {
@@ -78,11 +55,6 @@ class CourseRepository(
         } else {
             throw IllegalStateException("Course structure is empty")
         }
-    }
-
-    suspend fun getEnrolledCourseFromCacheById(courseId: String): EnrolledCourse? {
-        val course = courseDao.getEnrolledCourseById(courseId)
-        return course?.mapToDomain()
     }
 
     suspend fun getCourseStatus(courseId: String): CourseComponentStatus {

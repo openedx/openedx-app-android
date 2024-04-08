@@ -12,6 +12,7 @@ import org.openedx.core.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
+import org.openedx.discovery.data.api.DiscoveryApi
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.profile.data.api.ProfileApi
 import org.openedx.settings.data.api.SettingsApi
@@ -53,6 +54,7 @@ val networkingModule = module {
     single { provideApi<ProfileApi>(get()) }
     single { provideApi<SettingsApi>(get()) }
     single { provideApi<DiscussionApi>(get()) }
+    single { provideApi<DiscoveryApi>(get()) }
 }
 
 

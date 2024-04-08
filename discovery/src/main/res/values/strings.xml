@@ -6,6 +6,14 @@
     <string name="discovery_search_results">Search results</string>
     <string name="discovery_start_typing_to_find">Start typing to find the course</string>
     <string name="discovery_explore_the_catalog" tools:ignore="MissingTranslation">Explore the catalog</string>
+    <string name="discovery_course_details">Course details</string>
+    <string name="discovery_enroll_now">Enroll now</string>
+    <string name="discovery_view_course">View course</string>
+    <string name="discovery_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
+    <string name="discovery_no_internet_label">To enroll in this course, please make sure you are connected to the internet.</string>
+    <string name="discovery_enrolled_successfully">You have been successfully enrolled in this course.</string>
+    <string name="discovery_you_are_already_enrolled">You are already enrolled in this course.</string>
+    <string name="discovery_programs" tools:ignore="MissingTranslation">Programs</string>
 
     <plurals name="discovery_found_courses">
         <item quantity="zero">Found %s courses on your request</item>
@@ -15,4 +23,7 @@
         <item quantity="many">Found %s courses on your request</item>
         <item quantity="other">Found %s courses on your request</item>
     </plurals>
+
+    <!-- Accessibility -->
+    <string name="discovery_accessibility_play_video">Play video</string>
 </resources>

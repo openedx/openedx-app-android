@@ -7,10 +7,6 @@ import org.openedx.course.presentation.handouts.HandoutsType
 
 interface CourseRouter {
 
-    fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String, enrollmentMode: String
-    )
-
     fun navigateToNoAccess(
         fm: FragmentManager,
         title: String
@@ -62,18 +58,6 @@ interface CourseRouter {
     fun navigateToHandoutsWebView(
         fm: FragmentManager, courseId: String, title: String, type: HandoutsType
     )
-
-    fun navigateToCourseInfo(
-        fm: FragmentManager,
-        courseId: String,
-        infoType: String,
-    )
-
-    fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?)
-
-    fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?)
-
-    fun navigateToLogistration(fm: FragmentManager, courseId: String?)
 
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 

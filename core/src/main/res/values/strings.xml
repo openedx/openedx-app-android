@@ -118,6 +118,7 @@
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
+    <string name="core_accessibility_header_image_for">Header image for %1$s</string>
     <string name="core_accessibility_settings">Settings</string>
 
     <string name="core_video_download_to_device">Download to device</string>

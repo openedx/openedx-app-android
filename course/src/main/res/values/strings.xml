@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="course_enroll_now">Enroll now</string>
-    <string name="course_view_course">View course</string>
-    <string name="course_details">Course details</string>
     <string name="course_outline">Course Outline</string>
     <string name="course_content">Course content</string>
     <string name="course_units">Course units</string>
@@ -31,8 +28,6 @@
     <string name="course_section_finished">You\'ve completed \"%s\".</string>
     <string name="course_back_to_outline">Back to outline</string>
     <string name="course_next_section">Next section</string>
-    <string name="course_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
-    <string name="course_no_internet_label">To enroll in this course, please make sure you are connected to the internet.</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_navigation_course">Course</string>
@@ -49,8 +44,6 @@
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
-    <string name="course_you_are_already_enrolled" tools:ignore="MissingTranslation">You are already enrolled in this course.</string>
-    <string name="course_discover" tools:ignore="MissingTranslation">Discover</string>
     <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
     <string name="course_dates_shifted_message">Dates Shifted</string>
 
@@ -93,8 +86,6 @@
     <!-- endregion -->
 
     <!-- Accessibility -->
-    <string name="course_accessibility_header_image_for">Header image for %1$s</string>
-    <string name="course_accessibility_play_video">Play video</string>
     <string name="course_accessibility_video_player">Video player</string>
     <string name="course_accessibility_remove_course_section">Remove course section</string>
     <string name="course_accessibility_download_course_section">Download course section</string>
