@@ -178,15 +178,12 @@ internal fun ProfileView(
                                         .fillMaxHeight()
                                         .then(contentWidth)
                                         .verticalScroll(rememberScrollState()),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(24.dp)
                                 ) {
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     ProfileTopic(uiState.account)
-
-                                    Spacer(modifier = Modifier.height(36.dp))
-
                                     ProfileInfoSection(uiState.account)
-
-
                                     OpenEdXOutlinedButton(
                                         modifier = Modifier
                                             .fillMaxWidth(),
@@ -197,8 +194,7 @@ internal fun ProfileView(
                                         borderColor = MaterialTheme.appColors.buttonBackground,
                                         textColor = MaterialTheme.appColors.textAccent
                                     )
-
-                                    Spacer(Modifier.height(30.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
                         }
