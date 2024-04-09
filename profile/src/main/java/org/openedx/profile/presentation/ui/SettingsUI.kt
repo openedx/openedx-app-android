@@ -1,4 +1,4 @@
-package org.openedx.settings.presentation.ui
+package org.openedx.profile.presentation.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

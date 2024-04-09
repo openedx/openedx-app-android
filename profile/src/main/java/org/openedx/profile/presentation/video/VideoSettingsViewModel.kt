@@ -1,4 +1,4 @@
-package org.openedx.settings.presentation.video
+package org.openedx.profile.presentation.video
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
@@ -13,16 +13,16 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
-import org.openedx.settings.SettingsAnalytics
-import org.openedx.settings.SettingsAnalyticsEvent
-import org.openedx.settings.SettingsAnalyticsKey
-import org.openedx.settings.SettingsRouter
+import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
+import org.openedx.profile.presentation.ProfileRouter
 
 class VideoSettingsViewModel(
     private val preferencesManager: CorePreferences,
     private val notifier: VideoNotifier,
-    private val analytics: SettingsAnalytics,
-    private val router: SettingsRouter,
+    private val analytics: ProfileAnalytics,
+    private val router: ProfileRouter,
 ) : BaseViewModel() {
 
     private val _videoSettings = MutableLiveData<VideoSettings>()
@@ -52,11 +52,11 @@ class VideoSettingsViewModel(
         preferencesManager.videoSettings = currentSettings.copy(wifiDownloadOnly = value)
         _videoSettings.value = preferencesManager.videoSettings
         logProfileEvent(
-           SettingsAnalyticsEvent.WIFI_TOGGLE,
+           ProfileAnalyticsEvent.WIFI_TOGGLE,
             buildMap {
                 put(
-                    SettingsAnalyticsKey.ACTION.key,
-                    if (value) SettingsAnalyticsKey.TRUE.key else SettingsAnalyticsKey.FALSE.key
+                    ProfileAnalyticsKey.ACTION.key,
+                    if (value) ProfileAnalyticsKey.TRUE.key else ProfileAnalyticsKey.FALSE.key
                 )
             }
         )
@@ -75,14 +75,14 @@ class VideoSettingsViewModel(
     }
 
     private fun logProfileEvent(
-        event: SettingsAnalyticsEvent,
+        event: ProfileAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(SettingsAnalyticsKey.NAME.key, event.biValue)
-                put(SettingsAnalyticsKey.CATEGORY.key, SettingsAnalyticsKey.PROFILE.key)
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
                 putAll(params)
             }
         )

@@ -1,6 +1,6 @@
-package org.openedx.settings.presentation.settings
+package org.openedx.profile.presentation.settings
 
-import org.openedx.settings.domain.model.Configuration
+import org.openedx.profile.domain.model.Configuration
 
 sealed class SettingsUIState {
     data class Data(

@@ -1,4 +1,4 @@
-package org.openedx.settings.presentation.settings
+package org.openedx.profile.presentation.settings
 
 import android.content.Context
 import androidx.compose.ui.text.intl.Locale
@@ -25,22 +25,22 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.EmailUtil
-import org.openedx.settings.SettingsAnalytics
-import org.openedx.settings.SettingsAnalyticsEvent
-import org.openedx.settings.SettingsAnalyticsKey
-import org.openedx.settings.SettingsRouter
-import org.openedx.settings.domain.interactor.SettingsInteractor
-import org.openedx.settings.domain.model.Configuration
+import org.openedx.profile.domain.interactor.ProfileInteractor
+import org.openedx.profile.domain.model.Configuration
+import org.openedx.profile.presentation.ProfileAnalytics
+import org.openedx.profile.presentation.ProfileAnalyticsEvent
+import org.openedx.profile.presentation.ProfileAnalyticsKey
+import org.openedx.profile.presentation.ProfileRouter
 
 class SettingsViewModel(
     private val appData: AppData,
     private val config: Config,
     private val resourceManager: ResourceManager,
-    private val interactor: SettingsInteractor,
+    private val interactor: ProfileInteractor,
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
-    private val analytics: SettingsAnalytics,
-    private val router: SettingsRouter,
+    private val analytics: ProfileAnalytics,
+    private val router: ProfileRouter,
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
@@ -75,7 +75,7 @@ class SettingsViewModel(
     }
 
     fun logout() {
-        logProfileEvent(SettingsAnalyticsEvent.LOGOUT_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.LOGOUT_CLICKED)
         viewModelScope.launch {
             try {
                 workerController.removeModels()
@@ -83,9 +83,9 @@ class SettingsViewModel(
                     interactor.logout()
                 }
                 logProfileEvent(
-                    event = SettingsAnalyticsEvent.LOGGED_OUT,
+                    event = ProfileAnalyticsEvent.LOGGED_OUT,
                     params = buildMap {
-                        put(SettingsAnalyticsKey.FORCE.key, SettingsAnalyticsKey.FALSE.key)
+                        put(ProfileAnalyticsKey.FORCE.key, ProfileAnalyticsKey.FALSE.key)
                     }
                 )
             } catch (e: Exception) {
@@ -113,7 +113,7 @@ class SettingsViewModel(
 
     fun videoSettingsClicked(fragmentManager: FragmentManager) {
         router.navigateToVideoSettings(fragmentManager)
-        logProfileEvent(SettingsAnalyticsEvent.VIDEO_SETTING_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.VIDEO_SETTING_CLICKED)
     }
 
     fun privacyPolicyClicked(fragmentManager: FragmentManager) {
@@ -122,7 +122,7 @@ class SettingsViewModel(
             title = resourceManager.getString(R.string.core_privacy_policy),
             url = configuration.agreementUrls.privacyPolicyUrl,
         )
-        logProfileEvent(SettingsAnalyticsEvent.PRIVACY_POLICY_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.PRIVACY_POLICY_CLICKED)
     }
 
     fun cookiePolicyClicked(fragmentManager: FragmentManager) {
@@ -131,7 +131,7 @@ class SettingsViewModel(
             title = resourceManager.getString(R.string.core_cookie_policy),
             url = configuration.agreementUrls.cookiePolicyUrl,
         )
-        logProfileEvent(SettingsAnalyticsEvent.COOKIE_POLICY_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.COOKIE_POLICY_CLICKED)
     }
 
     fun dataSellClicked(fragmentManager: FragmentManager) {
@@ -140,11 +140,11 @@ class SettingsViewModel(
             title = resourceManager.getString(R.string.core_data_sell),
             url = configuration.agreementUrls.dataSellConsentUrl,
         )
-        logProfileEvent(SettingsAnalyticsEvent.DATA_SELL_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.DATA_SELL_CLICKED)
     }
 
     fun faqClicked() {
-        logProfileEvent(SettingsAnalyticsEvent.FAQ_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.FAQ_CLICKED)
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {
@@ -153,7 +153,7 @@ class SettingsViewModel(
             title = resourceManager.getString(R.string.core_terms_of_use),
             url = configuration.agreementUrls.tosUrl,
         )
-        logProfileEvent(SettingsAnalyticsEvent.TERMS_OF_USE_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.TERMS_OF_USE_CLICKED)
     }
 
     fun emailSupportClicked(context: Context) {
@@ -162,7 +162,7 @@ class SettingsViewModel(
             feedbackEmailAddress = config.getFeedbackEmailAddress(),
             appVersion = appData.versionName
         )
-        logProfileEvent(SettingsAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
+        logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
     }
 
     fun appVersionClickedEvent(context: Context) {
@@ -181,14 +181,14 @@ class SettingsViewModel(
     }
 
     private fun logProfileEvent(
-        event: SettingsAnalyticsEvent,
+        event: ProfileAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),
     ) {
         analytics.logEvent(
             event = event.eventName,
             params = buildMap {
-                put(SettingsAnalyticsKey.NAME.key, event.biValue)
-                put(SettingsAnalyticsKey.CATEGORY.key,SettingsAnalyticsKey.PROFILE.key)
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key,ProfileAnalyticsKey.PROFILE.key)
                 putAll(params)
             }
         )

@@ -48,14 +48,13 @@ import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.manage_account.ManageAccountFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
-import org.openedx.settings.SettingsRouter
-import org.openedx.settings.presentation.settings.SettingsFragment
-import org.openedx.settings.presentation.video.VideoSettingsFragment
+import org.openedx.profile.presentation.settings.SettingsFragment
+import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, AppUpgradeRouter, WhatsNewRouter, SettingsRouter {
+    ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
     override fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?) {
@@ -341,36 +340,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             SettingsFragment()
         )
     }
-    //endregion
 
-    private fun replaceFragmentWithBackStack(fm: FragmentManager, fragment: Fragment) {
-        fm.beginTransaction()
-            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
-            .addToBackStack(fragment.javaClass.simpleName)
-            .commit()
-    }
-
-    private fun replaceFragment(
-        fm: FragmentManager,
-        fragment: Fragment,
-        transaction: Int = FragmentTransaction.TRANSIT_NONE
-    ) {
-        fm.beginTransaction()
-            .setTransition(transaction)
-            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
-            .commit()
-    }
-
-    //App upgrade
-    override fun navigateToUserProfile(fm: FragmentManager) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, ProfileFragment())
-            .commit()
-    }
-    //endregion
-
-    //Settings
     override fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean) {
         fm.apply {
             clearBackStack(this)
@@ -399,6 +369,33 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToManageAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, ManageAccountFragment())
+    }
+    //endregion
+
+    private fun replaceFragmentWithBackStack(fm: FragmentManager, fragment: Fragment) {
+        fm.beginTransaction()
+            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+            .addToBackStack(fragment.javaClass.simpleName)
+            .commit()
+    }
+
+    private fun replaceFragment(
+        fm: FragmentManager,
+        fragment: Fragment,
+        transaction: Int = FragmentTransaction.TRANSIT_NONE
+    ) {
+        fm.beginTransaction()
+            .setTransition(transaction)
+            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+            .commit()
+    }
+
+    //App upgrade
+    override fun navigateToUserProfile(fm: FragmentManager) {
+        fm.popBackStack()
+        fm.beginTransaction()
+            .replace(R.id.container, ProfileFragment())
+            .commit()
     }
     //endregion
 }

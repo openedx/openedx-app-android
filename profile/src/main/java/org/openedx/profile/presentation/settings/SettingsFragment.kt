@@ -1,4 +1,4 @@
-package org.openedx.settings.presentation.settings
+package org.openedx.profile.presentation.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.settings.presentation.ui.SettingsScreen
 
 class SettingsFragment : Fragment() {
 

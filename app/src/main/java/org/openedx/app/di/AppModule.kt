@@ -61,8 +61,6 @@ import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.ProfileNotifier
-import org.openedx.settings.SettingsAnalytics
-import org.openedx.settings.SettingsRouter
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
@@ -107,7 +105,6 @@ val appModule = module {
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
-    single<SettingsRouter> { get<AppRouter>() }
 
     single { NetworkConnection(get()) }
 
@@ -175,7 +172,6 @@ val appModule = module {
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
     single<ProfileAnalytics> { get<AnalyticsManager>() }
     single<WhatsNewAnalytics> { get<AnalyticsManager>() }
-    single<SettingsAnalytics> { get<AnalyticsManager>() }
 
     factory { AgreementProvider(get(), get()) }
     factory { FacebookAuthHelper() }

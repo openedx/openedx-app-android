@@ -1,4 +1,4 @@
-package org.openedx.settings.presentation.ui
+package org.openedx.profile.presentation.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,7 +28,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,9 +67,9 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.settings.domain.model.Configuration
-import org.openedx.settings.presentation.settings.SettingsScreenAction
-import org.openedx.settings.presentation.settings.SettingsUIState
+import org.openedx.profile.domain.model.Configuration
+import org.openedx.profile.presentation.ui.SettingsItem
+import org.openedx.profile.R as profileR
 
 @Composable
 internal fun SettingsScreen(
@@ -221,7 +220,7 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
         ) {
             Column(Modifier.fillMaxWidth()) {
                 SettingsItem(
-                    text = stringResource(id = org.openedx.settings.R.string.settings_video_settings),
+                    text = stringResource(id = profileR.string.profile_video_settings),
                     onClick = onVideoSettingsClick
                 )
             }
@@ -257,7 +256,7 @@ private fun SupportInfoSection(
     Column {
         Text(
             modifier = Modifier.testTag("txt_support_info"),
-            text = stringResource(id = org.openedx.settings.R.string.settings_support_info),
+            text = stringResource(id = profileR.string.profile_support_info),
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textSecondary
         )
@@ -270,7 +269,7 @@ private fun SupportInfoSection(
         ) {
             Column(Modifier.fillMaxWidth()) {
                 if (uiState.configuration.supportEmail.isNotBlank()) {
-                    SettingsItem(text = stringResource(id = org.openedx.settings.R.string.settings_contact_support)) {
+                    SettingsItem(text = stringResource(id = profileR.string.profile_contact_support)) {
                         onAction(SettingsScreenAction.SupportClick)
                     }
                     Divider(
@@ -358,12 +357,12 @@ private fun LogoutButton(onClick: () -> Unit) {
         ) {
             Text(
                 modifier = Modifier.testTag("txt_logout"),
-                text = stringResource(id = org.openedx.settings.R.string.settings_logout),
+                text = stringResource(id = profileR.string.profile_logout),
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.error
             )
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                painterResource(id = profileR.drawable.profile_ic_logout),
                 contentDescription = null,
                 tint = MaterialTheme.appColors.error
             )
@@ -419,21 +418,21 @@ private fun LogoutDialog(
                     modifier = Modifier
                         .width(88.dp)
                         .height(85.dp),
-                    painter = painterResource(org.openedx.settings.R.drawable.settings_ic_exit),
+                    painter = painterResource(profileR.drawable.profile_ic_exit),
                     contentDescription = null,
                     tint = MaterialTheme.appColors.onBackground
                 )
                 Spacer(Modifier.size(36.dp))
                 Text(
                     modifier = Modifier.testTag("txt_logout_dialog_title"),
-                    text = stringResource(id = org.openedx.settings.R.string.settings_logout_dialog_body),
+                    text = stringResource(id = profileR.string.profile_logout_dialog_body),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleLarge,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.size(36.dp))
                 OpenEdXButton(
-                    text = stringResource(id = org.openedx.settings.R.string.settings_logout),
+                    text = stringResource(id = profileR.string.profile_logout),
                     backgroundColor = MaterialTheme.appColors.warning,
                     onClick = onLogoutClick,
                     content = {
@@ -447,7 +446,7 @@ private fun LogoutDialog(
                                 modifier = Modifier
                                     .testTag("txt_logout")
                                     .fillMaxWidth(),
-                                text = stringResource(id = org.openedx.settings.R.string.settings_logout),
+                                text = stringResource(id = profileR.string.profile_logout),
                                 color = MaterialTheme.appColors.textWarning,
                                 style = MaterialTheme.appTypography.labelLarge,
                                 textAlign = TextAlign.Center
@@ -455,7 +454,7 @@ private fun LogoutDialog(
                             Icon(
                                 modifier = Modifier
                                     .testTag("ic_logout"),
-                                painter = painterResource(id = org.openedx.settings.R.drawable.settings_ic_logout),
+                                painter = painterResource(id = profileR.drawable.profile_ic_logout),
                                 contentDescription = null,
                                 tint = Color.Black
                             )
