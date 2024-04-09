@@ -86,7 +86,7 @@ fun ProfileTopic(account: Account) {
 
 @Composable
 fun ProfileInfoSection(account: Account) {
-    if (account.yearOfBirth != null || account.bio.isNotEmpty()) {
+    if (account.bio.isNotEmpty()) {
         Column {
             Card(
                 modifier = Modifier,

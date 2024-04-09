@@ -318,14 +318,12 @@ internal fun DiscoveryScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = contentWidth
                 ) {
                     Text(
                         modifier = Modifier
@@ -340,7 +338,7 @@ internal fun DiscoveryScreen(
                     IconButton(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
-                            .offset(x = 12.dp),
+                            .padding(end = 12.dp),
                         onClick = { onSettingsClick() }
                     ) {
                         Icon(
@@ -354,6 +352,7 @@ internal fun DiscoveryScreen(
                 StaticSearchBar(
                     modifier = Modifier
                         .height(48.dp)
+                        .padding(horizontal = 24.dp)
                         .then(searchTabWidth),
                     onClick = {
                         onSearchClick()

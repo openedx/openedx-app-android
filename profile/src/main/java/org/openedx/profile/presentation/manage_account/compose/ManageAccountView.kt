@@ -110,16 +110,15 @@ internal fun ManageAccountView(
             modifier = Modifier
                 .padding(paddingValues)
                 .settingsHeaderBackground()
-                .displayCutoutForLandscape()
                 .statusBarsInset(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
-                modifier = topBarWidth,
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Toolbar(
-                    modifier = topBarWidth,
+                    modifier = topBarWidth
+                        .displayCutoutForLandscape(),
                     label = stringResource(id = R.string.core_manage_account),
                     canShowBackBtn = true,
                     titleTint = Color.White,
@@ -134,7 +133,8 @@ internal fun ManageAccountView(
                 shape = MaterialTheme.appShapes.screenBackgroundShape,
             ) {
                 Box(
-                    modifier = Modifier.pullRefresh(pullRefreshState),
+                    modifier = Modifier
+                        .pullRefresh(pullRefreshState),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Column(

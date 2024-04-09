@@ -37,7 +37,7 @@
     <string name="profile_logout_dialog_body">Are you sure you want to log out?</string>
     <string name="profile_contact_support">Contact support</string>
     <string name="profile_support_info">Support info</string>
-    <string name="profile_video_settings">Video settings</string>
+    <string name="profile_video">Video</string>
     <string name="profile_wifi_only_download">Wi-fi only download</string>
     <string name="profile_only_download_when_wifi_turned_on">Only download content when wi-fi is turned on</string>
 

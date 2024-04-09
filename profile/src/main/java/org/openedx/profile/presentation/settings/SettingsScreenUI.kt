@@ -106,11 +106,12 @@ internal fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .settingsHeaderBackground()
-            .displayCutoutForLandscape()
             .statusBarsInset()
     ) {
         Toolbar(
-            modifier = topBarWidth,
+            modifier = topBarWidth
+                .align(Alignment.CenterHorizontally)
+                .displayCutoutForLandscape(),
             label = stringResource(id = R.string.core_settings),
             canShowBackBtn = true,
             titleTint = Color.White,
@@ -144,7 +145,8 @@ internal fun SettingsScreen(
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .displayCutoutForLandscape(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         when (uiState) {
@@ -220,7 +222,7 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
         ) {
             Column(Modifier.fillMaxWidth()) {
                 SettingsItem(
-                    text = stringResource(id = profileR.string.profile_video_settings),
+                    text = stringResource(id = profileR.string.profile_video),
                     onClick = onVideoSettingsClick
                 )
             }

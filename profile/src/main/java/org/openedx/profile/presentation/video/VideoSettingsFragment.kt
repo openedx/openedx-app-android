@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -161,132 +162,137 @@ private fun VideoSettingsScreen(
         ) {
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(paddingValues)
                     .settingsHeaderBackground()
-                    .displayCutoutForLandscape()
                     .statusBarsInset(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Toolbar(
-                    modifier = topBarWidth,
-                    label = stringResource(id = R.string.profile_video_settings),
+                    modifier = topBarWidth
+                        .displayCutoutForLandscape(),
+                    label = stringResource(id = R.string.profile_video),
                     canShowBackBtn = true,
                     titleTint = Color.White,
                     iconTint = Color.White,
                     onBackClick = onBackClick
                 )
 
-                Column(
+                Box(
                     modifier = Modifier
-                        .clip(MaterialTheme.appShapes.screenBackgroundShape)
                         .fillMaxSize()
+                        .clip(MaterialTheme.appShapes.screenBackgroundShape)
                         .background(MaterialTheme.appColors.background)
-                        .then(contentWidth),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .displayCutoutForLandscape(),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    Row(
-                        Modifier
-                            .testTag("btn_wifi_only")
-                            .fillMaxWidth()
-                            .height(92.dp)
-                            .padding(top = 8.dp)
-                            .noRippleClickable {
-                                wifiDownloadOnly = !wifiDownloadOnly
-                                wifiDownloadChanged(wifiDownloadOnly)
-                            },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = contentWidth
                     ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                modifier = Modifier.testTag("txt_wifi_only_label"),
-                                text = stringResource(id = R.string.profile_wifi_only_download),
-                                color = MaterialTheme.appColors.textPrimary,
-                                style = MaterialTheme.appTypography.titleMedium
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                modifier = Modifier.testTag("txt_wifi_only_description"),
-                                text = stringResource(id = R.string.profile_only_download_when_wifi_turned_on),
-                                color = MaterialTheme.appColors.textSecondary,
-                                style = MaterialTheme.appTypography.labelMedium
+                        Row(
+                            Modifier
+                                .testTag("btn_wifi_only")
+                                .fillMaxWidth()
+                                .height(92.dp)
+                                .padding(top = 8.dp)
+                                .noRippleClickable {
+                                    wifiDownloadOnly = !wifiDownloadOnly
+                                    wifiDownloadChanged(wifiDownloadOnly)
+                                },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    modifier = Modifier.testTag("txt_wifi_only_label"),
+                                    text = stringResource(id = R.string.profile_wifi_only_download),
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    style = MaterialTheme.appTypography.titleMedium
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    modifier = Modifier.testTag("txt_wifi_only_description"),
+                                    text = stringResource(id = R.string.profile_only_download_when_wifi_turned_on),
+                                    color = MaterialTheme.appColors.textSecondary,
+                                    style = MaterialTheme.appTypography.labelMedium
+                                )
+                            }
+                            Switch(
+                                modifier = Modifier.testTag("sw_wifi_only"),
+                                checked = wifiDownloadOnly,
+                                onCheckedChange = {
+                                    wifiDownloadOnly = !wifiDownloadOnly
+                                    wifiDownloadChanged(wifiDownloadOnly)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.appColors.primary,
+                                    checkedTrackColor = MaterialTheme.appColors.primary
+                                )
                             )
                         }
-                        Switch(
-                            modifier = Modifier.testTag("sw_wifi_only"),
-                            checked = wifiDownloadOnly,
-                            onCheckedChange = {
-                                wifiDownloadOnly = !wifiDownloadOnly
-                                wifiDownloadChanged(wifiDownloadOnly)
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = MaterialTheme.appColors.primary,
-                                checkedTrackColor = MaterialTheme.appColors.primary
-                            )
-                        )
-                    }
-                    Divider()
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(92.dp)
-                            .clickable {
-                                videoStreamingQualityClick()
-                            },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(id = org.openedx.core.R.string.core_video_streaming_quality),
-                                color = MaterialTheme.appColors.textPrimary,
-                                style = MaterialTheme.appTypography.titleMedium
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(id = videoSettings.videoStreamingQuality.titleResId),
-                                color = MaterialTheme.appColors.textSecondary,
-                                style = MaterialTheme.appTypography.labelMedium
+                        Divider()
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(92.dp)
+                                .clickable {
+                                    videoStreamingQualityClick()
+                                },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(id = org.openedx.core.R.string.core_video_streaming_quality),
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    style = MaterialTheme.appTypography.titleMedium
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(id = videoSettings.videoStreamingQuality.titleResId),
+                                    color = MaterialTheme.appColors.textSecondary,
+                                    style = MaterialTheme.appTypography.labelMedium
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Filled.ChevronRight,
+                                tint = MaterialTheme.appColors.onSurface,
+                                contentDescription = "Expandable Arrow"
                             )
                         }
-                        Icon(
-                            imageVector = Icons.Filled.ChevronRight,
-                            tint = MaterialTheme.appColors.onSurface,
-                            contentDescription = "Expandable Arrow"
-                        )
-                    }
-                    Divider()
-                    Row(
-                        Modifier
-                            .testTag("btn_video_quality")
-                            .fillMaxWidth()
-                            .height(92.dp)
-                            .clickable {
-                                videoDownloadQualityClick()
-                            },
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(id = org.openedx.core.R.string.core_video_download_quality),
-                                color = MaterialTheme.appColors.textPrimary,
-                                style = MaterialTheme.appTypography.titleMedium
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
-                                color = MaterialTheme.appColors.textSecondary,
-                                style = MaterialTheme.appTypography.labelMedium
+                        Divider()
+                        Row(
+                            Modifier
+                                .testTag("btn_video_quality")
+                                .fillMaxWidth()
+                                .height(92.dp)
+                                .clickable {
+                                    videoDownloadQualityClick()
+                                },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(id = org.openedx.core.R.string.core_video_download_quality),
+                                    color = MaterialTheme.appColors.textPrimary,
+                                    style = MaterialTheme.appTypography.titleMedium
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(id = videoSettings.videoDownloadQuality.titleResId),
+                                    color = MaterialTheme.appColors.textSecondary,
+                                    style = MaterialTheme.appTypography.labelMedium
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Filled.ChevronRight,
+                                tint = MaterialTheme.appColors.onSurface,
+                                contentDescription = "Expandable Arrow"
                             )
                         }
-                        Icon(
-                            imageVector = Icons.Filled.ChevronRight,
-                            tint = MaterialTheme.appColors.onSurface,
-                            contentDescription = "Expandable Arrow"
-                        )
+                        Divider()
                     }
-                    Divider()
                 }
             }
         }
