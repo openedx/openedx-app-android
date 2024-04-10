@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.manage_account.compose
+package org.openedx.profile.presentation.manageaccount.compose
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -55,9 +54,10 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.manage_account.ManageAccountUIState
+import org.openedx.profile.presentation.manageaccount.ManageAccountUIState
 import org.openedx.profile.presentation.ui.ProfileTopic
+import org.openedx.profile.presentation.ui.mockAccount
+import org.openedx.profile.R as ProfileR
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -171,7 +171,7 @@ internal fun ManageAccountView(
                                     OpenEdXOutlinedButton(
                                         modifier = Modifier
                                             .fillMaxWidth(),
-                                        text = stringResource(id = org.openedx.profile.R.string.profile_edit_profile),
+                                        text = stringResource(id = ProfileR.string.profile_edit_profile),
                                         onClick = {
                                             onAction(ManageAccountViewAction.EditAccountClick)
                                         },
@@ -180,8 +180,8 @@ internal fun ManageAccountView(
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     IconText(
-                                        text = stringResource(id = org.openedx.profile.R.string.profile_delete_profile),
-                                        painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_trash),
+                                        text = stringResource(id = ProfileR.string.profile_delete_profile),
+                                        painter = painterResource(id = ProfileR.drawable.profile_ic_trash),
                                         textStyle = MaterialTheme.appTypography.labelLarge,
                                         color = MaterialTheme.appColors.error,
                                         onClick = {
@@ -235,25 +235,6 @@ private fun ManageAccountViewTabletPreview() {
         )
     }
 }
-
-val mockAccount = Account(
-    username = "thom84",
-    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
-    requiresParentalConsent = true,
-    name = "Thomas",
-    country = "Ukraine",
-    isActive = true,
-    profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = 2000,
-    levelOfEducation = "Bachelor",
-    goals = "130",
-    languageProficiencies = emptyList(),
-    gender = "male",
-    mailingAddress = "",
-    "",
-    null,
-    accountPrivacy = Account.Privacy.ALL_USERS
-)
 
 private val mockUiState = ManageAccountUIState.Data(
     account = mockAccount

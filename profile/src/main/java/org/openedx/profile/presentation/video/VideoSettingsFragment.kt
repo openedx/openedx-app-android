@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -66,6 +65,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.R
+import org.openedx.core.R as CoreR
 
 class VideoSettingsFragment : Fragment() {
 
@@ -243,7 +243,7 @@ private fun VideoSettingsScreen(
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    text = stringResource(id = org.openedx.core.R.string.core_video_streaming_quality),
+                                    text = stringResource(id = CoreR.string.core_video_streaming_quality),
                                     color = MaterialTheme.appColors.textPrimary,
                                     style = MaterialTheme.appTypography.titleMedium
                                 )
@@ -257,7 +257,7 @@ private fun VideoSettingsScreen(
                             Icon(
                                 imageVector = Icons.Filled.ChevronRight,
                                 tint = MaterialTheme.appColors.onSurface,
-                                contentDescription = "Expandable Arrow"
+                                contentDescription = stringResource(CoreR.string.core_accessibility_expandable_arrow)
                             )
                         }
                         Divider()
@@ -274,7 +274,7 @@ private fun VideoSettingsScreen(
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    text = stringResource(id = org.openedx.core.R.string.core_video_download_quality),
+                                    text = stringResource(id = CoreR.string.core_video_download_quality),
                                     color = MaterialTheme.appColors.textPrimary,
                                     style = MaterialTheme.appTypography.titleMedium
                                 )
@@ -288,7 +288,7 @@ private fun VideoSettingsScreen(
                             Icon(
                                 imageVector = Icons.Filled.ChevronRight,
                                 tint = MaterialTheme.appColors.onSurface,
-                                contentDescription = "Expandable Arrow"
+                                contentDescription = stringResource(CoreR.string.core_accessibility_expandable_arrow)
                             )
                         }
                         Divider()

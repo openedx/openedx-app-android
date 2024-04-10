@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.manage_account
+package org.openedx.profile.presentation.manageaccount
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
@@ -52,6 +52,7 @@ class ManageAccountViewModel(
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
+
     init {
         getAccount()
     }
@@ -104,7 +105,7 @@ class ManageAccountViewModel(
         getAccount()
     }
 
-    fun logout() {
+    private fun logout() {
         logProfileEvent(ProfileAnalyticsEvent.LOGOUT_CLICKED)
         viewModelScope.launch {
             try {

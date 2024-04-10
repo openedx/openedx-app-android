@@ -217,7 +217,7 @@ fun DeleteProfileScreen(
                             modifier = Modifier
                                 .size(145.dp)
                                 .align(Alignment.CenterHorizontally),
-                            painter = painterResource(id = org.openedx.profile.R.drawable.profile_delete_box),
+                            painter = painterResource(id = profileR.drawable.profile_delete_box),
                             contentDescription = null,
                         )
                         Spacer(Modifier.height(32.dp))

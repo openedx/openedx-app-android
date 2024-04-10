@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.anothers_account
+package org.openedx.profile.presentation.anothersaccount
 
 import org.openedx.profile.domain.model.Account
 

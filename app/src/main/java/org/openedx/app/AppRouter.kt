@@ -43,10 +43,10 @@ import org.openedx.discussion.presentation.threads.DiscussionAddThreadFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
+import org.openedx.profile.presentation.anothersaccount.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
-import org.openedx.profile.presentation.manage_account.ManageAccountFragment
+import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 import org.openedx.profile.presentation.settings.SettingsFragment
 import org.openedx.profile.presentation.video.VideoSettingsFragment

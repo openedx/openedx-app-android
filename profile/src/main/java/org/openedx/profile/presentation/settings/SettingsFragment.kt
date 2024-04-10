@@ -93,7 +93,6 @@ class SettingsFragment : Fragment() {
                     }
                 )
 
-
                 LaunchedEffect(logoutSuccess) {
                     if (logoutSuccess) {
                         viewModel.restartApp(requireActivity().supportFragmentManager)

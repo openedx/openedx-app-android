@@ -96,6 +96,7 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.Date
+import org.openedx.core.R as CoreR
 
 class DashboardFragment : Fragment() {
 
@@ -264,9 +265,9 @@ internal fun MyCoursesScreen(
                     onClick = { onSettingsClick() }
                 ) {
                     Icon(
-                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_settings),
+                        painter = painterResource(id = CoreR.drawable.core_ic_settings),
                         tint = MaterialTheme.appColors.primary,
-                        contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_settings)
+                        contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
                     )
                 }
             }
@@ -428,8 +429,8 @@ private fun CourseItem(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
-                    .error(org.openedx.core.R.drawable.core_no_image_course)
-                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                    .error(CoreR.drawable.core_no_image_course)
+                    .placeholder(CoreR.drawable.core_no_image_course)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,

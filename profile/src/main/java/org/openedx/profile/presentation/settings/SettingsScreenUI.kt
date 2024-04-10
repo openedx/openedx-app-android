@@ -169,7 +169,7 @@ internal fun SettingsScreen(
                                 ) {
                                     Spacer(Modifier.height(30.dp))
 
-                                    ManageAccountSection(onManageAccountClick =  {
+                                    ManageAccountSection(onManageAccountClick = {
                                         onAction(SettingsScreenAction.ManageAccount)
                                     })
 
@@ -234,7 +234,6 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
 private fun ManageAccountSection(onManageAccountClick: () -> Unit) {
     Column {
         Card(
-            modifier = Modifier,
             shape = MaterialTheme.appShapes.cardShape,
             elevation = 0.dp,
             backgroundColor = MaterialTheme.appColors.cardViewBackground
@@ -647,7 +646,7 @@ private val mockUiState = SettingsUIState.Data(
 
 @Preview
 @Composable
-fun AppVersionItemAppToDatePreview() {
+private fun AppVersionItemAppToDatePreview() {
     OpenEdXTheme {
         AppVersionItem(
             versionName = mockAppData.versionName,
@@ -659,7 +658,7 @@ fun AppVersionItemAppToDatePreview() {
 
 @Preview
 @Composable
-fun AppVersionItemUpgradeRecommendedPreview() {
+private fun AppVersionItemUpgradeRecommendedPreview() {
     OpenEdXTheme {
         AppVersionItem(
             versionName = mockAppData.versionName,
@@ -671,7 +670,7 @@ fun AppVersionItemUpgradeRecommendedPreview() {
 
 @Preview
 @Composable
-fun AppVersionItemUpgradeRequiredPreview() {
+private fun AppVersionItemUpgradeRequiredPreview() {
     OpenEdXTheme {
         AppVersionItem(
             versionName = mockAppData.versionName,
@@ -683,7 +682,7 @@ fun AppVersionItemUpgradeRequiredPreview() {
 
 @Preview
 @Composable
-fun LogoutDialogPreview() {
+private fun LogoutDialogPreview() {
     LogoutDialog({}, {})
 }
 

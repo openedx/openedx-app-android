@@ -84,6 +84,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
+import org.openedx.core.R as CoreR
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
 
@@ -342,9 +343,9 @@ internal fun DiscoveryScreen(
                         onClick = { onSettingsClick() }
                     ) {
                         Icon(
-                            painter = painterResource(id = org.openedx.core.R.drawable.core_ic_settings),
+                            painter = painterResource(id = CoreR.drawable.core_ic_settings),
                             tint = MaterialTheme.appColors.primary,
-                            contentDescription = stringResource(id = org.openedx.core.R.string.core_accessibility_settings)
+                            contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
                         )
                     }
                 }

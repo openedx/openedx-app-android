@@ -25,12 +25,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.openedx.core.R
+import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.manage_account.compose.mockAccount
+import org.openedx.profile.R as ProfileR
 
 @Composable
 fun ProfileTopic(image: String?, title: String, subtitle: String) {
@@ -103,7 +104,7 @@ fun ProfileInfoSection(account: Account) {
                     if (account.bio.isNotEmpty()) {
                         Text(
                             modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = org.openedx.profile.R.string.profile_about_me),
+                            text = stringResource(id = ProfileR.string.profile_about_me),
                             style = MaterialTheme.appTypography.titleSmall,
                             color = MaterialTheme.appColors.textPrimary
                         )
@@ -119,6 +120,25 @@ fun ProfileInfoSection(account: Account) {
         }
     }
 }
+
+val mockAccount = Account(
+    username = "thom84",
+    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
+    requiresParentalConsent = true,
+    name = "Thomas",
+    country = "Ukraine",
+    isActive = true,
+    profileImage = ProfileImage("", "", "", "", false),
+    yearOfBirth = 2000,
+    levelOfEducation = "Bachelor",
+    goals = "130",
+    languageProficiencies = emptyList(),
+    gender = "male",
+    mailingAddress = "",
+    "",
+    null,
+    accountPrivacy = Account.Privacy.ALL_USERS
+)
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

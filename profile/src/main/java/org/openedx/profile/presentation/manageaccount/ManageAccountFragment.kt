@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.manage_account
+package org.openedx.profile.presentation.manageaccount
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,8 +14,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.manage_account.compose.ManageAccountView
-import org.openedx.profile.presentation.manage_account.compose.ManageAccountViewAction
+import org.openedx.profile.presentation.manageaccount.compose.ManageAccountView
+import org.openedx.profile.presentation.manageaccount.compose.ManageAccountViewAction
 
 class ManageAccountFragment : Fragment() {
 

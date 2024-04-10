@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.manage_account
+package org.openedx.profile.presentation.manageaccount
 
 import org.openedx.profile.domain.model.Account
 

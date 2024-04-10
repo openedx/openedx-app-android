@@ -52,10 +52,10 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
+import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
-import org.openedx.profile.presentation.manage_account.ManageAccountViewModel
+import org.openedx.profile.presentation.manageaccount.ManageAccountViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
 import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.presentation.video.VideoSettingsViewModel
@@ -152,7 +152,7 @@ val screenModule = module {
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
-    viewModel{ SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     single { CourseRepository(get(), get(), get(), get()) }
