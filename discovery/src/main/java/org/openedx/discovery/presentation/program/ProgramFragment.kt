@@ -258,7 +258,7 @@ private fun ProgramInfoScreen(
         }
 
         Column(
-            modifier = modifierScreenWidth
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
                 .statusBarsInset()
@@ -273,8 +273,8 @@ private fun ProgramInfoScreen(
 
             Surface {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = modifierScreenWidth
+                        .fillMaxHeight()
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
