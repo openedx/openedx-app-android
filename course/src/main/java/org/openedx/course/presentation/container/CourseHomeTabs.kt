@@ -63,7 +63,7 @@ fun CourseHomeTabs(
     LazyRow(
         modifier = Modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 12.dp, horizontal = horizontalPadding),
+        contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
     ) {
         itemsIndexed(list) { index, item ->
             val backgroundColor = if (pagerState.currentPage == index) {

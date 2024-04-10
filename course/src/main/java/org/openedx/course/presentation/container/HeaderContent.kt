@@ -31,7 +31,8 @@ internal fun ExpandedHeaderContent(
     Column(
         modifier
             .fillMaxWidth()
-            .padding(horizontal = horizontalPadding, vertical = 8.dp)
+            .padding(horizontal = horizontalPadding)
+            .padding(top = 16.dp)
     ) {
         Text(
             modifier = Modifier
@@ -45,7 +46,9 @@ internal fun ExpandedHeaderContent(
                 .fillMaxWidth(),
             color = MaterialTheme.appColors.textDark,
             text = courseTitle,
-            style = MaterialTheme.appTypography.titleLarge
+            style = MaterialTheme.appTypography.titleLarge,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 3
         )
     }
 }

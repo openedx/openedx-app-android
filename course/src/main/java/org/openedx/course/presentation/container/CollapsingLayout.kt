@@ -90,12 +90,12 @@ internal fun CollapsingLayout(
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     val imageHeight = 200
-    val factor = (-imageHeight - offset.value) / -imageHeight
-    val alpha = if (factor.isNaN() || factor < 0) 0f else factor
+    val rawFactor = (-imageHeight - offset.value) / -imageHeight
+    val factor = if (rawFactor.isNaN() || rawFactor < 0) 0f else rawFactor
     val blurImagePadding = 40.dp
-    val toolbarOffset =
-        with(localDensity) { (offset.value + backgroundImageHeight - blurImagePadding.toPx()).roundToInt() }
-    val imageStartY = with(localDensity) { backgroundImageHeight - blurImagePadding.toPx() } * 0.5f
+    val blurImagePaddingPx = with(localDensity) { blurImagePadding.toPx() }
+    val toolbarOffset = (offset.value + backgroundImageHeight - blurImagePaddingPx).roundToInt()
+    val imageStartY = (backgroundImageHeight - blurImagePaddingPx) * 0.5f
     val imageOffsetY = -(offset.value + imageStartY)
     val toolbarBackgroundOffset = if (toolbarOffset >= 0) {
         toolbarOffset
@@ -115,8 +115,15 @@ internal fun CollapsingLayout(
 
     fun calculateOffset(delta: Float): Offset {
         val oldOffset = offset.value
-        val newOffset =
-            (oldOffset + delta).coerceIn(-expandedTopHeight - backgroundImageHeight + collapsedTopHeight, 0f)
+        val maxValue = 0f
+        val minValue = (-expandedTopHeight - backgroundImageHeight + collapsedTopHeight).let {
+            if (it >= maxValue) {
+                0f
+            } else {
+                it
+            }
+        }
+        val newOffset = (oldOffset + delta).coerceIn(minValue, maxValue)
         coroutineScope.launch {
             offset.snapTo(newOffset)
         }
@@ -207,7 +214,7 @@ internal fun CollapsingLayout(
                         .offset {
                             IntOffset(
                                 x = 0,
-                                y = with(localDensity) { (backgroundImageHeight - blurImagePadding.toPx()).roundToInt() })
+                                y = (backgroundImageHeight - blurImagePaddingPx).roundToInt())
                         }
                         .background(Color.White)
                         .blur(100.dp)
@@ -276,7 +283,7 @@ internal fun CollapsingLayout(
                         .offset {
                             IntOffset(
                                 x = 0,
-                                y = with(localDensity) { (backgroundImageHeight - blurImagePadding.toPx()).roundToInt() })
+                                y = (backgroundImageHeight - blurImagePaddingPx).roundToInt() )
                         }
                         .background(
                             brush = Brush.verticalGradient(
@@ -460,11 +467,12 @@ internal fun CollapsingLayout(
                         .background(Color.White)
                         .blur(100.dp)
                 ) {
+                    val adaptiveBlurImagePadding = blurImagePadding.value * (3 - rawFactor)
                     Box(
                         modifier = Modifier
                             .background(MaterialTheme.appColors.surface)
                             .fillMaxWidth()
-                            .height(with(localDensity) { (expandedTopHeight + navigationHeight).toDp() } + blurImagePadding)
+                            .height(with(localDensity) { (expandedTopHeight + navigationHeight + adaptiveBlurImagePadding).toDp() })
                             .align(Alignment.Center)
                     )
                     Image(
@@ -525,7 +533,7 @@ internal fun CollapsingLayout(
                         .offset {
                             IntOffset(
                                 x = 0,
-                                y = with(localDensity) { (offset.value + backgroundImageHeight - blurImagePadding.toPx()).roundToInt() })
+                                y = (offset.value + backgroundImageHeight - blurImagePaddingPx).roundToInt() )
                         }
                         .background(
                             brush = Brush.verticalGradient(
@@ -542,8 +550,13 @@ internal fun CollapsingLayout(
                     .onSizeChanged { size ->
                         expandedTopHeight = size.height.toFloat()
                     }
-                    .offset { IntOffset(x = 0, y = (offset.value + backgroundImageHeight).roundToInt()) }
-                    .alpha(alpha),
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = (offset.value + backgroundImageHeight - blurImagePaddingPx).roundToInt()
+                        )
+                    }
+                    .alpha(factor),
                 content = expandedTop,
             )
 
@@ -561,7 +574,7 @@ internal fun CollapsingLayout(
                         .statusBarsInset()
                         .padding(top = 12.dp, start = backBtnStartPadding)
                         .clip(CircleShape)
-                        .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(alpha / 2))
+                        .background(MaterialTheme.appColors.courseHomeBackBtnBackground.copy(factor / 2))
                         .clickable {
                             onBackClick()
                         },
@@ -572,18 +585,18 @@ internal fun CollapsingLayout(
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
                     modifier = Modifier
-                        .alpha(1 - alpha),
+                        .alpha(1 - factor),
                     content = collapsedTop,
                 )
             }
 
-
+            val adaptiveImagePadding = blurImagePaddingPx * factor
             Box(
                 modifier = Modifier
                     .offset {
                         IntOffset(
                             x = 0,
-                            y = (offset.value + backgroundImageHeight + expandedTopHeight).roundToInt()
+                            y = (offset.value + backgroundImageHeight + expandedTopHeight - adaptiveImagePadding).roundToInt()
                         )
                     }
                     .onSizeChanged { size ->
@@ -597,7 +610,7 @@ internal fun CollapsingLayout(
                     .offset {
                         IntOffset(
                             x = 0,
-                            y = (expandedTopHeight + offset.value + backgroundImageHeight + navigationHeight).roundToInt()
+                            y = (expandedTopHeight + offset.value + backgroundImageHeight + navigationHeight - blurImagePaddingPx * factor).roundToInt()
                         )
                     }
                     .padding(bottom = with(localDensity) { (collapsedTopHeight + navigationHeight).toDp() }),
