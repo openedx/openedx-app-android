@@ -163,7 +163,11 @@ internal fun ManageAccountView(
                                     verticalArrangement = Arrangement.spacedBy(24.dp)
                                 ) {
                                     Spacer(modifier = Modifier.height(12.dp))
-                                    ProfileTopic(uiState.account)
+                                    ProfileTopic(
+                                        image = if (uiState.account.profileImage.hasImage) uiState.account.profileImage.imageUrlFull else null,
+                                        title = uiState.account.name,
+                                        subtitle = uiState.account.email ?: ""
+                                    )
                                     OpenEdXOutlinedButton(
                                         modifier = Modifier
                                             .fillMaxWidth(),

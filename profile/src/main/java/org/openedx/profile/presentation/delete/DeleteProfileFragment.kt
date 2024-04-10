@@ -58,7 +58,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
 import org.openedx.core.ui.Toolbar
@@ -282,16 +281,6 @@ fun DeleteProfileScreen(
                             backgroundColor = MaterialTheme.appColors.error,
                             onClick = {
                                 onDeleteClick(password)
-                            }
-                        )
-                        Spacer(Modifier.height(35.dp))
-                        IconText(
-                            text = stringResource(id = profileR.string.profile_back_to_profile),
-                            painter = painterResource(id = R.drawable.core_ic_back),
-                            color = MaterialTheme.appColors.primary,
-                            textStyle = MaterialTheme.appTypography.labelLarge,
-                            onClick = {
-                                onBackClick()
                             }
                         )
                         Spacer(Modifier.height(24.dp))

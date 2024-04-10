@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -46,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
-import org.openedx.core.presentation.global.AppData
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
@@ -178,7 +176,11 @@ internal fun ProfileView(
                                     verticalArrangement = Arrangement.spacedBy(24.dp)
                                 ) {
                                     Spacer(modifier = Modifier.height(12.dp))
-                                    ProfileTopic(uiState.account)
+                                    ProfileTopic(
+                                        image = if (uiState.account.profileImage.hasImage) uiState.account.profileImage.imageUrlFull else null,
+                                        title = uiState.account.name,
+                                        subtitle = "@${uiState.account.username}"
+                                    )
                                     ProfileInfoSection(uiState.account)
                                     OpenEdXOutlinedButton(
                                         modifier = Modifier
@@ -240,10 +242,6 @@ private fun ProfileScreenTabletPreview() {
         )
     }
 }
-
-private val mockAppData = AppData(
-    versionName = "1.0.0",
-)
 
 val mockAccount = Account(
     username = "thom84",

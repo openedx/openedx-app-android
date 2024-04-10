@@ -7,11 +7,11 @@
     <string name="core_error_no_connection">Slow or no internet connection</string>
     <string name="core_error_unknown_error">Something went wrong</string>
     <string name="core_error_try_again">Try again</string>
-    <string name="core_privacy_policy">Privacy policy</string>
+    <string name="core_privacy_policy">Privacy Policy</string>
     <string name="core_cookie_policy" translatable="false">Cookie policy</string>
     <string name="core_data_sell" translatable="false">Do not sell my personal information</string>
     <string name="core_faq" translatable="false">View FAQ</string>
-    <string name="core_terms_of_use">Terms of use</string>
+    <string name="core_terms_of_use">Terms of Use</string>
     <string name="core_profile">Profile</string>
     <string name="core_cancel">Cancel</string>
     <string name="core_search">Search</string>

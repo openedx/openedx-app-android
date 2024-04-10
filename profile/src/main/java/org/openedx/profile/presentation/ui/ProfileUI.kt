@@ -33,13 +33,13 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.manage_account.compose.mockAccount
 
 @Composable
-fun ProfileTopic(account: Account) {
+fun ProfileTopic(image: String?, title: String, subtitle: String) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val profileImage = if (account.profileImage.hasImage) {
-            account.profileImage.imageUrlFull
+        val profileImage = if (!image.isNullOrEmpty()) {
+            image
         } else {
             R.drawable.core_ic_default_profile_picture
         }
@@ -51,7 +51,7 @@ fun ProfileTopic(account: Account) {
                 .build(),
             contentDescription = stringResource(
                 id = R.string.core_accessibility_user_profile_image,
-                account.username
+                title
             ),
             modifier = Modifier
                 .testTag("img_profile")
@@ -62,12 +62,12 @@ fun ProfileTopic(account: Account) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (account.name.isNotEmpty()) {
+            if (title.isNotEmpty()) {
                 Text(
                     modifier = Modifier
                         .testTag("txt_profile_name")
                         .fillMaxWidth(),
-                    text = account.name,
+                    text = title,
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleLarge
                 )
@@ -76,7 +76,7 @@ fun ProfileTopic(account: Account) {
                 modifier = Modifier
                     .testTag("txt_profile_username")
                     .fillMaxWidth(),
-                text = "@${account.username}",
+                text = subtitle,
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.bodyMedium
             )
@@ -126,7 +126,9 @@ fun ProfileInfoSection(account: Account) {
 private fun ProfileTopicPreview() {
     OpenEdXTheme {
         ProfileTopic(
-            account = mockAccount
+            image = mockAccount.profileImage.imageUrlFull,
+            title = mockAccount.name,
+            subtitle = mockAccount.username,
         )
     }
 }

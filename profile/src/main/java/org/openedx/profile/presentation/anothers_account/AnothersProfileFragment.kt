@@ -192,7 +192,11 @@ private fun AnothersProfileScreen(
                             .verticalScroll(rememberScrollState()),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        ProfileTopic(uiState.account)
+                        ProfileTopic(
+                            image = if (uiState.account.profileImage.hasImage) uiState.account.profileImage.imageUrlFull else null,
+                            title = uiState.account.name,
+                            subtitle = uiState.account.username
+                        )
 
                         Spacer(modifier = Modifier.height(36.dp))
 
