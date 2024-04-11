@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
@@ -269,7 +270,7 @@ private fun CourseInfoScreen(
         }
 
         Column(
-            modifier = modifierScreenWidth
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
                 .statusBarsInset()
@@ -284,9 +285,10 @@ private fun CourseInfoScreen(
 
             Surface {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White),
+                    modifier = modifierScreenWidth
+                        .fillMaxHeight()
+                        .background(Color.White)
+                        .navigationBarsPadding(),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (hasInternetConnection) {
