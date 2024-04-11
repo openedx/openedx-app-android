@@ -4,7 +4,7 @@
     <string name="previous">Previous</string>
 
     <string name="app_navigation_discovery">Discover</string>
-    <string name="app_navigation_dashboard">Dashboard</string>
+    <string name="app_navigation_learn">Learn</string>
     <string name="app_navigation_programs">Programs</string>
     <string name="app_navigation_profile">Profile</string>
 </resources>

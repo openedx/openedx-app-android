@@ -67,4 +67,9 @@ interface CourseApi {
 
     @GET("/api/mobile/v1/course_info/{course_id}/updates")
     suspend fun getAnnouncements(@Path("course_id") courseId: String): List<AnnouncementModel>
+
+    @GET("/api/mobile/v4/users/{username}/course_enrollments/")
+    suspend fun getUserCourses(
+        @Path("username") username: String
+    ): CourseEnrollments
 }

@@ -4,4 +4,6 @@
     <string name="dashboard_courses">Courses</string>
     <string name="dashboard_welcome_back">Welcome back. Let\'s keep learning.</string>
     <string name="dashboard_you_are_not_enrolled">You are not enrolled in any courses yet.</string>
+    <string name="dashboard_learn">Learn</string>
+    <string name="dashboard_programs">Programs</string>
 </resources>

@@ -30,4 +30,17 @@ class DashboardRepository(
         val list = dao.readAllData()
         return list.map { it.mapToDomain() }
     }
+
+    suspend fun getUserCourses(): DashboardCourseList {
+        val user = preferencesManager.user
+        val result = api.getUserCourses(
+            username = user?.username ?: ""
+        )
+        preferencesManager.appConfig = result.configs.mapToDomain()
+
+        dao.clearCachedData()
+        dao.insertEnrolledCourseEntity(*result.enrollments.results.map { it.mapToRoomEntity() }
+            .toTypedArray())
+        return result.enrollments.mapToDomain()
+    }
 }

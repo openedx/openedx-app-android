@@ -17,6 +17,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.dashboard.presentation.DashboardFragment
+import org.openedx.learn.presentation.LearnFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.program.ProgramFragment
@@ -47,19 +48,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         binding.bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.fragmentHome -> {
-                    viewModel.logDiscoveryTabClickedEvent()
-                    binding.viewPager.setCurrentItem(0, false)
-                }
-
-                R.id.fragmentDashboard -> {
+                R.id.fragmentLearn -> {
                     viewModel.logMyCoursesTabClickedEvent()
                     binding.viewPager.setCurrentItem(1, false)
                 }
 
-                R.id.fragmentPrograms -> {
-                    viewModel.logMyProgramsTabClickedEvent()
-                    binding.viewPager.setCurrentItem(2, false)
+                R.id.fragmentHome -> {
+                    viewModel.logDiscoveryTabClickedEvent()
+                    binding.viewPager.setCurrentItem(0, false)
                 }
 
                 R.id.fragmentProfile -> {
@@ -107,16 +103,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView)
             .getDiscoveryFragment()
-        val programFragment = if (viewModel.isProgramTypeWebView) {
-            ProgramFragment(true)
-        } else {
-            InDevelopmentFragment()
-        }
 
         adapter = MainNavigationFragmentAdapter(this).apply {
             addFragment(discoveryFragment)
-            addFragment(DashboardFragment())
-            addFragment(programFragment)
+            addFragment(LearnFragment())
             addFragment(ProfileFragment())
         }
         binding.viewPager.adapter = adapter
