@@ -59,7 +59,7 @@ object TimeUtils {
 
     private fun dateToCourseDate(resourceManager: ResourceManager, date: Date?): String {
         return formatDate(
-            format = resourceManager.getString(R.string.core_date_format_MMMM_dd), date = date
+            format = resourceManager.getString(R.string.core_date_format_MMMM_dd_yyyy), date = date
         )
     }
 

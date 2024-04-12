@@ -20,7 +20,9 @@ data class EnrolledCourse(
     @SerializedName("certificate")
     val certificate: Certificate?,
     @SerializedName("progress")
-    val progress: Progress?
+    val progress: Progress?,
+    @SerializedName("course_status")
+    val courseStatus: CourseStatus?
 ) {
     fun mapToDomain(): EnrolledCourse {
         return EnrolledCourse(
@@ -30,7 +32,8 @@ data class EnrolledCourse(
             isActive = isActive ?: false,
             course = course?.mapToDomain()!!,
             certificate = certificate?.mapToDomain(),
-            progress = progress?.mapToDomain() ?: org.openedx.core.domain.model.Progress.DEFAULT_PROGRESS
+            progress = progress?.mapToDomain() ?: org.openedx.core.domain.model.Progress.DEFAULT_PROGRESS,
+            courseStatus = courseStatus?.mapToDomain()
         )
     }
 
@@ -43,7 +46,8 @@ data class EnrolledCourse(
             isActive = isActive ?: false,
             course = course?.mapToRoomEntity()!!,
             certificate = certificate?.mapToRoomEntity(),
-            progress = progress?.mapToRoomEntity() ?: ProgressDb.DEFAULT_PROGRESS
+            progress = progress?.mapToRoomEntity() ?: ProgressDb.DEFAULT_PROGRESS,
+            courseStatus = courseStatus?.mapToRoomEntity()
         )
     }
 }

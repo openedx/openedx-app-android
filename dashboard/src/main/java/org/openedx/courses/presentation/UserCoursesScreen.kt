@@ -1,11 +1,16 @@
 package org.openedx.courses.presentation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +25,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -43,6 +50,7 @@ import coil.request.ImageRequest
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
@@ -190,7 +198,9 @@ private fun PrimaryCourseCard(
                     .height(140.dp)
             )
             LinearProgressIndicator(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp),
                 progress = primaryCourse.progress.numPointsEarned.toFloat(),
                 color = MaterialTheme.appColors.primary,
                 backgroundColor = MaterialTheme.appColors.divider
@@ -202,12 +212,65 @@ private fun PrimaryCourseCard(
                     .padding(top = 8.dp, bottom = 16.dp),
                 primaryCourse = primaryCourse
             )
+            ResumeButton(
+                modifier = Modifier.fillMaxWidth(),
+                primaryCourse = primaryCourse
+            )
         }
     }
 }
 
 @Composable
-fun PrimaryCourseTitle(
+fun ResumeButton(
+    modifier: Modifier = Modifier,
+    primaryCourse: EnrolledCourse
+) {
+    Row(
+        modifier = modifier
+            .heightIn(min = 60.dp)
+            .background(MaterialTheme.appColors.primary)
+            .clickable {
+                //TODO
+            }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (primaryCourse.courseStatus == null) {
+            Text(
+                modifier = modifier
+                    .fillMaxWidth(),
+                text = stringResource(R.string.dashboard_start_course),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.appColors.buttonText,
+                style = MaterialTheme.appTypography.titleSmall
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.School,
+                tint = MaterialTheme.appColors.buttonText,
+                contentDescription = null
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.dashboard_resume_course),
+                    color = MaterialTheme.appColors.buttonText,
+                    style = MaterialTheme.appTypography.labelSmall
+                )
+                Text(
+                    text = primaryCourse.courseStatus?.lastVisitedUnitDisplayName ?: "",
+                    color = MaterialTheme.appColors.buttonText,
+                    style = MaterialTheme.appTypography.titleSmall
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrimaryCourseTitle(
     modifier: Modifier = Modifier,
     primaryCourse: EnrolledCourse
 ) {
@@ -282,6 +345,7 @@ private val mockCourse = EnrolledCourse(
     mode = "mode",
     isActive = true,
     progress = Progress.DEFAULT_PROGRESS,
+    courseStatus = CourseStatus("", emptyList(), "", ""),
     course = EnrolledCourseData(
         id = "id",
         name = "Course name",
@@ -312,13 +376,11 @@ private val mockCourse = EnrolledCourse(
         isSelfPaced = false,
     )
 )
-
 private val mockPagination = Pagination(10, "", 4, "1")
 private val mockDashboardCourseList = DashboardCourseList(
     pagination = mockPagination,
     courses = listOf(mockCourse, mockCourse, mockCourse, mockCourse, mockCourse, mockCourse)
 )
-
 private val mockUserCourses = UserCourses(
     enrollments = mockDashboardCourseList,
     primary = mockCourse

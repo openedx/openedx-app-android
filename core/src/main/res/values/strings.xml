@@ -46,7 +46,7 @@
     <string name="core_android_os_version" translatable="false">OS version: </string>
     <string name="core_android_device_model" translatable="false">Device model: </string>
     <string name="core_email_subject" translatable="false">Feedback</string>
-    <string name="core_date_format_MMMM_dd">MMMM dd</string>
+    <string name="core_date_format_MMMM_dd_yyyy">MMMM dd, yyyy</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
     <string name="core_app_upgrade_title">App Update</string>
     <string name="core_app_upgrade_dialog_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>

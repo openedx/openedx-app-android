@@ -31,7 +31,7 @@
     <string name="core_user_not_active">Обліковий запис користувача не активовано. Будь ласка, спочатку активуйте свій обліковий запис.</string>
     <string name="core_email_chooser_header">Надіслати електронний лист за допомогою ...</string>
     <string name="core_email_client_not_present">Не встановлено жодного поштового клієнта</string>
-    <string name="core_date_format_MMMM_dd">dd MMMM</string>
+    <string name="core_date_format_MMMM_dd_yyyy">dd MMMM, yyyy</string>
     <string name="core_full_date_with_time">dd MMM yyyy HH:mm</string>
     <string name="core_app_upgrade_title">Оновлення додатку</string>
     <string name="core_app_upgrade_dialog_description">Ми рекомендуємо вам оновитись до останньої версії. Оновіться зараз, щоб отримати останні функції та виправлення.</string>

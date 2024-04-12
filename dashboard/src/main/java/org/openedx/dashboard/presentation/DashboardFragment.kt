@@ -74,6 +74,7 @@ import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
@@ -609,6 +610,7 @@ private val mockCourseEnrolled = EnrolledCourse(
     mode = "mode",
     isActive = true,
     progress = Progress.DEFAULT_PROGRESS,
+    courseStatus = CourseStatus("", emptyList(), "", ""),
     course = EnrolledCourseData(
         id = "id",
         name = "name",

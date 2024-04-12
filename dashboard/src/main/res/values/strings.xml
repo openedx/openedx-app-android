@@ -7,4 +7,6 @@
     <string name="dashboard_learn">Learn</string>
     <string name="dashboard_programs">Programs</string>
     <string name="dashboard_course_date">Course %1$s</string>
+    <string name="dashboard_start_course">Start course</string>
+    <string name="dashboard_resume_course">Resume Course</string>
 </resources>

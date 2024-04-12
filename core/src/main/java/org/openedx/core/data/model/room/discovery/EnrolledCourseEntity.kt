@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
@@ -32,6 +33,8 @@ data class EnrolledCourseEntity(
     val certificate: CertificateDb?,
     @Embedded
     val progress: ProgressDb,
+    @Embedded
+    val courseStatus: CourseStatusDb?,
 ) {
 
     fun mapToDomain(): EnrolledCourse {
@@ -42,7 +45,8 @@ data class EnrolledCourseEntity(
             isActive,
             course.mapToDomain(),
             certificate?.mapToDomain(),
-            progress.mapToDomain()
+            progress.mapToDomain(),
+            courseStatus?.mapToDomain()
         )
     }
 }
@@ -168,7 +172,23 @@ data class ProgressDb(
     val numPointsPossible: Int,
 ) {
     companion object {
-        val DEFAULT_PROGRESS = ProgressDb(0,0)
+        val DEFAULT_PROGRESS = ProgressDb(0, 0)
     }
-    fun mapToDomain() = Progress(numPointsEarned,numPointsPossible)
+
+    fun mapToDomain() = Progress(numPointsEarned, numPointsPossible)
+}
+
+data class CourseStatusDb(
+    @ColumnInfo("lastVisitedModuleId")
+    val lastVisitedModuleId: String,
+    @ColumnInfo("lastVisitedModulePath")
+    val lastVisitedModulePath: List<String>,
+    @ColumnInfo("lastVisitedBlockId")
+    val lastVisitedBlockId: String,
+    @ColumnInfo("lastVisitedUnitDisplayName")
+    val lastVisitedUnitDisplayName: String,
+) {
+    fun mapToDomain() = CourseStatus(
+        lastVisitedModuleId, lastVisitedModulePath, lastVisitedBlockId, lastVisitedUnitDisplayName
+    )
 }
