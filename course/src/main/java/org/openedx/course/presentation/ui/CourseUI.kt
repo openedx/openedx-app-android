@@ -85,6 +85,7 @@ import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.toFileSize
@@ -1367,6 +1368,7 @@ private val mockCourse = EnrolledCourse(
     certificate = Certificate(""),
     mode = "mode",
     isActive = true,
+    progress = Progress.DEFAULT_PROGRESS,
     course = EnrolledCourseData(
         id = "id",
         name = "Course name",

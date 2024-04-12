@@ -2,6 +2,7 @@ package org.openedx.core.data.model
 
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
+import org.openedx.core.data.model.room.discovery.ProgressDb
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.utils.TimeUtils
 
@@ -17,7 +18,9 @@ data class EnrolledCourse(
     @SerializedName("course")
     val course: EnrolledCourseData?,
     @SerializedName("certificate")
-    val certificate: Certificate?
+    val certificate: Certificate?,
+    @SerializedName("progress")
+    val progress: Progress?
 ) {
     fun mapToDomain(): EnrolledCourse {
         return EnrolledCourse(
@@ -26,7 +29,8 @@ data class EnrolledCourse(
             mode = mode ?: "",
             isActive = isActive ?: false,
             course = course?.mapToDomain()!!,
-            certificate = certificate?.mapToDomain()
+            certificate = certificate?.mapToDomain(),
+            progress = progress?.mapToDomain() ?: org.openedx.core.domain.model.Progress.DEFAULT_PROGRESS
         )
     }
 
@@ -38,7 +42,8 @@ data class EnrolledCourse(
             mode = mode ?: "",
             isActive = isActive ?: false,
             course = course?.mapToRoomEntity()!!,
-            certificate = certificate?.mapToRoomEntity()
+            certificate = certificate?.mapToRoomEntity(),
+            progress = progress?.mapToRoomEntity() ?: ProgressDb.DEFAULT_PROGRESS
         )
     }
 }

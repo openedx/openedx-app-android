@@ -1,9 +1,9 @@
 package org.openedx.courses.presentation
 
-import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.courses.domain.model.UserCourses
 
 sealed class UserCoursesUIState {
-    data class Courses(val courses: List<EnrolledCourse>) : UserCoursesUIState()
+    data class Courses(val userCourses: UserCourses) : UserCoursesUIState()
     object Empty : UserCoursesUIState()
     object Loading : UserCoursesUIState()
 }

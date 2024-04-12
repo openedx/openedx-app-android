@@ -43,10 +43,10 @@ class UserCoursesViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.getUserCourses()
-                if (response.courses.isEmpty()) {
+                if (response.enrollments.courses.isEmpty()) {
                     _uiState.value = UserCoursesUIState.Empty
                 } else {
-                    _uiState.value = UserCoursesUIState.Courses(response.courses)
+                    _uiState.value = UserCoursesUIState.Courses(response)
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {

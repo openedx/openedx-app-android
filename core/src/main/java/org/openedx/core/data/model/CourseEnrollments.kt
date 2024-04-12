@@ -14,6 +14,9 @@ data class CourseEnrollments(
 
     @SerializedName("config")
     val configs: AppConfig,
+
+    @SerializedName("primary")
+    val primary: EnrolledCourse?,
 ) {
     class Deserializer : JsonDeserializer<CourseEnrollments> {
         override fun deserialize(
@@ -23,8 +26,20 @@ data class CourseEnrollments(
         ): CourseEnrollments {
             val enrollments = deserializeEnrollments(json)
             val appConfig = deserializeAppConfig(json)
+            val primaryCourse = deserializePrimaryCourse(json)
 
-            return CourseEnrollments(enrollments, appConfig)
+            return CourseEnrollments(enrollments, appConfig, primaryCourse)
+        }
+
+        private fun deserializePrimaryCourse(json: JsonElement?): EnrolledCourse? {
+            return try {
+                Gson().fromJson(
+                    (json as JsonObject).get("primary"),
+                    EnrolledCourse::class.java
+                )
+            } catch (ex: Exception) {
+                null
+            }
         }
 
         private fun deserializeEnrollments(json: JsonElement?): DashboardCourseList {

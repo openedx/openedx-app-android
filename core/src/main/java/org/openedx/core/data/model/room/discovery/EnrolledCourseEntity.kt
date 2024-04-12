@@ -5,7 +5,12 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.openedx.core.data.model.room.MediaDb
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.utils.TimeUtils
 
 @Entity(tableName = "course_enrolled_table")
@@ -25,6 +30,8 @@ data class EnrolledCourseEntity(
     val course: EnrolledCourseDataDb,
     @Embedded
     val certificate: CertificateDb?,
+    @Embedded
+    val progress: ProgressDb,
 ) {
 
     fun mapToDomain(): EnrolledCourse {
@@ -34,7 +41,8 @@ data class EnrolledCourseEntity(
             mode,
             isActive,
             course.mapToDomain(),
-            certificate?.mapToDomain()
+            certificate?.mapToDomain(),
+            progress.mapToDomain()
         )
     }
 }
@@ -151,4 +159,16 @@ data class CourseSharingUtmParametersDb(
     fun mapToDomain() = CourseSharingUtmParameters(
         facebook, twitter
     )
+}
+
+data class ProgressDb(
+    @ColumnInfo("numPointsEarned")
+    val numPointsEarned: Int,
+    @ColumnInfo("numPointsPossible")
+    val numPointsPossible: Int,
+) {
+    companion object {
+        val DEFAULT_PROGRESS = ProgressDb(0,0)
+    }
+    fun mapToDomain() = Progress(numPointsEarned,numPointsPossible)
 }

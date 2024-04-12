@@ -4,6 +4,7 @@ import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.data.DashboardDao
 
 class DashboardRepository(
@@ -31,7 +32,7 @@ class DashboardRepository(
         return list.map { it.mapToDomain() }
     }
 
-    suspend fun getUserCourses(): DashboardCourseList {
+    suspend fun getUserCourses(): UserCourses {
         val user = preferencesManager.user
         val result = api.getUserCourses(
             username = user?.username ?: ""
@@ -41,6 +42,9 @@ class DashboardRepository(
         dao.clearCachedData()
         dao.insertEnrolledCourseEntity(*result.enrollments.results.map { it.mapToRoomEntity() }
             .toTypedArray())
-        return result.enrollments.mapToDomain()
+        return UserCourses(
+            enrollments = result.enrollments.mapToDomain(),
+            primary = result.primary?.mapToDomain()
+        )
     }
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -91,38 +90,40 @@ class LearnFragment : Fragment() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LearnScreen(
-    userCoursesViewModel : UserCoursesViewModel = viewModel(),
+    userCoursesViewModel : UserCoursesViewModel,
     windowSize: WindowSize
 ) {
     val scaffoldState = rememberScaffoldState()
     val pagerState = rememberPagerState {
         LearnType.entries.size
     }
+    val contentWidth by remember(key1 = windowSize) {
+        mutableStateOf(
+            windowSize.windowSizeValue(
+                expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                compact = Modifier.fillMaxSize(),
+            )
+        )
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
-        val contentWidth by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-                    compact = Modifier.fillMaxWidth(),
-                )
-            )
-        }
+
 
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
                 .statusBarsInset()
-                .displayCutoutForLandscape(),
+                .displayCutoutForLandscape()
+                .then(contentWidth),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LearnToolbar(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
                 label = stringResource(id = R.string.dashboard_learn),
                 onSearchClick = {
                     //TODO
@@ -130,14 +131,15 @@ private fun LearnScreen(
             )
 
             LearnDropdownMenu(
-                modifier = Modifier.align(Alignment.Start),
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(horizontal = 16.dp),
                 pagerState = pagerState
             )
 
             HorizontalPager(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .then(contentWidth),
+                    .fillMaxSize(),
                 state = pagerState,
                 userScrollEnabled = false
             ) { page ->
@@ -156,11 +158,12 @@ private fun LearnScreen(
 
 @Composable
 private fun LearnToolbar(
+    modifier: Modifier = Modifier,
     label: String,
     onSearchClick: () -> Unit
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Text(
             modifier = Modifier.align(Alignment.CenterStart),
@@ -260,6 +263,7 @@ private fun LearnDropdownMenu(
 private fun LearnScreenPreview() {
     OpenEdXTheme {
         LearnScreen(
+            userCoursesViewModel = viewModel(),
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
         )
     }
