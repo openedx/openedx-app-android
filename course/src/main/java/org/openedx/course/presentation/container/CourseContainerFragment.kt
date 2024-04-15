@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -294,6 +295,8 @@ fun CourseDashboard(
             val refreshing by viewModel.refreshing.collectAsState(true)
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
+            val dataReady = viewModel.dataReady.observeAsState()
+
             val pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
             val tabState = rememberLazyListState()
             val snackState = remember { SnackbarHostState() }
@@ -351,15 +354,17 @@ fun CourseDashboard(
                         fragmentManager.popBackStack()
                     },
                     bodyContent = {
-                        DashboardPager(
-                            windowSize = windowSize,
-                            viewModel = viewModel,
-                            pagerState = pagerState,
-                            isNavigationEnabled = isNavigationEnabled,
-                            isResumed = isResumed,
-                            fragmentManager = fragmentManager,
-                            bundle = bundle
-                        )
+                        if (dataReady.value == true) {
+                            DashboardPager(
+                                windowSize = windowSize,
+                                viewModel = viewModel,
+                                pagerState = pagerState,
+                                isNavigationEnabled = isNavigationEnabled,
+                                isResumed = isResumed,
+                                fragmentManager = fragmentManager,
+                                bundle = bundle
+                            )
+                        }
                     }
                 )
                 PullRefreshIndicator(
@@ -462,6 +467,8 @@ fun DashboardPager(
                     courseDatesViewModel = koinViewModel(
                         parameters = {
                             parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, ""),
                                 bundle.getString(CourseContainerFragment.ARG_ENROLLMENT_MODE, "")
                             )
                         }
@@ -478,6 +485,14 @@ fun DashboardPager(
 
             CourseContainerTab.DISCUSSIONS -> {
                 DiscussionTopicsScreen(
+                    discussionTopicsViewModel = koinViewModel(
+                        parameters = {
+                            parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, ""),
+                            )
+                        }
+                    ),
                     windowSize = windowSize,
                     fragmentManager = fragmentManager
                 )

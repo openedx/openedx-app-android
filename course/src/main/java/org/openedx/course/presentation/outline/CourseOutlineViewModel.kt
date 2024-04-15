@@ -28,7 +28,6 @@ import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
@@ -84,14 +83,11 @@ class CourseOutlineViewModel(
     init {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
-                when(event) {
+                when (event) {
                     is CourseStructureUpdated -> {
                         if (event.courseId == courseId) {
                             updateCourseData()
                         }
-                    }
-                    is CourseDataReady -> {
-                        getCourseData()
                     }
                 }
             }
@@ -113,6 +109,8 @@ class CourseOutlineViewModel(
                 }
             }
         }
+
+        getCourseData()
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -166,7 +164,7 @@ class CourseOutlineViewModel(
     private fun getCourseDataInternal() {
         viewModelScope.launch {
             try {
-                var courseStructure = interactor.getCourseStructureFromCache()
+                var courseStructure = interactor.getCourseStructure(courseId)
                 val blocks = courseStructure.blockData
 
                 val courseStatus = if (networkConnection.isOnline()) {

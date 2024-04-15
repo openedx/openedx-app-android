@@ -5,9 +5,11 @@ import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.module.db.DownloadDao
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.data.storage.CourseDao
 
 class CourseRepository(
@@ -15,8 +17,9 @@ class CourseRepository(
     private val courseDao: CourseDao,
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
+    private val networkConnection: NetworkConnection,
 ) {
-    private var courseStructure: CourseStructure? = null
+    private var courseStructure = mutableMapOf<String, CourseStructure>()
 
     suspend fun removeDownloadModel(id: String) {
         downloadDao.removeDownloadModel(id)
@@ -26,35 +29,33 @@ class CourseRepository(
         list.map { it.mapToDomain() }
     }
 
-    suspend fun preloadCourseStructure(courseId: String) {
-        val response = api.getCourseStructure(
-            "stale-if-error=0",
-            "v3",
-            preferencesManager.user?.username,
-            courseId
-        )
-        courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
-        courseStructure = null
-        courseStructure = response.mapToDomain()
+    fun hasCourses(courseId: String): Boolean {
+        return courseStructure[courseId] != null
     }
 
-    suspend fun preloadCourseStructureFromCache(courseId: String) {
-        val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
-        courseStructure = null
-        if (cachedCourseStructure != null) {
-            courseStructure = cachedCourseStructure.mapToDomain()
-        } else {
-            throw NoCachedDataException()
-        }
-    }
+    suspend fun getCourseStructure(courseId: String, isNeedRefresh: Boolean): CourseStructure {
+        if (!isNeedRefresh) courseStructure[courseId]?.let { return it }
 
-    @Throws(IllegalStateException::class)
-    fun getCourseStructureFromCache(): CourseStructure {
-        if (courseStructure != null) {
-            return courseStructure!!
+        if (networkConnection.isOnline()) {
+            val response = api.getCourseStructure(
+                "stale-if-error=0",
+                "v3",
+                preferencesManager.user?.username,
+                courseId
+            )
+            courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
+            courseStructure[courseId] = response.mapToDomain()
+
         } else {
-            throw IllegalStateException("Course structure is empty")
+            val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
+            if (cachedCourseStructure != null) {
+                courseStructure[courseId] = cachedCourseStructure.mapToDomain()
+            } else {
+                throw NoCachedDataException()
+            }
         }
+
+        return courseStructure[courseId]!!
     }
 
     suspend fun getCourseStatus(courseId: String): CourseComponentStatus {
