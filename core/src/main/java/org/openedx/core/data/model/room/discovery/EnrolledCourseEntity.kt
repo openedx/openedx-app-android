@@ -4,8 +4,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAssignments
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
@@ -13,6 +16,7 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.utils.TimeUtils
+import java.util.Date
 
 @Entity(tableName = "course_enrolled_table")
 data class EnrolledCourseEntity(
@@ -35,6 +39,8 @@ data class EnrolledCourseEntity(
     val progress: ProgressDb,
     @Embedded
     val courseStatus: CourseStatusDb?,
+    @Embedded
+    val courseAssignments: CourseAssignmentsDb?
 ) {
 
     fun mapToDomain(): EnrolledCourse {
@@ -46,7 +52,8 @@ data class EnrolledCourseEntity(
             course.mapToDomain(),
             certificate?.mapToDomain(),
             progress.mapToDomain(),
-            courseStatus?.mapToDomain()
+            courseStatus?.mapToDomain(),
+            courseAssignments?.mapToDomain()
         )
     }
 }
@@ -190,5 +197,50 @@ data class CourseStatusDb(
 ) {
     fun mapToDomain() = CourseStatus(
         lastVisitedModuleId, lastVisitedModulePath, lastVisitedBlockId, lastVisitedUnitDisplayName
+    )
+}
+
+data class CourseAssignmentsDb(
+    @Embedded
+    val futureAssignment: CourseDateBlockDb?,
+    @ColumnInfo("pastAssignments")
+    val pastAssignments: List<CourseDateBlockDb>?
+) {
+    fun mapToDomain() = CourseAssignments(
+        futureAssignment = futureAssignment?.mapToDomain(),
+        pastAssignments = pastAssignments?.map { it.mapToDomain() }
+    )
+}
+
+data class CourseDateBlockDb(
+    @ColumnInfo("title")
+    val title: String = "",
+    @ColumnInfo("description")
+    val description: String = "",
+    @ColumnInfo("link")
+    val link: String = "",
+    @ColumnInfo("blockId")
+    val blockId: String = "",
+    @ColumnInfo("learnerHasAccess")
+    val learnerHasAccess: Boolean = false,
+    @ColumnInfo("complete")
+    val complete: Boolean = false,
+    @ColumnInfo("date")
+    val date: String,
+    @ColumnInfo("dateType")
+    val dateType: DateType = DateType.NONE,
+    @ColumnInfo("assignmentType")
+    val assignmentType: String? = "",
+) {
+    fun mapToDomain() = CourseDateBlock(
+        title = title,
+        description = description,
+        link = link,
+        blockId = blockId,
+        learnerHasAccess = learnerHasAccess,
+        complete = complete,
+        date = TimeUtils.iso8601ToDate(date) ?: Date(),
+        dateType = dateType,
+        assignmentType = assignmentType
     )
 }

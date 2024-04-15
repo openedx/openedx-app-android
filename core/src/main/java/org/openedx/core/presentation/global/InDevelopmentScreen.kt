@@ -1,4 +1,4 @@
-package org.openedx.programs.presentation
+package org.openedx.core.presentation.global
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,9 +13,11 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
 @Composable
-fun ProgramsScreen() {
+fun InDevelopmentScreen(
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.appColors.secondary),
         contentAlignment = Alignment.Center

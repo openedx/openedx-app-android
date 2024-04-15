@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.presentation.global.InDevelopmentScreen
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.crop
@@ -63,7 +64,6 @@ import org.openedx.courses.presentation.UserCoursesViewModel
 import org.openedx.courses.presentation.UsersCourseScreen
 import org.openedx.dashboard.R
 import org.openedx.learn.LearnType
-import org.openedx.programs.presentation.ProgramsScreen
 
 class LearnFragment : Fragment() {
 
@@ -130,12 +130,14 @@ private fun LearnScreen(
                 }
             )
 
-            LearnDropdownMenu(
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(horizontal = 16.dp),
-                pagerState = pagerState
-            )
+            if (userCoursesViewModel.isProgramTypeWebView) {
+                LearnDropdownMenu(
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(horizontal = 16.dp),
+                    pagerState = pagerState
+                )
+            }
 
             HorizontalPager(
                 modifier = Modifier
@@ -149,7 +151,7 @@ private fun LearnScreen(
                         onItemClick = {},
                     )
 
-                    1 -> ProgramsScreen()
+                    1 -> InDevelopmentScreen()
                 }
             }
         }

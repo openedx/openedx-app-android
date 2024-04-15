@@ -73,6 +73,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAssignments
 import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
@@ -603,6 +604,7 @@ private fun MyCoursesScreenTabletPreview() {
     }
 }
 
+private val mockCourseAssignments = CourseAssignments(null, emptyList())
 private val mockCourseEnrolled = EnrolledCourse(
     auditAccessExpires = Date(),
     created = "created",
@@ -611,6 +613,7 @@ private val mockCourseEnrolled = EnrolledCourse(
     isActive = true,
     progress = Progress.DEFAULT_PROGRESS,
     courseStatus = CourseStatus("", emptyList(), "", ""),
+    courseAssignments = mockCourseAssignments,
     course = EnrolledCourseData(
         id = "id",
         name = "name",

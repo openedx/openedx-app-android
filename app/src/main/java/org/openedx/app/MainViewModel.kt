@@ -31,8 +31,6 @@ class MainViewModel(
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 
-    val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
-
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         notifier.notifier.onEach {

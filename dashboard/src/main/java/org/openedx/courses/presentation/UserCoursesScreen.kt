@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
@@ -27,6 +27,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -37,6 +38,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -49,6 +52,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAssignments
 import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
@@ -66,6 +70,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.R
 import java.util.Date
+import org.openedx.core.R as CoreR
 
 @Composable
 fun UsersCourseScreen(
@@ -81,7 +86,7 @@ fun UsersCourseScreen(
         uiState = uiState,
         updating = updating,
         apiHostUrl = viewModel.apiHostUrl,
-        onSwipeRefresh = viewModel::updateCoursed,
+        onSwipeRefresh = viewModel::updateCourses,
         onItemClick = onItemClick
     )
 }
@@ -97,8 +102,7 @@ private fun UsersCourseScreen(
     onItemClick: (EnrolledCourse) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState = rememberPullRefreshState(refreshing = updating, onRefresh = { onSwipeRefresh })
-    val scrollState = rememberLazyListState()
+    val pullRefreshState = rememberPullRefreshState(refreshing = updating, onRefresh = { onSwipeRefresh() })
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -108,13 +112,16 @@ private fun UsersCourseScreen(
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Surface(
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             color = MaterialTheme.appColors.background
         ) {
             Box(
                 Modifier
                     .fillMaxSize()
-                    .pullRefresh(pullRefreshState),
+                    .pullRefresh(pullRefreshState)
+                    .verticalScroll(rememberScrollState()),
             ) {
                 when (uiState) {
                     is UserCoursesUIState.Loading -> {
@@ -128,13 +135,14 @@ private fun UsersCourseScreen(
                         UserCourses(
                             modifier = Modifier.fillMaxSize(),
                             userCourses = uiState.userCourses,
-                            apiHostUrl = apiHostUrl,
-                            scrollState = scrollState
+                            apiHostUrl = apiHostUrl
                         )
                     }
 
                     is UserCoursesUIState.Empty -> {
-                        EmptyState()
+                        EmptyState(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
                     }
                 }
 
@@ -152,18 +160,61 @@ private fun UsersCourseScreen(
 private fun UserCourses(
     modifier: Modifier = Modifier,
     userCourses: UserCourses,
-    scrollState: LazyListState,
     apiHostUrl: String
 ) {
-    LazyColumn(
-        modifier = modifier,
-        state = scrollState
+    Column(
+        modifier = modifier
     ) {
         if (userCourses.primary != null) {
-            item {
-                PrimaryCourseCard(
-                    primaryCourse = userCourses.primary,
-                    apiHostUrl = apiHostUrl
+            PrimaryCourseCard(
+                primaryCourse = userCourses.primary,
+                apiHostUrl = apiHostUrl
+            )
+        }
+        SecondaryCourses(
+            courses = userCourses.enrollments.courses
+        )
+    }
+}
+
+@Composable
+private fun SecondaryCourses(
+    courses: List<EnrolledCourse>
+) {
+
+}
+
+@Composable
+fun AssignmentItem(
+    painter: Painter,
+    title: String?,
+    info: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painter,
+            tint = MaterialTheme.appColors.textDark,
+            contentDescription = null
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = info,
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.labelSmall
+            )
+            if (!title.isNullOrEmpty()) {
+                Text(
+                    text = title,
+                    color = MaterialTheme.appColors.textDark,
+                    style = MaterialTheme.appTypography.titleSmall
                 )
             }
         }
@@ -212,6 +263,25 @@ private fun PrimaryCourseCard(
                     .padding(top = 8.dp, bottom = 16.dp),
                 primaryCourse = primaryCourse
             )
+            val pastAssignments = primaryCourse.courseAssignments?.pastAssignments
+            if (!pastAssignments.isNullOrEmpty()) {
+                val title = if (pastAssignments.size == 1) pastAssignments.first().title else null
+                Divider()
+                AssignmentItem(
+                    painter = rememberVectorPainter(Icons.Default.Warning),
+                    title = title,
+                    info = stringResource(R.string.dashboard_past_due_assignment, pastAssignments.size)
+                )
+            }
+            val futureAssignment = primaryCourse.courseAssignments?.futureAssignment
+            if (futureAssignment != null) {
+                Divider()
+                AssignmentItem(
+                    painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
+                    title = futureAssignment.title,
+                    info = "${futureAssignment.assignmentType} Due in ${futureAssignment.date} days"
+                )
+            }
             ResumeButton(
                 modifier = Modifier.fillMaxWidth(),
                 primaryCourse = primaryCourse
@@ -275,7 +345,8 @@ private fun PrimaryCourseTitle(
     primaryCourse: EnrolledCourse
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(),
@@ -310,9 +381,11 @@ private fun PrimaryCourseTitle(
 }
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -338,6 +411,8 @@ private fun EmptyState() {
     }
 }
 
+
+private val mockCourseAssignments = CourseAssignments(null, emptyList())
 private val mockCourse = EnrolledCourse(
     auditAccessExpires = Date(),
     created = "created",
@@ -346,6 +421,7 @@ private val mockCourse = EnrolledCourse(
     isActive = true,
     progress = Progress.DEFAULT_PROGRESS,
     courseStatus = CourseStatus("", emptyList(), "", ""),
+    courseAssignments = mockCourseAssignments,
     course = EnrolledCourseData(
         id = "id",
         name = "Course name",
@@ -363,7 +439,7 @@ private val mockCourse = EnrolledCourse(
             "",
             "",
             "",
-            ""
+            "",
         ),
         media = null,
         courseImage = "",
@@ -373,7 +449,7 @@ private val mockCourse = EnrolledCourse(
         courseHandouts = "",
         discussionUrl = "",
         videoOutline = "",
-        isSelfPaced = false,
+        isSelfPaced = false
     )
 )
 private val mockPagination = Pagination(10, "", 4, "1")

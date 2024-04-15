@@ -1,5 +1,6 @@
 package org.openedx.courses.presentation
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -13,15 +14,19 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 
 class UserCoursesViewModel(
     private val config: Config,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
+    private val discoveryNotifier: DiscoveryNotifier,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
+    val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
 
     private val _uiState = MutableLiveData<UserCoursesUIState>(UserCoursesUIState.Loading)
     val uiState: LiveData<UserCoursesUIState>
@@ -35,6 +40,18 @@ class UserCoursesViewModel(
     val updating: LiveData<Boolean>
         get() = _updating
 
+    override fun onCreate(owner: LifecycleOwner) {
+        super.onCreate(owner)
+        viewModelScope.launch {
+            discoveryNotifier.notifier.collect {
+                // TODO Notifier doesn't collect data
+                if (it is CourseDashboardUpdate) {
+                    updateCourses()
+                }
+            }
+        }
+    }
+
     init {
         getCourses()
     }
@@ -43,7 +60,7 @@ class UserCoursesViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.getUserCourses()
-                if (response.enrollments.courses.isEmpty()) {
+                if (response.primary == null) {
                     _uiState.value = UserCoursesUIState.Empty
                 } else {
                     _uiState.value = UserCoursesUIState.Courses(response)
@@ -60,7 +77,7 @@ class UserCoursesViewModel(
         }
     }
 
-    fun updateCoursed() {
+    fun updateCourses() {
         _updating.value = true
         getCourses()
     }

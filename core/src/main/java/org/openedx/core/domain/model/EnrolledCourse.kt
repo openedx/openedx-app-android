@@ -13,5 +13,6 @@ data class EnrolledCourse(
     val course: EnrolledCourseData,
     val certificate: Certificate?,
     val progress: Progress,
-    val courseStatus: CourseStatus?
+    val courseStatus: CourseStatus?,
+    val courseAssignments: CourseAssignments?
 ) : Parcelable
