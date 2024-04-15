@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
@@ -22,8 +24,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.TextSnippet
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,12 +45,13 @@ import org.openedx.course.R
 @Composable
 fun CourseHomeTabs(
     pagerState: PagerState,
+    rowState: LazyListState = rememberLazyListState(),
     onPageChange: (Int) -> Unit
 ) {
     val list = listOf(
-        stringResource(id = R.string.course_navigation_course) to rememberVectorPainter(Icons.Default.Home),
+        stringResource(id = R.string.course_navigation_home) to rememberVectorPainter(Icons.Default.Home),
         stringResource(id = R.string.course_navigation_videos) to rememberVectorPainter(Icons.Rounded.PlayCircleFilled),
-        stringResource(id = R.string.course_navigation_dates) to rememberVectorPainter(Icons.Default.CalendarMonth),
+        stringResource(id = R.string.course_navigation_dates) to rememberVectorPainter(Icons.Outlined.CalendarMonth),
         stringResource(id = R.string.course_navigation_discussions) to rememberVectorPainter(Icons.AutoMirrored.Filled.Chat),
         stringResource(id = R.string.course_navigation_more) to rememberVectorPainter(Icons.AutoMirrored.Filled.TextSnippet)
     )
@@ -62,6 +65,7 @@ fun CourseHomeTabs(
     }
     LazyRow(
         modifier = Modifier,
+        state = rowState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
     ) {
@@ -92,7 +96,7 @@ fun CourseHomeTabs(
                     .background(backgroundColor)
                     .clickable {
                         scope.launch {
-                            pagerState.animateScrollToPage(index)
+                            pagerState.scrollToPage(index)
                             onPageChange(index)
                         }
                     }

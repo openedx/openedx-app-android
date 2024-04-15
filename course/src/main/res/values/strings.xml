@@ -30,7 +30,7 @@
     <string name="course_next_section">Next section</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
-    <string name="course_navigation_course">Course</string>
+    <string name="course_navigation_home">Home</string>
     <string name="course_navigation_videos">Videos</string>
     <string name="course_navigation_discussions">Discussions</string>
     <string name="course_navigation_more">More</string>

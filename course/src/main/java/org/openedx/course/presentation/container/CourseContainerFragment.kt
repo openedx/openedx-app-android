@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -184,11 +185,17 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 val refreshing by viewModel.showProgress.collectAsState(true)
                 val courseImage by viewModel.courseImage.collectAsState()
                 val pagerState = rememberPagerState(pageCount = { 5 })
+                val tabState = rememberLazyListState()
+                val windowSize = rememberWindowSize()
                 val pullRefreshState = rememberPullRefreshState(
                     refreshing = refreshing,
                     onRefresh = { onRefresh(pagerState.currentPage) }
                 )
-                val windowSize = rememberWindowSize()
+
+                LaunchedEffect(pagerState.currentPage) {
+                    tabState.animateScrollToItem(pagerState.currentPage)
+                }
+
                 Box {
                     CollapsingLayout(
                         modifier = Modifier
@@ -207,7 +214,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                             )
                         },
                         navigation = {
-                            CourseHomeTabs(pagerState = pagerState, viewModel::courseContainerTabClickedEvent)
+                            CourseHomeTabs(
+                                rowState = tabState,
+                                pagerState = pagerState,
+                                onPageChange = viewModel::courseContainerTabClickedEvent
+                            )
                         },
                         onBackClick = {
                             requireActivity().supportFragmentManager.popBackStack()

@@ -173,8 +173,8 @@ internal fun CollapsingLayout(
 
                             launch {
                                 // Handle Fling, offset.animateTo does not work if the value changes faster than 10ms
-                                if (change.uptimeMillis - change.previousUptimeMillis <= 15) {
-                                    delay(10)
+                                if (change.uptimeMillis - change.previousUptimeMillis <= 50) {
+                                    delay(50)
                                 }
 
                                 if (scrollDown) {
