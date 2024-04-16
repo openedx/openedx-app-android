@@ -3,23 +3,25 @@ package org.openedx.discussion.presentation.topics
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment.Companion.ALL_POSTS
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment.Companion.FOLLOWING_POSTS
 import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment.Companion.TOPIC
-import kotlinx.coroutines.launch
 
 class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
+    private val networkConnection: NetworkConnection,
     val courseId: String
 ) : BaseViewModel() {
 
@@ -35,45 +37,31 @@ class DiscussionTopicsViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
+
     var courseName = ""
 
-    fun updateCourseTopics() {
+    fun updateCourseTopics(withSwipeRefresh: Boolean = false) {
         viewModelScope.launch {
             try {
-                _isUpdating.value = true
+                if (withSwipeRefresh) {
+                    _isUpdating.value = true
+                } else {
+                    _uiState.value = DiscussionTopicsUIState.Loading
+                }
+
                 val response = interactor.getCourseTopics(courseId)
                 _uiState.value = DiscussionTopicsUIState.Topics(response)
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                val errorMessage = if (e.isInternetError()) {
+                    resourceManager.getString(R.string.core_error_no_connection)
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    resourceManager.getString(R.string.core_error_unknown_error)
                 }
-            }
-            _isUpdating.value = false
-        }
-    }
-
-    fun getCourseTopics() {
-        _uiState.value = DiscussionTopicsUIState.Loading
-        getCourseTopicsInternal()
-    }
-
-    private fun getCourseTopicsInternal() {
-        viewModelScope.launch {
-            try {
-                val response = interactor.getCourseTopics(courseId)
-                _uiState.value = DiscussionTopicsUIState.Topics(response)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                }
+                _uiMessage.value = UIMessage.SnackBarMessage(errorMessage)
+            } finally {
+                _isUpdating.value = false
             }
         }
     }
