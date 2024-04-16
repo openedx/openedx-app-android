@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,13 +50,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.CourseContainerTabEntity
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.presentation.global.InDevelopmentScreen
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -90,8 +91,32 @@ class LearnFragment : Fragment() {
                             requireParentFragment().parentFragmentManager,
                             it.course.id,
                             it.course.name,
-                            it.mode
+                            it.mode,
+                            CourseContainerTabEntity.COURSE
                         )
+                    },
+                    openDates = {
+                        router.navigateToCourseOutline(
+                            requireParentFragment().parentFragmentManager,
+                            it.course.id,
+                            it.course.name,
+                            it.mode,
+                            CourseContainerTabEntity.DATES
+                        )
+                    },
+                    onResumeClick = { componentId ->
+//                        viewModel.resumeSectionBlock?.let { subSection ->
+//                            viewModel.resumeCourseTappedEvent(subSection.id)
+//                            viewModel.resumeVerticalBlock?.let { unit ->
+//                                router.navigateToCourseContainer(
+//                                    fm = requireActivity().supportFragmentManager,
+//                                    courseId = viewModel.courseId,
+//                                    unitId = unit.id,
+//                                    componentId = componentId,
+//                                    mode = CourseViewMode.FULL
+//                                )
+//                            }
+//                        }
                     },
                     onViewAllClick = {
                         //TODO
@@ -113,6 +138,8 @@ private fun LearnScreen(
     windowSize: WindowSize,
     userCoursesViewModel: UserCoursesViewModel,
     onCourseClick: (course: EnrolledCourse) -> Unit,
+    openDates: (course: EnrolledCourse) -> Unit,
+    onResumeClick: (componentId: String) -> Unit,
     onViewAllClick: () -> Unit,
     onSearchClick: () -> Unit,
 ) {
@@ -170,7 +197,9 @@ private fun LearnScreen(
                     0 -> UsersCourseScreen(
                         viewModel = userCoursesViewModel,
                         onCourseClick = onCourseClick,
-                        onViewAllClick = onViewAllClick
+                        onViewAllClick = onViewAllClick,
+                        openDates = openDates,
+                        onResumeClick = onResumeClick
                     )
 
                     1 -> InDevelopmentScreen()
@@ -235,7 +264,7 @@ private fun LearnDropdownMenu(
     ) {
         Row(
             modifier = Modifier
-                .noRippleClickable {
+                .clickable {
                     expanded = true
                 },
             verticalAlignment = Alignment.CenterVertically
@@ -305,7 +334,9 @@ private fun LearnScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             onCourseClick = {},
             onViewAllClick = {},
-            onSearchClick = {}
+            onSearchClick = {},
+            openDates = {},
+            onResumeClick = {}
         )
     }
 }

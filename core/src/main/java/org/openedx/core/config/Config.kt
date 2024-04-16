@@ -119,6 +119,10 @@ class Config(context: Context) {
         return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
     }
 
+    fun isDashboardNewScreenEnabled(): Boolean {
+        return getBoolean(DASHBOARD_NEW_SCREEN_ENABLED, false)
+    }
+
     private fun getString(key: String, defaultValue: String): String {
         val element = getObject(key)
         return if (element != null) {
@@ -178,6 +182,7 @@ class Config(context: Context) {
         private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
+        private const val DASHBOARD_NEW_SCREEN_ENABLED = "DASHBOARD_NEW_SCREEN_ENABLED"
     }
 
     enum class ViewType {

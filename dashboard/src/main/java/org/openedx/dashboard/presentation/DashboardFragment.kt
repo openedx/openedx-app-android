@@ -71,6 +71,7 @@ import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
+import org.openedx.core.CourseContainerTabEntity
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseAssignments
@@ -142,7 +143,8 @@ class DashboardFragment : Fragment() {
                             requireParentFragment().parentFragmentManager,
                             it.course.id,
                             it.course.name,
-                            it.mode
+                            it.mode,
+                            CourseContainerTabEntity.COURSE
                         )
                     },
                     onSwipeRefresh = {

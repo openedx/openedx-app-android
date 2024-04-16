@@ -1,11 +1,16 @@
 package org.openedx.discovery.presentation
 
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.CourseContainerTabEntity
 
 interface DiscoveryRouter {
 
     fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String, enrollmentMode: String
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String,
+        enrollmentMode: String,
+        openTab: CourseContainerTabEntity = CourseContainerTabEntity.COURSE
     )
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?)

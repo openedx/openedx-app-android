@@ -16,6 +16,7 @@ import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.dashboard.presentation.DashboardFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.learn.presentation.LearnFragment
@@ -48,17 +49,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             when (it.itemId) {
                 R.id.fragmentLearn -> {
                     viewModel.logMyCoursesTabClickedEvent()
-                    binding.viewPager.setCurrentItem(1, false)
+                    binding.viewPager.setCurrentItem(0, false)
                 }
 
                 R.id.fragmentHome -> {
                     viewModel.logDiscoveryTabClickedEvent()
-                    binding.viewPager.setCurrentItem(0, false)
+                    binding.viewPager.setCurrentItem(1, false)
                 }
 
                 R.id.fragmentProfile -> {
                     viewModel.logProfileTabClickedEvent()
-                    binding.viewPager.setCurrentItem(3, false)
+                    binding.viewPager.setCurrentItem(2, false)
                 }
             }
             true
@@ -99,12 +100,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4
 
-        val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView)
-            .getDiscoveryFragment()
+        val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView).getDiscoveryFragment()
+        val dashboardFragment = if (config.isDashboardNewScreenEnabled()) {
+            LearnFragment()
+        } else {
+            DashboardFragment()
+        }
 
         adapter = MainNavigationFragmentAdapter(this).apply {
+            addFragment(dashboardFragment)
             addFragment(discoveryFragment)
-            addFragment(LearnFragment())
             addFragment(ProfileFragment())
         }
         binding.viewPager.adapter = adapter

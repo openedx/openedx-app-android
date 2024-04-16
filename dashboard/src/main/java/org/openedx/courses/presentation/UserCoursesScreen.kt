@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -31,6 +32,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -43,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -83,7 +86,9 @@ import org.openedx.core.R as CoreR
 fun UsersCourseScreen(
     viewModel: UserCoursesViewModel,
     onCourseClick: (EnrolledCourse) -> Unit,
+    openDates: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit,
+    onResumeClick: (componentId: String) -> Unit,
 ) {
     val updating by viewModel.updating.observeAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -96,7 +101,9 @@ fun UsersCourseScreen(
         apiHostUrl = viewModel.apiHostUrl,
         onSwipeRefresh = viewModel::updateCourses,
         onCourseClick = onCourseClick,
-        onViewAllClick = onViewAllClick
+        onViewAllClick = onViewAllClick,
+        openDates = openDates,
+        onResumeClick = onResumeClick
     )
 }
 
@@ -109,7 +116,9 @@ private fun UsersCourseScreen(
     apiHostUrl: String,
     onSwipeRefresh: () -> Unit,
     onCourseClick: (EnrolledCourse) -> Unit,
-    onViewAllClick: () -> Unit
+    openDates: (EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit,
+    onResumeClick: (componentId: String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState = rememberPullRefreshState(refreshing = updating, onRefresh = { onSwipeRefresh() })
@@ -147,7 +156,9 @@ private fun UsersCourseScreen(
                             userCourses = uiState.userCourses,
                             apiHostUrl = apiHostUrl,
                             onCourseClick = onCourseClick,
-                            onViewAllClick = onViewAllClick
+                            onViewAllClick = onViewAllClick,
+                            openDates = openDates,
+                            onResumeClick = onResumeClick
                         )
                     }
 
@@ -174,7 +185,9 @@ private fun UserCourses(
     userCourses: UserCourses,
     apiHostUrl: String,
     onCourseClick: (EnrolledCourse) -> Unit,
-    onViewAllClick: () -> Unit
+    openDates: (EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit,
+    onResumeClick: (componentId: String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -183,7 +196,10 @@ private fun UserCourses(
         if (userCourses.primary != null) {
             PrimaryCourseCard(
                 primaryCourse = userCourses.primary,
-                apiHostUrl = apiHostUrl
+                apiHostUrl = apiHostUrl,
+                openDates = openDates,
+                onResumeClick = onResumeClick,
+                onCourseClick = onCourseClick
             )
         }
         SecondaryCourses(
@@ -246,41 +262,60 @@ private fun CourseListItem(
         shape = MaterialTheme.appShapes.courseImageShape,
         elevation = 2.dp
     ) {
-        Column {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(apiHostUrl + course.course.courseImage)
-                    .error(org.openedx.core.R.drawable.core_no_image_course)
-                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(90.dp)
-            )
-            Text(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = 4.dp, vertical = 8.dp),
-                text = course.course.name,
-                style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textDark,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 2
-            )
+        Box {
+            Column {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(apiHostUrl + course.course.courseImage)
+                        .error(org.openedx.core.R.drawable.core_no_image_course)
+                        .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(90.dp)
+                )
+                Text(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 4.dp, vertical = 8.dp),
+                    text = course.course.name,
+                    style = MaterialTheme.appTypography.titleSmall,
+                    color = MaterialTheme.appColors.textDark,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2
+                )
+            }
+            if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
+                Icon(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(top = 8.dp, end = 8.dp)
+                        .background(
+                            color = Color.White,
+                            shape = CircleShape
+                        )
+                        .padding(4.dp)
+                        .align(Alignment.TopEnd),
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.appColors.textWarning
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun AssignmentItem(
+    modifier: Modifier = Modifier,
     painter: Painter,
     title: String?,
     info: String
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 62.dp)
             .padding(vertical = 12.dp, horizontal = 14.dp),
@@ -314,7 +349,10 @@ private fun AssignmentItem(
 @Composable
 private fun PrimaryCourseCard(
     primaryCourse: EnrolledCourse,
-    apiHostUrl: String
+    apiHostUrl: String,
+    openDates: (EnrolledCourse) -> Unit,
+    onResumeClick: (componentId: String) -> Unit,
+    onCourseClick: (EnrolledCourse) -> Unit,
 ) {
     val context = LocalContext.current
     Card(
@@ -359,6 +397,13 @@ private fun PrimaryCourseCard(
                 val title = if (pastAssignments.size == 1) pastAssignments.first().title else null
                 Divider()
                 AssignmentItem(
+                    modifier = Modifier.clickable {
+                        if (pastAssignments.size == 1) {
+                            onResumeClick(pastAssignments.first().blockId)
+                        } else {
+                            openDates(primaryCourse)
+                        }
+                    },
                     painter = rememberVectorPainter(Icons.Default.Warning),
                     title = title,
                     info = stringResource(R.string.dashboard_past_due_assignment, pastAssignments.size)
@@ -368,6 +413,9 @@ private fun PrimaryCourseCard(
             if (futureAssignment != null) {
                 Divider()
                 AssignmentItem(
+                    modifier = Modifier.clickable {
+                        onResumeClick(futureAssignment.blockId)
+                    },
                     painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
                     title = futureAssignment.title,
                     info = stringResource(
@@ -378,8 +426,14 @@ private fun PrimaryCourseCard(
                 )
             }
             ResumeButton(
-                modifier = Modifier.fillMaxWidth(),
-                primaryCourse = primaryCourse
+                primaryCourse = primaryCourse,
+                onClick = {
+                    if (primaryCourse.courseStatus == null) {
+                        onCourseClick(primaryCourse)
+                    } else {
+                        onResumeClick(primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
+                    }
+                }
             )
         }
     }
@@ -388,15 +442,15 @@ private fun PrimaryCourseCard(
 @Composable
 private fun ResumeButton(
     modifier: Modifier = Modifier,
-    primaryCourse: EnrolledCourse
+    primaryCourse: EnrolledCourse,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
             .heightIn(min = 60.dp)
             .background(MaterialTheme.appColors.primary)
-            .clickable {
-                //TODO
-            }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -515,7 +569,7 @@ private val mockCourse = EnrolledCourse(
     mode = "mode",
     isActive = true,
     progress = Progress.DEFAULT_PROGRESS,
-    courseStatus = CourseStatus("", emptyList(), "", ""),
+    courseStatus = CourseStatus("", emptyList(), "", "Unit name"),
     courseAssignments = mockCourseAssignments,
     course = EnrolledCourseData(
         id = "id",
@@ -568,7 +622,9 @@ private fun UsersCourseScreenPreview() {
             updating = false,
             onSwipeRefresh = { },
             onCourseClick = { },
-            onViewAllClick = { }
+            onViewAllClick = { },
+            openDates = { },
+            onResumeClick = { }
         )
     }
 }

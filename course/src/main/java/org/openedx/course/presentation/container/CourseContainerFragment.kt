@@ -17,6 +17,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -177,6 +178,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             }
             binding.bottomNavView.isVisible = true
         }
+
+        val openTab = requireArguments().parcelable<CourseContainerTab>(ARG_OPEN_TAB) ?: CourseContainerTab.COURSE
+        binding.viewPager.setCurrentItem(openTab.ordinal, false)
         viewModel.courseContainerTabClickedEvent(Tabs.entries[binding.viewPager.currentItem])
     }
 
@@ -290,16 +294,19 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
         private const val ARG_ENROLLMENT_MODE = "enrollmentMode"
+        private const val ARG_OPEN_TAB = "openTab"
         fun newInstance(
             courseId: String,
             courseTitle: String,
             enrollmentMode: String,
+            openTab: org.openedx.core.CourseContainerTabEntity
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
                 ARG_TITLE to courseTitle,
-                ARG_ENROLLMENT_MODE to enrollmentMode
+                ARG_ENROLLMENT_MODE to enrollmentMode,
+                ARG_OPEN_TAB to CourseContainerTab.fromEntity(openTab)
             )
             return fragment
         }
