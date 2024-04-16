@@ -27,5 +27,5 @@ enum class CourseContainerTab(val itemId: Int, val titleResId: Int) {
     VIDEOS(itemId = R.id.videos, titleResId = R.string.course_navigation_videos),
     DISCUSSION(itemId = R.id.discussions, titleResId = R.string.course_navigation_discussions),
     DATES(itemId = R.id.dates, titleResId = R.string.course_navigation_dates),
-    HANDOUTS(itemId = R.id.resources, titleResId = R.string.course_navigation_more),
+    MORE(itemId = R.id.resources, titleResId = R.string.course_navigation_more),
 }

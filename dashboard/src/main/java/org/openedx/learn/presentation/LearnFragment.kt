@@ -47,7 +47,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.presentation.global.InDevelopmentScreen
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -63,11 +65,13 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.courses.presentation.UserCoursesViewModel
 import org.openedx.courses.presentation.UsersCourseScreen
 import org.openedx.dashboard.R
+import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.learn.LearnType
 
 class LearnFragment : Fragment() {
 
     private val userCoursesViewModel by viewModel<UserCoursesViewModel>()
+    private val router by inject<DashboardRouter>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,7 +84,23 @@ class LearnFragment : Fragment() {
                 val windowSize = rememberWindowSize()
                 LearnScreen(
                     windowSize = windowSize,
-                    userCoursesViewModel = userCoursesViewModel
+                    userCoursesViewModel = userCoursesViewModel,
+                    onCourseClick = {
+                        router.navigateToCourseOutline(
+                            requireParentFragment().parentFragmentManager,
+                            it.course.id,
+                            it.course.name,
+                            it.mode
+                        )
+                    },
+                    onViewAllClick = {
+                        //TODO
+                    },
+                    onSearchClick = {
+                        router.navigateToCourseSearch(
+                            requireParentFragment().parentFragmentManager, ""
+                        )
+                    }
                 )
             }
         }
@@ -90,8 +110,11 @@ class LearnFragment : Fragment() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LearnScreen(
-    userCoursesViewModel : UserCoursesViewModel,
-    windowSize: WindowSize
+    windowSize: WindowSize,
+    userCoursesViewModel: UserCoursesViewModel,
+    onCourseClick: (course: EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit,
+    onSearchClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pagerState = rememberPagerState {
@@ -125,9 +148,7 @@ private fun LearnScreen(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),
                 label = stringResource(id = R.string.dashboard_learn),
-                onSearchClick = {
-                    //TODO
-                }
+                onSearchClick = onSearchClick
             )
 
             if (userCoursesViewModel.isProgramTypeWebView) {
@@ -148,7 +169,8 @@ private fun LearnScreen(
                 when (page) {
                     0 -> UsersCourseScreen(
                         viewModel = userCoursesViewModel,
-                        onItemClick = {},
+                        onCourseClick = onCourseClick,
+                        onViewAllClick = onViewAllClick
                     )
 
                     1 -> InDevelopmentScreen()
@@ -212,13 +234,16 @@ private fun LearnDropdownMenu(
         modifier = modifier
     ) {
         Row(
-            modifier = Modifier.noRippleClickable {
-                expanded = true
-            }
+            modifier = Modifier
+                .noRippleClickable {
+                    expanded = true
+                },
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(id = currentValue.title),
                 color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.titleSmall
             )
             Icon(
                 imageVector = Icons.Default.ExpandMore,
@@ -239,17 +264,28 @@ private fun LearnDropdownMenu(
                 onDismissRequest = { expanded = false }
             ) {
                 for (learnType in LearnType.entries) {
+                    val background: Color
+                    val textColor: Color
+                    if (currentValue == learnType) {
+                        background = MaterialTheme.appColors.primary
+                        textColor = MaterialTheme.appColors.buttonText
+                    } else {
+                        background = Color.Transparent
+                        textColor = MaterialTheme.appColors.textDark
+                    }
                     DropdownMenuItem(
                         modifier = Modifier
-                            .background(
-                                if (currentValue == learnType) MaterialTheme.appColors.primary else Color.Transparent
-                            ),
+                            .background(background),
                         onClick = {
                             currentValue = learnType
                             expanded = false
                         }
                     ) {
-                        Text(stringResource(id = learnType.title))
+                        Text(
+                            text = stringResource(id = learnType.title),
+                            style = MaterialTheme.appTypography.titleSmall,
+                            color = textColor
+                        )
                     }
                 }
             }
@@ -266,7 +302,10 @@ private fun LearnScreenPreview() {
     OpenEdXTheme {
         LearnScreen(
             userCoursesViewModel = viewModel(),
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            onCourseClick = {},
+            onViewAllClick = {},
+            onSearchClick = {}
         )
     }
 }

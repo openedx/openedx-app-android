@@ -902,21 +902,23 @@ fun TextIcon(
     icon: ImageVector,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
+    modifier: Modifier = Modifier,
+    iconModifier: Modifier? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val modifier = if (onClick == null) {
-        Modifier
+    val rowModifier = if (onClick == null) {
+        modifier
     } else {
-        Modifier.noRippleClickable { onClick.invoke() }
+        modifier.noRippleClickable { onClick.invoke() }
     }
     Row(
-        modifier = modifier,
+        modifier = rowModifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(text = text, color = color, style = textStyle)
         Icon(
-            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = iconModifier ?: Modifier.size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color

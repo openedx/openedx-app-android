@@ -10,4 +10,6 @@ interface DashboardRouter {
         courseTitle: String,
         enrollmentMode: String,
     )
+
+    fun navigateToCourseSearch(fm: FragmentManager, querySearch: String)
 }

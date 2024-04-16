@@ -10,4 +10,6 @@
     <string name="dashboard_start_course">Start course</string>
     <string name="dashboard_resume_course">Resume Course</string>
     <string name="dashboard_past_due_assignment">%1$d Past Due Assignment</string>
+    <string name="dashboard_view_all">View All (%1$d)</string>
+    <string name="dashboard_assignment_due_in_days">%1$s Due in %2$s</string>
 </resources>

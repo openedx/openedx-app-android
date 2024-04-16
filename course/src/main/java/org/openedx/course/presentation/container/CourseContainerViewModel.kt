@@ -168,7 +168,7 @@ class CourseContainerViewModel(
             CourseContainerTab.VIDEOS -> videoTabClickedEvent()
             CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
-            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
+            CourseContainerTab.MORE -> handoutsTabClickedEvent()
         }
     }
 

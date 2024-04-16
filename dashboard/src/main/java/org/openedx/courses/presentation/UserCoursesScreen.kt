@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
@@ -26,6 +30,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -46,6 +51,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -62,6 +68,7 @@ import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -75,7 +82,8 @@ import org.openedx.core.R as CoreR
 @Composable
 fun UsersCourseScreen(
     viewModel: UserCoursesViewModel,
-    onItemClick: (EnrolledCourse) -> Unit,
+    onCourseClick: (EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit,
 ) {
     val updating by viewModel.updating.observeAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -87,7 +95,8 @@ fun UsersCourseScreen(
         updating = updating,
         apiHostUrl = viewModel.apiHostUrl,
         onSwipeRefresh = viewModel::updateCourses,
-        onItemClick = onItemClick
+        onCourseClick = onCourseClick,
+        onViewAllClick = onViewAllClick
     )
 }
 
@@ -99,7 +108,8 @@ private fun UsersCourseScreen(
     updating: Boolean,
     apiHostUrl: String,
     onSwipeRefresh: () -> Unit,
-    onItemClick: (EnrolledCourse) -> Unit,
+    onCourseClick: (EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState = rememberPullRefreshState(refreshing = updating, onRefresh = { onSwipeRefresh() })
@@ -135,7 +145,9 @@ private fun UsersCourseScreen(
                         UserCourses(
                             modifier = Modifier.fillMaxSize(),
                             userCourses = uiState.userCourses,
-                            apiHostUrl = apiHostUrl
+                            apiHostUrl = apiHostUrl,
+                            onCourseClick = onCourseClick,
+                            onViewAllClick = onViewAllClick
                         )
                     }
 
@@ -160,10 +172,13 @@ private fun UsersCourseScreen(
 private fun UserCourses(
     modifier: Modifier = Modifier,
     userCourses: UserCourses,
-    apiHostUrl: String
+    apiHostUrl: String,
+    onCourseClick: (EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit
 ) {
     Column(
         modifier = modifier
+            .padding(vertical = 12.dp)
     ) {
         if (userCourses.primary != null) {
             PrimaryCourseCard(
@@ -172,20 +187,94 @@ private fun UserCourses(
             )
         }
         SecondaryCourses(
-            courses = userCourses.enrollments.courses
+            courses = userCourses.enrollments.courses,
+            apiHostUrl = apiHostUrl,
+            onCourseClick = onCourseClick,
+            onViewAllClick = onViewAllClick
         )
     }
 }
 
 @Composable
 private fun SecondaryCourses(
-    courses: List<EnrolledCourse>
+    courses: List<EnrolledCourse>,
+    apiHostUrl: String,
+    onCourseClick: (EnrolledCourse) -> Unit,
+    onViewAllClick: () -> Unit
 ) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp)
+            .padding(top = 8.dp)
+    ) {
+        TextIcon(
+            text = stringResource(R.string.dashboard_view_all, courses.size),
+            textStyle = MaterialTheme.appTypography.titleSmall,
+            icon = Icons.Default.ChevronRight,
+            color = MaterialTheme.appColors.textDark,
+            modifier = Modifier.padding(horizontal = 4.dp),
+            iconModifier = Modifier.size(22.dp),
+            onClick = onViewAllClick
+        )
+        LazyRow {
+            items(courses) {
+                CourseListItem(
+                    course = it,
+                    apiHostUrl = apiHostUrl,
+                    onCourseClick = onCourseClick
+                )
+            }
+        }
+    }
 }
 
 @Composable
-fun AssignmentItem(
+private fun CourseListItem(
+    course: EnrolledCourse,
+    apiHostUrl: String,
+    onCourseClick: (EnrolledCourse) -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .width(140.dp)
+            .padding(4.dp)
+            .clickable {
+                onCourseClick(course)
+            },
+        backgroundColor = MaterialTheme.appColors.background,
+        shape = MaterialTheme.appShapes.courseImageShape,
+        elevation = 2.dp
+    ) {
+        Column {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(apiHostUrl + course.course.courseImage)
+                    .error(org.openedx.core.R.drawable.core_no_image_course)
+                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(90.dp)
+            )
+            Text(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                text = course.course.name,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textDark,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2
+            )
+        }
+    }
+}
+
+@Composable
+private fun AssignmentItem(
     painter: Painter,
     title: String?,
     info: String
@@ -193,7 +282,8 @@ fun AssignmentItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 16.dp),
+            .heightIn(min = 62.dp)
+            .padding(vertical = 12.dp, horizontal = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -226,18 +316,19 @@ private fun PrimaryCourseCard(
     primaryCourse: EnrolledCourse,
     apiHostUrl: String
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .padding(top = 8.dp),
+            .fillMaxWidth()
+            .padding(2.dp),
         backgroundColor = MaterialTheme.appColors.background,
         shape = MaterialTheme.appShapes.courseImageShape,
         elevation = 4.dp
     ) {
         Column {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
+                model = ImageRequest.Builder(context)
                     .data(apiHostUrl + primaryCourse.course.courseImage)
                     .error(org.openedx.core.R.drawable.core_no_image_course)
                     .placeholder(org.openedx.core.R.drawable.core_no_image_course)
@@ -279,7 +370,11 @@ private fun PrimaryCourseCard(
                 AssignmentItem(
                     painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
                     title = futureAssignment.title,
-                    info = "${futureAssignment.assignmentType} Due in ${futureAssignment.date} days"
+                    info = stringResource(
+                        R.string.dashboard_assignment_due_in_days,
+                        futureAssignment.assignmentType ?: "",
+                        TimeUtils.getCourseFormattedDate(context, futureAssignment.date)
+                    )
                 )
             }
             ResumeButton(
@@ -291,7 +386,7 @@ private fun PrimaryCourseCard(
 }
 
 @Composable
-fun ResumeButton(
+private fun ResumeButton(
     modifier: Modifier = Modifier,
     primaryCourse: EnrolledCourse
 ) {
@@ -472,7 +567,8 @@ private fun UsersCourseScreenPreview() {
             uiMessage = null,
             updating = false,
             onSwipeRefresh = { },
-            onItemClick = { }
+            onCourseClick = { },
+            onViewAllClick = { }
         )
     }
 }

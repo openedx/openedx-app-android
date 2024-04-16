@@ -140,7 +140,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 )
             )
             addFragment(
-                Tabs.HANDOUTS,
+                Tabs.MORE,
                 HandoutsFragment.newInstance(viewModel.courseId)
             )
         }
