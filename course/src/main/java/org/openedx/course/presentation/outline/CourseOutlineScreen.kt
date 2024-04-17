@@ -440,7 +440,7 @@ private fun ResumeCourse(
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
                     painter = painterResource(id = CoreR.drawable.core_ic_forward),
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
@@ -499,7 +499,7 @@ private fun ResumeCourseTablet(
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
                     painter = painterResource(id = CoreR.drawable.core_ic_forward),
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }

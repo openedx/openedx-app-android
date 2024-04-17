@@ -21,9 +21,16 @@ data class AppColors(
     val textFieldText: Color,
     val textFieldHint: Color,
 
-    val buttonBackground: Color,
-    val buttonSecondaryBackground: Color,
-    val buttonText: Color,
+    val primaryButtonBackground: Color,
+    val primaryButtonText: Color,
+    val primaryButtonBorder: Color,
+    val primaryButtonBorderedText: Color,
+
+    val secondaryButtonBackground: Color,
+    val secondaryButtonText: Color,
+    val secondaryButtonBorder: Color,
+    val secondaryButtonBorderedBackground: Color,
+    val secondaryButtonBorderedText: Color,
 
     val cardViewBackground: Color,
     val cardViewBorder: Color,
@@ -36,7 +43,6 @@ data class AppColors(
     val info_variant: Color,
     val onWarning: Color,
     val onInfo: Color,
-    val buttonBorder: Color,
 
     val rateStars: Color,
     val inactiveButtonBackground: Color,
@@ -50,6 +56,7 @@ data class AppColors(
     val datesSectionBarNextWeek: Color,
     val datesSectionBarUpcoming: Color,
 
+    val authGoogleButtonBackground: Color,
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
 

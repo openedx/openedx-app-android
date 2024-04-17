@@ -230,7 +230,7 @@ fun OfflineQueueCard(
             Text(
                 text = downloadModel.size.toLong().toFileSize(),
                 style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.onBackground,
+                color = MaterialTheme.appColors.textSecondary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
@@ -263,7 +263,7 @@ fun OfflineQueueCard(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                    tint = MaterialTheme.appColors.onBackground
+                    tint = MaterialTheme.appColors.error
                 )
             }
         }
@@ -339,7 +339,7 @@ fun NavigationUnitsButtons(
                 colors = ButtonDefaults.outlinedButtonColors(
                     backgroundColor = MaterialTheme.appColors.background
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.secondary),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.primaryButtonBorder),
                 elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onPrevClick,
@@ -368,7 +368,7 @@ fun NavigationUnitsButtons(
             modifier = Modifier
                 .height(42.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.buttonBackground
+                backgroundColor = MaterialTheme.appColors.primaryButtonBackground
             ),
             elevation = null,
             shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -380,7 +380,7 @@ fun NavigationUnitsButtons(
             ) {
                 Text(
                     text = nextButtonText,
-                    color = MaterialTheme.appColors.onSecondary,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.labelLarge
                 )
                 Spacer(Modifier.width(8.dp))
@@ -388,7 +388,7 @@ fun NavigationUnitsButtons(
                     modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
                     painter = nextButtonIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.onSecondary
+                    tint = MaterialTheme.appColors.primaryButtonText
                 )
             }
         }

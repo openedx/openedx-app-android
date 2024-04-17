@@ -475,7 +475,7 @@ private fun DiscussionThreadsScreen(
                                                                 Modifier
                                                                     .size(40.dp)
                                                                     .clip(CircleShape)
-                                                                    .background(MaterialTheme.appColors.secondary)
+                                                                    .background(MaterialTheme.appColors.secondaryButtonBackground)
                                                                     .clickable {
                                                                         onCreatePostClick()
                                                                     },
@@ -485,7 +485,7 @@ private fun DiscussionThreadsScreen(
                                                                     modifier = Modifier.size(16.dp),
                                                                     painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
                                                                     contentDescription = stringResource(id = discussionR.string.discussion_add_comment),
-                                                                    tint = MaterialTheme.appColors.buttonText
+                                                                    tint = MaterialTheme.appColors.primaryButtonText
                                                                 )
                                                             }
                                                         }

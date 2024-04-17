@@ -197,7 +197,7 @@ private fun ChapterEndDialogScreen(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.course_section_finished, sectionName),
-                color = MaterialTheme.appColors.onBackground,
+                color = MaterialTheme.appColors.textFieldText,
                 style = MaterialTheme.appTypography.titleSmall,
                 textAlign = TextAlign.Center
             )
@@ -209,7 +209,7 @@ private fun ChapterEndDialogScreen(
                         TextIcon(
                             text = stringResource(id = R.string.course_next_section),
                             painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
-                            color = MaterialTheme.appColors.onSecondary,
+                            color = MaterialTheme.appColors.primaryButtonText,
                             textStyle = MaterialTheme.appTypography.labelLarge,
                             iconModifier = Modifier.rotate(if (isVerticalNavigation) 90f else 0f)
                         )
@@ -219,15 +219,15 @@ private fun ChapterEndDialogScreen(
                 Spacer(Modifier.height(16.dp))
             }
             OpenEdXOutlinedButton(
-                borderColor = MaterialTheme.appColors.buttonBackground,
-                textColor = MaterialTheme.appColors.onBackground,
+                borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 text = stringResource(id = R.string.course_back_to_outline),
                 onClick = onBackButtonClick,
                 content = {
                     AutoSizeText(
                         text = stringResource(id = R.string.course_back_to_outline),
                         style = MaterialTheme.appTypography.bodyMedium,
-                        color = MaterialTheme.appColors.onBackground
+                        color = MaterialTheme.appColors.primaryButtonBorderedText
                     )
                 }
             )
@@ -309,7 +309,7 @@ private fun ChapterEndDialogScreenLandscape(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.course_section_finished, sectionName),
-                        color = MaterialTheme.appColors.onBackground,
+                        color = MaterialTheme.appColors.textFieldText,
                         style = MaterialTheme.appTypography.titleSmall,
                         textAlign = TextAlign.Center
                     )
@@ -326,7 +326,7 @@ private fun ChapterEndDialogScreenLandscape(
                                 TextIcon(
                                     text = stringResource(id = R.string.course_next_section),
                                     painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
-                                    color = MaterialTheme.appColors.onSecondary,
+                                    color = MaterialTheme.appColors.primaryButtonText,
                                     textStyle = MaterialTheme.appTypography.labelLarge
                                 )
                             },
@@ -335,15 +335,15 @@ private fun ChapterEndDialogScreenLandscape(
                         Spacer(Modifier.height(16.dp))
                     }
                     OpenEdXOutlinedButton(
-                        borderColor = MaterialTheme.appColors.buttonBackground,
-                        textColor = MaterialTheme.appColors.buttonBackground,
+                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                        textColor = MaterialTheme.appColors.primaryButtonBackground,
                         text = stringResource(id = R.string.course_back_to_outline),
                         onClick = onBackButtonClick,
                         content = {
                             AutoSizeText(
                                 text = stringResource(id = R.string.course_back_to_outline),
                                 style = MaterialTheme.appTypography.bodyMedium,
-                                color = MaterialTheme.appColors.onBackground
+                                color = MaterialTheme.appColors.primaryButtonBorderedText
                             )
                         }
                     )

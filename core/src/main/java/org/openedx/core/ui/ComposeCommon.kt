@@ -254,11 +254,12 @@ fun SearchBar(
             }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textFieldText,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground,
-            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            cursorColor = MaterialTheme.appColors.textFieldText,
-            leadingIconColor = MaterialTheme.appColors.textFieldText
+            textColor = MaterialTheme.appColors.textPrimary,
+            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.primary,
+            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.primary,
+            leadingIconColor = MaterialTheme.appColors.textPrimary
         ),
         placeholder = {
             Text(
@@ -266,7 +267,7 @@ fun SearchBar(
                     .testTag("txt_search_placeholder")
                     .fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textFieldHint,
+                color = MaterialTheme.appColors.textSecondary,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -275,7 +276,7 @@ fun SearchBar(
                 modifier = Modifier.padding(start = 16.dp),
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = if (isFocused) MaterialTheme.appColors.textFieldText else MaterialTheme.appColors.textFieldHint
+                tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
             )
         },
         trailingIcon = {
@@ -345,18 +346,18 @@ fun SearchBarStateless(
             }
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            textColor = MaterialTheme.appColors.textFieldText,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground,
-            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            textColor = MaterialTheme.appColors.textPrimary,
+            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            cursorColor = MaterialTheme.appColors.textFieldText,
-            leadingIconColor = MaterialTheme.appColors.textFieldText
+            cursorColor = MaterialTheme.appColors.primary,
+            leadingIconColor = MaterialTheme.appColors.textPrimary
         ),
         placeholder = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textFieldText,
+                color = MaterialTheme.appColors.textSecondary,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -365,7 +366,7 @@ fun SearchBarStateless(
                 modifier = Modifier.padding(start = 16.dp),
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = if (isFocused) MaterialTheme.appColors.textFieldText else MaterialTheme.appColors.textFieldHint
+                tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
             )
         },
         trailingIcon = {
@@ -1057,8 +1058,8 @@ fun OpenEdXSecondaryButton(
         text = text,
         onClick = onClick,
         enabled = enabled,
-        textColor = MaterialTheme.appColors.onSecondary,
-        backgroundColor = MaterialTheme.appColors.secondary,
+        textColor = MaterialTheme.appColors.primaryButtonText,
+        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
         content = content
     )
 }
@@ -1069,8 +1070,8 @@ fun OpenEdXButton(
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
-    textColor: Color = MaterialTheme.appColors.onSecondary,
-    backgroundColor: Color = MaterialTheme.appColors.secondary,
+    textColor: Color = MaterialTheme.appColors.primaryButtonText,
+    backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
     content: (@Composable RowScope.() -> Unit)? = null
 ) {
     Button(
@@ -1111,9 +1112,9 @@ fun OpenEdXSecondaryOutlinedButton(
         text = text,
         onClick = onClick,
         enabled = enabled,
-        textColor = MaterialTheme.appColors.secondary,
-        backgroundColor = MaterialTheme.appColors.onSecondary,
-        borderColor = MaterialTheme.appColors.buttonBorder,
+        textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
+        backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
+        borderColor = MaterialTheme.appColors.secondaryButtonBorder,
         content = content
     )
 }

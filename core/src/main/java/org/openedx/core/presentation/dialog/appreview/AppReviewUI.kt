@@ -180,7 +180,7 @@ fun FeedbackDialog(
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = MaterialTheme.appColors.cardViewBackground,
                     unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                    textColor = MaterialTheme.appColors.textFieldHint
+                    textColor = MaterialTheme.appColors.textFieldText
                 ),
             )
 
@@ -320,8 +320,8 @@ fun DefaultTextButton(
     val textColor: Color
     val backgroundColor: Color
     if (isEnabled) {
-        textColor = MaterialTheme.appColors.buttonText
-        backgroundColor = MaterialTheme.appColors.buttonBackground
+        textColor = MaterialTheme.appColors.primaryButtonText
+        backgroundColor = MaterialTheme.appColors.primaryButtonBackground
     } else {
         textColor = MaterialTheme.appColors.inactiveButtonText
         backgroundColor = MaterialTheme.appColors.inactiveButtonBackground
@@ -345,7 +345,6 @@ fun DefaultTextButton(
         ) {
             Text(
                 text = text,
-                color = MaterialTheme.appColors.onSecondary,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }

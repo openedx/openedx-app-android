@@ -427,7 +427,7 @@ private fun CourseItem(
                 Text(
                     modifier = Modifier.testTag("txt_course_org"),
                     text = enrolledCourse.course.org,
-                    color = MaterialTheme.appColors.onBackground,
+                    color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.labelMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -463,7 +463,7 @@ private fun CourseItem(
                                 enrolledCourse.course.startType,
                                 enrolledCourse.course.startDisplay
                             ),
-                            color = MaterialTheme.appColors.onBackground,
+                            color = MaterialTheme.appColors.textFieldHint,
                             style = MaterialTheme.appTypography.labelMedium
                         )
                         Box(

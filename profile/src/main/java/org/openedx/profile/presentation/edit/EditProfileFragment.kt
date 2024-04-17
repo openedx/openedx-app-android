@@ -600,7 +600,7 @@ private fun EditProfileScreen(
                             Text(
                                 modifier = Modifier.testTag("txt_edit_profile_type_label"),
                                 text = stringResource(if (uiState.isLimited) R.string.profile_limited_profile else R.string.profile_full_profile),
-                                color = MaterialTheme.appColors.onBackground,
+                                color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.titleSmall
                             )
                             Spacer(modifier = Modifier.height(32.dp))
@@ -965,7 +965,7 @@ private fun SelectableField(
                 .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.onBackground
+            color = MaterialTheme.appColors.textPrimary
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -980,7 +980,7 @@ private fun SelectableField(
                 Icon(
                     imageVector = Icons.Filled.ExpandMore,
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.textFieldText
+                    tint = MaterialTheme.appColors.textPrimaryVariant
                 )
             },
             modifier = Modifier
@@ -1127,7 +1127,7 @@ private fun LeaveProfile(
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.buttonText,
+                            color = MaterialTheme.appColors.primaryButtonText,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )
@@ -1218,7 +1218,7 @@ private fun LeaveProfileLandscape(
                                     modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),
                                     text = stringResource(id = R.string.profile_leave),
                                     style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.buttonText
+                                    color = MaterialTheme.appColors.primaryButtonText
                                 )
                             },
                             onClick = onLeaveClick

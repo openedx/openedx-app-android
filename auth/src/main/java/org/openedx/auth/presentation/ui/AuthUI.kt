@@ -302,11 +302,11 @@ fun InputRegistrationField(
     }
     val isSingleLine = registrationField.type != RegistrationFieldType.TEXTAREA
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
-        MaterialTheme.appColors.primary
+        MaterialTheme.appColors.textSecondary
     } else if (isErrorShown) {
         MaterialTheme.appColors.error
     } else {
-        MaterialTheme.appColors.textFieldHint
+        MaterialTheme.appColors.textSecondary
     }
     val helperText = if (registrationField.errorInstructions.isEmpty()) {
         registrationField.instructions
@@ -381,11 +381,11 @@ fun SelectableRegisterField(
     onClick: (String, List<RegistrationField.Option>) -> Unit
 ) {
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
-        MaterialTheme.appColors.primary
+        MaterialTheme.appColors.textSecondary
     } else if (isErrorShown) {
         MaterialTheme.appColors.error
     } else {
-        MaterialTheme.appColors.textFieldHint
+        MaterialTheme.appColors.textSecondary
     }
     val helperText = if (registrationField.errorInstructions.isEmpty()) {
         registrationField.instructions

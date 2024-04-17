@@ -40,9 +40,16 @@ private val DarkColorPalette = AppColors(
     textFieldText = dark_text_field_text,
     textFieldHint = dark_text_field_hint,
 
-    buttonBackground = dark_button_background,
-    buttonSecondaryBackground = dark_button_secondary_background,
-    buttonText = dark_button_text,
+    primaryButtonBackground = dark_primary_button_background,
+    primaryButtonText = dark_primary_button_text,
+    primaryButtonBorder = dark_primary_button_border,
+    primaryButtonBorderedText = dark_primary_button_bordered_text,
+
+    secondaryButtonBackground = dark_secondary_button_background,
+    secondaryButtonText = dark_secondary_button_text,
+    secondaryButtonBorder = dark_secondary_button_border,
+    secondaryButtonBorderedBackground = dark_secondary_button_bordered_background,
+    secondaryButtonBorderedText = dark_secondary_button_bordered_text,
 
     cardViewBackground = dark_card_view_background,
     cardViewBorder = dark_card_view_border,
@@ -56,11 +63,10 @@ private val DarkColorPalette = AppColors(
     info_variant = dark_info_variant,
     onWarning = dark_onWarning,
     onInfo = dark_onInfo,
-    buttonBorder = dark_button_border,
 
     rateStars = dark_rate_stars,
     inactiveButtonBackground = dark_inactive_button_background,
-    inactiveButtonText = dark_button_text,
+    inactiveButtonText = dark_primary_button_text,
 
     accessGreen = dark_access_green,
 
@@ -70,6 +76,7 @@ private val DarkColorPalette = AppColors(
     datesSectionBarNextWeek = dark_dates_section_bar_next_week,
     datesSectionBarUpcoming = dark_dates_section_bar_upcoming,
 
+    authGoogleButtonBackground = dark_auth_google_button_background,
     authFacebookButtonBackground = dark_auth_facebook_button_background,
     authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
 
@@ -117,9 +124,16 @@ private val LightColorPalette = AppColors(
     textFieldText = light_text_field_text,
     textFieldHint = light_text_field_hint,
 
-    buttonBackground = light_button_background,
-    buttonSecondaryBackground = light_button_secondary_background,
-    buttonText = light_button_text,
+    primaryButtonBackground = light_primary_button_background,
+    primaryButtonText = light_primary_button_text,
+    primaryButtonBorder = light_primary_button_border,
+    primaryButtonBorderedText = light_primary_button_bordered_text,
+
+    secondaryButtonBackground = light_secondary_button_background,
+    secondaryButtonText = light_secondary_button_text,
+    secondaryButtonBorder = light_secondary_button_border,
+    secondaryButtonBorderedBackground = light_secondary_button_bordered_background,
+    secondaryButtonBorderedText = light_secondary_button_bordered_text,
 
     cardViewBackground = light_card_view_background,
     cardViewBorder = light_card_view_border,
@@ -133,11 +147,10 @@ private val LightColorPalette = AppColors(
     info_variant = light_info_variant,
     onWarning = light_onWarning,
     onInfo = light_onInfo,
-    buttonBorder = light_button_border,
 
     rateStars = light_rate_stars,
     inactiveButtonBackground = light_inactive_button_background,
-    inactiveButtonText = light_button_text,
+    inactiveButtonText = light_primary_button_text,
 
     accessGreen = light_access_green,
 
@@ -147,6 +160,7 @@ private val LightColorPalette = AppColors(
     datesSectionBarNextWeek = light_dates_section_bar_next_week,
     datesSectionBarUpcoming = light_dates_section_bar_upcoming,
 
+    authGoogleButtonBackground = light_auth_google_button_background,
     authFacebookButtonBackground = light_auth_facebook_button_background,
     authMicrosoftButtonBackground = light_auth_microsoft_button_background,
 
