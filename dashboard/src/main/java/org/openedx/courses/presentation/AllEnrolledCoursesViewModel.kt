@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
@@ -14,13 +15,11 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardAnalytics
-
 
 class AllEnrolledCoursesViewModel(
     private val config: Config,
@@ -28,8 +27,7 @@ class AllEnrolledCoursesViewModel(
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
-    private val analytics: DashboardAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val analytics: DashboardAnalytics
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
@@ -57,9 +55,7 @@ class AllEnrolledCoursesViewModel(
     val canLoadMore: LiveData<Boolean>
         get() = _canLoadMore
 
-    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent>()
-    val appUpgradeEvent: LiveData<AppUpgradeEvent>
-        get() = _appUpgradeEvent
+    val courseStatusFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -74,7 +70,6 @@ class AllEnrolledCoursesViewModel(
 
     init {
         getCourses()
-        collectAppUpgradeEvent()
     }
 
     fun getCourses() {
@@ -89,7 +84,7 @@ class AllEnrolledCoursesViewModel(
                 _updating.value = true
                 isLoading = true
                 page = 1
-                val response = interactor.getEnrolledCourses(page)
+                val response = interactor.getUserCourses(page, courseStatusFilter.value).enrollments
                 if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
                     _canLoadMore.value = true
                     page++
@@ -123,7 +118,7 @@ class AllEnrolledCoursesViewModel(
             try {
                 isLoading = true
                 val response = if (networkConnection.isOnline() || page > 1) {
-                    interactor.getEnrolledCourses(page)
+                    interactor.getUserCourses(page, courseStatusFilter.value).enrollments
                 } else {
                     null
                 }
@@ -164,14 +159,6 @@ class AllEnrolledCoursesViewModel(
     fun fetchMore() {
         if (!isLoading && page != -1) {
             internalLoadingCourses()
-        }
-    }
-
-    private fun collectAppUpgradeEvent() {
-        viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
-            }
         }
     }
 

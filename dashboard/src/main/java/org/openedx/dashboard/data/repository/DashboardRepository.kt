@@ -6,6 +6,7 @@ import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.data.DashboardDao
+import org.openedx.dashboard.domain.CourseStatusFilter
 
 class DashboardRepository(
     private val api: CourseApi,
@@ -32,10 +33,12 @@ class DashboardRepository(
         return list.map { it.mapToDomain() }
     }
 
-    suspend fun getUserCourses(): UserCourses {
+    suspend fun getUserCourses(page: Int, status: CourseStatusFilter?): UserCourses {
         val user = preferencesManager.user
         val result = api.getUserCourses(
-            username = user?.username ?: ""
+            username = user?.username ?: "",
+            page = page,
+            status = status?.key
         )
         preferencesManager.appConfig = result.configs.mapToDomain()
 

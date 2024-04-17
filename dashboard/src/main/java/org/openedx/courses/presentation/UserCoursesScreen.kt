@@ -222,7 +222,8 @@ private fun SecondaryCourses(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 14.dp)
-            .padding(top = 8.dp)
+            .padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TextIcon(
             text = stringResource(R.string.dashboard_view_all, courses.size),
@@ -284,7 +285,8 @@ private fun CourseListItem(
                     style = MaterialTheme.appTypography.titleSmall,
                     color = MaterialTheme.appColors.textDark,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 2
+                    maxLines = 2,
+                    minLines = 2
                 )
             }
             if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {

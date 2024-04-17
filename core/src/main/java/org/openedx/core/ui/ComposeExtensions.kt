@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -63,6 +64,16 @@ inline val Float.px: Float
     }
 
 fun LazyListState.shouldLoadMore(rememberedIndex: MutableState<Int>, threshold: Int): Boolean {
+    val firstVisibleIndex = this.firstVisibleItemIndex
+    if (rememberedIndex.value != firstVisibleIndex) {
+        rememberedIndex.value = firstVisibleIndex
+        val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        return lastVisibleIndex >= layoutInfo.totalItemsCount - 1 - threshold
+    }
+    return false
+}
+
+fun LazyGridState.shouldLoadMore(rememberedIndex: MutableState<Int>, threshold: Int): Boolean {
     val firstVisibleIndex = this.firstVisibleItemIndex
     if (rememberedIndex.value != firstVisibleIndex) {
         rememberedIndex.value = firstVisibleIndex
