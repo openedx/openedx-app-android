@@ -7,11 +7,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
 
@@ -19,8 +21,9 @@ class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
+    private val networkConnection: NetworkConnection,
     val courseId: String,
-    val courseName: String,
+    val courseName: String
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<DiscussionTopicsUIState>()
@@ -34,6 +37,9 @@ class DiscussionTopicsViewModel(
     private val _isUpdating = MutableSharedFlow<Boolean>()
     val isUpdating: SharedFlow<Boolean>
         get() = _isUpdating.asSharedFlow()
+
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
 
     init {
         getCourseTopics()

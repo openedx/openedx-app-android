@@ -286,7 +286,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             windowSize = windowSize,
                                             uiState = uiState,
                                             uiMessage = uiMessage,
-
                                             onItemClick = { action, data, title ->
                                                 discussionTopicsViewModel.discussionClickedEvent(action, data, title)
                                                 discussionRouter.navigateToDiscussionThread(
@@ -303,7 +302,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                     requireActivity().supportFragmentManager,
                                                     discussionTopicsViewModel.courseId
                                                 )
-                                            }
+                                            },
+                                            onReloadClick = {
+                                               discussionTopicsViewModel.getCourseTopics()
+                                            },
+                                            hasInternetConnection = discussionTopicsViewModel.hasInternetConnection
                                         )
                                     }
 

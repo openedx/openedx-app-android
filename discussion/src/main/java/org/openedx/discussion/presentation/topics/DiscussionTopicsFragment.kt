@@ -25,6 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -62,11 +65,17 @@ fun DiscussionTopicsScreen(
     windowSize: WindowSize,
     uiState: DiscussionTopicsUIState,
     uiMessage: UIMessage?,
+    hasInternetConnection: Boolean,
+    onReloadClick: () -> Unit,
     onSearchClick: () -> Unit,
     onItemClick: (String, String, String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
+
+    var isInternetConnectionShown by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -219,13 +228,27 @@ fun DiscussionTopicsScreen(
                                 DiscussionTopicsUIState.Loading -> {}
                             }
                         }
+
+                        if (!isInternetConnectionShown && !hasInternetConnection) {
+                            OfflineModeDialog(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomCenter),
+                                onDismissCLick = {
+                                    isInternetConnectionShown = true
+                                },
+                                onReloadClick = {
+                                    isInternetConnectionShown = true
+                                    onReloadClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -238,6 +261,8 @@ private fun DiscussionTopicsScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
+            hasInternetConnection = true,
+            onReloadClick = {},
             onItemClick = { _, _, _ -> },
             onSearchClick = {}
         )
@@ -253,6 +278,8 @@ private fun DiscussionTopicsScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
+            hasInternetConnection = true,
+            onReloadClick = {},
             onItemClick = { _, _, _ -> },
             onSearchClick = {}
         )
