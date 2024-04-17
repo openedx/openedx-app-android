@@ -70,6 +70,9 @@ interface CourseApi {
 
     @GET("/api/mobile/v4/users/{username}/course_enrollments/")
     suspend fun getUserCourses(
-        @Path("username") username: String
+        @Path("username") username: String,
+        @Query("page") page: Int = 1,
+        @Query("status") status: String? = null,
+        @Query("requested_fields") fields: List<String> = listOf("progress")
     ): CourseEnrollments
 }

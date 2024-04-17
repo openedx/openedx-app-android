@@ -29,6 +29,7 @@ import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
+import org.openedx.courses.presentation.AllEnrolledCoursesViewModel
 import org.openedx.courses.presentation.UserCoursesViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
@@ -117,6 +118,7 @@ val screenModule = module {
     factory { DashboardInteractor(get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { UserCoursesViewModel(get(), get(), get(), get()) }
+    viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }

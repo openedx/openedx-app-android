@@ -909,7 +909,7 @@ fun TextIcon(
     val rowModifier = if (onClick == null) {
         modifier
     } else {
-        modifier.noRippleClickable { onClick.invoke() }
+        modifier.clickable { onClick.invoke() }
     }
     Row(
         modifier = rowModifier,

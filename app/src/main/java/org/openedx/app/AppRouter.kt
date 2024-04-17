@@ -26,6 +26,7 @@ import org.openedx.course.presentation.unit.container.CourseUnitContainerFragmen
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
+import org.openedx.courses.presentation.AllEnrolledCoursesFragment
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
@@ -119,6 +120,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToUpgradeRequired(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
+    }
+
+    override fun navigateToAllEnrolledCourses(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
     }
 
     override fun navigateToCourseInfo(

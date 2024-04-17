@@ -119,7 +119,9 @@ class LearnFragment : Fragment() {
 //                        }
                     },
                     onViewAllClick = {
-                        //TODO
+                        router.navigateToAllEnrolledCourses(
+                            requireParentFragment().parentFragmentManager
+                        )
                     },
                     onSearchClick = {
                         router.navigateToCourseSearch(
