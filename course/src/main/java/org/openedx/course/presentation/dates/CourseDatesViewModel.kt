@@ -225,7 +225,7 @@ class CourseDatesViewModel(
     }
 
     fun logPlsShiftDates(isSuccess: Boolean) {
-        logPLSBannerEvent(CourseAnalyticsEvent.PLS_SHIFT_DATES, isSuccess)
+        logPLSBannerEvent(CourseAnalyticsEvent.PLS_SHIFT_DATES_SUCCESS, isSuccess)
     }
 
     fun logCourseComponentTapped(isSupported: Boolean, block: CourseDateBlock) {
@@ -261,7 +261,11 @@ class CourseDatesViewModel(
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
-                put(CourseAnalyticsKey.PACING.key, isSelfPaced)
+                put(
+                    CourseAnalyticsKey.PACING.key,
+                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
+                    else CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                )
                 putAll(param)
             }
         )

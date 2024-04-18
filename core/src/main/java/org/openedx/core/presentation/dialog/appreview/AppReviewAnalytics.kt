@@ -19,7 +19,7 @@ enum class AppReviewAnalyticsKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
     RATING("rating"),
-    APP_REVIEW("app_review"),
+    APP_REVIEW("app_reviews"),
     ACTION("action"),
     DISMISSED("dismissed"),
     NOT_NOW("not_now"),

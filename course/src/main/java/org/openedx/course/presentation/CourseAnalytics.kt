@@ -129,12 +129,12 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "PLS:Shift Button Clicked",
         "edx.bi.app.dates.pls_banner.shift_dates.clicked"
     ),
-    PLS_SHIFT_DATES(
-        "PLS:Shift Dates",
-        "edx.bi.app.dates.pls_banner.shift_dates"
+    PLS_SHIFT_DATES_SUCCESS(
+        "PLS:Shift Dates Success",
+        "edx.bi.app.dates.pls_banner.shift_dates.success"
     ),
     DATES_CALENDAR_SYNC_TOGGLE(
-        "Dates:CalendarSync Toggle",
+        "Dates:CalendarSync Toggle Clicked",
         "edx.bi.app.dates.calendar_sync.toggle"
     ),
     DATES_CALENDAR_SYNC_DIALOG_ACTION(
@@ -154,7 +154,7 @@ enum class CourseAnalyticsKey(val key: String) {
     OPEN_IN_BROWSER("open_in_browser_url"),
     COMPONENT("component"),
     VIDEO_PLAYER("video_player"),
-    ENROLLMENT_MODE("mode"),
+    ENROLLMENT_MODE("enrollment_mode"),
     PACING("pacing"),
     SCREEN_NAME("screen_name"),
     BANNER_TYPE("banner_type"),
@@ -177,8 +177,10 @@ enum class CourseAnalyticsKey(val key: String) {
     ACTION("action"),
     ON("on"),
     OFF("off"),
-    SNACKBAR("snackbar"),
+    SNACKBAR_TYPE("snackbar_type"),
     COURSE_DATES("course_dates"),
+    SELF_PACED("self"),
+    INSTRUCTOR_PACED("instructor"),
 }
 
 enum class CalendarSyncDialog(
@@ -186,11 +188,11 @@ enum class CalendarSyncDialog(
     private val positiveAction: String,
     private val negativeAction: String,
 ) {
-    PERMISSION("permission", "allow", "donot_allow"),
-    ADD("add", "ok", "cancel"),
-    REMOVE("remove", "ok", "cancel"),
-    UPDATE("update", "update", "remove"),
-    CONFIRMED("confirmed", "view_event", "done");
+    PERMISSION("device_permission", "allow", "donot_allow"),
+    ADD("add_calendar", "add", "cancel"),
+    REMOVE("remove_calendar", "remove", "cancel"),
+    UPDATE("update_calendar", "update", "remove"),
+    CONFIRMED("events_added", "view_event", "done");
 
     fun getBuildMap(action: Boolean): Map<String, Any> {
         return buildMap {
@@ -201,13 +203,13 @@ enum class CalendarSyncDialog(
 }
 
 enum class CalendarSyncSnackbar(private val snackbar: String) {
-    ADD("add"),
-    REMOVE("remove"),
-    UPDATE("update");
+    ADDED("added"),
+    REMOVED("removed"),
+    UPDATED("updated");
 
     fun getBuildMap(): Map<String, Any> {
         return buildMap {
-            put(CourseAnalyticsKey.SNACKBAR.key, snackbar)
+            put(CourseAnalyticsKey.SNACKBAR_TYPE.key, snackbar)
         }
     }
 }

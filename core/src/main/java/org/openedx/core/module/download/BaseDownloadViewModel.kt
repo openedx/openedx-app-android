@@ -246,10 +246,7 @@ abstract class BaseDownloadViewModel(
         logEvent(
             CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
             buildMap {
-                put(
-                    CoreAnalyticsKey.ACTION.key,
-                    if (toggle) CoreAnalyticsKey.TRUE.key else CoreAnalyticsKey.FALSE.key
-                )
+                put(CoreAnalyticsKey.ACTION.key, toggle)
             }
         )
     }
