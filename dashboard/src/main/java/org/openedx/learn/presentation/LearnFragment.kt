@@ -105,18 +105,7 @@ class LearnFragment : Fragment() {
                         )
                     },
                     onResumeClick = { componentId ->
-//                        viewModel.resumeSectionBlock?.let { subSection ->
-//                            viewModel.resumeCourseTappedEvent(subSection.id)
-//                            viewModel.resumeVerticalBlock?.let { unit ->
-//                                router.navigateToCourseContainer(
-//                                    fm = requireActivity().supportFragmentManager,
-//                                    courseId = viewModel.courseId,
-//                                    unitId = unit.id,
-//                                    componentId = componentId,
-//                                    mode = CourseViewMode.FULL
-//                                )
-//                            }
-//                        }
+                        //TODO
                     },
                     onViewAllClick = {
                         router.navigateToAllEnrolledCourses(
@@ -173,7 +162,7 @@ private fun LearnScreen(
                 .then(contentWidth),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LearnToolbar(
+            Header(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),
                 label = stringResource(id = R.string.dashboard_learn),
@@ -212,7 +201,7 @@ private fun LearnScreen(
 }
 
 @Composable
-private fun LearnToolbar(
+private fun Header(
     modifier: Modifier = Modifier,
     label: String,
     onSearchClick: () -> Unit

@@ -20,7 +20,6 @@ import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 
-
 class DashboardViewModel(
     private val config: Config,
     private val networkConnection: NetworkConnection,

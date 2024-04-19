@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,8 +45,9 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -122,15 +124,15 @@ class AllEnrolledCoursesFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                val uiState by viewModel.uiState.observeAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val refreshing by viewModel.updating.observeAsState(false)
-                val canLoadMore by viewModel.canLoadMore.observeAsState(false)
+                val uiState by viewModel.uiState.collectAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(null)
+                val refreshing by viewModel.updating.collectAsState(false)
+                val canLoadMore by viewModel.canLoadMore.collectAsState(false)
 
                 AllEnrolledCoursesScreen(
                     windowSize = windowSize,
                     viewModel.apiHostUrl,
-                    uiState!!,
+                    uiState,
                     uiMessage,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
@@ -186,15 +188,17 @@ internal fun AllEnrolledCoursesScreen(
     onItemClick: (EnrolledCourse) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = refreshing,
+        onRefresh = { onSwipeRefresh() }
+    )
 
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
     val scrollState = rememberLazyGridState()
     val firstVisibleIndex = remember {
-        mutableStateOf(scrollState.firstVisibleItemIndex)
+        mutableIntStateOf(scrollState.firstVisibleItemIndex)
     }
 
     Scaffold(
@@ -261,15 +265,17 @@ internal fun AllEnrolledCoursesScreen(
                 shape = MaterialTheme.appShapes.screenBackgroundShape
             ) {
                 Box(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding()
                         .pullRefresh(pullRefreshState),
                 ) {
                     when (state) {
                         is AllEnrolledCoursesUIState.Loading -> {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
@@ -283,9 +289,7 @@ internal fun AllEnrolledCoursesScreen(
                                 Column(
                                     modifier = Modifier.padding(contentPaddings)
                                 ) {
-                                    Header(
-                                        onSearchClick = onSearchClick
-                                    )
+                                    Header(onSearchClick = onSearchClick)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     LazyVerticalGrid(
                                         modifier = Modifier
@@ -330,7 +334,7 @@ internal fun AllEnrolledCoursesScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(
-                                    Modifier
+                                    modifier = Modifier
                                         .fillMaxHeight()
                                         .then(contentWidth)
                                         .then(emptyStatePaddings)
@@ -346,24 +350,20 @@ internal fun AllEnrolledCoursesScreen(
                         pullRefreshState,
                         Modifier.align(Alignment.TopCenter)
                     )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                    ) {
-                        if (!isInternetConnectionShown && !hasInternetConnection) {
-                            OfflineModeDialog(
-                                Modifier
-                                    .fillMaxWidth(),
-                                onDismissCLick = {
-                                    isInternetConnectionShown = true
-                                },
-                                onReloadClick = {
-                                    isInternetConnectionShown = true
-                                    onReloadClick()
-                                }
-                            )
-                        }
+
+                    if (!isInternetConnectionShown && !hasInternetConnection) {
+                        OfflineModeDialog(
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter),
+                            onDismissCLick = {
+                                isInternetConnectionShown = true
+                            },
+                            onReloadClick = {
+                                isInternetConnectionShown = true
+                                onReloadClick()
+                            }
+                        )
                     }
                 }
             }

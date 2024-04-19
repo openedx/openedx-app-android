@@ -1,14 +1,16 @@
 package org.openedx.courses.presentation
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
@@ -36,24 +38,24 @@ class AllEnrolledCoursesViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
 
-    private val _uiState = MutableLiveData<AllEnrolledCoursesUIState>(AllEnrolledCoursesUIState.Loading)
-    val uiState: LiveData<AllEnrolledCoursesUIState>
-        get() = _uiState
+    private val _uiState = MutableStateFlow<AllEnrolledCoursesUIState>(AllEnrolledCoursesUIState.Loading)
+    val uiState: StateFlow<AllEnrolledCoursesUIState>
+        get() = _uiState.asStateFlow()
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
-    private val _updating = MutableLiveData<Boolean>()
-    val updating: LiveData<Boolean>
-        get() = _updating
+    private val _updating = MutableStateFlow<Boolean>(false)
+    val updating: StateFlow<Boolean>
+        get() = _updating.asStateFlow()
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
-    private val _canLoadMore = MutableLiveData<Boolean>()
-    val canLoadMore: LiveData<Boolean>
-        get() = _canLoadMore
+    private val _canLoadMore = MutableStateFlow<Boolean>(false)
+    val canLoadMore: StateFlow<Boolean>
+        get() = _canLoadMore.asStateFlow()
 
     val courseStatusFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
@@ -101,11 +103,9 @@ class AllEnrolledCoursesViewModel(
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
             _updating.value = false
@@ -144,11 +144,9 @@ class AllEnrolledCoursesViewModel(
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
             _updating.value = false

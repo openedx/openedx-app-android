@@ -117,7 +117,7 @@ val screenModule = module {
     factory { DashboardRepository(get(), get(), get()) }
     factory { DashboardInteractor(get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { UserCoursesViewModel(get(), get(), get(), get()) }
+    viewModel { UserCoursesViewModel(get(), get(), get(), get(), get()) }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }

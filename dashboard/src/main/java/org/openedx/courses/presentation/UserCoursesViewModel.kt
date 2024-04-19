@@ -1,11 +1,12 @@
 package org.openedx.courses.presentation
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
@@ -14,6 +15,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
@@ -23,22 +25,26 @@ class UserCoursesViewModel(
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
+    private val networkConnection: NetworkConnection
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
     val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
 
-    private val _uiState = MutableLiveData<UserCoursesUIState>(UserCoursesUIState.Loading)
-    val uiState: LiveData<UserCoursesUIState>
-        get() = _uiState
+    private val _uiState = MutableStateFlow<UserCoursesUIState>(UserCoursesUIState.Loading)
+    val uiState: StateFlow<UserCoursesUIState>
+        get() = _uiState.asStateFlow()
 
-    private val _uiMessage = MutableStateFlow<UIMessage?>(null)
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage?>
-        get() = _uiMessage.asStateFlow()
+        get() = _uiMessage.asSharedFlow()
 
-    private val _updating = MutableLiveData<Boolean>()
-    val updating: LiveData<Boolean>
-        get() = _updating
+    private val _updating = MutableStateFlow<Boolean>(false)
+    val updating: StateFlow<Boolean>
+        get() = _updating.asStateFlow()
+
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -56,14 +62,26 @@ class UserCoursesViewModel(
         getCourses()
     }
 
-    private fun getCourses() {
+    fun getCourses() {
         viewModelScope.launch {
             try {
-                val response = interactor.getUserCourses()
-                if (response.primary == null) {
-                    _uiState.value = UserCoursesUIState.Empty
+                if (networkConnection.isOnline()) {
+                    val response = interactor.getUserCourses()
+                    if (response.primary == null && response.enrollments.courses.isNotEmpty()) {
+                        _uiState.value = UserCoursesUIState.Empty
+                    } else {
+                        _uiState.value = UserCoursesUIState.Courses(response.enrollments.courses, response.primary)
+                    }
                 } else {
-                    _uiState.value = UserCoursesUIState.Courses(response)
+                    val cachedList = interactor.getEnrolledCoursesFromCache()
+                    if (cachedList.isEmpty()) {
+                        _uiState.value = UserCoursesUIState.Empty
+                    } else {
+                        _uiState.value = UserCoursesUIState.Courses(
+                            cachedList,
+                            null
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {

@@ -42,7 +42,9 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,6 +73,7 @@ import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -90,9 +93,9 @@ fun UsersCourseScreen(
     onViewAllClick: () -> Unit,
     onResumeClick: (componentId: String) -> Unit,
 ) {
-    val updating by viewModel.updating.observeAsState(false)
+    val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val uiState by viewModel.uiState.observeAsState(UserCoursesUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(UserCoursesUIState.Loading)
 
     UsersCourseScreen(
         uiMessage = uiMessage,
@@ -100,10 +103,12 @@ fun UsersCourseScreen(
         updating = updating,
         apiHostUrl = viewModel.apiHostUrl,
         onSwipeRefresh = viewModel::updateCourses,
+        hasInternetConnection = viewModel.hasInternetConnection,
         onCourseClick = onCourseClick,
         onViewAllClick = onViewAllClick,
         openDates = openDates,
-        onResumeClick = onResumeClick
+        onResumeClick = onResumeClick,
+        onReloadClick = viewModel::getCourses
     )
 }
 
@@ -118,10 +123,18 @@ private fun UsersCourseScreen(
     onCourseClick: (EnrolledCourse) -> Unit,
     openDates: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit,
+    onReloadClick: () -> Unit,
     onResumeClick: (componentId: String) -> Unit,
+    hasInternetConnection: Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState = rememberPullRefreshState(refreshing = updating, onRefresh = { onSwipeRefresh() })
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = updating,
+        onRefresh = { onSwipeRefresh() }
+    )
+    var isInternetConnectionShown by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -153,7 +166,7 @@ private fun UsersCourseScreen(
                     is UserCoursesUIState.Courses -> {
                         UserCourses(
                             modifier = Modifier.fillMaxSize(),
-                            userCourses = uiState.userCourses,
+                            userCourses = uiState,
                             apiHostUrl = apiHostUrl,
                             onCourseClick = onCourseClick,
                             onViewAllClick = onViewAllClick,
@@ -174,6 +187,21 @@ private fun UsersCourseScreen(
                     pullRefreshState,
                     Modifier.align(Alignment.TopCenter)
                 )
+
+                if (!isInternetConnectionShown && !hasInternetConnection) {
+                    OfflineModeDialog(
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        onDismissCLick = {
+                            isInternetConnectionShown = true
+                        },
+                        onReloadClick = {
+                            isInternetConnectionShown = true
+                            onReloadClick()
+                        }
+                    )
+                }
             }
         }
     }
@@ -182,7 +210,7 @@ private fun UsersCourseScreen(
 @Composable
 private fun UserCourses(
     modifier: Modifier = Modifier,
-    userCourses: UserCourses,
+    userCourses: UserCoursesUIState.Courses,
     apiHostUrl: String,
     onCourseClick: (EnrolledCourse) -> Unit,
     openDates: (EnrolledCourse) -> Unit,
@@ -193,9 +221,9 @@ private fun UserCourses(
         modifier = modifier
             .padding(vertical = 12.dp)
     ) {
-        if (userCourses.primary != null) {
+        if (userCourses.primaryCourse != null) {
             PrimaryCourseCard(
-                primaryCourse = userCourses.primary,
+                primaryCourse = userCourses.primaryCourse,
                 apiHostUrl = apiHostUrl,
                 openDates = openDates,
                 onResumeClick = onResumeClick,
@@ -203,7 +231,7 @@ private fun UserCourses(
             )
         }
         SecondaryCourses(
-            courses = userCourses.enrollments.courses,
+            courses = userCourses.enrolledCourses,
             apiHostUrl = apiHostUrl,
             onCourseClick = onCourseClick,
             onViewAllClick = onViewAllClick
@@ -618,15 +646,17 @@ private val mockUserCourses = UserCourses(
 private fun UsersCourseScreenPreview() {
     OpenEdXTheme {
         UsersCourseScreen(
-            uiState = UserCoursesUIState.Courses(mockUserCourses),
+            uiState = UserCoursesUIState.Courses(mockUserCourses.enrollments.courses, mockUserCourses.primary),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,
+            hasInternetConnection = false,
             onSwipeRefresh = { },
             onCourseClick = { },
             onViewAllClick = { },
             openDates = { },
-            onResumeClick = { }
+            onResumeClick = { },
+            onReloadClick = { }
         )
     }
 }
