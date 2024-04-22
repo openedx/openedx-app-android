@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="course_enroll_now">Записатися зараз</string>
-    <string name="course_view_course">Переглянути курс</string>
-    <string name="course_details">Деталі курсу</string>
     <string name="course_outline">Огляд курсу</string>
     <string name="course_content">Зміст курсу</string>
     <string name="course_units">Одиниці курсу</string>
@@ -27,17 +24,16 @@
     <string name="course_announcements">Оголошення</string>
     <string name="course_find_important_info">Знайдіть важливу інформацію про курс</string>
     <string name="course_latest_news">Будьте в курсі останніх новин</string>
-    <string name="course_good_work">Гарна робота!</string>
+    <string name="course_good_job">Гарна робота!</string>
     <string name="course_section_finished">Секція \"%s\" завершена.</string>
     <string name="course_next_section">Наступний розділ</string>
     <string name="course_back_to_outline">Повернутись до модуля</string>
-    <string name="course_you_cant_enroll">Ви не можете записатися на цей курс, оскільки термін запису вже минув.</string>
     <string name="course_not_started">Цей курс ще не розпочався.</string>
     <string name="course_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
     <string name="course_navigation_course">Курс</string>
-    <string name="course_navigation_video">Відео</string>
-    <string name="course_navigation_discussion">Обговорення</string>
-    <string name="course_navigation_handouts">Матеріали</string>
+    <string name="course_navigation_videos">Відео</string>
+    <string name="course_navigation_discussions">Обговорення</string>
+    <string name="course_navigation_more">Матеріали</string>
     <string name="course_can_download_only_with_wifi">Ви можете завантажувати контент тільки через Wi-Fi</string>
     <string name="course_this_interactive_component">Ця інтерактивна компонента ще не доступна</string>
     <string name="course_explore_other_parts">Досліджуйте інші частини цього курсу або перегляньте це на веб-сайті.</string>
@@ -48,8 +44,6 @@
     <string name="course_to_proceed">Щоб перейти до \"%s\", натисніть \"Наступний розділ\".</string>
 
     <!-- Accessibility -->
-    <string name="course_accessibility_header_image_for">Заглавне зображення для курсу %1$s</string>
-    <string name="course_accessibility_play_video">Відтворити відео</string>
     <string name="course_accessibility_video_player">Відеоплеєр</string>
     <string name="course_accessibility_remove_course_section">Видалити секцію курсу</string>
     <string name="course_accessibility_download_course_section">Завантажити секцію курсу</string>

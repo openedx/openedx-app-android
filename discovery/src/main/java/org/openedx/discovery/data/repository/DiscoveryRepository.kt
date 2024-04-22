@@ -1,16 +1,40 @@
 package org.openedx.discovery.data.repository
 
-import org.openedx.core.data.api.CourseApi
-import org.openedx.core.data.model.room.CourseEntity
-import org.openedx.core.domain.model.CourseList
-import org.openedx.core.domain.model.Course
+import okhttp3.ResponseBody
+import org.openedx.core.data.model.EnrollBody
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.discovery.data.api.DiscoveryApi
+import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
+import org.openedx.discovery.domain.model.Course
+import org.openedx.discovery.domain.model.CourseList
 
 
 class DiscoveryRepository(
-    private val api: CourseApi,
+    private val api: DiscoveryApi,
     private val dao: DiscoveryDao,
+    private val preferencesManager: CorePreferences,
 ) {
+
+    suspend fun getCourseDetail(id: String): Course {
+        val course = api.getCourseDetail(id, preferencesManager.user?.username)
+        dao.updateCourseEntity(CourseEntity.createFrom(course))
+        return course.mapToDomain()
+    }
+
+    suspend fun getCourseDetailFromCache(id: String): Course? {
+        return dao.getCourseById(id)?.mapToDomain()
+    }
+
+    suspend fun enrollInACourse(courseId: String): ResponseBody {
+        val enrollBody = EnrollBody(
+            EnrollBody.CourseDetails(
+                courseId = courseId,
+                emailOptIn = preferencesManager.user?.email
+            )
+        )
+        return api.enrollInACourse(enrollBody)
+    }
 
     suspend fun getCoursesList(
         username: String?,

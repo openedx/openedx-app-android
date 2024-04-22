@@ -13,20 +13,21 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.adapter.MainNavigationFragmentAdapter
 import org.openedx.app.databinding.FragmentMainBinding
+import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dashboard.presentation.dashboard.DashboardFragment
-import org.openedx.dashboard.presentation.program.ProgramFragment
+import org.openedx.dashboard.presentation.DashboardFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.program.ProgramFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val binding by viewBinding(FragmentMainBinding::bind)
-    private val analytics by inject<AppAnalytics>()
     private val viewModel by viewModel<MainViewModel>()
     private val router by inject<DiscoveryRouter>()
+    private val config by inject<Config>()
 
     private lateinit var adapter: MainNavigationFragmentAdapter
 
@@ -47,27 +48,29 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.fragmentHome -> {
-                    analytics.discoveryTabClickedEvent()
+                    viewModel.logDiscoveryTabClickedEvent()
                     binding.viewPager.setCurrentItem(0, false)
                 }
 
                 R.id.fragmentDashboard -> {
-                    analytics.dashboardTabClickedEvent()
+                    viewModel.logMyCoursesTabClickedEvent()
                     binding.viewPager.setCurrentItem(1, false)
                 }
 
                 R.id.fragmentPrograms -> {
-                    analytics.programsTabClickedEvent()
+                    viewModel.logMyProgramsTabClickedEvent()
                     binding.viewPager.setCurrentItem(2, false)
                 }
 
                 R.id.fragmentProfile -> {
-                    analytics.profileTabClickedEvent()
+                    viewModel.logProfileTabClickedEvent()
                     binding.viewPager.setCurrentItem(3, false)
                 }
             }
             true
         }
+        // Trigger click event for the first tab on initial load
+        binding.bottomNavView.selectedItemId = binding.bottomNavView.selectedItemId
 
         viewModel.isBottomBarEnabled.observe(viewLifecycleOwner) { isBottomBarEnabled ->
             enableBottomBar(isBottomBarEnabled)
@@ -82,12 +85,19 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
 
         requireArguments().apply {
-            this.getString(ARG_COURSE_ID, null)?.let {
-                if (it.isNotBlank()) {
-                    router.navigateToCourseDetail(parentFragmentManager, it)
+            getString(ARG_COURSE_ID).takeIf { it.isNullOrBlank().not() }?.let { courseId ->
+                val infoType = getString(ARG_INFO_TYPE)
+
+                if (config.getDiscoveryConfig().isViewTypeWebView() && infoType != null) {
+                    router.navigateToCourseInfo(parentFragmentManager, courseId, infoType)
+                } else {
+                    router.navigateToCourseDetail(parentFragmentManager, courseId)
                 }
+
+                // Clear arguments after navigation
+                putString(ARG_COURSE_ID, "")
+                putString(ARG_INFO_TYPE, "")
             }
-            this.putString(ARG_COURSE_ID, null)
         }
     }
 
@@ -121,10 +131,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String? = null): MainFragment {
+        private const val ARG_INFO_TYPE = "info_type"
+        fun newInstance(courseId: String? = null, infoType: String? = null): MainFragment {
             val fragment = MainFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_INFO_TYPE to infoType
             )
             return fragment
         }

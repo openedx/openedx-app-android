@@ -35,9 +35,11 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -61,7 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -85,13 +87,14 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
+import org.openedx.core.extension.toFileSize
+import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberWindowSize
@@ -105,7 +108,7 @@ import org.openedx.course.presentation.outline.CourseOutlineFragment
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
-import org.openedx.course.R as courseR
+import org.openedx.core.R as coreR
 
 @Composable
 fun CourseImageHeader(
@@ -113,7 +116,8 @@ fun CourseImageHeader(
     apiHostUrl: String,
     courseImage: String?,
     courseCertificate: Certificate?,
-    courseName: String
+    onCertificateClick: (String) -> Unit = {},
+    courseName: String,
 ) {
     val configuration = LocalConfiguration.current
     val windowSize = rememberWindowSize()
@@ -123,7 +127,6 @@ fun CourseImageHeader(
         } else {
             ContentScale.Crop
         }
-    val uriHandler = LocalUriHandler.current
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
@@ -133,11 +136,11 @@ fun CourseImageHeader(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl)
-                .error(org.openedx.core.R.drawable.core_no_image_course)
-                .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                .error(coreR.drawable.core_no_image_course)
+                .placeholder(coreR.drawable.core_no_image_course)
                 .build(),
             contentDescription = stringResource(
-                id = R.string.course_accessibility_header_image_for,
+                id = coreR.string.core_accessibility_header_image_for,
                 courseName
             ),
             contentScale = contentScale,
@@ -155,18 +158,21 @@ fun CourseImageHeader(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
+                    modifier = Modifier.testTag("ic_congratulations"),
                     painter = painterResource(id = R.drawable.ic_course_completed_mark),
                     contentDescription = stringResource(id = R.string.course_congratulations),
                     tint = Color.White
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_congratulations"),
                     text = stringResource(id = R.string.course_congratulations),
                     style = MaterialTheme.appTypography.headlineMedium,
                     color = Color.White
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
+                    modifier = Modifier.testTag("txt_course_passed"),
                     text = stringResource(id = R.string.course_passed),
                     style = MaterialTheme.appTypography.bodyMedium,
                     color = Color.White
@@ -179,7 +185,7 @@ fun CourseImageHeader(
                     text = stringResource(id = R.string.course_view_certificate),
                     onClick = {
                         courseCertificate.certificateURL?.let {
-                            uriHandler.openUri(it)
+                            onCertificateClick(it)
                         }
                     })
             }
@@ -289,6 +295,77 @@ fun CourseSectionCard(
 }
 
 @Composable
+fun OfflineQueueCard(
+    downloadModel: DownloadModel,
+    progressValue: Long,
+    progressSize: Long,
+    onDownloadClick: (DownloadModel) -> Unit
+) {
+    val iconModifier = Modifier.size(24.dp)
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .padding(start = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            Text(
+                text = downloadModel.title.ifEmpty { stringResource(id = R.string.course_download_untitled) },
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+            Text(
+                text = downloadModel.size.toLong().toFileSize(),
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textSecondary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+
+            val progress = progressValue.toFloat() / progressSize
+
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                progress = progress
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Box(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(28.dp),
+                backgroundColor = Color.LightGray,
+                strokeWidth = 2.dp,
+                color = MaterialTheme.appColors.primary
+            )
+            IconButton(
+                modifier = iconModifier
+                    .padding(2.dp),
+                onClick = { onDownloadClick(downloadModel) }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                    tint = MaterialTheme.appColors.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun CardArrow(
     degrees: Float
 ) {
@@ -359,7 +436,6 @@ fun VideoTitle(
 
 @Composable
 fun NavigationUnitsButtons(
-    windowSize: WindowSize,
     nextButtonText: String,
     hasPrevBlock: Boolean,
     hasNextBlock: Boolean,
@@ -368,9 +444,9 @@ fun NavigationUnitsButtons(
     onNextClick: () -> Unit
 ) {
     val nextButtonIcon = if (hasNextBlock) {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_down)
+        painterResource(id = coreR.drawable.core_ic_down)
     } else {
-        painterResource(id = org.openedx.core.R.drawable.core_ic_check_in_box)
+        painterResource(id = coreR.drawable.core_ic_check_in_box)
     }
 
     val subModifier =
@@ -417,7 +493,7 @@ fun NavigationUnitsButtons(
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         modifier = Modifier.rotate(if (isVerticalNavigation) 0f else -90f),
-                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_up),
+                        painter = painterResource(id = coreR.drawable.core_ic_up),
                         contentDescription = null,
                         tint = MaterialTheme.appColors.primary
                     )
@@ -461,6 +537,7 @@ fun HorizontalPageIndicator(
     modifier: Modifier = Modifier,
     blocks: List<Block>,
     selectedPage: Int = 0,
+    completedAndSelectedColor: Color = Color.Green,
     completedColor: Color = Color.Green,
     selectedColor: Color = Color.White,
     defaultColor: Color = Color.Gray
@@ -471,23 +548,30 @@ fun HorizontalPageIndicator(
     ) {
         blocks.forEachIndexed { index, block ->
             val backgroundColor = when {
-                index == selectedPage -> selectedColor
+                block.isCompleted() && index == selectedPage -> completedAndSelectedColor
                 block.isCompleted() -> completedColor
+                index == selectedPage -> selectedColor
                 else -> defaultColor
             }
 
-            Box(
+            Surface(
                 modifier = Modifier
-                    .background(backgroundColor)
-                    .fillMaxHeight()
+                    .padding(vertical = if (index == selectedPage) 0.dp else 1.dp)
                     .weight(1f)
-            )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(backgroundColor)
+                        .fillMaxHeight()
+                )
+            }
         }
     }
 }
 
 @Composable
 fun VerticalPageIndicator(
+    modifier: Modifier = Modifier,
     numberOfPages: Int,
     selectedPage: Int = 0,
     selectedColor: Color = Color.White,
@@ -495,7 +579,6 @@ fun VerticalPageIndicator(
     defaultRadius: Dp = 8.dp,
     selectedLength: Dp = 25.dp,
     space: Dp = 4.dp,
-    modifier: Modifier = Modifier
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -577,7 +660,7 @@ fun VideoSubtitles(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = stringResource(id = courseR.string.course_subtitles),
+                        text = stringResource(id = R.string.course_subtitles),
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium
                     )
@@ -587,7 +670,7 @@ fun VideoSubtitles(
                                 onSettingsClick()
                             },
                             text = subtitleLanguage,
-                            painter = painterResource(id = courseR.drawable.course_ic_cc),
+                            painter = painterResource(id = R.drawable.course_ic_cc),
                             color = MaterialTheme.appColors.textAccent,
                             textStyle = MaterialTheme.appTypography.labelLarge
                         )
@@ -754,10 +837,12 @@ fun CourseSubSectionItem(
                         IconButton(
                             modifier = iconModifier.padding(2.dp),
                             onClick = { onDownloadClick(block) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                                tint = MaterialTheme.appColors.error
+                            Text(
+                                modifier = Modifier
+                                    .padding(bottom = 4.dp),
+                                text = "i",
+                                style = MaterialTheme.appTypography.titleMedium,
+                                color = MaterialTheme.appColors.primary
                             )
                         }
                     }
@@ -970,7 +1055,7 @@ fun SubSectionUnitsList(
 
 @Composable
 fun CourseDatesBanner(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     banner: CourseDatesBannerInfo,
     resetDates: () -> Unit,
 ) {
@@ -1016,7 +1101,7 @@ fun CourseDatesBanner(
 
 @Composable
 fun CourseDatesBannerTablet(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     banner: CourseDatesBannerInfo,
     resetDates: () -> Unit,
 ) {
@@ -1061,10 +1146,63 @@ fun CourseDatesBannerTablet(
         }
         banner.bannerType.buttonResId.nonZero()?.let {
             OpenEdXButton(
-                width = Modifier.width(210.dp),
+                modifier = Modifier.width(210.dp),
                 text = stringResource(id = it),
                 onClick = resetDates,
             )
+        }
+    }
+}
+
+@Composable
+fun DatesShiftedSnackBar(
+    showAction: Boolean = false,
+    onViewDates: () -> Unit? = {},
+    onClose: () -> Unit? = {},
+) {
+    Snackbar(
+        modifier = Modifier.padding(16.dp),
+        backgroundColor = MaterialTheme.appColors.background
+    ) {
+        Column(modifier = Modifier.padding(4.dp)) {
+            Box {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterStart),
+                    text = stringResource(id = coreR.string.core_dates_shift_dates_successfully_title),
+                    color = MaterialTheme.appColors.textFieldText,
+                    style = MaterialTheme.appTypography.titleMedium
+                )
+                IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = { onClose() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "close",
+                        tint = MaterialTheme.appColors.onBackground,
+                    )
+                }
+            }
+            Text(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(),
+                text = stringResource(id = coreR.string.core_dates_shift_dates_successfully_msg),
+                color = MaterialTheme.appColors.textFieldText,
+                style = MaterialTheme.appTypography.titleSmall,
+            )
+            if (showAction) {
+                OpenEdXOutlinedButton(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .fillMaxWidth(),
+                    text = stringResource(id = coreR.string.core_dates_view_all_dates),
+                    backgroundColor = MaterialTheme.appColors.background,
+                    textColor = MaterialTheme.appColors.primary,
+                    borderColor = MaterialTheme.appColors.primary,
+                    onClick = {
+                        onViewDates()
+                    })
+            }
         }
     }
 }
@@ -1075,7 +1213,6 @@ fun CourseDatesBannerTablet(
 private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = true,
             isVerticalNavigation = true,
@@ -1090,7 +1227,6 @@ private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
 private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = false,
             isVerticalNavigation = true,
@@ -1105,7 +1241,6 @@ private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
 private fun NavigationUnitsButtonsWithFinishPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = false,
             isVerticalNavigation = true,
@@ -1120,7 +1255,6 @@ private fun NavigationUnitsButtonsWithFinishPreview() {
 private fun NavigationUnitsButtonsWithNextPreview() {
     OpenEdXTheme {
         NavigationUnitsButtons(
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             hasPrevBlock = true,
             hasNextBlock = true,
             isVerticalNavigation = true,
@@ -1133,7 +1267,7 @@ private fun NavigationUnitsButtonsWithNextPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SequentialItemPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         Surface(color = MaterialTheme.appColors.background) {
             SequentialItem(block = mockChapterBlock, onClick = {})
         }
@@ -1199,6 +1333,31 @@ private fun CourseDatesBannerTabletPreview() {
             banner = mockedCourseBannerInfo,
             resetDates = {}
         )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun OfflineQueueCardPreview() {
+    OpenEdXTheme {
+        Surface(color = MaterialTheme.appColors.background) {
+            OfflineQueueCard(
+                downloadModel = DownloadModel(
+                    id = "",
+                    title = "Problems of society",
+                    size = 4000,
+                    path = "",
+                    url = "",
+                    type = FileType.VIDEO,
+                    downloadedState = DownloadedState.DOWNLOADING,
+                    progress = 0f
+                ),
+                progressValue = 10,
+                progressSize = 30,
+                onDownloadClick = {}
+            )
+        }
     }
 }
 

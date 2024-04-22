@@ -12,13 +12,13 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.Course
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.domain.model.Course
 
 class NativeDiscoveryViewModel(
     private val config: Config,
@@ -27,7 +27,7 @@ class NativeDiscoveryViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
     private val appUpgradeNotifier: AppUpgradeNotifier,
-    private val corePreferences: CorePreferences
+    private val corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -182,5 +182,18 @@ class NativeDiscoveryViewModel(
 
     fun discoveryCourseClicked(courseId: String, courseName: String) {
         analytics.discoveryCourseClickedEvent(courseId, courseName)
+    }
+
+    fun courseDetailClickedEvent(courseId: String, courseTitle: String) {
+        val event = DiscoveryAnalyticsEvent.COURSE_INFO
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+                put(DiscoveryAnalyticsKey.COURSE_NAME.key, courseTitle)
+                put(DiscoveryAnalyticsKey.CATEGORY.key, DiscoveryAnalyticsKey.DISCOVERY.key)
+            }
+        )
     }
 }

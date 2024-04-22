@@ -118,7 +118,7 @@ class HtmlUnitFragment : Fragment() {
                                 },
                                 onWebPageLoaded = {
                                     isLoading = false
-                                    viewModel.setWebPageLoaded(requireContext().assets)
+                                    if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
                                 }
                             )
                         } else {

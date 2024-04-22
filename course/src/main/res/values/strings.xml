@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="course_enroll_now">Enroll now</string>
-    <string name="course_view_course">View course</string>
-    <string name="course_details">Course details</string>
     <string name="course_outline">Course Outline</string>
     <string name="course_content">Course content</string>
     <string name="course_units">Course units</string>
     <string name="course_subsections">Course subsections</string>
     <string name="course_videos">Videos</string>
     <string name="course_passed_course">You have passed the course! Now you can get the certificate</string>
-    <string name="course_passed">You’ve passed the course</string>
+    <string name="course_passed">You’ve completed the course</string>
     <string name="course_congratulations">Congratulations!</string>
     <string name="course_view_certificate">View the certificate</string>
     <string name="course_you_can_get_certificate">You can get a certificate after completing the course (earn required grade)</string>
@@ -27,19 +24,18 @@
     <string name="course_announcements">Announcements</string>
     <string name="course_find_important_info">Find important course information</string>
     <string name="course_latest_news">Keep up with the latest news</string>
-    <string name="course_good_work">Good work!</string>
-    <string name="course_section_finished">Section \"%s\" is finished.</string>
+    <string name="course_good_job">Good job!</string>
+    <string name="course_section_finished">You\'ve completed \"%s\".</string>
     <string name="course_back_to_outline">Back to outline</string>
     <string name="course_next_section">Next section</string>
-    <string name="course_you_cant_enroll">You cannot enroll in this course because the enrollment date is over.</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_navigation_course">Course</string>
-    <string name="course_navigation_video">Video</string>
-    <string name="course_navigation_discussion">Discussion</string>
-    <string name="course_navigation_handouts">Handouts</string>
+    <string name="course_navigation_videos">Videos</string>
+    <string name="course_navigation_discussions">Discussions</string>
+    <string name="course_navigation_more">More</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
-    <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
+    <string name="course_this_interactive_component">This interactive component isn\'t available on mobile.</string>
     <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>
@@ -48,18 +44,61 @@
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
     <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
-    <string name="course_you_are_already_enrolled" tools:ignore="MissingTranslation">You are already enrolled in this course.</string>
-    <string name="course_discover" tools:ignore="MissingTranslation">Discover</string>
+    <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
+    <string name="course_dates_shifted_message">Dates Shifted</string>
+
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 
+    <!-- region: Calendar Sync -->
+    <string name="course_header_sync_to_calendar" tools:ignore="MissingTranslation">Sync to calendar</string>
+    <string name="course_body_sync_to_calendar" tools:ignore="MissingTranslation">Automatically sync all deadlines and due dates for this course to your calendar.</string>
+
+    <string name="course_title_request_calendar_permission" tools:ignore="MissingTranslation">\“%s\” Would Like to Access Your Calendar</string>
+    <string name="course_message_request_calendar_permission" tools:ignore="MissingTranslation">%s would like to use your calendar list to subscribe to your personalized %s calendar for this course.</string>
+    <string name="course_label_do_not_allow" tools:ignore="MissingTranslation">Don’t allow</string>
+
+    <string name="course_title_add_course_calendar" tools:ignore="MissingTranslation">Add Course Dates to Calendar</string>
+    <string name="course_message_add_course_calendar" tools:ignore="MissingTranslation">Would you like to add \“%s\” dates to your calendar? \n\nYou can edit or remove your course dates at any time from your calendar or settings.</string>
+
+    <string name="course_title_syncing_calendar" tools:ignore="MissingTranslation">Syncing calendar…</string>
+
+    <string name="course_message_course_calendar_added" tools:ignore="MissingTranslation">\“%s\” has been added to your phone\'s calendar.</string>
+    <string name="course_label_view_events" tools:ignore="MissingTranslation">View Events</string>
+    <string name="course_label_done" tools:ignore="MissingTranslation">Done</string>
+
+    <string name="course_title_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Dates from Calendar</string>
+    <string name="course_message_remove_course_calendar" tools:ignore="MissingTranslation">Would you like to remove the \“%s\” dates from your calendar?</string>
+    <string name="course_label_remove" tools:ignore="MissingTranslation">Remove</string>
+
+    <string name="course_title_calendar_out_of_date" tools:ignore="MissingTranslation">Your course calendar is out of date</string>
+    <string name="course_message_calendar_out_of_date" tools:ignore="MissingTranslation">Your course dates have been shifted and your course calendar is no longer up to date with your new schedule.</string>
+    <string name="course_label_update_now" tools:ignore="MissingTranslation">Update Now</string>
+    <string name="course_label_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Calendar</string>
+
+    <string name="course_snackbar_course_calendar_added" tools:ignore="MissingTranslation">Your course calendar has been added.</string>
+    <string name="course_snackbar_course_calendar_removed" tools:ignore="MissingTranslation">Your course calendar has been removed.</string>
+    <string name="course_snackbar_course_calendar_updated" tools:ignore="MissingTranslation">Your course calendar has been updated.</string>
+    <string name="course_snackbar_course_calendar_error" tools:ignore="MissingTranslation">Error Adding Calendar, Please try later</string>
+
+    <string name="course_assignment_due_tag" tools:ignore="MissingTranslation">Assignment Due</string>
+
+    <!-- endregion -->
+
     <!-- Accessibility -->
-    <string name="course_accessibility_header_image_for">Header image for %1$s</string>
-    <string name="course_accessibility_play_video">Play video</string>
     <string name="course_accessibility_video_player">Video player</string>
     <string name="course_accessibility_remove_course_section">Remove course section</string>
     <string name="course_accessibility_download_course_section">Download course section</string>
     <string name="course_accessibility_stop_downloading_course_section">Stop downloading course section</string>
     <string name="course_accessibility_section_completed">Section completed</string>
     <string name="course_accessibility_section_uncompleted">Section uncompleted</string>
+
+    <string name="course_download_queue_title">Downloads</string>
+    <string name="course_download_untitled">(Untitled)</string>
+    <string name="course_download_big_files_confirmation_title">Download</string>
+    <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
+    <string name="course_delete_while_downloading_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
+    <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
+    <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
+
 </resources>

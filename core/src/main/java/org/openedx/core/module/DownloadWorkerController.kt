@@ -5,14 +5,15 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.common.util.concurrent.ListenableFuture
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.download.FileDownloader
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import java.io.File
 import java.util.concurrent.ExecutionException
 
 class DownloadWorkerController(
@@ -51,34 +52,46 @@ class DownloadWorkerController(
             }
     }
 
-    suspend fun saveModels(vararg downloadModel: DownloadModel) {
-            downloadDao.insertDownloadModel(
-                *downloadModel.map { DownloadModelEntity.createFrom(it) }.toTypedArray()
-            )
+    suspend fun saveModels(downloadModels: List<DownloadModel>) {
+        downloadDao.insertDownloadModel(
+            downloadModels.map { DownloadModelEntity.createFrom(it) }
+        )
     }
 
-    suspend fun cancelWork(vararg ids: String) {
-            for (id in ids.toList()) {
-                updateList()
-                val downloadModel = downloadTaskList.find { it.id == id }
-                if (downloadTaskList.size == 1) {
-                    fileDownloader.cancelDownloading()
-                    downloadDao.removeDownloadModel(id)
-                    workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)
-                    return
-                }
-                downloadModel?.let {
-                    if (it.downloadedState == DownloadedState.WAITING) {
-                        downloadDao.removeDownloadModel(id)
-                    } else {
-                        fileDownloader.cancelDownloading()
-                        downloadDao.removeDownloadModel(id)
-                    }
-                }
+    suspend fun removeModel(id: String) {
+        removeModels(listOf(id))
+    }
+
+    suspend fun removeModels(ids: List<String>) {
+        val downloadModels = getDownloadModelsById(ids)
+        val removeIds = mutableListOf<String>()
+        var hasDownloading = false
+
+        downloadModels.forEach { downloadModel ->
+            removeIds.add(downloadModel.id)
+
+            if (downloadModel.downloadedState == DownloadedState.DOWNLOADING) {
+                hasDownloading = true
             }
+
+            try {
+                File(downloadModel.path).delete()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        if (hasDownloading) fileDownloader.cancelDownloading()
+        downloadDao.removeAllDownloadModels(removeIds)
+
+        updateList()
+
+        if (downloadTaskList.isEmpty()) {
+            workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)
+        }
     }
 
-    suspend fun cancelWork() {
+    suspend fun removeModels() {
         fileDownloader.cancelDownloading()
         workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)
     }
@@ -101,4 +114,7 @@ class DownloadWorkerController(
         }
     }
 
+    private suspend fun getDownloadModelsById(ids: List<String>): List<DownloadModel> {
+        return downloadDao.readAllDataByIds(ids).first().map { it.mapToDomain() }
+    }
 }

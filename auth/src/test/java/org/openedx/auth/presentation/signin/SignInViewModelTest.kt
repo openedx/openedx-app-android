@@ -23,7 +23,9 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
@@ -33,6 +35,7 @@ import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
@@ -54,7 +57,10 @@ class SignInViewModelTest {
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val agreementProvider = mockk<AgreementProvider>()
     private val oAuthHelper = mockk<OAuthHelper>()
+    private val router = mockk<AuthRouter>()
+    private val whatsNewGlobalManager = mockk<WhatsNewGlobalManager>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -73,6 +79,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
         every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { agreementProvider.getAgreement(true) } returns null
         every { config.isPreLoginExperienceEnabled() } returns false
         every { config.isSocialAuthEnabled() } returns false
         every { config.getFacebookConfig() } returns FacebookConfig()
@@ -90,6 +97,7 @@ class SignInViewModelTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -98,12 +106,17 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -117,6 +130,7 @@ class SignInViewModelTest {
         every { validator.isEmailOrUserNameValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -125,8 +139,12 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -145,6 +163,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         val viewModel = SignInViewModel(
             interactor = interactor,
@@ -154,8 +173,12 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("acc@test.org", "")
 
@@ -174,6 +197,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns false
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -182,13 +206,18 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         viewModel.login("acc@test.org", "ed")
 
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -201,9 +230,9 @@ class SignInViewModelTest {
     fun `login success`() = runTest {
         every { validator.isEmailOrUserNameValid(any()) } returns true
         every { validator.isPasswordValid(any()) } returns true
-        every { analytics.userLoginEvent(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -212,16 +241,20 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
-        verify(exactly = 1) { analytics.userLoginEvent(any()) }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
@@ -235,6 +268,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -243,8 +277,12 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -252,6 +290,7 @@ class SignInViewModelTest {
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -267,6 +306,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -275,8 +315,12 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -285,6 +329,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -299,6 +344,7 @@ class SignInViewModelTest {
         every { validator.isPasswordValid(any()) } returns true
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
@@ -307,8 +353,12 @@ class SignInViewModelTest {
             analytics = analytics,
             appUpgradeNotifier = appUpgradeNotifier,
             oAuthHelper = oAuthHelper,
+            agreementProvider = agreementProvider,
             config = config,
+            router = router,
+            whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
+            infoType = "",
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
@@ -317,6 +367,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value

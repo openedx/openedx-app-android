@@ -54,10 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.presentation.global.AppData
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.calculateCurrentOffsetForPage
 import org.openedx.core.ui.rememberWindowSize
@@ -66,8 +64,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.whatsnew.WhatsNewRouter
-import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.domain.model.WhatsNewItem
 import org.openedx.whatsnew.domain.model.WhatsNewMessage
 import org.openedx.whatsnew.presentation.ui.NavigationUnitsButtons
@@ -76,11 +72,11 @@ import org.openedx.whatsnew.presentation.ui.PageIndicator
 class WhatsNewFragment : Fragment() {
 
     private val viewModel: WhatsNewViewModel by viewModel {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, null))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, null),
+            requireArguments().getString(ARG_INFO_TYPE, null)
+        )
     }
-    private val preferencesManager by inject<WhatsNewPreferences>()
-    private val router by inject<WhatsNewRouter>()
-    private val appData: AppData by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,21 +92,28 @@ class WhatsNewFragment : Fragment() {
                     windowSize = windowSize,
                     whatsNewItem = whatsNewItem.value,
                     onCloseClick = {
-                        val versionName = appData.versionName
-                        preferencesManager.lastWhatsNewVersion = versionName
-                        router.navigateToMain(parentFragmentManager, viewModel.courseId)
+                        viewModel.logWhatsNewDismissed(it)
+                        viewModel.navigateToMain(parentFragmentManager)
+                    },
+                    onDoneClick = {
+                        viewModel.logWhatsNewCompleted()
+                        viewModel.navigateToMain(parentFragmentManager)
                     }
                 )
+                viewModel.logWhatsNewViewed()
             }
         }
     }
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String? = null): WhatsNewFragment {
+        private const val ARG_INFO_TYPE = "info_type"
+
+        fun newInstance(courseId: String? = null, infoType: String? = null): WhatsNewFragment {
             val fragment = WhatsNewFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_INFO_TYPE to infoType
             )
             return fragment
         }
@@ -122,7 +125,8 @@ class WhatsNewFragment : Fragment() {
 fun WhatsNewScreen(
     windowSize: WindowSize,
     whatsNewItem: WhatsNewItem?,
-    onCloseClick: () -> Unit
+    onCloseClick: (Int) -> Unit,
+    onDoneClick: () -> Unit,
 ) {
     whatsNewItem?.let { item ->
         OpenEdXTheme {
@@ -141,6 +145,7 @@ fun WhatsNewScreen(
                 topBar = {
                     WhatsNewTopBar(
                         windowSize = windowSize,
+                        pagerState = pagerState,
                         onCloseClick = onCloseClick
                     )
                 },
@@ -152,7 +157,7 @@ fun WhatsNewScreen(
                                 modifier = Modifier.padding(paddingValues),
                                 whatsNewItem = item,
                                 pagerState = pagerState,
-                                onCloseClick = onCloseClick
+                                onDoneClick = onDoneClick
                             )
 
                         else ->
@@ -160,7 +165,7 @@ fun WhatsNewScreen(
                                 modifier = Modifier.padding(paddingValues),
                                 whatsNewItem = item,
                                 pagerState = pagerState,
-                                onCloseClick = onCloseClick
+                                onDoneClick = onDoneClick
                             )
                     }
                 }
@@ -169,10 +174,12 @@ fun WhatsNewScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WhatsNewTopBar(
     windowSize: WindowSize,
-    onCloseClick: () -> Unit
+    pagerState: PagerState,
+    onCloseClick: (Int) -> Unit,
 ) {
     val topBarWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -209,7 +216,7 @@ private fun WhatsNewTopBar(
                     modifier = Modifier
                         .testTag("ib_close")
                         .padding(end = 16.dp),
-                    onClick = onCloseClick
+                    onClick = { onCloseClick(pagerState.currentPage + 1) }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
@@ -228,7 +235,7 @@ private fun WhatsNewScreenPortrait(
     modifier: Modifier = Modifier,
     whatsNewItem: WhatsNewItem,
     pagerState: PagerState,
-    onCloseClick: () -> Unit
+    onDoneClick: () -> Unit,
 ) {
     OpenEdXTheme {
         val coroutineScope = rememberCoroutineScope()
@@ -320,7 +327,7 @@ private fun WhatsNewScreenPortrait(
                                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                     }
                                 } else {
-                                    onCloseClick()
+                                    onDoneClick()
                                 }
                             }
                         }
@@ -337,7 +344,7 @@ private fun WhatsNewScreenLandscape(
     modifier: Modifier = Modifier,
     whatsNewItem: WhatsNewItem,
     pagerState: PagerState,
-    onCloseClick: () -> Unit
+    onDoneClick: () -> Unit,
 ) {
     OpenEdXTheme {
         val coroutineScope = rememberCoroutineScope()
@@ -425,7 +432,7 @@ private fun WhatsNewScreenLandscape(
                                             pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                         }
                                     } else {
-                                        onCloseClick()
+                                        onDoneClick()
                                     }
                                 }
                             }
@@ -465,7 +472,7 @@ private fun WhatsNewPortraitPreview() {
     OpenEdXTheme {
         WhatsNewScreenPortrait(
             whatsNewItem = whatsNewItemPreview,
-            onCloseClick = {},
+            onDoneClick = {},
             pagerState = rememberPagerState { 4 }
         )
     }
@@ -489,7 +496,7 @@ private fun WhatsNewLandscapePreview() {
     OpenEdXTheme {
         WhatsNewScreenLandscape(
             whatsNewItem = whatsNewItemPreview,
-            onCloseClick = {},
+            onDoneClick = {},
             pagerState = rememberPagerState { 4 }
         )
     }

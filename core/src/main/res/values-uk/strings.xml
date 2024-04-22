@@ -20,10 +20,10 @@
     <string name="core_label_expired_on">Термін дії курсу минув %1$s</string>
     <string name="core_password">Пароль</string>
     <string name="core_assessment_soon">незабаром</string>
-    <string name="auto_recommended_text">Авто (Рекомендовано)</string>
-    <string name="video_quality_p360">360p (Менше використання трафіку)</string>
-    <string name="video_quality_p540">540p</string>
-    <string name="video_quality_p720">720p (Найкраща якість)</string>
+    <string name="core_video_quality_auto">Авто</string>
+    <string name="core_video_quality_auto_description">Рекомендовано</string>
+    <string name="core_video_quality_p360_description">Менше використання трафіку</string>
+    <string name="core_video_quality_p720_description">Найкраща якість</string>
     <string name="core_offline">Офлайн</string>
     <string name="core_dismiss">Закрити</string>
     <string name="core_reload">Перезавантажити</string>
@@ -58,11 +58,13 @@
     <string name="core_rate_us">Оцінити нас</string>
     <string name="core_thank_you_dialog_positive_description">Дякуємо за надання відгуку. Чи бажаєте ви поділитися своєю оцінкою цього додатка з іншими користувачами в магазині додатків?</string>
     <string name="core_thank_you_dialog_negative_description">Ми отримали ваш відгук і використовуватимемо його, щоб покращити ваш досвід навчання в майбутньому. Дякуємо, що поділилися!</string>
-    <string name="core_not_connected_to_internet">Ви не підключені до Інтернету. Будь ласка, перевірте ваше підключення до Інтернету.</string>
 
     <string name="core_register">Зареєструватися</string>
     <string name="core_sign_in">Увійти</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s зображення профілю</string>
+    <string name="core_accessibility_header_image_for">Заглавне зображення для курсу %1$s</string>
+
+    <string name="core_video_streaming_quality">Якість транслювання відео</string>
 </resources>

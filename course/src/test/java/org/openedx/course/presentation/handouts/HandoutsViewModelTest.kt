@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -17,6 +18,7 @@ import org.junit.rules.TestRule
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.*
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
 import java.net.UnknownHostException
 import java.util.*
 
@@ -30,6 +32,7 @@ class HandoutsViewModelTest {
 
     private val config = mockk<Config>()
     private val interactor = mockk<CourseInteractor>()
+    private val analytics = mockk<CourseAnalytics>()
 
     //region mockHandoutsModel
 
@@ -50,17 +53,16 @@ class HandoutsViewModelTest {
 
     @Test
     fun `getEnrolledCourse no internet connection exception`() = runTest {
-        val viewModel = HandoutsViewModel("", config, "Handouts", interactor)
+        val viewModel = HandoutsViewModel("", "Handouts", config, interactor, analytics)
         coEvery { interactor.getHandouts(any()) } throws UnknownHostException()
 
         advanceUntilIdle()
-
         assert(viewModel.htmlContent.value == null)
     }
 
     @Test
     fun `getEnrolledCourse unknown exception`() = runTest {
-        val viewModel = HandoutsViewModel("", config, "Handouts", interactor)
+        val viewModel = HandoutsViewModel("", "Handouts", config, interactor, analytics)
         coEvery { interactor.getHandouts(any()) } throws Exception()
         advanceUntilIdle()
 
@@ -69,7 +71,8 @@ class HandoutsViewModelTest {
 
     @Test
     fun `getEnrolledCourse handouts success`() = runTest {
-        val viewModel = HandoutsViewModel("", config, HandoutsType.Handouts.name, interactor)
+        val viewModel =
+            HandoutsViewModel("", HandoutsType.Handouts.name, config, interactor, analytics)
         coEvery { interactor.getHandouts(any()) } returns HandoutsModel("hello")
 
         advanceUntilIdle()
@@ -81,7 +84,8 @@ class HandoutsViewModelTest {
 
     @Test
     fun `getEnrolledCourse announcements success`() = runTest {
-        val viewModel = HandoutsViewModel("", config, HandoutsType.Announcements.name, interactor)
+        val viewModel =
+            HandoutsViewModel("", HandoutsType.Announcements.name, config, interactor, analytics)
         coEvery { interactor.getAnnouncements(any()) } returns listOf(
             AnnouncementModel(
                 "date",
@@ -98,7 +102,8 @@ class HandoutsViewModelTest {
 
     @Test
     fun `injectDarkMode test`() = runTest {
-        val viewModel = HandoutsViewModel("", config, HandoutsType.Announcements.name, interactor)
+        val viewModel =
+            HandoutsViewModel("", HandoutsType.Announcements.name, config, interactor, analytics)
         coEvery { interactor.getAnnouncements(any()) } returns listOf(
             AnnouncementModel(
                 "date",
@@ -116,5 +121,4 @@ class HandoutsViewModelTest {
 
         assert(viewModel.htmlContent.value != null)
     }
-
 }

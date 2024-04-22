@@ -38,9 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.auth.R
-import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -52,7 +52,9 @@ import org.openedx.core.ui.theme.compose.LogistrationLogoView
 
 class LogistrationFragment : Fragment() {
 
-    private val router: AuthRouter by inject()
+    private val viewModel: LogistrationViewModel by viewModel {
+        parametersOf(arguments?.getString(ARG_COURSE_ID, "") ?: "")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -62,16 +64,15 @@ class LogistrationFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val courseId = arguments?.getString(ARG_COURSE_ID, "")
                 LogistrationScreen(
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, courseId)
+                        viewModel.navigateToSignIn(parentFragmentManager)
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, courseId)
+                        viewModel.navigateToSignUp(parentFragmentManager)
                     },
                     onSearchClick = { querySearch ->
-                        router.navigateToDiscoverCourses(parentFragmentManager, querySearch)
+                        viewModel.navigateToDiscovery(parentFragmentManager, querySearch)
                     }
                 )
             }
@@ -153,6 +154,7 @@ private fun LogistrationScreen(
                         label = stringResource(id = R.string.pre_auth_search_hint),
                         requestFocus = false,
                         searchValue = textFieldValue,
+                        clearOnSubmit = true,
                         keyboardActions = {
                             focusManager.clearFocus()
                             onSearchClick(textFieldValue.text)

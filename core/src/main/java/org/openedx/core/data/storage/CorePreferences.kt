@@ -1,6 +1,7 @@
 package org.openedx.core.data.storage
 
 import org.openedx.core.data.model.User
+import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.VideoSettings
 
 interface CorePreferences {
@@ -9,6 +10,7 @@ interface CorePreferences {
     var accessTokenExpiresAt: Long
     var user: User?
     var videoSettings: VideoSettings
+    var appConfig: AppConfig
 
     fun clear()
 }

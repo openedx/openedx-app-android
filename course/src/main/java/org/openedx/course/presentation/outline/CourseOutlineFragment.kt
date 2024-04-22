@@ -28,6 +28,10 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarData
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -35,6 +39,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +48,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -54,7 +60,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -66,6 +71,7 @@ import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -79,6 +85,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.CourseContainerTab
@@ -89,6 +96,7 @@ import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseImageHeader
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.io.File
 import java.util.Date
 
@@ -98,8 +106,6 @@ class CourseOutlineFragment : Fragment() {
         parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
     }
     private val router by inject<CourseRouter>()
-
-    private var snackBar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,7 +161,7 @@ class CourseOutlineFragment : Fragment() {
                     },
                     onSubSectionClick = { subSectionBlock ->
                         viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                            viewModel.verticalClickedEvent(unit.blockId, unit.displayName)
+                            viewModel.logUnitDetailViewedEvent(unit.blockId, unit.displayName)
                             router.navigateToCourseContainer(
                                 requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
@@ -168,22 +174,35 @@ class CourseOutlineFragment : Fragment() {
                         viewModel.resumeSectionBlock?.let { subSection ->
                             viewModel.resumeCourseTappedEvent(subSection.id)
                             viewModel.resumeVerticalBlock?.let { unit ->
-                                router.navigateToCourseSubsections(
-                                    requireActivity().supportFragmentManager,
-                                    courseId = viewModel.courseId,
-                                    subSectionId = subSection.id,
-                                    mode = CourseViewMode.FULL,
-                                    unitId = unit.id,
-                                    componentId = componentId
-                                )
+                                if (viewModel.isCourseExpandableSectionsEnabled) {
+                                    router.navigateToCourseContainer(
+                                        fm = requireActivity().supportFragmentManager,
+                                        courseId = viewModel.courseId,
+                                        unitId = unit.id,
+                                        componentId = componentId,
+                                        mode = CourseViewMode.FULL
+                                    )
+                                } else {
+                                    router.navigateToCourseSubsections(
+                                        requireActivity().supportFragmentManager,
+                                        courseId = viewModel.courseId,
+                                        subSectionId = subSection.id,
+                                        mode = CourseViewMode.FULL,
+                                        unitId = unit.id,
+                                        componentId = componentId
+                                    )
+                                }
                             }
                         }
                     },
                     onDownloadClick = {
                         if (viewModel.isBlockDownloading(it.id)) {
-                            viewModel.cancelWork(it.id)
+                            router.navigateToDownloadQueue(
+                                fm = requireActivity().supportFragmentManager,
+                                viewModel.getDownloadableChildren(it.id) ?: arrayListOf()
+                            )
                         } else if (viewModel.isBlockDownloaded(it.id)) {
-                            viewModel.removeDownloadedModels(it.id)
+                            viewModel.removeDownloadModels(it.id)
                         } else {
                             viewModel.saveDownloadModels(
                                 requireContext().externalCacheDir.toString() +
@@ -197,44 +216,27 @@ class CourseOutlineFragment : Fragment() {
                     onResetDatesClick = {
                         viewModel.resetCourseDatesBanner(onResetDates = {
                             (parentFragment as CourseContainerFragment).updateCourseDates()
-                            showDatesUpdateSnackbar(it)
                         })
+                    },
+                    onViewDates = {
+                        (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
+                    },
+                    onCertificateClick = {
+                        viewModel.viewCertificateTappedEvent()
+                        it.takeIfNotEmpty()
+                            ?.let { url -> AndroidUriHandler(requireContext()).openUri(url) }
                     }
                 )
             }
         }
     }
 
-    override fun onDestroyView() {
-        snackBar?.dismiss()
-        super.onDestroyView()
-    }
-
-    private fun showDatesUpdateSnackbar(isSuccess: Boolean) {
-        val message = if (isSuccess) {
-            getString(R.string.core_dates_shift_dates_successfully_msg)
-        } else {
-            getString(R.string.core_dates_shift_dates_unsuccessful_msg)
-        }
-        snackBar = view?.let {
-            Snackbar.make(it, message, Snackbar.LENGTH_LONG).apply {
-                if (isSuccess) {
-                    setAction(R.string.core_dates_view_all_dates) {
-                        (parentFragment as CourseContainerFragment).navigateToTab(CourseContainerTab.DATES)
-                    }
-                }
-            }
-        }
-        snackBar?.show()
-    }
-
-
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
         fun newInstance(
             courseId: String,
-            title: String
+            title: String,
         ): CourseOutlineFragment {
             val fragment = CourseOutlineFragment()
             fragment.arguments = bundleOf(
@@ -275,6 +277,8 @@ internal fun CourseOutlineScreen(
     onResumeClick: (String) -> Unit,
     onDownloadClick: (Block) -> Unit,
     onResetDatesClick: () -> Unit,
+    onViewDates: () -> Unit?,
+    onCertificateClick: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState =
@@ -318,6 +322,17 @@ internal fun CourseOutlineScreen(
             )
         }
 
+        val snackState = remember { SnackbarHostState() }
+        if (uiMessage is DatesShiftedSnackBar) {
+            val datesShiftedMessage =
+                stringResource(id = org.openedx.course.R.string.course_dates_shifted_message)
+            LaunchedEffect(uiMessage) {
+                snackState.showSnackbar(
+                    message = datesShiftedMessage,
+                    duration = SnackbarDuration.Long
+                )
+            }
+        }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -357,11 +372,11 @@ internal fun CourseOutlineScreen(
                                             courseImage = uiState.courseStructure.media?.image?.large
                                                 ?: "",
                                             courseCertificate = uiState.courseStructure.certificate,
+                                            onCertificateClick = onCertificateClick,
                                             courseName = uiState.courseStructure.name
                                         )
                                     }
                                 }
-                                item { Spacer(Modifier.height(28.dp)) }
                                 if (uiState.datesBannerInfo.isBannerAvailableForDashboard()) {
                                     item {
                                         Box(
@@ -370,13 +385,11 @@ internal fun CourseOutlineScreen(
                                         ) {
                                             if (windowSize.isTablet) {
                                                 CourseDatesBannerTablet(
-                                                    modifier = Modifier.padding(bottom = 16.dp),
                                                     banner = uiState.datesBannerInfo,
                                                     resetDates = onResetDatesClick,
                                                 )
                                             } else {
                                                 CourseDatesBanner(
-                                                    modifier = Modifier.padding(bottom = 16.dp),
                                                     banner = uiState.datesBannerInfo,
                                                     resetDates = onResetDatesClick,
                                                 )
@@ -389,11 +402,13 @@ internal fun CourseOutlineScreen(
                                         Box(listPadding) {
                                             if (windowSize.isTablet) {
                                                 ResumeCourseTablet(
+                                                    modifier = Modifier.padding(vertical = 16.dp),
                                                     block = uiState.resumeComponent,
                                                     onResumeClick = onResumeClick
                                                 )
                                             } else {
                                                 ResumeCourse(
+                                                    modifier = Modifier.padding(vertical = 16.dp),
                                                     block = uiState.resumeComponent,
                                                     onResumeClick = onResumeClick
                                                 )
@@ -403,9 +418,6 @@ internal fun CourseOutlineScreen(
                                 }
 
                                 if (isCourseNestedListEnabled) {
-                                    item {
-                                        Spacer(Modifier.height(16.dp))
-                                    }
                                     uiState.courseStructure.blockData.forEach { section ->
                                         val courseSubSections =
                                             uiState.courseSubSections[section.id]
@@ -499,6 +511,17 @@ internal fun CourseOutlineScreen(
                         )
                     }
                 }
+
+                SnackbarHost(
+                    modifier = Modifier.align(Alignment.BottomStart),
+                    hostState = snackState
+                ) { snackbarData: SnackbarData ->
+                    DatesShiftedSnackBar(showAction = true,
+                        onViewDates = onViewDates,
+                        onClose = {
+                            snackbarData.dismiss()
+                        })
+                }
             }
         }
     }
@@ -506,11 +529,12 @@ internal fun CourseOutlineScreen(
 
 @Composable
 private fun ResumeCourse(
+    modifier: Modifier = Modifier,
     block: Block,
     onResumeClick: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Text(
             text = stringResource(id = org.openedx.course.R.string.course_continue_with),
@@ -557,11 +581,12 @@ private fun ResumeCourse(
 
 @Composable
 private fun ResumeCourseTablet(
+    modifier: Modifier = Modifier,
     block: Block,
     onResumeClick: (String) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
@@ -595,7 +620,7 @@ private fun ResumeCourseTablet(
             }
         }
         OpenEdXButton(
-            width = Modifier.width(210.dp),
+            modifier = Modifier.width(210.dp),
             text = stringResource(id = org.openedx.course.R.string.course_resume),
             onClick = {
                 onResumeClick(block.id)
@@ -648,6 +673,8 @@ private fun CourseOutlineScreenPreview() {
             onReloadClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
+            onViewDates = {},
+            onCertificateClick = {},
         )
     }
 }
@@ -688,6 +715,8 @@ private fun CourseOutlineScreenTabletPreview() {
             onReloadClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
+            onViewDates = {},
+            onCertificateClick = {},
         )
     }
 }
@@ -697,7 +726,7 @@ private fun CourseOutlineScreenTabletPreview() {
 @Composable
 private fun ResumeCoursePreview() {
     OpenEdXTheme {
-        ResumeCourse(mockChapterBlock) {}
+        ResumeCourse(block = mockChapterBlock) {}
     }
 }
 

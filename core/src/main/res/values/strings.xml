@@ -26,13 +26,19 @@
     <string name="core_password">Password</string>
     <string name="core_assessment_soon">Soon</string>
     <string name="core_offline">Offline</string>
+    <string name="core_warning">Warning</string>
+    <string name="core_delete">Delete</string>
+    <string name="core_confirm">Confirm</string>
     <string name="core_dismiss">Dismiss</string>
     <string name="core_reload">Reload</string>
     <string name="core_downloading_in_progress">Downloading in progress</string>
-    <string name="auto_recommended_text">Auto (Recommended)</string>
-    <string name="video_quality_p360">360p (Lower data usage)</string>
-    <string name="video_quality_p540">540p</string>
-    <string name="video_quality_p720">720p (Best quality)</string>
+    <string name="core_video_quality_auto">Auto</string>
+    <string name="core_video_quality_auto_description">Recommended</string>
+    <string name="core_video_quality_p360" translatable="false">360p</string>
+    <string name="core_video_quality_p360_description">Lower data usage</string>
+    <string name="core_video_quality_p540" translatable="false">540p</string>
+    <string name="core_video_quality_p720" translatable="false">720p</string>
+    <string name="core_video_quality_p720_description">Best quality</string>
     <string name="core_user_not_active">User account is not activated. Please activate your account first.</string>
     <string name="core_email_chooser_header">Send email using…</string>
     <string name="core_email_client_not_present">No e-mail clients installed</string>
@@ -67,7 +73,8 @@
     <string name="core_rate_us">Rate Us</string>
     <string name="core_thank_you_dialog_positive_description">Thank you for sharing your feedback with us. Would you like to share your review of this app with other users on the app store?</string>
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
-    <string name="core_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
+    <string name="core_no_internet_connection">No internet connection</string>
+    <string name="core_no_internet_connection_description">Please connect to the internet to view this content.</string>
     <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
     <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
     <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
@@ -100,13 +107,23 @@
     <string name="core_dates_info_banner_body" tools:ignore="MissingTranslation">We built a suggested schedule to help you stay on track. But don’t worry – it’s flexible so you can learn at your own pace. If you happen to fall behind, you’ll be able to adjust the dates to keep yourself on track.</string>
     <string name="core_dates_upgrade_to_graded_banner_body" tools:ignore="MissingTranslation">To complete graded assignments as part of this course, you can upgrade today.</string>
     <string name="core_dates_upgrade_to_reset_banner_body" tools:ignore="MissingTranslation">You are auditing this course, which means that you are unable to participate in graded assignments. It looks like you missed some important deadlines based on our suggested schedule. To complete graded assignments as part of this course and shift the past due assignments into the future, you can upgrade today.</string>
+    <string name="core_dates_shift_dates_successfully_title" tools:ignore="MissingTranslation">Due Dates Shifted</string>
     <string name="core_dates_shift_dates_successfully_msg" tools:ignore="MissingTranslation">Your due dates have been successfully shifted to help you stay on track.</string>
     <string name="core_dates_shift_dates_unsuccessful_msg" tools:ignore="MissingTranslation">Your dates could not be shifted. Please try again.</string>
-    <string name="core_dates_view_all_dates" tools:ignore="MissingTranslation"><u>View all dates</u></string>
+    <string name="core_dates_view_all_dates" tools:ignore="MissingTranslation"><u>View All Dates</u></string>
 
     <string name="core_register">Register</string>
     <string name="core_sign_in">Sign in</string>
 
     <!--    Accessibility-->
     <string name="core_accessibility_user_profile_image">%1$s profile image</string>
+    <string name="core_accessibility_header_image_for">Header image for %1$s</string>
+
+    <string name="core_video_download_to_device">Download to device</string>
+    <string name="core_video_downloading_to_device">Downloading videos…</string>
+    <string name="core_video_downloaded_to_device">All videos downloaded</string>
+    <string name="core_video_remaining_to_download" formatted="false">Remaining %d, %s Total</string>
+    <string name="core_video_downloaded_subtitle" formatted="false">Videos %d, %s Total</string>
+    <string name="core_video_streaming_quality">Video streaming quality</string>
+    <string name="core_video_download_quality">Video download quality</string>
 </resources>

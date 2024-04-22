@@ -2,20 +2,21 @@ package org.openedx.course.presentation.unit.video
 
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
-import org.openedx.core.BaseViewModel
-import org.openedx.course.data.repository.CourseRepository
-import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseVideoPositionChanged
 import kotlinx.coroutines.launch
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseVideoPositionChanged
+import org.openedx.course.data.repository.CourseRepository
+import org.openedx.course.presentation.CourseAnalytics
 
 class VideoViewModel(
     private val courseId: String,
     private val courseRepository: CourseRepository,
     private val notifier: CourseNotifier,
-    private val preferencesManager: CorePreferences
-) : BaseViewModel() {
+    private val preferencesManager: CorePreferences,
+    courseAnalytics: CourseAnalytics,
+) : BaseVideoViewModel(courseId, courseAnalytics) {
 
     var videoUrl = ""
     var currentVideoTime = 0L
@@ -27,12 +28,19 @@ class VideoViewModel(
     fun sendTime() {
         if (currentVideoTime != C.TIME_UNSET) {
             viewModelScope.launch {
-                notifier.send(CourseVideoPositionChanged(videoUrl, currentVideoTime, isPlaying ?: false))
+                notifier.send(
+                    CourseVideoPositionChanged(
+                        videoUrl,
+                        currentVideoTime,
+                        isPlaying ?: false
+                    )
+                )
             }
         }
     }
 
-    fun markBlockCompleted(blockId: String) {
+    fun markBlockCompleted(blockId: String, medium: String) {
+        logLoadedCompletedEvent(videoUrl, false, currentVideoTime, medium)
         if (!isBlockAlreadyCompleted) {
             viewModelScope.launch {
                 try {
@@ -49,5 +57,5 @@ class VideoViewModel(
         }
     }
 
-    fun getVideoQuality() = preferencesManager.videoSettings.videoQuality
+    fun getVideoQuality() = preferencesManager.videoSettings.videoStreamingQuality
 }

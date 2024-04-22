@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalComposeUiApi::class)
-
 package org.openedx.discussion.presentation.threads
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
@@ -7,17 +5,53 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -40,8 +74,23 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
-import org.openedx.core.ui.*
-import org.openedx.core.ui.theme.*
+import org.openedx.core.ui.BackBtn
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedTextField
+import org.openedx.core.ui.SheetContent
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.isImeVisibleState
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.statusBarsInset
+import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
+import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.R as discussionR
 
@@ -261,7 +310,11 @@ private fun DiscussionAddThreadScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 48.dp),
-                                text = stringResource(id = discussionR.string.discussion_create_post),
+                                text = if (currentPage == 0) {
+                                    stringResource(id = discussionR.string.discussion_create_post)
+                                } else {
+                                    stringResource(id = discussionR.string.discussion_create_question)
+                                },
                                 color = MaterialTheme.appColors.textPrimary,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.appTypography.titleMedium,
@@ -385,8 +438,12 @@ private fun DiscussionAddThreadScreen(
                                     CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                 } else {
                                     OpenEdXButton(
-                                        width = buttonWidth,
-                                        text = stringResource(id = discussionR.string.discussion_create_post),
+                                        modifier = buttonWidth,
+                                        text = if (currentPage == 0) {
+                                            stringResource(id = discussionR.string.discussion_create_post)
+                                        } else {
+                                            stringResource(id = discussionR.string.discussion_create_question)
+                                        },
                                         onClick = {
                                             onPostDiscussionClick(
                                                 discussionType,
@@ -423,7 +480,7 @@ private fun Tabs(
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(20))
             .border(1.dp, MaterialTheme.appColors.cardViewBorder, RoundedCornerShape(20)),
-        indicator = { tabPositions: List<TabPosition> ->
+        indicator = { _ ->
             Box {}
         }
     ) {

@@ -1,3 +1,3 @@
 package org.openedx.core.system.notifier
 
-class CourseDashboardUpdate : CourseEvent
+class CourseDashboardUpdate : DiscoveryEvent

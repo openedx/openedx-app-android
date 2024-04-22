@@ -13,21 +13,25 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
+import org.openedx.core.presentation.settings.VideoQualityFragment
+import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
-import org.openedx.course.presentation.detail.CourseDetailsFragment
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.handouts.HandoutsWebViewFragment
-import org.openedx.course.presentation.info.CourseInfoFragment
 import org.openedx.course.presentation.section.CourseSectionFragment
 import org.openedx.course.presentation.unit.container.CourseUnitContainerFragment
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
+import org.openedx.course.settings.download.DownloadQueueFragment
 import org.openedx.dashboard.presentation.DashboardRouter
-import org.openedx.dashboard.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
+import org.openedx.discovery.presentation.WebViewDiscoveryFragment
+import org.openedx.discovery.presentation.detail.CourseDetailsFragment
+import org.openedx.discovery.presentation.info.CourseInfoFragment
+import org.openedx.discovery.presentation.program.ProgramFragment
 import org.openedx.discovery.presentation.search.CourseSearchFragment
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.Thread
@@ -43,7 +47,6 @@ import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
-import org.openedx.profile.presentation.settings.video.VideoQualityFragment
 import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
@@ -52,37 +55,45 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
-    override fun navigateToMain(fm: FragmentManager, courseId: String?) {
+    override fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance(courseId))
+            .replace(R.id.container, MainFragment.newInstance(courseId, infoType))
             .commit()
     }
 
-    override fun navigateToSignIn(fm: FragmentManager, courseId: String?) {
-        replaceFragmentWithBackStack(fm, SignInFragment.newInstance(courseId))
+    override fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?) {
+        replaceFragmentWithBackStack(fm, SignInFragment.newInstance(courseId, infoType))
     }
 
-    override fun navigateToSignUp(fm: FragmentManager, courseId: String?) {
-        replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId))
+    override fun navigateToSignUp(fm: FragmentManager, courseId: String?, infoType: String?) {
+        replaceFragmentWithBackStack(fm, SignUpFragment.newInstance(courseId, infoType))
     }
 
     override fun navigateToLogistration(fm: FragmentManager, courseId: String?) {
         replaceFragmentWithBackStack(fm, LogistrationFragment.newInstance(courseId))
     }
 
+    override fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String>) {
+        replaceFragmentWithBackStack(fm, DownloadQueueFragment.newInstance(descendants))
+    }
+
     override fun navigateToRestorePassword(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, RestorePasswordFragment())
     }
 
-    override fun navigateToDiscoverCourses(fm: FragmentManager, querySearch: String) {
+    override fun navigateToNativeDiscoverCourses(fm: FragmentManager, querySearch: String) {
         replaceFragmentWithBackStack(fm, NativeDiscoveryFragment.newInstance(querySearch))
     }
 
-    override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?) {
+    override fun navigateToWebDiscoverCourses(fm: FragmentManager, querySearch: String) {
+        replaceFragmentWithBackStack(fm, WebViewDiscoveryFragment.newInstance(querySearch))
+    }
+
+    override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?, infoType: String?) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, WhatsNewFragment.newInstance(courseId))
+            .replace(R.id.container, WhatsNewFragment.newInstance(courseId, infoType))
             .commit()
     }
 
@@ -123,15 +134,16 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToCourseOutline(
         fm: FragmentManager,
         courseId: String,
-        courseTitle: String
+        courseTitle: String,
+        enrollmentMode: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle)
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
         )
     }
 
-    override fun navigateToProgramInfo(fm: FragmentManager, pathId: String) {
+    override fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String) {
         replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
     }
 
@@ -320,8 +332,8 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, VideoSettingsFragment())
     }
 
-    override fun navigateToVideoQuality(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, VideoQualityFragment())
+    override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
+        replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
     }
 
     override fun navigateToDeleteAccount(fm: FragmentManager) {

@@ -50,6 +50,7 @@ import org.openedx.auth.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.extension.TextConverter
+import org.openedx.core.extension.tagId
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.noRippleClickable
@@ -86,7 +87,7 @@ fun RequiredFields(
                 val linkedText =
                     TextConverter.htmlTextToLinkedText(field.label)
                 HyperlinkText(
-                    modifier = Modifier.testTag("txt_${field.name}"),
+                    modifier = Modifier.testTag("txt_${field.name.tagId()}"),
                     fullText = linkedText.text,
                     hyperLinks = linkedText.links,
                     linkTextColor = MaterialTheme.appColors.primary
@@ -94,7 +95,9 @@ fun RequiredFields(
             }
 
             RegistrationFieldType.CHECKBOX -> {
-                //Text("checkbox")
+                CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                    onFieldUpdated(field.name, it.toString())
+                }
             }
 
             RegistrationFieldType.SELECT -> {
@@ -138,6 +141,7 @@ fun OptionalFields(
     selectableNamesMap: MutableMap<String, String?>,
     onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit,
     onFieldUpdated: (String, String) -> Unit,
+    hyperLinkAction: ((Map<String, String>, String) -> Unit)? = null,
 ) {
     Column {
         fields.forEach { field ->
@@ -166,12 +170,17 @@ fun OptionalFields(
                     HyperlinkText(
                         fullText = linkedText.text,
                         hyperLinks = linkedText.links,
-                        linkTextColor = MaterialTheme.appColors.primary
+                        linkTextColor = MaterialTheme.appColors.primary,
+                        action = {
+                            hyperLinkAction?.invoke(linkedText.links, it)
+                        },
                     )
                 }
 
                 RegistrationFieldType.CHECKBOX -> {
-                    //Text("checkbox")
+                    CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                        onFieldUpdated(field.name, it.toString())
+                    }
                 }
 
                 RegistrationFieldType.SELECT -> {
@@ -305,7 +314,7 @@ fun InputRegistrationField(
     Column {
         Text(
             modifier = Modifier
-                .testTag("txt_${registrationField.name}_label")
+                .testTag("txt_${registrationField.name.tagId()}_label")
                 .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
@@ -329,7 +338,7 @@ fun InputRegistrationField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
-                    modifier = modifier.testTag("txt_${registrationField.name}_placeholder"),
+                    modifier = modifier.testTag("txt_${registrationField.name.tagId()}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -345,11 +354,11 @@ fun InputRegistrationField(
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
-            modifier = modifier.testTag("tf_${registrationField.name}")
+            modifier = modifier.testTag("tf_${registrationField.name.tagId()}")
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            modifier = Modifier.testTag("txt_${registrationField.name}_description"),
+            modifier = Modifier.testTag("txt_${registrationField.name.tagId()}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor
@@ -392,7 +401,7 @@ fun SelectableRegisterField(
     ) {
         Text(
             modifier = Modifier
-                .testTag("txt_${registrationField.name}_label")
+                .testTag("txt_${registrationField.name.tagId()}_label")
                 .fillMaxWidth(),
             text = registrationField.label,
             style = MaterialTheme.appTypography.labelLarge,
@@ -414,14 +423,14 @@ fun SelectableRegisterField(
             textStyle = MaterialTheme.appTypography.bodyMedium,
             onValueChange = { },
             modifier = Modifier
-                .testTag("tf_${registrationField.name}")
+                .testTag("tf_${registrationField.name.tagId()}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick(registrationField.name, registrationField.options)
                 },
             placeholder = {
                 Text(
-                    modifier = Modifier.testTag("txt_${registrationField.name}_placeholder"),
+                    modifier = Modifier.testTag("txt_${registrationField.name.tagId()}_placeholder"),
                     text = registrationField.label,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -437,7 +446,7 @@ fun SelectableRegisterField(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            modifier = Modifier.testTag("txt_${registrationField.name}_description"),
+            modifier = Modifier.testTag("txt_${registrationField.name.tagId()}_description"),
             text = helperText,
             style = MaterialTheme.appTypography.bodySmall,
             color = helperTextColor

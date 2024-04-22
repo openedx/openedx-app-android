@@ -1,9 +1,10 @@
 package org.openedx.app
 
 import android.app.Application
-import com.google.firebase.FirebaseOptions
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.initialize
+import com.braze.Braze
+import com.braze.configuration.BrazeConfig
+import com.google.firebase.FirebaseApp
+import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -26,16 +27,29 @@ class OpenEdXApp : Application() {
                 screenModule
             )
         }
-        val firebaseConfig = config.getFirebaseConfig()
-        if (firebaseConfig.enabled) {
-            val options = FirebaseOptions.Builder()
-                .setProjectId(firebaseConfig.projectId)
-                .setApplicationId(firebaseConfig.applicationId)
-                .setApiKey(firebaseConfig.apiKey)
-                .setGcmSenderId(firebaseConfig.gcmSenderId)
+        if (config.getFirebaseConfig().enabled) {
+            FirebaseApp.initializeApp(this)
+        }
+
+        if (config.getBranchConfig().enabled) {
+            if (BuildConfig.DEBUG) {
+                Branch.enableTestMode()
+                Branch.enableLogging()
+            }
+            Branch.getAutoInstance(this)
+        }
+
+        if (config.getBrazeConfig().isEnabled && config.getFirebaseConfig().enabled) {
+            val isCloudMessagingEnabled = config.getFirebaseConfig().isCloudMessagingEnabled &&
+                    config.getBrazeConfig().isPushNotificationsEnabled
+
+            val brazeConfig = BrazeConfig.Builder()
+                .setIsFirebaseCloudMessagingRegistrationEnabled(isCloudMessagingEnabled)
+                .setFirebaseCloudMessagingSenderIdKey(config.getFirebaseConfig().projectNumber)
+                .setHandlePushDeepLinksAutomatically(true)
+                .setIsFirebaseMessagingServiceOnNewTokenRegistrationEnabled(true)
                 .build()
-            Firebase.initialize(this, options)
+            Braze.configure(this, brazeConfig)
         }
     }
-
 }

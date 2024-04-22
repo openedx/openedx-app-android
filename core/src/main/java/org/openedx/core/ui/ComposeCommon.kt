@@ -1,8 +1,6 @@
 package org.openedx.core.ui
 
-import android.content.Context
 import android.os.Build.VERSION.SDK_INT
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,13 +34,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
@@ -92,13 +88,13 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import coil.request.ImageRequest
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
+import org.openedx.core.extension.tagId
 import org.openedx.core.extension.toastMessage
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
@@ -110,19 +106,21 @@ fun StaticSearchBar(
     onClick: () -> Unit = {},
 ) {
     Row(
-        modifier = modifier.then(Modifier
-            .background(
-                MaterialTheme.appColors.textFieldBackground,
-                MaterialTheme.appShapes.textFieldShape
-            )
-            .clip(MaterialTheme.appShapes.textFieldShape)
-            .border(
-                1.dp,
-                MaterialTheme.appColors.textFieldBorder,
-                MaterialTheme.appShapes.textFieldShape
-            )
-            .clickable { onClick() }
-            .padding(horizontal = 20.dp)),
+        modifier = modifier
+            .testTag("tf_search")
+            .then(Modifier
+                .background(
+                    MaterialTheme.appColors.textFieldBackground,
+                    MaterialTheme.appShapes.textFieldShape
+                )
+                .clip(MaterialTheme.appShapes.textFieldShape)
+                .border(
+                    1.dp,
+                    MaterialTheme.appColors.textFieldBorder,
+                    MaterialTheme.appShapes.textFieldShape
+                )
+                .clickable { onClick() }
+                .padding(horizontal = 20.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -133,7 +131,9 @@ fun StaticSearchBar(
         Spacer(Modifier.width(10.dp))
         Box {
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .testTag("txt_search")
+                    .fillMaxWidth(),
                 text = text,
                 color = MaterialTheme.appColors.textFieldHint
             )
@@ -146,7 +146,7 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -159,7 +159,10 @@ fun Toolbar(
 
         Text(
             modifier = Modifier
-                .align(Alignment.Center),
+                .fillMaxWidth()
+                .testTag("txt_toolbar_title")
+                .align(Alignment.Center)
+                .padding(horizontal = 48.dp),
             text = label,
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleMedium,
@@ -177,6 +180,7 @@ fun SearchBar(
     searchValue: TextFieldValue,
     requestFocus: Boolean = false,
     label: String = stringResource(id = R.string.core_search),
+    clearOnSubmit: Boolean = false,
     keyboardActions: () -> Unit,
     onValueChanged: (TextFieldValue) -> Unit = {},
     onClearValue: () -> Unit,
@@ -197,6 +201,7 @@ fun SearchBar(
     }
     OutlinedTextField(
         modifier = Modifier
+            .testTag("tf_search")
             .focusRequester(focusRequester)
             .onFocusChanged {
                 isFocused = it.hasFocus
@@ -258,6 +263,10 @@ fun SearchBar(
         keyboardActions = KeyboardActions {
             keyboardController?.hide()
             keyboardActions()
+            if (clearOnSubmit) {
+                textFieldValue = TextFieldValue("")
+                onClearValue()
+            }
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         maxLines = 1
@@ -384,6 +393,7 @@ fun HyperlinkText(
     linkTextFontWeight: FontWeight = FontWeight.Normal,
     linkTextDecoration: TextDecoration = TextDecoration.None,
     fontSize: TextUnit = TextUnit.Unspecified,
+    action: ((String) -> Unit)? = null,
 ) {
     val annotatedString = buildAnnotatedString {
         append(fullText)
@@ -436,7 +446,8 @@ fun HyperlinkText(
             annotatedString
                 .getStringAnnotations("URL", it, it)
                 .firstOrNull()?.let { stringAnnotation ->
-                    uriHandler.openUri(stringAnnotation.item)
+                    action?.invoke(stringAnnotation.item)
+                        ?: uriHandler.openUri(stringAnnotation.item)
                 }
         }
     )
@@ -573,7 +584,7 @@ fun SheetContent(
     expandedList: List<RegistrationField.Option>,
     onItemClick: (RegistrationField.Option) -> Unit,
     listState: LazyListState,
-    searchValueChanged: (String) -> Unit
+    searchValueChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -614,7 +625,7 @@ fun SheetContent(
             }) { item ->
                 Text(
                     modifier = Modifier
-                        .testTag("txt_${item.value}_title")
+                        .testTag("txt_${item.value.tagId()}_title")
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .clickable {
@@ -637,7 +648,7 @@ fun SheetContent(
     title: String = stringResource(id = R.string.core_select_value),
     expandedList: List<Pair<String, String>>,
     onItemClick: (Pair<String, String>) -> Unit,
-    searchValueChanged: (String) -> Unit
+    searchValueChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     Column(
@@ -714,7 +725,9 @@ fun OpenEdXOutlinedTextField(
 
     Column {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_${title.tagId()}_label")
+                .fillMaxWidth(),
             text = buildAnnotatedString {
                 if (withRequiredMark) {
                     append(title)
@@ -760,11 +773,12 @@ fun OpenEdXOutlinedTextField(
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
             isError = !errorText.isNullOrEmpty(),
-            modifier = modifier
+            modifier = modifier.testTag("tf_${title.tagId()}_input")
         )
         if (!errorText.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
+                modifier = Modifier.testTag("txt_${title.tagId()}_error"),
                 text = errorText,
                 style = MaterialTheme.appTypography.bodySmall,
                 color = MaterialTheme.appColors.error
@@ -807,76 +821,6 @@ fun AutoSizeText(
 }
 
 @Composable
-fun DiscoveryCourseItem(
-    apiHostUrl: String,
-    course: Course,
-    windowSize: WindowSize,
-    onClick: (String) -> Unit
-) {
-
-    val imageWidth by remember(key1 = windowSize) {
-        mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = 170.dp,
-                compact = 105.dp
-            )
-        )
-    }
-
-    val imageUrl = apiHostUrl.dropLast(1) + course.media.courseImage?.uri
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(140.dp)
-            .clickable { onClick(course.courseId) }
-            .background(MaterialTheme.appColors.background),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.appColors.background),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
-                    .error(R.drawable.core_no_image_course)
-                    .placeholder(R.drawable.core_no_image_course)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .width(imageWidth)
-                    .height(105.dp)
-                    .clip(MaterialTheme.appShapes.courseImageShape)
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(105.dp),
-            ) {
-                Text(
-                    modifier = Modifier.padding(top = 12.dp),
-                    text = course.org, color = MaterialTheme.appColors.textFieldHint,
-                    style = MaterialTheme.appTypography.labelMedium
-                )
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    text = course.name,
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleSmall,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun IconText(
     text: String,
     icon: ImageVector,
@@ -888,7 +832,9 @@ fun IconText(
     val modifierClickable = if (onClick == null) {
         Modifier
     } else {
-        Modifier.noRippleClickable { onClick.invoke() }
+        Modifier
+            .testTag("btn_${text.tagId()}")
+            .noRippleClickable { onClick.invoke() }
     }
     Row(
         modifier = modifier.then(modifierClickable),
@@ -896,12 +842,19 @@ fun IconText(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = Modifier
+                .testTag("ic_${text.tagId()}")
+                .size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
         )
-        Text(text = text, color = color, style = textStyle)
+        Text(
+            modifier = Modifier.testTag("txt_${text.tagId()}"),
+            text = text,
+            color = color,
+            style = textStyle
+        )
     }
 }
 
@@ -917,7 +870,9 @@ fun IconText(
     val modifierClickable = if (onClick == null) {
         Modifier
     } else {
-        Modifier.noRippleClickable { onClick.invoke() }
+        Modifier
+            .testTag("btn_${text.tagId()}")
+            .noRippleClickable { onClick.invoke() }
     }
     Row(
         modifier = modifier.then(modifierClickable),
@@ -925,12 +880,19 @@ fun IconText(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = Modifier
+                .testTag("ic_${text.tagId()}")
+                .size((textStyle.fontSize.value + 4).dp),
             painter = painter,
             contentDescription = null,
             tint = color
         )
-        Text(text = text, color = color, style = textStyle)
+        Text(
+            modifier = Modifier.testTag("txt_${text.tagId()}"),
+            text = text,
+            color = color,
+            style = textStyle
+        )
     }
 }
 
@@ -1007,27 +969,40 @@ fun OfflineModeDialog(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(vertical = 10.dp, horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
+            IconText(
                 text = stringResource(id = R.string.core_offline),
-                style = MaterialTheme.appTypography.labelMedium,
-                color = MaterialTheme.appColors.textDark
+                painter = painterResource(id = R.drawable.core_ic_offline),
+                color = Color.Black,
+                textStyle = MaterialTheme.appTypography.titleSmall
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    modifier = Modifier.clickable { onDismissCLick() },
-                    text = stringResource(id = R.string.core_dismiss),
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.primary
-                )
-                Text(
-                    modifier = Modifier.clickable { onReloadClick() },
-                    text = stringResource(id = R.string.core_reload),
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.primary
-                )
+            Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = {
+                        onReloadClick()
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        painter = painterResource(R.drawable.core_ic_reload),
+                        contentDescription = null,
+                        tint = MaterialTheme.appColors.primary
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.size(20.dp),
+                    onClick = {
+                        onDismissCLick()
+                    }) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = Color.Black
+                    )
+                }
             }
         }
     }
@@ -1035,16 +1010,17 @@ fun OfflineModeDialog(
 
 @Composable
 fun OpenEdXButton(
-    width: Modifier = Modifier.fillMaxWidth(),
+    modifier: Modifier = Modifier.fillMaxWidth(),
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
     backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null
+    content: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Button(
         modifier = Modifier
-            .then(width)
+            .testTag("btn_${text.tagId()}")
+            .then(modifier)
             .height(42.dp),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.buttonColors(
@@ -1055,6 +1031,7 @@ fun OpenEdXButton(
     ) {
         if (content == null) {
             Text(
+                modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
                 color = MaterialTheme.appColors.buttonText,
                 style = MaterialTheme.appTypography.labelLarge
@@ -1073,10 +1050,11 @@ fun OpenEdXOutlinedButton(
     textColor: Color,
     text: String = "",
     onClick: () -> Unit,
-    content: (@Composable RowScope.() -> Unit)? = null
+    content: (@Composable RowScope.() -> Unit)? = null,
 ) {
     OutlinedButton(
         modifier = Modifier
+            .testTag("btn_${text.tagId()}")
             .then(modifier)
             .height(42.dp),
         onClick = onClick,
@@ -1086,6 +1064,7 @@ fun OpenEdXOutlinedButton(
     ) {
         if (content == null) {
             Text(
+                modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
                 style = MaterialTheme.appTypography.labelLarge,
                 color = textColor
@@ -1100,7 +1079,7 @@ fun OpenEdXOutlinedButton(
 fun BackBtn(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.appColors.primary,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     IconButton(modifier = modifier.testTag("ib_back"),
         onClick = { onBackClick() }) {
@@ -1115,7 +1094,7 @@ fun BackBtn(
 @Composable
 fun ConnectionErrorView(
     modifier: Modifier,
-    onReloadClick: () -> Unit
+    onReloadClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -1124,21 +1103,29 @@ fun ConnectionErrorView(
     ) {
         Icon(
             modifier = Modifier.size(100.dp),
-            imageVector = Icons.Filled.Wifi,
+            painter = painterResource(id = R.drawable.core_no_internet_connection),
             contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
+        Spacer(Modifier.height(28.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(0.8f),
+            text = stringResource(id = R.string.core_no_internet_connection),
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.titleLarge,
+            textAlign = TextAlign.Center
+        )
         Spacer(Modifier.height(16.dp))
         Text(
-            modifier = Modifier.fillMaxWidth(0.6f),
-            text = stringResource(id = R.string.core_not_connected_to_internet),
+            modifier = Modifier.fillMaxWidth(0.8f),
+            text = stringResource(id = R.string.core_no_internet_connection_description),
             color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium,
+            style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
         OpenEdXButton(
-            width = Modifier
+            modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = R.string.core_reload),
             onClick = onReloadClick
@@ -1149,11 +1136,11 @@ fun ConnectionErrorView(
 @Composable
 fun AuthButtonsPanel(
     onRegisterClick: () -> Unit,
-    onSignInClick: () -> Unit
+    onSignInClick: () -> Unit,
 ) {
     Row {
         OpenEdXButton(
-            width = Modifier
+            modifier = Modifier
                 .testTag("btn_register")
                 .width(0.dp)
                 .weight(1f),
@@ -1215,4 +1202,40 @@ private fun ToolbarPreview() {
 @Composable
 private fun AuthButtonsPanelPreview() {
     AuthButtonsPanel(onRegisterClick = {}, onSignInClick = {})
+}
+
+@Preview
+@Composable
+private fun OpenEdXOutlinedTextFieldPreview() {
+    OpenEdXTheme(darkTheme = true) {
+        OpenEdXOutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            title = "OpenEdXOutlinedTextField",
+            onValueChanged = {},
+            keyboardActions = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun IconTextPreview() {
+    IconText(
+        text = "IconText",
+        icon = Icons.Filled.Close,
+        color = MaterialTheme.appColors.primary
+    )
+}
+
+@Preview
+@Composable
+private fun ConnectionErrorViewPreview() {
+    OpenEdXTheme(darkTheme = true) {
+        ConnectionErrorView(
+            modifier = Modifier
+                .fillMaxSize(),
+            onReloadClick = {}
+        )
+    }
 }

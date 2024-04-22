@@ -10,4 +10,7 @@ object AppDataConstants {
 
     const val VIDEO_FORMAT_M3U8 = ".m3u8"
     const val VIDEO_FORMAT_MP4 = ".mp4"
+
+    // Equal 1GB
+    const val DOWNLOADS_CONFIRMATION_SIZE = 1024 * 1024 * 1024L
 }

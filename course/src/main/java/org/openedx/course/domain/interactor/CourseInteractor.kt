@@ -3,20 +3,11 @@ package org.openedx.course.domain.interactor
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.course.data.repository.CourseRepository
 
 class CourseInteractor(
     private val repository: CourseRepository
-) : EnrollInCourseInteractor {
-
-    suspend fun getCourseDetails(id: String) = repository.getCourseDetail(id)
-
-    suspend fun getCourseDetailsFromCache(id: String) = repository.getCourseDetailFromCache(id)
-
-    override suspend fun enrollInACourse(id: String) {
-        repository.enrollInACourse(courseId = id)
-    }
+) {
 
     suspend fun preloadCourseStructure(courseId: String) =
         repository.preloadCourseStructure(courseId)
@@ -43,15 +34,13 @@ class CourseInteractor(
                         blocks.firstOrNull { it.descendants.contains(sequentialBlock.id) }
                     if (chapterBlock != null) {
                         resultBlocks.add(videoBlock)
-                        if (!resultBlocks.contains(verticalBlock)) {
+                        val verticalIndex = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
+                        if (verticalIndex == -1) {
                             resultBlocks.add(verticalBlock.copy(descendants = listOf(videoBlock.id)))
                         } else {
-                            val index = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
-                            if (index != -1) {
-                                val block = resultBlocks[index]
-                                resultBlocks[index] =
-                                    block.copy(descendants = block.descendants + videoBlock.id)
-                            }
+                            val block = resultBlocks[verticalIndex]
+                            resultBlocks[verticalIndex] =
+                                block.copy(descendants = block.descendants + videoBlock.id)
                         }
                         if (!resultBlocks.contains(sequentialBlock)) {
                             resultBlocks.add(sequentialBlock)
@@ -66,9 +55,6 @@ class CourseInteractor(
         }
         return courseStructure.copy(blockData = resultBlocks.toList())
     }
-
-    suspend fun getEnrolledCourseFromCacheById(courseId: String) =
-        repository.getEnrolledCourseFromCacheById(courseId)
 
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
 

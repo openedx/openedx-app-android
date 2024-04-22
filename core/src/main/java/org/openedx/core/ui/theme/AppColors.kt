@@ -11,6 +11,7 @@ data class AppColors(
     val textSecondary: Color,
     val textDark: Color,
     val textAccent: Color,
+    val textWarning: Color,
 
     val textFieldBackground: Color,
     val textFieldBackgroundVariant: Color,
@@ -46,6 +47,7 @@ data class AppColors(
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
 
+    val componentHorizontalProgressCompletedAndSelected: Color,
     val componentHorizontalProgressCompleted: Color,
     val componentHorizontalProgressSelected: Color,
     val componentHorizontalProgressDefault: Color,

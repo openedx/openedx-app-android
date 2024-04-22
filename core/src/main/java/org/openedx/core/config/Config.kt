@@ -47,6 +47,10 @@ class Config(context: Context) {
         return getString(FEEDBACK_EMAIL_ADDRESS, "")
     }
 
+    fun getPlatformName(): String {
+        return getString(PLATFORM_NAME, "")
+    }
+
     fun getAgreement(locale: String): AgreementUrls {
         val agreement =
             getObjectOrNewInstance(AGREEMENT_URLS, AgreementUrlsConfig::class.java).mapToDomain()
@@ -55,6 +59,14 @@ class Config(context: Context) {
 
     fun getFirebaseConfig(): FirebaseConfig {
         return getObjectOrNewInstance(FIREBASE, FirebaseConfig::class.java)
+    }
+
+    fun getSegmentConfig(): SegmentConfig {
+        return getObjectOrNewInstance(SEGMENT_IO, SegmentConfig::class.java)
+    }
+
+    fun getBrazeConfig(): BrazeConfig {
+        return getObjectOrNewInstance(BRAZE, BrazeConfig::class.java)
     }
 
     fun getFacebookConfig(): FacebookConfig {
@@ -77,6 +89,10 @@ class Config(context: Context) {
 
     fun getProgramConfig(): ProgramConfig {
         return getObjectOrNewInstance(PROGRAM, ProgramConfig::class.java)
+    }
+
+    fun getBranchConfig(): BranchConfig {
+        return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
 
     fun isWhatsNewEnabled(): Boolean {
@@ -148,16 +164,20 @@ class Config(context: Context) {
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
         private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
         private const val FIREBASE = "FIREBASE"
+        private const val SEGMENT_IO = "SEGMENT_IO"
+        private const val BRAZE = "BRAZE"
         private const val FACEBOOK = "FACEBOOK"
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
+        private const val BRANCH = "BRANCH"
         private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
         private const val COURSE_BANNER_ENABLED = "COURSE_BANNER_ENABLED"
         private const val COURSE_TOP_TAB_BAR_ENABLED = "COURSE_TOP_TAB_BAR_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
+        private const val PLATFORM_NAME = "PLATFORM_NAME"
     }
 
     enum class ViewType {

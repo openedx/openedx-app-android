@@ -10,17 +10,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,11 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -42,10 +40,10 @@ import androidx.compose.ui.zIndex
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.replaceLinkTags
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.EmailUtil
 import java.nio.charset.StandardCharsets
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WebContentScreen(
     windowSize: WindowSize,
@@ -59,7 +57,10 @@ fun WebContentScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 16.dp),
+            .padding(bottom = 24.dp)
+            .semantics {
+                testTagsAsResourceId = true
+            },
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
@@ -88,23 +89,12 @@ fun WebContentScreen(
                         .zIndex(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    BackBtn {
-                        onBackClick()
-                    }
-
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 56.dp),
-                        text = title,
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
+                    Toolbar(
+                        label = title,
+                        canShowBackBtn = true,
+                        onBackClick = onBackClick
                     )
                 }
-                Spacer(Modifier.height(6.dp))
                 Surface(
                     Modifier.fillMaxSize(),
                     color = MaterialTheme.appColors.background
@@ -122,9 +112,7 @@ fun WebContentScreen(
                     } else {
                         var webViewAlpha by rememberSaveable { mutableFloatStateOf(0f) }
                         Surface(
-                            Modifier
-                                .padding(horizontal = 16.dp, vertical = 24.dp)
-                                .alpha(webViewAlpha),
+                            Modifier.alpha(webViewAlpha),
                             color = MaterialTheme.appColors.background
                         ) {
                             WebViewContent(
@@ -209,5 +197,19 @@ private fun WebViewContent(
                 }
             }
         },
+        update = { webView ->
+            body?.let {
+                webView.loadDataWithBaseURL(
+                    apiHostUrl,
+                    body.replaceLinkTags(isDarkTheme),
+                    "text/html",
+                    StandardCharsets.UTF_8.name(),
+                    null
+                )
+            }
+            contentUrl?.let {
+                webView.loadUrl(it)
+            }
+        }
     )
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -35,19 +37,22 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.presentation.catalog.CatalogWebViewScreen
-import org.openedx.core.presentation.catalog.WebViewLink
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
+import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
@@ -59,11 +64,15 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
+import org.openedx.discovery.presentation.catalog.CatalogWebViewScreen
+import org.openedx.discovery.presentation.catalog.WebViewLink
 import org.openedx.core.R as CoreR
 
 class WebViewDiscoveryFragment : Fragment() {
 
-    private val viewModel by viewModel<WebViewDiscoveryViewModel>()
+    private val viewModel by viewModel<WebViewDiscoveryViewModel> {
+        parametersOf(requireArguments().getString(ARG_SEARCH_QUERY, ""))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,9 +86,9 @@ class WebViewDiscoveryFragment : Fragment() {
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
-
                 WebViewDiscoveryScreen(
                     windowSize = windowSize,
+                    isPreLogin = viewModel.isPreLogin,
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
@@ -91,8 +100,17 @@ class WebViewDiscoveryFragment : Fragment() {
                     },
                     onUriClick = { param, authority ->
                         when (authority) {
-                            WebViewLink.Authority.COURSE_INFO,
+                            WebViewLink.Authority.COURSE_INFO -> {
+                                viewModel.courseInfoClickedEvent(param)
+                                viewModel.infoCardClicked(
+                                    fragmentManager = requireActivity().supportFragmentManager,
+                                    pathId = param,
+                                    infoType = authority.name
+                                )
+                            }
+
                             WebViewLink.Authority.PROGRAM_INFO -> {
+                                viewModel.programInfoClickedEvent(param)
                                 viewModel.infoCardClicked(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     pathId = param,
@@ -108,6 +126,7 @@ class WebViewDiscoveryFragment : Fragment() {
                                         getString(CoreR.string.platform_name)
                                     ),
                                     url = param,
+                                    source = DiscoveryAnalyticsScreen.DISCOVERY.screenName
                                 ).show(
                                     requireActivity().supportFragmentManager,
                                     ActionDialogFragment::class.simpleName
@@ -116,23 +135,48 @@ class WebViewDiscoveryFragment : Fragment() {
 
                             else -> {}
                         }
+                    },
+                    onRegisterClick = {
+                        viewModel.navigateToSignUp(parentFragmentManager)
+                    },
+                    onSignInClick = {
+                        viewModel.navigateToSignIn(parentFragmentManager)
+                    },
+                    onBackClick = {
+                        requireActivity().supportFragmentManager.popBackStackImmediate()
                     }
                 )
             }
         }
     }
+
+    companion object {
+
+        private const val ARG_SEARCH_QUERY = "query_search"
+
+        fun newInstance(querySearch: String = ""): WebViewDiscoveryFragment {
+            val fragment = WebViewDiscoveryFragment()
+            fragment.arguments = bundleOf(ARG_SEARCH_QUERY to querySearch)
+            return fragment
+        }
+    }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
+    isPreLogin: Boolean,
     contentUrl: String,
     uriScheme: String,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
-    onUriClick: (String, WebViewLink.Authority) -> Unit
+    onUriClick: (String, WebViewLink.Authority) -> Unit,
+    onRegisterClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
@@ -140,8 +184,29 @@ private fun WebViewDiscoveryScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                testTagsAsResourceId = true
+            },
+        backgroundColor = MaterialTheme.appColors.background,
+        bottomBar = {
+            if (isPreLogin) {
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 16.dp,
+                            vertical = 32.dp,
+                        )
+                        .navigationBarsPadding()
+                ) {
+                    AuthButtonsPanel(
+                        onRegisterClick = onRegisterClick,
+                        onSignInClick = onSignInClick
+                    )
+                }
+            }
+        }
     ) {
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
@@ -157,19 +222,23 @@ private fun WebViewDiscoveryScreen(
         }
 
         Column(
-            modifier = modifierScreenWidth
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
                 .statusBarsInset()
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Toolbar(label = stringResource(id = R.string.discovery_explore_the_catalog))
+            Toolbar(
+                label = stringResource(id = R.string.discovery_explore_the_catalog),
+                canShowBackBtn = isPreLogin,
+                onBackClick = onBackClick
+            )
 
             Surface {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = modifierScreenWidth
+                        .fillMaxHeight()
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
@@ -286,11 +355,15 @@ private fun WebViewDiscoveryScreenPreview() {
         WebViewDiscoveryScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             contentUrl = "https://www.example.com/",
+            isPreLogin = false,
             uriScheme = "",
             hasInternetConnection = false,
             checkInternetConnection = {},
             onWebPageUpdated = {},
             onUriClick = { _, _ -> },
+            onRegisterClick = {},
+            onSignInClick = {},
+            onBackClick = {}
         )
     }
 }

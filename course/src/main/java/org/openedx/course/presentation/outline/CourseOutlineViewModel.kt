@@ -13,19 +13,27 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
@@ -37,9 +45,16 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
+    coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
-    workerController: DownloadWorkerController
-) : BaseDownloadViewModel(downloadDao, preferencesManager, workerController) {
+    workerController: DownloadWorkerController,
+) : BaseDownloadViewModel(
+    courseId,
+    downloadDao,
+    preferencesManager,
+    workerController,
+    coreAnalytics
+) {
 
     val apiHostUrl get() = config.getApiHostURL()
 
@@ -68,6 +83,8 @@ class CourseOutlineViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
@@ -169,17 +186,24 @@ class CourseOutlineViewModel(
                     CourseComponentStatus("")
                 }
 
-                val datesBannerInfo = if (networkConnection.isOnline()) {
-                    interactor.getDatesBannerInfo(courseId)
+                val courseDatesResult = if (networkConnection.isOnline()) {
+                    interactor.getCourseDates(courseId)
                 } else {
-                    CourseDatesBannerInfo(
-                        missedDeadlines = false,
-                        missedGatedContent = false,
-                        verifiedUpgradeLink = "",
-                        contentTypeGatingEnabled = false,
-                        hasEnded = false
+                    CourseDatesResult(
+                        datesSection = linkedMapOf(),
+                        courseBanner = CourseDatesBannerInfo(
+                            missedDeadlines = false,
+                            missedGatedContent = false,
+                            verifiedUpgradeLink = "",
+                            contentTypeGatingEnabled = false,
+                            hasEnded = false
+                        )
                     )
                 }
+                val datesBannerInfo = courseDatesResult.courseBanner
+
+                checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
+
                 setBlocks(blocks)
                 courseSubSections.clear()
                 courseSubSectionUnit.clear()
@@ -242,7 +266,7 @@ class CourseOutlineViewModel(
 
     private fun getResumeBlock(
         blocks: List<Block>,
-        continueBlockId: String
+        continueBlockId: String,
     ): Block? {
         val resumeBlock = blocks.firstOrNull { it.id == continueBlockId }
         resumeVerticalBlock =
@@ -257,6 +281,7 @@ class CourseOutlineViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 updateCourseData(false)
+                _uiMessage.value = DatesShiftedSnackBar()
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -264,17 +289,38 @@ class CourseOutlineViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
                 }
                 onResetDates(false)
             }
         }
     }
 
+    fun viewCertificateTappedEvent() {
+        analytics.logEvent(
+            CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
+            buildMap {
+                put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.VIEW_CERTIFICATE.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+            }
+        )
+    }
+
     fun resumeCourseTappedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
-            analytics.resumeCourseTappedEvent(courseId, currentState.courseStructure.name, blockId)
+            analytics.logEvent(
+                CourseAnalyticsEvent.RESUME_COURSE_CLICKED.eventName,
+                buildMap {
+                    put(
+                        CourseAnalyticsKey.NAME.key,
+                        CourseAnalyticsEvent.RESUME_COURSE_CLICKED.biValue
+                    )
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                }
+            )
         }
     }
 
@@ -290,10 +336,31 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun verticalClickedEvent(blockId: String, blockName: String) {
+    fun logUnitDetailViewedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
-            analytics.verticalClickedEvent(courseId, courseTitle, blockId, blockName)
+            analytics.logEvent(
+                CourseAnalyticsEvent.UNIT_DETAIL.eventName,
+                buildMap {
+                    put(CourseAnalyticsKey.NAME.key, CourseAnalyticsEvent.UNIT_DETAIL.biValue)
+                    put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+                    put(CourseAnalyticsKey.COURSE_NAME.key, courseTitle)
+                    put(CourseAnalyticsKey.BLOCK_ID.key, blockId)
+                    put(CourseAnalyticsKey.BLOCK_NAME.key, blockName)
+                }
+            )
+        }
+    }
+
+    private fun checkIfCalendarOutOfDate(courseDates: List<CourseDateBlock>) {
+        viewModelScope.launch {
+            notifier.send(
+                CreateCalendarSyncEvent(
+                    courseDates = courseDates,
+                    dialogType = CalendarSyncDialogType.NONE.name,
+                    checkOutOfSync = true,
+                )
+            )
         }
     }
 }

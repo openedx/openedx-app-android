@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signin
 
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -14,7 +15,11 @@ import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
@@ -22,7 +27,9 @@ import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeEvent
@@ -38,8 +45,12 @@ class SignInViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
+    private val router: AuthRouter,
+    private val whatsNewGlobalManager: WhatsNewGlobalManager,
+    agreementProvider: AgreementProvider,
     config: Config,
     val courseId: String?,
+    val infoType: String?,
 ) : BaseViewModel() {
 
     private val logger = Logger("SignInViewModel")
@@ -51,6 +62,7 @@ class SignInViewModel(
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
+            agreement = agreementProvider.getAgreement(isSignIn = true)?.createHonorCodeField(),
         )
     )
     internal val uiState: StateFlow<SignInUIState> = _uiState
@@ -68,6 +80,7 @@ class SignInViewModel(
     }
 
     fun login(username: String, password: String) {
+        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
         if (!validator.isEmailOrUserNameValid(username)) {
             _uiMessage.value =
                 UIMessage.SnackBarMessage(resourceManager.getString(R.string.auth_invalid_email_username))
@@ -85,7 +98,15 @@ class SignInViewModel(
                 interactor.login(username, password)
                 _uiState.update { it.copy(loginSuccess = true) }
                 setUserId()
-                analytics.userLoginEvent(AuthType.PASSWORD.methodName)
+                logEvent(
+                    AuthAnalyticsEvent.SIGN_IN_SUCCESS,
+                    buildMap {
+                        put(
+                            AuthAnalyticsKey.METHOD.key,
+                            AuthType.PASSWORD.methodName.lowercase()
+                        )
+                    }
+                )
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =
@@ -123,12 +144,14 @@ class SignInViewModel(
         }
     }
 
-    fun signUpClickedEvent() {
-        analytics.signUpClickedEvent()
+    fun navigateToSignUp(parentFragmentManager: FragmentManager) {
+        router.navigateToSignUp(parentFragmentManager, null, null)
+        logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
     }
 
-    fun forgotPasswordClickedEvent() {
-        analytics.forgotPasswordClickedEvent()
+    fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {
+        router.navigateToRestorePassword(parentFragmentManager)
+        logEvent(AuthAnalyticsEvent.FORGOT_PASSWORD_CLICKED)
     }
 
     override fun onCleared() {
@@ -146,7 +169,6 @@ class SignInViewModel(
             logger.d { "Social login (${authType.methodName}) success" }
             _uiState.update { it.copy(loginSuccess = true) }
             setUserId()
-            analytics.userLoginEvent(authType.methodName)
             _uiState.update { it.copy(showProgress = false) }
         }
     }
@@ -175,5 +197,47 @@ class SignInViewModel(
                 _uiState.update { it.copy(showProgress = false) }
             }
         } ?: onUnknownError()
+    }
+
+    fun openLink(fragmentManager: FragmentManager, links: Map<String, String>, link: String) {
+        links.forEach { (key, value) ->
+            if (value == link) {
+                router.navigateToWebContent(fragmentManager, key, value)
+                return
+            }
+        }
+    }
+
+    fun proceedWhatsNew(parentFragmentManager: FragmentManager) {
+        val isNeedToShowWhatsNew = whatsNewGlobalManager.shouldShowWhatsNew()
+        if (uiState.value.loginSuccess) {
+            router.clearBackStack(parentFragmentManager)
+            if (isNeedToShowWhatsNew) {
+                router.navigateToWhatsNew(
+                    parentFragmentManager,
+                    courseId,
+                    infoType
+                )
+            } else {
+                router.navigateToMain(
+                    parentFragmentManager,
+                    courseId,
+                    infoType
+                )
+            }
+        }
+    }
+
+    private fun logEvent(
+        event: AuthAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
     }
 }

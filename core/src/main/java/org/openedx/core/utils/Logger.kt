@@ -12,6 +12,10 @@ class Logger(private val tag: String) {
         if (BuildConfig.DEBUG) Log.e(tag, message())
     }
 
+    fun i(message: () -> String) {
+        if (BuildConfig.DEBUG) Log.i(tag, message())
+    }
+
     fun w(message: () -> String) {
         if (BuildConfig.DEBUG) Log.w(tag, message())
     }

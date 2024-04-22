@@ -24,7 +24,10 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 class SignUpFragment : Fragment() {
 
     private val viewModel by viewModel<SignUpViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_INFO_TYPE, "")
+        )
     }
     private val router by inject<AuthRouter>()
 
@@ -67,13 +70,20 @@ class SignUpFragment : Fragment() {
                         },
                         onFieldUpdated = { key, value ->
                             viewModel.updateField(key, value)
+                        },
+                        onHyperLinkClick = { links, link ->
+                            viewModel.openLink(parentFragmentManager, links, link)
                         }
                     )
 
                     LaunchedEffect(uiState.successLogin) {
                         if (uiState.successLogin) {
                             router.clearBackStack(requireActivity().supportFragmentManager)
-                            router.navigateToMain(parentFragmentManager, viewModel.courseId)
+                            router.navigateToMain(
+                                parentFragmentManager,
+                                viewModel.courseId,
+                                viewModel.infoType
+                            )
                         }
                     }
                 } else {
@@ -89,10 +99,12 @@ class SignUpFragment : Fragment() {
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
-        fun newInstance(courseId: String?): SignUpFragment {
+        private const val ARG_INFO_TYPE = "info_type"
+        fun newInstance(courseId: String?, infoType: String?): SignUpFragment {
             val fragment = SignUpFragment()
             fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId
+                ARG_COURSE_ID to courseId,
+                ARG_INFO_TYPE to infoType
             )
             return fragment
         }

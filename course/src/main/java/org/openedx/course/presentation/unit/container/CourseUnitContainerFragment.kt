@@ -5,11 +5,16 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +34,6 @@ import org.openedx.core.BlockType
 import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
@@ -37,7 +41,12 @@ import org.openedx.course.databinding.FragmentCourseUnitContainerBinding
 import org.openedx.course.presentation.ChapterEndFragmentDialog
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.DialogListener
-import org.openedx.course.presentation.ui.*
+import org.openedx.course.presentation.ui.CourseUnitToolbar
+import org.openedx.course.presentation.ui.HorizontalPageIndicator
+import org.openedx.course.presentation.ui.NavigationUnitsButtons
+import org.openedx.course.presentation.ui.SubSectionUnitsList
+import org.openedx.course.presentation.ui.SubSectionUnitsTitle
+import org.openedx.course.presentation.ui.VerticalPageIndicator
 
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
@@ -47,12 +56,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     private var _binding: FragmentCourseUnitContainerBinding? = null
 
     private val viewModel by viewModel<CourseUnitContainerViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(UNIT_ID, "")
+        )
     }
 
     private val router by inject<CourseRouter>()
 
-    private var unitId: String = ""
     private var componentId: String = ""
 
     private lateinit var adapter: CourseUnitContainerAdapter
@@ -72,13 +83,60 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
     }
 
+    private val dialogListener = object : DialogListener {
+        override fun <T> onClick(value: T) {
+            viewModel.proceedToNext()
+            val nextBlock = viewModel.getCurrentVerticalBlock()
+            nextBlock?.let {
+                viewModel.finishVerticalNextClickedEvent(
+                    it.blockId,
+                    it.displayName
+                )
+                if (it.type.isContainer()) {
+                    router.navigateToCourseContainer(
+                        fm = requireActivity().supportFragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = it.id,
+                        mode = requireArguments().serializable(ARG_MODE)!!
+                    )
+                }
+            }
+        }
+
+        override fun onDismiss() {
+            viewModel.finishVerticalBackClickedEvent()
+            navigateToParentFragment()
+        }
+    }
+
+    // Start workaround to fix an issue when onDestroy is not called after one fragment
+    // was replaced with another using the 'FragmentManager.replace()' function
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            navigateToParentFragment()
+        }
+    }
+
+    private fun navigateToParentFragment() {
+        activity?.supportFragmentManager?.let { fm ->
+            for (i in fm.backStackEntryCount - 1 downTo 0) {
+                val entryName = fm.getBackStackEntryAt(i).name
+                if (entryName != CourseUnitContainerFragment::class.simpleName) {
+                    fm.popBackStack(entryName, 0)
+                    return
+                }
+            }
+        }
+    }
+    // End workaround
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
-        unitId = requireArguments().getString(UNIT_ID, "")
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
         viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
-        viewModel.setupCurrentIndex(unitId, componentId)
+        viewModel.setupCurrentIndex(componentId)
+        viewModel.courseUnitContainerShowedEvent()
     }
 
     override fun onCreateView(
@@ -133,6 +191,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     HorizontalPageIndicator(
                         blocks = descendantsBlocks,
                         selectedPage = index,
+                        completedAndSelectedColor = MaterialTheme.appColors.componentHorizontalProgressCompletedAndSelected,
                         completedColor = MaterialTheme.appColors.componentHorizontalProgressCompleted,
                         selectedColor = MaterialTheme.appColors.componentHorizontalProgressSelected,
                         defaultColor = MaterialTheme.appColors.componentHorizontalProgressDefault
@@ -178,7 +237,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             CourseUnitToolbar(
                 title = title,
                 onBackClick = {
-                    requireActivity().supportFragmentManager.popBackStack()
+                    navigateToParentFragment()
                 }
             )
         }
@@ -186,7 +245,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         if (viewModel.isCourseExpandableSectionsEnabled) {
             binding.subSectionUnitsTitle.setContent {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
-                val currentUnit = unitBlocks.firstOrNull { it.id == unitId }
+                val currentUnit = unitBlocks.firstOrNull { it.id == viewModel.unitId }
                 val unitName = currentUnit?.displayName ?: ""
                 val unitsListShowed by viewModel.unitsListShowed.observeAsState(false)
 
@@ -204,14 +263,14 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
             binding.subSectionUnitsList.setContent {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
-                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == unitId }
+                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == viewModel.unitId }
                 OpenEdXTheme {
                     SubSectionUnitsList(
                         unitBlocks = unitBlocks,
                         selectedUnitIndex = selectedUnitIndex
                     ) { index, unit ->
                         if (index != selectedUnitIndex) {
-                            router.replaceCourseContainer(
+                            router.navigateToCourseContainer(
                                 fm = requireActivity().supportFragmentManager,
                                 courseId = viewModel.courseId,
                                 unitId = unit.id,
@@ -230,6 +289,22 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         }
 
         if (viewModel.unitsListShowed.value == true) handleUnitsClick()
+
+        val chapterEndDialogTag = ChapterEndFragmentDialog::class.simpleName
+        (requireActivity().supportFragmentManager
+            .findFragmentByTag(chapterEndDialogTag) as? ChapterEndFragmentDialog)?.let { fragment ->
+            fragment.listener = dialogListener
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity?.onBackPressedDispatcher?.addCallback(onBackPressedCallback)
+    }
+
+    override fun onPause() {
+        onBackPressedCallback.remove()
+        super.onPause()
     }
 
     override fun onDestroyView() {
@@ -312,30 +387,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         it.displayName
                     )
                 }
-                dialog.listener = object : DialogListener {
-                    override fun <T> onClick(value: T) {
-                        viewModel.proceedToNext()
-                        val nextBlock = viewModel.getCurrentVerticalBlock()
-                        nextBlock?.let {
-                            viewModel.finishVerticalNextClickedEvent(
-                                it.blockId,
-                                it.displayName
-                            )
-                            if (it.type.isContainer()) {
-                                router.replaceCourseContainer(
-                                    fm = requireActivity().supportFragmentManager,
-                                    courseId = viewModel.courseId,
-                                    unitId = it.id,
-                                    mode = requireArguments().serializable(ARG_MODE)!!
-                                )
-                            }
-                        }
-                    }
-
-                    override fun onDismiss() {
-                        viewModel.finishVerticalBackClickedEvent()
-                    }
-                }
+                dialog.listener = dialogListener
                 dialog.show(
                     requireActivity().supportFragmentManager,
                     ChapterEndFragmentDialog::class.simpleName
@@ -375,10 +427,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 hasPrevBlock = hasPrev
                 hasNextBlock = hasNext
             }
-            val windowSize = rememberWindowSize()
 
             NavigationUnitsButtons(
-                windowSize = windowSize,
                 hasPrevBlock = hasPrevBlock,
                 nextButtonText = nextButtonText,
                 hasNextBlock = hasNextBlock,

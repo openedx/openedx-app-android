@@ -9,12 +9,16 @@ import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AnnouncementModel
 import org.openedx.core.domain.model.HandoutsModel
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseAnalyticsKey
 
 class HandoutsViewModel(
     private val courseId: String,
+    val handoutsType: String,
     private val config: Config,
-    private val handoutsType: String,
-    private val interactor: CourseInteractor
+    private val interactor: CourseInteractor,
+    private val courseAnalytics: CourseAnalytics,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -93,5 +97,13 @@ class HandoutsViewModel(
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
-
+    fun logEvent(event: CourseAnalyticsEvent) {
+        courseAnalytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(CourseAnalyticsKey.NAME.key, event.biValue)
+                put(CourseAnalyticsKey.COURSE_ID.key, courseId)
+            }
+        )
+    }
 }

@@ -25,12 +25,16 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,6 +59,7 @@ fun AppUpgradeRequiredScreen(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AppUpgradeRequiredScreen(
     modifier: Modifier = Modifier,
@@ -66,11 +71,13 @@ fun AppUpgradeRequiredScreen(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.appColors.background)
-            .statusBarsInset(),
+            .statusBarsInset()
+            .semantics { testTagsAsResourceId = true },
         contentAlignment = Alignment.TopCenter
     ) {
         Text(
             modifier = Modifier
+                .testTag("txt_app_upgrade_deprecated")
                 .fillMaxWidth()
                 .padding(top = 10.dp, bottom = 12.dp),
             text = stringResource(id = R.string.core_deprecated_app_version),
@@ -92,6 +99,7 @@ fun AppUpgradeRequiredScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AppUpgradeRecommendDialog(
     modifier: Modifier = Modifier,
@@ -106,11 +114,12 @@ fun AppUpgradeRecommendDialog(
     }
 
     Surface(
-        modifier = modifier,
+        modifier = modifier.semantics { testTagsAsResourceId = true },
         color = Color.Transparent
     ) {
         Box(
             modifier = modifier
+                .testTag("btn_upgrade_dialog_not_now")
                 .fillMaxSize()
                 .padding(horizontal = 4.dp)
                 .noRippleClickable {
@@ -142,11 +151,13 @@ fun AppUpgradeRecommendDialog(
                         contentDescription = null
                     )
                     Text(
+                        modifier = Modifier.testTag("txt_app_upgrade_title"),
                         text = stringResource(id = R.string.core_app_upgrade_title),
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium
                     )
                     Text(
+                        modifier = Modifier.testTag("txt_app_upgrade_description"),
                         text = stringResource(id = R.string.core_app_upgrade_dialog_description),
                         color = MaterialTheme.appColors.textPrimary,
                         textAlign = TextAlign.Center,
@@ -162,6 +173,7 @@ fun AppUpgradeRecommendDialog(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AppUpgradeRequiredContent(
     modifier: Modifier = Modifier,
@@ -170,7 +182,7 @@ fun AppUpgradeRequiredContent(
     onUpdateClick: () -> Unit
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.semantics { testTagsAsResourceId = true },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
@@ -183,11 +195,13 @@ fun AppUpgradeRequiredContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
+                modifier = Modifier.testTag("txt_app_upgrade_required_title"),
                 text = stringResource(id = R.string.core_app_update_required_title),
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleMedium
             )
             Text(
+                modifier = Modifier.testTag("txt_app_upgrade_required_description"),
                 text = stringResource(id = R.string.core_app_update_required_description),
                 color = MaterialTheme.appColors.textPrimary,
                 textAlign = TextAlign.Center,
@@ -250,6 +264,7 @@ fun TransparentTextButton(
 ) {
     Button(
         modifier = Modifier
+            .testTag("btn_secondary")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color.Transparent
@@ -259,6 +274,7 @@ fun TransparentTextButton(
         onClick = onClick
     ) {
         Text(
+            modifier = Modifier.testTag("txt_secondary"),
             color = MaterialTheme.appColors.textAccent,
             style = MaterialTheme.appTypography.labelLarge,
             text = text
@@ -273,6 +289,7 @@ fun DefaultTextButton(
 ) {
     Button(
         modifier = Modifier
+            .testTag("btn_primary")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.appColors.buttonBackground
@@ -286,6 +303,7 @@ fun DefaultTextButton(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
+                modifier = Modifier.testTag("txt_primary"),
                 text = text,
                 color = MaterialTheme.appColors.buttonText,
                 style = MaterialTheme.appTypography.labelLarge
@@ -301,6 +319,7 @@ fun AppUpgradeRecommendedBox(
 ) {
     Card(
         modifier = modifier
+            .testTag("btn_upgrade_box")
             .fillMaxWidth()
             .padding(20.dp)
             .clickable {
@@ -322,11 +341,13 @@ fun AppUpgradeRecommendedBox(
             )
             Column {
                 Text(
+                    modifier = Modifier.testTag("txt_app_upgrade_title"),
                     text = stringResource(id = R.string.core_app_upgrade_title),
                     color = Color.White,
                     style = MaterialTheme.appTypography.titleMedium
                 )
                 Text(
+                    modifier = Modifier.testTag("txt_app_upgrade_description"),
                     text = stringResource(id = R.string.core_app_upgrade_box_description),
                     color = Color.White,
                     style = MaterialTheme.appTypography.bodyMedium

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -40,10 +41,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -55,14 +60,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
-import org.openedx.core.ui.DiscoveryCourseItem
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
@@ -77,6 +80,8 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
+import org.openedx.discovery.domain.model.Course
+import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
 
 class NativeDiscoveryFragment : Fragment() {
 
@@ -147,16 +152,17 @@ class NativeDiscoveryFragment : Fragment() {
                     },
                     onItemClick = { course ->
                         viewModel.discoveryCourseClicked(course.id, course.name)
+                        viewModel.courseDetailClickedEvent(course.id, course.name)
                         router.navigateToCourseDetail(
                             requireActivity().supportFragmentManager,
                             course.id
                         )
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, null)
+                        router.navigateToSignUp(parentFragmentManager, null, null)
                     },
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, null)
+                        router.navigateToSignIn(parentFragmentManager, null, null)
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
@@ -175,7 +181,7 @@ class NativeDiscoveryFragment : Fragment() {
 
     companion object {
         private const val ARG_SEARCH_QUERY = "query_search"
-        fun newInstance(querySearch: String): NativeDiscoveryFragment {
+        fun newInstance(querySearch: String = ""): NativeDiscoveryFragment {
             val fragment = NativeDiscoveryFragment()
             fragment.arguments = bundleOf(
                 ARG_SEARCH_QUERY to querySearch
@@ -186,7 +192,7 @@ class NativeDiscoveryFragment : Fragment() {
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun DiscoveryScreen(
     windowSize: WindowSize,
@@ -222,7 +228,11 @@ internal fun DiscoveryScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
             if (!isUserLoggedIn) {
@@ -232,6 +242,7 @@ internal fun DiscoveryScreen(
                             horizontal = 16.dp,
                             vertical = 32.dp,
                         )
+                        .navigationBarsPadding()
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
@@ -306,6 +317,7 @@ internal fun DiscoveryScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
+                    modifier = Modifier.testTag("txt_discovery_title"),
                     text = stringResource(id = R.string.discovery_Discovery),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleMedium
@@ -354,12 +366,15 @@ internal fun DiscoveryScreen(
                                     item {
                                         Column {
                                             Text(
+                                                modifier = Modifier.testTag("txt_discovery_new"),
                                                 text = stringResource(id = R.string.discovery_discovery_new),
                                                 color = MaterialTheme.appColors.textPrimary,
                                                 style = MaterialTheme.appTypography.displaySmall
                                             )
                                             Text(
-                                                modifier = Modifier.padding(top = 4.dp),
+                                                modifier = Modifier
+                                                    .testTag("txt_discovery_lets_find")
+                                                    .padding(top = 4.dp),
                                                 text = stringResource(id = R.string.discovery_lets_find),
                                                 color = MaterialTheme.appColors.textPrimary,
                                                 style = MaterialTheme.appTypography.titleSmall

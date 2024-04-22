@@ -9,6 +9,7 @@
     <string name="discussion_most_activity">Most activity</string>
     <string name="discussion_most_votes">Most votes</string>
     <string name="discussion_create_post">Create discussion</string>
+    <string name="discussion_create_question">Create question</string>
     <string name="discussion_add_response">Add a response</string>
     <string name="discussion_last_post">Last post: %1$s</string>
     <string name="discussion_follow">Follow</string>
@@ -34,6 +35,7 @@
     <string name="discussion_anonymous">anonymous</string>
     <string name="discussion_no_yet">No discussions yet</string>
     <string name="discussion_click_button_create_discussion">Click the button below to create your first discussion.</string>
+    <string name="discussion_unnamed_subcategory">Unnamed subcategory</string>
 
 
     <plurals name="discussion_votes">

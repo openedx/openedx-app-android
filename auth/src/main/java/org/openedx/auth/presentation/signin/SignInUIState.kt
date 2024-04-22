@@ -1,5 +1,7 @@
 package org.openedx.auth.presentation.signin
 
+import org.openedx.core.domain.model.RegistrationField
+
 /**
  * Data class to store UI state of the SignIn screen
  *
@@ -18,4 +20,5 @@ internal data class SignInUIState(
     val isLogistrationEnabled: Boolean = false,
     val showProgress: Boolean = false,
     val loginSuccess: Boolean = false,
+    val agreement: RegistrationField? = null,
 )

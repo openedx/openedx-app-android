@@ -2,13 +2,10 @@ package org.openedx.course.presentation
 
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.course.presentation.handouts.HandoutsType
 
 interface CourseRouter {
-
-    fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String
-    )
 
     fun navigateToNoAccess(
         fm: FragmentManager,
@@ -62,15 +59,7 @@ interface CourseRouter {
         fm: FragmentManager, courseId: String, title: String, type: HandoutsType
     )
 
-    fun navigateToCourseInfo(
-        fm: FragmentManager,
-        courseId: String,
-        infoType: String,
-    )
+    fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
-    fun navigateToSignUp(fm: FragmentManager, courseId: String?)
-
-    fun navigateToSignIn(fm: FragmentManager, courseId: String?)
-
-    fun navigateToLogistration(fm: FragmentManager, courseId: String?)
+    fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
 }

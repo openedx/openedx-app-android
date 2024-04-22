@@ -7,9 +7,9 @@ class DiscoveryNavigator(
 ) {
     fun getDiscoveryFragment(): Fragment {
         return if (isDiscoveryTypeWebView) {
-            WebViewDiscoveryFragment()
+            WebViewDiscoveryFragment.newInstance()
         } else {
-            NativeDiscoveryFragment()
+            NativeDiscoveryFragment.newInstance()
         }
     }
 }

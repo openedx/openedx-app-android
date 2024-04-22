@@ -2,35 +2,44 @@ package org.openedx.core.module.download
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
-import org.openedx.core.BaseViewModel
-import org.openedx.core.BlockType
-import org.openedx.core.domain.model.Block
-import org.openedx.core.module.DownloadWorkerController
-import org.openedx.core.module.db.DownloadDao
-import org.openedx.core.module.db.DownloadModel
-import org.openedx.core.module.db.DownloadedState
-import org.openedx.core.utils.Sha1Util
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.openedx.core.BaseViewModel
+import org.openedx.core.BlockType
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.Block
+import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.module.db.DownloadDao
+import org.openedx.core.module.db.DownloadModel
+import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.CoreAnalyticsEvent
+import org.openedx.core.presentation.CoreAnalyticsKey
+import org.openedx.core.utils.Sha1Util
 import java.io.File
 
 abstract class BaseDownloadViewModel(
+    private val courseId: String,
     private val downloadDao: DownloadDao,
     private val preferencesManager: CorePreferences,
-    private val workerController: DownloadWorkerController
+    private val workerController: DownloadWorkerController,
+    private val analytics: CoreAnalytics,
 ) : BaseViewModel() {
 
-    private val allBlocks = mutableListOf<Block>()
+    private val allBlocks = hashMapOf<String, Block>()
 
-    private var downloadableChildrenMap = hashMapOf<String, List<String>>()
+    private val downloadableChildrenMap = hashMapOf<String, List<String>>()
     private val downloadModelsStatus = hashMapOf<String, DownloadedState>()
 
     private val _downloadModelsStatusFlow = MutableSharedFlow<HashMap<String, DownloadedState>>()
     protected val downloadModelsStatusFlow = _downloadModelsStatusFlow.asSharedFlow()
+
+    private var downloadingModelsList = listOf<DownloadModel>()
+    private val _downloadingModelsFlow = MutableSharedFlow<List<DownloadModel>>()
+    protected val downloadingModelsFlow = _downloadingModelsFlow.asSharedFlow()
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -52,26 +61,46 @@ abstract class BaseDownloadViewModel(
         return downloadDao.readAllData().first().map { it.mapToDomain() }
     }
 
-    private fun updateDownloadModelsStatus(models: List<DownloadModel>) {
+    private suspend fun updateDownloadModelsStatus(models: List<DownloadModel>) {
+        val downloadModelMap = models.associateBy { it.id }
         for (item in downloadableChildrenMap) {
-            if (models.find { item.value.contains(it.id) && it.downloadedState.isWaitingOrDownloading } != null) {
-                downloadModelsStatus[item.key] = DownloadedState.DOWNLOADING
-            } else if (item.value.all { id -> models.find { it.id == id && it.downloadedState == DownloadedState.DOWNLOADED } != null }) {
-                downloadModelsStatus[item.key] = DownloadedState.DOWNLOADED
-            } else {
-                downloadModelsStatus[item.key] = DownloadedState.NOT_DOWNLOADED
+            var downloadingCount = 0
+            var downloadedCount = 0
+            item.value.forEach { blockId ->
+                val downloadModel = downloadModelMap[blockId]
+                if (downloadModel != null) {
+                    if (downloadModel.downloadedState.isWaitingOrDownloading) {
+                        downloadModelsStatus[blockId] = DownloadedState.DOWNLOADING
+                        downloadingCount++
+                    } else if (downloadModel.downloadedState.isDownloaded) {
+                        downloadModelsStatus[blockId] = DownloadedState.DOWNLOADED
+                        downloadedCount++
+                    }
+                } else {
+                    downloadModelsStatus[blockId] = DownloadedState.NOT_DOWNLOADED
+                }
+            }
+
+            downloadModelsStatus[item.key] = when {
+                downloadingCount > 0 -> DownloadedState.DOWNLOADING
+                downloadedCount == item.value.size -> DownloadedState.DOWNLOADED
+                else -> DownloadedState.NOT_DOWNLOADED
             }
         }
+
+        downloadingModelsList = models.filter { it.downloadedState.isWaitingOrDownloading }
+        _downloadingModelsFlow.emit(downloadingModelsList)
     }
 
     protected fun setBlocks(list: List<Block>) {
+        downloadableChildrenMap.clear()
         allBlocks.clear()
-        allBlocks.addAll(list)
+        allBlocks.putAll(list.map { it.id to it })
     }
 
     fun isBlockDownloading(id: String): Boolean {
         val blockDownloadingState = downloadModelsStatus[id]
-        return blockDownloadingState == DownloadedState.DOWNLOADING || blockDownloadingState == DownloadedState.WAITING
+        return blockDownloadingState?.isWaitingOrDownloading == true
     }
 
     fun isBlockDownloaded(id: String): Boolean {
@@ -82,73 +111,119 @@ abstract class BaseDownloadViewModel(
     open fun saveDownloadModels(folder: String, id: String) {
         viewModelScope.launch {
             val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
-            val downloadModels = mutableListOf<DownloadModel>()
-            for (blockId in saveBlocksIds) {
-                allBlocks.find { it.id == blockId }?.let { block ->
-                    val videoInfo =
-                        block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                            preferencesManager.videoSettings.videoQuality
-                        )
-                    val size = videoInfo?.fileSize ?: 0
-                    val url = videoInfo?.url ?: ""
-                    val extension = url.split('.').lastOrNull() ?: "mp4"
-                    val path =
-                        folder + File.separator + "${Sha1Util.SHA1(block.displayName)}.$extension"
-                    if (getDownloadModelList().find { it.id == blockId && it.downloadedState.isDownloaded } == null) {
-                        downloadModels.add(
-                            DownloadModel(
-                                block.id,
-                                block.displayName,
-                                size,
-                                path,
-                                url,
-                                block.downloadableType,
-                                DownloadedState.WAITING,
-                                null
-                            )
-                        )
-                    }
-                }
-            }
-            workerController.saveModels(*downloadModels.toTypedArray())
+            logSubsectionDownloadEvent(id, saveBlocksIds.size)
+            saveDownloadModels(folder, saveBlocksIds)
         }
     }
 
-    fun removeDownloadedModels(id: String) {
+    open fun saveAllDownloadModels(folder: String) {
         viewModelScope.launch {
-            val saveBlocksIds = downloadableChildrenMap[id] ?: listOf()
-            val downloaded =
-                getDownloadModelList().filter { saveBlocksIds.contains(it.id) && it.downloadedState.isDownloaded }
-            downloaded.forEach {
-                downloadDao.removeDownloadModel(it.id)
+            val saveBlocksIds = downloadableChildrenMap.values.flatten()
+            saveDownloadModels(folder, saveBlocksIds)
+        }
+    }
+
+    private suspend fun saveDownloadModels(folder: String, saveBlocksIds: List<String>) {
+        val downloadModels = mutableListOf<DownloadModel>()
+        val downloadModelList = getDownloadModelList()
+        for (blockId in saveBlocksIds) {
+            allBlocks[blockId]?.let { block ->
+                val videoInfo =
+                    block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
+                        preferencesManager.videoSettings.videoDownloadQuality
+                    )
+                val size = videoInfo?.fileSize ?: 0
+                val url = videoInfo?.url ?: ""
+                val extension = url.split('.').lastOrNull() ?: "mp4"
+                val path =
+                    folder + File.separator + "${Sha1Util.SHA1(block.displayName)}.$extension"
+                if (downloadModelList.find { it.id == blockId && it.downloadedState.isDownloaded } == null) {
+                    downloadModels.add(
+                        DownloadModel(
+                            block.id,
+                            block.displayName,
+                            size,
+                            path,
+                            url,
+                            block.downloadableType,
+                            DownloadedState.WAITING,
+                            null
+                        )
+                    )
+                }
             }
         }
+        workerController.saveModels(downloadModels)
     }
 
     fun getDownloadModelsStatus() = downloadModelsStatus.toMap()
 
-    fun cancelWork(blockId: String) {
+    fun getDownloadModelsSize(): DownloadModelsSize {
+        var isAllBlocksDownloadedOrDownloading = true
+        var remainingCount = 0
+        var remainingSize = 0L
+        var allCount = 0
+        var allSize = 0L
+
+        downloadableChildrenMap.keys.forEach { id ->
+            if (!isBlockDownloaded(id) && !isBlockDownloading(id)) {
+                isAllBlocksDownloadedOrDownloading = false
+            }
+
+            downloadableChildrenMap[id]?.forEach { downloadableBlock ->
+                val block = allBlocks[downloadableBlock]
+                val videoInfo =
+                    block?.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
+                        preferencesManager.videoSettings.videoDownloadQuality
+                    )
+
+                allCount++
+                allSize += videoInfo?.fileSize ?: 0
+
+                if (!isBlockDownloaded(downloadableBlock)) {
+                    remainingCount++
+                    remainingSize += videoInfo?.fileSize ?: 0
+                }
+            }
+        }
+        return DownloadModelsSize(
+            isAllBlocksDownloadedOrDownloading = isAllBlocksDownloadedOrDownloading,
+            remainingCount = remainingCount,
+            remainingSize = remainingSize,
+            allCount = allCount,
+            allSize = allSize
+        )
+    }
+
+    fun hasDownloadModelsInQueue() = downloadingModelsList.isNotEmpty()
+
+    fun getDownloadableChildren(id: String) = downloadableChildrenMap[id]
+
+    open fun removeDownloadModels(blockId: String) {
         viewModelScope.launch {
             val downloadableChildren = downloadableChildrenMap[blockId] ?: listOf()
-            val ids = getDownloadModelList().filter {
-                (it.downloadedState == DownloadedState.DOWNLOADING ||
-                        it.downloadedState == DownloadedState.WAITING) && downloadableChildren.contains(
-                    it.id
-                )
-            }.map { it.id }
-            workerController.cancelWork(*ids.toTypedArray())
+            logSubsectionDeleteEvent(blockId, downloadableChildren.size)
+            workerController.removeModels(downloadableChildren)
+        }
+    }
+
+    fun removeAllDownloadModels() {
+        viewModelScope.launch {
+            val downloadableChildren = downloadableChildrenMap.values.flatten()
+            workerController.removeModels(downloadableChildren)
         }
     }
 
     protected fun addDownloadableChildrenForSequentialBlock(sequentialBlock: Block) {
         for (item in sequentialBlock.descendants) {
-            allBlocks.find { it.id == item }?.let { blockDescendant ->
+            allBlocks[item]?.let { blockDescendant ->
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     for (unitBlockId in blockDescendant.descendants) {
-                        allBlocks.find { it.id == unitBlockId && it.isDownloadable }?.let {
+                        val block = allBlocks[unitBlockId]
+                        if (block?.isDownloadable == true) {
                             val id = sequentialBlock.id
                             val children = downloadableChildrenMap[id] ?: listOf()
-                            downloadableChildrenMap[id] = children + it.id
+                            downloadableChildrenMap[id] = children + block.id
                         }
                     }
                 }
@@ -158,12 +233,54 @@ abstract class BaseDownloadViewModel(
 
     protected fun addDownloadableChildrenForVerticalBlock(verticalBlock: Block) {
         for (unitBlockId in verticalBlock.descendants) {
-            allBlocks.find { it.id == unitBlockId && it.isDownloadable }?.let {
+            val block = allBlocks[unitBlockId]
+            if (block?.isDownloadable == true) {
                 val id = verticalBlock.id
                 val children = downloadableChildrenMap[id] ?: listOf()
-                downloadableChildrenMap[id] = children + it.id
+                downloadableChildrenMap[id] = children + block.id
             }
         }
     }
 
+    fun logBulkDownloadToggleEvent(toggle: Boolean) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
+            buildMap {
+                put(
+                    CoreAnalyticsKey.ACTION.key,
+                    if (toggle) CoreAnalyticsKey.TRUE.key else CoreAnalyticsKey.FALSE.key
+                )
+            }
+        )
+    }
+
+    private fun logSubsectionDownloadEvent(subsectionId: String, numberOfVideos: Int) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_DOWNLOAD_SUBSECTION,
+            buildMap {
+                put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+                put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
+            })
+    }
+
+    private fun logSubsectionDeleteEvent(subsectionId: String, numberOfVideos: Int) {
+        logEvent(
+            CoreAnalyticsEvent.VIDEO_DELETE_SUBSECTION,
+            buildMap {
+                put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
+                put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
+            })
+    }
+
+    private fun logEvent(event: CoreAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {
+        analytics.logEvent(
+            event.eventName,
+            buildMap {
+                put(CoreAnalyticsKey.NAME.key, event.biValue)
+                put(CoreAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.VIDEOS.key)
+                put(CoreAnalyticsKey.COURSE_ID.key, courseId)
+                putAll(param)
+            }
+        )
+    }
 }

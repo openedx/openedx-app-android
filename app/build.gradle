@@ -1,14 +1,29 @@
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id 'kotlin-parcelize'
-    id 'kotlin-kapt'
-    id 'com.google.firebase.crashlytics'
-}
-
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
 def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
+def firebaseConfig = config.get('FIREBASE')
+def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
+
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
+if (firebaseEnabled) {
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+
+    tasks.register('generateGoogleServicesJson') {
+        configHelper.generateGoogleServicesJson(appId)
+    }
+
+    preBuild.dependsOn(generateGoogleServicesJson)
+} else {
+    tasks.register('removeGoogleServicesJson') {
+        configHelper.removeGoogleServicesJson()
+    }
+
+    preBuild.dependsOn(removeGoogleServicesJson)
+}
 
 android {
     compileSdk 34
@@ -31,12 +46,18 @@ android {
     productFlavors {
         prod {
             dimension 'env'
+            setupBranchConfigFields(it)
+            setupFirebaseConfigFields(it)
         }
         develop {
             dimension 'env'
+            setupBranchConfigFields(it)
+            setupFirebaseConfigFields(it)
         }
         stage {
             dimension 'env'
+            setupBranchConfigFields(it)
+            setupFirebaseConfigFields(it)
         }
     }
 
@@ -57,8 +78,10 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-            firebaseCrashlytics {
-                mappingFileUploadEnabled false
+            if (firebaseEnabled) {
+                firebaseCrashlytics {
+                    mappingFileUploadEnabled false
+                }
             }
         }
     }
@@ -72,6 +95,7 @@ android {
     buildFeatures {
         viewBinding true
         compose true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "$compose_compiler_version"
@@ -106,6 +130,22 @@ dependencies {
 
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
+    // Segment Library
+    implementation "com.segment.analytics.kotlin:android:1.14.2"
+    // Segment's Firebase integration
+    implementation 'com.segment.analytics.kotlin.destinations:firebase:1.5.2'
+    // Braze SDK Integration
+    implementation "com.braze:braze-segment-kotlin:1.4.2"
+    implementation "com.braze:android-sdk-ui:30.2.0"
+
+    // Firebase Cloud Messaging Integration for Braze
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
+
+    // Branch SDK Integration
+    implementation 'io.branch.sdk.android:library:5.9.0'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+    implementation "com.android.installreferrer:installreferrer:2.2"
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
@@ -115,4 +155,38 @@ dependencies {
     testImplementation "io.mockk:mockk-android:$mockk_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"
+}
+
+private def setupBranchConfigFields(buildType) {
+    def branchConfig = configHelper.fetchConfig().get("BRANCH")
+    def branchKey = ""
+    def branchUriScheme = ""
+    def branchHost = ""
+    def branchAlternateHost = ""
+
+    if (branchConfig && branchConfig.get("ENABLED")) {
+        branchKey = branchConfig.getOrDefault("KEY", "")
+        branchUriScheme = branchConfig.getOrDefault("URI_SCHEME", "")
+        branchHost = branchConfig.getOrDefault("HOST", "")
+        branchAlternateHost = branchConfig.getOrDefault("ALTERNATE_HOST", "")
+
+        // Validation: Throw exception if any field is empty
+        if (branchKey.isEmpty() || branchUriScheme.isEmpty() || branchHost.isEmpty() ||
+                branchAlternateHost.isEmpty()) {
+            throw new IllegalStateException("One or more Branch configuration fields are empty.")
+        }
+    }
+
+    buildType.resValue "string", "branch_key", branchKey
+    buildType.resValue "string", "branch_uri_scheme", branchUriScheme
+    buildType.resValue "string", "branch_host", branchHost
+    buildType.resValue "string", "branch_alternate_host", branchAlternateHost
+}
+
+private def setupFirebaseConfigFields(buildType) {
+    def firebaseConfig = configHelper.fetchConfig().get('FIREBASE')
+    def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
+    def cloudMessagingEnabled = firebaseConfig?.getOrDefault('CLOUD_MESSAGING_ENABLED', false)
+
+    buildType.manifestPlaceholders = [fcmEnabled: firebaseEnabled && cloudMessagingEnabled]
 }

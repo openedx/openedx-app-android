@@ -16,7 +16,6 @@ import android.provider.MediaStore
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -84,8 +83,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -107,13 +109,13 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
-import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.getFileName
 import org.openedx.core.extension.parcelable
+import org.openedx.core.extension.tagId
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -135,12 +137,13 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
+import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import org.openedx.profile.R as profileR
+import org.openedx.core.R as coreR
 
 private const val BIO_TEXT_FIELD_LIMIT = 300
 
@@ -158,21 +161,6 @@ class EditProfileFragment : Fragment() {
                 viewModel.setImageUri(cropImage(it))
             }
         }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val callback = requireActivity()
-            .onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (viewModel.profileDataChanged) {
-                        viewModel.setShowLeaveDialog(true)
-                    } else {
-                        requireActivity().supportFragmentManager.popBackStack()
-                    }
-                }
-            })
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -256,6 +244,7 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun cropImage(uri: Uri): Uri {
         val matrix = Matrix()
         matrix.postRotate(getImageOrientation(uri).toFloat())
@@ -398,15 +387,21 @@ private fun EditProfileScreen(
     }
 
     val imageRes: Any = if (!isImageDeleted) {
-        if (selectedImageUri != null) {
-            selectedImageUri.toString()
-        } else if (uiState.account.profileImage.hasImage) {
-            uiState.account.profileImage.imageUrlFull
-        } else {
-            R.drawable.core_ic_default_profile_picture
+        when {
+            selectedImageUri != null -> {
+                selectedImageUri.toString()
+            }
+
+            uiState.account.profileImage.hasImage -> {
+                uiState.account.profileImage.imageUrlFull
+            }
+
+            else -> {
+                coreR.drawable.core_ic_default_profile_picture
+            }
         }
     } else {
-        R.drawable.core_ic_default_profile_picture
+        coreR.drawable.core_ic_default_profile_picture
     }
 
     val modalListState = rememberLazyListState()
@@ -426,7 +421,10 @@ private fun EditProfileScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .semantics {
+                testTagsAsResourceId = true
+            },
         scaffoldState = scaffoldState
     ) { paddingValues ->
 
@@ -467,6 +465,7 @@ private fun EditProfileScreen(
 
         ModalBottomSheetLayout(
             modifier = Modifier
+                .testTag("btn_bottom_sheet_edit_profile")
                 .padding(bottom = if (isImeVisible && bottomSheetScaffoldState.isVisible) 120.dp else 0.dp)
                 .noRippleClickable {
                     if (bottomSheetScaffoldState.isVisible) {
@@ -560,8 +559,9 @@ private fun EditProfileScreen(
                 ) {
                     Text(
                         modifier = Modifier
+                            .testTag("txt_edit_profile_title")
                             .fillMaxWidth(),
-                        text = stringResource(id = profileR.string.profile_edit_profile),
+                        text = stringResource(id = R.string.profile_edit_profile),
                         color = MaterialTheme.appColors.textPrimary,
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.appTypography.titleMedium
@@ -579,7 +579,7 @@ private fun EditProfileScreen(
                                 modifier = Modifier
                                     .height(48.dp)
                                     .padding(end = 24.dp),
-                                text = stringResource(id = profileR.string.profile_done),
+                                text = stringResource(id = R.string.profile_done),
                                 icon = Icons.Filled.Done,
                                 color = MaterialTheme.appColors.primary,
                                 textStyle = MaterialTheme.appTypography.labelLarge,
@@ -609,7 +609,8 @@ private fun EditProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = stringResource(if (uiState.isLimited) profileR.string.profile_limited_profile else profileR.string.profile_full_profile),
+                                modifier = Modifier.testTag("txt_edit_profile_type_label"),
+                                text = stringResource(if (uiState.isLimited) R.string.profile_limited_profile else R.string.profile_full_profile),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.titleSmall
                             )
@@ -618,12 +619,16 @@ private fun EditProfileScreen(
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
                                         .data(imageRes)
-                                        .error(R.drawable.core_ic_default_profile_picture)
-                                        .placeholder(R.drawable.core_ic_default_profile_picture)
+                                        .error(coreR.drawable.core_ic_default_profile_picture)
+                                        .placeholder(coreR.drawable.core_ic_default_profile_picture)
                                         .build(),
                                     contentScale = ContentScale.Crop,
-                                    contentDescription = stringResource(id = R.string.core_accessibility_user_profile_image, uiState.account.username),
+                                    contentDescription = stringResource(
+                                        id = coreR.string.core_accessibility_user_profile_image,
+                                        uiState.account.username
+                                    ),
                                     modifier = Modifier
+                                        .testTag("img_edit_profile_user_image")
                                         .border(
                                             2.dp,
                                             MaterialTheme.appColors.onSurface,
@@ -645,34 +650,43 @@ private fun EditProfileScreen(
                                         .size(32.dp)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.appColors.primary)
-                                        .padding(5.dp),
-                                    painter = painterResource(id = profileR.drawable.profile_ic_edit_image),
+                                        .padding(5.dp)
+                                        .clickable {
+                                            isOpenChangeImageDialogState = true
+                                            if (!uiState.account.isOlderThanMinAge()) {
+                                                openWarningMessageDialog = true
+                                            }
+                                        },
+                                    painter = painterResource(id = R.drawable.profile_ic_edit_image),
                                     contentDescription = null,
                                     tint = Color.White
                                 )
                             }
                             Spacer(modifier = Modifier.height(20.dp))
                             Text(
+                                modifier = Modifier.testTag("txt_edit_profile_user_name"),
                                 text = uiState.account.name,
                                 style = MaterialTheme.appTypography.headlineSmall,
                                 color = MaterialTheme.appColors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(24.dp))
                             Text(
-                                modifier = Modifier.clickable {
-                                    if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
-                                        val privacy = if (uiState.isLimited) {
-                                            Account.Privacy.ALL_USERS
+                                modifier = Modifier
+                                    .testTag("txt_edit_profile_limited_profile_label")
+                                    .clickable {
+                                        if (!LocaleUtils.isProfileLimited(mapFields[YEAR_OF_BIRTH].toString())) {
+                                            val privacy = if (uiState.isLimited) {
+                                                Account.Privacy.ALL_USERS
+                                            } else {
+                                                Account.Privacy.PRIVATE
+                                            }
+                                            mapFields[ACCOUNT_PRIVACY] = privacy
+                                            onLimitedProfileChange(!uiState.isLimited)
                                         } else {
-                                            Account.Privacy.PRIVATE
+                                            openWarningMessageDialog = true
                                         }
-                                        mapFields[ACCOUNT_PRIVACY] = privacy
-                                        onLimitedProfileChange(!uiState.isLimited)
-                                    } else {
-                                        openWarningMessageDialog = true
-                                    }
-                                },
-                                text = stringResource(if (uiState.isLimited) profileR.string.profile_switch_to_full else profileR.string.profile_switch_to_limited),
+                                    },
+                                text = stringResource(if (uiState.isLimited) R.string.profile_switch_to_full else R.string.profile_switch_to_limited),
                                 color = MaterialTheme.appColors.textAccent,
                                 style = MaterialTheme.appTypography.labelLarge
                             )
@@ -680,17 +694,23 @@ private fun EditProfileScreen(
                             ProfileFields(
                                 disabled = uiState.isLimited,
                                 onFieldClick = { it, title ->
-                                    if (it == YEAR_OF_BIRTH) {
-                                        serverFieldName.value = YEAR_OF_BIRTH
-                                        expandedList =
-                                            LocaleUtils.getBirthYearsRange()
-                                    } else if (it == COUNTRY) {
-                                        serverFieldName.value = COUNTRY
-                                        expandedList =
-                                            LocaleUtils.getCountries()
-                                    } else if (it == LANGUAGE) {
-                                        serverFieldName.value = LANGUAGE
-                                        expandedList = LocaleUtils.getLanguages()
+                                    when (it) {
+                                        YEAR_OF_BIRTH -> {
+                                            serverFieldName.value = YEAR_OF_BIRTH
+                                            expandedList =
+                                                LocaleUtils.getBirthYearsRange()
+                                        }
+
+                                        COUNTRY -> {
+                                            serverFieldName.value = COUNTRY
+                                            expandedList =
+                                                LocaleUtils.getCountries()
+                                        }
+
+                                        LANGUAGE -> {
+                                            serverFieldName.value = LANGUAGE
+                                            expandedList = LocaleUtils.getLanguages()
+                                        }
                                     }
                                     bottomDialogTitle = title
                                     keyboardController?.hide()
@@ -720,8 +740,8 @@ private fun EditProfileScreen(
                             )
                             Spacer(Modifier.height(40.dp))
                             IconText(
-                                text = stringResource(id = org.openedx.profile.R.string.profile_delete_profile),
-                                painter = painterResource(id = profileR.drawable.profile_ic_trash),
+                                text = stringResource(id = R.string.profile_delete_profile),
+                                painter = painterResource(id = R.drawable.profile_ic_trash),
                                 textStyle = MaterialTheme.appTypography.labelLarge,
                                 color = MaterialTheme.appColors.error,
                                 onClick = {
@@ -749,6 +769,7 @@ private fun LimitedProfileDialog(
     modifier: Modifier,
     onCloseClick: () -> Unit
 ) {
+    val tint = MaterialTheme.appColors.textWarning
     Column(
         modifier
             .shadow(
@@ -760,37 +781,33 @@ private fun LimitedProfileDialog(
                 MaterialTheme.appShapes.material.medium
             )
     ) {
-        Column(
-            Modifier
+        Row(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Outlined.Report,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textDark
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = stringResource(id = profileR.string.profile_oh_sorry),
-                    color = MaterialTheme.appColors.textDark,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
-                Icon(
-                    modifier = Modifier.clickable { onCloseClick() },
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textDark
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            Icon(
+                imageVector = Icons.Outlined.Report,
+                contentDescription = null,
+                tint = tint
+            )
             Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = profileR.string.profile_must_be_over),
-                color = MaterialTheme.appColors.textDark,
-                style = MaterialTheme.appTypography.bodyMedium
+                modifier = Modifier
+                    .testTag("txt_edit_profile_limited_profile_message")
+                    .weight(1f),
+                text = stringResource(id = R.string.profile_must_be_over),
+                color = tint,
+                style = MaterialTheme.appTypography.labelLarge
+            )
+            Icon(
+                modifier = Modifier
+                    .testTag("ic_edit_profile_limited_profile_close")
+                    .clickable { onCloseClick() },
+                imageVector = Icons.Filled.Close,
+                contentDescription = null,
+                tint = tint
             )
         }
     }
@@ -808,7 +825,9 @@ private fun ChangeImageDialog(
         val dialogWindowProvider = LocalView.current.parent as DialogWindowProvider
         dialogWindowProvider.window.setGravity(Gravity.BOTTOM)
         Box(
-            Modifier.padding(bottom = 24.dp)
+            Modifier
+                .padding(bottom = 24.dp)
+                .semantics { testTagsAsResourceId = true }
         ) {
             Column(
                 Modifier
@@ -833,18 +852,20 @@ private fun ChangeImageDialog(
                 )
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    text = stringResource(id = profileR.string.profile_change_image),
+                    modifier = Modifier.testTag("txt_edit_profile_change_image_title"),
+                    text = stringResource(id = R.string.profile_change_image),
                     style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textPrimary
                 )
                 Spacer(Modifier.height(20.dp))
                 OpenEdXButton(
-                    text = stringResource(id = profileR.string.profile_select_from_gallery),
+                    text = stringResource(id = R.string.profile_select_from_gallery),
                     onClick = onSelectFromGalleryClick,
                     content = {
                         IconText(
-                            text = stringResource(id = profileR.string.profile_select_from_gallery),
-                            painter = painterResource(id = profileR.drawable.profile_ic_gallery),
+                            modifier = Modifier.testTag("it_select_from_gallery"),
+                            text = stringResource(id = R.string.profile_select_from_gallery),
+                            painter = painterResource(id = R.drawable.profile_ic_gallery),
                             color = Color.White,
                             textStyle = MaterialTheme.appTypography.labelLarge
                         )
@@ -854,12 +875,13 @@ private fun ChangeImageDialog(
                 OpenEdXOutlinedButton(
                     borderColor = MaterialTheme.appColors.error,
                     textColor = MaterialTheme.appColors.textPrimary,
-                    text = stringResource(id = profileR.string.profile_remove_photo),
+                    text = stringResource(id = R.string.profile_remove_photo),
                     onClick = onRemoveImageClick,
                     content = {
                         IconText(
-                            text = stringResource(id = profileR.string.profile_remove_photo),
-                            painter = painterResource(id = profileR.drawable.profile_ic_remove_image),
+                            modifier = Modifier.testTag("it_remove_photo"),
+                            text = stringResource(id = R.string.profile_remove_photo),
+                            painter = painterResource(id = R.drawable.profile_ic_remove_image),
                             color = MaterialTheme.appColors.error,
                             textStyle = MaterialTheme.appTypography.labelLarge
                         )
@@ -869,7 +891,7 @@ private fun ChangeImageDialog(
                 OpenEdXOutlinedButton(
                     borderColor = MaterialTheme.appColors.textPrimaryVariant,
                     textColor = MaterialTheme.appColors.textPrimary,
-                    text = stringResource(id = R.string.core_cancel),
+                    text = stringResource(id = coreR.string.core_cancel),
                     onClick = onCancelClick
                 )
                 Spacer(Modifier.height(20.dp))
@@ -894,27 +916,27 @@ private fun ProfileFields(
     } else ""
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         SelectableField(
-            name = stringResource(id = profileR.string.profile_year),
+            name = stringResource(id = R.string.profile_year),
             initialValue = mapFields[YEAR_OF_BIRTH].toString(),
             onClick = {
-                onFieldClick(YEAR_OF_BIRTH, context.getString(profileR.string.profile_year))
+                onFieldClick(YEAR_OF_BIRTH, context.getString(R.string.profile_year))
             }
         )
         if (!disabled) {
             SelectableField(
-                name = stringResource(id = profileR.string.profile_location),
+                name = stringResource(id = R.string.profile_location),
                 initialValue = LocaleUtils.getCountryByCountryCode(mapFields[COUNTRY].toString()),
                 onClick = {
-                    onFieldClick(COUNTRY, context.getString(profileR.string.profile_location))
+                    onFieldClick(COUNTRY, context.getString(R.string.profile_location))
                 }
             )
             SelectableField(
-                name = stringResource(id = profileR.string.profile_spoken_language),
+                name = stringResource(id = R.string.profile_spoken_language),
                 initialValue = lang,
                 onClick = {
                     onFieldClick(
                         LANGUAGE,
-                        context.getString(profileR.string.profile_spoken_language)
+                        context.getString(R.string.profile_spoken_language)
                     )
                 }
             )
@@ -922,7 +944,7 @@ private fun ProfileFields(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(132.dp),
-                name = stringResource(id = profileR.string.profile_about_me),
+                name = stringResource(id = R.string.profile_about_me),
                 initialValue = mapFields[BIO].toString(),
                 onValueChanged = {
                     onValueChanged(it.take(BIO_TEXT_FIELD_LIMIT))
@@ -954,9 +976,11 @@ private fun SelectableField(
             disabledPlaceholderColor = MaterialTheme.appColors.textFieldHint
         )
     }
-    Column() {
+    Column {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_label_${name.tagId()}")
+                .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -978,12 +1002,14 @@ private fun SelectableField(
                 )
             },
             modifier = Modifier
+                .testTag("tf_select_${name.tagId()}")
                 .fillMaxWidth()
                 .noRippleClickable {
                     onClick()
                 },
             placeholder = {
                 Text(
+                    modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1008,7 +1034,9 @@ private fun InputEditField(
 
     Column {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .testTag("txt_label_${name.tagId()}")
+                .fillMaxWidth(),
             text = name,
             style = MaterialTheme.appTypography.labelLarge,
             color = MaterialTheme.appColors.textPrimary
@@ -1027,6 +1055,7 @@ private fun InputEditField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
+                    modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
@@ -1042,7 +1071,7 @@ private fun InputEditField(
                 onDoneClick()
             },
             textStyle = MaterialTheme.appTypography.bodyMedium,
-            modifier = modifier
+            modifier = modifier.testTag("tf_input_${name.tagId()}")
         )
     }
 }
@@ -1072,39 +1101,49 @@ private fun LeaveProfile(
                         MaterialTheme.appShapes.cardShape
                     )
                     .padding(horizontal = 40.dp)
-                    .padding(top = 48.dp, bottom = 36.dp),
+                    .padding(top = 48.dp, bottom = 36.dp)
+                    .semantics {
+                        testTagsAsResourceId = true
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
                     modifier = Modifier
-                        .size(100.dp),
-                    painter = painterResource(org.openedx.profile.R.drawable.profile_ic_save),
+                        .size(60.dp),
+                    painter = painterResource(R.drawable.profile_ic_save),
+                    tint = MaterialTheme.appColors.textPrimary,
                     contentDescription = null
                 )
                 Spacer(Modifier.size(48.dp))
                 Text(
-                    text = stringResource(id = org.openedx.profile.R.string.profile_leave_profile),
+                    modifier = Modifier
+                        .testTag("txt_leave_profile_title"),
+                    text = stringResource(id = R.string.profile_leave_profile),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleLarge,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.size(12.dp))
                 Text(
-                    text = stringResource(id = org.openedx.profile.R.string.profile_changes_you_made),
+                    modifier = Modifier
+                        .testTag("txt_leave_profile_description"),
+                    text = stringResource(id = R.string.profile_changes_you_made),
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.size(40.dp))
                 OpenEdXButton(
-                    text = stringResource(id = org.openedx.profile.R.string.profile_leave),
+                    text = stringResource(id = R.string.profile_leave),
                     onClick = onLeaveClick,
                     backgroundColor = MaterialTheme.appColors.warning,
                     content = {
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = org.openedx.profile.R.string.profile_leave),
-                            color = MaterialTheme.appColors.textDark,
+                            modifier = Modifier
+                                .testTag("txt_leave")
+                                .fillMaxWidth(),
+                            text = stringResource(id = R.string.profile_leave),
+                            color = MaterialTheme.appColors.textWarning,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )
@@ -1114,7 +1153,7 @@ private fun LeaveProfile(
                 OpenEdXOutlinedButton(
                     borderColor = MaterialTheme.appColors.textPrimary,
                     textColor = MaterialTheme.appColors.textPrimary,
-                    text = stringResource(id = org.openedx.profile.R.string.profile_keep_editing),
+                    text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
                 )
             }
@@ -1130,12 +1169,17 @@ private fun LeaveProfileLandscape(
     val screenWidth = configuration.screenWidthDp.dp
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false, usePlatformDefaultWidth = false),
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        ),
         content = {
             Card(
                 modifier = Modifier
                     .width(screenWidth * 0.7f)
-                    .clip(MaterialTheme.appShapes.courseImageShape),
+                    .clip(MaterialTheme.appShapes.courseImageShape)
+                    .semantics { testTagsAsResourceId = true },
                 backgroundColor = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.courseImageShape
             ) {
@@ -1152,22 +1196,26 @@ private fun LeaveProfileLandscape(
                     ) {
                         Icon(
                             modifier = Modifier.size(100.dp),
-                            painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_save),
+                            painter = painterResource(id = R.drawable.profile_ic_save),
                             contentDescription = null,
                             tint = MaterialTheme.appColors.onBackground
                         )
                         Spacer(Modifier.height(20.dp))
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = org.openedx.profile.R.string.profile_leave_profile),
+                            modifier = Modifier
+                                .testTag("txt_leave_profile_dialog_title")
+                                .fillMaxWidth(),
+                            text = stringResource(id = R.string.profile_leave_profile),
                             color = MaterialTheme.appColors.textPrimary,
                             style = MaterialTheme.appTypography.titleLarge,
                             textAlign = TextAlign.Center
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = org.openedx.profile.R.string.profile_changes_you_made),
+                            modifier = Modifier
+                                .testTag("txt_leave_profile_dialog_description")
+                                .fillMaxWidth(),
+                            text = stringResource(id = R.string.profile_changes_you_made),
                             color = MaterialTheme.appColors.textFieldText,
                             style = MaterialTheme.appTypography.titleSmall,
                             textAlign = TextAlign.Center
@@ -1179,11 +1227,12 @@ private fun LeaveProfileLandscape(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         OpenEdXButton(
-                            text = stringResource(id = org.openedx.profile.R.string.profile_leave),
+                            text = stringResource(id = R.string.profile_leave),
                             backgroundColor = MaterialTheme.appColors.warning,
                             content = {
                                 AutoSizeText(
-                                    text = stringResource(id = org.openedx.profile.R.string.profile_leave),
+                                    modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),
+                                    text = stringResource(id = R.string.profile_leave),
                                     style = MaterialTheme.appTypography.bodyMedium,
                                     color = MaterialTheme.appColors.textDark
                                 )
@@ -1194,11 +1243,13 @@ private fun LeaveProfileLandscape(
                         OpenEdXOutlinedButton(
                             borderColor = MaterialTheme.appColors.textPrimary,
                             textColor = MaterialTheme.appColors.textPrimary,
-                            text = stringResource(id = org.openedx.profile.R.string.profile_keep_editing),
+                            text = stringResource(id = R.string.profile_keep_editing),
                             onClick = onDismissRequest,
                             content = {
                                 AutoSizeText(
-                                    text = stringResource(id = org.openedx.profile.R.string.profile_keep_editing),
+                                    modifier = Modifier
+                                        .testTag("btn_leave_profile_dialog_keep_editing"),
+                                    text = stringResource(id = R.string.profile_keep_editing),
                                     style = MaterialTheme.appTypography.bodyMedium,
                                     color = MaterialTheme.appColors.textPrimary
                                 )
@@ -1225,6 +1276,25 @@ fun LeaveProfileLandscapePreview() {
     LeaveProfileLandscape(
         onDismissRequest = {},
         onLeaveClick = {}
+    )
+}
+
+@Preview
+@Composable
+fun ChangeProfileImagePreview() {
+    ChangeImageDialog(
+        onSelectFromGalleryClick = {},
+        onRemoveImageClick = {},
+        onCancelClick = {}
+    )
+}
+
+@Preview
+@Composable
+fun LimitedProfilePreview() {
+    LimitedProfileDialog(
+        modifier = Modifier,
+        onCloseClick = {}
     )
 }
 

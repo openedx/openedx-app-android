@@ -2,19 +2,29 @@ package org.openedx.course.presentation.container
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.calendarsync.CalendarSyncDialog
+import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
@@ -30,12 +40,22 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private val viewModel by viewModel<CourseContainerViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_TITLE, "")
+            requireArguments().getString(ARG_TITLE, ""),
+            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
         )
     }
     private val router by inject<CourseRouter>()
 
     private var adapter: CourseContainerAdapter? = null
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { isGranted ->
+        viewModel.logCalendarPermissionAccess(!isGranted.containsValue(false))
+        if (!isGranted.containsValue(false)) {
+            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.SYNC_DIALOG)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +67,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupToolbar(viewModel.courseName)
+        if (viewModel.calendarSyncUIState.value.isCalendarSyncEnabled) {
+            setUpCourseCalendar()
+        }
         observe()
     }
 
@@ -109,7 +132,12 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             )
             addFragment(
                 Tabs.DATES,
-                CourseDatesFragment.newInstance(viewModel.courseId, viewModel.isSelfPaced)
+                CourseDatesFragment.newInstance(
+                    viewModel.courseId,
+                    viewModel.courseName,
+                    viewModel.isSelfPaced,
+                    viewModel.enrollmentMode,
+                )
             )
             addFragment(
                 Tabs.HANDOUTS,
@@ -122,22 +150,123 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         if (viewModel.isCourseTopTabBarEnabled) {
             TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
                 tab.text = getString(
-                    Tabs.values().find { it.ordinal == position }?.titleResId
+                    Tabs.entries.find { it.ordinal == position }?.titleResId
                         ?: R.string.course_navigation_course
                 )
             }.attach()
             binding.tabLayout.isVisible = true
+            binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    tab?.let {
+                        viewModel.courseContainerTabClickedEvent(Tabs.entries[it.position])
+                    }
+                }
 
+                override fun onTabUnselected(p0: TabLayout.Tab?) {}
+
+                override fun onTabReselected(p0: TabLayout.Tab?) {}
+            })
         } else {
             binding.viewPager.isUserInputEnabled = false
             binding.bottomNavView.setOnItemSelectedListener { menuItem ->
-                Tabs.values().find { menuItem.itemId == it.itemId }?.let { tab ->
+                Tabs.entries.find { menuItem.itemId == it.itemId }?.let { tab ->
                     viewModel.courseContainerTabClickedEvent(tab)
                     binding.viewPager.setCurrentItem(tab.ordinal, false)
                 }
                 true
             }
             binding.bottomNavView.isVisible = true
+        }
+        viewModel.courseContainerTabClickedEvent(Tabs.entries[binding.viewPager.currentItem])
+    }
+
+    private fun setUpCourseCalendar() {
+        binding.composeContainer.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                OpenEdXTheme {
+                    val syncState by viewModel.calendarSyncUIState.collectAsState()
+
+                    LaunchedEffect(key1 = syncState.checkForOutOfSync) {
+                        if (syncState.isCalendarSyncEnabled && syncState.checkForOutOfSync.get()) {
+                            viewModel.checkIfCalendarOutOfDate()
+                        }
+                    }
+
+                    LaunchedEffect(syncState.uiMessage.get()) {
+                        syncState.uiMessage.get().takeIfNotEmpty()?.let {
+                            Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
+                            syncState.uiMessage.set("")
+                        }
+                    }
+
+                    CalendarSyncDialog(
+                        syncDialogType = syncState.dialogType,
+                        calendarTitle = syncState.calendarTitle,
+                        syncDialogPosAction = { dialog ->
+                            when (dialog) {
+                                CalendarSyncDialogType.SYNC_DIALOG -> {
+                                    viewModel.logCalendarAddDates(true)
+                                    viewModel.addOrUpdateEventsInCalendar(
+                                        updatedEvent = false,
+                                    )
+                                }
+
+                                CalendarSyncDialogType.UN_SYNC_DIALOG -> {
+                                    viewModel.logCalendarRemoveDates(true)
+                                    viewModel.deleteCourseCalendar()
+                                }
+
+                                CalendarSyncDialogType.PERMISSION_DIALOG -> {
+                                    permissionLauncher.launch(viewModel.calendarPermissions)
+                                }
+
+                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
+                                    viewModel.logCalendarSyncUpdate(true)
+                                    viewModel.addOrUpdateEventsInCalendar(
+                                        updatedEvent = true,
+                                    )
+                                }
+
+                                CalendarSyncDialogType.EVENTS_DIALOG -> {
+                                    viewModel.logCalendarSyncedConfirmation(true)
+                                    viewModel.openCalendarApp()
+                                }
+
+                                else -> {}
+                            }
+                        },
+                        syncDialogNegAction = { dialog ->
+                            when (dialog) {
+                                CalendarSyncDialogType.SYNC_DIALOG ->
+                                    viewModel.logCalendarAddDates(false)
+
+                                CalendarSyncDialogType.UN_SYNC_DIALOG ->
+                                    viewModel.logCalendarRemoveDates(false)
+
+                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
+                                    viewModel.logCalendarSyncUpdate(false)
+                                    viewModel.deleteCourseCalendar()
+                                }
+
+                                CalendarSyncDialogType.EVENTS_DIALOG ->
+                                    viewModel.logCalendarSyncedConfirmation(false)
+
+                                CalendarSyncDialogType.LOADING_DIALOG,
+                                CalendarSyncDialogType.PERMISSION_DIALOG,
+                                CalendarSyncDialogType.NONE,
+                                -> {
+                                }
+                            }
+
+                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
+                        },
+                        dismissSyncDialog = {
+                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -160,16 +289,20 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
+        private const val ARG_ENROLLMENT_MODE = "enrollmentMode"
         fun newInstance(
             courseId: String,
-            courseTitle: String
+            courseTitle: String,
+            enrollmentMode: String,
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_TITLE to courseTitle
+                ARG_TITLE to courseTitle,
+                ARG_ENROLLMENT_MODE to enrollmentMode
             )
             return fragment
         }
     }
 }
+

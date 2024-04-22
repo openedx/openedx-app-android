@@ -45,8 +45,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -61,11 +64,9 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Course
 import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
-import org.openedx.core.ui.DiscoveryCourseItem
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.SearchBar
 import org.openedx.core.ui.WindowSize
@@ -77,7 +78,9 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
 import org.openedx.discovery.R as discoveryR
 
 class CourseSearchFragment : Fragment() {
@@ -134,10 +137,10 @@ class CourseSearchFragment : Fragment() {
                         )
                     },
                     onRegisterClick = {
-                        router.navigateToSignUp(parentFragmentManager, null)
+                        router.navigateToSignUp(parentFragmentManager, null, null)
                     },
                     onSignInClick = {
-                        router.navigateToSignIn(parentFragmentManager, null)
+                        router.navigateToSignIn(parentFragmentManager, null, null)
                     },
                 )
             }
@@ -205,7 +208,8 @@ private fun CourseSearchScreen(
         scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .semantics { testTagsAsResourceId = true },
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
             if (!isUserLoggedIn) {
@@ -282,6 +286,7 @@ private fun CourseSearchScreen(
                         }
                         Text(
                             modifier = Modifier
+                                .testTag("txt_search_title")
                                 .fillMaxWidth()
                                 .padding(horizontal = 56.dp),
                             text = stringResource(id = org.openedx.core.R.string.core_search),
@@ -340,12 +345,15 @@ private fun CourseSearchScreen(
                             item {
                                 Column {
                                     Text(
+                                        modifier = Modifier.testTag("txt_search_results_title"),
                                         text = stringResource(id = discoveryR.string.discovery_search_results),
                                         color = MaterialTheme.appColors.textPrimary,
                                         style = MaterialTheme.appTypography.displaySmall
                                     )
                                     Text(
-                                        modifier = Modifier.padding(top = 4.dp),
+                                        modifier = Modifier
+                                            .testTag("txt_search_results_subtitle")
+                                            .padding(top = 4.dp),
                                         text = typingText,
                                         color = MaterialTheme.appColors.textPrimary,
                                         style = MaterialTheme.appTypography.titleSmall

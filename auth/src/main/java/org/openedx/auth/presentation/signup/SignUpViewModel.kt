@@ -1,6 +1,7 @@
 package org.openedx.auth.presentation.signup
 
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
@@ -14,20 +15,25 @@ import kotlinx.coroutines.withContext
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.domain.model.SocialAuthResponse
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.AuthAnalyticsEvent
+import org.openedx.auth.presentation.AuthAnalyticsKey
+import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.BaseViewModel
-import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
+import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.utils.Logger
+import org.openedx.core.R as coreR
 
 class SignUpViewModel(
     private val interactor: AuthInteractor,
@@ -35,9 +41,12 @@ class SignUpViewModel(
     private val analytics: AuthAnalytics,
     private val preferencesManager: CorePreferences,
     private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val agreementProvider: AgreementProvider,
     private val oAuthHelper: OAuthHelper,
     private val config: Config,
+    private val router: AuthRouter,
     val courseId: String?,
+    val infoType: String?,
 ) : BaseViewModel() {
 
     private val logger = Logger("SignUpViewModel")
@@ -68,35 +77,65 @@ class SignUpViewModel(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
-                val allFields = interactor.getRegistrationFields()
-                _uiState.update { state ->
-                    state.copy(
-                        allFields = allFields,
-                        isLoading = false,
-                    )
-                }
+                updateFields(interactor.getRegistrationFields())
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(
                         UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
+                            resourceManager.getString(coreR.string.core_error_no_connection)
                         )
                     )
                 } else {
                     _uiMessage.emit(
                         UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
+                            resourceManager.getString(coreR.string.core_error_unknown_error)
                         )
                     )
+                }
+            } finally {
+                _uiState.update { state ->
+                    state.copy(isLoading = false)
                 }
             }
         }
     }
 
+    private fun updateFields(allFields: List<RegistrationField>) {
+        val mutableAllFields = allFields.toMutableList()
+        val requiredFields = mutableListOf<RegistrationField>()
+        val optionalFields = mutableListOf<RegistrationField>()
+        val agreementFields = mutableListOf<RegistrationField>()
+        val agreementText = agreementProvider.getAgreement(isSignIn = false)
+        if (agreementText != null) {
+            val honourCode =
+                allFields.find { it.name == ApiConstants.RegistrationFields.HONOR_CODE }
+            val marketingEmails =
+                allFields.find { it.name == ApiConstants.RegistrationFields.MARKETING_EMAILS }
+            mutableAllFields.remove(honourCode)
+            requiredFields.addAll(mutableAllFields.filter { it.required })
+            optionalFields.addAll(mutableAllFields.filter { !it.required })
+            requiredFields.remove(marketingEmails)
+            optionalFields.remove(marketingEmails)
+            marketingEmails?.let { agreementFields.add(it) }
+            agreementFields.add(agreementText.createHonorCodeField())
+        } else {
+            requiredFields.addAll(mutableAllFields.filter { it.required })
+            optionalFields.addAll(mutableAllFields.filter { !it.required })
+        }
+        _uiState.update { state ->
+            state.copy(
+                allFields = mutableAllFields,
+                requiredFields = requiredFields,
+                optionalFields = optionalFields,
+                agreementFields = agreementFields,
+            )
+        }
+    }
+
     fun register() {
-        analytics.createAccountClickedEvent("")
+        logEvent(AuthAnalyticsEvent.CREATE_ACCOUNT_CLICKED)
         val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
-                mapOf(ApiConstants.HONOR_CODE to true.toString())
+                mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
         val resultMap = mapFields.toMutableMap()
         uiState.value.allFields.filter { !it.required }.forEach { (k, _) ->
             if (mapFields[k].isNullOrEmpty()) {
@@ -119,7 +158,16 @@ class SignUpViewModel(
                         resultMap[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
                     }
                     interactor.register(resultMap.toMap())
-                    analytics.registrationSuccessEvent(socialAuth?.authType?.postfix.orEmpty())
+                    logEvent(
+                        event = AuthAnalyticsEvent.REGISTER_SUCCESS,
+                        params = buildMap {
+                            put(
+                                AuthAnalyticsKey.METHOD.key,
+                                (socialAuth?.authType?.methodName
+                                    ?: AuthType.PASSWORD.methodName).lowercase()
+                            )
+                        }
+                    )
                     if (socialAuth == null) {
                         interactor.login(
                             resultMap.getValue(ApiConstants.EMAIL),
@@ -136,13 +184,13 @@ class SignUpViewModel(
                 if (e.isInternetError()) {
                     _uiMessage.emit(
                         UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
+                            resourceManager.getString(coreR.string.core_error_no_connection)
                         )
                     )
                 } else {
                     _uiMessage.emit(
                         UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_unknown_error)
+                            resourceManager.getString(coreR.string.core_error_unknown_error)
                         )
                     )
                 }
@@ -177,21 +225,29 @@ class SignUpViewModel(
         runCatching {
             interactor.loginSocial(socialAuth.accessToken, socialAuth.authType)
         }.onFailure {
+            val fields = uiState.value.allFields.toMutableList()
+                .filter { field -> field.type != RegistrationFieldType.PASSWORD }
+            updateField(ApiConstants.NAME, socialAuth.name)
+            updateField(ApiConstants.EMAIL, socialAuth.email)
+            setErrorInstructions(emptyMap())
             _uiState.update {
-                val fields = it.allFields.toMutableList()
-                    .filter { field -> field.type != RegistrationFieldType.PASSWORD }
-                updateField(ApiConstants.NAME, socialAuth.name)
-                updateField(ApiConstants.EMAIL, socialAuth.email)
-                setErrorInstructions(emptyMap())
                 it.copy(
                     isLoading = false,
                     socialAuth = socialAuth,
-                    allFields = fields
                 )
             }
+            updateFields(fields)
         }.onSuccess {
             setUserId()
-            analytics.userLoginEvent(socialAuth.authType.methodName)
+            logEvent(
+                AuthAnalyticsEvent.SIGN_IN_SUCCESS,
+                buildMap {
+                    put(
+                        AuthAnalyticsKey.METHOD.key,
+                        socialAuth.authType.methodName.lowercase()
+                    )
+                }
+            )
             _uiState.update { it.copy(successLogin = true) }
             logger.d { "Social login (${socialAuth.authType.methodName}) success" }
         }
@@ -207,12 +263,8 @@ class SignUpViewModel(
                 updatedFields.add(it.copy(errorInstructions = ""))
             }
         }
-        _uiState.update { state ->
-            state.copy(
-                allFields = updatedFields,
-                isLoading = false,
-            )
-        }
+        updateFields(updatedFields)
+        _uiState.update { it.copy(isLoading = false) }
     }
 
     private fun collectAppUpgradeEvent() {
@@ -230,15 +282,35 @@ class SignUpViewModel(
     }
 
     fun updateField(key: String, value: String) {
-        _uiState.update {
-            val updatedFields = uiState.value.allFields.toMutableList().map { field ->
-                if (field.name == key) {
-                    field.copy(placeholder = value)
-                } else {
-                    field
-                }
+        val updatedFields = uiState.value.allFields.toMutableList().map { field ->
+            if (field.name == key) {
+                field.copy(placeholder = value)
+            } else {
+                field
             }
-            it.copy(allFields = updatedFields)
         }
+        updateFields(updatedFields)
+    }
+
+    fun openLink(fragmentManager: FragmentManager, links: Map<String, String>, link: String) {
+        links.forEach { (key, value) ->
+            if (value == link) {
+                router.navigateToWebContent(fragmentManager, key, value)
+                return
+            }
+        }
+    }
+
+    private fun logEvent(
+        event: AuthAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
     }
 }

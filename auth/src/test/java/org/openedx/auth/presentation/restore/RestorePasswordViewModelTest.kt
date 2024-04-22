@@ -1,12 +1,6 @@
 package org.openedx.auth.presentation.restore
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.openedx.auth.domain.interactor.AuthInteractor
-import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.system.EdxError
-import org.openedx.core.system.ResourceManager
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -15,13 +9,23 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.auth.domain.interactor.AuthInteractor
+import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.core.R
+import org.openedx.core.UIMessage
+import org.openedx.core.system.EdxError
+import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import java.net.UnknownHostException
 
@@ -66,13 +70,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `passwordReset empty email validation error`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(emptyEmail) } returns true
-        every { analytics.resetPasswordClickedEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(emptyEmail)
         advanceUntilIdle()
         coVerify(exactly = 0) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -83,13 +88,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `passwordReset invalid email validation error`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(invalidEmail) } returns true
-        every { analytics.resetPasswordClickedEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(invalidEmail)
         advanceUntilIdle()
         coVerify(exactly = 0) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -100,13 +106,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `passwordReset validation error`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(correctEmail) } throws EdxError.ValidationException("error")
-        every { analytics.resetPasswordClickedEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -117,13 +124,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `passwordReset no internet error`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(correctEmail) } throws UnknownHostException()
-        every { analytics.resetPasswordClickedEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -134,13 +142,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `passwordReset unknown error`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(correctEmail) } throws Exception()
-        every { analytics.resetPasswordClickedEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -151,13 +160,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `unSuccess restore password`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(correctEmail) } returns false
-        every { analytics.resetPasswordClickedEvent(false) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(false) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -169,13 +179,14 @@ class RestorePasswordViewModelTest {
 
     @Test
     fun `success restore password`() = runTest {
-        val viewModel = RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
+        val viewModel =
+            RestorePasswordViewModel(interactor, resourceManager, analytics, appUpgradeNotifier)
         coEvery { interactor.passwordReset(correctEmail) } returns true
-        every { analytics.resetPasswordClickedEvent(true) } returns Unit
+        every { analytics.logEvent(any(), any()) } returns Unit
         viewModel.passwordReset(correctEmail)
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.passwordReset(any()) }
-        verify(exactly = 1) { analytics.resetPasswordClickedEvent(true) }
+        verify(exactly = 2) { analytics.logEvent(any(), any()) }
         verify(exactly = 1) { appUpgradeNotifier.notifier }
 
         val state = viewModel.uiState.value as? RestorePasswordUIState.Success
@@ -185,6 +196,4 @@ class RestorePasswordViewModelTest {
         assertEquals(true, viewModel.uiState.value is RestorePasswordUIState.Success)
         assertEquals(null, message)
     }
-
-
 }

@@ -18,6 +18,7 @@ import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
@@ -25,12 +26,14 @@ import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
-import org.openedx.core.interfaces.EnrollInCourseInteractor
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
 import org.openedx.core.module.download.FileDownloader
+import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
@@ -40,11 +43,14 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.dashboard.notifier.DashboardNotifier
+import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.dashboard.presentation.dashboard.DashboardAnalytics
+import org.openedx.course.presentation.calendarsync.CalendarManager
+import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryRouter
@@ -58,6 +64,7 @@ import org.openedx.profile.system.notifier.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
+import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 
 val appModule = module {
 
@@ -67,19 +74,27 @@ val appModule = module {
     single<ProfilePreferences> { get<PreferencesManager>() }
     single<WhatsNewPreferences> { get<PreferencesManager>() }
     single<InAppReviewPreferences> { get<PreferencesManager>() }
+    single<CoursePreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
+    single { CalendarManager(get(), get(), get()) }
 
-    single<Gson> { GsonBuilder().create() }
+    single<Gson> {
+        GsonBuilder()
+            .registerTypeAdapter(CourseEnrollments::class.java, CourseEnrollments.Deserializer())
+            .create()
+    }
 
     single { AppNotifier() }
     single { CourseNotifier() }
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
     single { AppUpgradeNotifier() }
-    single { DashboardNotifier() }
+    single { DownloadNotifier() }
+    single { VideoNotifier() }
+    single { DiscoveryNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }
@@ -147,18 +162,20 @@ val appModule = module {
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
     single { AnalyticsManager(get(), get()) }
-    single<DashboardAnalytics> { get<AnalyticsManager>() }
-    single<AuthAnalytics> { get<AnalyticsManager>() }
     single<AppAnalytics> { get<AnalyticsManager>() }
-    single<DiscoveryAnalytics> { get<AnalyticsManager>() }
-    single<ProfileAnalytics> { get<AnalyticsManager>() }
+    single<AuthAnalytics> { get<AnalyticsManager>() }
+    single<AppReviewAnalytics> { get<AnalyticsManager>() }
+    single<CoreAnalytics> { get<AnalyticsManager>() }
     single<CourseAnalytics> { get<AnalyticsManager>() }
+    single<DashboardAnalytics> { get<AnalyticsManager>() }
+    single<DiscoveryAnalytics> { get<AnalyticsManager>() }
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
+    single<ProfileAnalytics> { get<AnalyticsManager>() }
+    single<WhatsNewAnalytics> { get<AnalyticsManager>() }
 
+    factory { AgreementProvider(get(), get()) }
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
     factory { OAuthHelper(get(), get(), get()) }
-
-    factory<EnrollInCourseInteractor> { CourseInteractor(get()) }
 }

@@ -23,7 +23,9 @@ class CourseUnitContainerAdapter(
 
     private fun unitBlockFragment(block: Block): Fragment {
         return when {
-            (block.isVideoBlock && block.studentViewData?.encodedVideos != null) -> {
+            (block.isVideoBlock &&
+                    (block.studentViewData?.encodedVideos?.hasVideoUrl == true ||
+                            block.studentViewData?.encodedVideos?.hasYoutubeUrl == true)) -> {
                 val encodedVideos = block.studentViewData?.encodedVideos!!
                 val transcripts = block.studentViewData!!.transcripts
                 with(encodedVideos) {
@@ -31,19 +33,7 @@ class CourseUnitContainerAdapter(
                     val videoUrl = if (viewModel.getDownloadModelById(block.id) != null) {
                         isDownloaded = true
                         viewModel.getDownloadModelById(block.id)!!.path
-                    } else if (fallback != null) {
-                        fallback!!.url
-                    } else if (hls != null) {
-                        hls!!.url
-                    } else if (desktopMp4 != null) {
-                        desktopMp4!!.url
-                    } else if (mobileHigh != null) {
-                        mobileHigh!!.url
-                    } else if (mobileLow != null) {
-                        mobileLow!!.url
-                    } else {
-                        ""
-                    }
+                    } else videoUrl
                     if (videoUrl.isNotEmpty()) {
                         VideoUnitFragment.newInstance(
                             block.id,
@@ -57,7 +47,7 @@ class CourseUnitContainerAdapter(
                         YoutubeVideoUnitFragment.newInstance(
                             block.id,
                             viewModel.courseId,
-                            encodedVideos.youtube?.url!!,
+                            encodedVideos.youtube?.url ?: "",
                             transcripts?.toMap() ?: emptyMap(),
                             block.displayName
                         )

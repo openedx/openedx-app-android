@@ -20,7 +20,7 @@ class AppViewModel(
     private val room: RoomDatabase,
     private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
-    private val analytics: AppAnalytics
+    private val analytics: AppAnalytics,
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
@@ -30,6 +30,8 @@ class AppViewModel(
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
     private var logoutHandledAt: Long = 0
+
+    val isBranchEnabled get() = config.getBranchConfig().enabled
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -49,10 +51,18 @@ class AppViewModel(
         }
     }
 
+    fun logAppLaunchEvent() {
+        analytics.logEvent(
+            event = AppAnalyticsEvent.LAUNCH.eventName,
+            params = buildMap {
+                put(AppAnalyticsKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
+            }
+        )
+    }
+
     private fun setUserId() {
         preferencesManager.user?.let {
             analytics.setUserIdForSession(it.id)
         }
     }
-
 }

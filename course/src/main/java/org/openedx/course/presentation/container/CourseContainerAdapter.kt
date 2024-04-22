@@ -24,8 +24,8 @@ class CourseContainerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment
 
 enum class CourseContainerTab(val itemId: Int, val titleResId: Int) {
     COURSE(itemId = R.id.course, titleResId = R.string.course_navigation_course),
-    VIDEOS(itemId = R.id.videos, titleResId = R.string.course_navigation_video),
-    DISCUSSION(itemId = R.id.discussions, titleResId = R.string.course_navigation_discussion),
+    VIDEOS(itemId = R.id.videos, titleResId = R.string.course_navigation_videos),
+    DISCUSSION(itemId = R.id.discussions, titleResId = R.string.course_navigation_discussions),
     DATES(itemId = R.id.dates, titleResId = R.string.course_navigation_dates),
-    HANDOUTS(itemId = R.id.resources, titleResId = R.string.course_navigation_handouts),
+    HANDOUTS(itemId = R.id.resources, titleResId = R.string.course_navigation_more),
 }
