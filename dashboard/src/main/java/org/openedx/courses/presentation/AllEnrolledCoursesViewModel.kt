@@ -86,7 +86,7 @@ class AllEnrolledCoursesViewModel(
                 _updating.value = true
                 isLoading = true
                 page = 1
-                val response = interactor.getUserCourses(page, courseStatusFilter.value).enrollments
+                val response = interactor.getAllUserCourses(page, courseStatusFilter.value)
                 if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
                     _canLoadMore.value = true
                     page++
@@ -118,7 +118,7 @@ class AllEnrolledCoursesViewModel(
             try {
                 isLoading = true
                 val response = if (networkConnection.isOnline() || page > 1) {
-                    interactor.getUserCourses(page, courseStatusFilter.value).enrollments
+                    interactor.getAllUserCourses(page, courseStatusFilter.value)
                 } else {
                     null
                 }

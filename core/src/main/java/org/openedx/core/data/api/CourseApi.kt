@@ -73,6 +73,6 @@ interface CourseApi {
         @Path("username") username: String,
         @Query("page") page: Int = 1,
         @Query("status") status: String? = null,
-        @Query("requested_fields") fields: List<String> = listOf("progress")
+        @Query("requested_fields") fields: List<String> = emptyList()
     ): CourseEnrollments
 }

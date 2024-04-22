@@ -166,7 +166,7 @@ private fun UsersCourseScreen(
                     is UserCoursesUIState.Courses -> {
                         UserCourses(
                             modifier = Modifier.fillMaxSize(),
-                            userCourses = uiState,
+                            userCourses = uiState.userCourses,
                             apiHostUrl = apiHostUrl,
                             onCourseClick = onCourseClick,
                             onViewAllClick = onViewAllClick,
@@ -210,7 +210,7 @@ private fun UsersCourseScreen(
 @Composable
 private fun UserCourses(
     modifier: Modifier = Modifier,
-    userCourses: UserCoursesUIState.Courses,
+    userCourses: UserCourses,
     apiHostUrl: String,
     onCourseClick: (EnrolledCourse) -> Unit,
     openDates: (EnrolledCourse) -> Unit,
@@ -221,9 +221,9 @@ private fun UserCourses(
         modifier = modifier
             .padding(vertical = 12.dp)
     ) {
-        if (userCourses.primaryCourse != null) {
+        if (userCourses.primary != null) {
             PrimaryCourseCard(
-                primaryCourse = userCourses.primaryCourse,
+                primaryCourse = userCourses.primary,
                 apiHostUrl = apiHostUrl,
                 openDates = openDates,
                 onResumeClick = onResumeClick,
@@ -231,7 +231,7 @@ private fun UserCourses(
             )
         }
         SecondaryCourses(
-            courses = userCourses.enrolledCourses,
+            courses = userCourses.enrollments,
             apiHostUrl = apiHostUrl,
             onCourseClick = onCourseClick,
             onViewAllClick = onViewAllClick
@@ -637,7 +637,7 @@ private val mockDashboardCourseList = DashboardCourseList(
     courses = listOf(mockCourse, mockCourse, mockCourse, mockCourse, mockCourse, mockCourse)
 )
 private val mockUserCourses = UserCourses(
-    enrollments = mockDashboardCourseList,
+    enrollments = mockDashboardCourseList.courses,
     primary = mockCourse
 )
 
@@ -646,7 +646,7 @@ private val mockUserCourses = UserCourses(
 private fun UsersCourseScreenPreview() {
     OpenEdXTheme {
         UsersCourseScreen(
-            uiState = UserCoursesUIState.Courses(mockUserCourses.enrollments.courses, mockUserCourses.primary),
+            uiState = UserCoursesUIState.Courses(mockUserCourses),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,

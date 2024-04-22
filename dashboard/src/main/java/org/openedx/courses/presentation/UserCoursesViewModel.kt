@@ -18,6 +18,8 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.utils.FileUtil
+import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 
 class UserCoursesViewModel(
@@ -25,7 +27,8 @@ class UserCoursesViewModel(
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
-    private val networkConnection: NetworkConnection
+    private val networkConnection: NetworkConnection,
+    private val fileUtil: FileUtil
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -66,21 +69,18 @@ class UserCoursesViewModel(
         viewModelScope.launch {
             try {
                 if (networkConnection.isOnline()) {
-                    val response = interactor.getUserCourses()
-                    if (response.primary == null && response.enrollments.courses.isNotEmpty()) {
+                    val response = interactor.getMainUserCourses()
+                    if (response.primary == null && response.enrollments.isNotEmpty()) {
                         _uiState.value = UserCoursesUIState.Empty
                     } else {
-                        _uiState.value = UserCoursesUIState.Courses(response.enrollments.courses, response.primary)
+                        _uiState.value = UserCoursesUIState.Courses(response)
                     }
                 } else {
-                    val cachedList = interactor.getEnrolledCoursesFromCache()
-                    if (cachedList.isEmpty()) {
+                    val cachedUserCourses = fileUtil.getObjectFromFile<UserCourses>()
+                    if (cachedUserCourses == null) {
                         _uiState.value = UserCoursesUIState.Empty
                     } else {
-                        _uiState.value = UserCoursesUIState.Courses(
-                            cachedList,
-                            null
-                        )
+                        _uiState.value = UserCoursesUIState.Courses(cachedUserCourses)
                     }
                 }
             } catch (e: Exception) {
