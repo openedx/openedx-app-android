@@ -1,0 +1,16 @@
+# This file records information about this repo. Its use is described in OEP-55:
+# https://open-edx-proposals.readthedocs.io/en/latest/processes/oep-0055-proc-project-maintainers.html
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: 'openedx-app-android'
+  description: "The mobile app for Android for the Open EdX Platform"
+  links:
+    - url: "https://github.com/openedx/openedx-app-android/tree/main/Documentation"
+      title: "Documentation"
+      icon: "PhoneAndroid"
+spec:
+  owner: group:openedx-mobile-maintainers
+  type: 'mobile'
+  lifecycle: 'production'
