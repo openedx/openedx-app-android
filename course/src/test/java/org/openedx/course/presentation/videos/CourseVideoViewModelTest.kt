@@ -276,7 +276,6 @@ class CourseVideoViewModelTest {
         coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
 
         assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
-        assert(viewModel.isUpdating.value == false)
     }
 
     @Test
@@ -300,10 +299,7 @@ class CourseVideoViewModelTest {
         )
         coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
-        viewModel.setIsUpdating()
         advanceUntilIdle()
-
-        assert(viewModel.isUpdating.value == true)
     }
 
     @Test
@@ -418,7 +414,6 @@ class CourseVideoViewModelTest {
         advanceUntilIdle()
 
         assert(message.await()?.message.isNullOrEmpty())
-        assert(!viewModel.hasInternetConnection)
     }
 
 

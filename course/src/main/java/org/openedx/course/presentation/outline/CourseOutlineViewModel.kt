@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.outline
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -28,9 +27,9 @@ import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -58,9 +57,6 @@ class CourseOutlineViewModel(
     workerController,
     coreAnalytics
 ) {
-
-    val apiHostUrl get() = config.getApiHostURL()
-
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
     private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
@@ -71,17 +67,10 @@ class CourseOutlineViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
-
     var resumeSectionBlock: Block? = null
         private set
     var resumeVerticalBlock: Block? = null
         private set
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
 
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
@@ -89,13 +78,12 @@ class CourseOutlineViewModel(
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
+    init {
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is CourseStructureUpdated) {
                     if (event.courseId == courseId) {
-                        updateCourseData(event.withSwipeRefresh)
+                        updateCourseData()
                     }
                 }
             }
@@ -119,10 +107,6 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun setIsUpdating() {
-        _isUpdating.value = true
-    }
-
     override fun saveDownloadModels(folder: String, id: String) {
         if (preferencesManager.videoSettings.wifiDownloadOnly) {
             if (networkConnection.isWifiConnected()) {
@@ -137,8 +121,7 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun updateCourseData(withSwipeRefresh: Boolean) {
-        _isUpdating.value = withSwipeRefresh
+    fun updateCourseData() {
         getCourseDataInternal()
     }
 
@@ -225,7 +208,6 @@ class CourseOutlineViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
-            _isUpdating.value = false
         }
     }
 
@@ -272,8 +254,8 @@ class CourseOutlineViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
-                updateCourseData(false)
-                _uiMessage.emit(DatesShiftedSnackBar())
+                updateCourseData()
+                notifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {

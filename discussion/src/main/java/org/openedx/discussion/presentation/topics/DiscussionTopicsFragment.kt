@@ -22,11 +22,11 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -63,19 +62,32 @@ object DiscussionTopic {
 @Composable
 fun DiscussionTopicsScreen(
     windowSize: WindowSize,
+    discussionTopicsViewModel: DiscussionTopicsViewModel,
+    onSearchClick: () -> Unit,
+    onItemClick: (String, String, String) -> Unit
+) {
+    val uiState by discussionTopicsViewModel.uiState.observeAsState(DiscussionTopicsUIState.Loading)
+    val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
+
+    DiscussionTopicsScreen(
+        windowSize = windowSize,
+        uiState = uiState,
+        uiMessage = uiMessage,
+        onSearchClick = onSearchClick,
+        onItemClick = onItemClick
+    )
+}
+
+@Composable
+private fun DiscussionTopicsScreen(
+    windowSize: WindowSize,
     uiState: DiscussionTopicsUIState,
     uiMessage: UIMessage?,
-    hasInternetConnection: Boolean,
-    onReloadClick: () -> Unit,
     onSearchClick: () -> Unit,
     onItemClick: (String, String, String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-
-    var isInternetConnectionShown by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -228,21 +240,6 @@ fun DiscussionTopicsScreen(
                                 DiscussionTopicsUIState.Loading -> {}
                             }
                         }
-
-                        if (!isInternetConnectionShown && !hasInternetConnection) {
-                            OfflineModeDialog(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.BottomCenter),
-                                onDismissCLick = {
-                                    isInternetConnectionShown = true
-                                },
-                                onReloadClick = {
-                                    isInternetConnectionShown = true
-                                    onReloadClick()
-                                }
-                            )
-                        }
                     }
                 }
             }
@@ -261,8 +258,6 @@ private fun DiscussionTopicsScreenPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
-            hasInternetConnection = true,
-            onReloadClick = {},
             onItemClick = { _, _, _ -> },
             onSearchClick = {}
         )
@@ -278,8 +273,6 @@ private fun DiscussionTopicsScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
-            hasInternetConnection = true,
-            onReloadClick = {},
             onItemClick = { _, _, _ -> },
             onSearchClick = {}
         )

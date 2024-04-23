@@ -7,13 +7,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
 
@@ -21,7 +19,6 @@ class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
-    private val networkConnection: NetworkConnection,
     val courseId: String,
     val courseName: String
 ) : BaseViewModel() {
@@ -34,13 +31,6 @@ class DiscussionTopicsViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private val _isUpdating = MutableSharedFlow<Boolean>()
-    val isUpdating: SharedFlow<Boolean>
-        get() = _isUpdating.asSharedFlow()
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
-
     init {
         getCourseTopics()
     }
@@ -48,7 +38,6 @@ class DiscussionTopicsViewModel(
     fun updateCourseTopics() {
         viewModelScope.launch {
             try {
-                _isUpdating.emit(true)
                 val response = interactor.getCourseTopics(courseId)
                 _uiState.value = DiscussionTopicsUIState.Topics(response)
             } catch (e: Exception) {
@@ -58,7 +47,6 @@ class DiscussionTopicsViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
-            _isUpdating.emit(false)
         }
     }
 

@@ -5,27 +5,43 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarData
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -33,8 +49,12 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.FragmentViewType
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
@@ -47,10 +67,10 @@ import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.outline.CourseOutlineScreen
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.ui.CourseVideosScreen
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
-import org.openedx.discussion.presentation.topics.DiscussionTopicsUIState
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
@@ -157,24 +177,25 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun onRefresh(currentPage: Int) {
-        when (currentPage) {
-            0 -> {
-                courseOutlineViewModel.setIsUpdating()
-                updateCourseStructure(true)
+        viewModel.showRefreshIndicator()
+        when (CourseHomeTab.entries[currentPage]) {
+            CourseHomeTab.HOME -> {
+                updateCourseStructure(false)
             }
 
-            1 -> {
-                courseVideoViewModel.setIsUpdating()
-                updateCourseStructure(true)
+            CourseHomeTab.VIDEOS -> {
+                updateCourseStructure(false)
             }
 
-            2 -> {
-                courseDatesViewModel.getCourseDates(swipeToRefresh = true)
+            CourseHomeTab.DATES -> {
+                courseDatesViewModel.getCourseDates()
             }
 
-            3 -> {
+            CourseHomeTab.DISCUSSIONS -> {
                 discussionTopicsViewModel.updateCourseTopics()
             }
+
+            else -> {}
         }
     }
 
@@ -182,163 +203,201 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private fun setupCollapsingLayout() {
         binding.composeCollapsingLayout.setContent {
             OpenEdXTheme {
-                val refreshing by viewModel.showProgress.collectAsState(true)
-                val courseImage by viewModel.courseImage.collectAsState()
-                val pagerState = rememberPagerState(pageCount = { 5 })
-                val tabState = rememberLazyListState()
                 val windowSize = rememberWindowSize()
-                val pullRefreshState = rememberPullRefreshState(
-                    refreshing = refreshing,
-                    onRefresh = { onRefresh(pagerState.currentPage) }
-                )
+                val scope = rememberCoroutineScope()
+                val scaffoldState = rememberScaffoldState()
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .navigationBarsPadding(),
+                    scaffoldState = scaffoldState,
+                    backgroundColor = MaterialTheme.appColors.background
+                ) { paddingValues ->
+                    val refreshing by viewModel.refreshing.collectAsState(true)
+                    val courseImage by viewModel.courseImage.collectAsState()
+                    val uiMessage by viewModel.uiMessage.collectAsState(null)
+                    val pagerState = rememberPagerState(pageCount = { CourseHomeTab.entries.size })
+                    val tabState = rememberLazyListState()
+                    val snackState = remember { SnackbarHostState() }
+                    val pullRefreshState = rememberPullRefreshState(
+                        refreshing = refreshing,
+                        onRefresh = { onRefresh(pagerState.currentPage) }
+                    )
+                    if (uiMessage is DatesShiftedSnackBar) {
+                        val datesShiftedMessage = stringResource(id = R.string.course_dates_shifted_message)
+                        LaunchedEffect(uiMessage) {
+                            snackState.showSnackbar(
+                                message = datesShiftedMessage,
+                                duration = SnackbarDuration.Long
+                            )
+                        }
+                    }
+                    HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-                LaunchedEffect(pagerState.currentPage) {
-                    tabState.animateScrollToItem(pagerState.currentPage)
-                }
+                    LaunchedEffect(pagerState.currentPage) {
+                        tabState.animateScrollToItem(pagerState.currentPage)
+                    }
 
-                Box {
-                    CollapsingLayout(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pullRefresh(pullRefreshState),
-                        courseImage = courseImage,
-                        expandedTop = {
-                            ExpandedHeaderContent(
-                                courseTitle = viewModel.courseName,
-                                org = viewModel.organization
-                            )
-                        },
-                        collapsedTop = {
-                            CollapsedHeaderContent(
-                                courseTitle = viewModel.courseName
-                            )
-                        },
-                        navigation = {
-                            CourseHomeTabs(
-                                rowState = tabState,
-                                pagerState = pagerState,
-                                onPageChange = viewModel::courseContainerTabClickedEvent
-                            )
-                        },
-                        onBackClick = {
-                            requireActivity().supportFragmentManager.popBackStack()
-                        },
-                        bodyContent = {
-                            HorizontalPager(
-                                state = pagerState
-                            ) { page ->
-                                when (page) {
-                                    0 -> {
-                                        val scope = rememberCoroutineScope()
-                                        CourseOutlineScreen(
-                                            windowSize = windowSize,
-                                            courseOutlineViewModel = courseOutlineViewModel,
-                                            courseRouter = courseRouter,
-                                            fragmentManager = requireActivity().supportFragmentManager,
-                                            onReloadClick = {
-                                                updateCourseStructure(false)
-                                            },
-                                            onResetDatesClick = {
-                                                courseOutlineViewModel.resetCourseDatesBanner(onResetDates = {
-                                                    updateCourseDates()
-                                                })
-                                            },
-                                            onViewDates = {
-                                                scope.launch {
-                                                    pagerState.animateScrollToPage(4)
+                    Box {
+                        CollapsingLayout(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(paddingValues)
+                                .pullRefresh(pullRefreshState),
+                            courseImage = courseImage,
+                            imageHeight = 200,
+                            expandedTop = {
+                                ExpandedHeaderContent(
+                                    courseTitle = viewModel.courseName,
+                                    org = viewModel.organization
+                                )
+                            },
+                            collapsedTop = {
+                                CollapsedHeaderContent(
+                                    courseTitle = viewModel.courseName
+                                )
+                            },
+                            navigation = {
+                                CourseHomeTabs(
+                                    rowState = tabState,
+                                    pagerState = pagerState,
+                                    onPageChange = viewModel::courseContainerTabClickedEvent
+                                )
+                            },
+                            onBackClick = {
+                                requireActivity().supportFragmentManager.popBackStack()
+                            },
+                            bodyContent = {
+                                HorizontalPager(
+                                    state = pagerState
+                                ) { page ->
+                                    when (CourseHomeTab.entries[page]) {
+                                        CourseHomeTab.HOME -> {
+                                            CourseOutlineScreen(
+                                                windowSize = windowSize,
+                                                courseOutlineViewModel = courseOutlineViewModel,
+                                                courseRouter = courseRouter,
+                                                fragmentManager = requireActivity().supportFragmentManager,
+                                                onResetDatesClick = {
+                                                    courseOutlineViewModel.resetCourseDatesBanner(onResetDates = {
+                                                        updateCourseDates()
+                                                    })
                                                 }
-                                            }
-                                        )
-                                    }
+                                            )
+                                        }
 
-                                    1 -> {
-                                        CourseVideosScreen(
-                                            windowSize = windowSize,
-                                            courseVideoViewModel = courseVideoViewModel,
-                                            fragmentManager = requireActivity().supportFragmentManager,
-                                            courseRouter = courseRouter,
-                                            onReloadClick = {
-                                                updateCourseStructure(false)
-                                            }
-                                        )
-                                    }
+                                        CourseHomeTab.VIDEOS -> {
+                                            CourseVideosScreen(
+                                                windowSize = windowSize,
+                                                courseVideoViewModel = courseVideoViewModel,
+                                                fragmentManager = requireActivity().supportFragmentManager,
+                                                courseRouter = courseRouter,
+                                            )
+                                        }
 
-                                    2 -> {
-                                        CourseDatesScreen(
-                                            windowSize = windowSize,
-                                            courseDatesViewModel = courseDatesViewModel,
-                                            courseRouter = courseRouter,
-                                            fragmentManager = requireActivity().supportFragmentManager,
-                                            isFragmentResumed = isResumed,
-                                            updateCourseStructure = {
-                                                updateCourseStructure(false)
-                                            }
-                                        )
-                                    }
+                                        CourseHomeTab.DATES -> {
+                                            CourseDatesScreen(
+                                                windowSize = windowSize,
+                                                courseDatesViewModel = courseDatesViewModel,
+                                                courseRouter = courseRouter,
+                                                fragmentManager = requireActivity().supportFragmentManager,
+                                                isFragmentResumed = isResumed,
+                                                updateCourseStructure = {
+                                                    updateCourseStructure(false)
+                                                }
+                                            )
+                                        }
 
-                                    3 -> {
-                                        val uiState by discussionTopicsViewModel.uiState.observeAsState(
-                                            DiscussionTopicsUIState.Loading
-                                        )
-                                        val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
+                                        CourseHomeTab.DISCUSSIONS -> {
+                                            DiscussionTopicsScreen(
+                                                windowSize = windowSize,
+                                                discussionTopicsViewModel = discussionTopicsViewModel,
+                                                onItemClick = { action, data, title ->
+                                                    discussionTopicsViewModel.discussionClickedEvent(
+                                                        action,
+                                                        data,
+                                                        title
+                                                    )
+                                                    discussionRouter.navigateToDiscussionThread(
+                                                        requireActivity().supportFragmentManager,
+                                                        action,
+                                                        discussionTopicsViewModel.courseId,
+                                                        data,
+                                                        title,
+                                                        FragmentViewType.FULL_CONTENT
+                                                    )
+                                                },
+                                                onSearchClick = {
+                                                    discussionRouter.navigateToSearchThread(
+                                                        requireActivity().supportFragmentManager,
+                                                        discussionTopicsViewModel.courseId
+                                                    )
+                                                })
+                                        }
 
-                                        DiscussionTopicsScreen(
-                                            windowSize = windowSize,
-                                            uiState = uiState,
-                                            uiMessage = uiMessage,
-                                            onItemClick = { action, data, title ->
-                                                discussionTopicsViewModel.discussionClickedEvent(action, data, title)
-                                                discussionRouter.navigateToDiscussionThread(
-                                                    requireActivity().supportFragmentManager,
-                                                    action,
-                                                    discussionTopicsViewModel.courseId,
-                                                    data,
-                                                    title,
-                                                    FragmentViewType.FULL_CONTENT
-                                                )
-                                            },
-                                            onSearchClick = {
-                                                discussionRouter.navigateToSearchThread(
-                                                    requireActivity().supportFragmentManager,
-                                                    discussionTopicsViewModel.courseId
-                                                )
-                                            },
-                                            onReloadClick = {
-                                               discussionTopicsViewModel.getCourseTopics()
-                                            },
-                                            hasInternetConnection = discussionTopicsViewModel.hasInternetConnection
-                                        )
-                                    }
-
-                                    4 -> {
-                                        HandoutsScreen(
-                                            windowSize = windowSize,
-                                            onHandoutsClick = {
-                                                courseRouter.navigateToHandoutsWebView(
-                                                    requireActivity().supportFragmentManager,
-                                                    requireArguments().getString(ARG_COURSE_ID, ""),
-                                                    getString(R.string.course_handouts),
-                                                    HandoutsType.Handouts
-                                                )
-                                            },
-                                            onAnnouncementsClick = {
-                                                courseRouter.navigateToHandoutsWebView(
-                                                    requireActivity().supportFragmentManager,
-                                                    requireArguments().getString(ARG_COURSE_ID, ""),
-                                                    getString(R.string.course_announcements),
-                                                    HandoutsType.Announcements
-                                                )
-                                            })
+                                        CourseHomeTab.MORE -> {
+                                            HandoutsScreen(
+                                                windowSize = windowSize,
+                                                onHandoutsClick = {
+                                                    courseRouter.navigateToHandoutsWebView(
+                                                        requireActivity().supportFragmentManager,
+                                                        requireArguments().getString(ARG_COURSE_ID, ""),
+                                                        getString(R.string.course_handouts),
+                                                        HandoutsType.Handouts
+                                                    )
+                                                },
+                                                onAnnouncementsClick = {
+                                                    courseRouter.navigateToHandoutsWebView(
+                                                        requireActivity().supportFragmentManager,
+                                                        requireArguments().getString(ARG_COURSE_ID, ""),
+                                                        getString(R.string.course_announcements),
+                                                        HandoutsType.Announcements
+                                                    )
+                                                })
+                                        }
                                     }
                                 }
                             }
+                        )
+                        PullRefreshIndicator(
+                            refreshing,
+                            pullRefreshState,
+                            Modifier.align(Alignment.TopCenter)
+                        )
+
+                        var isInternetConnectionShown by rememberSaveable {
+                            mutableStateOf(false)
                         }
-                    )
-                    PullRefreshIndicator(
-                        refreshing,
-                        pullRefreshState,
-                        Modifier.align(Alignment.TopCenter)
-                    )
+                        if (!isInternetConnectionShown && !viewModel.hasInternetConnection) {
+                            OfflineModeDialog(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomCenter),
+                                onDismissCLick = {
+                                    isInternetConnectionShown = true
+                                },
+                                onReloadClick = {
+                                    isInternetConnectionShown = true
+                                    onRefresh(pagerState.currentPage)
+                                }
+                            )
+                        }
+
+                        SnackbarHost(
+                            modifier = Modifier.align(Alignment.BottomStart),
+                            hostState = snackState
+                        ) { snackbarData: SnackbarData ->
+                            DatesShiftedSnackBar(
+                                showAction = true,
+                                onViewDates = {
+                                    scrollToDates(scope, pagerState)
+                                },
+                                onClose = {
+                                    snackbarData.dismiss()
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -440,6 +499,13 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private fun updateCourseDates() {
         courseDatesViewModel.getCourseDates()
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
+        scope.launch {
+            pagerState.animateScrollToPage(CourseHomeTab.entries.indexOf(CourseHomeTab.DATES))
+        }
     }
 
     companion object {

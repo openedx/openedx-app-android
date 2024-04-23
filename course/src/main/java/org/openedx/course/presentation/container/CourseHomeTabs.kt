@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.container
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,14 @@ import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.R
 
+enum class CourseHomeTab(@StringRes val title: Int, val icon: ImageVector) {
+    HOME(R.string.course_navigation_home, Icons.Default.Home),
+    VIDEOS(R.string.course_navigation_videos, Icons.Rounded.PlayCircleFilled),
+    DATES(R.string.course_navigation_dates, Icons.Outlined.CalendarMonth),
+    DISCUSSIONS(R.string.course_navigation_discussions, Icons.AutoMirrored.Filled.Chat),
+    MORE(R.string.course_navigation_more, Icons.AutoMirrored.Filled.TextSnippet)
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CourseHomeTabs(
@@ -48,14 +58,6 @@ fun CourseHomeTabs(
     rowState: LazyListState = rememberLazyListState(),
     onPageChange: (Int) -> Unit
 ) {
-    val list = listOf(
-        stringResource(id = R.string.course_navigation_home) to rememberVectorPainter(Icons.Default.Home),
-        stringResource(id = R.string.course_navigation_videos) to rememberVectorPainter(Icons.Rounded.PlayCircleFilled),
-        stringResource(id = R.string.course_navigation_dates) to rememberVectorPainter(Icons.Outlined.CalendarMonth),
-        stringResource(id = R.string.course_navigation_discussions) to rememberVectorPainter(Icons.AutoMirrored.Filled.Chat),
-        stringResource(id = R.string.course_navigation_more) to rememberVectorPainter(Icons.AutoMirrored.Filled.TextSnippet)
-    )
-
     val scope = rememberCoroutineScope()
     val windowSize = rememberWindowSize()
     val horizontalPadding = if (!windowSize.isTablet){
@@ -69,7 +71,7 @@ fun CourseHomeTabs(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
     ) {
-        itemsIndexed(list) { index, item ->
+        itemsIndexed(CourseHomeTab.entries) { index, item ->
             val backgroundColor = if (pagerState.currentPage == index) {
                 MaterialTheme.appColors.primary
             } else {
@@ -106,13 +108,13 @@ fun CourseHomeTabs(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    painter = item.second,
+                    painter = rememberVectorPainter(item.icon),
                     tint = contentColor,
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = item.first,
+                    text = stringResource(item.title),
                     color = contentColor
                 )
             }

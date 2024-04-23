@@ -154,7 +154,7 @@ class CourseContainerViewModelTest {
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value == null)
     }
 
@@ -186,7 +186,7 @@ class CourseContainerViewModelTest {
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value == null)
     }
 
@@ -218,7 +218,7 @@ class CourseContainerViewModelTest {
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         assert(viewModel.errorMessage.value == null)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value != null)
     }
 
@@ -251,7 +251,7 @@ class CourseContainerViewModelTest {
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         assert(viewModel.errorMessage.value == null)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value != null)
     }
 
@@ -281,7 +281,7 @@ class CourseContainerViewModelTest {
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
     }
 
     @Test
@@ -310,7 +310,7 @@ class CourseContainerViewModelTest {
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
     }
 
     @Test
@@ -338,6 +338,6 @@ class CourseContainerViewModelTest {
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
 
         assert(viewModel.errorMessage.value == null)
-        assert(!viewModel.showProgress.value)
+        assert(!viewModel.refreshing.value)
     }
 }

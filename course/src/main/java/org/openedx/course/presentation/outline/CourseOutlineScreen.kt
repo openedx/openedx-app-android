@@ -22,22 +22,15 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarData
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AndroidUriHandler
@@ -61,7 +54,6 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.WindowSize
@@ -71,23 +63,22 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
-import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.io.File
 import java.util.Date
+import org.openedx.course.R as CourseR
 
 fun getUnitBlockIcon(block: Block): Int {
     return when (block.type) {
-        BlockType.VIDEO -> org.openedx.course.R.drawable.ic_course_video
-        BlockType.PROBLEM -> org.openedx.course.R.drawable.ic_course_pen
-        BlockType.DISCUSSION -> org.openedx.course.R.drawable.ic_course_discussion
-        else -> org.openedx.course.R.drawable.ic_course_block
+        BlockType.VIDEO -> CourseR.drawable.ic_course_video
+        BlockType.PROBLEM -> CourseR.drawable.ic_course_pen
+        BlockType.DISCUSSION -> CourseR.drawable.ic_course_discussion
+        else -> CourseR.drawable.ic_course_block
     }
 }
 
@@ -97,9 +88,7 @@ fun CourseOutlineScreen(
     courseOutlineViewModel: CourseOutlineViewModel,
     courseRouter: CourseRouter,
     fragmentManager: FragmentManager,
-    onReloadClick: () -> Unit,
-    onResetDatesClick: () -> Unit,
-    onViewDates: () -> Unit
+    onResetDatesClick: () -> Unit
 ) {
     val uiState by courseOutlineViewModel.uiState.observeAsState(CourseOutlineUIState.Loading)
     val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
@@ -110,8 +99,6 @@ fun CourseOutlineScreen(
         uiState = uiState,
         isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
         uiMessage = uiMessage,
-        hasInternetConnection = courseOutlineViewModel.hasInternetConnection,
-        onReloadClick = onReloadClick,
         onItemClick = { block ->
             courseOutlineViewModel.sequentialClickedEvent(
                 block.blockId,
@@ -191,7 +178,6 @@ fun CourseOutlineScreen(
             }
         },
         onResetDatesClick = onResetDatesClick,
-        onViewDates = onViewDates,
         onCertificateClick = {
             courseOutlineViewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
@@ -206,21 +192,15 @@ internal fun CourseOutlineScreen(
     uiState: CourseOutlineUIState,
     isCourseNestedListEnabled: Boolean,
     uiMessage: UIMessage?,
-    hasInternetConnection: Boolean,
-    onReloadClick: () -> Unit,
     onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
     onDownloadClick: (Block) -> Unit,
     onResetDatesClick: () -> Unit,
-    onViewDates: () -> Unit?,
     onCertificateClick: (String) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
-    var isInternetConnectionShown by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     Scaffold(
         modifier = Modifier
@@ -256,17 +236,6 @@ internal fun CourseOutlineScreen(
             )
         }
 
-        val snackState = remember { SnackbarHostState() }
-        if (uiMessage is DatesShiftedSnackBar) {
-            val datesShiftedMessage =
-                stringResource(id = org.openedx.course.R.string.course_dates_shifted_message)
-            LaunchedEffect(uiMessage) {
-                snackState.showSnackbar(
-                    message = datesShiftedMessage,
-                    duration = SnackbarDuration.Long
-                )
-            }
-        }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -403,31 +372,6 @@ internal fun CourseOutlineScreen(
 
                         CourseOutlineUIState.Loading -> {}
                     }
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
-                            }
-                        )
-                    }
-                }
-
-                SnackbarHost(
-                    modifier = Modifier.align(Alignment.BottomStart),
-                    hostState = snackState
-                ) { snackbarData: SnackbarData ->
-                    DatesShiftedSnackBar(showAction = true,
-                        onViewDates = onViewDates,
-                        onClose = {
-                            snackbarData.dismiss()
-                        })
                 }
             }
         }
@@ -568,15 +512,12 @@ private fun CourseOutlineScreenPreview() {
             ),
             isCourseNestedListEnabled = true,
             uiMessage = null,
-            hasInternetConnection = true,
             onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
-            onReloadClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
-            onViewDates = {},
             onCertificateClick = {},
         )
     }
@@ -606,15 +547,12 @@ private fun CourseOutlineScreenTabletPreview() {
             ),
             isCourseNestedListEnabled = true,
             uiMessage = null,
-            hasInternetConnection = true,
             onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
-            onReloadClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
-            onViewDates = {},
             onCertificateClick = {},
         )
     }

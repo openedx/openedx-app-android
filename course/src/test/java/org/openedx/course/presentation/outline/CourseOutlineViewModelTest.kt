@@ -13,7 +13,6 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -221,6 +220,7 @@ class CourseOutlineViewModelTest {
     fun `getCourseDataInternal no internet connection exception`() = runTest(UnconfinedTestDispatcher()) {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isOnline() } returns true
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         coEvery { interactor.getCourseStatus(any()) } throws UnknownHostException()
 
         val viewModel = CourseOutlineViewModel(
@@ -248,7 +248,6 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
 
         assertEquals(noInternet, message.await()?.message)
-        assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
     }
 
@@ -256,6 +255,7 @@ class CourseOutlineViewModelTest {
     fun `getCourseDataInternal unknown exception`() = runTest(UnconfinedTestDispatcher()) {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isOnline() } returns true
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         coEvery { interactor.getCourseStatus(any()) } throws Exception()
         val viewModel = CourseOutlineViewModel(
             "",
@@ -282,7 +282,6 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
 
         assertEquals(somethingWrong, message.await()?.message)
-        assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
     }
 
@@ -329,7 +328,6 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
-        assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
     }
 
@@ -376,7 +374,6 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 0) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
-        assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
     }
 
@@ -417,19 +414,19 @@ class CourseOutlineViewModelTest {
             }
         }
         viewModel.getCourseData()
-        viewModel.updateCourseData(false)
+        viewModel.updateCourseData()
         advanceUntilIdle()
 
         coVerify(exactly = 2) { interactor.getCourseStructureFromCache() }
         coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
-        assert(viewModel.isUpdating.value == false)
         assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
     }
 
     @Test
-    fun `CourseStructureUpdated notifier test`() = runTest {
+    fun `CourseStructureUpdated notifier test`() = runTest(UnconfinedTestDispatcher()) {
+        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseOutlineViewModel(
             "",
             "",
@@ -446,12 +443,6 @@ class CourseOutlineViewModelTest {
         )
         coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("", false)) }
         every { interactor.getCourseStructureFromCache() } returns courseStructure
-        every { downloadDao.readAllData() } returns flow {
-            repeat(5) {
-                delay(10000)
-                emit(emptyList())
-            }
-        }
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
 
@@ -461,11 +452,10 @@ class CourseOutlineViewModelTest {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
 
         viewModel.getCourseData()
-        viewModel.setIsUpdating()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
+        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
     }
 
     @Test
@@ -523,7 +513,6 @@ class CourseOutlineViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
-        coEvery { downloadDao.readAllData() } returns mockk()
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { config.isCourseNestedListEnabled() } returns false
@@ -588,6 +577,5 @@ class CourseOutlineViewModelTest {
         advanceUntilIdle()
 
         assert(message.await()?.message.isNullOrEmpty())
-        assert(!viewModel.hasInternetConnection)
     }
 }

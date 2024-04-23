@@ -38,7 +38,6 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -58,7 +57,6 @@ class CourseDatesViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val interactor = mockk<CourseInteractor>()
     private val calendarManager = mockk<CalendarManager>()
-    private val networkConnection = mockk<NetworkConnection>()
     private val corePreferences = mockk<CorePreferences>()
     private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
@@ -165,13 +163,11 @@ class CourseDatesViewModelTest {
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
         val message = async {
             withTimeoutOrNull(5000) {
@@ -183,7 +179,6 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         Assert.assertEquals(noInternet, message.await()?.message)
-        assert(viewModel.updating.value == false)
         assert(viewModel.uiState.value is DatesUIState.Loading)
     }
 
@@ -196,13 +191,11 @@ class CourseDatesViewModelTest {
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws Exception()
         val message = async {
             withTimeoutOrNull(5000) {
@@ -214,7 +207,6 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         Assert.assertEquals(somethingWrong, message.await()?.message)
-        assert(viewModel.updating.value == false)
         assert(viewModel.uiState.value is DatesUIState.Loading)
     }
 
@@ -227,13 +219,11 @@ class CourseDatesViewModelTest {
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
         val message = async {
             withTimeoutOrNull(5000) {
@@ -245,7 +235,6 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
-        assert(viewModel.updating.value == false)
         assert(viewModel.uiState.value is DatesUIState.Dates)
     }
 
@@ -258,13 +247,11 @@ class CourseDatesViewModelTest {
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),
             courseBanner = mockCourseDatesBannerInfo,
@@ -279,7 +266,6 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
-        assert(viewModel.updating.value == false)
         assert(viewModel.uiState.value is DatesUIState.Empty)
     }
 }

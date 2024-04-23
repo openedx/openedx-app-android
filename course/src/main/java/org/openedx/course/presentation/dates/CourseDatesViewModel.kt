@@ -23,11 +23,10 @@ import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -44,7 +43,6 @@ class CourseDatesViewModel(
     private val notifier: CourseNotifier,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
-    private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
     private val corePreferences: CorePreferences,
     private val courseAnalytics: CourseAnalytics,
@@ -71,13 +69,6 @@ class CourseDatesViewModel(
     val calendarSyncUIState: StateFlow<CalendarSyncUIState> =
         _calendarSyncUIState.asStateFlow()
 
-    private val _updating = MutableLiveData<Boolean>()
-    val updating: LiveData<Boolean>
-        get() = _updating
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
-
     private var courseBannerType: CourseBannerType = CourseBannerType.BLANK
 
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
@@ -93,11 +84,7 @@ class CourseDatesViewModel(
         }
     }
 
-    fun getCourseDates(swipeToRefresh: Boolean = false) {
-        if (!swipeToRefresh) {
-            _uiState.value = DatesUIState.Loading
-        }
-        _updating.value = swipeToRefresh
+    fun getCourseDates() {
         loadingCourseDatesInternal()
     }
 
@@ -119,7 +106,6 @@ class CourseDatesViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
             }
-            _updating.value = false
         }
     }
 
@@ -128,7 +114,7 @@ class CourseDatesViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 getCourseDates()
-                _uiMessage.emit(DatesShiftedSnackBar())
+                notifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {

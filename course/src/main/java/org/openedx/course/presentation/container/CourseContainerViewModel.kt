@@ -9,14 +9,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.ImageProcessor
 import org.openedx.core.SingleEventLiveData
+import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
@@ -26,9 +30,11 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.utils.TimeUtils
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -74,6 +80,14 @@ class CourseContainerViewModel(
     val showProgress: StateFlow<Boolean> =
         _showProgress.asStateFlow()
 
+    private val _refreshing = MutableStateFlow(false)
+    val refreshing: StateFlow<Boolean> =
+        _refreshing.asStateFlow()
+
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
+
     private var _isSelfPaced: Boolean = true
     val isSelfPaced: Boolean
         get() = _isSelfPaced
@@ -97,6 +111,9 @@ class CourseContainerViewModel(
     private var _courseImage = MutableStateFlow(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
     val courseImage: StateFlow<Bitmap> = _courseImage.asStateFlow()
 
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
+
     init {
         viewModelScope.launch {
             notifier.notifier.collect { event ->
@@ -113,6 +130,10 @@ class CourseContainerViewModel(
                             checkForOutOfSync = AtomicReference(event.checkOutOfSync)
                         )
                     }
+                }
+
+                if (event is CourseDatesShifted) {
+                    _uiMessage.emit(DatesShiftedSnackBar())
                 }
             }
         }
@@ -166,8 +187,11 @@ class CourseContainerViewModel(
         }
     }
 
+    fun showRefreshIndicator() {
+        _refreshing.value = true
+    }
+
     fun updateData(withSwipeRefresh: Boolean) {
-        _showProgress.value = true
         viewModelScope.launch {
             try {
                 interactor.preloadCourseStructure(courseId)
@@ -180,18 +204,18 @@ class CourseContainerViewModel(
                         resourceManager.getString(CoreR.string.core_error_unknown_error)
                 }
             }
-            _showProgress.value = false
+            _refreshing.value = false
             notifier.send(CourseStructureUpdated(courseId, withSwipeRefresh))
         }
     }
 
     fun courseContainerTabClickedEvent(index: Int) {
-        when (index) {
-            0 -> courseTabClickedEvent()
-            1 -> videoTabClickedEvent()
-            2 -> discussionTabClickedEvent()
-            3 -> datesTabClickedEvent()
-            4 -> handoutsTabClickedEvent()
+        when (CourseHomeTab.entries[index]) {
+            CourseHomeTab.HOME -> courseTabClickedEvent()
+            CourseHomeTab.VIDEOS -> videoTabClickedEvent()
+            CourseHomeTab.DISCUSSIONS -> discussionTabClickedEvent()
+            CourseHomeTab.DATES -> datesTabClickedEvent()
+            CourseHomeTab.MORE -> moreTabClickedEvent()
         }
     }
 
@@ -336,8 +360,8 @@ class CourseContainerViewModel(
         logCourseContainerEvent(CourseAnalyticsEvent.DATES_TAB)
     }
 
-    private fun handoutsTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticsEvent.HANDOUTS_TAB)
+    private fun moreTabClickedEvent() {
+        logCourseContainerEvent(CourseAnalyticsEvent.MORE_TAB)
     }
 
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {

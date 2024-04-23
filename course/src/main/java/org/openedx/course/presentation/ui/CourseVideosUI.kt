@@ -42,7 +42,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -70,7 +69,6 @@ import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.VideoQualityType
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -90,10 +88,9 @@ fun CourseVideosScreen(
     windowSize: WindowSize,
     courseVideoViewModel: CourseVideoViewModel,
     fragmentManager: FragmentManager,
-    courseRouter: CourseRouter,
-    onReloadClick: () -> Unit
+    courseRouter: CourseRouter
 ) {
-    val uiState by courseVideoViewModel.uiState.observeAsState(CourseVideosUIState.Loading)
+    val uiState by courseVideoViewModel.uiState.collectAsState(CourseVideosUIState.Loading)
     val uiMessage by courseVideoViewModel.uiMessage.collectAsState(null)
     val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
     val context = LocalContext.current
@@ -104,9 +101,7 @@ fun CourseVideosScreen(
         uiMessage = uiMessage,
         courseTitle = courseVideoViewModel.courseTitle,
         isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
-        hasInternetConnection = courseVideoViewModel.hasInternetConnection,
         videoSettings = videoSettings,
-        onReloadClick = onReloadClick,
         onItemClick = { block ->
             courseRouter.navigateToCourseSubsections(
                 fm = fragmentManager,
@@ -190,21 +185,16 @@ fun CourseVideosScreen(
     uiMessage: UIMessage?,
     courseTitle: String,
     isCourseNestedListEnabled: Boolean,
-    hasInternetConnection: Boolean,
     videoSettings: VideoSettings,
     onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
-    onReloadClick: () -> Unit,
     onDownloadClick: (Block) -> Unit,
     onDownloadAllClick: (Boolean) -> Unit,
     onDownloadQueueClick: () -> Unit,
     onVideoDownloadQualityClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
-    var isInternetConnectionShown by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     Scaffold(
         modifier = Modifier
@@ -304,7 +294,6 @@ fun CourseVideosScreen(
                                                 onDownloadAllClick = { isSwitched ->
                                                     if (isSwitched) {
                                                         isDeleteDownloadsConfirmationShowed = true
-
                                                     } else {
                                                         onDownloadAllClick(false)
                                                     }
@@ -317,10 +306,8 @@ fun CourseVideosScreen(
 
                                     if (isCourseNestedListEnabled) {
                                         uiState.courseStructure.blockData.forEach { section ->
-                                            val courseSubSections =
-                                                uiState.courseSubSections[section.id]
-                                            val courseSectionsState =
-                                                uiState.courseSectionsState[section.id]
+                                            val courseSubSections = uiState.courseSubSections[section.id]
+                                            val courseSectionsState = uiState.courseSectionsState[section.id]
 
                                             item {
                                                 Column {
@@ -406,20 +393,6 @@ fun CourseVideosScreen(
 
                             CourseVideosUIState.Loading -> {}
                         }
-                    }
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
-                            }
-                        )
                     }
                 }
             }
@@ -739,7 +712,7 @@ private fun CourseVideosScreenPreview() {
                     isAllBlocksDownloadedOrDownloading = false,
                     remainingCount = 0,
                     remainingSize = 0,
-                    allCount = 0,
+                    allCount = 1,
                     allSize = 0
                 )
             ),
@@ -748,9 +721,7 @@ private fun CourseVideosScreenPreview() {
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
-            hasInternetConnection = true,
             videoSettings = VideoSettings.default,
-            onReloadClick = {},
             onDownloadClick = {},
             onDownloadAllClick = {},
             onDownloadQueueClick = {},
@@ -775,8 +746,6 @@ private fun CourseVideosScreenEmptyPreview() {
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
-            onReloadClick = {},
-            hasInternetConnection = true,
             videoSettings = VideoSettings.default,
             onDownloadClick = {},
             onDownloadAllClick = {},
@@ -813,8 +782,6 @@ private fun CourseVideosScreenTabletPreview() {
             onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
-            onReloadClick = {},
-            hasInternetConnection = true,
             videoSettings = VideoSettings.default,
             onDownloadClick = {},
             onDownloadAllClick = {},

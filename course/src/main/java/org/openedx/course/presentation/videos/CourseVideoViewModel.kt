@@ -1,11 +1,10 @@
 package org.openedx.course.presentation.videos
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -51,17 +50,11 @@ class CourseVideoViewModel(
     coreAnalytics
 ) {
 
-    val apiHostUrl get() = config.getApiHostURL()
-
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
-    private val _uiState = MutableLiveData<CourseVideosUIState>()
-    val uiState: LiveData<CourseVideosUIState>
-        get() = _uiState
-
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
+    private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
+    val uiState: StateFlow<CourseVideosUIState>
+        get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
@@ -69,9 +62,6 @@ class CourseVideoViewModel(
 
     private val _videoSettings = MutableStateFlow(VideoSettings.default)
     val videoSettings = _videoSettings.asStateFlow()
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
@@ -145,13 +135,8 @@ class CourseVideoViewModel(
         super.saveAllDownloadModels(folder)
     }
 
-    fun setIsUpdating() {
-        _isUpdating.value = true
-    }
-
     private fun updateVideos() {
         getVideos()
-        _isUpdating.value = false
     }
 
     fun getVideos() {
