@@ -29,7 +29,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -82,6 +81,7 @@ import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.ToolbarWithSettings
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -245,32 +245,10 @@ internal fun MyCoursesScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = contentWidth
-            ) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .testTag("txt_dashboard_title"),
-                    text = stringResource(id = R.string.dashboard_title),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 12.dp),
-                    onClick = { onSettingsClick() }
-                ) {
-                    Icon(
-                        painter = painterResource(id = CoreR.drawable.core_ic_settings),
-                        tint = MaterialTheme.appColors.primary,
-                        contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
-                    )
-                }
-            }
+            ToolbarWithSettings(
+                title = stringResource(id = R.string.dashboard_title),
+                onSettingsClick = onSettingsClick
+            )
 
             Surface(
                 color = MaterialTheme.appColors.background,

@@ -193,7 +193,7 @@ private fun AnothersProfileScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ProfileTopic(
-                            image = if (uiState.account.profileImage.hasImage) uiState.account.profileImage.imageUrlFull else null,
+                            image = uiState.account.profileImage.imageUrlFull,
                             title = uiState.account.name,
                             subtitle = uiState.account.username
                         )

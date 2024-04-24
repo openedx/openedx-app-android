@@ -71,6 +71,8 @@ private val DarkColorPalette = AppColors(
     componentHorizontalProgressCompleted = dark_component_horizontal_progress_completed,
     componentHorizontalProgressSelected = dark_component_horizontal_progress_selected,
     componentHorizontalProgressDefault = dark_component_horizontal_progress_default,
+
+    settingsTitleContent = dark_settings_title_content
 )
 
 private val LightColorPalette = AppColors(
@@ -134,6 +136,8 @@ private val LightColorPalette = AppColors(
     componentHorizontalProgressCompleted = light_component_horizontal_progress_completed,
     componentHorizontalProgressSelected = light_component_horizontal_progress_selected,
     componentHorizontalProgressDefault = light_component_horizontal_progress_default,
+
+    settingsTitleContent = light_settings_title_content
 )
 
 val MaterialTheme.appColors: AppColors

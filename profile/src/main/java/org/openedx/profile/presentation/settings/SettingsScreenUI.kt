@@ -114,8 +114,8 @@ internal fun SettingsScreen(
                 .displayCutoutForLandscape(),
             label = stringResource(id = R.string.core_settings),
             canShowBackBtn = true,
-            titleTint = Color.White,
-            iconTint = Color.White,
+            labelTint = MaterialTheme.appColors.settingsTitleContent,
+            iconTint = MaterialTheme.appColors.settingsTitleContent,
             onBackClick = onBackClick
         )
 

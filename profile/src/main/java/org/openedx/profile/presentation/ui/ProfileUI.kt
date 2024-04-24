@@ -34,19 +34,14 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.R as ProfileR
 
 @Composable
-fun ProfileTopic(image: String?, title: String, subtitle: String) {
+fun ProfileTopic(image: String, title: String, subtitle: String) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val profileImage = if (!image.isNullOrEmpty()) {
-            image
-        } else {
-            R.drawable.core_ic_default_profile_picture
-        }
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(profileImage)
+                .data(image)
                 .error(R.drawable.core_ic_default_profile_picture)
                 .placeholder(R.drawable.core_ic_default_profile_picture)
                 .build(),
@@ -135,7 +130,7 @@ val mockAccount = Account(
     languageProficiencies = emptyList(),
     gender = "male",
     mailingAddress = "",
-    "",
+    "example@email.com",
     null,
     accountPrivacy = Account.Privacy.ALL_USERS
 )

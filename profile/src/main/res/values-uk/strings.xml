@@ -26,7 +26,6 @@
     <string name="profile_delete_your_account">видалити свій акаунт?</string>
     <string name="profile_confirm_action">Для підтвердження цієї дії потрібно ввести пароль вашого акаунту</string>
     <string name="profile_yes_delete_account">Так, видалити акаунт</string>
-    <string name="profile_back_to_profile">Назад до профілю</string>
     <string name="profile_password_is_incorrect">Пароль невірний. Будь ласка, спробуйте знову.</string>
     <string name="profile_invalid_password">Пароль занадто короткий</string>
     <string name="profile_leave_profile">Покинути профіль?</string>

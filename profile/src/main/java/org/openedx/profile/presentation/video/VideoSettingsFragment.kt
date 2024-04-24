@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
@@ -173,8 +172,8 @@ private fun VideoSettingsScreen(
                         .displayCutoutForLandscape(),
                     label = stringResource(id = R.string.profile_video),
                     canShowBackBtn = true,
-                    titleTint = Color.White,
-                    iconTint = Color.White,
+                    labelTint = MaterialTheme.appColors.settingsTitleContent,
+                    iconTint = MaterialTheme.appColors.settingsTitleContent,
                     onBackClick = onBackClick
                 )
 

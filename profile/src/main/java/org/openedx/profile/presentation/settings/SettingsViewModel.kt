@@ -3,12 +3,13 @@ package org.openedx.profile.presentation.settings
 import android.content.Context
 import androidx.compose.ui.text.intl.Locale
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,21 +45,20 @@ class SettingsViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier
 ) : BaseViewModel() {
 
-    private val _uiState: MutableStateFlow<SettingsUIState> =
-        MutableStateFlow(SettingsUIState.Data(configuration))
+    private val _uiState: MutableStateFlow<SettingsUIState> = MutableStateFlow(SettingsUIState.Data(configuration))
     internal val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
 
-    private val _successLogout = MutableLiveData<Boolean>()
-    val successLogout: LiveData<Boolean>
-        get() = _successLogout
+    private val _successLogout = MutableSharedFlow<Boolean>()
+    val successLogout: SharedFlow<Boolean>
+        get() = _successLogout.asSharedFlow()
 
-    private val _uiMessage = MutableLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
-    private val _appUpgradeEvent = MutableLiveData<AppUpgradeEvent?>()
-    val appUpgradeEvent: LiveData<AppUpgradeEvent?>
-        get() = _appUpgradeEvent
+    private val _appUpgradeEvent = MutableStateFlow<AppUpgradeEvent?>(null)
+    val appUpgradeEvent: StateFlow<AppUpgradeEvent?>
+        get() = _appUpgradeEvent.asStateFlow()
 
     private val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
@@ -90,15 +90,13 @@ class SettingsViewModel(
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             } finally {
                 cookieManager.clearWebViewCookie()
-                _successLogout.value = true
+                _successLogout.emit(true)
             }
         }
     }

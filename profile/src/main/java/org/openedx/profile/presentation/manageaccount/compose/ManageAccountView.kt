@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -121,8 +120,8 @@ internal fun ManageAccountView(
                         .displayCutoutForLandscape(),
                     label = stringResource(id = R.string.core_manage_account),
                     canShowBackBtn = true,
-                    titleTint = Color.White,
-                    iconTint = Color.White,
+                    labelTint = MaterialTheme.appColors.settingsTitleContent,
+                    iconTint = MaterialTheme.appColors.settingsTitleContent,
                     onBackClick = {
                         onAction(ManageAccountViewAction.BackClick)
                     }
@@ -164,7 +163,7 @@ internal fun ManageAccountView(
                                 ) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     ProfileTopic(
-                                        image = if (uiState.account.profileImage.hasImage) uiState.account.profileImage.imageUrlFull else null,
+                                        image = uiState.account.profileImage.imageUrlFull,
                                         title = uiState.account.name,
                                         subtitle = uiState.account.email ?: ""
                                     )

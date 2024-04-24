@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -28,8 +27,8 @@ class SettingsFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val uiState by viewModel.uiState.collectAsState()
-                val logoutSuccess by viewModel.successLogout.observeAsState(false)
-                val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
+                val logoutSuccess by viewModel.successLogout.collectAsState(false)
+                val appUpgradeEvent by viewModel.appUpgradeEvent.collectAsState(null)
 
                 SettingsScreen(
                     windowSize = windowSize,

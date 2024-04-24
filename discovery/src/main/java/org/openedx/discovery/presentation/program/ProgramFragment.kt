@@ -47,7 +47,7 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.ToolbarWithSettings
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -179,6 +179,9 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                             }
                         }
                     },
+                    onSettingsClick = {
+                        viewModel.navigateToSettings(requireActivity().supportFragmentManager)
+                    },
                     refreshSessionCookie = {
                         viewModel.refreshCookie()
                     },
@@ -221,6 +224,7 @@ private fun ProgramInfoScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageLoaded: () -> Unit,
+    onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
     refreshSessionCookie: () -> Unit = {},
@@ -265,10 +269,11 @@ private fun ProgramInfoScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Toolbar(
-                label = stringResource(id = R.string.discovery_programs),
-                canShowBackBtn = canShowBackBtn,
-                onBackClick = onBackClick
+            ToolbarWithSettings(
+                title = stringResource(id = R.string.discovery_programs),
+                showBackBtn = canShowBackBtn,
+                onBackClick = onBackClick,
+                onSettingsClick = onSettingsClick
             )
 
             Surface {
@@ -339,6 +344,7 @@ fun MyProgramsPreview() {
             checkInternetConnection = {},
             onBackClick = {},
             onWebPageLoaded = {},
+            onSettingsClick = {},
             onUriClick = { _, _ -> },
         )
     }

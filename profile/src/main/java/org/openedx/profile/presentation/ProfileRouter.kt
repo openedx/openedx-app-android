@@ -13,8 +13,12 @@ interface ProfileRouter {
     fun navigateToSettings(fm: FragmentManager)
 
     fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
+
     fun navigateToVideoSettings(fm: FragmentManager)
+
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
+
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
+
     fun navigateToManageAccount(fm: FragmentManager)
 }

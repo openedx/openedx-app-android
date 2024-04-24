@@ -5,22 +5,18 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.manageaccount.compose.ManageAccountView
 import org.openedx.profile.presentation.manageaccount.compose.ManageAccountViewAction
 
 class ManageAccountFragment : Fragment() {
 
     private val viewModel: ManageAccountViewModel by viewModel()
-    private val router by inject<ProfileRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +33,8 @@ class ManageAccountFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val uiState by viewModel.uiState.collectAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val refreshing by viewModel.isUpdating.observeAsState(false)
+                val uiMessage by viewModel.uiMessage.collectAsState(null)
+                val refreshing by viewModel.isUpdating.collectAsState(false)
 
                 ManageAccountView(
                     windowSize = windowSize,
@@ -60,7 +56,7 @@ class ManageAccountFragment : Fragment() {
                             }
                             ManageAccountViewAction.DeleteAccount -> {
                                 viewModel.profileDeleteAccountClickedEvent()
-                                router.navigateToDeleteAccount(
+                                viewModel.profileRouter.navigateToDeleteAccount(
                                     requireActivity().supportFragmentManager
                                 )
                             }

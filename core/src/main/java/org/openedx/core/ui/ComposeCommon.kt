@@ -146,7 +146,7 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
-    titleTint: Color = MaterialTheme.appColors.textPrimary,
+    labelTint: Color = MaterialTheme.appColors.textPrimary,
     iconTint: Color = MaterialTheme.appColors.textPrimary,
     onBackClick: () -> Unit = {},
 ) {
@@ -169,12 +169,49 @@ fun Toolbar(
                 .align(Alignment.Center)
                 .padding(horizontal = 48.dp),
             text = label,
-            color = titleTint,
+            color = labelTint,
             style = MaterialTheme.appTypography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )
+    }
+}
+
+@Composable
+fun ToolbarWithSettings(
+    title: String,
+    showBackBtn: Boolean = false,
+    onBackClick: () -> Unit = {},
+    onSettingsClick: () -> Unit,
+) {
+    Box {
+        if (showBackBtn) {
+            BackBtn(
+                onBackClick = onBackClick
+            )
+        }
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
+            text = title,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.titleMedium
+        )
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 12.dp),
+            onClick = { onSettingsClick() }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.core_ic_settings),
+                tint = MaterialTheme.appColors.primary,
+                contentDescription = stringResource(id = R.string.core_accessibility_settings)
+            )
+        }
     }
 }
 
@@ -1090,7 +1127,7 @@ fun BackBtn(
         onClick = { onBackClick() }) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),
-            contentDescription = "back",
+            contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
             tint = tint
         )
     }

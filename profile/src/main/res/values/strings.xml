@@ -21,7 +21,6 @@
     <string name="profile_delete_your_account">delete your account?</string>
     <string name="profile_confirm_action">To confirm this action, please enter your account password.</string>
     <string name="profile_yes_delete_account">Yes, delete account</string>
-    <string name="profile_back_to_profile">Back to profile</string>
     <string name="profile_password_is_incorrect">The password is incorrect. Please try again.</string>
     <string name="profile_invalid_password">Password is too short</string>
     <string name="profile_done">Done</string>

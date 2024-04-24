@@ -52,7 +52,7 @@ class VideoSettingsViewModel(
         preferencesManager.videoSettings = currentSettings.copy(wifiDownloadOnly = value)
         _videoSettings.value = preferencesManager.videoSettings
         logProfileEvent(
-           ProfileAnalyticsEvent.WIFI_TOGGLE,
+            ProfileAnalyticsEvent.WIFI_TOGGLE,
             buildMap {
                 put(
                     ProfileAnalyticsKey.ACTION.key,

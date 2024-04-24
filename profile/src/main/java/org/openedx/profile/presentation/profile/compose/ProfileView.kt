@@ -15,12 +15,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -32,12 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -46,13 +40,13 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.ToolbarWithSettings
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.presentation.profile.ProfileUIState
 import org.openedx.profile.presentation.ui.ProfileInfoSection
@@ -95,16 +89,6 @@ internal fun ProfileView(
             )
         }
 
-        val topBarWidth by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-                    compact = Modifier
-                        .fillMaxWidth()
-                )
-            )
-        }
-
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Column(
@@ -114,35 +98,11 @@ internal fun ProfileView(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = topBarWidth,
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_profile_title")
-                        .fillMaxWidth(),
-                    text = stringResource(id = R.string.core_profile),
-                    color = MaterialTheme.appColors.textPrimary,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
+            ToolbarWithSettings(
+                title = stringResource(id = R.string.core_profile),
+                onSettingsClick = onSettingsClick
+            )
 
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 12.dp),
-                    onClick = {
-                        onSettingsClick()
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.core_ic_settings),
-                        tint = MaterialTheme.appColors.primary,
-                        contentDescription = stringResource(id = R.string.core_accessibility_settings)
-                    )
-                }
-            }
             Surface(
                 color = MaterialTheme.appColors.background
             ) {
@@ -176,7 +136,7 @@ internal fun ProfileView(
                                 ) {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     ProfileTopic(
-                                        image = if (uiState.account.profileImage.hasImage) uiState.account.profileImage.imageUrlFull else null,
+                                        image = uiState.account.profileImage.imageUrlFull,
                                         title = uiState.account.name,
                                         subtitle = "@${uiState.account.username}"
                                     )

@@ -147,13 +147,13 @@ val screenModule = module {
             router = get(),
         )
     }
-    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
+    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { ManageAccountViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
 
     single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }

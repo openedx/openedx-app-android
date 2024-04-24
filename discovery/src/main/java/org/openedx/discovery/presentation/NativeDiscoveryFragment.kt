@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -24,8 +23,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -49,11 +46,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -74,6 +69,7 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
+import org.openedx.core.ui.ToolbarWithSettings
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -85,7 +81,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
-import org.openedx.core.R as CoreR
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
 
@@ -325,32 +320,11 @@ internal fun DiscoveryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Box(
-                    modifier = contentWidth
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Center)
-                            .testTag("txt_discovery_title"),
-                        text = stringResource(id = R.string.discovery_Discovery),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.appColors.textPrimary,
-                        style = MaterialTheme.appTypography.titleMedium
-                    )
-                    IconButton(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 12.dp),
-                        onClick = { onSettingsClick() }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = CoreR.drawable.core_ic_settings),
-                            tint = MaterialTheme.appColors.primary,
-                            contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
-                        )
-                    }
-                }
+                ToolbarWithSettings(
+                    title = stringResource(id = R.string.discovery_Discovery),
+                    onSettingsClick = onSettingsClick
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
                 StaticSearchBar(
                     modifier = Modifier
