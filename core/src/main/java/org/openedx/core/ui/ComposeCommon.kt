@@ -2,12 +2,15 @@ package org.openedx.core.ui
 
 import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +24,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,6 +46,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -45,6 +55,7 @@ import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,6 +71,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -88,6 +100,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
@@ -1161,6 +1174,79 @@ fun AuthButtonsPanel(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun RoundTabs(
+    modifier: Modifier = Modifier,
+    items: List<TabItem>,
+    pagerState: PagerState,
+    rowState: LazyListState = rememberLazyListState(),
+    onPageChange: (Int) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val windowSize = rememberWindowSize()
+    val horizontalPadding = if (!windowSize.isTablet) {
+        12.dp
+    } else {
+        98.dp
+    }
+    LazyRow(
+        modifier = modifier,
+        state = rowState,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
+    ) {
+        itemsIndexed(items) { index, item ->
+            val backgroundColor = if (pagerState.currentPage == index) {
+                MaterialTheme.appColors.primary
+            } else {
+                MaterialTheme.appColors.tabUnselectedBtnBackground
+            }
+            val contentColor = if (pagerState.currentPage == index) {
+                Color.White
+            } else {
+                MaterialTheme.appColors.tabUnselectedBtnContent
+            }
+            val border = if (isSystemInDarkTheme()) {
+                Modifier
+            } else {
+                Modifier.border(
+                    1.dp,
+                    MaterialTheme.appColors.primary,
+                    CircleShape
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .height(40.dp)
+                    .clip(CircleShape)
+                    .background(backgroundColor)
+                    .clickable {
+                        scope.launch {
+                            pagerState.scrollToPage(index)
+                            onPageChange(index)
+                        }
+                    }
+                        then (border)
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = rememberVectorPainter(item.icon),
+                    tint = contentColor,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(item.title),
+                    color = contentColor
+                )
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun StaticSearchBarPreview() {
@@ -1236,6 +1322,25 @@ private fun ConnectionErrorViewPreview() {
             modifier = Modifier
                 .fillMaxSize(),
             onReloadClick = {}
+        )
+    }
+}
+
+val mockTab = object : TabItem {
+    override val title: Int = R.string.app_name
+    override val icon: ImageVector = Icons.Default.AccountCircle
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Preview
+@Composable
+private fun RoundTabsPreview() {
+    OpenEdXTheme {
+        RoundTabs(
+            items = listOf(mockTab, mockTab, mockTab),
+            rowState = rememberLazyListState(),
+            pagerState = rememberPagerState(pageCount = { 3 }),
+            onPageChange = { }
         )
     }
 }

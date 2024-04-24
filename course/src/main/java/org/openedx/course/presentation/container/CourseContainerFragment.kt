@@ -51,6 +51,7 @@ import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.RoundTabs
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -258,7 +259,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 )
                             },
                             navigation = {
-                                CourseHomeTabs(
+                                RoundTabs(
+                                    items = CourseHomeTab.entries,
                                     rowState = tabState,
                                     pagerState = pagerState,
                                     onPageChange = viewModel::courseContainerTabClickedEvent
