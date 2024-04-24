@@ -9,7 +9,7 @@ import org.openedx.course.presentation.unit.html.HtmlUnitFragment
 import org.openedx.course.presentation.unit.video.VideoUnitFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
-import org.openedx.discussion.presentation.topics.DiscussionTopic
+import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 
 class CourseUnitContainerAdapter(
     fragment: Fragment,
@@ -57,7 +57,7 @@ class CourseUnitContainerAdapter(
 
             (block.isDiscussionBlock && block.studentViewData?.topicId.isNullOrEmpty().not()) -> {
                 DiscussionThreadsFragment.newInstance(
-                    DiscussionTopic.TOPIC,
+                    DiscussionTopicsViewModel.TOPIC,
                     viewModel.courseId,
                     block.studentViewData?.topicId ?: "",
                     block.displayName,

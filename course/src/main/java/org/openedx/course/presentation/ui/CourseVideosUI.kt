@@ -95,7 +95,7 @@ fun CourseVideosScreen(
     val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
     val context = LocalContext.current
 
-    CourseVideosScreen(
+    CourseVideosUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
@@ -179,7 +179,7 @@ fun CourseVideosScreen(
 }
 
 @Composable
-fun CourseVideosScreen(
+private fun CourseVideosUI(
     windowSize: WindowSize,
     uiState: CourseVideosUIState,
     uiMessage: UIMessage?,
@@ -699,7 +699,7 @@ private fun AllVideosDownloadItem(
 @Composable
 private fun CourseVideosScreenPreview() {
     OpenEdXTheme {
-        CourseVideosScreen(
+        CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
             uiState = CourseVideosUIState.CourseData(
@@ -735,7 +735,7 @@ private fun CourseVideosScreenPreview() {
 @Composable
 private fun CourseVideosScreenEmptyPreview() {
     OpenEdXTheme {
-        CourseVideosScreen(
+        CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
             uiState = CourseVideosUIState.Empty(
@@ -760,7 +760,7 @@ private fun CourseVideosScreenEmptyPreview() {
 @Composable
 private fun CourseVideosScreenTabletPreview() {
     OpenEdXTheme {
-        CourseVideosScreen(
+        CourseVideosUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiMessage = null,
             uiState = CourseVideosUIState.CourseData(

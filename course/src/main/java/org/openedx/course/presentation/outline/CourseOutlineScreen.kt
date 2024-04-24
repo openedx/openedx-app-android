@@ -28,7 +28,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -73,15 +72,6 @@ import java.io.File
 import java.util.Date
 import org.openedx.course.R as CourseR
 
-fun getUnitBlockIcon(block: Block): Int {
-    return when (block.type) {
-        BlockType.VIDEO -> CourseR.drawable.ic_course_video
-        BlockType.PROBLEM -> CourseR.drawable.ic_course_pen
-        BlockType.DISCUSSION -> CourseR.drawable.ic_course_discussion
-        else -> CourseR.drawable.ic_course_block
-    }
-}
-
 @Composable
 fun CourseOutlineScreen(
     windowSize: WindowSize,
@@ -90,11 +80,11 @@ fun CourseOutlineScreen(
     fragmentManager: FragmentManager,
     onResetDatesClick: () -> Unit
 ) {
-    val uiState by courseOutlineViewModel.uiState.observeAsState(CourseOutlineUIState.Loading)
+    val uiState by courseOutlineViewModel.uiState.collectAsState()
     val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
     val context = LocalContext.current
 
-    CourseOutlineScreen(
+    CourseOutlineUI(
         windowSize = windowSize,
         uiState = uiState,
         isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
@@ -187,7 +177,7 @@ fun CourseOutlineScreen(
 }
 
 @Composable
-internal fun CourseOutlineScreen(
+private fun CourseOutlineUI(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
     isCourseNestedListEnabled: Boolean,
@@ -488,12 +478,21 @@ private fun ResumeCourseTablet(
     }
 }
 
+fun getUnitBlockIcon(block: Block): Int {
+    return when (block.type) {
+        BlockType.VIDEO -> CourseR.drawable.ic_course_video
+        BlockType.PROBLEM -> CourseR.drawable.ic_course_pen
+        BlockType.DISCUSSION -> CourseR.drawable.ic_course_discussion
+        else -> CourseR.drawable.ic_course_block
+    }
+}
+
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun CourseOutlineScreenPreview() {
     OpenEdXTheme {
-        CourseOutlineScreen(
+        CourseOutlineUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CourseOutlineUIState.CourseData(
                 mockCourseStructure,
@@ -528,7 +527,7 @@ private fun CourseOutlineScreenPreview() {
 @Composable
 private fun CourseOutlineScreenTabletPreview() {
     OpenEdXTheme {
-        CourseOutlineScreen(
+        CourseOutlineUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = CourseOutlineUIState.CourseData(
                 mockCourseStructure,

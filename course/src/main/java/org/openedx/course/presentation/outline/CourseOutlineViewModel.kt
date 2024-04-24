@@ -1,11 +1,12 @@
 package org.openedx.course.presentation.outline
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
@@ -28,6 +29,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -39,7 +41,7 @@ import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
-    val courseTitle: String,
+    private val courseTitle: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -59,9 +61,9 @@ class CourseOutlineViewModel(
 ) {
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
-    private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
-    val uiState: LiveData<CourseOutlineUIState>
-        get() = _uiState
+    private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
+    val uiState: StateFlow<CourseOutlineUIState>
+        get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
@@ -126,7 +128,9 @@ class CourseOutlineViewModel(
     }
 
     fun getCourseData() {
-        _uiState.value = CourseOutlineUIState.Loading
+        viewModelScope.launch {
+            notifier.send(CourseLoading(true))
+        }
         getCourseDataInternal()
     }
 
@@ -201,6 +205,7 @@ class CourseOutlineViewModel(
                     subSectionsDownloadsCount = subSectionsDownloadsCount,
                     datesBannerInfo = datesBannerInfo,
                 )
+                notifier.send(CourseLoading(false))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))

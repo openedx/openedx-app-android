@@ -31,6 +31,7 @@ import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseDatesShifted
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.utils.TimeUtils
@@ -43,6 +44,7 @@ import org.openedx.course.presentation.CalendarSyncSnackbar
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -63,10 +65,9 @@ class CourseContainerViewModel(
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
     private val courseAnalytics: CourseAnalytics,
-    private val imageProcessor: ImageProcessor
+    private val imageProcessor: ImageProcessor,
+    val courseRouter: CourseRouter
 ) : BaseViewModel() {
-
-    var organization: String = ""
 
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>
@@ -91,6 +92,10 @@ class CourseContainerViewModel(
     private var _isSelfPaced: Boolean = true
     val isSelfPaced: Boolean
         get() = _isSelfPaced
+
+    private var _organization: String = ""
+    val organization: String
+        get() = _organization
 
     val calendarPermissions: Array<String>
         get() = calendarManager.permissions
@@ -135,6 +140,10 @@ class CourseContainerViewModel(
                 if (event is CourseDatesShifted) {
                     _uiMessage.emit(DatesShiftedSnackBar())
                 }
+
+                if (event is CourseLoading) {
+                    _showProgress.value = event.isLoading
+                }
             }
         }
     }
@@ -155,22 +164,9 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
-                organization = courseStructure.org
+                _organization = courseStructure.org
                 _isSelfPaced = courseStructure.isSelfPaced
-                imageProcessor.loadImage(
-                    imageUrl = config.getApiHostURL() + courseStructure.media?.image?.large,
-                    defaultImage = CoreR.drawable.core_no_image_course,
-                    onComplete = { drawable ->
-                        val bitmap = (drawable as BitmapDrawable).bitmap.apply {
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                imageProcessor.applyBlur(this@apply, 10f)
-                            }
-                        }
-                        viewModelScope.launch {
-                            _courseImage.emit(bitmap)
-                        }
-                    }
-                )
+                loadCourseImage(courseStructure.media?.image?.large)
                 _dataReady.value = courseStructure.start?.let { start ->
                     start < Date()
                 }
@@ -183,8 +179,24 @@ class CourseContainerViewModel(
                         resourceManager.getString(CoreR.string.core_error_unknown_error)
                 }
             }
-            _showProgress.value = false
         }
+    }
+
+    private fun loadCourseImage(imageUrl: String?) {
+        imageProcessor.loadImage(
+            imageUrl = config.getApiHostURL() + imageUrl,
+            defaultImage = CoreR.drawable.core_no_image_course,
+            onComplete = { drawable ->
+                val bitmap = (drawable as BitmapDrawable).bitmap.apply {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        imageProcessor.applyBlur(this@apply, 10f)
+                    }
+                }
+                viewModelScope.launch {
+                    _courseImage.emit(bitmap)
+                }
+            }
+        )
     }
 
     fun showRefreshIndicator() {

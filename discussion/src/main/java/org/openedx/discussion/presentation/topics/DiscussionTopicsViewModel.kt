@@ -14,11 +14,13 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
+import org.openedx.discussion.presentation.DiscussionRouter
 
 class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
+    val discussionRouter: DiscussionRouter,
     val courseId: String,
     val courseName: String
 ) : BaseViewModel() {
@@ -50,7 +52,7 @@ class DiscussionTopicsViewModel(
         }
     }
 
-    fun getCourseTopics() {
+    private fun getCourseTopics() {
         _uiState.value = DiscussionTopicsUIState.Loading
         getCourseTopicsInternal()
     }
@@ -72,17 +74,23 @@ class DiscussionTopicsViewModel(
 
     fun discussionClickedEvent(action: String, data: String, title: String) {
         when (action) {
-            DiscussionTopic.ALL_POSTS -> {
+            ALL_POSTS -> {
                 analytics.discussionAllPostsClickedEvent(courseId, courseName)
             }
 
-            DiscussionTopic.FOLLOWING_POSTS -> {
+            FOLLOWING_POSTS -> {
                 analytics.discussionFollowingClickedEvent(courseId, courseName)
             }
 
-            DiscussionTopic.TOPIC -> {
+            TOPIC -> {
                 analytics.discussionTopicClickedEvent(courseId, courseName, data, title)
             }
         }
+    }
+
+    companion object DiscussionTopic {
+        const val TOPIC = "Topic"
+        const val ALL_POSTS = "All posts"
+        const val FOLLOWING_POSTS = "Following"
     }
 }

@@ -74,6 +74,7 @@ private val DarkColorPalette = AppColors(
 
     tabUnselectedBtnBackground = dark_tab_unselected_btn_background,
     tabUnselectedBtnContent = dark_tab_unselected_btn_content,
+    tabSelectedBtnContent = dark_tab_selected_btn_content,
     courseHomeHeaderShade = dark_course_home_header_shade,
     courseHomeBackBtnBackground = dark_course_home_back_btn_background
 )
@@ -142,6 +143,7 @@ private val LightColorPalette = AppColors(
 
     tabUnselectedBtnBackground = light_tab_unselected_btn_background,
     tabUnselectedBtnContent = light_tab_unselected_btn_content,
+    tabSelectedBtnContent = light_tab_selected_btn_content,
     courseHomeHeaderShade = light_course_home_header_shade,
     courseHomeBackBtnBackground = light_course_home_back_btn_background
 )

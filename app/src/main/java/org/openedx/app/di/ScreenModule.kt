@@ -195,6 +195,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -310,6 +311,7 @@ val screenModule = module {
     factory { DiscussionInteractor(get()) }
     viewModel { (courseId: String, courseName: String) ->
         DiscussionTopicsViewModel(
+            get(),
             get(),
             get(),
             get(),

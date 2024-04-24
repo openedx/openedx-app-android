@@ -1185,11 +1185,7 @@ fun RoundTabs(
 ) {
     val scope = rememberCoroutineScope()
     val windowSize = rememberWindowSize()
-    val horizontalPadding = if (!windowSize.isTablet) {
-        12.dp
-    } else {
-        98.dp
-    }
+    val horizontalPadding = if (!windowSize.isTablet) 12.dp else 98.dp
     LazyRow(
         modifier = modifier,
         state = rowState,
@@ -1197,53 +1193,58 @@ fun RoundTabs(
         contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
     ) {
         itemsIndexed(items) { index, item ->
-            val backgroundColor = if (pagerState.currentPage == index) {
-                MaterialTheme.appColors.primary
-            } else {
-                MaterialTheme.appColors.tabUnselectedBtnBackground
-            }
-            val contentColor = if (pagerState.currentPage == index) {
-                Color.White
-            } else {
-                MaterialTheme.appColors.tabUnselectedBtnContent
-            }
-            val border = if (isSystemInDarkTheme()) {
-                Modifier
-            } else {
-                Modifier.border(
-                    1.dp,
-                    MaterialTheme.appColors.primary,
-                    CircleShape
-                )
-            }
-            Row(
+            val isSelected = pagerState.currentPage == index
+            val backgroundColor =
+                if (isSelected) MaterialTheme.appColors.primary else MaterialTheme.appColors.tabUnselectedBtnBackground
+            val contentColor =
+                if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
+            val border = if (!isSystemInDarkTheme()) Modifier.border(
+                1.dp,
+                MaterialTheme.appColors.primary,
+                CircleShape
+            ) else Modifier
+
+            RoundTab(
                 modifier = Modifier
                     .height(40.dp)
                     .clip(CircleShape)
                     .background(backgroundColor)
+                    .then(border)
                     .clickable {
                         scope.launch {
                             pagerState.scrollToPage(index)
                             onPageChange(index)
                         }
                     }
-                        then (border)
                     .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = rememberVectorPainter(item.icon),
-                    tint = contentColor,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = stringResource(item.title),
-                    color = contentColor
-                )
-            }
+                item = item,
+                contentColor = contentColor
+            )
         }
+    }
+}
+
+@Composable
+private fun RoundTab(
+    modifier: Modifier = Modifier,
+    item: TabItem,
+    contentColor: Color
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = rememberVectorPainter(item.icon),
+            tint = contentColor,
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = stringResource(item.title),
+            color = contentColor
+        )
     }
 }
 

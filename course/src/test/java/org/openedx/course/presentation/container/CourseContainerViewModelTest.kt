@@ -39,6 +39,7 @@ import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import java.net.UnknownHostException
 import java.util.Date
@@ -62,6 +63,7 @@ class CourseContainerViewModelTest {
     private val coursePreferences = mockk<CoursePreferences>()
     private val mockBitmap = mockk<Bitmap>()
     private val imageProcessor = mockk<ImageProcessor>()
+    private val courseRouter = mockk<CourseRouter>()
 
     private val openEdx = "OpenEdx"
     private val calendarTitle = "OpenEdx - Abc"
@@ -141,7 +143,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
@@ -173,7 +176,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
@@ -205,7 +209,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
@@ -237,7 +242,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.preloadCourseStructureFromCache(any()) } returns Unit
@@ -270,7 +276,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
@@ -299,7 +306,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
@@ -328,7 +336,8 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
-            imageProcessor
+            imageProcessor,
+            courseRouter
         )
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
         coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit

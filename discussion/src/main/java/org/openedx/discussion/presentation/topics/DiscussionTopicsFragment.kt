@@ -53,12 +53,6 @@ import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
 import org.openedx.discussion.R as discussionR
 
-object DiscussionTopic {
-    const val TOPIC = "Topic"
-    const val ALL_POSTS = "All posts"
-    const val FOLLOWING_POSTS = "Following"
-}
-
 @Composable
 fun DiscussionTopicsScreen(
     windowSize: WindowSize,
@@ -69,7 +63,7 @@ fun DiscussionTopicsScreen(
     val uiState by discussionTopicsViewModel.uiState.observeAsState(DiscussionTopicsUIState.Loading)
     val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
 
-    DiscussionTopicsScreen(
+    DiscussionTopicsUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
@@ -79,7 +73,7 @@ fun DiscussionTopicsScreen(
 }
 
 @Composable
-private fun DiscussionTopicsScreen(
+private fun DiscussionTopicsUI(
     windowSize: WindowSize,
     uiState: DiscussionTopicsUIState,
     uiMessage: UIMessage?,
@@ -191,7 +185,7 @@ private fun DiscussionTopicsScreen(
                                                         .height(categoriesHeight),
                                                     onClick = {
                                                         onItemClick(
-                                                            DiscussionTopic.ALL_POSTS,
+                                                            DiscussionTopicsViewModel.ALL_POSTS,
                                                             "",
                                                             context.getString(discussionR.string.discussion_all_posts)
                                                         )
@@ -204,7 +198,7 @@ private fun DiscussionTopicsScreen(
                                                         .height(categoriesHeight),
                                                     onClick = {
                                                         onItemClick(
-                                                            DiscussionTopic.FOLLOWING_POSTS,
+                                                            DiscussionTopicsViewModel.FOLLOWING_POSTS,
                                                             "",
                                                             context.getString(discussionR.string.discussion_posts_following)
                                                         )
@@ -224,7 +218,7 @@ private fun DiscussionTopicsScreen(
                                             } else {
                                                 TopicItem(topic = topic, onClick = { id, title ->
                                                     onItemClick(
-                                                        DiscussionTopic.TOPIC,
+                                                        DiscussionTopicsViewModel.TOPIC,
                                                         id,
                                                         title
                                                     )
@@ -254,7 +248,7 @@ private fun DiscussionTopicsScreen(
 @Composable
 private fun DiscussionTopicsScreenPreview() {
     OpenEdXTheme {
-        DiscussionTopicsScreen(
+        DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
@@ -269,7 +263,7 @@ private fun DiscussionTopicsScreenPreview() {
 @Composable
 private fun DiscussionTopicsScreenTabletPreview() {
     OpenEdXTheme {
-        DiscussionTopicsScreen(
+        DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,

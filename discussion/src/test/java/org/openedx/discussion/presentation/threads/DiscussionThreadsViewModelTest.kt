@@ -32,7 +32,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.domain.model.ThreadsData
-import org.openedx.discussion.presentation.topics.DiscussionTopic
+import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
@@ -127,7 +127,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.ALL_POSTS
+            DiscussionTopicsViewModel.ALL_POSTS
         )
         advanceUntilIdle()
 
@@ -147,7 +147,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.ALL_POSTS
+            DiscussionTopicsViewModel.ALL_POSTS
         )
         coEvery { interactor.getAllThreads(any(), any(), any(), any()) } throws Exception()
         advanceUntilIdle()
@@ -178,7 +178,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.ALL_POSTS
+            DiscussionTopicsViewModel.ALL_POSTS
         )
         advanceUntilIdle()
 
@@ -206,7 +206,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.FOLLOWING_POSTS
+            DiscussionTopicsViewModel.FOLLOWING_POSTS
         )
         advanceUntilIdle()
 
@@ -226,7 +226,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.FOLLOWING_POSTS
+            DiscussionTopicsViewModel.FOLLOWING_POSTS
         )
         coEvery {
             interactor.getFollowingThreads(
@@ -281,7 +281,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.FOLLOWING_POSTS
+            DiscussionTopicsViewModel.FOLLOWING_POSTS
         )
         advanceUntilIdle()
 
@@ -309,7 +309,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         advanceUntilIdle()
 
@@ -329,7 +329,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } throws Exception()
         advanceUntilIdle()
@@ -360,7 +360,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         advanceUntilIdle()
 
@@ -379,7 +379,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } returns ThreadsData(
             threads,
@@ -399,7 +399,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } returns ThreadsData(
             threads,
@@ -419,7 +419,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         coEvery { interactor.getThreads(any(), any(), any(), any(), any()) } returns ThreadsData(
             threads,
@@ -449,7 +449,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
         viewModel.updateThread("")
         advanceUntilIdle()
@@ -485,7 +485,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
 
 
@@ -524,7 +524,7 @@ class DiscussionThreadsViewModelTest {
             notifier,
             "",
             "",
-            DiscussionTopic.TOPIC
+            DiscussionTopicsViewModel.TOPIC
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

@@ -106,7 +106,7 @@ fun CourseDatesScreen(
     val calendarSyncUIState by courseDatesViewModel.calendarSyncUIState.collectAsState()
     val context = LocalContext.current
 
-    CourseDatesScreen(
+    CourseDatesUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
@@ -176,7 +176,7 @@ fun CourseDatesScreen(
 }
 
 @Composable
-internal fun CourseDatesScreen(
+private fun CourseDatesUI(
     windowSize: WindowSize,
     uiState: DatesUIState,
     uiMessage: UIMessage?,
@@ -639,7 +639,7 @@ private fun CourseDateItem(
 @Composable
 private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(
+        CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
@@ -658,7 +658,7 @@ private fun CourseDatesScreenPreview() {
 @Composable
 private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(
+        CourseDatesUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,

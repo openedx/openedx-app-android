@@ -5,8 +5,10 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -43,7 +46,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.FragmentViewType
@@ -58,7 +60,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialog
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.dates.CourseDatesScreen
@@ -70,7 +71,6 @@ import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.course.presentation.videos.CourseVideoViewModel
-import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 
@@ -78,8 +78,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private val binding by viewBinding(FragmentCourseContainerBinding::bind)
 
-    private val courseRouter by inject<CourseRouter>()
-    private val discussionRouter by inject<DiscussionRouter>()
+    private var isNavigationEnabled = false
 
     private val viewModel by viewModel<CourseContainerViewModel> {
         parametersOf(
@@ -89,7 +88,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         )
     }
 
-    private val discussionTopicsViewModel by viewModel<DiscussionTopicsViewModel> {
+    private val courseOutlineViewModel by viewModel<CourseOutlineViewModel> {
+        parametersOf(
+            requireArguments().getString(ARG_COURSE_ID, ""),
+            requireArguments().getString(ARG_TITLE, "")
+        )
+    }
+
+    private val courseVideoViewModel by viewModel<CourseVideoViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_TITLE, "")
@@ -104,14 +110,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         )
     }
 
-    private val courseVideoViewModel by viewModel<CourseVideoViewModel> {
-        parametersOf(
-            requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_TITLE, "")
-        )
-    }
-
-    private val courseOutlineViewModel by viewModel<CourseOutlineViewModel> {
+    private val discussionTopicsViewModel by viewModel<DiscussionTopicsViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_TITLE, "")
@@ -155,8 +154,9 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 courseOutlineViewModel.getCourseData()
                 courseDatesViewModel.isSelfPaced = viewModel.isSelfPaced
                 courseDatesViewModel.updateAndFetchCalendarSyncState()
+                isNavigationEnabled = true
             } else {
-                courseRouter.navigateToNoAccess(
+                viewModel.courseRouter.navigateToNoAccess(
                     requireActivity().supportFragmentManager,
                     viewModel.courseName
                 )
@@ -259,26 +259,31 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                 )
                             },
                             navigation = {
-                                RoundTabs(
-                                    items = CourseHomeTab.entries,
-                                    rowState = tabState,
-                                    pagerState = pagerState,
-                                    onPageChange = viewModel::courseContainerTabClickedEvent
-                                )
+                                if (isNavigationEnabled) {
+                                    RoundTabs(
+                                        items = CourseHomeTab.entries,
+                                        rowState = tabState,
+                                        pagerState = pagerState,
+                                        onPageChange = viewModel::courseContainerTabClickedEvent
+                                    )
+                                } else {
+                                    Spacer(modifier = Modifier.height(52.dp))
+                                }
                             },
                             onBackClick = {
                                 requireActivity().supportFragmentManager.popBackStack()
                             },
                             bodyContent = {
                                 HorizontalPager(
-                                    state = pagerState
+                                    state = pagerState,
+                                    userScrollEnabled = isNavigationEnabled
                                 ) { page ->
                                     when (CourseHomeTab.entries[page]) {
                                         CourseHomeTab.HOME -> {
                                             CourseOutlineScreen(
                                                 windowSize = windowSize,
                                                 courseOutlineViewModel = courseOutlineViewModel,
-                                                courseRouter = courseRouter,
+                                                courseRouter = viewModel.courseRouter,
                                                 fragmentManager = requireActivity().supportFragmentManager,
                                                 onResetDatesClick = {
                                                     courseOutlineViewModel.resetCourseDatesBanner(onResetDates = {
@@ -293,7 +298,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                 windowSize = windowSize,
                                                 courseVideoViewModel = courseVideoViewModel,
                                                 fragmentManager = requireActivity().supportFragmentManager,
-                                                courseRouter = courseRouter,
+                                                courseRouter = viewModel.courseRouter,
                                             )
                                         }
 
@@ -301,7 +306,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             CourseDatesScreen(
                                                 windowSize = windowSize,
                                                 courseDatesViewModel = courseDatesViewModel,
-                                                courseRouter = courseRouter,
+                                                courseRouter = viewModel.courseRouter,
                                                 fragmentManager = requireActivity().supportFragmentManager,
                                                 isFragmentResumed = isResumed,
                                                 updateCourseStructure = {
@@ -320,7 +325,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                         data,
                                                         title
                                                     )
-                                                    discussionRouter.navigateToDiscussionThread(
+                                                    discussionTopicsViewModel.discussionRouter.navigateToDiscussionThread(
                                                         requireActivity().supportFragmentManager,
                                                         action,
                                                         discussionTopicsViewModel.courseId,
@@ -330,7 +335,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                     )
                                                 },
                                                 onSearchClick = {
-                                                    discussionRouter.navigateToSearchThread(
+                                                    discussionTopicsViewModel.discussionRouter.navigateToSearchThread(
                                                         requireActivity().supportFragmentManager,
                                                         discussionTopicsViewModel.courseId
                                                     )
@@ -341,7 +346,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             HandoutsScreen(
                                                 windowSize = windowSize,
                                                 onHandoutsClick = {
-                                                    courseRouter.navigateToHandoutsWebView(
+                                                    viewModel.courseRouter.navigateToHandoutsWebView(
                                                         requireActivity().supportFragmentManager,
                                                         requireArguments().getString(ARG_COURSE_ID, ""),
                                                         getString(R.string.course_handouts),
@@ -349,7 +354,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                     )
                                                 },
                                                 onAnnouncementsClick = {
-                                                    courseRouter.navigateToHandoutsWebView(
+                                                    viewModel.courseRouter.navigateToHandoutsWebView(
                                                         requireActivity().supportFragmentManager,
                                                         requireArguments().getString(ARG_COURSE_ID, ""),
                                                         getString(R.string.course_announcements),

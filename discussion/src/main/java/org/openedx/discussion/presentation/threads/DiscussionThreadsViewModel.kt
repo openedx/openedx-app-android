@@ -12,7 +12,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.presentation.topics.DiscussionTopic
+import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
@@ -101,15 +101,15 @@ class DiscussionThreadsViewModel(
         }
         lastOrderBy = orderBy
         when (threadType) {
-            DiscussionTopic.ALL_POSTS -> {
+            DiscussionTopicsViewModel.ALL_POSTS -> {
                 getAllThreads(orderBy)
             }
 
-            DiscussionTopic.FOLLOWING_POSTS -> {
+            DiscussionTopicsViewModel.FOLLOWING_POSTS -> {
                 getFollowingThreads(orderBy)
             }
 
-            DiscussionTopic.TOPIC -> {
+            DiscussionTopicsViewModel.TOPIC -> {
                 getThreads(
                     topicId,
                     orderBy
@@ -129,15 +129,15 @@ class DiscussionThreadsViewModel(
             filter
         }
         when (threadType) {
-            DiscussionTopic.ALL_POSTS -> {
+            DiscussionTopicsViewModel.ALL_POSTS -> {
                 getAllThreads(lastOrderBy)
             }
 
-            DiscussionTopic.FOLLOWING_POSTS -> {
+            DiscussionTopicsViewModel.FOLLOWING_POSTS -> {
                 getFollowingThreads(lastOrderBy)
             }
 
-            DiscussionTopic.TOPIC -> {
+            DiscussionTopicsViewModel.TOPIC -> {
                 getThreads(
                     topicId,
                     lastOrderBy

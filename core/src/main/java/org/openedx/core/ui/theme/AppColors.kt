@@ -54,6 +54,7 @@ data class AppColors(
 
     val tabUnselectedBtnBackground: Color,
     val tabUnselectedBtnContent: Color,
+    val tabSelectedBtnContent: Color,
     val courseHomeHeaderShade: Color,
     val courseHomeBackBtnBackground: Color
 ) {
