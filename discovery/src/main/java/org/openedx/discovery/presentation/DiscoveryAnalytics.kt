@@ -10,7 +10,7 @@ interface DiscoveryAnalytics {
 enum class DiscoveryAnalyticsEvent(val eventName: String, val biValue: String) {
     COURSE_INFO(
         "Discovery:Course Info",
-        "edx.bi.app.course.info"
+        "edx.bi.app.discovery.course_info"
     ),
     PROGRAM_INFO(
         "Discovery:Program Info",

@@ -39,7 +39,7 @@ enum class CoreAnalyticsKey(val key: String) {
     NAME("name"),
     CATEGORY("category"),
     DISCOVERY("discovery"),
-    VIDEOS("video"),
+    VIDEOS("videos"),
     PROFILE("profile"),
     URL("url"),
     ACTION("action"),
