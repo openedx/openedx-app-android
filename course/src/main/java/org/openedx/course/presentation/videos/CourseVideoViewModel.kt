@@ -20,6 +20,7 @@ import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.VideoNotifier
@@ -163,6 +164,7 @@ class CourseVideoViewModel(
                         courseSectionsState, subSectionsDownloadsCount, getDownloadModelsSize()
                     )
             }
+            courseNotifier.send(CourseLoading(false))
         }
     }
 

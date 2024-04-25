@@ -123,7 +123,7 @@ class CourseContainerViewModel(
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is CourseCompletionSet) {
-                    updateData(false)
+                    updateData()
                 }
 
                 if (event is CreateCalendarSyncEvent) {
@@ -143,6 +143,9 @@ class CourseContainerViewModel(
 
                 if (event is CourseLoading) {
                     _showProgress.value = event.isLoading
+                    if (!event.isLoading) {
+                        _refreshing.value = false
+                    }
                 }
             }
         }
@@ -203,7 +206,11 @@ class CourseContainerViewModel(
         _refreshing.value = true
     }
 
-    fun updateData(withSwipeRefresh: Boolean) {
+    fun hideRefreshIndicator() {
+        _refreshing.value = false
+    }
+
+    fun updateData() {
         viewModelScope.launch {
             try {
                 interactor.preloadCourseStructure(courseId)
@@ -217,17 +224,17 @@ class CourseContainerViewModel(
                 }
             }
             _refreshing.value = false
-            notifier.send(CourseStructureUpdated(courseId, withSwipeRefresh))
+            notifier.send(CourseStructureUpdated(courseId))
         }
     }
 
     fun courseContainerTabClickedEvent(index: Int) {
-        when (CourseHomeTab.entries[index]) {
-            CourseHomeTab.HOME -> courseTabClickedEvent()
-            CourseHomeTab.VIDEOS -> videoTabClickedEvent()
-            CourseHomeTab.DISCUSSIONS -> discussionTabClickedEvent()
-            CourseHomeTab.DATES -> datesTabClickedEvent()
-            CourseHomeTab.MORE -> moreTabClickedEvent()
+        when (CourseContainerTab.entries[index]) {
+            CourseContainerTab.HOME -> courseTabClickedEvent()
+            CourseContainerTab.VIDEOS -> videoTabClickedEvent()
+            CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
+            CourseContainerTab.DATES -> datesTabClickedEvent()
+            CourseContainerTab.MORE -> moreTabClickedEvent()
         }
     }
 

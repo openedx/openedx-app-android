@@ -1176,7 +1176,7 @@ fun AuthButtonsPanel(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RoundTabs(
+fun RoundTabsBar(
     modifier: Modifier = Modifier,
     items: List<TabItem>,
     pagerState: PagerState,
@@ -1242,7 +1242,7 @@ private fun RoundTab(
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = stringResource(item.title),
+            text = stringResource(item.labelResId),
             color = contentColor
         )
     }
@@ -1328,16 +1328,16 @@ private fun ConnectionErrorViewPreview() {
 }
 
 val mockTab = object : TabItem {
-    override val title: Int = R.string.app_name
+    override val labelResId: Int = R.string.app_name
     override val icon: ImageVector = Icons.Default.AccountCircle
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
-private fun RoundTabsPreview() {
+private fun RoundTabsBarPreview() {
     OpenEdXTheme {
-        RoundTabs(
+        RoundTabsBar(
             items = listOf(mockTab, mockTab, mockTab),
             rowState = rememberLazyListState(),
             pagerState = rememberPagerState(pageCount = { 3 }),

@@ -242,7 +242,7 @@ class CourseVideoViewModelTest {
     fun `updateVideos success`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure
-        coEvery { courseNotifier.notifier } returns flow { emit(CourseStructureUpdated("", false)) }
+        coEvery { courseNotifier.notifier } returns flow { emit(CourseStructureUpdated("")) }
         every { downloadDao.readAllData() } returns flow {
             repeat(5) {
                 delay(10000)
@@ -282,21 +282,6 @@ class CourseVideoViewModelTest {
     fun `setIsUpdating success`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
-        val viewModel = CourseVideoViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            networkConnection,
-            preferencesManager,
-            courseNotifier,
-            videoNotifier,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
         coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         advanceUntilIdle()

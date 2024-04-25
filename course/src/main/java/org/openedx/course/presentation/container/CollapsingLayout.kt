@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.openedx.core.ui.RoundTabs
+import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
@@ -744,8 +744,8 @@ private fun CollapsingLayoutPreview() {
                 )
             },
             navigation = {
-                RoundTabs(
-                    items = CourseHomeTab.entries,
+                RoundTabsBar(
+                    items = CourseContainerTab.entries,
                     rowState = rememberLazyListState(),
                     pagerState = rememberPagerState(pageCount = { 5 }),
                     onPageChange = { }

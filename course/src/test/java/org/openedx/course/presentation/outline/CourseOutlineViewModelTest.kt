@@ -441,7 +441,7 @@ class CourseOutlineViewModelTest {
             downloadDao,
             workerController
         )
-        coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("", false)) }
+        coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("")) }
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")

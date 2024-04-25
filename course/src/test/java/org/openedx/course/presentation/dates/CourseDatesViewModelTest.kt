@@ -39,6 +39,7 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -147,6 +148,7 @@ class CourseDatesViewModelTest {
         every { notifier.notifier } returns emptyFlow()
         every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
         coEvery { notifier.send(any<CreateCalendarSyncEvent>()) } returns Unit
+        coEvery { notifier.send(any<CourseLoading>()) } returns Unit
     }
 
     @After

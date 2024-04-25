@@ -53,7 +53,7 @@ import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.RoundTabs
+import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -179,24 +179,26 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private fun onRefresh(currentPage: Int) {
         viewModel.showRefreshIndicator()
-        when (CourseHomeTab.entries[currentPage]) {
-            CourseHomeTab.HOME -> {
-                updateCourseStructure(false)
+        when (CourseContainerTab.entries[currentPage]) {
+            CourseContainerTab.HOME -> {
+                updateCourseStructure()
             }
 
-            CourseHomeTab.VIDEOS -> {
-                updateCourseStructure(false)
+            CourseContainerTab.VIDEOS -> {
+                updateCourseStructure()
             }
 
-            CourseHomeTab.DATES -> {
+            CourseContainerTab.DATES -> {
                 courseDatesViewModel.getCourseDates()
             }
 
-            CourseHomeTab.DISCUSSIONS -> {
+            CourseContainerTab.DISCUSSIONS -> {
                 discussionTopicsViewModel.updateCourseTopics()
             }
 
-            else -> {}
+            else -> {
+                viewModel.hideRefreshIndicator()
+            }
         }
     }
 
@@ -217,7 +219,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     val refreshing by viewModel.refreshing.collectAsState(true)
                     val courseImage by viewModel.courseImage.collectAsState()
                     val uiMessage by viewModel.uiMessage.collectAsState(null)
-                    val pagerState = rememberPagerState(pageCount = { CourseHomeTab.entries.size })
+                    val pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
                     val tabState = rememberLazyListState()
                     val snackState = remember { SnackbarHostState() }
                     val pullRefreshState = rememberPullRefreshState(
@@ -260,8 +262,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                             },
                             navigation = {
                                 if (isNavigationEnabled) {
-                                    RoundTabs(
-                                        items = CourseHomeTab.entries,
+                                    RoundTabsBar(
+                                        items = CourseContainerTab.entries,
                                         rowState = tabState,
                                         pagerState = pagerState,
                                         onPageChange = viewModel::courseContainerTabClickedEvent
@@ -278,8 +280,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                     state = pagerState,
                                     userScrollEnabled = isNavigationEnabled
                                 ) { page ->
-                                    when (CourseHomeTab.entries[page]) {
-                                        CourseHomeTab.HOME -> {
+                                    when (CourseContainerTab.entries[page]) {
+                                        CourseContainerTab.HOME -> {
                                             CourseOutlineScreen(
                                                 windowSize = windowSize,
                                                 courseOutlineViewModel = courseOutlineViewModel,
@@ -293,7 +295,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             )
                                         }
 
-                                        CourseHomeTab.VIDEOS -> {
+                                        CourseContainerTab.VIDEOS -> {
                                             CourseVideosScreen(
                                                 windowSize = windowSize,
                                                 courseVideoViewModel = courseVideoViewModel,
@@ -302,7 +304,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                             )
                                         }
 
-                                        CourseHomeTab.DATES -> {
+                                        CourseContainerTab.DATES -> {
                                             CourseDatesScreen(
                                                 windowSize = windowSize,
                                                 courseDatesViewModel = courseDatesViewModel,
@@ -310,12 +312,12 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                 fragmentManager = requireActivity().supportFragmentManager,
                                                 isFragmentResumed = isResumed,
                                                 updateCourseStructure = {
-                                                    updateCourseStructure(false)
+                                                    updateCourseStructure()
                                                 }
                                             )
                                         }
 
-                                        CourseHomeTab.DISCUSSIONS -> {
+                                        CourseContainerTab.DISCUSSIONS -> {
                                             DiscussionTopicsScreen(
                                                 windowSize = windowSize,
                                                 discussionTopicsViewModel = discussionTopicsViewModel,
@@ -342,7 +344,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                                 })
                                         }
 
-                                        CourseHomeTab.MORE -> {
+                                        CourseContainerTab.MORE -> {
                                             HandoutsScreen(
                                                 windowSize = windowSize,
                                                 onHandoutsClick = {
@@ -395,7 +397,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                             hostState = snackState
                         ) { snackbarData: SnackbarData ->
                             DatesShiftedSnackBar(
-                                showAction = true,
+                                showAction = CourseContainerTab.entries[pagerState.currentPage] != CourseContainerTab.DATES,
                                 onViewDates = {
                                     scrollToDates(scope, pagerState)
                                 },
@@ -500,8 +502,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 
-    private fun updateCourseStructure(withSwipeRefresh: Boolean) {
-        viewModel.updateData(withSwipeRefresh)
+    private fun updateCourseStructure() {
+        viewModel.updateData()
     }
 
     private fun updateCourseDates() {
@@ -511,7 +513,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     @OptIn(ExperimentalFoundationApi::class)
     private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
         scope.launch {
-            pagerState.animateScrollToPage(CourseHomeTab.entries.indexOf(CourseHomeTab.DATES))
+            pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.DATES))
         }
     }
 

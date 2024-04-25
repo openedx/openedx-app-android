@@ -280,8 +280,8 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
-        coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
-        viewModel.updateData(false)
+        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        viewModel.updateData()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
@@ -310,8 +310,8 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
-        coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
-        viewModel.updateData(false)
+        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        viewModel.updateData()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
@@ -340,8 +340,8 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         coEvery { interactor.preloadCourseStructure(any()) } returns Unit
-        coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
-        viewModel.updateData(false)
+        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        viewModel.updateData()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }

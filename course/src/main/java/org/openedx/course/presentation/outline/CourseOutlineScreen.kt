@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
-import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -62,6 +61,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
@@ -70,7 +70,7 @@ import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
 import java.io.File
 import java.util.Date
-import org.openedx.course.R as CourseR
+import org.openedx.core.R as CoreR
 
 @Composable
 fun CourseOutlineScreen(
@@ -162,7 +162,7 @@ fun CourseOutlineScreen(
                     context.externalCacheDir.toString() +
                             File.separator +
                             context
-                                .getString(R.string.app_name)
+                                .getString(CoreR.string.app_name)
                                 .replace(Regex("\\s"), "_"), it.id
                 )
             }
@@ -378,7 +378,7 @@ private fun ResumeCourse(
         modifier = modifier.fillMaxWidth()
     ) {
         Text(
-            text = stringResource(id = org.openedx.course.R.string.course_continue_with),
+            text = stringResource(id = R.string.course_continue_with),
             style = MaterialTheme.appTypography.labelMedium,
             color = MaterialTheme.appColors.textPrimaryVariant
         )
@@ -403,14 +403,14 @@ private fun ResumeCourse(
         }
         Spacer(Modifier.height(24.dp))
         OpenEdXButton(
-            text = stringResource(id = org.openedx.course.R.string.course_resume),
+            text = stringResource(id = R.string.course_resume),
             onClick = {
                 onResumeClick(block.id)
             },
             content = {
                 TextIcon(
-                    text = stringResource(id = org.openedx.course.R.string.course_resume),
-                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    text = stringResource(id = R.string.course_resume),
+                    painter = painterResource(id = CoreR.drawable.core_ic_forward),
                     color = MaterialTheme.appColors.buttonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
@@ -436,7 +436,7 @@ private fun ResumeCourseTablet(
                 .padding(end = 35.dp)
         ) {
             Text(
-                text = stringResource(id = org.openedx.course.R.string.course_continue_with),
+                text = stringResource(id = R.string.course_continue_with),
                 style = MaterialTheme.appTypography.labelMedium,
                 color = MaterialTheme.appColors.textPrimaryVariant
             )
@@ -462,14 +462,14 @@ private fun ResumeCourseTablet(
         }
         OpenEdXButton(
             modifier = Modifier.width(210.dp),
-            text = stringResource(id = org.openedx.course.R.string.course_resume),
+            text = stringResource(id = R.string.course_resume),
             onClick = {
                 onResumeClick(block.id)
             },
             content = {
                 TextIcon(
-                    text = stringResource(id = org.openedx.course.R.string.course_resume),
-                    painter = painterResource(id = R.drawable.core_ic_forward),
+                    text = stringResource(id = R.string.course_resume),
+                    painter = painterResource(id = CoreR.drawable.core_ic_forward),
                     color = MaterialTheme.appColors.buttonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
@@ -480,10 +480,10 @@ private fun ResumeCourseTablet(
 
 fun getUnitBlockIcon(block: Block): Int {
     return when (block.type) {
-        BlockType.VIDEO -> CourseR.drawable.ic_course_video
-        BlockType.PROBLEM -> CourseR.drawable.ic_course_pen
-        BlockType.DISCUSSION -> CourseR.drawable.ic_course_discussion
-        else -> CourseR.drawable.ic_course_block
+        BlockType.VIDEO -> R.drawable.ic_course_video
+        BlockType.PROBLEM -> R.drawable.ic_course_pen
+        BlockType.DISCUSSION -> R.drawable.ic_course_discussion
+        else -> R.drawable.ic_course_block
     }
 }
 

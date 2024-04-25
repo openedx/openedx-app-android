@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.openedx.core
 
 import android.content.Context

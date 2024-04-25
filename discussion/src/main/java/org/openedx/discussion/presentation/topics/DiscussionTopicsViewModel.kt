@@ -12,6 +12,8 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.notifier.CourseLoading
+import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
@@ -20,6 +22,7 @@ class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
+    private val notifier: CourseNotifier,
     val discussionRouter: DiscussionRouter,
     val courseId: String,
     val courseName: String
@@ -48,6 +51,8 @@ class DiscussionTopicsViewModel(
                 } else {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
+            } finally {
+                notifier.send(CourseLoading(false))
             }
         }
     }
