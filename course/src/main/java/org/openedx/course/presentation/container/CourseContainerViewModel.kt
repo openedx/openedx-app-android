@@ -218,10 +218,10 @@ class CourseContainerViewModel(
             updateCalendarSyncState()
 
             if (updatedEvent) {
-                logCalendarSyncSnackbar(CalendarSyncSnackbar.UPDATE)
+                logCalendarSyncSnackbar(CalendarSyncSnackbar.UPDATED)
                 setUiMessage(R.string.course_snackbar_course_calendar_updated)
             } else if (coursePreferences.isCalendarSyncEventsDialogShown(courseName)) {
-                logCalendarSyncSnackbar(CalendarSyncSnackbar.ADD)
+                logCalendarSyncSnackbar(CalendarSyncSnackbar.ADDED)
                 setUiMessage(R.string.course_snackbar_course_calendar_added)
             } else {
                 coursePreferences.setCalendarSyncEventsDialogShown(courseName)
@@ -265,7 +265,7 @@ class CourseContainerViewModel(
                 updateCalendarSyncState()
 
             }
-            logCalendarSyncSnackbar(CalendarSyncSnackbar.REMOVE)
+            logCalendarSyncSnackbar(CalendarSyncSnackbar.REMOVED)
             setUiMessage(R.string.course_snackbar_course_calendar_removed)
         }
     }
@@ -379,7 +379,11 @@ class CourseContainerViewModel(
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)
                 put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
-                put(CourseAnalyticsKey.PACING.key, isSelfPaced)
+                put(
+                    CourseAnalyticsKey.PACING.key,
+                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
+                    else CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                )
                 putAll(param)
             }
         )

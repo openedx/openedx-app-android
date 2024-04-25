@@ -305,7 +305,15 @@ val screenModule = module {
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), get(), courseId) }
+    viewModel { (courseId: String) ->
+        DiscussionTopicsViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            courseId
+        )
+    }
     viewModel { (courseId: String, topicId: String, threadType: String) ->
         DiscussionThreadsViewModel(
             get(),

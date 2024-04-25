@@ -50,7 +50,7 @@ enum class ProfileAnalyticsEvent(val eventName: String, val biValue: String) {
         "edx.bi.app.profile.delete_account.clicked"
     ),
     USER_DELETE_ACCOUNT_CLICKED(
-        "Profile:User Delete Account Success",
+        "Profile:User Delete Account Clicked",
         "edx.bi.app.profile.user.delete_account.clicked"
     ),
     DELETE_ACCOUNT_SUCCESS(
@@ -80,6 +80,5 @@ enum class ProfileAnalyticsKey(val key: String) {
     LIMITED_PROFILE("limited_profile"),
     SUCCESS("success"),
     FORCE("force"),
-    TRUE("true"),
     FALSE("false"),
 }
