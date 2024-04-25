@@ -9,7 +9,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
@@ -29,9 +28,6 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.ProfileImage
-import org.openedx.core.module.DownloadWorkerController
-import org.openedx.core.presentation.global.AppData
-import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.presentation.ProfileAnalytics
@@ -52,14 +48,8 @@ class ProfileViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<ProfileInteractor>()
     private val notifier = mockk<ProfileNotifier>()
-    private val cookieManager = mockk<AppCookieManager>()
-    private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<ProfileAnalytics>()
     private val router = mockk<ProfileRouter>()
-
-    private val appData = AppData(
-        versionName = "1.0.0",
-    )
 
     private val account = org.openedx.profile.domain.model.Account(
         username = "",
@@ -102,13 +92,9 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection and cache is null`() = runTest {
         val viewModel = ProfileViewModel(
-            config,
             interactor,
             resourceManager,
             notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
             analytics,
             router
         )
@@ -126,13 +112,9 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount no internetConnection and cache is not null`() = runTest {
         val viewModel = ProfileViewModel(
-            config,
             interactor,
             resourceManager,
             notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
             analytics,
             router
         )
@@ -150,13 +132,9 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount unknown exception`() = runTest {
         val viewModel = ProfileViewModel(
-            config,
             interactor,
             resourceManager,
             notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
             analytics,
             router
         )
@@ -174,13 +152,9 @@ class ProfileViewModelTest {
     @Test
     fun `getAccount success`() = runTest {
         val viewModel = ProfileViewModel(
-            config,
             interactor,
             resourceManager,
             notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
             analytics,
             router
         )
@@ -195,100 +169,11 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `logout no internet connection`() = runTest {
-        val viewModel = ProfileViewModel(
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
-            analytics,
-            router
-        )
-        coEvery { interactor.logout() } throws UnknownHostException()
-        coEvery { workerController.removeModels() } returns Unit
-        every { analytics.logEvent(any(), any()) } returns Unit
-        every { cookieManager.clearWebViewCookie() } returns Unit
-        viewModel.logout()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { interactor.logout() }
-
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(noInternet, message?.message)
-        assert(viewModel.successLogout.value == true)
-    }
-
-    @Test
-    fun `logout unknown exception`() = runTest {
-        val viewModel = ProfileViewModel(
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
-            analytics,
-            router
-        )
-        coEvery { interactor.logout() } throws Exception()
-        coEvery { workerController.removeModels() } returns Unit
-        every { analytics.logEvent(any(), any()) } returns Unit
-        every { cookieManager.clearWebViewCookie() } returns Unit
-        viewModel.logout()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { interactor.logout() }
-        verify(exactly = 1) { cookieManager.clearWebViewCookie() }
-        verify { analytics.logEvent(any(), any()) }
-
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-        assertEquals(somethingWrong, message?.message)
-        assert(viewModel.successLogout.value == true)
-    }
-
-    @Test
-    fun `logout success`() = runTest {
-        val viewModel = ProfileViewModel(
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
-            analytics,
-            router
-        )
-        coEvery { interactor.getCachedAccount() } returns mockk()
-        coEvery { interactor.getAccount() } returns mockk()
-        every { analytics.logEvent(any(), any()) } returns Unit
-        coEvery { interactor.logout() } returns Unit
-        coEvery { workerController.removeModels() } returns Unit
-        every { cookieManager.clearWebViewCookie() } returns Unit
-        viewModel.logout()
-        advanceUntilIdle()
-        coVerify(exactly = 1) { interactor.logout() }
-        verify(exactly = 2) { analytics.logEvent(any(), any()) }
-        verify(exactly = 1) { cookieManager.clearWebViewCookie() }
-
-        assert(viewModel.uiMessage.value == null)
-        assert(viewModel.successLogout.value == true)
-    }
-
-    @Test
     fun `AccountUpdated notifier test`() = runTest {
         val viewModel = ProfileViewModel(
-            config,
             interactor,
             resourceManager,
             notifier,
-            dispatcher,
-            cookieManager,
-            workerController,
             analytics,
             router
         )

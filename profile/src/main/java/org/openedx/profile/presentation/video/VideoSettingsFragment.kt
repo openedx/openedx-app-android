@@ -313,4 +313,3 @@ private fun VideoSettingsScreenPreview() {
         )
     }
 }
-

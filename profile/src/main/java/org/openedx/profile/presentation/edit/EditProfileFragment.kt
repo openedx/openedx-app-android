@@ -220,12 +220,6 @@ class EditProfileFragment : Fragment() {
                     onKeepEdit = {
                         viewModel.setShowLeaveDialog(false)
                     },
-                    onDeleteClick = {
-                        viewModel.profileDeleteAccountClickedEvent()
-                        viewModel.profileRouter.navigateToDeleteAccount(
-                            requireActivity().supportFragmentManager
-                        )
-                    },
                     onSelectImageClick = {
                         registerForActivityResult.launch("image/*")
                     },
@@ -327,7 +321,6 @@ private fun EditProfileScreen(
     onLimitedProfileChange: (Boolean) -> Unit,
     onBackClick: (Boolean) -> Unit,
     onSaveClick: (Map<String, Any?>) -> Unit,
-    onDeleteClick: () -> Unit,
     onSelectImageClick: () -> Unit,
     onDeleteImageClick: () -> Unit,
 ) {
@@ -734,15 +727,6 @@ private fun EditProfileScreen(
                                 mapFields = mapFields,
                                 onDoneClick = { onSaveClick(mapFields.toMap()) }
                             )
-                            Spacer(Modifier.height(40.dp))
-                            IconText(
-                                text = stringResource(id = R.string.profile_delete_profile),
-                                painter = painterResource(id = R.drawable.profile_ic_trash),
-                                textStyle = MaterialTheme.appTypography.labelLarge,
-                                color = MaterialTheme.appColors.error,
-                                onClick = {
-                                    onDeleteClick()
-                                })
                             Spacer(Modifier.height(52.dp))
                         }
                         if (openWarningMessageDialog) {
@@ -1310,7 +1294,6 @@ private fun EditProfileScreenPreview() {
             leaveDialog = false,
             onBackClick = {},
             onSaveClick = {},
-            onDeleteClick = {},
             onSelectImageClick = {},
             onDeleteImageClick = {},
             onDataChanged = {},
@@ -1334,7 +1317,6 @@ private fun EditProfileScreenTabletPreview() {
             leaveDialog = false,
             onBackClick = {},
             onSaveClick = {},
-            onDeleteClick = {},
             onSelectImageClick = {},
             onDeleteImageClick = {},
             onDataChanged = {},

@@ -32,6 +32,8 @@ import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.profile.system.notifier.AccountDeactivated
+import org.openedx.profile.system.notifier.ProfileNotifier
 
 class SettingsViewModel(
     private val appData: AppData,
@@ -42,7 +44,8 @@ class SettingsViewModel(
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
     private val router: ProfileRouter,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val profileNotifier: ProfileNotifier,
 ) : BaseViewModel() {
 
     private val _uiState: MutableStateFlow<SettingsUIState> = MutableStateFlow(SettingsUIState.Data(configuration))
@@ -60,7 +63,7 @@ class SettingsViewModel(
     val appUpgradeEvent: StateFlow<AppUpgradeEvent?>
         get() = _appUpgradeEvent.asStateFlow()
 
-    private val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
+    val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
     private val configuration
         get() = Configuration(
@@ -72,6 +75,7 @@ class SettingsViewModel(
 
     init {
         collectAppUpgradeEvent()
+        collectProfileEvent()
     }
 
     fun logout() {
@@ -105,6 +109,16 @@ class SettingsViewModel(
         viewModelScope.launch {
             appUpgradeNotifier.notifier.collect { event ->
                 _appUpgradeEvent.value = event
+            }
+        }
+    }
+
+    private fun collectProfileEvent() {
+        viewModelScope.launch {
+            profileNotifier.notifier.collect {
+                if (it is AccountDeactivated) {
+                    logout()
+                }
             }
         }
     }
@@ -186,7 +200,7 @@ class SettingsViewModel(
             event = event.eventName,
             params = buildMap {
                 put(ProfileAnalyticsKey.NAME.key, event.biValue)
-                put(ProfileAnalyticsKey.CATEGORY.key,ProfileAnalyticsKey.PROFILE.key)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
                 putAll(params)
             }
         )

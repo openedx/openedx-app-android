@@ -146,9 +146,11 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
+    canShowSettingsIcon: Boolean = false,
     labelTint: Color = MaterialTheme.appColors.textPrimary,
     iconTint: Color = MaterialTheme.appColors.textPrimary,
     onBackClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -175,42 +177,20 @@ fun Toolbar(
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )
-    }
-}
 
-@Composable
-fun ToolbarWithSettings(
-    title: String,
-    showBackBtn: Boolean = false,
-    onBackClick: () -> Unit = {},
-    onSettingsClick: () -> Unit,
-) {
-    Box {
-        if (showBackBtn) {
-            BackBtn(
-                onBackClick = onBackClick
-            )
-        }
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center),
-            text = title,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.appColors.textPrimary,
-            style = MaterialTheme.appTypography.titleMedium
-        )
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 12.dp),
-            onClick = { onSettingsClick() }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.core_ic_settings),
-                tint = MaterialTheme.appColors.primary,
-                contentDescription = stringResource(id = R.string.core_accessibility_settings)
-            )
+        if (canShowSettingsIcon) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 12.dp),
+                onClick = { onSettingsClick() }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.core_ic_settings),
+                    tint = MaterialTheme.appColors.primary,
+                    contentDescription = stringResource(id = R.string.core_accessibility_settings)
+                )
+            }
         }
     }
 }

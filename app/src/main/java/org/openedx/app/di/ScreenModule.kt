@@ -136,23 +136,19 @@ val screenModule = module {
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(
-            config = get(),
             interactor = get(),
             resourceManager = get(),
             notifier = get(),
-            dispatcher = get(named("IODispatcher")),
-            cookieManager = get(),
-            workerController = get(),
             analytics = get(),
-            router = get(),
+            profileRouter = get(),
         )
     }
-    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), get(), account) }
+    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
 
     single { CourseRepository(get(), get(), get(), get()) }

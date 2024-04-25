@@ -47,7 +47,7 @@ import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.ToolbarWithSettings
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -269,9 +269,10 @@ private fun ProgramInfoScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ToolbarWithSettings(
-                title = stringResource(id = R.string.discovery_programs),
-                showBackBtn = canShowBackBtn,
+            Toolbar(
+                label = stringResource(id = R.string.discovery_programs),
+                canShowBackBtn = canShowBackBtn,
+                canShowSettingsIcon = !canShowBackBtn,
                 onBackClick = onBackClick,
                 onSettingsClick = onSettingsClick
             )

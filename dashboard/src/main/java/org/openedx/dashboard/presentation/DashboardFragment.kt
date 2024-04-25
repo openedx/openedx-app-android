@@ -81,7 +81,7 @@ import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.ToolbarWithSettings
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -245,8 +245,9 @@ internal fun MyCoursesScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ToolbarWithSettings(
-                title = stringResource(id = R.string.dashboard_title),
+            Toolbar(
+                label = stringResource(id = R.string.dashboard_title),
+                canShowSettingsIcon = true,
                 onSettingsClick = onSettingsClick
             )
 

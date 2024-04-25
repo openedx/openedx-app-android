@@ -24,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -72,13 +73,13 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.profile.ProfileViewModel
+import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.R as profileR
 
 class DeleteProfileFragment : Fragment() {
 
     private val viewModel by viewModel<DeleteProfileViewModel>()
-    private val logoutViewModel by viewModel<ProfileViewModel>()
+    private val logoutViewModel by viewModel<SettingsViewModel>()
     private val router by inject<ProfileRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +99,7 @@ class DeleteProfileFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(DeleteProfileFragmentUIState.Initial)
                 val uiMessage by viewModel.uiMessage.observeAsState()
-                val logoutSuccess by logoutViewModel.successLogout.observeAsState(false)
+                val logoutSuccess by logoutViewModel.successLogout.collectAsState(false)
 
                 DeleteProfileScreen(
                     windowSize = windowSize,

@@ -40,7 +40,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXOutlinedButton
-import org.openedx.core.ui.ToolbarWithSettings
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -98,8 +98,9 @@ internal fun ProfileView(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ToolbarWithSettings(
-                title = stringResource(id = R.string.core_profile),
+            Toolbar(
+                label = stringResource(id = R.string.core_profile),
+                canShowSettingsIcon = true,
                 onSettingsClick = onSettingsClick
             )
 

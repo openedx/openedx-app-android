@@ -31,15 +31,14 @@ class ManageAccountViewModel(
     val profileRouter: ProfileRouter
 ) : BaseViewModel() {
 
-    private val _uiState: MutableStateFlow<ManageAccountUIState> =
-        MutableStateFlow(ManageAccountUIState.Loading)
+    private val _uiState: MutableStateFlow<ManageAccountUIState> = MutableStateFlow(ManageAccountUIState.Loading)
     internal val uiState: StateFlow<ManageAccountUIState> = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private val _isUpdating = MutableStateFlow<Boolean>(false)
+    private val _isUpdating = MutableStateFlow(false)
     val isUpdating: StateFlow<Boolean>
         get() = _isUpdating.asStateFlow()
 

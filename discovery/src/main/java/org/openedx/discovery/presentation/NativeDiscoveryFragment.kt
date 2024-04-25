@@ -69,7 +69,7 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
-import org.openedx.core.ui.ToolbarWithSettings
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -320,8 +320,11 @@ internal fun DiscoveryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                ToolbarWithSettings(
-                    title = stringResource(id = R.string.discovery_Discovery),
+                Toolbar(
+                    label = stringResource(id = R.string.discovery_Discovery),
+                    canShowBackBtn = canShowBackButton,
+                    canShowSettingsIcon = !canShowBackButton,
+                    onBackClick = onBackClick,
                     onSettingsClick = onSettingsClick
                 )
 

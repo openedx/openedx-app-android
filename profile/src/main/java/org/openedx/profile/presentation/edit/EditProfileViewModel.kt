@@ -15,7 +15,6 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
-import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 import java.io.File
@@ -25,7 +24,6 @@ class EditProfileViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val analytics: ProfileAnalytics,
-    val profileRouter: ProfileRouter,
     account: Account,
 ) : BaseViewModel() {
 
@@ -143,10 +141,6 @@ class EditProfileViewModel(
 
     fun profileEditDoneClickedEvent() {
         logProfileEvent(ProfileAnalyticsEvent.EDIT_DONE_CLICKED)
-    }
-
-    fun profileDeleteAccountClickedEvent() {
-        logProfileEvent(ProfileAnalyticsEvent.DELETE_ACCOUNT_CLICKED)
     }
 
     private fun logProfileEvent(
