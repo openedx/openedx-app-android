@@ -26,7 +26,7 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
             event = AppReviewAnalyticsEvent.RATING_DIALOG.eventName,
             params = buildMap {
                 put(AppReviewAnalyticsKey.NAME.key, AppReviewAnalyticsEvent.RATING_DIALOG.biValue)
-                put(AppReviewAnalyticsKey.CATEGORY.key, AppReviewAnalyticsKey.APP_REVIEW.key)
+                put(AppReviewAnalyticsKey.CATEGORY.key, AppReviewAnalyticsKey.APP_REVIEWS.key)
             }
         )
     }
@@ -65,7 +65,7 @@ open class BaseAppReviewDialogFragment : DialogFragment() {
                     AppReviewAnalyticsKey.NAME.key,
                     AppReviewAnalyticsEvent.RATING_DIALOG_ACTION.biValue
                 )
-                put(AppReviewAnalyticsKey.CATEGORY.key, AppReviewAnalyticsKey.APP_REVIEW.key)
+                put(AppReviewAnalyticsKey.CATEGORY.key, AppReviewAnalyticsKey.APP_REVIEWS.key)
                 put(AppReviewAnalyticsKey.ACTION.key, action)
                 rating.nonZero()?.let { put(AppReviewAnalyticsKey.RATING.key, it) }
             }
