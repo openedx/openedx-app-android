@@ -20,6 +20,7 @@ import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -71,9 +72,15 @@ class CourseVideoViewModel(
     init {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
-                if (event is CourseStructureUpdated) {
-                    if (event.courseId == courseId) {
-                        updateVideos()
+                when (event) {
+                    is CourseStructureUpdated -> {
+                        if (event.courseId == courseId) {
+                            updateVideos()
+                        }
+                    }
+
+                    is CourseDataReady -> {
+                        getVideos()
                     }
                 }
             }
@@ -105,8 +112,6 @@ class CourseVideoViewModel(
                 }
             }
         }
-
-        getVideos()
 
         _videoSettings.value = preferencesManager.videoSettings
     }

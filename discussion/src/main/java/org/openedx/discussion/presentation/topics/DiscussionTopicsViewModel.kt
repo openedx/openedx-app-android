@@ -11,9 +11,12 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
@@ -22,11 +25,12 @@ class DiscussionTopicsViewModel(
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     val discussionRouter: DiscussionRouter,
-    val courseId: String,
-    val courseName: String
 ) : BaseViewModel() {
+
+    var courseId: String = ""
+    var courseName: String = ""
 
     private val _uiState = MutableLiveData<DiscussionTopicsUIState>()
     val uiState: LiveData<DiscussionTopicsUIState>
@@ -37,10 +41,10 @@ class DiscussionTopicsViewModel(
         get() = _uiMessage.asSharedFlow()
 
     init {
-        getCourseTopics()
+        collectCourseNotifier()
     }
 
-    fun updateCourseTopics() {
+    private fun updateCourseTopics() {
         viewModelScope.launch {
             try {
                 val response = interactor.getCourseTopics(courseId)
@@ -52,7 +56,7 @@ class DiscussionTopicsViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             } finally {
-                notifier.send(CourseLoading(false))
+                courseNotifier.send(CourseLoading(false))
             }
         }
     }
@@ -89,6 +93,26 @@ class DiscussionTopicsViewModel(
 
             TOPIC -> {
                 analytics.discussionTopicClickedEvent(courseId, courseName, data, title)
+            }
+        }
+    }
+
+    private fun collectCourseNotifier() {
+        viewModelScope.launch {
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CourseDataReady -> {
+                        courseId = event.courseStructure.id
+                        courseName = event.courseStructure.name
+                        updateCourseTopics()
+                    }
+
+                    is CourseRefresh -> {
+                        if (event.courseContainerTab == CourseContainerTab.DISCUSSIONS) {
+                            updateCourseTopics()
+                        }
+                    }
+                }
             }
         }
     }

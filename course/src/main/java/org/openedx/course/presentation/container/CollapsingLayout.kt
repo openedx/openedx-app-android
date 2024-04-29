@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize

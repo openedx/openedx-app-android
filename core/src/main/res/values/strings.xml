@@ -126,4 +126,10 @@
     <string name="core_video_downloaded_subtitle" formatted="false">Videos %d, %s Total</string>
     <string name="core_video_streaming_quality">Video streaming quality</string>
     <string name="core_video_download_quality">Video download quality</string>
+
+    <string name="core_course_container_nav_home">Home</string>
+    <string name="core_course_container_nav_videos">Videos</string>
+    <string name="core_course_container_nav_discussions">Discussions</string>
+    <string name="core_course_container_nav_more">More</string>
+    <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
 </resources>

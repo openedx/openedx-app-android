@@ -167,7 +167,13 @@ fun CourseOutlineScreen(
                 )
             }
         },
-        onResetDatesClick = onResetDatesClick,
+        onResetDatesClick = {
+            courseOutlineViewModel.resetCourseDatesBanner(
+                onResetDates = {
+                    onResetDatesClick()
+                }
+            )
+        },
         onCertificateClick = {
             courseOutlineViewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()

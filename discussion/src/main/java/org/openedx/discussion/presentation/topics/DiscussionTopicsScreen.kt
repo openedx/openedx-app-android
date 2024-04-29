@@ -36,6 +36,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
+import org.koin.androidx.compose.koinViewModel
+import org.openedx.core.FragmentViewType
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.StaticSearchBar
@@ -55,10 +58,9 @@ import org.openedx.discussion.R as discussionR
 
 @Composable
 fun DiscussionTopicsScreen(
+    discussionTopicsViewModel: DiscussionTopicsViewModel = koinViewModel(),
     windowSize: WindowSize,
-    discussionTopicsViewModel: DiscussionTopicsViewModel,
-    onSearchClick: () -> Unit,
-    onItemClick: (String, String, String) -> Unit
+    fragmentManager: FragmentManager
 ) {
     val uiState by discussionTopicsViewModel.uiState.observeAsState(DiscussionTopicsUIState.Loading)
     val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
@@ -67,8 +69,27 @@ fun DiscussionTopicsScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        onSearchClick = onSearchClick,
-        onItemClick = onItemClick
+        onSearchClick = {
+            discussionTopicsViewModel.discussionRouter.navigateToSearchThread(
+                fragmentManager,
+                discussionTopicsViewModel.courseId
+            )
+        },
+        onItemClick = { action, data, title ->
+            discussionTopicsViewModel.discussionClickedEvent(
+                action,
+                data,
+                title
+            )
+            discussionTopicsViewModel.discussionRouter.navigateToDiscussionThread(
+                fragmentManager,
+                action,
+                discussionTopicsViewModel.courseId,
+                data,
+                title,
+                FragmentViewType.FULL_CONTENT
+            )
+        },
     )
 }
 

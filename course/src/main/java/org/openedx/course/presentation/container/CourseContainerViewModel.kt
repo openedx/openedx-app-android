@@ -25,14 +25,17 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
@@ -60,7 +63,7 @@ class CourseContainerViewModel(
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
@@ -121,30 +124,32 @@ class CourseContainerViewModel(
 
     init {
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
-                if (event is CourseCompletionSet) {
-                    updateData()
-                }
-
-                if (event is CreateCalendarSyncEvent) {
-                    _calendarSyncUIState.update {
-                        val dialogType = CalendarSyncDialogType.valueOf(event.dialogType)
-                        it.copy(
-                            courseDates = event.courseDates,
-                            dialogType = dialogType,
-                            checkForOutOfSync = AtomicReference(event.checkOutOfSync)
-                        )
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CourseCompletionSet -> {
+                        updateData()
                     }
-                }
 
-                if (event is CourseDatesShifted) {
-                    _uiMessage.emit(DatesShiftedSnackBar())
-                }
+                    is CreateCalendarSyncEvent -> {
+                        _calendarSyncUIState.update {
+                            val dialogType = CalendarSyncDialogType.valueOf(event.dialogType)
+                            it.copy(
+                                courseDates = event.courseDates,
+                                dialogType = dialogType,
+                                checkForOutOfSync = AtomicReference(event.checkOutOfSync)
+                            )
+                        }
+                    }
 
-                if (event is CourseLoading) {
-                    _showProgress.value = event.isLoading
-                    if (!event.isLoading) {
-                        _refreshing.value = false
+                    is CourseDatesShifted -> {
+                        _uiMessage.emit(DatesShiftedSnackBar())
+                    }
+
+                    is CourseLoading -> {
+                        _showProgress.value = event.isLoading
+                        if (!event.isLoading) {
+                            _refreshing.value = false
+                        }
                     }
                 }
             }
@@ -171,7 +176,11 @@ class CourseContainerViewModel(
                 _isSelfPaced = courseStructure.isSelfPaced
                 loadCourseImage(courseStructure.media?.image?.large)
                 _dataReady.value = courseStructure.start?.let { start ->
-                    start < Date()
+                    val isReady = start < Date()
+                    if (isReady) {
+                        courseNotifier.send(CourseDataReady(courseStructure))
+                    }
+                    isReady
                 }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
@@ -202,12 +211,33 @@ class CourseContainerViewModel(
         )
     }
 
-    fun showRefreshIndicator() {
+    fun onRefresh(courseContainerTab: CourseContainerTab) {
         _refreshing.value = true
-    }
+        when (courseContainerTab) {
+            CourseContainerTab.HOME -> {
+                updateData()
+            }
 
-    fun hideRefreshIndicator() {
-        _refreshing.value = false
+            CourseContainerTab.VIDEOS -> {
+                updateData()
+            }
+
+            CourseContainerTab.DATES -> {
+                viewModelScope.launch {
+                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                }
+            }
+
+            CourseContainerTab.DISCUSSIONS -> {
+                viewModelScope.launch {
+                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                }
+            }
+
+            else -> {
+                _refreshing.value = false
+            }
+        }
     }
 
     fun updateData() {
@@ -224,7 +254,7 @@ class CourseContainerViewModel(
                 }
             }
             _refreshing.value = false
-            notifier.send(CourseStructureUpdated(courseId))
+            courseNotifier.send(CourseStructureUpdated(courseId))
         }
     }
 
@@ -302,7 +332,7 @@ class CourseContainerViewModel(
             val isCalendarSynced = calendarManager.isCalendarExists(
                 calendarTitle = _calendarSyncUIState.value.calendarTitle
             )
-            notifier.send(CheckCalendarSyncEvent(isSynced = isCalendarSynced))
+            courseNotifier.send(CheckCalendarSyncEvent(isSynced = isCalendarSynced))
         }
     }
 

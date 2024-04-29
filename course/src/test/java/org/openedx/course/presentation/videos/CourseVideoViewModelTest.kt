@@ -15,6 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -45,6 +46,7 @@ import org.openedx.core.module.db.FileType
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.VideoNotifier
@@ -169,6 +171,7 @@ class CourseVideoViewModelTest {
         every { resourceManager.getString(R.string.course_can_download_only_with_wifi) } returns cantDownload
         Dispatchers.setMain(dispatcher)
         every { config.getApiHostURL() } returns "http://localhost:8000"
+        every { courseNotifier.notifier } returns flowOf(CourseDataReady(courseStructure))
     }
 
     @After
@@ -242,7 +245,10 @@ class CourseVideoViewModelTest {
     fun `updateVideos success`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
         every { interactor.getCourseStructureForVideos() } returns courseStructure
-        coEvery { courseNotifier.notifier } returns flow { emit(CourseStructureUpdated("")) }
+        coEvery { courseNotifier.notifier } returns flow {
+            emit(CourseStructureUpdated(""))
+            emit(CourseDataReady(courseStructure))
+        }
         every { downloadDao.readAllData() } returns flow {
             repeat(5) {
                 delay(10000)

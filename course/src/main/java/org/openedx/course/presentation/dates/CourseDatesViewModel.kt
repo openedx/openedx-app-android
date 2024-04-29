@@ -22,12 +22,15 @@ import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -38,10 +41,8 @@ import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
-    val courseId: String,
-    var courseName: String,
     private val enrollmentMode: String,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
@@ -50,6 +51,8 @@ class CourseDatesViewModel(
     private val config: Config,
 ) : BaseViewModel() {
 
+    var courseId = ""
+    var courseName = ""
     var isSelfPaced = true
 
     private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)
@@ -75,18 +78,29 @@ class CourseDatesViewModel(
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
     init {
-        getCourseDates()
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
-                if (event is CheckCalendarSyncEvent) {
-                    _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CheckCalendarSyncEvent -> {
+                        _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
+                    }
+
+                    is CourseRefresh -> {
+                        if (event.courseContainerTab == CourseContainerTab.DATES) {
+                            loadingCourseDatesInternal()
+                        }
+                    }
+
+                    is CourseDataReady -> {
+                        courseId = event.courseStructure.id
+                        courseName = event.courseStructure.name
+                        isSelfPaced = event.courseStructure.isSelfPaced
+                        loadingCourseDatesInternal()
+                        updateAndFetchCalendarSyncState()
+                    }
                 }
             }
         }
-    }
-
-    fun getCourseDates() {
-        loadingCourseDatesInternal()
     }
 
     private fun loadingCourseDatesInternal() {
@@ -107,7 +121,7 @@ class CourseDatesViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
             } finally {
-              notifier.send(CourseLoading(false))
+                courseNotifier.send(CourseLoading(false))
             }
         }
     }
@@ -116,8 +130,8 @@ class CourseDatesViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
-                getCourseDates()
-                notifier.send(CourseDatesShifted)
+                loadingCourseDatesInternal()
+                courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -160,7 +174,7 @@ class CourseDatesViewModel(
         )
     }
 
-    fun updateAndFetchCalendarSyncState(): Boolean {
+    private fun updateAndFetchCalendarSyncState(): Boolean {
         val isCalendarSynced = calendarManager.isCalendarExists(
             calendarTitle = _calendarSyncUIState.value.calendarTitle
         )
@@ -172,7 +186,7 @@ class CourseDatesViewModel(
         val value = _uiState.value
         if (value is DatesUIState.Dates) {
             viewModelScope.launch {
-                notifier.send(
+                courseNotifier.send(
                     CreateCalendarSyncEvent(
                         courseDates = value.courseDatesResult.datesSection.values.flatten(),
                         dialogType = dialog.name,
@@ -187,7 +201,7 @@ class CourseDatesViewModel(
         val value = _uiState.value
         if (value is DatesUIState.Dates) {
             viewModelScope.launch {
-                notifier.send(
+                courseNotifier.send(
                     CreateCalendarSyncEvent(
                         courseDates = value.courseDatesResult.datesSection.values.flatten(),
                         dialogType = CalendarSyncDialogType.NONE.name,

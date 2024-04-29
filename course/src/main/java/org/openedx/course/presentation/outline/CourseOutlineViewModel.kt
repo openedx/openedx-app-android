@@ -28,6 +28,7 @@ import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
@@ -45,7 +46,7 @@ class CourseOutlineViewModel(
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
@@ -82,10 +83,15 @@ class CourseOutlineViewModel(
 
     init {
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
-                if (event is CourseStructureUpdated) {
-                    if (event.courseId == courseId) {
-                        updateCourseData()
+            courseNotifier.notifier.collect { event ->
+                when(event) {
+                    is CourseStructureUpdated -> {
+                        if (event.courseId == courseId) {
+                            updateCourseData()
+                        }
+                    }
+                    is CourseDataReady -> {
+                        getCourseData()
                     }
                 }
             }
@@ -129,7 +135,7 @@ class CourseOutlineViewModel(
 
     fun getCourseData() {
         viewModelScope.launch {
-            notifier.send(CourseLoading(true))
+            courseNotifier.send(CourseLoading(true))
         }
         getCourseDataInternal()
     }
@@ -205,7 +211,7 @@ class CourseOutlineViewModel(
                     subSectionsDownloadsCount = subSectionsDownloadsCount,
                     datesBannerInfo = datesBannerInfo,
                 )
-                notifier.send(CourseLoading(false))
+                courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
@@ -260,7 +266,7 @@ class CourseOutlineViewModel(
             try {
                 interactor.resetCourseDates(courseId = courseId)
                 updateCourseData()
-                notifier.send(CourseDatesShifted)
+                courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -331,7 +337,7 @@ class CourseOutlineViewModel(
 
     private fun checkIfCalendarOutOfDate(courseDates: List<CourseDateBlock>) {
         viewModelScope.launch {
-            notifier.send(
+            courseNotifier.send(
                 CreateCalendarSyncEvent(
                     courseDates = courseDates,
                     dialogType = CalendarSyncDialogType.NONE.name,

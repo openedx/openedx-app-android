@@ -30,10 +30,6 @@
     <string name="course_next_section">Next section</string>
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
-    <string name="course_navigation_home">Home</string>
-    <string name="course_navigation_videos">Videos</string>
-    <string name="course_navigation_discussions">Discussions</string>
-    <string name="course_navigation_more">More</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
     <string name="course_this_interactive_component">This interactive component isn\'t available on mobile.</string>
     <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
@@ -43,7 +39,6 @@
     <string name="course_resume">Resume</string>
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
-    <string name="course_navigation_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
     <string name="course_dates_shifted_message">Dates Shifted</string>
 

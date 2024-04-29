@@ -46,10 +46,11 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.FragmentViewType
 import org.openedx.core.extension.takeIfNotEmpty
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -63,16 +64,12 @@ import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialog
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.dates.CourseDatesScreen
-import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.outline.CourseOutlineScreen
-import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
-import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
-import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -85,35 +82,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_TITLE, ""),
             requireArguments().getString(ARG_ENROLLMENT_MODE, "")
-        )
-    }
-
-    private val courseOutlineViewModel by viewModel<CourseOutlineViewModel> {
-        parametersOf(
-            requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_TITLE, "")
-        )
-    }
-
-    private val courseVideoViewModel by viewModel<CourseVideoViewModel> {
-        parametersOf(
-            requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_TITLE, "")
-        )
-    }
-
-    private val courseDatesViewModel by viewModel<CourseDatesViewModel> {
-        parametersOf(
-            requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_ENROLLMENT_MODE, ""),
-            requireArguments().getString(ARG_TITLE, "")
-        )
-    }
-
-    private val discussionTopicsViewModel by viewModel<DiscussionTopicsViewModel> {
-        parametersOf(
-            requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_TITLE, "")
         )
     }
 
@@ -150,10 +118,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     private fun observe() {
         viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
             if (isReady == true) {
-                setupCollapsingLayout()
-                courseOutlineViewModel.getCourseData()
-                courseDatesViewModel.isSelfPaced = viewModel.isSelfPaced
-                courseDatesViewModel.updateAndFetchCalendarSyncState()
                 isNavigationEnabled = true
             } else {
                 viewModel.courseRouter.navigateToNoAccess(
@@ -178,28 +142,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 
     private fun onRefresh(currentPage: Int) {
-        viewModel.showRefreshIndicator()
-        when (CourseContainerTab.entries[currentPage]) {
-            CourseContainerTab.HOME -> {
-                updateCourseStructure()
-            }
-
-            CourseContainerTab.VIDEOS -> {
-                updateCourseStructure()
-            }
-
-            CourseContainerTab.DATES -> {
-                courseDatesViewModel.getCourseDates()
-            }
-
-            CourseContainerTab.DISCUSSIONS -> {
-                discussionTopicsViewModel.updateCourseTopics()
-            }
-
-            else -> {
-                viewModel.hideRefreshIndicator()
-            }
-        }
+        viewModel.onRefresh(CourseContainerTab.entries[currentPage])
     }
 
     @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -278,19 +221,25 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                             bodyContent = {
                                 HorizontalPager(
                                     state = pagerState,
-                                    userScrollEnabled = isNavigationEnabled
+                                    userScrollEnabled = isNavigationEnabled,
+                                    beyondBoundsPageCount = CourseContainerTab.entries.size
                                 ) { page ->
                                     when (CourseContainerTab.entries[page]) {
                                         CourseContainerTab.HOME -> {
                                             CourseOutlineScreen(
                                                 windowSize = windowSize,
-                                                courseOutlineViewModel = courseOutlineViewModel,
+                                                courseOutlineViewModel = koinViewModel(
+                                                    parameters = {
+                                                        parametersOf(
+                                                            requireArguments().getString(ARG_COURSE_ID, ""),
+                                                            requireArguments().getString(ARG_TITLE, "")
+                                                        )
+                                                    }
+                                                ),
                                                 courseRouter = viewModel.courseRouter,
                                                 fragmentManager = requireActivity().supportFragmentManager,
                                                 onResetDatesClick = {
-                                                    courseOutlineViewModel.resetCourseDatesBanner(onResetDates = {
-                                                        updateCourseDates()
-                                                    })
+                                                    viewModel.onRefresh(CourseContainerTab.DATES)
                                                 }
                                             )
                                         }
@@ -298,7 +247,14 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                         CourseContainerTab.VIDEOS -> {
                                             CourseVideosScreen(
                                                 windowSize = windowSize,
-                                                courseVideoViewModel = courseVideoViewModel,
+                                                courseVideoViewModel = koinViewModel(
+                                                    parameters = {
+                                                        parametersOf(
+                                                            requireArguments().getString(ARG_COURSE_ID, ""),
+                                                            requireArguments().getString(ARG_TITLE, "")
+                                                        )
+                                                    }
+                                                ),
                                                 fragmentManager = requireActivity().supportFragmentManager,
                                                 courseRouter = viewModel.courseRouter,
                                             )
@@ -306,13 +262,19 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
                                         CourseContainerTab.DATES -> {
                                             CourseDatesScreen(
+                                                courseDatesViewModel = koinViewModel(
+                                                    parameters = {
+                                                        parametersOf(
+                                                            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
+                                                        )
+                                                    }
+                                                ),
                                                 windowSize = windowSize,
-                                                courseDatesViewModel = courseDatesViewModel,
                                                 courseRouter = viewModel.courseRouter,
                                                 fragmentManager = requireActivity().supportFragmentManager,
                                                 isFragmentResumed = isResumed,
                                                 updateCourseStructure = {
-                                                    updateCourseStructure()
+                                                    viewModel.updateData()
                                                 }
                                             )
                                         }
@@ -320,28 +282,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                                         CourseContainerTab.DISCUSSIONS -> {
                                             DiscussionTopicsScreen(
                                                 windowSize = windowSize,
-                                                discussionTopicsViewModel = discussionTopicsViewModel,
-                                                onItemClick = { action, data, title ->
-                                                    discussionTopicsViewModel.discussionClickedEvent(
-                                                        action,
-                                                        data,
-                                                        title
-                                                    )
-                                                    discussionTopicsViewModel.discussionRouter.navigateToDiscussionThread(
-                                                        requireActivity().supportFragmentManager,
-                                                        action,
-                                                        discussionTopicsViewModel.courseId,
-                                                        data,
-                                                        title,
-                                                        FragmentViewType.FULL_CONTENT
-                                                    )
-                                                },
-                                                onSearchClick = {
-                                                    discussionTopicsViewModel.discussionRouter.navigateToSearchThread(
-                                                        requireActivity().supportFragmentManager,
-                                                        discussionTopicsViewModel.courseId
-                                                    )
-                                                })
+                                                fragmentManager = requireActivity().supportFragmentManager
+                                            )
                                         }
 
                                         CourseContainerTab.MORE -> {
@@ -500,14 +442,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 }
             }
         }
-    }
-
-    private fun updateCourseStructure() {
-        viewModel.updateData()
-    }
-
-    private fun updateCourseDates() {
-        courseDatesViewModel.getCourseDates()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
