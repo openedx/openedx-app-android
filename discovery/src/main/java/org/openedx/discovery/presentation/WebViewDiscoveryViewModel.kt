@@ -61,6 +61,10 @@ class WebViewDiscoveryViewModel(
         router.navigateToSignIn(fragmentManager, null, null)
     }
 
+    fun navigateToSettings(fragmentManager: FragmentManager) {
+        router.navigateToSettings(fragmentManager)
+    }
+
     fun courseInfoClickedEvent(courseId: String) {
         logEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
     }

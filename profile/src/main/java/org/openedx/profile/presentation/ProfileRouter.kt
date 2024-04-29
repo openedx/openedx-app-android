@@ -8,13 +8,17 @@ interface ProfileRouter {
 
     fun navigateToEditProfile(fm: FragmentManager, account: Account)
 
+    fun navigateToDeleteAccount(fm: FragmentManager)
+
+    fun navigateToSettings(fm: FragmentManager)
+
+    fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
+
     fun navigateToVideoSettings(fm: FragmentManager)
 
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
 
-    fun navigateToDeleteAccount(fm: FragmentManager)
-
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
-    fun restartApp(fm: FragmentManager, isLogistrationEnabled: Boolean)
+    fun navigateToManageAccount(fm: FragmentManager)
 }

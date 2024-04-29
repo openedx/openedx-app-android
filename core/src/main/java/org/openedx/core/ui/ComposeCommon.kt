@@ -159,7 +159,11 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     label: String,
     canShowBackBtn: Boolean = false,
+    canShowSettingsIcon: Boolean = false,
+    labelTint: Color = MaterialTheme.appColors.textPrimary,
+    iconTint: Color = MaterialTheme.appColors.textPrimary,
     onBackClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -167,7 +171,10 @@ fun Toolbar(
             .height(48.dp),
     ) {
         if (canShowBackBtn) {
-            BackBtn(onBackClick = onBackClick)
+            BackBtn(
+                tint = iconTint,
+                onBackClick = onBackClick
+            )
         }
 
         Text(
@@ -177,12 +184,27 @@ fun Toolbar(
                 .align(Alignment.Center)
                 .padding(horizontal = 48.dp),
             text = label,
-            color = MaterialTheme.appColors.textPrimary,
+            color = labelTint,
             style = MaterialTheme.appTypography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )
+
+        if (canShowSettingsIcon) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 12.dp),
+                onClick = { onSettingsClick() }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.core_ic_settings),
+                    tint = MaterialTheme.appColors.primary,
+                    contentDescription = stringResource(id = R.string.core_accessibility_settings)
+                )
+            }
+        }
     }
 }
 
@@ -1098,7 +1120,7 @@ fun BackBtn(
         onClick = { onBackClick() }) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),
-            contentDescription = "back",
+            contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
             tint = tint
         )
     }
