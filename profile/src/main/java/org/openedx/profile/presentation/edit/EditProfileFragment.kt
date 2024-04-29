@@ -105,7 +105,6 @@ import androidx.fragment.app.Fragment
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
@@ -139,7 +138,6 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.ProfileRouter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -152,8 +150,6 @@ class EditProfileFragment : Fragment() {
     private val viewModel by viewModel<EditProfileViewModel> {
         parametersOf(requireArguments().parcelable<Account>(ARG_ACCOUNT)!!)
     }
-
-    private val router by inject<ProfileRouter>()
 
     private val registerForActivityResult =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -223,12 +219,6 @@ class EditProfileFragment : Fragment() {
                     },
                     onKeepEdit = {
                         viewModel.setShowLeaveDialog(false)
-                    },
-                    onDeleteClick = {
-                        viewModel.profileDeleteAccountClickedEvent()
-                        router.navigateToDeleteAccount(
-                            requireActivity().supportFragmentManager
-                        )
                     },
                     onSelectImageClick = {
                         registerForActivityResult.launch("image/*")
@@ -331,7 +321,6 @@ private fun EditProfileScreen(
     onLimitedProfileChange: (Boolean) -> Unit,
     onBackClick: (Boolean) -> Unit,
     onSaveClick: (Map<String, Any?>) -> Unit,
-    onDeleteClick: () -> Unit,
     onSelectImageClick: () -> Unit,
     onDeleteImageClick: () -> Unit,
 ) {
@@ -738,15 +727,6 @@ private fun EditProfileScreen(
                                 mapFields = mapFields,
                                 onDoneClick = { onSaveClick(mapFields.toMap()) }
                             )
-                            Spacer(Modifier.height(40.dp))
-                            IconText(
-                                text = stringResource(id = R.string.profile_delete_profile),
-                                painter = painterResource(id = R.drawable.profile_ic_trash),
-                                textStyle = MaterialTheme.appTypography.labelLarge,
-                                color = MaterialTheme.appColors.error,
-                                onClick = {
-                                    onDeleteClick()
-                                })
                             Spacer(Modifier.height(52.dp))
                         }
                         if (openWarningMessageDialog) {
@@ -1314,7 +1294,6 @@ private fun EditProfileScreenPreview() {
             leaveDialog = false,
             onBackClick = {},
             onSaveClick = {},
-            onDeleteClick = {},
             onSelectImageClick = {},
             onDeleteImageClick = {},
             onDataChanged = {},
@@ -1338,7 +1317,6 @@ private fun EditProfileScreenTabletPreview() {
             leaveDialog = false,
             onBackClick = {},
             onSaveClick = {},
-            onDeleteClick = {},
             onSelectImageClick = {},
             onDeleteImageClick = {},
             onDataChanged = {},

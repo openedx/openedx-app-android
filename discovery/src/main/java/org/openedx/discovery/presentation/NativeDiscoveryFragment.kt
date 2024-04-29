@@ -69,6 +69,7 @@ import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -166,7 +167,11 @@ class NativeDiscoveryFragment : Fragment() {
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
-                    })
+                    },
+                    onSettingsClick = {
+                        router.navigateToSettings(requireActivity().supportFragmentManager)
+                    }
+                )
                 LaunchedEffect(uiState) {
                     if (querySearch.isNotEmpty()) {
                         router.navigateToCourseSearch(
@@ -213,6 +218,7 @@ internal fun DiscoveryScreen(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
     onBackClick: () -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyListState()
@@ -310,22 +316,23 @@ internal fun DiscoveryScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 10.dp),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    modifier = Modifier.testTag("txt_discovery_title"),
-                    text = stringResource(id = R.string.discovery_Discovery),
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleMedium
+                Toolbar(
+                    label = stringResource(id = R.string.discovery_Discovery),
+                    canShowBackBtn = canShowBackButton,
+                    canShowSettingsIcon = !canShowBackButton,
+                    onBackClick = onBackClick,
+                    onSettingsClick = onSettingsClick
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
                 StaticSearchBar(
                     modifier = Modifier
                         .height(48.dp)
+                        .padding(horizontal = 24.dp)
                         .then(searchTabWidth),
                     onClick = {
                         onSearchClick()
@@ -514,6 +521,7 @@ private fun DiscoveryScreenPreview() {
             onSignInClick = {},
             onRegisterClick = {},
             onBackClick = {},
+            onSettingsClick = {},
             canShowBackButton = false
         )
     }
@@ -554,6 +562,7 @@ private fun DiscoveryScreenTabletPreview() {
             onSignInClick = {},
             onRegisterClick = {},
             onBackClick = {},
+            onSettingsClick = {},
             canShowBackButton = false
         )
     }

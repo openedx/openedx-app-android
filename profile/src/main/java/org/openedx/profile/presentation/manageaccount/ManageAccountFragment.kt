@@ -1,23 +1,22 @@
-package org.openedx.profile.presentation.profile
+package org.openedx.profile.presentation.manageaccount
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.profile.presentation.profile.compose.ProfileView
-import org.openedx.profile.presentation.profile.compose.ProfileViewAction
+import org.openedx.profile.presentation.manageaccount.compose.ManageAccountView
+import org.openedx.profile.presentation.manageaccount.compose.ManageAccountViewAction
 
-class ProfileFragment : Fragment() {
+class ManageAccountFragment : Fragment() {
 
-    private val viewModel: ProfileViewModel by viewModel()
+    private val viewModel: ManageAccountViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,26 +33,32 @@ class ProfileFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
                 val uiState by viewModel.uiState.collectAsState()
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val refreshing by viewModel.isUpdating.observeAsState(false)
+                val uiMessage by viewModel.uiMessage.collectAsState(null)
+                val refreshing by viewModel.isUpdating.collectAsState(false)
 
-                ProfileView(
+                ManageAccountView(
                     windowSize = windowSize,
                     uiState = uiState,
                     uiMessage = uiMessage,
                     refreshing = refreshing,
-                    onSettingsClick = {
-                        viewModel.profileRouter.navigateToSettings(requireActivity().supportFragmentManager)
-                    },
                     onAction = { action ->
                         when (action) {
-                            ProfileViewAction.EditAccountClick -> {
+                            ManageAccountViewAction.EditAccountClick -> {
                                 viewModel.profileEditClicked(
-                                    requireParentFragment().parentFragmentManager
+                                    requireActivity().supportFragmentManager
                                 )
                             }
-                            ProfileViewAction.SwipeRefresh -> {
+                            ManageAccountViewAction.SwipeRefresh -> {
                                 viewModel.updateAccount()
+                            }
+                            ManageAccountViewAction.BackClick -> {
+                                requireActivity().supportFragmentManager.popBackStack()
+                            }
+                            ManageAccountViewAction.DeleteAccount -> {
+                                viewModel.profileDeleteAccountClickedEvent()
+                                viewModel.profileRouter.navigateToDeleteAccount(
+                                    requireActivity().supportFragmentManager
+                                )
                             }
                         }
                     }

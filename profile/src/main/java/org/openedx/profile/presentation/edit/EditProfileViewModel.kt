@@ -143,10 +143,6 @@ class EditProfileViewModel(
         logProfileEvent(ProfileAnalyticsEvent.EDIT_DONE_CLICKED)
     }
 
-    fun profileDeleteAccountClickedEvent() {
-        logProfileEvent(ProfileAnalyticsEvent.DELETE_ACCOUNT_CLICKED)
-    }
-
     private fun logProfileEvent(
         event: ProfileAnalyticsEvent,
         params: Map<String, Any?> = emptyMap(),

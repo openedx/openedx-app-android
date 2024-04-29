@@ -1,12 +1,13 @@
-package org.openedx.profile.presentation.profile
+package org.openedx.profile.presentation.manageaccount
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
@@ -22,7 +23,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.notifier.AccountUpdated
 import org.openedx.profile.system.notifier.ProfileNotifier
 
-class ProfileViewModel(
+class ManageAccountViewModel(
     private val interactor: ProfileInteractor,
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
@@ -30,16 +31,16 @@ class ProfileViewModel(
     val profileRouter: ProfileRouter
 ) : BaseViewModel() {
 
-    private val _uiState: MutableStateFlow<ProfileUIState> = MutableStateFlow(ProfileUIState.Loading)
-    internal val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<ManageAccountUIState> = MutableStateFlow(ManageAccountUIState.Loading)
+    internal val uiState: StateFlow<ManageAccountUIState> = _uiState.asStateFlow()
 
-    private val _uiMessage = MutableLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
+    private val _isUpdating = MutableStateFlow(false)
+    val isUpdating: StateFlow<Boolean>
+        get() = _isUpdating.asStateFlow()
 
     init {
         getAccount()
@@ -57,28 +58,26 @@ class ProfileViewModel(
     }
 
     private fun getAccount() {
-        _uiState.value = ProfileUIState.Loading
+        _uiState.value = ManageAccountUIState.Loading
         viewModelScope.launch {
             try {
                 val cachedAccount = interactor.getCachedAccount()
                 if (cachedAccount == null) {
-                    _uiState.value = ProfileUIState.Loading
+                    _uiState.value = ManageAccountUIState.Loading
                 } else {
-                    _uiState.value = ProfileUIState.Data(
+                    _uiState.value = ManageAccountUIState.Data(
                         account = cachedAccount
                     )
                 }
                 val account = interactor.getAccount()
-                _uiState.value = ProfileUIState.Data(
+                _uiState.value = ManageAccountUIState.Data(
                     account = account
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             } finally {
                 _isUpdating.value = false
@@ -92,13 +91,17 @@ class ProfileViewModel(
     }
 
     fun profileEditClicked(fragmentManager: FragmentManager) {
-        (uiState.value as? ProfileUIState.Data)?.let { data ->
+        (uiState.value as? ManageAccountUIState.Data)?.let { data ->
             profileRouter.navigateToEditProfile(
                 fragmentManager,
                 data.account
             )
         }
         logProfileEvent(ProfileAnalyticsEvent.EDIT_CLICKED)
+    }
+
+    fun profileDeleteAccountClickedEvent() {
+        logProfileEvent(ProfileAnalyticsEvent.DELETE_ACCOUNT_CLICKED)
     }
 
     private fun logProfileEvent(

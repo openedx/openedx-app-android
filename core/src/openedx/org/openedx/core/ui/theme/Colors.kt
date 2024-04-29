@@ -50,6 +50,7 @@ val light_component_horizontal_progress_completed_and_selected = Color(0xFF30a17
 val light_component_horizontal_progress_completed = Color(0xFFbbe6d7)
 val light_component_horizontal_progress_selected = Color(0xFFF0CB00)
 val light_component_horizontal_progress_default = Color(0xFFD6D3D1)
+val light_settings_title_content = Color.White
 
 
 val dark_primary = Color(0xFF5478F9)
@@ -100,3 +101,4 @@ val dark_component_horizontal_progress_completed_and_selected = Color(0xFF30a171
 val dark_component_horizontal_progress_completed = Color(0xFFbbe6d7)
 val dark_component_horizontal_progress_selected = Color(0xFFF0CB00)
 val dark_component_horizontal_progress_default = Color(0xFFD6D3D1)
+val dark_settings_title_content = Color.White

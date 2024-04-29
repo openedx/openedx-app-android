@@ -101,6 +101,10 @@ class ProgramViewModel(
         viewModelScope.launch { notifier.send(NavigationToDiscovery()) }
     }
 
+    fun navigateToSettings(fragmentManager: FragmentManager) {
+        router.navigateToSettings(fragmentManager)
+    }
+
     fun refreshCookie() {
         viewModelScope.launch { edxCookieManager.tryToRefreshSessionCookie() }
     }

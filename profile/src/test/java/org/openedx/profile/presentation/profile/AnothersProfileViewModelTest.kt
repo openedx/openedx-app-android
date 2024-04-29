@@ -7,7 +7,11 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -19,8 +23,8 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
-import org.openedx.profile.presentation.anothers_account.AnothersProfileUIState
-import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
+import org.openedx.profile.presentation.anothersaccount.AnothersProfileUIState
+import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
