@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.calendarsync
+package org.openedx.core.presentation.settings.calendarsync
 
 import org.openedx.core.domain.model.CourseDateBlock
 import java.util.concurrent.atomic.AtomicReference

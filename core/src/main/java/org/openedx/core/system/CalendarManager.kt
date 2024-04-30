@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.calendarsync
+package org.openedx.core.system
 
 import android.annotation.SuppressLint
 import android.content.ContentUris
@@ -10,12 +10,11 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
+import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.utils.Logger
 import org.openedx.core.utils.toCalendar
-import org.openedx.course.R
 import java.util.Calendar
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
@@ -165,7 +164,7 @@ class CalendarManager(
             put(CalendarContract.Events.DTEND, endMillis)
             put(
                 CalendarContract.Events.TITLE,
-                "${resourceManager.getString(R.string.course_assignment_due_tag)} : $courseName"
+                "${resourceManager.getString(R.string.core_assignment_due_tag)} : $courseName"
             )
             put(
                 CalendarContract.Events.DESCRIPTION,

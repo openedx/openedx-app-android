@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.calendarsync
+package org.openedx.core.presentation.settings.calendarsync
 
 data class DialogProperties(
     val title: String,

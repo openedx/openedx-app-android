@@ -19,12 +19,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialog
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialog
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.container.CourseContainerTab
 import org.openedx.course.presentation.dates.CourseDatesFragment
 import org.openedx.course.presentation.handouts.HandoutsFragment
