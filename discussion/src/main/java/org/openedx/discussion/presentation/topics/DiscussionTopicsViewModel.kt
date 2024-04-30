@@ -44,7 +44,7 @@ class DiscussionTopicsViewModel(
         collectCourseNotifier()
     }
 
-    private fun updateCourseTopics() {
+    private fun getCourseTopic() {
         viewModelScope.launch {
             try {
                 val response = interactor.getCourseTopics(courseId)
@@ -57,26 +57,6 @@ class DiscussionTopicsViewModel(
                 }
             } finally {
                 courseNotifier.send(CourseLoading(false))
-            }
-        }
-    }
-
-    private fun getCourseTopics() {
-        _uiState.value = DiscussionTopicsUIState.Loading
-        getCourseTopicsInternal()
-    }
-
-    private fun getCourseTopicsInternal() {
-        viewModelScope.launch {
-            try {
-                val response = interactor.getCourseTopics(courseId)
-                _uiState.value = DiscussionTopicsUIState.Topics(response)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
-                } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
-                }
             }
         }
     }
@@ -104,12 +84,12 @@ class DiscussionTopicsViewModel(
                     is CourseDataReady -> {
                         courseId = event.courseStructure.id
                         courseName = event.courseStructure.name
-                        updateCourseTopics()
+                        getCourseTopic()
                     }
 
                     is CourseRefresh -> {
                         if (event.courseContainerTab == CourseContainerTab.DISCUSSIONS) {
-                            updateCourseTopics()
+                            getCourseTopic()
                         }
                     }
                 }

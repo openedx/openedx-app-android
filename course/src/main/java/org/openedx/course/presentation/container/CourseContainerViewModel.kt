@@ -88,6 +88,10 @@ class CourseContainerViewModel(
     val refreshing: StateFlow<Boolean> =
         _refreshing.asStateFlow()
 
+    private val _isNavigationEnabled = MutableStateFlow(false)
+    val isNavigationEnabled: StateFlow<Boolean> =
+        _isNavigationEnabled.asStateFlow()
+
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
@@ -178,6 +182,7 @@ class CourseContainerViewModel(
                 _dataReady.value = courseStructure.start?.let { start ->
                     val isReady = start < Date()
                     if (isReady) {
+                        _isNavigationEnabled.value = true
                         courseNotifier.send(CourseDataReady(courseStructure))
                     }
                     isReady

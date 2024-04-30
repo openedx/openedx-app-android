@@ -11,7 +11,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.openedx.core.R
 import org.openedx.core.ui.TabItem
 
-enum class CourseContainerTab(@StringRes override val labelResId: Int, override val icon: ImageVector) : TabItem {
+enum class CourseContainerTab(
+    @StringRes
+    override val labelResId: Int,
+    override val icon: ImageVector
+) : TabItem {
     HOME(R.string.core_course_container_nav_home, Icons.Default.Home),
     VIDEOS(R.string.core_course_container_nav_videos, Icons.Rounded.PlayCircleFilled),
     DATES(R.string.core_course_container_nav_dates, Icons.Outlined.CalendarMonth),

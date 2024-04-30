@@ -13,7 +13,12 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 
 class ImageProcessor(private val context: Context) {
-    fun loadImage(imageUrl: String, @DrawableRes defaultImage: Int, onComplete: (result: Drawable) -> Unit) {
+    fun loadImage(
+        @DrawableRes
+        defaultImage: Int,
+        imageUrl: String,
+        onComplete: (result: Drawable) -> Unit
+    ) {
         val loader = ImageLoader(context)
         val request = ImageRequest.Builder(context)
             .data(imageUrl)
