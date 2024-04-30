@@ -193,11 +193,14 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get()
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseOutlineViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -234,9 +237,10 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseVideoViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -275,13 +279,9 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean, enrollmentMode: String) ->
+    viewModel { (enrollmentMode: String) ->
         CourseDatesViewModel(
-            courseId,
-            courseName,
-            isSelfPaced,
             enrollmentMode,
-            get(),
             get(),
             get(),
             get(),
@@ -305,13 +305,13 @@ val screenModule = module {
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel { (courseId: String) ->
+    viewModel {
         DiscussionTopicsViewModel(
             get(),
             get(),
             get(),
             get(),
-            courseId
+            get()
         )
     }
     viewModel { (courseId: String, topicId: String, threadType: String) ->

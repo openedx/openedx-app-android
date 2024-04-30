@@ -7,12 +7,16 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -34,8 +38,9 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDataReady
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -54,7 +59,6 @@ class CourseDatesViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val interactor = mockk<CourseInteractor>()
     private val calendarManager = mockk<CalendarManager>()
-    private val networkConnection = mockk<NetworkConnection>()
     private val corePreferences = mockk<CorePreferences>()
     private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
@@ -142,9 +146,12 @@ class CourseDatesViewModelTest {
         every { interactor.getCourseStructureFromCache() } returns courseStructure
         every { corePreferences.user } returns user
         every { corePreferences.appConfig } returns appConfig
-        every { notifier.notifier } returns emptyFlow()
+        every { notifier.notifier } returns flowOf(CourseDataReady(courseStructure))
         every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
+        every { calendarManager.isCalendarExists(any()) } returns true
         coEvery { notifier.send(any<CreateCalendarSyncEvent>()) } returns Unit
+        coEvery { notifier.send(any<CourseLoading>()) } returns Unit
+        coEvery { notifier.send(any<CourseDataReady>()) } returns Unit
     }
 
     @After
@@ -153,119 +160,109 @@ class CourseDatesViewModelTest {
     }
 
     @Test
-    fun `getCourseDates no internet connection exception`() = runTest {
+    fun `getCourseDates no internet connection exception`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = CourseDatesViewModel(
-            "",
-            "",
-            true,
             "",
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseDates(any()) }
+         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        Assert.assertEquals(noInternet, message?.message)
-        assert(viewModel.updating.value == false)
+        Assert.assertEquals(noInternet, message.await()?.message)
         assert(viewModel.uiState.value is DatesUIState.Loading)
     }
 
     @Test
-    fun `getCourseDates unknown exception`() = runTest {
+    fun `getCourseDates unknown exception`() =  runTest(UnconfinedTestDispatcher()) {
         val viewModel = CourseDatesViewModel(
-            "",
-            "",
-            true,
             "",
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } throws Exception()
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
-        val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
-
-        Assert.assertEquals(somethingWrong, message?.message)
-        assert(viewModel.updating.value == false)
+        Assert.assertEquals(somethingWrong, message.await()?.message)
         assert(viewModel.uiState.value is DatesUIState.Loading)
     }
 
     @Test
-    fun `getCourseDates success with internet`() = runTest {
+    fun `getCourseDates success with internet`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = CourseDatesViewModel(
-            "",
-            "",
-            true,
             "",
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
-
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
-        assert(viewModel.uiMessage.value == null)
-        assert(viewModel.updating.value == false)
+        assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is DatesUIState.Dates)
     }
 
     @Test
-    fun `getCourseDates success with EmptyList`() = runTest {
+    fun `getCourseDates success with EmptyList`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = CourseDatesViewModel(
-            "",
-            "",
-            true,
             "",
             notifier,
             interactor,
             calendarManager,
-            networkConnection,
             resourceManager,
             corePreferences,
             analytics,
             config
         )
-        every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),
             courseBanner = mockCourseDatesBannerInfo,
         )
-
+        val message = async {
+            withTimeoutOrNull(5000) {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+        }
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
-        assert(viewModel.uiMessage.value == null)
-        assert(viewModel.updating.value == false)
+        assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is DatesUIState.Empty)
     }
 }

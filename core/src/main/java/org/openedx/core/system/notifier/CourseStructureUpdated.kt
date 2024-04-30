@@ -1,6 +1,5 @@
 package org.openedx.core.system.notifier
 
 class CourseStructureUpdated(
-    val courseId: String,
-    val withSwipeRefresh: Boolean,
+    val courseId: String
 ) : CourseEvent

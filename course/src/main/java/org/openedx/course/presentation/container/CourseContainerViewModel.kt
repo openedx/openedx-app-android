@@ -1,30 +1,44 @@
 package org.openedx.course.presentation.container
 
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
+import org.openedx.core.ImageProcessor
 import org.openedx.core.SingleEventLiveData
+import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseDataReady
+import org.openedx.core.system.notifier.CourseDatesShifted
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.utils.TimeUtils
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -33,6 +47,7 @@ import org.openedx.course.presentation.CalendarSyncSnackbar
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
@@ -43,19 +58,19 @@ import org.openedx.core.R as CoreR
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
-    val enrollmentMode: String,
+    private val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
     private val courseAnalytics: CourseAnalytics,
+    private val imageProcessor: ImageProcessor,
+    val courseRouter: CourseRouter
 ) : BaseViewModel() {
-
-    val isCourseTopTabBarEnabled get() = config.isCourseTopTabBarEnabled()
 
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>
@@ -65,13 +80,29 @@ class CourseContainerViewModel(
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
-    private val _showProgress = MutableLiveData<Boolean>()
-    val showProgress: LiveData<Boolean>
-        get() = _showProgress
+    private val _showProgress = MutableStateFlow(true)
+    val showProgress: StateFlow<Boolean> =
+        _showProgress.asStateFlow()
+
+    private val _refreshing = MutableStateFlow(false)
+    val refreshing: StateFlow<Boolean> =
+        _refreshing.asStateFlow()
+
+    private val _isNavigationEnabled = MutableStateFlow(false)
+    val isNavigationEnabled: StateFlow<Boolean> =
+        _isNavigationEnabled.asStateFlow()
+
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     private var _isSelfPaced: Boolean = true
     val isSelfPaced: Boolean
         get() = _isSelfPaced
+
+    private var _organization: String = ""
+    val organization: String
+        get() = _organization
 
     val calendarPermissions: Array<String>
         get() = calendarManager.permissions
@@ -89,21 +120,40 @@ class CourseContainerViewModel(
     val calendarSyncUIState: StateFlow<CalendarSyncUIState> =
         _calendarSyncUIState.asStateFlow()
 
+    private var _courseImage = MutableStateFlow(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
+    val courseImage: StateFlow<Bitmap> = _courseImage.asStateFlow()
+
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
+
     init {
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
-                if (event is CourseCompletionSet) {
-                    updateData(false)
-                }
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CourseCompletionSet -> {
+                        updateData()
+                    }
 
-                if (event is CreateCalendarSyncEvent) {
-                    _calendarSyncUIState.update {
-                        val dialogType = CalendarSyncDialogType.valueOf(event.dialogType)
-                        it.copy(
-                            courseDates = event.courseDates,
-                            dialogType = dialogType,
-                            checkForOutOfSync = AtomicReference(event.checkOutOfSync)
-                        )
+                    is CreateCalendarSyncEvent -> {
+                        _calendarSyncUIState.update {
+                            val dialogType = CalendarSyncDialogType.valueOf(event.dialogType)
+                            it.copy(
+                                courseDates = event.courseDates,
+                                dialogType = dialogType,
+                                checkForOutOfSync = AtomicReference(event.checkOutOfSync)
+                            )
+                        }
+                    }
+
+                    is CourseDatesShifted -> {
+                        _uiMessage.emit(DatesShiftedSnackBar())
+                    }
+
+                    is CourseLoading -> {
+                        _showProgress.value = event.isLoading
+                        if (!event.isLoading) {
+                            _refreshing.value = false
+                        }
                     }
                 }
             }
@@ -126,9 +176,16 @@ class CourseContainerViewModel(
                 }
                 val courseStructure = interactor.getCourseStructureFromCache()
                 courseName = courseStructure.name
+                _organization = courseStructure.org
                 _isSelfPaced = courseStructure.isSelfPaced
+                loadCourseImage(courseStructure.media?.image?.large)
                 _dataReady.value = courseStructure.start?.let { start ->
-                    start < Date()
+                    val isReady = start < Date()
+                    if (isReady) {
+                        _isNavigationEnabled.value = true
+                        courseNotifier.send(CourseDataReady(courseStructure))
+                    }
+                    isReady
                 }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
@@ -139,12 +196,56 @@ class CourseContainerViewModel(
                         resourceManager.getString(CoreR.string.core_error_unknown_error)
                 }
             }
-            _showProgress.value = false
         }
     }
 
-    fun updateData(withSwipeRefresh: Boolean) {
-        _showProgress.value = true
+    private fun loadCourseImage(imageUrl: String?) {
+        imageProcessor.loadImage(
+            imageUrl = config.getApiHostURL() + imageUrl,
+            defaultImage = CoreR.drawable.core_no_image_course,
+            onComplete = { drawable ->
+                val bitmap = (drawable as BitmapDrawable).bitmap.apply {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        imageProcessor.applyBlur(this@apply, 10f)
+                    }
+                }
+                viewModelScope.launch {
+                    _courseImage.emit(bitmap)
+                }
+            }
+        )
+    }
+
+    fun onRefresh(courseContainerTab: CourseContainerTab) {
+        _refreshing.value = true
+        when (courseContainerTab) {
+            CourseContainerTab.HOME -> {
+                updateData()
+            }
+
+            CourseContainerTab.VIDEOS -> {
+                updateData()
+            }
+
+            CourseContainerTab.DATES -> {
+                viewModelScope.launch {
+                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                }
+            }
+
+            CourseContainerTab.DISCUSSIONS -> {
+                viewModelScope.launch {
+                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                }
+            }
+
+            else -> {
+                _refreshing.value = false
+            }
+        }
+    }
+
+    fun updateData() {
         viewModelScope.launch {
             try {
                 interactor.preloadCourseStructure(courseId)
@@ -157,20 +258,21 @@ class CourseContainerViewModel(
                         resourceManager.getString(CoreR.string.core_error_unknown_error)
                 }
             }
-            _showProgress.value = false
-            notifier.send(CourseStructureUpdated(courseId, withSwipeRefresh))
+            _refreshing.value = false
+            courseNotifier.send(CourseStructureUpdated(courseId))
         }
     }
 
-    fun courseContainerTabClickedEvent(tab: CourseContainerTab) {
-        when (tab) {
-            CourseContainerTab.COURSE -> courseTabClickedEvent()
+    fun courseContainerTabClickedEvent(index: Int) {
+        when (CourseContainerTab.entries[index]) {
+            CourseContainerTab.HOME -> courseTabClickedEvent()
             CourseContainerTab.VIDEOS -> videoTabClickedEvent()
-            CourseContainerTab.DISCUSSION -> discussionTabClickedEvent()
+            CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
-            CourseContainerTab.HANDOUTS -> handoutsTabClickedEvent()
+            CourseContainerTab.MORE -> moreTabClickedEvent()
         }
     }
+
 
     fun setCalendarSyncDialogType(dialogType: CalendarSyncDialogType) {
         val currentState = _calendarSyncUIState.value
@@ -235,7 +337,7 @@ class CourseContainerViewModel(
             val isCalendarSynced = calendarManager.isCalendarExists(
                 calendarTitle = _calendarSyncUIState.value.calendarTitle
             )
-            notifier.send(CheckCalendarSyncEvent(isSynced = isCalendarSynced))
+            courseNotifier.send(CheckCalendarSyncEvent(isSynced = isCalendarSynced))
         }
     }
 
@@ -312,8 +414,8 @@ class CourseContainerViewModel(
         logCourseContainerEvent(CourseAnalyticsEvent.DATES_TAB)
     }
 
-    private fun handoutsTabClickedEvent() {
-        logCourseContainerEvent(CourseAnalyticsEvent.HANDOUTS_TAB)
+    private fun moreTabClickedEvent() {
+        logCourseContainerEvent(CourseAnalyticsEvent.MORE_TAB)
     }
 
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {

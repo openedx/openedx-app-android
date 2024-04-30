@@ -5,7 +5,10 @@ import androidx.fragment.app.FragmentManager
 interface DiscoveryRouter {
 
     fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String, enrollmentMode: String
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String,
+        enrollmentMode: String
     )
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?)
