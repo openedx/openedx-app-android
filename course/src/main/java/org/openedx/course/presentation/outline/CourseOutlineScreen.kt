@@ -26,6 +26,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +63,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
@@ -75,90 +75,77 @@ import org.openedx.core.R as CoreR
 @Composable
 fun CourseOutlineScreen(
     windowSize: WindowSize,
-    courseOutlineViewModel: CourseOutlineViewModel,
-    courseRouter: CourseRouter,
+    viewModel: CourseOutlineViewModel,
     fragmentManager: FragmentManager,
     onResetDatesClick: () -> Unit
 ) {
-    val uiState by courseOutlineViewModel.uiState.collectAsState()
-    val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
+    val uiState by viewModel.uiState.collectAsState()
+    val uiMessage by viewModel.uiMessage.collectAsState(null)
+    val openBlock by viewModel.openBlock.collectAsState("")
     val context = LocalContext.current
+
+    LaunchedEffect(openBlock) {
+        if (openBlock.isNotEmpty()) {
+            viewModel.openBlock(fragmentManager, openBlock)
+        }
+    }
 
     CourseOutlineUI(
         windowSize = windowSize,
         uiState = uiState,
-        isCourseNestedListEnabled = courseOutlineViewModel.isCourseNestedListEnabled,
+        isCourseNestedListEnabled = viewModel.isCourseNestedListEnabled,
         uiMessage = uiMessage,
         onItemClick = { block ->
-            courseOutlineViewModel.sequentialClickedEvent(
+            viewModel.sequentialClickedEvent(
                 block.blockId,
                 block.displayName
             )
-            courseRouter.navigateToCourseSubsections(
+            viewModel.courseRouter.navigateToCourseSubsections(
                 fm = fragmentManager,
-                courseId = courseOutlineViewModel.courseId,
+                courseId = viewModel.courseId,
                 subSectionId = block.id,
                 mode = CourseViewMode.FULL
             )
         },
         onExpandClick = { block ->
-            if (courseOutlineViewModel.switchCourseSections(block.id)) {
-                courseOutlineViewModel.sequentialClickedEvent(
+            if (viewModel.switchCourseSections(block.id)) {
+                viewModel.sequentialClickedEvent(
                     block.blockId,
                     block.displayName
                 )
             }
         },
         onSubSectionClick = { subSectionBlock ->
-            courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                courseOutlineViewModel.logUnitDetailViewedEvent(
+            viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                viewModel.logUnitDetailViewedEvent(
                     unit.blockId,
                     unit.displayName
                 )
-                courseRouter.navigateToCourseContainer(
+                viewModel.courseRouter.navigateToCourseContainer(
                     fragmentManager,
-                    courseId = courseOutlineViewModel.courseId,
+                    courseId = viewModel.courseId,
                     unitId = unit.id,
                     mode = CourseViewMode.FULL
                 )
             }
         },
         onResumeClick = { componentId ->
-            courseOutlineViewModel.resumeSectionBlock?.let { subSection ->
-                courseOutlineViewModel.resumeCourseTappedEvent(subSection.id)
-                courseOutlineViewModel.resumeVerticalBlock?.let { unit ->
-                    if (courseOutlineViewModel.isCourseExpandableSectionsEnabled) {
-                        courseRouter.navigateToCourseContainer(
-                            fm = fragmentManager,
-                            courseId = courseOutlineViewModel.courseId,
-                            unitId = unit.id,
-                            componentId = componentId,
-                            mode = CourseViewMode.FULL
-                        )
-                    } else {
-                        courseRouter.navigateToCourseSubsections(
-                            fragmentManager,
-                            courseId = courseOutlineViewModel.courseId,
-                            subSectionId = subSection.id,
-                            mode = CourseViewMode.FULL,
-                            unitId = unit.id,
-                            componentId = componentId
-                        )
-                    }
-                }
-            }
+            viewModel.openBlock(
+                fragmentManager,
+                componentId
+            )
         },
         onDownloadClick = {
-            if (courseOutlineViewModel.isBlockDownloading(it.id)) {
-                courseRouter.navigateToDownloadQueue(
+            if (viewModel.isBlockDownloading(it.id)) {
+                viewModel.courseRouter.navigateToDownloadQueue(
                     fm = fragmentManager,
-                    courseOutlineViewModel.getDownloadableChildren(it.id)
+                    viewModel.getDownloadableChildren(it.id)
                         ?: arrayListOf()
                 )
-            } else if (courseOutlineViewModel.isBlockDownloaded(it.id)) {
-                courseOutlineViewModel.removeDownloadModels(it.id)
+            } else if (viewModel.isBlockDownloaded(it.id)) {
+                viewModel.removeDownloadModels(it.id)
             } else {
-                courseOutlineViewModel.saveDownloadModels(
+                viewModel.saveDownloadModels(
                     context.externalCacheDir.toString() +
                             File.separator +
                             context
@@ -168,14 +155,14 @@ fun CourseOutlineScreen(
             }
         },
         onResetDatesClick = {
-            courseOutlineViewModel.resetCourseDatesBanner(
+            viewModel.resetCourseDatesBanner(
                 onResetDates = {
                     onResetDatesClick()
                 }
             )
         },
         onCertificateClick = {
-            courseOutlineViewModel.viewCertificateTappedEvent()
+            viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
                 ?.let { url -> AndroidUriHandler(context).openUri(url) }
         }

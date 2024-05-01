@@ -20,4 +20,5 @@ class CourseNotifier {
     suspend fun send(event: CourseLoading) = channel.emit(event)
     suspend fun send(event: CourseDataReady) = channel.emit(event)
     suspend fun send(event: CourseRefresh) = channel.emit(event)
+    suspend fun send(event: CourseOpenBlock) = channel.emit(event)
 }

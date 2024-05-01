@@ -5,6 +5,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,7 +52,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.parcelable
+import org.openedx.core.extension.serializable
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.global.viewBinding
@@ -83,7 +84,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_TITLE, ""),
-            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
+            requireArguments().getString(ARG_ENROLLMENT_MODE, ""),
+            requireArguments().getString(ARG_OPEN_BLOCK, "")
         )
     }
 
@@ -255,16 +257,22 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         const val ARG_COURSE_ID = "courseId"
         const val ARG_TITLE = "title"
         const val ARG_ENROLLMENT_MODE = "enrollmentMode"
+        const val ARG_REQUIRED_TAB = "requiredTab"
+        const val ARG_OPEN_BLOCK = "resume_block"
         fun newInstance(
             courseId: String,
             courseTitle: String,
             enrollmentMode: String,
+            requiredTab: CourseContainerTab = CourseContainerTab.HOME,
+            openBlock: String = ""
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
                 ARG_TITLE to courseTitle,
-                ARG_ENROLLMENT_MODE to enrollmentMode
+                ARG_ENROLLMENT_MODE to enrollmentMode,
+                ARG_REQUIRED_TAB to requiredTab,
+                ARG_OPEN_BLOCK to openBlock
             )
             return fragment
         }
@@ -295,7 +303,11 @@ fun CourseDashboard(
             val refreshing by viewModel.refreshing.collectAsState(true)
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
-            val pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
+            val requiredTab = bundle.serializable<CourseContainerTab>(CourseContainerFragment.ARG_REQUIRED_TAB)
+            val pagerState = rememberPagerState(
+                initialPage = CourseContainerTab.entries.indexOf(requiredTab),
+                pageCount = { CourseContainerTab.entries.size }
+            )
             val tabState = rememberLazyListState()
             val snackState = remember { SnackbarHostState() }
             val pullRefreshState = rememberPullRefreshState(
@@ -340,9 +352,11 @@ fun CourseDashboard(
                         if (isNavigationEnabled) {
                             RoundTabsBar(
                                 items = CourseContainerTab.entries,
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
                                 rowState = tabState,
                                 pagerState = pagerState,
-                                onPageChange = viewModel::courseContainerTabClickedEvent
+                                withPager = true,
+                                onTabClicked = viewModel::courseContainerTabClickedEvent
                             )
                         } else {
                             Spacer(modifier = Modifier.height(52.dp))
@@ -426,7 +440,7 @@ fun DashboardPager(
             CourseContainerTab.HOME -> {
                 CourseOutlineScreen(
                     windowSize = windowSize,
-                    courseOutlineViewModel = koinViewModel(
+                    viewModel = koinViewModel(
                         parameters = {
                             parametersOf(
                                 bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
@@ -434,7 +448,6 @@ fun DashboardPager(
                             )
                         }
                     ),
-                    courseRouter = viewModel.courseRouter,
                     fragmentManager = fragmentManager,
                     onResetDatesClick = {
                         viewModel.onRefresh(CourseContainerTab.DATES)
@@ -445,7 +458,7 @@ fun DashboardPager(
             CourseContainerTab.VIDEOS -> {
                 CourseVideosScreen(
                     windowSize = windowSize,
-                    courseVideoViewModel = koinViewModel(
+                    viewModel = koinViewModel(
                         parameters = {
                             parametersOf(
                                 bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
@@ -453,14 +466,13 @@ fun DashboardPager(
                             )
                         }
                     ),
-                    fragmentManager = fragmentManager,
-                    courseRouter = viewModel.courseRouter,
+                    fragmentManager = fragmentManager
                 )
             }
 
             CourseContainerTab.DATES -> {
                 CourseDatesScreen(
-                    courseDatesViewModel = koinViewModel(
+                    viewModel = koinViewModel(
                         parameters = {
                             parametersOf(
                                 bundle.getString(CourseContainerFragment.ARG_ENROLLMENT_MODE, "")
@@ -468,7 +480,6 @@ fun DashboardPager(
                         }
                     ),
                     windowSize = windowSize,
-                    courseRouter = viewModel.courseRouter,
                     fragmentManager = fragmentManager,
                     isFragmentResumed = isResumed,
                     updateCourseStructure = {

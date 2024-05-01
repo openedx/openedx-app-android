@@ -748,8 +748,7 @@ private fun CollapsingLayoutPreview() {
                 RoundTabsBar(
                     items = CourseContainerTab.entries,
                     rowState = rememberLazyListState(),
-                    pagerState = rememberPagerState(pageCount = { 5 }),
-                    onPageChange = { }
+                    pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
                 )
             },
             onBackClick = {},

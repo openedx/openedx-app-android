@@ -47,14 +47,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.viewmodel.compose.viewModel
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.CourseContainerTabEntity
-import org.openedx.core.domain.model.EnrolledCourse
+import androidx.fragment.app.FragmentManager
+import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.presentation.global.InDevelopmentScreen
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.PreviewFragmentManager
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
@@ -63,16 +59,11 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.courses.presentation.UserCoursesViewModel
 import org.openedx.courses.presentation.UsersCourseScreen
 import org.openedx.dashboard.R
-import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.learn.LearnType
 
 class LearnFragment : Fragment() {
-
-    private val userCoursesViewModel by viewModel<UserCoursesViewModel>()
-    private val router by inject<DashboardRouter>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,41 +73,8 @@ class LearnFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val windowSize = rememberWindowSize()
                 LearnScreen(
-                    windowSize = windowSize,
-                    userCoursesViewModel = userCoursesViewModel,
-                    onCourseClick = {
-                        router.navigateToCourseOutline(
-                            requireParentFragment().parentFragmentManager,
-                            it.course.id,
-                            it.course.name,
-                            it.mode,
-                            CourseContainerTabEntity.COURSE
-                        )
-                    },
-                    openDates = {
-                        router.navigateToCourseOutline(
-                            requireParentFragment().parentFragmentManager,
-                            it.course.id,
-                            it.course.name,
-                            it.mode,
-                            CourseContainerTabEntity.DATES
-                        )
-                    },
-                    onResumeClick = { componentId ->
-                        //TODO
-                    },
-                    onViewAllClick = {
-                        router.navigateToAllEnrolledCourses(
-                            requireParentFragment().parentFragmentManager
-                        )
-                    },
-                    onSearchClick = {
-                        router.navigateToCourseSearch(
-                            requireParentFragment().parentFragmentManager, ""
-                        )
-                    }
+                    fragmentManager = requireParentFragment().parentFragmentManager
                 )
             }
         }
@@ -126,14 +84,10 @@ class LearnFragment : Fragment() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LearnScreen(
-    windowSize: WindowSize,
-    userCoursesViewModel: UserCoursesViewModel,
-    onCourseClick: (course: EnrolledCourse) -> Unit,
-    openDates: (course: EnrolledCourse) -> Unit,
-    onResumeClick: (componentId: String) -> Unit,
-    onViewAllClick: () -> Unit,
-    onSearchClick: () -> Unit,
+    viewModel: LearnViewModel = koinViewModel(),
+    fragmentManager: FragmentManager,
 ) {
+    val windowSize = rememberWindowSize()
     val scaffoldState = rememberScaffoldState()
     val pagerState = rememberPagerState {
         LearnType.entries.size
@@ -141,7 +95,7 @@ private fun LearnScreen(
     val contentWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
-                expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+                expanded = Modifier.widthIn(Dp.Unspecified, 650.dp),
                 compact = Modifier.fillMaxSize(),
             )
         )
@@ -152,48 +106,47 @@ private fun LearnScreen(
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
-
-
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .statusBarsInset()
-                .displayCutoutForLandscape()
-                .then(contentWidth),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Header(
+            Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp),
-                label = stringResource(id = R.string.dashboard_learn),
-                onSearchClick = onSearchClick
-            )
-
-            if (userCoursesViewModel.isProgramTypeWebView) {
-                LearnDropdownMenu(
+                    .padding(paddingValues)
+                    .statusBarsInset()
+                    .displayCutoutForLandscape()
+                    .then(contentWidth),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Header(
                     modifier = Modifier
-                        .align(Alignment.Start)
                         .padding(horizontal = 16.dp),
-                    pagerState = pagerState
+                    label = stringResource(id = R.string.dashboard_learn),
+                    onSearchClick = {
+                        viewModel.onSearchClick(fragmentManager)
+                    }
                 )
-            }
 
-            HorizontalPager(
-                modifier = Modifier
-                    .fillMaxSize(),
-                state = pagerState,
-                userScrollEnabled = false
-            ) { page ->
-                when (page) {
-                    0 -> UsersCourseScreen(
-                        viewModel = userCoursesViewModel,
-                        onCourseClick = onCourseClick,
-                        onViewAllClick = onViewAllClick,
-                        openDates = openDates,
-                        onResumeClick = onResumeClick
+                if (viewModel.isProgramTypeWebView) {
+                    LearnDropdownMenu(
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(horizontal = 16.dp),
+                        pagerState = pagerState
                     )
+                }
 
-                    1 -> InDevelopmentScreen()
+                HorizontalPager(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    state = pagerState,
+                    userScrollEnabled = false
+                ) { page ->
+                    when (page) {
+                        0 -> UsersCourseScreen(fragmentManager = fragmentManager)
+
+                        1 -> InDevelopmentScreen()
+                    }
                 }
             }
         }
@@ -321,13 +274,7 @@ private fun LearnDropdownMenu(
 private fun LearnScreenPreview() {
     OpenEdXTheme {
         LearnScreen(
-            userCoursesViewModel = viewModel(),
-            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            onCourseClick = {},
-            onViewAllClick = {},
-            onSearchClick = {},
-            openDates = {},
-            onResumeClick = {}
+            fragmentManager = PreviewFragmentManager
         )
     }
 }

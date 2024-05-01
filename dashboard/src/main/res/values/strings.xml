@@ -10,11 +10,13 @@
     <string name="dashboard_start_course">Start course</string>
     <string name="dashboard_resume_course">Resume Course</string>
     <string name="dashboard_past_due_assignment">%1$d Past Due Assignment</string>
-    <string name="dashboard_view_all">View All (%1$d)</string>
+    <string name="dashboard_view_all_with_count">View All (%1$d)</string>
+    <string name="dashboard_view_all">View All</string>
     <string name="dashboard_assignment_due_in_days">%1$s Due in %2$s</string>
     <string name="dashboard_course_filter_all">All</string>
     <string name="dashboard_course_filter_in_progress">In Progress</string>
     <string name="dashboard_course_filter_completed">Completed</string>
     <string name="dashboard_course_filter_expired">Expired</string>
     <string name="dashboard_all_courses">All Courses</string>
+    <string name="dashboard_all">All</string>
 </resources>

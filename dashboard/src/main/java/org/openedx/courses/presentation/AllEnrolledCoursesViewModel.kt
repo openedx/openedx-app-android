@@ -22,6 +22,7 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardAnalytics
+import org.openedx.dashboard.presentation.DashboardRouter
 
 class AllEnrolledCoursesViewModel(
     private val config: Config,
@@ -29,7 +30,8 @@ class AllEnrolledCoursesViewModel(
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
-    private val analytics: DashboardAnalytics
+    private val analytics: DashboardAnalytics,
+    val dashboardRouter: DashboardRouter
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
@@ -57,7 +59,7 @@ class AllEnrolledCoursesViewModel(
     val canLoadMore: StateFlow<Boolean>
         get() = _canLoadMore.asStateFlow()
 
-    val courseStatusFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
+    private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -71,13 +73,13 @@ class AllEnrolledCoursesViewModel(
     }
 
     init {
-        getCourses()
+        getCourses(currentFilter.value)
     }
 
-    fun getCourses() {
+    fun getCourses(courseStatusFilter: CourseStatusFilter? = null) {
         _uiState.value = AllEnrolledCoursesUIState.Loading
         coursesList.clear()
-        internalLoadingCourses()
+        internalLoadingCourses(courseStatusFilter ?: currentFilter.value)
     }
 
     fun updateCourses() {
@@ -86,7 +88,7 @@ class AllEnrolledCoursesViewModel(
                 _updating.value = true
                 isLoading = true
                 page = 1
-                val response = interactor.getAllUserCourses(page, courseStatusFilter.value)
+                val response = interactor.getAllUserCourses(page, currentFilter.value)
                 if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
                     _canLoadMore.value = true
                     page++
@@ -113,12 +115,16 @@ class AllEnrolledCoursesViewModel(
         }
     }
 
-    private fun internalLoadingCourses() {
+    private fun internalLoadingCourses(courseStatusFilter: CourseStatusFilter? = null) {
+        if (courseStatusFilter != null) {
+            page = 1
+            currentFilter.value = courseStatusFilter
+        }
         viewModelScope.launch {
             try {
                 isLoading = true
                 val response = if (networkConnection.isOnline() || page > 1) {
-                    interactor.getAllUserCourses(page, courseStatusFilter.value)
+                    interactor.getAllUserCourses(page, currentFilter.value)
                 } else {
                     null
                 }
@@ -164,4 +170,14 @@ class AllEnrolledCoursesViewModel(
         analytics.dashboardCourseClickedEvent(courseId, courseName)
     }
 
+}
+
+interface AllEnrolledCoursesAction {
+    object Reload : AllEnrolledCoursesAction
+    object SwipeRefresh : AllEnrolledCoursesAction
+    object EndOfPage : AllEnrolledCoursesAction
+    object Back : AllEnrolledCoursesAction
+    object Search : AllEnrolledCoursesAction
+    data class OpenCourse(val enrolledCourse: EnrolledCourse) : AllEnrolledCoursesAction
+    data class FilterChange(val courseStatusFilter: CourseStatusFilter?) : AllEnrolledCoursesAction
 }

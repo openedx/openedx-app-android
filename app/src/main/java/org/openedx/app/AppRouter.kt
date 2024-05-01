@@ -8,8 +8,8 @@ import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
-import org.openedx.core.CourseContainerTabEntity
 import org.openedx.core.FragmentViewType
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
@@ -135,6 +135,18 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ) {
         replaceFragmentWithBackStack(fm, CourseInfoFragment.newInstance(courseId, infoType))
     }
+
+    override fun navigateToCourseOutline(
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String,
+        enrollmentMode: String
+    ) {
+        replaceFragmentWithBackStack(
+            fm,
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
+        )
+    }
     //endregion
 
     //region DashboardRouter
@@ -144,11 +156,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         courseTitle: String,
         enrollmentMode: String,
-        openTab: CourseContainerTabEntity
+        requiredTab: CourseContainerTab,
+        openBlock: String
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, openTab)
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, requiredTab, openBlock)
         )
     }
 

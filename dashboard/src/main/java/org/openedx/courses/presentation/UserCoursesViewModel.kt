@@ -1,6 +1,5 @@
 package org.openedx.courses.presentation
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +12,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -21,6 +21,7 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.utils.FileUtil
 import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
+import org.openedx.dashboard.presentation.DashboardRouter
 
 class UserCoursesViewModel(
     private val config: Config,
@@ -28,11 +29,11 @@ class UserCoursesViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val networkConnection: NetworkConnection,
-    private val fileUtil: FileUtil
+    private val fileUtil: FileUtil,
+    val dashboardRouter: DashboardRouter
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
-    val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
 
     private val _uiState = MutableStateFlow<UserCoursesUIState>(UserCoursesUIState.Loading)
     val uiState: StateFlow<UserCoursesUIState>
@@ -49,19 +50,8 @@ class UserCoursesViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-        viewModelScope.launch {
-            discoveryNotifier.notifier.collect {
-                // TODO Notifier doesn't collect data
-                if (it is CourseDashboardUpdate) {
-                    updateCourses()
-                }
-            }
-        }
-    }
-
     init {
+        collectDiscoveryNotifier()
         getCourses()
     }
 
@@ -99,4 +89,23 @@ class UserCoursesViewModel(
         _updating.value = true
         getCourses()
     }
+
+    private fun collectDiscoveryNotifier() {
+        viewModelScope.launch {
+            discoveryNotifier.notifier.collect {
+                if (it is CourseDashboardUpdate) {
+                    updateCourses()
+                }
+            }
+        }
+    }
+}
+
+interface UserCoursesScreenAction {
+    object SwipeRefresh : UserCoursesScreenAction
+    object ViewAll : UserCoursesScreenAction
+    object Reload : UserCoursesScreenAction
+    data class OpenBlock(val enrolledCourse: EnrolledCourse, val blockId: String) : UserCoursesScreenAction
+    data class OpenCourse(val enrolledCourse: EnrolledCourse) : UserCoursesScreenAction
+    data class NavigateToDates(val enrolledCourse: EnrolledCourse) : UserCoursesScreenAction
 }

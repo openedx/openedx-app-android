@@ -35,6 +35,7 @@ import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.utils.TimeUtils
@@ -58,6 +59,7 @@ import org.openedx.core.R as CoreR
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
+    private var openBlock: String,
     private val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
@@ -184,6 +186,9 @@ class CourseContainerViewModel(
                     if (isReady) {
                         _isNavigationEnabled.value = true
                         courseNotifier.send(CourseDataReady(courseStructure))
+                        if (openBlock.isNotEmpty()) {
+                            courseNotifier.send(CourseOpenBlock(openBlock))
+                        }
                     }
                     isReady
                 }

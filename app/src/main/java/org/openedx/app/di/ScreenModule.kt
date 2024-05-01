@@ -51,6 +51,7 @@ import org.openedx.discussion.presentation.search.DiscussionSearchThreadViewMode
 import org.openedx.discussion.presentation.threads.DiscussionAddThreadViewModel
 import org.openedx.discussion.presentation.threads.DiscussionThreadsViewModel
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
+import org.openedx.learn.presentation.LearnViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
@@ -119,8 +120,9 @@ val screenModule = module {
     factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { UserCoursesViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { UserCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { LearnViewModel(get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -183,10 +185,11 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
+    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String, openBlock: String) ->
         CourseContainerViewModel(
             courseId,
             courseTitle,
+            openBlock,
             enrollmentMode,
             get(),
             get(),
@@ -215,6 +218,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String) ->
@@ -256,6 +260,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
@@ -293,6 +298,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->

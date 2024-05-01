@@ -1,6 +1,7 @@
 package org.openedx.discovery.presentation
 
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.presentation.course.CourseContainerTab
 
 interface DiscoveryRouter {
 

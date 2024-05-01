@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.outline
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,7 @@ import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
@@ -32,11 +34,13 @@ import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.R as courseR
 
@@ -50,6 +54,7 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
+    val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -70,12 +75,14 @@ class CourseOutlineViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    var resumeSectionBlock: Block? = null
-        private set
-    var resumeVerticalBlock: Block? = null
-        private set
+    private val _openBlock = MutableSharedFlow<String>()
+    val openBlock: SharedFlow<String>
+        get() = _openBlock.asSharedFlow()
 
-    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+    private var resumeSectionBlock: Block? = null
+    private var resumeVerticalBlock: Block? = null
+
+    private val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
@@ -84,14 +91,19 @@ class CourseOutlineViewModel(
     init {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
-                when(event) {
+                when (event) {
                     is CourseStructureUpdated -> {
                         if (event.courseId == courseId) {
                             updateCourseData()
                         }
                     }
+
                     is CourseDataReady -> {
                         getCourseData()
+                    }
+
+                    is CourseOpenBlock -> {
+                        _openBlock.emit(event.blockId)
                     }
                 }
             }
@@ -279,6 +291,39 @@ class CourseOutlineViewModel(
         }
     }
 
+    fun openBlock(fragmentManager: FragmentManager, blockId: String) {
+        val courseStructure = interactor.getCourseStructureFromCache()
+        val blocks = courseStructure.blockData
+        getResumeBlock(blocks, blockId)
+        resumeBlock(fragmentManager, blockId)
+    }
+
+    private fun resumeBlock(fragmentManager: FragmentManager, blockId: String) {
+        resumeSectionBlock?.let { subSection ->
+            resumeCourseTappedEvent(subSection.id)
+            resumeVerticalBlock?.let { unit ->
+                if (isCourseExpandableSectionsEnabled) {
+                    courseRouter.navigateToCourseContainer(
+                        fm = fragmentManager,
+                        courseId = courseId,
+                        unitId = unit.id,
+                        componentId = blockId,
+                        mode = CourseViewMode.FULL
+                    )
+                } else {
+                    courseRouter.navigateToCourseSubsections(
+                        fragmentManager,
+                        courseId = courseId,
+                        subSectionId = subSection.id,
+                        mode = CourseViewMode.FULL,
+                        unitId = unit.id,
+                        componentId = blockId
+                    )
+                }
+            }
+        }
+    }
+
     fun viewCertificateTappedEvent() {
         analytics.logEvent(
             CourseAnalyticsEvent.VIEW_CERTIFICATE.eventName,
@@ -289,7 +334,7 @@ class CourseOutlineViewModel(
         )
     }
 
-    fun resumeCourseTappedEvent(blockId: String) {
+    private fun resumeCourseTappedEvent(blockId: String) {
         val currentState = uiState.value
         if (currentState is CourseOutlineUIState.CourseData) {
             analytics.logEvent(

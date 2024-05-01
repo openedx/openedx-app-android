@@ -1,10 +1,12 @@
 package org.openedx.courses.presentation
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,8 +17,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -57,13 +60,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentManager
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseAssignments
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
@@ -72,9 +79,11 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.TextIcon
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -87,11 +96,8 @@ import org.openedx.core.R as CoreR
 
 @Composable
 fun UsersCourseScreen(
-    viewModel: UserCoursesViewModel,
-    onCourseClick: (EnrolledCourse) -> Unit,
-    openDates: (EnrolledCourse) -> Unit,
-    onViewAllClick: () -> Unit,
-    onResumeClick: (componentId: String) -> Unit,
+    viewModel: UserCoursesViewModel = koinViewModel(),
+    fragmentManager: FragmentManager,
 ) {
     val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -102,13 +108,51 @@ fun UsersCourseScreen(
         uiState = uiState,
         updating = updating,
         apiHostUrl = viewModel.apiHostUrl,
-        onSwipeRefresh = viewModel::updateCourses,
         hasInternetConnection = viewModel.hasInternetConnection,
-        onCourseClick = onCourseClick,
-        onViewAllClick = onViewAllClick,
-        openDates = openDates,
-        onResumeClick = onResumeClick,
-        onReloadClick = viewModel::getCourses
+        onAction = { action ->
+            when (action) {
+                UserCoursesScreenAction.SwipeRefresh -> {
+                    viewModel.updateCourses()
+                }
+
+                UserCoursesScreenAction.ViewAll -> {
+                    viewModel.dashboardRouter.navigateToAllEnrolledCourses(fragmentManager)
+                }
+
+                UserCoursesScreenAction.Reload -> {
+                    viewModel.getCourses()
+                }
+
+                is UserCoursesScreenAction.OpenCourse -> {
+                    viewModel.dashboardRouter.navigateToCourseOutline(
+                        fm = fragmentManager,
+                        courseId = action.enrolledCourse.course.id,
+                        courseTitle = action.enrolledCourse.course.name,
+                        enrollmentMode = action.enrolledCourse.mode
+                    )
+                }
+
+                is UserCoursesScreenAction.NavigateToDates -> {
+                    viewModel.dashboardRouter.navigateToCourseOutline(
+                        fm = fragmentManager,
+                        courseId = action.enrolledCourse.course.id,
+                        courseTitle = action.enrolledCourse.course.name,
+                        enrollmentMode = action.enrolledCourse.mode,
+                        requiredTab = CourseContainerTab.DATES
+                    )
+                }
+
+                is UserCoursesScreenAction.OpenBlock -> {
+                    viewModel.dashboardRouter.navigateToCourseOutline(
+                        fm = fragmentManager,
+                        courseId = action.enrolledCourse.course.id,
+                        courseTitle = action.enrolledCourse.course.name,
+                        enrollmentMode = action.enrolledCourse.mode,
+                        openBlock = action.blockId
+                    )
+                }
+            }
+        }
     )
 }
 
@@ -119,18 +163,13 @@ private fun UsersCourseScreen(
     uiState: UserCoursesUIState,
     updating: Boolean,
     apiHostUrl: String,
-    onSwipeRefresh: () -> Unit,
-    onCourseClick: (EnrolledCourse) -> Unit,
-    openDates: (EnrolledCourse) -> Unit,
-    onViewAllClick: () -> Unit,
-    onReloadClick: () -> Unit,
-    onResumeClick: (componentId: String) -> Unit,
+    onAction: (UserCoursesScreenAction) -> Unit,
     hasInternetConnection: Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = updating,
-        onRefresh = { onSwipeRefresh() }
+        onRefresh = { onAction(UserCoursesScreenAction.SwipeRefresh) }
     )
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
@@ -168,10 +207,18 @@ private fun UsersCourseScreen(
                             modifier = Modifier.fillMaxSize(),
                             userCourses = uiState.userCourses,
                             apiHostUrl = apiHostUrl,
-                            onCourseClick = onCourseClick,
-                            onViewAllClick = onViewAllClick,
-                            openDates = openDates,
-                            onResumeClick = onResumeClick
+                            openCourse = {
+                                onAction(UserCoursesScreenAction.OpenCourse(it))
+                            },
+                            onViewAllClick = {
+                                onAction(UserCoursesScreenAction.ViewAll)
+                            },
+                            navigateToDates = {
+                                onAction(UserCoursesScreenAction.NavigateToDates(it))
+                            },
+                            openBlock = { course, blockId ->
+                                onAction(UserCoursesScreenAction.OpenBlock(course, blockId))
+                            }
                         )
                     }
 
@@ -198,7 +245,7 @@ private fun UsersCourseScreen(
                         },
                         onReloadClick = {
                             isInternetConnectionShown = true
-                            onReloadClick()
+                            onAction(UserCoursesScreenAction.Reload)
                         }
                     )
                 }
@@ -212,10 +259,10 @@ private fun UserCourses(
     modifier: Modifier = Modifier,
     userCourses: UserCourses,
     apiHostUrl: String,
-    onCourseClick: (EnrolledCourse) -> Unit,
-    openDates: (EnrolledCourse) -> Unit,
+    openCourse: (EnrolledCourse) -> Unit,
+    navigateToDates: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit,
-    onResumeClick: (componentId: String) -> Unit,
+    openBlock: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -225,15 +272,15 @@ private fun UserCourses(
             PrimaryCourseCard(
                 primaryCourse = userCourses.primary,
                 apiHostUrl = apiHostUrl,
-                openDates = openDates,
-                onResumeClick = onResumeClick,
-                onCourseClick = onCourseClick
+                navigateToDates = navigateToDates,
+                openBlock = openBlock,
+                openCourse = openCourse
             )
         }
         SecondaryCourses(
             courses = userCourses.enrollments,
             apiHostUrl = apiHostUrl,
-            onCourseClick = onCourseClick,
+            onCourseClick = openCourse,
             onViewAllClick = onViewAllClick
         )
     }
@@ -246,30 +293,86 @@ private fun SecondaryCourses(
     onCourseClick: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit
 ) {
+    val windowSize = rememberWindowSize()
+    val itemsCount = if (windowSize.isTablet) 7 else 5
+    val rows = if (windowSize.isTablet) 2 else 1
+    val height = if (windowSize.isTablet) 322.dp else 152.dp
+    val items = courses.take(itemsCount)
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 14.dp)
+            .fillMaxSize()
             .padding(top = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TextIcon(
-            text = stringResource(R.string.dashboard_view_all, courses.size),
+            modifier = Modifier.padding(horizontal = 18.dp),
+            text = stringResource(R.string.dashboard_view_all_with_count, courses.size),
             textStyle = MaterialTheme.appTypography.titleSmall,
             icon = Icons.Default.ChevronRight,
             color = MaterialTheme.appColors.textDark,
-            modifier = Modifier.padding(horizontal = 4.dp),
             iconModifier = Modifier.size(22.dp),
             onClick = onViewAllClick
         )
-        LazyRow {
-            items(courses) {
-                CourseListItem(
-                    course = it,
-                    apiHostUrl = apiHostUrl,
-                    onCourseClick = onCourseClick
-                )
+        LazyHorizontalGrid(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(height),
+            rows = GridCells.Fixed(rows),
+            contentPadding = PaddingValues(horizontal = 18.dp),
+            content = {
+                items(items) {
+                    CourseListItem(
+                        course = it,
+                        apiHostUrl = apiHostUrl,
+                        onCourseClick = onCourseClick
+                    )
+                }
+                item {
+                    ViewAllItem(
+                        onViewAllClick = onViewAllClick
+                    )
+                }
             }
+        )
+    }
+}
+
+@Composable
+private fun ViewAllItem(
+    onViewAllClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(140.dp)
+            .height(152.dp)
+            .padding(4.dp)
+            .clickable(
+                onClickLabel = stringResource(id = R.string.dashboard_view_all),
+                onClick = {
+                    onViewAllClick()
+                }
+            ),
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
+        shape = MaterialTheme.appShapes.courseImageShape,
+        elevation = 2.dp,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                modifier = Modifier.size(48.dp),
+                painter = painterResource(id = R.drawable.dashboard_ic_book),
+                tint = MaterialTheme.appColors.textFieldBorder,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(id = R.string.dashboard_view_all),
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textDark
+            )
         }
     }
 }
@@ -283,6 +386,7 @@ private fun CourseListItem(
     Card(
         modifier = Modifier
             .width(140.dp)
+            .height(152.dp)
             .padding(4.dp)
             .clickable {
                 onCourseClick(course)
@@ -360,10 +464,15 @@ private fun AssignmentItem(
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            val infoTextStyle = if (title.isNullOrEmpty()) {
+                MaterialTheme.appTypography.titleSmall
+            } else {
+                MaterialTheme.appTypography.labelSmall
+            }
             Text(
                 text = info,
                 color = MaterialTheme.appColors.textDark,
-                style = MaterialTheme.appTypography.labelSmall
+                style = infoTextStyle
             )
             if (!title.isNullOrEmpty()) {
                 Text(
@@ -380,9 +489,9 @@ private fun AssignmentItem(
 private fun PrimaryCourseCard(
     primaryCourse: EnrolledCourse,
     apiHostUrl: String,
-    openDates: (EnrolledCourse) -> Unit,
-    onResumeClick: (componentId: String) -> Unit,
-    onCourseClick: (EnrolledCourse) -> Unit,
+    navigateToDates: (EnrolledCourse) -> Unit,
+    openBlock: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
+    openCourse: (EnrolledCourse) -> Unit,
 ) {
     val context = LocalContext.current
     Card(
@@ -407,11 +516,16 @@ private fun PrimaryCourseCard(
                     .fillMaxWidth()
                     .height(140.dp)
             )
+            val progress: Float = try {
+                (primaryCourse.progress.numPointsEarned / primaryCourse.progress.numPointsPossible).toFloat()
+            } catch (_: ArithmeticException) {
+                0f
+            }
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),
-                progress = primaryCourse.progress.numPointsEarned.toFloat(),
+                progress = progress,
                 color = MaterialTheme.appColors.primary,
                 backgroundColor = MaterialTheme.appColors.divider
             )
@@ -424,14 +538,15 @@ private fun PrimaryCourseCard(
             )
             val pastAssignments = primaryCourse.courseAssignments?.pastAssignments
             if (!pastAssignments.isNullOrEmpty()) {
-                val title = if (pastAssignments.size == 1) pastAssignments.first().title else null
+                val nearestAssignment = pastAssignments.maxBy { it.date }
+                val title = if (pastAssignments.size == 1) nearestAssignment.title else null
                 Divider()
                 AssignmentItem(
                     modifier = Modifier.clickable {
                         if (pastAssignments.size == 1) {
-                            onResumeClick(pastAssignments.first().blockId)
+                            openBlock(primaryCourse, nearestAssignment.blockId)
                         } else {
-                            openDates(primaryCourse)
+                            navigateToDates(primaryCourse)
                         }
                     },
                     painter = rememberVectorPainter(Icons.Default.Warning),
@@ -439,19 +554,25 @@ private fun PrimaryCourseCard(
                     info = stringResource(R.string.dashboard_past_due_assignment, pastAssignments.size)
                 )
             }
-            val futureAssignment = primaryCourse.courseAssignments?.futureAssignment
-            if (futureAssignment != null) {
+            val futureAssignments = primaryCourse.courseAssignments?.futureAssignments
+            if (!futureAssignments.isNullOrEmpty()) {
+                val nearestAssignment = futureAssignments.minBy { it.date }
+                val title = if (futureAssignments.size == 1) nearestAssignment.title else null
                 Divider()
                 AssignmentItem(
                     modifier = Modifier.clickable {
-                        onResumeClick(futureAssignment.blockId)
+                        if (futureAssignments.size == 1) {
+                            openBlock(primaryCourse, nearestAssignment.blockId)
+                        } else {
+                            navigateToDates(primaryCourse)
+                        }
                     },
                     painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
-                    title = futureAssignment.title,
+                    title = title,
                     info = stringResource(
                         R.string.dashboard_assignment_due_in_days,
-                        futureAssignment.assignmentType ?: "",
-                        TimeUtils.getCourseFormattedDate(context, futureAssignment.date)
+                        nearestAssignment.assignmentType ?: "",
+                        TimeUtils.getCourseFormattedDate(context, nearestAssignment.date)
                     )
                 )
             }
@@ -459,9 +580,9 @@ private fun PrimaryCourseCard(
                 primaryCourse = primaryCourse,
                 onClick = {
                     if (primaryCourse.courseStatus == null) {
-                        onCourseClick(primaryCourse)
+                        openCourse(primaryCourse)
                     } else {
-                        onResumeClick(primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
+                        openBlock(primaryCourse, primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
                     }
                 }
             )
@@ -590,8 +711,14 @@ private fun EmptyState(
     }
 }
 
-
-private val mockCourseAssignments = CourseAssignments(null, emptyList())
+private val mockCourseDateBlock = CourseDateBlock(
+    title = "Homework 1: ABCD",
+    description = "After this date, course content will be archived",
+    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
+    assignmentType = "Homework"
+)
+private val mockCourseAssignments =
+    CourseAssignments(listOf(mockCourseDateBlock), listOf(mockCourseDateBlock, mockCourseDateBlock))
 private val mockCourse = EnrolledCourse(
     auditAccessExpires = Date(),
     created = "created",
@@ -603,7 +730,7 @@ private val mockCourse = EnrolledCourse(
     courseAssignments = mockCourseAssignments,
     course = EnrolledCourseData(
         id = "id",
-        name = "Course name",
+        name = "Looooooooooooooooooooong Course name",
         number = "",
         org = "Org",
         start = Date(),
@@ -641,7 +768,21 @@ private val mockUserCourses = UserCourses(
     primary = mockCourse
 )
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ViewAllItemPreview() {
+    OpenEdXTheme {
+        ViewAllItem(
+            onViewAllClick = {}
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
 private fun UsersCourseScreenPreview() {
     OpenEdXTheme {
@@ -651,12 +792,7 @@ private fun UsersCourseScreenPreview() {
             uiMessage = null,
             updating = false,
             hasInternetConnection = false,
-            onSwipeRefresh = { },
-            onCourseClick = { },
-            onViewAllClick = { },
-            openDates = { },
-            onResumeClick = { },
-            onReloadClick = { }
+            onAction = {}
         )
     }
 }

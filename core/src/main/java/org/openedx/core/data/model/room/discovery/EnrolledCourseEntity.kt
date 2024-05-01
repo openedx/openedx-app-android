@@ -201,13 +201,13 @@ data class CourseStatusDb(
 }
 
 data class CourseAssignmentsDb(
-    @Embedded
-    val futureAssignment: CourseDateBlockDb?,
+    @ColumnInfo("futureAssignments")
+    val futureAssignments: List<CourseDateBlockDb>?,
     @ColumnInfo("pastAssignments")
     val pastAssignments: List<CourseDateBlockDb>?
 ) {
     fun mapToDomain() = CourseAssignments(
-        futureAssignment = futureAssignment?.mapToDomain(),
+        futureAssignments = futureAssignments?.map { it.mapToDomain() },
         pastAssignments = pastAssignments?.map { it.mapToDomain() }
     )
 }

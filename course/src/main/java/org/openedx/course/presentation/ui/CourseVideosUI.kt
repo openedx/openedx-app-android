@@ -77,7 +77,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.presentation.videos.CourseVideosUIState
 import java.io.File
@@ -86,58 +85,57 @@ import java.util.Date
 @Composable
 fun CourseVideosScreen(
     windowSize: WindowSize,
-    courseVideoViewModel: CourseVideoViewModel,
-    fragmentManager: FragmentManager,
-    courseRouter: CourseRouter
+    viewModel: CourseVideoViewModel,
+    fragmentManager: FragmentManager
 ) {
-    val uiState by courseVideoViewModel.uiState.collectAsState(CourseVideosUIState.Loading)
-    val uiMessage by courseVideoViewModel.uiMessage.collectAsState(null)
-    val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
+    val uiState by viewModel.uiState.collectAsState(CourseVideosUIState.Loading)
+    val uiMessage by viewModel.uiMessage.collectAsState(null)
+    val videoSettings by viewModel.videoSettings.collectAsState()
     val context = LocalContext.current
 
     CourseVideosUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        courseTitle = courseVideoViewModel.courseTitle,
-        isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
+        courseTitle = viewModel.courseTitle,
+        isCourseNestedListEnabled = viewModel.isCourseNestedListEnabled,
         videoSettings = videoSettings,
         onItemClick = { block ->
-            courseRouter.navigateToCourseSubsections(
+            viewModel.courseRouter.navigateToCourseSubsections(
                 fm = fragmentManager,
-                courseId = courseVideoViewModel.courseId,
+                courseId = viewModel.courseId,
                 subSectionId = block.id,
                 mode = CourseViewMode.VIDEOS
             )
         },
         onExpandClick = { block ->
-            courseVideoViewModel.switchCourseSections(block.id)
+            viewModel.switchCourseSections(block.id)
         },
         onSubSectionClick = { subSectionBlock ->
-            courseVideoViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                courseVideoViewModel.sequentialClickedEvent(
+            viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                viewModel.sequentialClickedEvent(
                     unit.blockId,
                     unit.displayName
                 )
-                courseRouter.navigateToCourseContainer(
+                viewModel.courseRouter.navigateToCourseContainer(
                     fm = fragmentManager,
-                    courseId = courseVideoViewModel.courseId,
+                    courseId = viewModel.courseId,
                     unitId = unit.id,
                     mode = CourseViewMode.VIDEOS
                 )
             }
         },
         onDownloadClick = {
-            if (courseVideoViewModel.isBlockDownloading(it.id)) {
-                courseRouter.navigateToDownloadQueue(
+            if (viewModel.isBlockDownloading(it.id)) {
+                viewModel.courseRouter.navigateToDownloadQueue(
                     fm = fragmentManager,
-                    courseVideoViewModel.getDownloadableChildren(it.id)
+                    viewModel.getDownloadableChildren(it.id)
                         ?: arrayListOf()
                 )
-            } else if (courseVideoViewModel.isBlockDownloaded(it.id)) {
-                courseVideoViewModel.removeDownloadModels(it.id)
+            } else if (viewModel.isBlockDownloaded(it.id)) {
+                viewModel.removeDownloadModels(it.id)
             } else {
-                courseVideoViewModel.saveDownloadModels(
+                viewModel.saveDownloadModels(
                     context.externalCacheDir.toString() +
                             File.separator +
                             context
@@ -147,11 +145,11 @@ fun CourseVideosScreen(
             }
         },
         onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
-            courseVideoViewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
+            viewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
             if (isAllBlocksDownloadedOrDownloading) {
-                courseVideoViewModel.removeAllDownloadModels()
+                viewModel.removeAllDownloadModels()
             } else {
-                courseVideoViewModel.saveAllDownloadModels(
+                viewModel.saveAllDownloadModels(
                     context.externalCacheDir.toString() +
                             File.separator +
                             context
@@ -161,15 +159,15 @@ fun CourseVideosScreen(
             }
         },
         onDownloadQueueClick = {
-            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
-                courseRouter.navigateToDownloadQueue(fm = fragmentManager)
+            if (viewModel.hasDownloadModelsInQueue()) {
+                viewModel.courseRouter.navigateToDownloadQueue(fm = fragmentManager)
             }
         },
         onVideoDownloadQualityClick = {
-            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
-                courseVideoViewModel.onChangingVideoQualityWhileDownloading()
+            if (viewModel.hasDownloadModelsInQueue()) {
+                viewModel.onChangingVideoQualityWhileDownloading()
             } else {
-                courseRouter.navigateToVideoQuality(
+                viewModel.courseRouter.navigateToVideoQuality(
                     fragmentManager,
                     VideoQualityType.Download
                 )

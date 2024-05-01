@@ -72,6 +72,7 @@ interface CourseApi {
     suspend fun getUserCourses(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 20,
         @Query("status") status: String? = null,
         @Query("requested_fields") fields: List<String> = emptyList()
     ): CourseEnrollments

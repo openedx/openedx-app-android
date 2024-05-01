@@ -1,6 +1,7 @@
 package org.openedx.dashboard.presentation
 
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.presentation.course.CourseContainerTab
 
 interface DashboardRouter {
 
@@ -9,6 +10,8 @@ interface DashboardRouter {
         courseId: String,
         courseTitle: String,
         enrollmentMode: String,
+        requiredTab: CourseContainerTab = CourseContainerTab.HOME,
+        openBlock: String = ""
     )
 
     fun navigateToSettings(fm: FragmentManager)
