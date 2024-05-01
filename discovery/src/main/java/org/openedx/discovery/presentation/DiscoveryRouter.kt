@@ -1,7 +1,6 @@
 package org.openedx.discovery.presentation
 
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.CourseContainerTabEntity
 
 interface DiscoveryRouter {
 
@@ -9,8 +8,7 @@ interface DiscoveryRouter {
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        enrollmentMode: String,
-        openTab: CourseContainerTabEntity = CourseContainerTabEntity.COURSE
+        enrollmentMode: String
     )
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?)
@@ -26,6 +24,8 @@ interface DiscoveryRouter {
     fun navigateToSignUp(fm: FragmentManager, courseId: String? = null, infoType: String? = null)
 
     fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?)
+
+    fun navigateToSettings(fm: FragmentManager)
 
     fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String)
 }

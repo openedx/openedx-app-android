@@ -1,143 +1,108 @@
 package org.openedx.discussion.presentation.topics
 
 import android.content.res.Configuration
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
+import androidx.fragment.app.FragmentManager
+import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.FragmentViewType
 import org.openedx.core.UIMessage
-import org.openedx.core.ui.*
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.StaticSearchBar
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.discussion.domain.model.Topic
-import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
 import org.openedx.discussion.R as discussionR
 
-class DiscussionTopicsFragment : Fragment() {
+@Composable
+fun DiscussionTopicsScreen(
+    discussionTopicsViewModel: DiscussionTopicsViewModel = koinViewModel(),
+    windowSize: WindowSize,
+    fragmentManager: FragmentManager
+) {
+    val uiState by discussionTopicsViewModel.uiState.observeAsState(DiscussionTopicsUIState.Loading)
+    val uiMessage by discussionTopicsViewModel.uiMessage.collectAsState(null)
 
-    private val viewModel by viewModel<DiscussionTopicsViewModel> {
-        parametersOf(requireArguments().getString(ARG_COURSE_ID, ""))
-    }
-    private val router by inject<DiscussionRouter>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.courseName = requireArguments().getString(ARG_COURSE_NAME, "")
-        viewModel.getCourseTopics()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ) = ComposeView(requireContext()).apply {
-        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-        setContent {
-            OpenEdXTheme {
-                val windowSize = rememberWindowSize()
-
-                val uiState by viewModel.uiState.observeAsState(DiscussionTopicsUIState.Loading)
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val refreshing by viewModel.isUpdating.observeAsState(false)
-                DiscussionTopicsScreen(
-                    windowSize = windowSize,
-                    uiState = uiState,
-                    uiMessage = uiMessage,
-                    refreshing = refreshing,
-                    onSwipeRefresh = {
-                        viewModel.updateCourseTopics()
-                    },
-                    onItemClick = { action, data, title ->
-                        viewModel.discussionClickedEvent(action, data, title)
-                        router.navigateToDiscussionThread(
-                            requireActivity().supportFragmentManager,
-                            action,
-                            viewModel.courseId,
-                            data,
-                            title,
-                            FragmentViewType.FULL_CONTENT
-                        )
-                    },
-                    onSearchClick = {
-                        router.navigateToSearchThread(
-                            requireActivity().supportFragmentManager,
-                            viewModel.courseId
-                        )
-                    }
-                )
-            }
-        }
-    }
-
-    companion object {
-        const val TOPIC = "Topic"
-        const val ALL_POSTS = "All posts"
-        const val FOLLOWING_POSTS = "Following"
-
-        private const val ARG_COURSE_ID = "argCourseID"
-        private const val ARG_COURSE_NAME = "argCourseName"
-        fun newInstance(
-            courseId: String,
-            courseName: String
-        ): DiscussionTopicsFragment {
-            val fragment = DiscussionTopicsFragment()
-            fragment.arguments = bundleOf(
-                ARG_COURSE_ID to courseId,
-                ARG_COURSE_NAME to courseName,
+    DiscussionTopicsUI(
+        windowSize = windowSize,
+        uiState = uiState,
+        uiMessage = uiMessage,
+        onSearchClick = {
+            discussionTopicsViewModel.discussionRouter.navigateToSearchThread(
+                fragmentManager,
+                discussionTopicsViewModel.courseId
             )
-            return fragment
-        }
-    }
+        },
+        onItemClick = { action, data, title ->
+            discussionTopicsViewModel.discussionClickedEvent(
+                action,
+                data,
+                title
+            )
+            discussionTopicsViewModel.discussionRouter.navigateToDiscussionThread(
+                fragmentManager,
+                action,
+                discussionTopicsViewModel.courseId,
+                data,
+                title,
+                FragmentViewType.FULL_CONTENT
+            )
+        },
+    )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun DiscussionTopicsScreen(
+private fun DiscussionTopicsUI(
     windowSize: WindowSize,
     uiState: DiscussionTopicsUIState,
     uiMessage: UIMessage?,
-    refreshing: Boolean,
     onSearchClick: () -> Unit,
-    onSwipeRefresh: () -> Unit,
     onItemClick: (String, String, String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val context = LocalContext.current
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -206,7 +171,7 @@ private fun DiscussionTopicsScreen(
                     color = MaterialTheme.appColors.background,
                     shape = MaterialTheme.appShapes.screenBackgroundShape
                 ) {
-                    Box(Modifier.pullRefresh(pullRefreshState)) {
+                    Box {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -241,7 +206,7 @@ private fun DiscussionTopicsScreen(
                                                         .height(categoriesHeight),
                                                     onClick = {
                                                         onItemClick(
-                                                            DiscussionTopicsFragment.ALL_POSTS,
+                                                            DiscussionTopicsViewModel.ALL_POSTS,
                                                             "",
                                                             context.getString(discussionR.string.discussion_all_posts)
                                                         )
@@ -254,7 +219,7 @@ private fun DiscussionTopicsScreen(
                                                         .height(categoriesHeight),
                                                     onClick = {
                                                         onItemClick(
-                                                            DiscussionTopicsFragment.FOLLOWING_POSTS,
+                                                            DiscussionTopicsViewModel.FOLLOWING_POSTS,
                                                             "",
                                                             context.getString(discussionR.string.discussion_posts_following)
                                                         )
@@ -274,7 +239,7 @@ private fun DiscussionTopicsScreen(
                                             } else {
                                                 TopicItem(topic = topic, onClick = { id, title ->
                                                     onItemClick(
-                                                        DiscussionTopicsFragment.TOPIC,
+                                                        DiscussionTopicsViewModel.TOPIC,
                                                         id,
                                                         title
                                                     )
@@ -287,28 +252,15 @@ private fun DiscussionTopicsScreen(
                                     }
                                 }
 
-                                DiscussionTopicsUIState.Loading -> {
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize(), contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                                    }
-                                }
+                                DiscussionTopicsUIState.Loading -> {}
                             }
                         }
-                        PullRefreshIndicator(
-                            refreshing,
-                            pullRefreshState,
-                            Modifier.align(Alignment.TopCenter)
-                        )
                     }
                 }
             }
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -317,13 +269,11 @@ private fun DiscussionTopicsScreen(
 @Composable
 private fun DiscussionTopicsScreenPreview() {
     OpenEdXTheme {
-        DiscussionTopicsScreen(
+        DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
-            refreshing = false,
             onItemClick = { _, _, _ -> },
-            onSwipeRefresh = {},
             onSearchClick = {}
         )
     }
@@ -334,13 +284,11 @@ private fun DiscussionTopicsScreenPreview() {
 @Composable
 private fun DiscussionTopicsScreenTabletPreview() {
     OpenEdXTheme {
-        DiscussionTopicsScreen(
+        DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
             uiMessage = null,
-            refreshing = false,
             onItemClick = { _, _, _ -> },
-            onSwipeRefresh = {},
             onSearchClick = {}
         )
     }

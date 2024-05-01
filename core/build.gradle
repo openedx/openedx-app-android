@@ -139,7 +139,7 @@ dependencies {
     // Koin DI
     api "io.insert-koin:koin-core:$koin_version"
     api "io.insert-koin:koin-android:$koin_version"
-    api("io.insert-koin:koin-androidx-compose:$koin_version")
+    api "io.insert-koin:koin-androidx-compose:$koin_version"
 
     api "io.coil-kt:coil-compose:$coil_version"
     api "io.coil-kt:coil-gif:$coil_version"

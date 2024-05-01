@@ -100,6 +100,7 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.Date
+import org.openedx.core.R as CoreR
 
 class DashboardFragment : Fragment() {
 
@@ -159,6 +160,9 @@ class DashboardFragment : Fragment() {
                             AppUpdateState.openPlayMarket(requireContext())
                         },
                     ),
+                    onSettingsClick = {
+                        router.navigateToSettings(requireActivity().supportFragmentManager)
+                    }
                 )
             }
         }
@@ -178,6 +182,7 @@ internal fun MyCoursesScreen(
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
+    onSettingsClick: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
@@ -245,7 +250,11 @@ internal fun MyCoursesScreen(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Toolbar(label = stringResource(id = R.string.dashboard_title))
+            Toolbar(
+                label = stringResource(id = R.string.dashboard_title),
+                canShowSettingsIcon = true,
+                onSettingsClick = onSettingsClick
+            )
 
             Surface(
                 color = MaterialTheme.appColors.background,
@@ -404,8 +413,8 @@ private fun CourseItem(
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
-                    .error(org.openedx.core.R.drawable.core_no_image_course)
-                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                    .error(CoreR.drawable.core_no_image_course)
+                    .placeholder(CoreR.drawable.core_no_image_course)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -570,6 +579,7 @@ private fun MyCoursesScreenDay() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
+            onSettingsClick = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -601,6 +611,7 @@ private fun MyCoursesScreenTabletPreview() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
+            onSettingsClick = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }

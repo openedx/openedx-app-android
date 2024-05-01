@@ -294,7 +294,18 @@ class CalendarManager(
                 }
 
                 matchedDate?.let { unit ->
-                    if (unit.date.toCalendar().timeInMillis == dueDateInMillis) {
+                    val dueDateCalendar = Calendar.getInstance().apply {
+                        timeInMillis = dueDateInMillis
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+
+                    val unitDateCalendar = unit.date.toCalendar().apply {
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+
+                    if (dueDateCalendar == unitDateCalendar) {
                         datesList.remove(unit)
                     } else {
                         // If any single value isn't matched, return false

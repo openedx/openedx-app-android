@@ -89,8 +89,6 @@ android:
 - **WHATS_NEW_ENABLED:** Enables the "What's New" feature to present the latest changes to the user.
 - **SOCIAL_AUTH_ENABLED:** Enables SSO buttons on the SignIn and SignUp screens.
 - **COURSE_NESTED_LIST_ENABLED:** Enables an alternative visual representation for the course structure.
-- **COURSE_BANNER_ENABLED:** Enables the display of the course image on the Course Home screen.
-- **COURSE_TOP_TAB_BAR_ENABLED:** Enables an alternative navigation on the Course Home screen.
 - **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware. 
 
 ## Future Support

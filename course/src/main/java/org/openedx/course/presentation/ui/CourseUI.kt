@@ -100,7 +100,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.presentation.dates.mockedCourseBannerInfo
-import org.openedx.course.presentation.outline.CourseOutlineFragment
+import org.openedx.course.presentation.outline.getUnitBlockIcon
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
@@ -1010,7 +1010,7 @@ fun SubSectionUnitsList(
                             modifier = Modifier
                                 .size(18.dp),
                             painter = painterResource(
-                                id = CourseOutlineFragment.getUnitBlockIcon(unit)
+                                id = getUnitBlockIcon(unit)
                             ),
                             contentDescription = null,
                             tint = MaterialTheme.appColors.textPrimary

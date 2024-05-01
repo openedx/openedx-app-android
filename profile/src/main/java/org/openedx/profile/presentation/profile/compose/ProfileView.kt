@@ -1,40 +1,23 @@
 package org.openedx.profile.presentation.profile.compose
 
 import android.content.res.Configuration
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -43,50 +26,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
 import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.AgreementUrls
-import org.openedx.core.domain.model.ProfileImage
-import org.openedx.core.extension.tagId
-import org.openedx.core.presentation.global.AppData
-import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.theme.appShapes
-import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.profile.ProfileUIState
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
-import org.openedx.profile.domain.model.Configuration as AppConfiguration
+import org.openedx.profile.presentation.ui.mockAccount
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -95,11 +60,10 @@ internal fun ProfileView(
     uiState: ProfileUIState,
     uiMessage: UIMessage?,
     refreshing: Boolean,
-    appUpgradeEvent: AppUpgradeEvent?,
     onAction: (ProfileViewAction) -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
-    var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
@@ -125,29 +89,7 @@ internal fun ProfileView(
             )
         }
 
-        val topBarWidth by remember(key1 = windowSize) {
-            mutableStateOf(
-                windowSize.windowSizeValue(
-                    expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-                    compact = Modifier
-                        .fillMaxWidth()
-                )
-            )
-        }
-
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
-
-        if (showLogoutDialog) {
-            LogoutDialog(
-                onDismissRequest = {
-                    showLogoutDialog = false
-                },
-                onLogoutClick = {
-                    showLogoutDialog = false
-                    onAction(ProfileViewAction.LogoutClick)
-                }
-            )
-        }
 
         Column(
             modifier = Modifier
@@ -156,36 +98,12 @@ internal fun ProfileView(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = topBarWidth,
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Text(
-                    modifier = Modifier
-                        .testTag("txt_profile_title")
-                        .fillMaxWidth(),
-                    text = stringResource(id = R.string.core_profile),
-                    color = MaterialTheme.appColors.textPrimary,
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.appTypography.titleMedium
-                )
+            Toolbar(
+                label = stringResource(id = R.string.core_profile),
+                canShowSettingsIcon = true,
+                onSettingsClick = onSettingsClick
+            )
 
-                IconText(
-                    modifier = Modifier
-                        .testTag("it_edit_account")
-                        .height(48.dp)
-                        .padding(end = 24.dp),
-                    text = stringResource(org.openedx.profile.R.string.profile_edit),
-                    painter = painterResource(id = R.drawable.core_ic_edit),
-                    textStyle = MaterialTheme.appTypography.labelLarge,
-                    color = MaterialTheme.appColors.primary,
-                    onClick = {
-                        if (uiState is ProfileUIState.Data) {
-                            onAction(ProfileViewAction.EditAccountClick)
-                        }
-                    }
-                )
-            }
             Surface(
                 color = MaterialTheme.appColors.background
             ) {
@@ -214,35 +132,27 @@ internal fun ProfileView(
                                         .fillMaxHeight()
                                         .then(contentWidth)
                                         .verticalScroll(rememberScrollState()),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(24.dp)
                                 ) {
-                                    ProfileTopic(uiState.account)
-
-                                    Spacer(modifier = Modifier.height(36.dp))
-
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    ProfileTopic(
+                                        image = uiState.account.profileImage.imageUrlFull,
+                                        title = uiState.account.name,
+                                        subtitle = "@${uiState.account.username}"
+                                    )
                                     ProfileInfoSection(uiState.account)
-
-                                    Spacer(modifier = Modifier.height(24.dp))
-
-                                    SettingsSection(onVideoSettingsClick = {
-                                        onAction(ProfileViewAction.VideoSettingsClick)
-                                    })
-
-                                    Spacer(modifier = Modifier.height(24.dp))
-
-                                    SupportInfoSection(
-                                        uiState = uiState,
-                                        onAction = onAction,
-                                        appUpgradeEvent = appUpgradeEvent,
+                                    OpenEdXOutlinedButton(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        text = stringResource(id = org.openedx.profile.R.string.profile_edit_profile),
+                                        onClick = {
+                                            onAction(ProfileViewAction.EditAccountClick)
+                                        },
+                                        borderColor = MaterialTheme.appColors.buttonBackground,
+                                        textColor = MaterialTheme.appColors.textAccent
                                     )
-
-                                    Spacer(modifier = Modifier.height(24.dp))
-
-                                    LogoutButton(
-                                        onClick = { showLogoutDialog = true }
-                                    )
-
-                                    Spacer(Modifier.height(30.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
                         }
@@ -258,492 +168,6 @@ internal fun ProfileView(
     }
 }
 
-@Composable
-private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
-    Column {
-        Text(
-            modifier = Modifier.testTag("txt_settings"),
-            text = stringResource(id = org.openedx.profile.R.string.profile_settings),
-            style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textSecondary
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-        Card(
-            modifier = Modifier,
-            shape = MaterialTheme.appShapes.cardShape,
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
-        ) {
-            Column(Modifier.fillMaxWidth()) {
-                ProfileInfoItem(
-                    text = stringResource(id = org.openedx.profile.R.string.profile_video_settings),
-                    onClick = onVideoSettingsClick
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SupportInfoSection(
-    uiState: ProfileUIState.Data,
-    appUpgradeEvent: AppUpgradeEvent?,
-    onAction: (ProfileViewAction) -> Unit
-) {
-    Column {
-        Text(
-            modifier = Modifier.testTag("txt_support_info"),
-            text = stringResource(id = org.openedx.profile.R.string.profile_support_info),
-            style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textSecondary
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-        Card(
-            modifier = Modifier,
-            shape = MaterialTheme.appShapes.cardShape,
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.appColors.cardViewBackground
-        ) {
-            Column(Modifier.fillMaxWidth()) {
-                if (uiState.configuration.supportEmail.isNotBlank()) {
-                    ProfileInfoItem(text = stringResource(id = org.openedx.profile.R.string.profile_contact_support)) {
-                        onAction(ProfileViewAction.SupportClick)
-                    }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
-                }
-                if (uiState.configuration.agreementUrls.tosUrl.isNotBlank()) {
-                    ProfileInfoItem(text = stringResource(id = R.string.core_terms_of_use)) {
-                        onAction(ProfileViewAction.TermsClick)
-                    }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
-                }
-                if (uiState.configuration.agreementUrls.privacyPolicyUrl.isNotBlank()) {
-                    ProfileInfoItem(text = stringResource(id = R.string.core_privacy_policy)) {
-                        onAction(ProfileViewAction.PrivacyPolicyClick)
-                    }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
-                }
-                if (uiState.configuration.agreementUrls.cookiePolicyUrl.isNotBlank()) {
-                    ProfileInfoItem(text = stringResource(id = R.string.core_cookie_policy)) {
-                        onAction(ProfileViewAction.CookiePolicyClick)
-                    }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
-                }
-                if (uiState.configuration.agreementUrls.dataSellConsentUrl.isNotBlank()) {
-                    ProfileInfoItem(text = stringResource(id = R.string.core_data_sell)) {
-                        onAction(ProfileViewAction.DataSellClick)
-                    }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
-                }
-                if (uiState.configuration.faqUrl.isNotBlank()) {
-                    val uriHandler = LocalUriHandler.current
-                    ProfileInfoItem(
-                        text = stringResource(id = R.string.core_faq),
-                        external = true,
-                    ) {
-                        uriHandler.openUri(uiState.configuration.faqUrl)
-                        onAction(ProfileViewAction.FaqClick)
-                    }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
-                }
-                AppVersionItem(
-                    versionName = uiState.configuration.versionName,
-                    appUpgradeEvent = appUpgradeEvent,
-                ) {
-                    onAction(ProfileViewAction.AppVersionClick)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LogoutButton(onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .testTag("btn_logout")
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            },
-        shape = MaterialTheme.appShapes.cardShape,
-        elevation = 0.dp,
-        backgroundColor = MaterialTheme.appColors.cardViewBackground
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                modifier = Modifier.testTag("txt_logout"),
-                text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.error
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.error
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun LogoutDialog(
-    onDismissRequest: () -> Unit,
-    onLogoutClick: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        content = {
-            Column(
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxWidth()
-                    .background(
-                        MaterialTheme.appColors.background,
-                        MaterialTheme.appShapes.cardShape
-                    )
-                    .clip(MaterialTheme.appShapes.cardShape)
-                    .border(
-                        1.dp,
-                        MaterialTheme.appColors.cardViewBorder,
-                        MaterialTheme.appShapes.cardShape
-                    )
-                    .padding(horizontal = 40.dp, vertical = 36.dp)
-                    .semantics { testTagsAsResourceId = true },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    IconButton(
-                        modifier = Modifier
-                            .testTag("ib_close")
-                            .size(24.dp),
-                        onClick = onDismissRequest
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(id = R.string.core_cancel),
-                            tint = MaterialTheme.appColors.primary
-                        )
-                    }
-                }
-                Icon(
-                    modifier = Modifier
-                        .width(88.dp)
-                        .height(85.dp),
-                    painter = painterResource(org.openedx.profile.R.drawable.profile_ic_exit),
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.onBackground
-                )
-                Spacer(Modifier.size(36.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_logout_dialog_title"),
-                    text = stringResource(id = org.openedx.profile.R.string.profile_logout_dialog_body),
-                    color = MaterialTheme.appColors.textPrimary,
-                    style = MaterialTheme.appTypography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.size(36.dp))
-                OpenEdXButton(
-                    text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                    backgroundColor = MaterialTheme.appColors.warning,
-                    onClick = onLogoutClick,
-                    content = {
-                        Box(
-                            Modifier
-                                .testTag("btn_logout")
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .testTag("txt_logout")
-                                    .fillMaxWidth(),
-                                text = stringResource(id = org.openedx.profile.R.string.profile_logout),
-                                color = MaterialTheme.appColors.textWarning,
-                                style = MaterialTheme.appTypography.labelLarge,
-                                textAlign = TextAlign.Center
-                            )
-                            Icon(
-                                modifier = Modifier
-                                    .testTag("ic_logout"),
-                                painter = painterResource(id = org.openedx.profile.R.drawable.profile_ic_logout),
-                                contentDescription = null,
-                                tint = Color.Black
-                            )
-                        }
-                    }
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun ProfileInfoItem(
-    text: String,
-    external: Boolean = false,
-    onClick: () -> Unit
-) {
-    val icon = if (external) {
-        Icons.AutoMirrored.Filled.OpenInNew
-    } else {
-        Icons.AutoMirrored.Filled.ArrowForwardIos
-    }
-    Row(
-        Modifier
-            .testTag("btn_${text.tagId()}")
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier
-                .testTag("txt_${text.tagId()}")
-                .weight(1f),
-            text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.appTypography.titleMedium,
-            color = MaterialTheme.appColors.textPrimary
-        )
-        Icon(
-            modifier = Modifier.size(16.dp),
-            imageVector = icon,
-            contentDescription = null
-        )
-    }
-}
-
-@Composable
-private fun AppVersionItem(
-    versionName: String,
-    appUpgradeEvent: AppUpgradeEvent?,
-    onClick: () -> Unit
-) {
-    Box(modifier = Modifier.padding(20.dp)) {
-        when (appUpgradeEvent) {
-            is AppUpgradeEvent.UpgradeRecommendedEvent -> {
-                AppVersionItemUpgradeRecommended(
-                    versionName = versionName,
-                    appUpgradeEvent = appUpgradeEvent,
-                    onClick = onClick
-                )
-            }
-
-            is AppUpgradeEvent.UpgradeRequiredEvent -> {
-                AppVersionItemUpgradeRequired(
-                    versionName = versionName,
-                    onClick = onClick
-                )
-            }
-
-            else -> {
-                AppVersionItemAppToDate(
-                    versionName = versionName
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AppVersionItemAppToDate(versionName: String) {
-    Column(
-        Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            modifier = Modifier.testTag("txt_app_version_code"),
-            text = stringResource(id = R.string.core_version, versionName),
-            style = MaterialTheme.appTypography.titleMedium,
-            color = MaterialTheme.appColors.textPrimary
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                modifier = Modifier.size(
-                    (MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp
-                ),
-                painter = painterResource(id = R.drawable.core_ic_check),
-                contentDescription = null,
-                tint = MaterialTheme.appColors.accessGreen
-            )
-            Text(
-                modifier = Modifier.testTag("txt_up_to_date"),
-                text = stringResource(id = R.string.core_up_to_date),
-                color = MaterialTheme.appColors.textSecondary,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        }
-    }
-}
-
-@Composable
-private fun AppVersionItemUpgradeRecommended(
-    versionName: String,
-    appUpgradeEvent: AppUpgradeEvent.UpgradeRecommendedEvent,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .testTag("btn_upgrade_recommended")
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                modifier = Modifier.testTag("txt_app_version_code"),
-                text = stringResource(id = R.string.core_version, versionName),
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.textPrimary
-            )
-            Text(
-                modifier = Modifier.testTag("txt_upgrade_recommended"),
-                text = stringResource(
-                    id = R.string.core_tap_to_update_to_version,
-                    appUpgradeEvent.newVersionName
-                ),
-                color = MaterialTheme.appColors.textAccent,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        }
-        Icon(
-            modifier = Modifier.size(28.dp),
-            painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
-            tint = MaterialTheme.appColors.primary,
-            contentDescription = null
-        )
-    }
-}
-
-@Composable
-fun AppVersionItemUpgradeRequired(
-    versionName: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .testTag("btn_upgrade_required")
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size((MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
-                    painter = painterResource(id = R.drawable.core_ic_warning),
-                    contentDescription = null
-                )
-                Text(
-                    modifier = Modifier.testTag("txt_app_version_code"),
-                    text = stringResource(id = R.string.core_version, versionName),
-                    style = MaterialTheme.appTypography.titleMedium,
-                    color = MaterialTheme.appColors.textPrimary
-                )
-            }
-            Text(
-                modifier = Modifier.testTag("txt_upgrade_required"),
-                text = stringResource(id = R.string.core_tap_to_install_required_app_update),
-                color = MaterialTheme.appColors.textAccent,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        }
-        Icon(
-            modifier = Modifier.size(28.dp),
-            painter = painterResource(id = R.drawable.core_ic_icon_upgrade),
-            tint = MaterialTheme.appColors.primary,
-            contentDescription = null
-        )
-    }
-}
-
-@Preview
-@Composable
-fun AppVersionItemAppToDatePreview() {
-    OpenEdXTheme {
-        AppVersionItem(
-            versionName = mockAppData.versionName,
-            appUpgradeEvent = null,
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-fun AppVersionItemUpgradeRecommendedPreview() {
-    OpenEdXTheme {
-        AppVersionItem(
-            versionName = mockAppData.versionName,
-            appUpgradeEvent = AppUpgradeEvent.UpgradeRecommendedEvent("1.0.1"),
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-fun AppVersionItemUpgradeRequiredPreview() {
-    OpenEdXTheme {
-        AppVersionItem(
-            versionName = mockAppData.versionName,
-            appUpgradeEvent = AppUpgradeEvent.UpgradeRequiredEvent,
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-fun LogoutDialogPreview() {
-    LogoutDialog({}, {})
-}
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
@@ -757,7 +181,7 @@ private fun ProfileScreenPreview() {
             uiMessage = null,
             refreshing = false,
             onAction = {},
-            appUpgradeEvent = null,
+            onSettingsClick = {},
         )
     }
 }
@@ -774,56 +198,16 @@ private fun ProfileScreenTabletPreview() {
             uiMessage = null,
             refreshing = false,
             onAction = {},
-            appUpgradeEvent = null,
+            onSettingsClick = {},
         )
     }
 }
 
-private val mockAppData = AppData(
-    versionName = "1.0.0",
-)
-
-val mockAccount = Account(
-    username = "thom84",
-    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
-    requiresParentalConsent = true,
-    name = "Thomas",
-    country = "Ukraine",
-    isActive = true,
-    profileImage = ProfileImage("", "", "", "", false),
-    yearOfBirth = 2000,
-    levelOfEducation = "Bachelor",
-    goals = "130",
-    languageProficiencies = emptyList(),
-    gender = "male",
-    mailingAddress = "",
-    "",
-    null,
-    accountPrivacy = Account.Privacy.ALL_USERS
-)
-
-private val mockConfiguration = AppConfiguration(
-    agreementUrls = AgreementUrls(),
-    faqUrl = "https://example.com/faq",
-    supportEmail = "test@example.com",
-    versionName = mockAppData.versionName,
-)
-
 private val mockUiState = ProfileUIState.Data(
-    account = mockAccount,
-    configuration = mockConfiguration,
+    account = mockAccount
 )
 
 internal interface ProfileViewAction {
-    object AppVersionClick : ProfileViewAction
     object EditAccountClick : ProfileViewAction
-    object LogoutClick : ProfileViewAction
-    object PrivacyPolicyClick : ProfileViewAction
-    object CookiePolicyClick : ProfileViewAction
-    object DataSellClick : ProfileViewAction
-    object FaqClick : ProfileViewAction
-    object TermsClick : ProfileViewAction
-    object SupportClick : ProfileViewAction
-    object VideoSettingsClick : ProfileViewAction
     object SwipeRefresh : ProfileViewAction
 }

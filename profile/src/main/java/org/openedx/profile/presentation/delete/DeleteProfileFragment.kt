@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
@@ -51,13 +53,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
 import org.openedx.core.ui.Toolbar
@@ -65,20 +65,21 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.edit.EditProfileFragment
-import org.openedx.profile.presentation.profile.ProfileViewModel
+import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.R as profileR
 
 class DeleteProfileFragment : Fragment() {
 
     private val viewModel by viewModel<DeleteProfileViewModel>()
-    private val logoutViewModel by viewModel<ProfileViewModel>()
+    private val logoutViewModel by viewModel<SettingsViewModel>()
     private val router by inject<ProfileRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +99,7 @@ class DeleteProfileFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(DeleteProfileFragmentUIState.Initial)
                 val uiMessage by viewModel.uiMessage.observeAsState()
-                val logoutSuccess by logoutViewModel.successLogout.observeAsState(false)
+                val logoutSuccess by logoutViewModel.successLogout.collectAsState(false)
 
                 DeleteProfileScreen(
                     windowSize = windowSize,
@@ -106,12 +107,6 @@ class DeleteProfileFragment : Fragment() {
                     uiMessage = uiMessage,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
-                    },
-                    onBackToProfileClick = {
-                        requireActivity().supportFragmentManager.popBackStack(
-                            EditProfileFragment::class.java.simpleName,
-                            FragmentManager.POP_BACK_STACK_INCLUSIVE
-                        )
                     },
                     onDeleteClick = {
                         viewModel.deleteProfile(it)
@@ -139,8 +134,7 @@ fun DeleteProfileScreen(
     uiState: DeleteProfileFragmentUIState,
     uiMessage: UIMessage?,
     onDeleteClick: (String) -> Unit,
-    onBackClick: () -> Unit,
-    onBackToProfileClick: () -> Unit
+    onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
@@ -193,103 +187,104 @@ fun DeleteProfileScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .statusBarsInset()
-                    .displayCutoutForLandscape(),
+                    .settingsHeaderBackground()
+                    .statusBarsInset(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Toolbar(
-                    modifier = topBarWidth,
+                    modifier = topBarWidth
+                        .displayCutoutForLandscape(),
                     label = stringResource(id = profileR.string.profile_delete_account),
+                    labelTint = MaterialTheme.appColors.settingsTitleContent,
+                    iconTint = MaterialTheme.appColors.settingsTitleContent,
                     canShowBackBtn = true,
                     onBackClick = onBackClick
                 )
-                Column(
+                Box(
                     Modifier
-                        .fillMaxHeight()
-                        .then(contentWidth)
+                        .fillMaxSize()
+                        .clip(MaterialTheme.appShapes.screenBackgroundShape)
+                        .background(MaterialTheme.appColors.background)
+                        .displayCutoutForLandscape()
                         .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    Spacer(Modifier.height(48.dp))
-                    Image(
-                        modifier = Modifier.size(145.dp),
-                        painter = painterResource(id = org.openedx.profile.R.drawable.profile_delete_box),
-                        contentDescription = null,
-                    )
-                    Spacer(Modifier.height(32.dp))
-                    Text(
-                        modifier = Modifier
-                            .testTag("txt_delete_account_title")
-                            .fillMaxWidth(),
-                        text = buildAnnotatedString {
-                            append(stringResource(id = profileR.string.profile_you_want_to))
-                            append(" ")
-                            append(stringResource(id = profileR.string.profile_delete_your_account))
-                            addStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.appColors.textPrimary
-                                ),
-                                start = 0,
-                                end = stringResource(id = profileR.string.profile_you_want_to).length
-                            )
-                            addStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.appColors.error
-                                ),
-                                start = stringResource(id = profileR.string.profile_you_want_to).length + 1,
-                                end = this.length
-                            )
-                        },
-                        style = MaterialTheme.appTypography.headlineSmall,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        modifier = Modifier
-                            .testTag("txt_delete_account_description")
-                            .fillMaxWidth(),
-                        text = stringResource(id = profileR.string.profile_confirm_action),
-                        style = MaterialTheme.appTypography.labelLarge,
-                        color = MaterialTheme.appColors.textSecondary,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(40.dp))
-                    OpenEdXOutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        title = stringResource(id = R.string.core_password),
-                        onValueChanged = {
-                            password = it
-                        },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done,
-                        keyboardActions = {
-                            it.clearFocus()
-                            onDeleteClick(password)
-                        },
-                        errorText = errorText
-                    )
-                    Spacer(Modifier.height(38.dp))
-                    OpenEdXButton(
-                        text = stringResource(id = profileR.string.profile_yes_delete_account),
-                        enabled = uiState !is DeleteProfileFragmentUIState.Loading && password.isNotEmpty(),
-                        backgroundColor = MaterialTheme.appColors.error,
-                        onClick = {
-                            onDeleteClick(password)
-                        }
-                    )
-                    Spacer(Modifier.height(35.dp))
-                    IconText(
-                        text = stringResource(id = profileR.string.profile_back_to_profile),
-                        painter = painterResource(id = R.drawable.core_ic_back),
-                        color = MaterialTheme.appColors.primary,
-                        textStyle = MaterialTheme.appTypography.labelLarge,
-                        onClick = {
-                            onBackToProfileClick()
-                        }
-                    )
-                    Spacer(Modifier.height(24.dp))
+                    Column(
+                        modifier = contentWidth
+                    ) {
+                        Spacer(Modifier.height(48.dp))
+                        Image(
+                            modifier = Modifier
+                                .size(145.dp)
+                                .align(Alignment.CenterHorizontally),
+                            painter = painterResource(id = profileR.drawable.profile_delete_box),
+                            contentDescription = null,
+                        )
+                        Spacer(Modifier.height(32.dp))
+                        Text(
+                            modifier = Modifier
+                                .testTag("txt_delete_account_title")
+                                .fillMaxWidth(),
+                            text = buildAnnotatedString {
+                                append(stringResource(id = profileR.string.profile_you_want_to))
+                                append(" ")
+                                append(stringResource(id = profileR.string.profile_delete_your_account))
+                                addStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.appColors.textPrimary
+                                    ),
+                                    start = 0,
+                                    end = stringResource(id = profileR.string.profile_you_want_to).length
+                                )
+                                addStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.appColors.error
+                                    ),
+                                    start = stringResource(id = profileR.string.profile_you_want_to).length + 1,
+                                    end = this.length
+                                )
+                            },
+                            style = MaterialTheme.appTypography.headlineSmall,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            modifier = Modifier
+                                .testTag("txt_delete_account_description")
+                                .fillMaxWidth(),
+                            text = stringResource(id = profileR.string.profile_confirm_action),
+                            style = MaterialTheme.appTypography.labelLarge,
+                            color = MaterialTheme.appColors.textSecondary,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(40.dp))
+                        OpenEdXOutlinedTextField(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            title = stringResource(id = R.string.core_password),
+                            onValueChanged = {
+                                password = it
+                            },
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done,
+                            keyboardActions = {
+                                it.clearFocus()
+                                onDeleteClick(password)
+                            },
+                            errorText = errorText
+                        )
+                        Spacer(Modifier.height(38.dp))
+                        OpenEdXButton(
+                            text = stringResource(id = profileR.string.profile_yes_delete_account),
+                            enabled = uiState !is DeleteProfileFragmentUIState.Loading && password.isNotEmpty(),
+                            backgroundColor = MaterialTheme.appColors.error,
+                            onClick = {
+                                onDeleteClick(password)
+                            }
+                        )
+                        Spacer(Modifier.height(24.dp))
+                    }
                 }
             }
         }
@@ -315,7 +310,6 @@ fun DeleteProfileScreenPreview() {
             uiState = DeleteProfileFragmentUIState.Initial,
             uiMessage = null,
             onBackClick = {},
-            onBackToProfileClick = {},
             onDeleteClick = {}
         )
     }

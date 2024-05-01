@@ -54,11 +54,13 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
-import org.openedx.profile.presentation.anothers_account.AnothersProfileViewModel
+import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
+import org.openedx.profile.presentation.manageaccount.ManageAccountViewModel
 import org.openedx.profile.presentation.profile.ProfileViewModel
-import org.openedx.profile.presentation.settings.video.VideoSettingsViewModel
+import org.openedx.profile.presentation.settings.SettingsViewModel
+import org.openedx.profile.presentation.video.VideoSettingsViewModel
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
@@ -138,17 +140,11 @@ val screenModule = module {
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(
-            appData = get(),
-            config = get(),
             interactor = get(),
             resourceManager = get(),
             notifier = get(),
-            dispatcher = get(named("IODispatcher")),
-            cookieManager = get(),
-            workerController = get(),
             analytics = get(),
-            appUpgradeNotifier = get(),
-            router = get(),
+            profileRouter = get(),
         )
     }
     viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
@@ -156,6 +152,8 @@ val screenModule = module {
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
 
     single { CourseRepository(get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
@@ -199,11 +197,14 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get()
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseOutlineViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -240,9 +241,10 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseVideoViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -281,13 +283,9 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean, enrollmentMode: String) ->
+    viewModel { (enrollmentMode: String) ->
         CourseDatesViewModel(
-            courseId,
-            courseName,
-            isSelfPaced,
             enrollmentMode,
-            get(),
             get(),
             get(),
             get(),
@@ -311,7 +309,15 @@ val screenModule = module {
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel { (courseId: String) -> DiscussionTopicsViewModel(get(), get(), get(), courseId) }
+    viewModel {
+        DiscussionTopicsViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { (courseId: String, topicId: String, threadType: String) ->
         DiscussionThreadsViewModel(
             get(),
@@ -373,4 +379,5 @@ val screenModule = module {
     viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
+
 }

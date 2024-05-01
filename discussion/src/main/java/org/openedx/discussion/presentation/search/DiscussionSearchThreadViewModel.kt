@@ -4,6 +4,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
@@ -13,11 +24,6 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 
 class DiscussionSearchThreadViewModel(
     private val interactor: DiscussionInteractor,
@@ -51,6 +57,7 @@ class DiscussionSearchThreadViewModel(
     private var currentQuery: String? = null
     private val threadsList = mutableListOf<org.openedx.discussion.domain.model.Thread>()
     private var isLoading = false
+    private var loadNextJob: Job? = null
 
     private val queryChannel = MutableSharedFlow<String>(replay = 0, extraBufferCapacity = 0)
 
@@ -84,26 +91,26 @@ class DiscussionSearchThreadViewModel(
             queryChannel
                 .asSharedFlow()
                 .debounce(400)
-                .collect {
+                .collect { query ->
                     nextPage = 1
-                    currentQuery = it
                     threadsList.clear()
-                    _uiState.value = DiscussionSearchThreadUIState.Loading
-                    loadThreadsInternal(currentQuery!!, nextPage!!)
+                    if (query.isNotEmpty()) {
+                        currentQuery = query
+                        _uiState.value = DiscussionSearchThreadUIState.Loading
+                        loadThreadsInternal(currentQuery!!, nextPage!!)
+                    } else {
+                        loadNextJob?.cancel()
+                        currentQuery = null
+                        _uiState.value = DiscussionSearchThreadUIState.Threads(emptyList(), 0)
+                        _canLoadMore.value = false
+                    }
                 }
         }
     }
 
     fun searchThreads(query: String) {
         viewModelScope.launch {
-            if (query.trim().isNotEmpty()) {
-                queryChannel.emit(query.trim())
-            } else {
-                currentQuery = null
-                nextPage = 1
-                threadsList.clear()
-                _uiState.value = DiscussionSearchThreadUIState.Threads(emptyList(), 0)
-            }
+            queryChannel.emit(query.trim())
         }
     }
 
@@ -126,10 +133,13 @@ class DiscussionSearchThreadViewModel(
     }
 
     private fun loadThreadsInternal(query: String, page: Int) {
-        viewModelScope.launch {
-            try {
+        loadNextJob?.cancel()
+        loadNextJob = flow {
+            emit(interactor.searchThread(courseId, query, page))
+        }
+            .cancellable()
+            .onEach { response ->
                 isLoading = true
-                val response = interactor.searchThread(courseId, query, page)
                 if (response.pagination.next.isNotEmpty() && page < response.pagination.numPages) {
                     _canLoadMore.value = true
                     nextPage = page + 1
@@ -139,8 +149,12 @@ class DiscussionSearchThreadViewModel(
                 }
                 threadsList.addAll(response.results)
                 _uiState.value =
-                    DiscussionSearchThreadUIState.Threads(threadsList, response.pagination.count)
-            } catch (e: Exception) {
+                    DiscussionSearchThreadUIState.Threads(
+                        threadsList, response.pagination.count
+                    )
+                isLoading = false
+                _isUpdating.value = false
+            }.catch { e ->
                 if (e.isInternetError()) {
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
@@ -148,11 +162,10 @@ class DiscussionSearchThreadViewModel(
                     _uiMessage.value =
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                 }
-            } finally {
                 isLoading = false
                 _isUpdating.value = false
             }
-        }
+            .launchIn(viewModelScope)
     }
 
 }

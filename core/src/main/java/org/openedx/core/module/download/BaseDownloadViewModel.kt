@@ -1,6 +1,5 @@
 package org.openedx.core.module.download
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -41,8 +40,7 @@ abstract class BaseDownloadViewModel(
     private val _downloadingModelsFlow = MutableSharedFlow<List<DownloadModel>>()
     protected val downloadingModelsFlow = _downloadingModelsFlow.asSharedFlow()
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
+    init {
         viewModelScope.launch {
             downloadDao.readAllData().map { list -> list.map { it.mapToDomain() } }
                 .collect { downloadModels ->
@@ -246,10 +244,7 @@ abstract class BaseDownloadViewModel(
         logEvent(
             CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,
             buildMap {
-                put(
-                    CoreAnalyticsKey.ACTION.key,
-                    if (toggle) CoreAnalyticsKey.TRUE.key else CoreAnalyticsKey.FALSE.key
-                )
+                put(CoreAnalyticsKey.ACTION.key, toggle)
             }
         )
     }
