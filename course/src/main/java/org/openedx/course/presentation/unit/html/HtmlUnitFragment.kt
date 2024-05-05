@@ -9,13 +9,30 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.webkit.*
+import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,10 +50,15 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.isEmailValid
+import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.*
+import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.ui.roundBorderWithoutBottom
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
 
 class HtmlUnitFragment : Fragment() {
@@ -268,13 +290,15 @@ private fun HTMLContentView(
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
-                loadUrl(url)
+
+                loadUrl(url, coroutineScope, cookieManager)
             }
         },
         update = { webView ->
             if (!isLoading && injectJSList.isNotEmpty()) {
                 injectJSList.forEach { webView.evaluateJavascript(it, null) }
             }
-        })
+        }
+    )
 }
 

@@ -6,8 +6,12 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.openedx.core.system.AppCookieManager
 
 fun Context.dpToPixel(dp: Int): Float {
     return dp * (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
@@ -45,4 +49,15 @@ fun DialogFragment.setWidthPercent(percentage: Int) {
 
 fun Context.toastMessage(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+}
+
+fun WebView.loadUrl(url: String, scope: CoroutineScope, cookieManager: AppCookieManager) {
+    if (cookieManager.isSessionCookieMissingOrExpired()) {
+        scope.launch {
+            cookieManager.tryToRefreshSessionCookie()
+            loadUrl(url)
+        }
+    } else {
+        loadUrl(url)
+    }
 }

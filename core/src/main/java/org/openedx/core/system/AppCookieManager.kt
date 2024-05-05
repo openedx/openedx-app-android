@@ -11,8 +11,6 @@ import java.util.concurrent.TimeUnit
 class AppCookieManager(private val config: Config, private val api: CookiesApi) {
 
     companion object {
-        private const val REV_934_COOKIE =
-            "REV_934=mobile; expires=Tue, 31 Dec 2021 12:00:20 GMT; domain=.edx.org;"
         private val FRESHNESS_INTERVAL = TimeUnit.HOURS.toMillis(1)
     }
 
@@ -34,19 +32,11 @@ class AppCookieManager(private val config: Config, private val api: CookiesApi) 
     }
 
     fun clearWebViewCookie() {
-        CookieManager.getInstance().removeAllCookies { result ->
-            if (result) {
-                authSessionCookieExpiration = -1
-            }
-        }
+        CookieManager.getInstance().removeAllCookies(null)
+        authSessionCookieExpiration = -1
     }
 
     fun isSessionCookieMissingOrExpired(): Boolean {
         return authSessionCookieExpiration < System.currentTimeMillis()
     }
-
-    fun setMobileCookie() {
-        CookieManager.getInstance().setCookie(config.getApiHostURL(), REV_934_COOKIE)
-    }
-
 }
