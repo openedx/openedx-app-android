@@ -61,7 +61,7 @@ MICROSOFT:
   CLIENT_ID: 'microsoftClientID'
 ```
 
-Also, all envirenment folders contain a `file_mappings.yaml` file that points to the config files to be parsed.
+Also, all environment folders contain a `file_mappings.yaml` file that points to the config files to be parsed.
 
 By modifying `file_mappings.yaml`, you can achieve splitting of the base `config.yaml` or add additional configuration files.
 
@@ -81,7 +81,7 @@ android:
 - **Microsoft:** Sign in and Sign up via Microsoft
 - **Facebook:** Sign in and Sign up via Facebook
 - **Branch:** Deeplinks
-- **Braze:** Could Messaging
+- **Braze:** Cloud Messaging
 - **SegmentIO:** Analytics
 
 ## Available Feature Flags
