@@ -5,7 +5,10 @@ import androidx.fragment.app.FragmentManager
 interface DiscoveryRouter {
 
     fun navigateToCourseOutline(
-        fm: FragmentManager, courseId: String, courseTitle: String, enrollmentMode: String
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String,
+        enrollmentMode: String
     )
 
     fun navigateToLogistration(fm: FragmentManager, courseId: String?)
@@ -21,6 +24,8 @@ interface DiscoveryRouter {
     fun navigateToSignUp(fm: FragmentManager, courseId: String? = null, infoType: String? = null)
 
     fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?)
+
+    fun navigateToSettings(fm: FragmentManager)
 
     fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String)
 }

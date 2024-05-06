@@ -51,6 +51,14 @@ data class AppColors(
     val componentHorizontalProgressCompleted: Color,
     val componentHorizontalProgressSelected: Color,
     val componentHorizontalProgressDefault: Color,
+
+    val tabUnselectedBtnBackground: Color,
+    val tabUnselectedBtnContent: Color,
+    val tabSelectedBtnContent: Color,
+    val courseHomeHeaderShade: Color,
+    val courseHomeBackBtnBackground: Color,
+
+    val settingsTitleContent: Color
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant

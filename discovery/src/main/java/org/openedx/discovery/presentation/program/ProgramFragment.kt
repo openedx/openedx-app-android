@@ -179,6 +179,9 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                             }
                         }
                     },
+                    onSettingsClick = {
+                        viewModel.navigateToSettings(requireActivity().supportFragmentManager)
+                    },
                     refreshSessionCookie = {
                         viewModel.refreshCookie()
                     },
@@ -221,6 +224,7 @@ private fun ProgramInfoScreen(
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageLoaded: () -> Unit,
+    onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
     refreshSessionCookie: () -> Unit = {},
@@ -268,7 +272,9 @@ private fun ProgramInfoScreen(
             Toolbar(
                 label = stringResource(id = R.string.discovery_programs),
                 canShowBackBtn = canShowBackBtn,
-                onBackClick = onBackClick
+                canShowSettingsIcon = !canShowBackBtn,
+                onBackClick = onBackClick,
+                onSettingsClick = onSettingsClick
             )
 
             Surface {
@@ -339,6 +345,7 @@ fun MyProgramsPreview() {
             checkInternetConnection = {},
             onBackClick = {},
             onWebPageLoaded = {},
+            onSettingsClick = {},
             onUriClick = { _, _ -> },
         )
     }

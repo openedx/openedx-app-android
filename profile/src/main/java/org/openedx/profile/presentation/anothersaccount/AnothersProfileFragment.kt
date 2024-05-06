@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.anothers_account
+package org.openedx.profile.presentation.anothersaccount
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
@@ -192,7 +192,11 @@ private fun AnothersProfileScreen(
                             .verticalScroll(rememberScrollState()),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        ProfileTopic(uiState.account)
+                        ProfileTopic(
+                            image = uiState.account.profileImage.imageUrlFull,
+                            title = uiState.account.name,
+                            subtitle = uiState.account.username
+                        )
 
                         Spacer(modifier = Modifier.height(36.dp))
 

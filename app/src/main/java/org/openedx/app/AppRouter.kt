@@ -43,11 +43,13 @@ import org.openedx.discussion.presentation.threads.DiscussionAddThreadFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.anothers_account.AnothersProfileFragment
+import org.openedx.profile.presentation.anothersaccount.AnothersProfileFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
+import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
-import org.openedx.profile.presentation.settings.video.VideoSettingsFragment
+import org.openedx.profile.presentation.settings.SettingsFragment
+import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
@@ -328,22 +330,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, EditProfileFragment.newInstance(account))
     }
 
-    override fun navigateToVideoSettings(fm: FragmentManager) {
-        replaceFragmentWithBackStack(fm, VideoSettingsFragment())
-    }
-
-    override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
-        replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
-    }
-
     override fun navigateToDeleteAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, DeleteProfileFragment())
     }
 
-    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
+    override fun navigateToSettings(fm: FragmentManager) {
         replaceFragmentWithBackStack(
             fm,
-            WebContentFragment.newInstance(title = title, url = url)
+            SettingsFragment()
         )
     }
 
@@ -356,6 +350,25 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
                 replaceFragment(fm, SignInFragment())
             }
         }
+    }
+
+    override fun navigateToVideoSettings(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, VideoSettingsFragment())
+    }
+
+    override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
+        replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
+    }
+
+    override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
+        replaceFragmentWithBackStack(
+            fm,
+            WebContentFragment.newInstance(title = title, url = url)
+        )
+    }
+
+    override fun navigateToManageAccount(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, ManageAccountFragment())
     }
     //endregion
 
@@ -384,4 +397,5 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             .replace(R.id.container, ProfileFragment())
             .commit()
     }
+    //endregion
 }

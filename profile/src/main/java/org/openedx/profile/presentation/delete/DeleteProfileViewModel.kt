@@ -34,7 +34,6 @@ class DeleteProfileViewModel(
     val uiMessage: LiveData<UIMessage>
         get() = _uiMessage
 
-
     fun deleteProfile(password: String) {
         logDeleteProfileClickedEvent()
         if (!validator.isPasswordValid(password)) {

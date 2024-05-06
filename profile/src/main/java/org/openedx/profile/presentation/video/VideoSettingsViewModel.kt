@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.settings.video
+package org.openedx.profile.presentation.video
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
@@ -54,10 +54,7 @@ class VideoSettingsViewModel(
         logProfileEvent(
             ProfileAnalyticsEvent.WIFI_TOGGLE,
             buildMap {
-                put(
-                    ProfileAnalyticsKey.ACTION.key,
-                    if (value) ProfileAnalyticsKey.TRUE.key else ProfileAnalyticsKey.FALSE.key
-                )
+                put(ProfileAnalyticsKey.ACTION.key, value)
             }
         )
     }

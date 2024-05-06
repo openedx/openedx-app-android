@@ -1,9 +1,6 @@
 package org.openedx.course.presentation.dates
 
 import android.content.res.Configuration
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -32,15 +29,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarData
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
@@ -48,27 +39,20 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -78,11 +62,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.parameter.parametersOf
+import androidx.fragment.app.FragmentManager
 import org.openedx.core.UIMessage
 import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
@@ -94,11 +74,9 @@ import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -106,181 +84,110 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
-import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
-import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
-import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import java.util.concurrent.atomic.AtomicReference
-import org.openedx.core.R as coreR
+import org.openedx.core.R as CoreR
 
-class CourseDatesFragment : Fragment() {
+@Composable
+fun CourseDatesScreen(
+    windowSize: WindowSize,
+    courseDatesViewModel: CourseDatesViewModel,
+    courseRouter: CourseRouter,
+    fragmentManager: FragmentManager,
+    isFragmentResumed: Boolean,
+    updateCourseStructure: () -> Unit
+) {
+    val uiState by courseDatesViewModel.uiState.observeAsState(DatesUIState.Loading)
+    val uiMessage by courseDatesViewModel.uiMessage.collectAsState(null)
+    val calendarSyncUIState by courseDatesViewModel.calendarSyncUIState.collectAsState()
+    val context = LocalContext.current
 
-    val viewModel by viewModel<CourseDatesViewModel> {
-        parametersOf(
-            requireArguments().getString(ARG_COURSE_ID, ""),
-            requireArguments().getString(ARG_COURSE_NAME, ""),
-            requireArguments().getBoolean(ARG_IS_SELF_PACED, true),
-            requireArguments().getString(ARG_ENROLLMENT_MODE, "")
-        )
-    }
-    private val router by inject<CourseRouter>()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        viewModel.updateAndFetchCalendarSyncState()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ) = ComposeView(requireContext()).apply {
-        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-        setContent {
-            OpenEdXTheme {
-                val windowSize = rememberWindowSize()
-                val uiState by viewModel.uiState.observeAsState(DatesUIState.Loading)
-                val uiMessage by viewModel.uiMessage.observeAsState()
-                val refreshing by viewModel.updating.observeAsState(false)
-                val calendarSyncUIState by viewModel.calendarSyncUIState.collectAsState()
-
-                CourseDatesScreen(
-                    windowSize = windowSize,
-                    uiState = uiState,
-                    uiMessage = uiMessage,
-                    refreshing = refreshing,
-                    isSelfPaced = viewModel.isSelfPaced,
-                    hasInternetConnection = viewModel.hasInternetConnection,
-                    calendarSyncUIState = calendarSyncUIState,
-                    onReloadClick = {
-                        viewModel.getCourseDates()
-                    },
-                    onSwipeRefresh = {
-                        viewModel.getCourseDates(swipeToRefresh = true)
-                    },
-                    onItemClick = { block ->
-                        if (block.blockId.isNotEmpty()) {
-                            viewModel.getVerticalBlock(block.blockId)?.let { verticalBlock ->
-                                viewModel.logCourseComponentTapped(true, block)
-                                if (viewModel.isCourseExpandableSectionsEnabled) {
-                                    router.navigateToCourseContainer(
-                                        fm = requireActivity().supportFragmentManager,
-                                        courseId = viewModel.courseId,
+    CourseDatesUI(
+        windowSize = windowSize,
+        uiState = uiState,
+        uiMessage = uiMessage,
+        isSelfPaced = courseDatesViewModel.isSelfPaced,
+        calendarSyncUIState = calendarSyncUIState,
+        onItemClick = { block ->
+            if (block.blockId.isNotEmpty()) {
+                courseDatesViewModel.getVerticalBlock(block.blockId)
+                    ?.let { verticalBlock ->
+                        courseDatesViewModel.logCourseComponentTapped(true, block)
+                        if (courseDatesViewModel.isCourseExpandableSectionsEnabled) {
+                            courseRouter.navigateToCourseContainer(
+                                fm = fragmentManager,
+                                courseId = courseDatesViewModel.courseId,
+                                unitId = verticalBlock.id,
+                                componentId = "",
+                                mode = CourseViewMode.FULL
+                            )
+                        } else {
+                            courseDatesViewModel.getSequentialBlock(verticalBlock.id)
+                                ?.let { sequentialBlock ->
+                                    courseRouter.navigateToCourseSubsections(
+                                        fm = fragmentManager,
+                                        subSectionId = sequentialBlock.id,
+                                        courseId = courseDatesViewModel.courseId,
                                         unitId = verticalBlock.id,
-                                        componentId = "",
                                         mode = CourseViewMode.FULL
                                     )
-                                } else {
-                                    viewModel.getSequentialBlock(verticalBlock.id)
-                                        ?.let { sequentialBlock ->
-                                            router.navigateToCourseSubsections(
-                                                fm = requireActivity().supportFragmentManager,
-                                                subSectionId = sequentialBlock.id,
-                                                courseId = viewModel.courseId,
-                                                unitId = verticalBlock.id,
-                                                mode = CourseViewMode.FULL
-                                            )
-                                        }
                                 }
-                            } ?: {
-                                viewModel.logCourseComponentTapped(false, block)
-                                ActionDialogFragment.newInstance(
-                                    title = getString(coreR.string.core_leaving_the_app),
-                                    message = getString(
-                                        coreR.string.core_leaving_the_app_message,
-                                        getString(coreR.string.platform_name)
-                                    ),
-                                    url = block.link,
-                                    source = CoreAnalyticsScreen.COURSE_DATES.screenName
-                                ).show(
-                                    requireActivity().supportFragmentManager,
-                                    ActionDialogFragment::class.simpleName
-                                )
+                        }
+                    } ?: {
+                    courseDatesViewModel.logCourseComponentTapped(false, block)
+                    ActionDialogFragment.newInstance(
+                        title = context.getString(CoreR.string.core_leaving_the_app),
+                        message = context.getString(
+                            CoreR.string.core_leaving_the_app_message,
+                            context.getString(CoreR.string.platform_name)
+                        ),
+                        url = block.link,
+                        source = CoreAnalyticsScreen.COURSE_DATES.screenName
+                    ).show(
+                        fragmentManager,
+                        ActionDialogFragment::class.simpleName
+                    )
 
-                            }
-                        }
-                    },
-                    onPLSBannerViewed = {
-                        if (isResumed) {
-                            viewModel.logPlsBannerViewed()
-                        }
-                    },
-                    onSyncDates = {
-                        viewModel.logPlsShiftButtonClicked()
-                        viewModel.resetCourseDatesBanner {
-                            viewModel.logPlsShiftDates(it)
-                            if (it) {
-                                (parentFragment as CourseContainerFragment)
-                                    .updateCourseStructure(false)
-                            }
-                        }
-                    },
-                    onCalendarSyncSwitch = { isChecked ->
-                        viewModel.handleCalendarSyncState(isChecked)
-                    },
-                )
+                }
             }
-        }
-    }
-
-    fun updateData() {
-        viewModel.getCourseDates()
-    }
-
-    companion object {
-        private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_COURSE_NAME = "courseName"
-        private const val ARG_IS_SELF_PACED = "selfPaced"
-        private const val ARG_ENROLLMENT_MODE = "enrollmentMode"
-
-        fun newInstance(
-            courseId: String,
-            courseName: String,
-            isSelfPaced: Boolean,
-            enrollmentMode: String,
-        ): CourseDatesFragment {
-            val fragment = CourseDatesFragment()
-            fragment.arguments =
-                bundleOf(
-                    ARG_COURSE_ID to courseId,
-                    ARG_COURSE_NAME to courseName,
-                    ARG_IS_SELF_PACED to isSelfPaced,
-                    ARG_ENROLLMENT_MODE to enrollmentMode,
-                )
-            return fragment
-        }
-    }
+        },
+        onPLSBannerViewed = {
+            if (isFragmentResumed) {
+                courseDatesViewModel.logPlsBannerViewed()
+            }
+        },
+        onSyncDates = {
+            courseDatesViewModel.logPlsShiftButtonClicked()
+            courseDatesViewModel.resetCourseDatesBanner {
+                courseDatesViewModel.logPlsShiftDates(it)
+                if (it) {
+                    updateCourseStructure()
+                }
+            }
+        },
+        onCalendarSyncSwitch = { isChecked ->
+            courseDatesViewModel.handleCalendarSyncState(isChecked)
+        },
+    )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-internal fun CourseDatesScreen(
+private fun CourseDatesUI(
     windowSize: WindowSize,
     uiState: DatesUIState,
     uiMessage: UIMessage?,
-    refreshing: Boolean,
     isSelfPaced: Boolean,
-    hasInternetConnection: Boolean,
     calendarSyncUIState: CalendarSyncUIState,
-    onReloadClick: () -> Unit,
-    onSwipeRefresh: () -> Unit,
     onItemClick: (CourseDateBlock) -> Unit,
     onPLSBannerViewed: () -> Unit,
     onSyncDates: () -> Unit,
     onCalendarSyncSwitch: (Boolean) -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
-    val pullRefreshState =
-        rememberPullRefreshState(refreshing = refreshing, onRefresh = { onSwipeRefresh() })
-
-    var isInternetConnectionShown by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -305,16 +212,6 @@ internal fun CourseDatesScreen(
             )
         }
 
-        val snackState = remember { SnackbarHostState() }
-        if (uiMessage is DatesShiftedSnackBar) {
-            val datesShiftedMessage = stringResource(id = R.string.course_dates_shifted_message)
-            LaunchedEffect(uiMessage) {
-                snackState.showSnackbar(
-                    message = datesShiftedMessage,
-                    duration = SnackbarDuration.Long
-                )
-            }
-        }
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Box(
@@ -330,18 +227,8 @@ internal fun CourseDatesScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .pullRefresh(pullRefreshState)
                 ) {
                     when (uiState) {
-                        is DatesUIState.Loading -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-
                         is DatesUIState.Dates -> {
                             LazyColumn(
                                 modifier = Modifier
@@ -423,33 +310,9 @@ internal fun CourseDatesScreen(
                                 )
                             }
                         }
-                    }
 
-                    PullRefreshIndicator(
-                        refreshing, pullRefreshState, Modifier.align(Alignment.TopCenter)
-                    )
-                    if (!isInternetConnectionShown && !hasInternetConnection) {
-                        OfflineModeDialog(
-                            Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                            onDismissCLick = {
-                                isInternetConnectionShown = true
-                            },
-                            onReloadClick = {
-                                isInternetConnectionShown = true
-                                onReloadClick()
-                            })
+                        DatesUIState.Loading -> {}
                     }
-                }
-
-                SnackbarHost(
-                    modifier = Modifier.align(Alignment.BottomStart),
-                    hostState = snackState
-                ) { snackbarData: SnackbarData ->
-                    DatesShiftedSnackBar(onClose = {
-                        snackbarData.dismiss()
-                    })
                 }
             }
         }
@@ -566,7 +429,7 @@ fun ExpandableView(
                 AnimatedVisibility(visible = expanded.not()) {
                     Text(
                         text = pluralStringResource(
-                            id = coreR.plurals.core_date_items_hidden,
+                            id = CoreR.plurals.core_date_items_hidden,
                             count = sectionDates.size,
                             formatArgs = arrayOf(sectionDates.size)
                         ),
@@ -726,7 +589,7 @@ private fun CourseDateItem(
                     modifier = Modifier
                         .padding(end = 4.dp)
                         .align(Alignment.CenterVertically),
-                    painter = painterResource(id = if (dateBlock.learnerHasAccess.not()) coreR.drawable.core_ic_lock else icon),
+                    painter = painterResource(id = if (dateBlock.learnerHasAccess.not()) CoreR.drawable.core_ic_lock else icon),
                     contentDescription = null,
                     tint = MaterialTheme.appColors.textDark
                 )
@@ -776,16 +639,12 @@ private fun CourseDateItem(
 @Composable
 private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(
+        CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
-            refreshing = false,
             isSelfPaced = true,
-            hasInternetConnection = true,
             calendarSyncUIState = mockCalendarSyncUIState,
-            onReloadClick = {},
-            onSwipeRefresh = {},
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
@@ -799,16 +658,12 @@ private fun CourseDatesScreenPreview() {
 @Composable
 private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
-        CourseDatesScreen(
+        CourseDatesUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
-            refreshing = false,
             isSelfPaced = true,
-            hasInternetConnection = true,
             calendarSyncUIState = mockCalendarSyncUIState,
-            onReloadClick = {},
-            onSwipeRefresh = {},
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},

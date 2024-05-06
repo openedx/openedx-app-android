@@ -39,7 +39,7 @@ jobs:
       - name: Generate mock files
         run: ./gradlew generateMockedRawFile
       - name: Run unit tests
-        run: ./gradlew testProdReleaseUnitTest $CI_GRADLE_ARG_PROPERTIES
+        run: ./gradlew testProdDebugUnitTest $CI_GRADLE_ARG_PROPERTIES
 
       - name: Upload reports
         uses: actions/upload-artifact@v3
