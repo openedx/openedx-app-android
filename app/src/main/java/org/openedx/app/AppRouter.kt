@@ -59,10 +59,15 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
 
     //region AuthRouter
-    override fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?) {
+    override fun navigateToMain(
+        fm: FragmentManager,
+        courseId: String?,
+        infoType: String?,
+        openTab: String
+    ) {
         fm.popBackStack()
         fm.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance(courseId, infoType))
+            .replace(R.id.container, MainFragment.newInstance(courseId, infoType, openTab))
             .commit()
     }
 
@@ -286,12 +291,11 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToHandoutsWebView(
         fm: FragmentManager,
         courseId: String,
-        title: String,
         type: HandoutsType,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            HandoutsWebViewFragment.newInstance(title, type.name, courseId)
+            HandoutsWebViewFragment.newInstance(type.name, courseId)
         )
     }
     //endregion
@@ -408,6 +412,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, CalendarFragment())
     }
     //endregion
+
+    fun getVisibleFragment(fm: FragmentManager): Fragment? {
+        return fm.fragments.firstOrNull { it.isVisible }
+    }
 
     private fun replaceFragmentWithBackStack(fm: FragmentManager, fragment: Fragment) {
         fm.beginTransaction()

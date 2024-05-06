@@ -12,6 +12,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
@@ -109,6 +110,7 @@ val appModule = module {
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
+    single { DeepLinkRouter(get(), get(), get(), get(), get()) }
 
     single { NetworkConnection(get()) }
 

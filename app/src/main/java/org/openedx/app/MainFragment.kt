@@ -12,11 +12,13 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.FragmentMainBinding
+import org.openedx.app.deeplink.HomeTab
 import org.openedx.core.adapter.NavigationFragmentAdapter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.learn.presentation.LearnFragment
+import org.openedx.learn.presentation.LearnTab
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -60,8 +62,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
             true
         }
-        // Trigger click event for the first tab on initial load
-        binding.bottomNavView.selectedItemId = binding.bottomNavView.selectedItemId
 
         viewModel.isBottomBarEnabled.observe(viewLifecycleOwner) { isBottomBarEnabled ->
             enableBottomBar(isBottomBarEnabled)
@@ -89,6 +89,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 putString(ARG_COURSE_ID, "")
                 putString(ARG_INFO_TYPE, "")
             }
+
+            when (requireArguments().getString(ARG_OPEN_TAB, HomeTab.LEARN.name)) {
+                HomeTab.LEARN.name,
+                HomeTab.PROGRAMS.name -> {
+                    binding.bottomNavView.selectedItemId = R.id.fragmentLearn
+                }
+
+                HomeTab.DISCOVER.name -> {
+                    binding.bottomNavView.selectedItemId = R.id.fragmentDiscover
+                }
+
+                HomeTab.PROFILE.name -> {
+                    binding.bottomNavView.selectedItemId = R.id.fragmentProfile
+                }
+            }
+            requireArguments().remove(ARG_OPEN_TAB)
         }
     }
 
@@ -96,8 +112,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4
 
+        val openTab = requireArguments().getString(ARG_OPEN_TAB, HomeTab.LEARN.name)
+        val learnTab = if (openTab == HomeTab.PROGRAMS.name) {
+            LearnTab.PROGRAMS
+        } else {
+            LearnTab.COURSES
+        }
         adapter = NavigationFragmentAdapter(this).apply {
-            addFragment(LearnFragment())
+            addFragment(LearnFragment.newInstance(openTab = learnTab.name))
             addFragment(viewModel.getDiscoveryFragment)
             addFragment(ProfileFragment())
         }
@@ -114,11 +136,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_INFO_TYPE = "info_type"
-        fun newInstance(courseId: String? = null, infoType: String? = null): MainFragment {
+        private const val ARG_OPEN_TAB = "open_tab"
+        fun newInstance(
+            courseId: String? = null,
+            infoType: String? = null,
+            openTab: String = HomeTab.LEARN.name
+        ): MainFragment {
             val fragment = MainFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
-                ARG_INFO_TYPE to infoType
+                ARG_INFO_TYPE to infoType,
+                ARG_OPEN_TAB to openTab
             )
             return fragment
         }

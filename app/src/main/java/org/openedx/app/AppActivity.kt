@@ -18,6 +18,7 @@ import io.branch.referral.Branch.BranchUniversalReferralInitListener
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.app.deeplink.DeepLink
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
@@ -145,10 +146,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         super.onStart()
 
         if (viewModel.isBranchEnabled) {
-            val callback = BranchUniversalReferralInitListener { _, linkProperties, error ->
-                if (linkProperties != null) {
+            val callback = BranchUniversalReferralInitListener { branchUniversalObject, _, error ->
+                if (branchUniversalObject?.contentMetadata?.customMetadata != null) {
                     branchLogger.i { "Branch init complete." }
-                    branchLogger.i { linkProperties.controlParams.toString() }
+                    branchLogger.i { branchUniversalObject.contentMetadata.customMetadata.toString() }
+                    viewModel.makeExternalRoute(
+                        fm = supportFragmentManager,
+                        deepLink = DeepLink(branchUniversalObject.contentMetadata.customMetadata)
+                    )
                 } else if (error != null) {
                     branchLogger.e { "Branch init failed. Caused by -" + error.message }
                 }
