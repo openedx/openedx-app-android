@@ -5,7 +5,11 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.openedx.core.data.model.room.MediaDb
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.utils.TimeUtils
 
 @Entity(tableName = "course_enrolled_table")
@@ -34,7 +38,8 @@ data class EnrolledCourseEntity(
             mode,
             isActive,
             course.mapToDomain(),
-            certificate?.mapToDomain()
+            certificate?.mapToDomain(),
+            null
         )
     }
 }

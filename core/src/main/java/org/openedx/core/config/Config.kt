@@ -27,6 +27,10 @@ class Config(context: Context) {
         return getString(API_HOST_URL, "")
     }
 
+    fun getEcommerceURL(): String {
+        return getString(ECOMMERCE_URL, "")
+    }
+
     fun getUriScheme(): String {
         return getString(URI_SCHEME, "")
     }
@@ -147,6 +151,7 @@ class Config(context: Context) {
 
     companion object {
         private const val API_HOST_URL = "API_HOST_URL"
+        private const val ECOMMERCE_URL = "ECOMMERCE_URL"
         private const val URI_SCHEME = "URI_SCHEME"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"

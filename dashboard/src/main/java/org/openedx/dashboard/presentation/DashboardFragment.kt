@@ -40,6 +40,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -77,10 +78,16 @@ import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.ProductInfo
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.presentation.iap.IAPAction
+import org.openedx.core.presentation.iap.IAPUIState
+import org.openedx.core.presentation.iap.IAPViewModel
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.IAPDialog
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -101,6 +108,7 @@ import org.openedx.core.R as CoreR
 class DashboardFragment : Fragment() {
 
     private val viewModel by viewModel<DashboardViewModel>()
+    private val iapViewModel by viewModel<IAPViewModel>()
     private val router by inject<DashboardRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,12 +130,14 @@ class DashboardFragment : Fragment() {
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
+                val iapState by iapViewModel.uiState.collectAsState()
 
                 MyCoursesScreen(
                     windowSize = windowSize,
                     viewModel.apiHostUrl,
-                    uiState!!,
-                    uiMessage,
+                    state = uiState!!,
+                    uiMessage = uiMessage,
+                    iapState = iapState,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
@@ -148,6 +158,25 @@ class DashboardFragment : Fragment() {
                     },
                     paginationCallback = {
                         viewModel.fetchMore()
+                    },
+                    iapCallback = { action, course ->
+                        when (action) {
+                            IAPAction.LOAD_PRICE -> {
+                                course?.let { iapViewModel.loadPrice(course = it) }
+                            }
+
+                            IAPAction.START_PURCHASE_FLOW -> {
+                                iapViewModel.startPurchaseFlow()
+                            }
+
+                            IAPAction.PURCHASE_PRODUCT -> {
+                                iapViewModel.purchaseItem(requireActivity())
+                            }
+
+                            IAPAction.CLEAR -> {
+                                iapViewModel.clearIAPFLow()
+                            }
+                        }
                     },
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
@@ -171,6 +200,7 @@ internal fun MyCoursesScreen(
     apiHostUrl: String,
     state: DashboardUIState,
     uiMessage: UIMessage?,
+    iapState: IAPUIState,
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
@@ -179,6 +209,7 @@ internal fun MyCoursesScreen(
     paginationCallback: () -> Unit,
     onSettingsClick: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
+    iapCallback: (IAPAction, EnrolledCourse?) -> Unit,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -260,6 +291,50 @@ internal fun MyCoursesScreen(
                         .fillMaxWidth()
                         .pullRefresh(pullRefreshState),
                 ) {
+                    when (iapState) {
+                        is IAPUIState.Loading -> {
+                            IAPDialog(
+                                courseTitle = iapState.course.course.name,
+                                isLoading = true,
+                                onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                })
+                        }
+
+                        is IAPUIState.ProductData -> {
+                            IAPDialog(
+                                courseTitle = iapState.course.course.name,
+                                formattedPrice = iapState.formattedPrice,
+                                iapCallback = { action ->
+                                    iapCallback(action, null)
+                                }, onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                })
+                        }
+
+                        is IAPUIState.Error -> {
+                            IAPDialog(
+                                courseTitle = iapState.course.course.name,
+                                isError = true,
+                                onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                })
+                        }
+
+                        is IAPUIState.PurchaseProduct -> {
+                            iapCallback(IAPAction.PURCHASE_PRODUCT, null)
+                        }
+
+                        is IAPUIState.PurchaseComplete -> {
+                            onSwipeRefresh()
+                            iapCallback(IAPAction.CLEAR, null)
+                        }
+
+                        else -> {
+                            iapCallback(IAPAction.CLEAR, null)
+                        }
+                    }
+
                     when (state) {
                         is DashboardUIState.Loading -> {
                             Box(
@@ -282,7 +357,7 @@ internal fun MyCoursesScreen(
                                     state = scrollState,
                                     contentPadding = contentPaddings,
                                     content = {
-                                        item() {
+                                        item {
                                             Column {
                                                 Header()
                                                 Spacer(modifier = Modifier.height(16.dp))
@@ -294,6 +369,22 @@ internal fun MyCoursesScreen(
                                                 course,
                                                 windowSize,
                                                 onClick = { onItemClick(it) })
+                                            if (course.isUpgradeable && state.isValuePropEnabled) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(vertical = 16.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    OpenEdXButton(text = "Upgrade to access more features",
+                                                        onClick = {
+                                                            iapCallback(
+                                                                IAPAction.LOAD_PRICE,
+                                                                course
+                                                            )
+                                                        })
+                                                }
+                                            }
                                             Divider()
                                         }
                                         item {
@@ -557,24 +648,26 @@ private fun MyCoursesScreenDay() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
-                listOf(
+                courses = listOf(
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled
-                )
+                ), isValuePropEnabled = false
             ),
             uiMessage = null,
-            onSwipeRefresh = {},
-            onItemClick = {},
-            onReloadClick = {},
-            hasInternetConnection = true,
-            refreshing = false,
+            iapState = IAPUIState.Clear,
             canLoadMore = false,
+            refreshing = false,
+            hasInternetConnection = true,
+            onReloadClick = {},
+            onSwipeRefresh = {},
             paginationCallback = {},
             onSettingsClick = {},
+            onItemClick = {},
+            iapCallback = { _, _ -> },
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -589,24 +682,26 @@ private fun MyCoursesScreenTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
-                listOf(
+                courses = listOf(
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled
-                )
+                ), isValuePropEnabled = false
             ),
             uiMessage = null,
-            onSwipeRefresh = {},
-            onItemClick = {},
-            onReloadClick = {},
-            hasInternetConnection = true,
-            refreshing = false,
+            iapState = IAPUIState.Clear,
             canLoadMore = false,
+            refreshing = false,
+            hasInternetConnection = true,
+            onReloadClick = {},
+            onSwipeRefresh = {},
             paginationCallback = {},
             onSettingsClick = {},
+            onItemClick = {},
+            iapCallback = { _, _ -> },
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -646,5 +741,6 @@ private val mockCourseEnrolled = EnrolledCourse(
         discussionUrl = "",
         videoOutline = "",
         isSelfPaced = false
-    )
+    ),
+    productInfo = ProductInfo(courseSku = "example_sku", storeSku = "mobile.android.example_100")
 )

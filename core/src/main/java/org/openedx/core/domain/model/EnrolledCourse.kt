@@ -12,4 +12,22 @@ data class EnrolledCourse(
     val isActive: Boolean,
     val course: EnrolledCourseData,
     val certificate: Certificate?,
+    val productInfo: ProductInfo?,
+) : Parcelable {
+    private val isAuditAccessExpired: Boolean
+        get() = auditAccessExpires == null || Date().after(auditAccessExpires)
+
+    private val isAuditMode: Boolean
+        get() = EnrollmentMode.AUDIT.toString().equals(mode, ignoreCase = true)
+    val isUpgradeable: Boolean
+        get() = isAuditMode &&
+                course.isStarted &&
+                course.isUpgradeDeadlinePassed.not() &&
+                productInfo != null && isAuditAccessExpired.not()
+}
+
+@Parcelize
+data class ProductInfo(
+    val courseSku: String,
+    val storeSku: String,
 ) : Parcelable

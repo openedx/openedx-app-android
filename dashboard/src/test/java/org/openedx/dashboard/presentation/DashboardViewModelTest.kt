@@ -27,6 +27,7 @@ import org.junit.rules.TestRule
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.system.ResourceManager
@@ -52,6 +53,7 @@ class DashboardViewModelTest {
     private val discoveryNotifier = mockk<DiscoveryNotifier>()
     private val analytics = mockk<DashboardAnalytics>()
     private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val corePreferences = mockk<CorePreferences>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -84,7 +86,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
@@ -108,7 +111,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
@@ -132,9 +136,11 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
         every { networkConnection.isOnline() } returns true
+        every { corePreferences.appConfig.isValuePropEnabled } returns false
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
         advanceUntilIdle()
@@ -156,9 +162,11 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
         every { networkConnection.isOnline() } returns true
+        every { corePreferences.appConfig.isValuePropEnabled } returns false
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(
             Pagination(
                 10,
@@ -182,6 +190,7 @@ class DashboardViewModelTest {
     @Test
     fun `getCourses from cache`() = runTest {
         every { networkConnection.isOnline() } returns false
+        every { corePreferences.appConfig.isValuePropEnabled } returns false
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
         val viewModel = DashboardViewModel(
             config,
@@ -190,7 +199,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
 
         advanceUntilIdle()
@@ -214,7 +224,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
 
         coEvery { interactor.getEnrolledCourses(any()) } throws UnknownHostException()
@@ -242,7 +253,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
 
         coEvery { interactor.getEnrolledCourses(any()) } throws Exception()
@@ -262,6 +274,7 @@ class DashboardViewModelTest {
     @Test
     fun `updateCourses success`() = runTest {
         every { networkConnection.isOnline() } returns true
+        every { corePreferences.appConfig.isValuePropEnabled } returns false
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
         val viewModel = DashboardViewModel(
             config,
@@ -270,7 +283,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
 
         viewModel.updateCourses()
@@ -288,6 +302,7 @@ class DashboardViewModelTest {
     @Test
     fun `updateCourses success with next page`() = runTest {
         every { networkConnection.isOnline() } returns true
+        every { corePreferences.appConfig.isValuePropEnabled } returns false
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList.copy(
             Pagination(
                 10,
@@ -303,7 +318,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
 
         viewModel.updateCourses()
@@ -328,7 +344,8 @@ class DashboardViewModelTest {
             resourceManager,
             discoveryNotifier,
             analytics,
-            appUpgradeNotifier
+            appUpgradeNotifier,
+            corePreferences
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

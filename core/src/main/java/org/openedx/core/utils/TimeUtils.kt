@@ -79,7 +79,7 @@ object TimeUtils {
      * @return <code>true</code> if the other date is past today,
      * <code>false</code> otherwise.
      */
-    private fun isDatePassed(today: Date, otherDate: Date?): Boolean {
+    fun isDatePassed(today: Date, otherDate: Date?): Boolean {
         return otherDate != null && today.after(otherDate)
     }
 

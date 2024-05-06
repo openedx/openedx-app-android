@@ -2,7 +2,8 @@ package org.openedx.core.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.util.*
+import org.openedx.core.utils.TimeUtils
+import java.util.Date
 
 @Parcelize
 data class EnrolledCourseData(
@@ -26,4 +27,10 @@ data class EnrolledCourseData(
     val discussionUrl: String,
     val videoOutline: String,
     val isSelfPaced: Boolean
-) : Parcelable
+) : Parcelable {
+    val isStarted: Boolean
+        get() = TimeUtils.isDatePassed(Date(), start)
+
+    val isUpgradeDeadlinePassed: Boolean
+        get() = TimeUtils.isDatePassed(Date(), TimeUtils.iso8601ToDate(dynamicUpgradeDeadline))
+}

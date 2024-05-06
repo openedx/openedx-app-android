@@ -32,6 +32,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
+import org.openedx.core.module.billing.BillingProcessor
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
@@ -163,6 +164,8 @@ val appModule = module {
     single { TranscriptManager(get()) }
     single { WhatsNewManager(get(), get(), get(), get()) }
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
+
+    single<BillingProcessor> { BillingProcessor(get(), get(named("IODispatcher"))) }
 
     single { AnalyticsManager(get(), get()) }
     single<AppAnalytics> { get<AnalyticsManager>() }

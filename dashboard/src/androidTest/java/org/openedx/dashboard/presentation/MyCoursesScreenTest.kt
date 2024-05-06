@@ -17,6 +17,7 @@ import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.presentation.iap.IAPUIState
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import java.util.Date
@@ -61,7 +62,8 @@ class MyCoursesScreenTest {
             discussionUrl = "",
             videoOutline = "",
             isSelfPaced = false
-        )
+        ),
+        productInfo = null
     )
     //endregion
 
@@ -71,17 +73,22 @@ class MyCoursesScreenTest {
             MyCoursesScreen(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
-                state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
+                state = DashboardUIState.Courses(
+                    listOf(mockCourseEnrolled, mockCourseEnrolled),
+                    false
+                ),
                 uiMessage = null,
-                refreshing = false,
                 canLoadMore = false,
+                refreshing = false,
                 hasInternetConnection = true,
                 onReloadClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
+                onSettingsClick = {},
+                iapCallback = { _, _ -> },
+                iapState = IAPUIState.Clear,
             )
         }
 
@@ -104,17 +111,22 @@ class MyCoursesScreenTest {
             MyCoursesScreen(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
-                state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
+                state = DashboardUIState.Courses(
+                    listOf(mockCourseEnrolled, mockCourseEnrolled),
+                    false
+                ),
                 uiMessage = null,
-                refreshing = false,
                 canLoadMore = false,
+                refreshing = false,
                 hasInternetConnection = true,
                 onReloadClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
+                onSettingsClick = {},
+                iapCallback = { _, _ -> },
+                iapState = IAPUIState.Clear,
             )
         }
 
@@ -130,17 +142,22 @@ class MyCoursesScreenTest {
             MyCoursesScreen(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
-                state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
+                state = DashboardUIState.Courses(
+                    listOf(mockCourseEnrolled, mockCourseEnrolled),
+                    false
+                ),
                 uiMessage = null,
-                refreshing = true,
                 canLoadMore = false,
+                refreshing = true,
                 hasInternetConnection = true,
                 onReloadClick = {},
                 onSwipeRefresh = {},
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
+                onSettingsClick = {},
+                iapCallback = { _, _ -> },
+                iapState = IAPUIState.Clear,
             )
         }
 
@@ -162,5 +179,4 @@ class MyCoursesScreenTest {
             )
         }
     }
-
 }
