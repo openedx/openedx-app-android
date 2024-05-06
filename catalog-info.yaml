@@ -10,6 +10,8 @@ metadata:
     - url: "https://github.com/openedx/openedx-app-android/tree/main/Documentation"
       title: "Documentation"
       icon: "PhoneAndroid"
+  annotations:
+    openedx.org/release: "main"
 spec:
   owner: group:openedx-mobile-maintainers
   type: 'mobile'
