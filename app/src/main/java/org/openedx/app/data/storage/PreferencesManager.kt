@@ -152,6 +152,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getBoolean(APP_WAS_POSITIVE_RATED)
 
+    override var canResetAppDirectory: Boolean
+        set(value) {
+            saveBoolean(RESET_APP_DIRECTORY, value)
+        }
+        get() = getBoolean(RESET_APP_DIRECTORY, true)
+
     override fun setCalendarSyncEventsDialogShown(courseName: String) {
         saveBoolean(courseName.replaceSpace("_"), true)
     }
@@ -172,5 +178,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val VIDEO_SETTINGS_STREAMING_QUALITY = "video_settings_streaming_quality"
         private const val VIDEO_SETTINGS_DOWNLOAD_QUALITY = "video_settings_download_quality"
         private const val APP_CONFIG = "app_config"
+        private const val RESET_APP_DIRECTORY = "reset_app_directory"
     }
 }

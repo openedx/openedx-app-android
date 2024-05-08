@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.io.File
+import java.util.Collections
 
 class FileUtil(val context: Context) {
 
@@ -15,7 +16,10 @@ class FileUtil(val context: Context) {
         return file
     }
 
-    inline fun <reified T> saveObjectToFile(obj: T, fileName: String = "${T::class.java.simpleName}.json") {
+    inline fun <reified T> saveObjectToFile(
+        obj: T,
+        fileName: String = "${T::class.java.simpleName}.json",
+    ) {
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
         val jsonString = gson.toJson(obj)
         File(getExternalAppDir().path + fileName).writeText(jsonString)
@@ -30,6 +34,45 @@ class FileUtil(val context: Context) {
         } else {
             null
         }
+    }
+
+    /**
+     * Deletes all the files and directories in the app's external storage directory.
+     *
+     * @param context The current context.
+     */
+    fun deleteOldAppDirectory(context: Context) {
+        val externalFilesDir = context.getExternalFilesDir(null)
+        val externalAppDir: File = File(externalFilesDir?.parentFile, "videos")
+        if (externalAppDir.isDirectory) {
+            deleteRecursive(externalAppDir, Collections.emptyList())
+        }
+    }
+
+    /**
+     * Deletes a file or directory and all its content recursively.
+     *
+     * @param fileOrDirectory The file or directory that needs to be deleted.
+     * @param exceptions      Names of the files or directories that need to be skipped while deletion.
+     */
+    private fun deleteRecursive(
+        fileOrDirectory: File,
+        exceptions: List<String>,
+    ) {
+        if (exceptions.contains(fileOrDirectory.name)) return
+
+        if (fileOrDirectory.isDirectory) {
+            val filesList = fileOrDirectory.listFiles()
+            if (filesList != null) {
+                for (child in filesList) {
+                    deleteRecursive(child, exceptions)
+                }
+            }
+        }
+
+        // Don't break the recursion upon encountering an error
+        // noinspection ResultOfMethodCallIgnored
+        fileOrDirectory.delete()
     }
 }
 

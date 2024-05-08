@@ -10,6 +10,7 @@ import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -27,7 +28,8 @@ class DashboardListViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val preferences: CorePreferences
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
@@ -35,6 +37,7 @@ class DashboardListViewModel(
     private var isLoading = false
 
     val apiHostUrl get() = config.getApiHostURL()
+    val canResetAppDirectory = preferences.canResetAppDirectory
 
     private val _uiState = MutableLiveData<DashboardUIState>(DashboardUIState.Loading)
     val uiState: LiveData<DashboardUIState>
@@ -163,6 +166,10 @@ class DashboardListViewModel(
         if (!isLoading && page != -1) {
             internalLoadingCourses()
         }
+    }
+
+    fun setResetAppDirectoryPreference(){
+        preferences.canResetAppDirectory = false
     }
 
     private fun collectAppUpgradeEvent() {
