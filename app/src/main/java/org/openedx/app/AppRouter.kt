@@ -128,6 +128,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
     }
 
+    override fun getProgramFragmentInstance(): Fragment {
+        return ProgramFragment(myPrograms = true, isNestedFragment = true)
+    }
+
     override fun navigateToCourseInfo(
         fm: FragmentManager,
         courseId: String,

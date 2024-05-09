@@ -1,20 +1,16 @@
 package org.openedx.learn.presentation
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.view.View
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
@@ -22,32 +18,31 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.viewpager2.widget.ViewPager2
+import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
-import org.openedx.core.presentation.global.InDevelopmentScreen
+import org.openedx.core.adapter.NavigationFragmentAdapter
+import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
@@ -56,37 +51,56 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.courses.presentation.PrimaryCourseScreen
+import org.openedx.courses.presentation.PrimaryCourseFragment
 import org.openedx.dashboard.R
+import org.openedx.dashboard.databinding.FragmentLearnBinding
+import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.learn.LearnType
 
-class PrimaryCourseDashboardFragment : Fragment() {
+class LearnFragment : Fragment(R.layout.fragment_learn) {
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ) = ComposeView(requireContext()).apply {
-        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-        setContent {
+    private val binding by viewBinding(FragmentLearnBinding::bind)
+    private val router by inject<DashboardRouter>()
+    private lateinit var adapter: NavigationFragmentAdapter
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.header.setContent {
             OpenEdXTheme {
-                LearnScreen(
-                    fragmentManager = requireParentFragment().parentFragmentManager
+                Header(
+                    fragmentManager = requireParentFragment().parentFragmentManager,
+                    viewPager = binding.viewPager
                 )
             }
         }
+        initViewPager()
+    }
+
+    private fun initViewPager() {
+        binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
+        binding.viewPager.offscreenPageLimit = 2
+
+        adapter = NavigationFragmentAdapter(this).apply {
+            addFragment(PrimaryCourseFragment())
+            addFragment(router.getProgramFragmentInstance())
+        }
+        binding.viewPager.adapter = adapter
+        binding.viewPager.setUserInputEnabled(false)
+    }
+
+    private fun setFragment() {
+        binding.viewPager.setCurrentItem(0, false)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun LearnScreen(
+private fun Header(
     viewModel: LearnViewModel = koinViewModel(),
     fragmentManager: FragmentManager,
+    viewPager: ViewPager2
 ) {
     val windowSize = rememberWindowSize()
-    val scope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
     val pagerState = rememberPagerState {
         LearnType.entries.size
     }
@@ -94,67 +108,40 @@ private fun LearnScreen(
         mutableStateOf(
             windowSize.windowSizeValue(
                 expanded = Modifier.widthIn(Dp.Unspecified, 650.dp),
-                compact = Modifier.fillMaxSize(),
+                compact = Modifier.fillMaxWidth(),
             )
         )
     }
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
-        backgroundColor = MaterialTheme.appColors.background
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .statusBarsInset()
-                    .displayCutoutForLandscape()
-                    .then(contentWidth),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Header(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp),
-                    label = stringResource(id = R.string.dashboard_learn),
-                    onSearchClick = {
-                        viewModel.onSearchClick(fragmentManager)
-                    }
-                )
-
-                if (viewModel.isProgramTypeWebView) {
-                    LearnDropdownMenu(
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(horizontal = 16.dp),
-                        pagerState = pagerState
-                    )
-
-                    HorizontalPager(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        state = pagerState,
-                        userScrollEnabled = false
-                    ) { page ->
-                        when (page) {
-                            0 -> PrimaryCourseScreen(fragmentManager = fragmentManager)
-
-                            1 -> InDevelopmentScreen()
-                        }
-                    }
-                } else {
-                    PrimaryCourseScreen(fragmentManager = fragmentManager)
-                }
+    Column(
+        modifier = Modifier
+            .statusBarsInset()
+            .displayCutoutForLandscape()
+            .then(contentWidth),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Title(
+            modifier = Modifier
+                .padding(horizontal = 16.dp),
+            label = stringResource(id = R.string.dashboard_learn),
+            onSearchClick = {
+                viewModel.onSearchClick(fragmentManager)
             }
+        )
+
+        if (viewModel.isProgramTypeWebView) {
+            LearnDropdownMenu(
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(horizontal = 16.dp),
+                viewPager = viewPager
+            )
         }
     }
 }
 
 @Composable
-private fun Header(
+private fun Title(
     modifier: Modifier = Modifier,
     label: String,
     onSearchClick: () -> Unit
@@ -189,17 +176,17 @@ private fun Header(
 @Composable
 private fun LearnDropdownMenu(
     modifier: Modifier = Modifier,
-    pagerState: PagerState
+    viewPager: ViewPager2
 ) {
     var expanded by remember { mutableStateOf(false) }
     var currentValue by remember { mutableStateOf(LearnType.COURSES) }
 
     LaunchedEffect(currentValue) {
-        pagerState.scrollToPage(
+        viewPager.setCurrentItem(
             when (currentValue) {
                 LearnType.COURSES -> 0
                 LearnType.PROGRAMS -> 1
-            }
+            }, false
         )
     }
 
@@ -270,7 +257,7 @@ private fun LearnDropdownMenu(
 @Composable
 private fun HeaderPreview() {
     OpenEdXTheme {
-        Header(
+        Title(
             label = stringResource(id = R.string.dashboard_learn),
             onSearchClick = {}
         )
@@ -282,8 +269,9 @@ private fun HeaderPreview() {
 @Composable
 private fun LearnDropdownMenuPreview() {
     OpenEdXTheme {
+        val context = LocalContext.current
         LearnDropdownMenu(
-            pagerState = rememberPagerState { 2 }
+            viewPager = ViewPager2(context)
         )
     }
 }

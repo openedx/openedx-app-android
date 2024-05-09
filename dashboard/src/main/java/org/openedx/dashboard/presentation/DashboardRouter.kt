@@ -1,5 +1,6 @@
 package org.openedx.dashboard.presentation
 
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.presentation.course.CourseContainerTab
 
@@ -19,4 +20,6 @@ interface DashboardRouter {
     fun navigateToCourseSearch(fm: FragmentManager, querySearch: String)
 
     fun navigateToAllEnrolledCourses(fm: FragmentManager)
+
+    fun getProgramFragmentInstance(): Fragment
 }

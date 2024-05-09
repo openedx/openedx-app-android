@@ -11,8 +11,8 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.app.adapter.MainNavigationFragmentAdapter
 import org.openedx.app.databinding.FragmentMainBinding
+import org.openedx.core.adapter.NavigationFragmentAdapter
 import org.openedx.core.config.Config
 import org.openedx.core.config.DashboardConfig
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
@@ -20,7 +20,7 @@ import org.openedx.core.presentation.global.viewBinding
 import org.openedx.dashboard.presentation.ListDashboardFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
-import org.openedx.learn.presentation.PrimaryCourseDashboardFragment
+import org.openedx.learn.presentation.LearnFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -30,7 +30,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val router by inject<DiscoveryRouter>()
     private val config by inject<Config>()
 
-    private lateinit var adapter: MainNavigationFragmentAdapter
+    private lateinit var adapter: NavigationFragmentAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,10 +104,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView).getDiscoveryFragment()
         val dashboardFragment = when (config.getDashboardConfig().getType()) {
             DashboardConfig.DashboardType.LIST -> ListDashboardFragment()
-            DashboardConfig.DashboardType.PRIMARY_COURSE -> PrimaryCourseDashboardFragment()
+            DashboardConfig.DashboardType.PRIMARY_COURSE -> LearnFragment()
         }
 
-        adapter = MainNavigationFragmentAdapter(this).apply {
+        adapter = NavigationFragmentAdapter(this).apply {
             addFragment(dashboardFragment)
             addFragment(discoveryFragment)
             addFragment(ProfileFragment())
