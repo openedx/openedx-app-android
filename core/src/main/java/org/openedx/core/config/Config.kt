@@ -91,6 +91,10 @@ class Config(context: Context) {
         return getObjectOrNewInstance(PROGRAM, ProgramConfig::class.java)
     }
 
+    fun getDashboardConfig(): DashboardConfig {
+        return getObjectOrNewInstance(DASHBOARD, DashboardConfig::class.java)
+    }
+
     fun getBranchConfig(): BranchConfig {
         return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
@@ -109,10 +113,6 @@ class Config(context: Context) {
 
     fun isCourseUnitProgressEnabled(): Boolean {
         return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
-    }
-
-    fun isDashboardNewScreenEnabled(): Boolean {
-        return getBoolean(DASHBOARD_NEW_SCREEN_ENABLED, false)
     }
 
     private fun getString(key: String, defaultValue: String): String {
@@ -168,11 +168,11 @@ class Config(context: Context) {
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
+        private const val DASHBOARD = "DASHBOARD"
         private const val BRANCH = "BRANCH"
         private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
-        private const val DASHBOARD_NEW_SCREEN_ENABLED = "DASHBOARD_NEW_SCREEN_ENABLED"
     }
 
     enum class ViewType {

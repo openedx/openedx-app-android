@@ -34,6 +34,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.School
@@ -95,15 +96,15 @@ import java.util.Date
 import org.openedx.core.R as CoreR
 
 @Composable
-fun UsersCourseScreen(
-    viewModel: UserCoursesViewModel = koinViewModel(),
+fun PrimaryCourseScreen(
+    viewModel: PrimaryCourseViewModel = koinViewModel(),
     fragmentManager: FragmentManager,
 ) {
     val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val uiState by viewModel.uiState.collectAsState(UserCoursesUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(PrimaryCourseUIState.Loading)
 
-    UsersCourseScreen(
+    PrimaryCourseScreen(
         uiMessage = uiMessage,
         uiState = uiState,
         updating = updating,
@@ -111,19 +112,19 @@ fun UsersCourseScreen(
         hasInternetConnection = viewModel.hasInternetConnection,
         onAction = { action ->
             when (action) {
-                UserCoursesScreenAction.SwipeRefresh -> {
+                PrimaryCourseScreenAction.SwipeRefresh -> {
                     viewModel.updateCourses()
                 }
 
-                UserCoursesScreenAction.ViewAll -> {
+                PrimaryCourseScreenAction.ViewAll -> {
                     viewModel.dashboardRouter.navigateToAllEnrolledCourses(fragmentManager)
                 }
 
-                UserCoursesScreenAction.Reload -> {
+                PrimaryCourseScreenAction.Reload -> {
                     viewModel.getCourses()
                 }
 
-                is UserCoursesScreenAction.OpenCourse -> {
+                is PrimaryCourseScreenAction.OpenCourse -> {
                     viewModel.dashboardRouter.navigateToCourseOutline(
                         fm = fragmentManager,
                         courseId = action.enrolledCourse.course.id,
@@ -132,7 +133,7 @@ fun UsersCourseScreen(
                     )
                 }
 
-                is UserCoursesScreenAction.NavigateToDates -> {
+                is PrimaryCourseScreenAction.NavigateToDates -> {
                     viewModel.dashboardRouter.navigateToCourseOutline(
                         fm = fragmentManager,
                         courseId = action.enrolledCourse.course.id,
@@ -142,7 +143,7 @@ fun UsersCourseScreen(
                     )
                 }
 
-                is UserCoursesScreenAction.OpenBlock -> {
+                is PrimaryCourseScreenAction.OpenBlock -> {
                     viewModel.dashboardRouter.navigateToCourseOutline(
                         fm = fragmentManager,
                         courseId = action.enrolledCourse.course.id,
@@ -158,18 +159,18 @@ fun UsersCourseScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun UsersCourseScreen(
+private fun PrimaryCourseScreen(
     uiMessage: UIMessage?,
-    uiState: UserCoursesUIState,
+    uiState: PrimaryCourseUIState,
     updating: Boolean,
     apiHostUrl: String,
-    onAction: (UserCoursesScreenAction) -> Unit,
+    onAction: (PrimaryCourseScreenAction) -> Unit,
     hasInternetConnection: Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = updating,
-        onRefresh = { onAction(UserCoursesScreenAction.SwipeRefresh) }
+        onRefresh = { onAction(PrimaryCourseScreenAction.SwipeRefresh) }
     )
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
@@ -195,34 +196,34 @@ private fun UsersCourseScreen(
                     .verticalScroll(rememberScrollState()),
             ) {
                 when (uiState) {
-                    is UserCoursesUIState.Loading -> {
+                    is PrimaryCourseUIState.Loading -> {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.appColors.primary
                         )
                     }
 
-                    is UserCoursesUIState.Courses -> {
+                    is PrimaryCourseUIState.Courses -> {
                         UserCourses(
                             modifier = Modifier.fillMaxSize(),
                             userCourses = uiState.userCourses,
                             apiHostUrl = apiHostUrl,
                             openCourse = {
-                                onAction(UserCoursesScreenAction.OpenCourse(it))
+                                onAction(PrimaryCourseScreenAction.OpenCourse(it))
                             },
                             onViewAllClick = {
-                                onAction(UserCoursesScreenAction.ViewAll)
+                                onAction(PrimaryCourseScreenAction.ViewAll)
                             },
                             navigateToDates = {
-                                onAction(UserCoursesScreenAction.NavigateToDates(it))
+                                onAction(PrimaryCourseScreenAction.NavigateToDates(it))
                             },
                             openBlock = { course, blockId ->
-                                onAction(UserCoursesScreenAction.OpenBlock(course, blockId))
+                                onAction(PrimaryCourseScreenAction.OpenBlock(course, blockId))
                             }
                         )
                     }
 
-                    is UserCoursesUIState.Empty -> {
+                    is PrimaryCourseUIState.Empty -> {
                         EmptyState(
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -245,7 +246,7 @@ private fun UsersCourseScreen(
                         },
                         onReloadClick = {
                             isInternetConnectionShown = true
-                            onAction(UserCoursesScreenAction.Reload)
+                            onAction(PrimaryCourseScreenAction.Reload)
                         }
                     )
                 }
@@ -400,8 +401,8 @@ private fun CourseListItem(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(apiHostUrl + course.course.courseImage)
-                        .error(org.openedx.core.R.drawable.core_no_image_course)
-                        .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                        .error(CoreR.drawable.core_no_image_course)
+                        .placeholder(CoreR.drawable.core_no_image_course)
                         .build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
@@ -507,8 +508,8 @@ private fun PrimaryCourseCard(
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(apiHostUrl + primaryCourse.course.courseImage)
-                    .error(org.openedx.core.R.drawable.core_no_image_course)
-                    .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                    .error(CoreR.drawable.core_no_image_course)
+                    .placeholder(CoreR.drawable.core_no_image_course)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -517,7 +518,7 @@ private fun PrimaryCourseCard(
                     .height(140.dp)
             )
             val progress: Float = try {
-                (primaryCourse.progress.numPointsEarned / primaryCourse.progress.numPointsPossible).toFloat()
+                (primaryCourse.progress.assignmentsCompleted / primaryCourse.progress.totalAssignmentsCount).toFloat()
             } catch (_: ArithmeticException) {
                 0f
             }
@@ -607,11 +608,14 @@ private fun ResumeButton(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (primaryCourse.courseStatus == null) {
+            Icon(
+                imageVector = Icons.Default.School,
+                tint = MaterialTheme.appColors.buttonText,
+                contentDescription = null
+            )
             Text(
-                modifier = modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.weight(1f),
                 text = stringResource(R.string.dashboard_start_course),
-                textAlign = TextAlign.Center,
                 color = MaterialTheme.appColors.buttonText,
                 style = MaterialTheme.appTypography.titleSmall
             )
@@ -622,6 +626,7 @@ private fun ResumeButton(
                 contentDescription = null
             )
             Column(
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
@@ -636,6 +641,12 @@ private fun ResumeButton(
                 )
             }
         }
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            tint = MaterialTheme.appColors.buttonText,
+            contentDescription = null
+        )
     }
 }
 
@@ -784,10 +795,10 @@ private fun ViewAllItemPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
-private fun UsersCourseScreenPreview() {
+private fun PrimaryCourseScreenPreview() {
     OpenEdXTheme {
-        UsersCourseScreen(
-            uiState = UserCoursesUIState.Courses(mockUserCourses),
+        PrimaryCourseScreen(
+            uiState = PrimaryCourseUIState.Courses(mockUserCourses),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,

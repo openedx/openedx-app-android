@@ -23,7 +23,7 @@ import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardRouter
 
-class UserCoursesViewModel(
+class PrimaryCourseViewModel(
     private val config: Config,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
@@ -35,8 +35,8 @@ class UserCoursesViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
 
-    private val _uiState = MutableStateFlow<UserCoursesUIState>(UserCoursesUIState.Loading)
-    val uiState: StateFlow<UserCoursesUIState>
+    private val _uiState = MutableStateFlow<PrimaryCourseUIState>(PrimaryCourseUIState.Loading)
+    val uiState: StateFlow<PrimaryCourseUIState>
         get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
@@ -61,16 +61,16 @@ class UserCoursesViewModel(
                 if (networkConnection.isOnline()) {
                     val response = interactor.getMainUserCourses()
                     if (response.primary == null && response.enrollments.isNotEmpty()) {
-                        _uiState.value = UserCoursesUIState.Empty
+                        _uiState.value = PrimaryCourseUIState.Empty
                     } else {
-                        _uiState.value = UserCoursesUIState.Courses(response)
+                        _uiState.value = PrimaryCourseUIState.Courses(response)
                     }
                 } else {
                     val cachedUserCourses = fileUtil.getObjectFromFile<UserCourses>()
                     if (cachedUserCourses == null) {
-                        _uiState.value = UserCoursesUIState.Empty
+                        _uiState.value = PrimaryCourseUIState.Empty
                     } else {
-                        _uiState.value = UserCoursesUIState.Courses(cachedUserCourses)
+                        _uiState.value = PrimaryCourseUIState.Courses(cachedUserCourses)
                     }
                 }
             } catch (e: Exception) {
@@ -101,11 +101,11 @@ class UserCoursesViewModel(
     }
 }
 
-interface UserCoursesScreenAction {
-    object SwipeRefresh : UserCoursesScreenAction
-    object ViewAll : UserCoursesScreenAction
-    object Reload : UserCoursesScreenAction
-    data class OpenBlock(val enrolledCourse: EnrolledCourse, val blockId: String) : UserCoursesScreenAction
-    data class OpenCourse(val enrolledCourse: EnrolledCourse) : UserCoursesScreenAction
-    data class NavigateToDates(val enrolledCourse: EnrolledCourse) : UserCoursesScreenAction
+interface PrimaryCourseScreenAction {
+    object SwipeRefresh : PrimaryCourseScreenAction
+    object ViewAll : PrimaryCourseScreenAction
+    object Reload : PrimaryCourseScreenAction
+    data class OpenBlock(val enrolledCourse: EnrolledCourse, val blockId: String) : PrimaryCourseScreenAction
+    data class OpenCourse(val enrolledCourse: EnrolledCourse) : PrimaryCourseScreenAction
+    data class NavigateToDates(val enrolledCourse: EnrolledCourse) : PrimaryCourseScreenAction
 }

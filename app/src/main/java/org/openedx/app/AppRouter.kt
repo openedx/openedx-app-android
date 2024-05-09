@@ -166,7 +166,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     override fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String) {
-        replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
+        replaceFragmentWithBackStack(fm, ProgramFragment(true))
     }
 
     override fun navigateToNoAccess(

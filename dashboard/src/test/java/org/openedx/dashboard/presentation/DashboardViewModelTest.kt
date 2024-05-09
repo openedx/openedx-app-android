@@ -77,7 +77,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses no internet connection`() = runTest {
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -101,7 +101,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses unknown error`() = runTest {
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -125,7 +125,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses from network`() = runTest {
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -149,7 +149,7 @@ class DashboardViewModelTest {
 
     @Test
     fun `getCourses from network with next page`() = runTest {
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -183,7 +183,7 @@ class DashboardViewModelTest {
     fun `getCourses from cache`() = runTest {
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getEnrolledCoursesFromCache() } returns listOf(mockk())
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -207,7 +207,7 @@ class DashboardViewModelTest {
     fun `updateCourses no internet error`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -235,7 +235,7 @@ class DashboardViewModelTest {
     fun `updateCourses unknown exception`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -263,7 +263,7 @@ class DashboardViewModelTest {
     fun `updateCourses success`() = runTest {
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getEnrolledCourses(any()) } returns dashboardCourseList
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -296,7 +296,7 @@ class DashboardViewModelTest {
                 ""
             )
         )
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,
@@ -321,7 +321,7 @@ class DashboardViewModelTest {
     @Test
     fun `CourseDashboardUpdate notifier test`() = runTest {
         coEvery { discoveryNotifier.notifier } returns flow { emit(CourseDashboardUpdate()) }
-        val viewModel = DashboardViewModel(
+        val viewModel = ListDashboardViewModel(
             config,
             networkConnection,
             interactor,

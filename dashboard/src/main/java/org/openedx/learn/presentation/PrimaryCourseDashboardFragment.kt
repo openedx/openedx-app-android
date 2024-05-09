@@ -1,7 +1,5 @@
 package org.openedx.learn.presentation
 
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -35,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,7 +48,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.presentation.global.InDevelopmentScreen
-import org.openedx.core.ui.PreviewFragmentManager
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
@@ -59,11 +56,11 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.courses.presentation.UsersCourseScreen
+import org.openedx.courses.presentation.PrimaryCourseScreen
 import org.openedx.dashboard.R
 import org.openedx.learn.LearnType
 
-class LearnFragment : Fragment() {
+class PrimaryCourseDashboardFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,6 +85,7 @@ private fun LearnScreen(
     fragmentManager: FragmentManager,
 ) {
     val windowSize = rememberWindowSize()
+    val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
     val pagerState = rememberPagerState {
         LearnType.entries.size
@@ -134,19 +132,21 @@ private fun LearnScreen(
                             .padding(horizontal = 16.dp),
                         pagerState = pagerState
                     )
-                }
 
-                HorizontalPager(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = pagerState,
-                    userScrollEnabled = false
-                ) { page ->
-                    when (page) {
-                        0 -> UsersCourseScreen(fragmentManager = fragmentManager)
+                    HorizontalPager(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        state = pagerState,
+                        userScrollEnabled = false
+                    ) { page ->
+                        when (page) {
+                            0 -> PrimaryCourseScreen(fragmentManager = fragmentManager)
 
-                        1 -> InDevelopmentScreen()
+                            1 -> InDevelopmentScreen()
+                        }
                     }
+                } else {
+                    PrimaryCourseScreen(fragmentManager = fragmentManager)
                 }
             }
         }
@@ -266,15 +266,24 @@ private fun LearnDropdownMenu(
     }
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_NO)
-@Preview(uiMode = UI_MODE_NIGHT_YES)
-@Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
-@Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
+@Preview
 @Composable
-private fun LearnScreenPreview() {
+private fun HeaderPreview() {
     OpenEdXTheme {
-        LearnScreen(
-            fragmentManager = PreviewFragmentManager
+        Header(
+            label = stringResource(id = R.string.dashboard_learn),
+            onSearchClick = {}
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Preview
+@Composable
+private fun LearnDropdownMenuPreview() {
+    OpenEdXTheme {
+        LearnDropdownMenu(
+            pagerState = rememberPagerState { 2 }
         )
     }
 }

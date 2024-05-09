@@ -30,10 +30,10 @@ import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
 import org.openedx.courses.presentation.AllEnrolledCoursesViewModel
-import org.openedx.courses.presentation.UserCoursesViewModel
+import org.openedx.courses.presentation.PrimaryCourseViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.DashboardViewModel
+import org.openedx.dashboard.presentation.ListDashboardViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -119,8 +119,8 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { UserCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ListDashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { PrimaryCourseViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { LearnViewModel(get(), get()) }
 

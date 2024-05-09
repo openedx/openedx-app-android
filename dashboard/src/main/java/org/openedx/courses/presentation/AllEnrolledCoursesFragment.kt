@@ -108,6 +108,7 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import org.openedx.dashboard.domain.CourseStatusFilter
 import java.util.Date
+import org.openedx.core.R as CoreR
 
 class AllEnrolledCoursesFragment : Fragment() {
 
@@ -455,8 +456,8 @@ private fun CourseItem(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(apiHostUrl + course.course.courseImage)
-                        .error(org.openedx.core.R.drawable.core_no_image_course)
-                        .placeholder(org.openedx.core.R.drawable.core_no_image_course)
+                        .error(CoreR.drawable.core_no_image_course)
+                        .placeholder(CoreR.drawable.core_no_image_course)
                         .build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
@@ -468,7 +469,7 @@ private fun CourseItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    progress = course.progress.numPointsEarned.toFloat(),
+                    progress = course.progress.assignmentsCompleted.toFloat(),
                     color = MaterialTheme.appColors.primary,
                     backgroundColor = MaterialTheme.appColors.divider
                 )

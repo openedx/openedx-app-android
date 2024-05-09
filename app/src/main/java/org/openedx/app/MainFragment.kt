@@ -14,12 +14,13 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.adapter.MainNavigationFragmentAdapter
 import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.config.Config
+import org.openedx.core.config.DashboardConfig
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dashboard.presentation.DashboardFragment
+import org.openedx.dashboard.presentation.ListDashboardFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
-import org.openedx.learn.presentation.LearnFragment
+import org.openedx.learn.presentation.PrimaryCourseDashboardFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -101,10 +102,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.viewPager.offscreenPageLimit = 4
 
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView).getDiscoveryFragment()
-        val dashboardFragment = if (config.isDashboardNewScreenEnabled()) {
-            LearnFragment()
-        } else {
-            DashboardFragment()
+        val dashboardFragment = when (config.getDashboardConfig().getType()) {
+            DashboardConfig.DashboardType.LIST -> ListDashboardFragment()
+            DashboardConfig.DashboardType.PRIMARY_COURSE -> PrimaryCourseDashboardFragment()
         }
 
         adapter = MainNavigationFragmentAdapter(this).apply {

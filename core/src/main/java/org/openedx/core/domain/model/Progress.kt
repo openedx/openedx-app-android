@@ -5,8 +5,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Progress(
-    val numPointsEarned: Int,
-    val numPointsPossible: Int,
+    val assignmentsCompleted: Int,
+    val totalAssignmentsCount: Int,
 ) : Parcelable {
     companion object {
         val DEFAULT_PROGRESS = Progress(0,0)

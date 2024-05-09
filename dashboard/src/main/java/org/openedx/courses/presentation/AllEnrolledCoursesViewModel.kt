@@ -34,11 +34,13 @@ class AllEnrolledCoursesViewModel(
     val dashboardRouter: DashboardRouter
 ) : BaseViewModel() {
 
+    val apiHostUrl get() = config.getApiHostURL()
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
+
     private val coursesList = mutableListOf<EnrolledCourse>()
     private var page = 1
     private var isLoading = false
-
-    val apiHostUrl get() = config.getApiHostURL()
 
     private val _uiState = MutableStateFlow<AllEnrolledCoursesUIState>(AllEnrolledCoursesUIState.Loading)
     val uiState: StateFlow<AllEnrolledCoursesUIState>
@@ -52,8 +54,6 @@ class AllEnrolledCoursesViewModel(
     val updating: StateFlow<Boolean>
         get() = _updating.asStateFlow()
 
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
 
     private val _canLoadMore = MutableStateFlow<Boolean>(false)
     val canLoadMore: StateFlow<Boolean>

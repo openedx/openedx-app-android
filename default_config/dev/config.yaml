@@ -23,10 +23,13 @@ DISCOVERY:
     PROGRAM_DETAIL_TEMPLATE: ''
 
 PROGRAM:
-  TYPE: 'native'
+  TYPE: 'webview'
   WEBVIEW:
     PROGRAM_URL: ''
     PROGRAM_DETAIL_URL_TEMPLATE: ''
+
+DASHBOARD:
+  TYPE: 'primary_course'
 
 FIREBASE:
   ENABLED: false
@@ -78,6 +81,3 @@ SOCIAL_AUTH_ENABLED: false
 #Course navigation feature flags
 COURSE_NESTED_LIST_ENABLED: false
 COURSE_UNIT_PROGRESS_ENABLED: false
-#Dashboard feature flags
-DASHBOARD_NEW_SCREEN_ENABLED: true
-

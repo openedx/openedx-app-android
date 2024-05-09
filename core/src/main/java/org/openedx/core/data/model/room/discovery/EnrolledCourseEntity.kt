@@ -173,16 +173,16 @@ data class CourseSharingUtmParametersDb(
 }
 
 data class ProgressDb(
-    @ColumnInfo("numPointsEarned")
-    val numPointsEarned: Int,
-    @ColumnInfo("numPointsPossible")
-    val numPointsPossible: Int,
+    @ColumnInfo("assignments_completed")
+    val assignmentsCompleted: Int,
+    @ColumnInfo("total_assignments_count")
+    val totalAssignmentsCount: Int,
 ) {
     companion object {
         val DEFAULT_PROGRESS = ProgressDb(0, 0)
     }
 
-    fun mapToDomain() = Progress(numPointsEarned, numPointsPossible)
+    fun mapToDomain() = Progress(assignmentsCompleted, totalAssignmentsCount)
 }
 
 data class CourseStatusDb(

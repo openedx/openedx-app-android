@@ -101,9 +101,9 @@ import org.openedx.dashboard.R
 import java.util.Date
 import org.openedx.core.R as CoreR
 
-class DashboardFragment : Fragment() {
+class ListDashboardFragment : Fragment() {
 
-    private val viewModel by viewModel<DashboardViewModel>()
+    private val viewModel by viewModel<ListDashboardViewModel>()
     private val router by inject<DashboardRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,7 +126,7 @@ class DashboardFragment : Fragment() {
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
 
-                MyCoursesScreen(
+                ListDashboardScreen(
                     windowSize = windowSize,
                     viewModel.apiHostUrl,
                     uiState!!,
@@ -169,7 +169,7 @@ class DashboardFragment : Fragment() {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
-internal fun MyCoursesScreen(
+internal fun ListDashboardScreen(
     windowSize: WindowSize,
     apiHostUrl: String,
     state: DashboardUIState,
@@ -554,9 +554,9 @@ private fun CourseItemPreview() {
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun MyCoursesScreenDay() {
+private fun ListDashboardScreenPreview() {
     OpenEdXTheme {
-        MyCoursesScreen(
+        ListDashboardScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
@@ -586,9 +586,9 @@ private fun MyCoursesScreenDay() {
 @Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
 @Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
-private fun MyCoursesScreenTabletPreview() {
+private fun ListDashboardScreenTabletPreview() {
     OpenEdXTheme {
-        MyCoursesScreen(
+        ListDashboardScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
