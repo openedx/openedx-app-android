@@ -105,7 +105,7 @@ fun Modifier.displayCutoutForLandscape(): Modifier = composed {
 }
 
 inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier = composed {
-    clickable(
+    this then Modifier.clickable(
         indication = null,
         interactionSource = remember { MutableInteractionSource() }) {
         onClick()

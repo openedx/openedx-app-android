@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -41,10 +42,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.extension.loadUrl
 import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
+import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
@@ -119,6 +124,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState,
                     contentUrl = getInitialUrl(),
+                    cookieManager = viewModel.cookieManager,
                     canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
                         ?.isNotEmpty() == true,
                     uriScheme = viewModel.uriScheme,
@@ -182,14 +188,10 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     onSettingsClick = {
                         viewModel.navigateToSettings(requireActivity().supportFragmentManager)
                     },
-                    refreshSessionCookie = {
-                        viewModel.refreshCookie()
-                    },
                 )
             }
         }
     }
-
 
     private fun getInitialUrl(): String {
         return arguments?.let { args ->
@@ -219,6 +221,7 @@ private fun ProgramInfoScreen(
     windowSize: WindowSize,
     uiState: ProgramUIState?,
     contentUrl: String,
+    cookieManager: AppCookieManager,
     uriScheme: String,
     canShowBackBtn: Boolean,
     hasInternetConnection: Boolean,
@@ -227,10 +230,10 @@ private fun ProgramInfoScreen(
     onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
-    refreshSessionCookie: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
+    val coroutineScope = rememberCoroutineScope()
     val isLoading = uiState is ProgramUIState.Loading
 
     when (uiState) {
@@ -290,7 +293,11 @@ private fun ProgramInfoScreen(
                             uriScheme = uriScheme,
                             isAllLinksExternal = true,
                             onWebPageLoaded = onWebPageLoaded,
-                            refreshSessionCookie = refreshSessionCookie,
+                            refreshSessionCookie = {
+                                coroutineScope.launch {
+                                    cookieManager.tryToRefreshSessionCookie()
+                                }
+                            },
                             onUriClick = onUriClick,
                         )
 
@@ -301,7 +308,7 @@ private fun ProgramInfoScreen(
                                 webView
                             },
                             update = {
-                                webView.loadUrl(contentUrl)
+                                webView.loadUrl(contentUrl, coroutineScope, cookieManager)
                             }
                         )
                     } else {
@@ -339,6 +346,7 @@ fun MyProgramsPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = ProgramUIState.Loading,
             contentUrl = "https://www.example.com/",
+            cookieManager = koinViewModel<ProgramViewModel>().cookieManager,
             uriScheme = "",
             canShowBackBtn = false,
             hasInternetConnection = false,

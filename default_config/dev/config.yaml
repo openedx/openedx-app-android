@@ -13,7 +13,7 @@ AGREEMENT_URLS:
   DATA_SELL_CONSENT_URL: ''
   TOS_URL: ''
   EULA_URL: ''
-  SUPPORTED_LANGUAGES: [ ] #en is defalut language
+  SUPPORTED_LANGUAGES: [ ] #en is default language
 
 DISCOVERY:
   TYPE: 'native'

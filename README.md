@@ -14,7 +14,7 @@ Modern vision of the mobile application for the Open edX platform from Raccoon G
 
 3. Choose ``openedx-app-android``.
 
-4. Configure `config_settings.yaml` inside `default_config` and `config.yaml` inside sub direcroties to point to your Open edX configuration. [Configuration Docuementation](./Documentation/ConfigurationManagement.md)
+4. Configure `config_settings.yaml` inside `default_config` and `config.yaml` inside sub directories to point to your Open edX configuration. [Configuration Documentation](./Documentation/ConfigurationManagement.md)
 
 5. Select the build variant ``develop``, ``stage``, or ``prod``.
 
