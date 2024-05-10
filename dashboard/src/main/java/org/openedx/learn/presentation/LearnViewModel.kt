@@ -12,7 +12,7 @@ class LearnViewModel(
 
     val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
 
-    fun onSearchClick(fragmentManager: FragmentManager) {
-        dashboardRouter.navigateToCourseSearch(fragmentManager, "")
+    fun onSettingsClick(fragmentManager: FragmentManager) {
+        dashboardRouter.navigateToSettings(fragmentManager)
     }
 }

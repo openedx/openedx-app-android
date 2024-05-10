@@ -56,6 +56,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseRouter
 import java.net.UnknownHostException
 import java.util.Date
 
@@ -77,6 +78,7 @@ class CourseOutlineViewModelTest {
     private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<CourseAnalytics>()
     private val coreAnalytics = mockk<CoreAnalytics>()
+    private val courseRouter = mockk<CourseRouter>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -233,6 +235,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController,
@@ -267,6 +270,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -311,6 +315,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -357,6 +362,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -403,6 +409,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -437,6 +444,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -485,6 +493,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -528,6 +537,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -563,6 +573,7 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController

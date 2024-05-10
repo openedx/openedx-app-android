@@ -18,6 +18,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.core.utils.FileUtil
 import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
@@ -90,6 +91,10 @@ class PrimaryCourseViewModel(
         getCourses()
     }
 
+    fun navigateToDiscovery() {
+        viewModelScope.launch { discoveryNotifier.send(NavigationToDiscovery()) }
+    }
+
     private fun collectDiscoveryNotifier() {
         viewModelScope.launch {
             discoveryNotifier.notifier.collect {
@@ -105,6 +110,7 @@ interface PrimaryCourseScreenAction {
     object SwipeRefresh : PrimaryCourseScreenAction
     object ViewAll : PrimaryCourseScreenAction
     object Reload : PrimaryCourseScreenAction
+    object NavigateToDiscovery : PrimaryCourseScreenAction
     data class OpenBlock(val enrolledCourse: EnrolledCourse, val blockId: String) : PrimaryCourseScreenAction
     data class OpenCourse(val enrolledCourse: EnrolledCourse) : PrimaryCourseScreenAction
     data class NavigateToDates(val enrolledCourse: EnrolledCourse) : PrimaryCourseScreenAction

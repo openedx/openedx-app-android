@@ -83,6 +83,7 @@ import org.openedx.core.domain.model.Progress
 import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -122,6 +123,10 @@ fun PrimaryCourseScreen(
 
                 PrimaryCourseScreenAction.Reload -> {
                     viewModel.getCourses()
+                }
+
+                PrimaryCourseScreenAction.NavigateToDiscovery -> {
+                    viewModel.navigateToDiscovery()
                 }
 
                 is PrimaryCourseScreenAction.OpenCourse -> {
@@ -181,6 +186,7 @@ private fun PrimaryCourseScreen(
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
+
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
         Surface(
@@ -224,8 +230,16 @@ private fun PrimaryCourseScreen(
                     }
 
                     is PrimaryCourseUIState.Empty -> {
-                        EmptyState(
-                            modifier = Modifier.align(Alignment.Center)
+                        NoCoursesInfo(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                        )
+                        FindACourseButton(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter),
+                            findACourseClick = {
+                                onAction(PrimaryCourseScreenAction.NavigateToDiscovery)
+                            }
                         )
                     }
                 }
@@ -692,7 +706,27 @@ private fun PrimaryCourseTitle(
 }
 
 @Composable
-private fun EmptyState(
+private fun FindACourseButton(
+    modifier: Modifier = Modifier,
+    findACourseClick: () -> Unit
+) {
+    OpenEdXButton(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 20.dp),
+        onClick = {
+            findACourseClick()
+        }
+    ) {
+        Text(
+            color = MaterialTheme.appColors.buttonText,
+            text = stringResource(id = R.string.dashboard_find_a_course)
+        )
+    }
+}
+
+@Composable
+private fun NoCoursesInfo(
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -700,22 +734,32 @@ private fun EmptyState(
         contentAlignment = Alignment.Center
     ) {
         Column(
-            Modifier.width(185.dp),
+            modifier = Modifier.width(200.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.dashboard_ic_empty),
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textFieldBorder
+                painter = painterResource(id = R.drawable.dashboard_ic_book),
+                tint = MaterialTheme.appColors.textFieldBorder,
+                contentDescription = null
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(4.dp))
+            Text(
+                modifier = Modifier
+                    .testTag("txt_empty_state_title")
+                    .fillMaxWidth(),
+                text = stringResource(id = R.string.dashboard_all_courses_empty_title),
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(12.dp))
             Text(
                 modifier = Modifier
                     .testTag("txt_empty_state_description")
                     .fillMaxWidth(),
-                text = stringResource(id = R.string.dashboard_you_are_not_enrolled),
-                color = MaterialTheme.appColors.textPrimaryVariant,
-                style = MaterialTheme.appTypography.bodySmall,
+                text = stringResource(id = R.string.dashboard_all_courses_empty_description),
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.labelMedium,
                 textAlign = TextAlign.Center
             )
         }
@@ -805,5 +849,13 @@ private fun PrimaryCourseScreenPreview() {
             hasInternetConnection = false,
             onAction = {}
         )
+    }
+}
+
+@Preview
+@Composable
+private fun NoCoursesInfoPreview() {
+    OpenEdXTheme {
+        NoCoursesInfo()
     }
 }

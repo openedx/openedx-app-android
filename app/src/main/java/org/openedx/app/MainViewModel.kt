@@ -4,6 +4,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -31,13 +32,17 @@ class MainViewModel(
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 
+    @OptIn(FlowPreview::class)
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        notifier.notifier.onEach {
-            if (it is NavigationToDiscovery) {
-                _navigateToDiscovery.emit(true)
+        notifier.notifier
+            .onEach {
+                if (it is NavigationToDiscovery) {
+                    _navigateToDiscovery.emit(true)
+                }
             }
-        }.distinctUntilChanged().launchIn(viewModelScope)
+            .distinctUntilChanged()
+            .launchIn(viewModelScope)
     }
 
     fun enableBottomBar(enable: Boolean) {

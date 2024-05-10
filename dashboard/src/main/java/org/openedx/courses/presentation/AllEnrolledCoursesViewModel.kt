@@ -1,6 +1,5 @@
 package org.openedx.courses.presentation
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,18 +60,8 @@ class AllEnrolledCoursesViewModel(
 
     private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-        viewModelScope.launch {
-            discoveryNotifier.notifier.collect {
-                if (it is CourseDashboardUpdate) {
-                    updateCourses()
-                }
-            }
-        }
-    }
-
     init {
+        collectDiscoveryNotifier()
         getCourses(currentFilter.value)
     }
 
@@ -170,6 +159,15 @@ class AllEnrolledCoursesViewModel(
         analytics.dashboardCourseClickedEvent(courseId, courseName)
     }
 
+    private fun collectDiscoveryNotifier() {
+        viewModelScope.launch {
+            discoveryNotifier.notifier.collect {
+                if (it is CourseDashboardUpdate) {
+                    updateCourses()
+                }
+            }
+        }
+    }
 }
 
 interface AllEnrolledCoursesAction {

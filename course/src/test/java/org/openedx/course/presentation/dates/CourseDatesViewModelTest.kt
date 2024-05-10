@@ -44,6 +44,7 @@ import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.calendarsync.CalendarManager
 import java.net.UnknownHostException
 import java.util.Date
@@ -62,6 +63,7 @@ class CourseDatesViewModelTest {
     private val corePreferences = mockk<CorePreferences>()
     private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
+    private val courseRouter = mockk<CourseRouter>()
 
     private val openEdx = "OpenEdx"
     private val calendarTitle = "OpenEdx - Abc"
@@ -169,7 +171,8 @@ class CourseDatesViewModelTest {
             resourceManager,
             corePreferences,
             analytics,
-            config
+            config,
+            courseRouter
         )
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
         val message = async {
@@ -195,7 +198,8 @@ class CourseDatesViewModelTest {
             resourceManager,
             corePreferences,
             analytics,
-            config
+            config,
+            courseRouter
         )
         coEvery { interactor.getCourseDates(any()) } throws Exception()
         val message = async {
@@ -221,7 +225,8 @@ class CourseDatesViewModelTest {
             resourceManager,
             corePreferences,
             analytics,
-            config
+            config,
+            courseRouter
         )
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
         val message = async {
@@ -247,7 +252,8 @@ class CourseDatesViewModelTest {
             resourceManager,
             corePreferences,
             analytics,
-            config
+            config,
+            courseRouter
         )
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),

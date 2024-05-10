@@ -21,7 +21,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -56,6 +56,7 @@ import org.openedx.dashboard.R
 import org.openedx.dashboard.databinding.FragmentLearnBinding
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.learn.LearnType
+import org.openedx.core.R as CoreR
 
 class LearnFragment : Fragment(R.layout.fragment_learn) {
 
@@ -121,11 +122,9 @@ private fun Header(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Title(
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
             label = stringResource(id = R.string.dashboard_learn),
-            onSearchClick = {
-                viewModel.onSearchClick(fragmentManager)
+            onSettingsClick = {
+                viewModel.onSettingsClick(fragmentManager)
             }
         )
 
@@ -144,13 +143,15 @@ private fun Header(
 private fun Title(
     modifier: Modifier = Modifier,
     label: String,
-    onSearchClick: () -> Unit
+    onSettingsClick: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
         Text(
-            modifier = Modifier.align(Alignment.CenterStart),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 16.dp),
             text = label,
             color = MaterialTheme.appColors.textDark,
             style = MaterialTheme.appTypography.headlineBolt
@@ -158,15 +159,15 @@ private fun Title(
         IconButton(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(start = 16.dp),
+                .padding(end = 12.dp),
             onClick = {
-                onSearchClick()
+                onSettingsClick()
             }
         ) {
             Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textDark
+                painter = painterResource(id = CoreR.drawable.core_ic_settings),
+                tint = MaterialTheme.appColors.primary,
+                contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
             )
         }
     }
@@ -259,7 +260,7 @@ private fun HeaderPreview() {
     OpenEdXTheme {
         Title(
             label = stringResource(id = R.string.dashboard_learn),
-            onSearchClick = {}
+            onSettingsClick = {}
         )
     }
 }

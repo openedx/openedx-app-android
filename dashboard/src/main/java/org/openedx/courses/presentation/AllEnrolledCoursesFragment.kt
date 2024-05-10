@@ -400,7 +400,9 @@ private fun AllEnrolledCoursesScreen(
                                                 .fillMaxHeight()
                                                 .then(emptyStatePaddings)
                                         ) {
-                                            EmptyState()
+                                            EmptyState(
+                                                currentCourseStatus = CourseStatusFilter.entries[tabPagerState.currentPage]
+                                            )
                                         }
                                     }
                                 }
@@ -560,28 +562,33 @@ private fun Header(
 }
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(
+    currentCourseStatus: CourseStatusFilter
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            Modifier.width(185.dp),
+            Modifier.width(200.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.dashboard_ic_empty),
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textFieldBorder
+                painter = painterResource(id = R.drawable.dashboard_ic_book),
+                tint = MaterialTheme.appColors.textFieldBorder,
+                contentDescription = null
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(4.dp))
             Text(
                 modifier = Modifier
-                    .testTag("txt_empty_state_description")
+                    .testTag("txt_empty_state_title")
                     .fillMaxWidth(),
-                text = stringResource(id = R.string.dashboard_you_are_not_enrolled),
-                color = MaterialTheme.appColors.textPrimaryVariant,
-                style = MaterialTheme.appTypography.bodySmall,
+                text = stringResource(
+                    id = R.string.dashboard_no_status_courses,
+                    stringResource(currentCourseStatus.labelResId)
+                ),
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.titleMedium,
                 textAlign = TextAlign.Center
             )
         }
@@ -612,6 +619,16 @@ private fun AllEnrolledCoursesPreview() {
             refreshing = false,
             canLoadMore = false,
             onAction = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyStatePreview() {
+    OpenEdXTheme {
+        EmptyState(
+            currentCourseStatus = CourseStatusFilter.COMPLETE
         )
     }
 }

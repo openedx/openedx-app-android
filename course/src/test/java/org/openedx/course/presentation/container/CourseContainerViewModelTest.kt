@@ -134,6 +134,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -164,6 +165,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `preloadCourseStructure unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             "",
             "",
@@ -200,6 +202,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -230,6 +233,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `preloadCourseStructure success without internet`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             "",
             "",
@@ -267,6 +271,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -297,6 +302,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -324,6 +330,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `updateData success`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             "",
             "",
