@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -88,13 +87,8 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         binding.viewPager.adapter = adapter
         binding.viewPager.setUserInputEnabled(false)
     }
-
-    private fun setFragment() {
-        binding.viewPager.setCurrentItem(0, false)
-    }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Header(
     viewModel: LearnViewModel = koinViewModel(),
@@ -102,9 +96,6 @@ private fun Header(
     viewPager: ViewPager2
 ) {
     val windowSize = rememberWindowSize()
-    val pagerState = rememberPagerState {
-        LearnType.entries.size
-    }
     val contentWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -116,6 +107,7 @@ private fun Header(
 
     Column(
         modifier = Modifier
+            .background(MaterialTheme.appColors.background)
             .statusBarsInset()
             .displayCutoutForLandscape()
             .then(contentWidth),

@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -36,7 +35,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -51,7 +49,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
@@ -68,6 +65,7 @@ import androidx.fragment.app.FragmentManager
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
+import org.openedx.Lock
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseAssignments
@@ -292,12 +290,14 @@ private fun UserCourses(
                 openCourse = openCourse
             )
         }
-        SecondaryCourses(
-            courses = userCourses.enrollments,
-            apiHostUrl = apiHostUrl,
-            onCourseClick = openCourse,
-            onViewAllClick = onViewAllClick
-        )
+        if (userCourses.enrollments.isNotEmpty()) {
+            SecondaryCourses(
+                courses = userCourses.enrollments,
+                apiHostUrl = apiHostUrl,
+                onCourseClick = openCourse,
+                onViewAllClick = onViewAllClick
+            )
+        }
     }
 }
 
@@ -437,20 +437,7 @@ private fun CourseListItem(
                 )
             }
             if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
-                Icon(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .padding(top = 8.dp, end = 8.dp)
-                        .background(
-                            color = Color.White,
-                            shape = CircleShape
-                        )
-                        .padding(4.dp)
-                        .align(Alignment.TopEnd),
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = null,
-                    tint = MaterialTheme.appColors.textWarning
-                )
+                Lock()
             }
         }
     }
@@ -477,6 +464,7 @@ private fun AssignmentItem(
             contentDescription = null
         )
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val infoTextStyle = if (title.isNullOrEmpty()) {
@@ -497,6 +485,12 @@ private fun AssignmentItem(
                 )
             }
         }
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            tint = MaterialTheme.appColors.textDark,
+            contentDescription = null
+        )
     }
 }
 

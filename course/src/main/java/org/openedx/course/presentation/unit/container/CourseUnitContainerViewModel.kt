@@ -81,21 +81,6 @@ class CourseUnitContainerViewModel(
     private val _descendantsBlocks = MutableStateFlow<List<Block>>(listOf())
     val descendantsBlocks = _descendantsBlocks.asStateFlow()
 
-    fun loadBlocks(mode: CourseViewMode) {
-        currentMode = mode
-        try {
-            val courseStructure = when (mode) {
-                CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
-                CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
-            }
-            val blocks = courseStructure.blockData
-            courseName = courseStructure.name
-            this.blocks.clearAndAddAll(blocks)
-        } catch (e: Exception) {
-            //ignore e.printStackTrace()
-        }
-    }
-
     init {
         _indexInContainer.value = 0
 
@@ -110,6 +95,21 @@ class CourseUnitContainerViewModel(
                         getSubSectionUnitBlocks(blocks, getSubSectionId(blockId))
                 }
             }
+        }
+    }
+
+    fun loadBlocks(mode: CourseViewMode) {
+        currentMode = mode
+        try {
+            val courseStructure = when (mode) {
+                CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
+                CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
+            }
+            val blocks = courseStructure.blockData
+            courseName = courseStructure.name
+            this.blocks.clearAndAddAll(blocks)
+        } catch (e: Exception) {
+            //ignore e.printStackTrace()
         }
     }
 

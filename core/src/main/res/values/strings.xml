@@ -18,7 +18,7 @@
     <string name="core_select_value">Select value</string>
     <string name="core_label_starting">Starting %1$s</string>
     <string name="core_label_ended">Ended %1$s</string>
-    <string name="core_label_ending">Ending %1$s</string>
+    <string name="core_label_ends">Ends %1$s</string>
     <string name="core_label_expires">Course access expires %1$s</string>
     <string name="core_label_expires_on">Course access expires on %1$s</string>
     <string name="core_label_expired">Course access expired %1$s</string>
@@ -46,7 +46,7 @@
     <string name="core_android_os_version" translatable="false">OS version: </string>
     <string name="core_android_device_model" translatable="false">Device model: </string>
     <string name="core_email_subject" translatable="false">Feedback</string>
-    <string name="core_date_format_MMMM_dd_yyyy">MMMM dd, yyyy</string>
+    <string name="core_date_format_MMM_dd_yyyy">MMM dd, yyyy</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
     <string name="core_app_upgrade_title">App Update</string>
     <string name="core_app_upgrade_dialog_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>

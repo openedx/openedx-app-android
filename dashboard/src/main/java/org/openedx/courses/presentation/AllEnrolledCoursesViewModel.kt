@@ -1,6 +1,7 @@
 package org.openedx.courses.presentation
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -60,6 +61,8 @@ class AllEnrolledCoursesViewModel(
 
     private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
+    private var job: Job? = null
+
     init {
         collectDiscoveryNotifier()
         getCourses(currentFilter.value)
@@ -109,7 +112,8 @@ class AllEnrolledCoursesViewModel(
             page = 1
             currentFilter.value = courseStatusFilter
         }
-        viewModelScope.launch {
+        job?.cancel()
+        job = viewModelScope.launch {
             try {
                 isLoading = true
                 val response = if (networkConnection.isOnline() || page > 1) {
