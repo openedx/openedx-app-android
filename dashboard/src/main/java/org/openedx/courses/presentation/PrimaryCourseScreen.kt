@@ -321,7 +321,7 @@ private fun SecondaryCourses(
     ) {
         TextIcon(
             modifier = Modifier.padding(horizontal = 18.dp),
-            text = stringResource(R.string.dashboard_view_all_with_count, courses.size),
+            text = stringResource(R.string.dashboard_view_all_with_count, courses.size + 1),
             textStyle = MaterialTheme.appTypography.titleSmall,
             icon = Icons.Default.ChevronRight,
             color = MaterialTheme.appColors.textDark,
