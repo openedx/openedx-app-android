@@ -64,7 +64,7 @@ class CourseOutlineViewModel(
     workerController,
     coreAnalytics
 ) {
-    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseNestedListEnabled get() = config.getUIComponentConfig().isCourseNestedListEnabled
 
     private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: StateFlow<CourseOutlineUIState>
@@ -81,7 +81,7 @@ class CourseOutlineViewModel(
     private var resumeSectionBlock: Block? = null
     private var resumeVerticalBlock: Block? = null
 
-    private val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+    private val isCourseExpandableSectionsEnabled get() = config.getUIComponentConfig().isCourseNestedListEnabled
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()

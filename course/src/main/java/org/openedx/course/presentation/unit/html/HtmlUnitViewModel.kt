@@ -24,7 +24,7 @@ class HtmlUnitViewModel(
     val injectJSList = _injectJSList.asStateFlow()
 
     val isOnline get() = networkConnection.isOnline()
-    val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+    val isCourseUnitProgressEnabled get() = config.getUIComponentConfig().isCourseUnitProgressEnabled
     val apiHostURL get() = config.getApiHostURL()
     val cookieManager get() = edxCookieManager
 

@@ -37,9 +37,9 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseExpandableSectionsEnabled get() = config.getUIComponentConfig().isCourseNestedListEnabled
 
-    val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+    val isCourseUnitProgressEnabled get() = config.getUIComponentConfig().isCourseUnitProgressEnabled
 
     private var currentIndex = 0
     private var currentVerticalIndex = 0

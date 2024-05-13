@@ -53,7 +53,7 @@ class CourseVideoViewModel(
     coreAnalytics
 ) {
 
-    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseNestedListEnabled get() = config.getUIComponentConfig().isCourseNestedListEnabled
 
     private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
     val uiState: StateFlow<CourseVideosUIState>
