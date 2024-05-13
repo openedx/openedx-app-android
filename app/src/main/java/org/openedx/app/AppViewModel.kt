@@ -1,5 +1,6 @@
 package org.openedx.app
 
+import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -13,6 +14,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.utils.FileUtil
 
 class AppViewModel(
     private val config: Config,
@@ -32,6 +34,7 @@ class AppViewModel(
     private var logoutHandledAt: Long = 0
 
     val isBranchEnabled get() = config.getBranchConfig().enabled
+    val canResetAppDirectory = preferencesManager.canResetAppDirectory
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -58,6 +61,11 @@ class AppViewModel(
                 put(AppAnalyticsKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
             }
         )
+    }
+
+    fun resetAppDirectory(context: Context) {
+        FileUtil.deleteOldAppDirectory(context)
+        preferencesManager.canResetAppDirectory = false
     }
 
     private fun setUserId() {

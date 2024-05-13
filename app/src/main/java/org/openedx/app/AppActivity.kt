@@ -136,6 +136,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             }
         }
 
+        if (viewModel.canResetAppDirectory){
+            viewModel.resetAppDirectory(this)
+        }
+
         viewModel.logoutUser.observe(this) {
             profileRouter.restartApp(supportFragmentManager, viewModel.isLogistrationEnabled)
         }

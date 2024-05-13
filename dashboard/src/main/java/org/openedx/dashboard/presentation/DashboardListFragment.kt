@@ -96,7 +96,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.utils.FileUtil
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import java.util.Date
@@ -164,11 +163,6 @@ class DashboardListFragment : Fragment() {
                     }
                 )
             }
-        }
-
-        if (viewModel.canResetAppDirectory) {
-            FileUtil.deleteOldAppDirectory(context)
-            viewModel.setResetAppDirectoryPreference()
         }
     }
 }
@@ -387,7 +381,7 @@ private fun CourseItem(
     apiHostUrl: String,
     enrolledCourse: EnrolledCourse,
     windowSize: WindowSize,
-    onClick: (EnrolledCourse) -> Unit
+    onClick: (EnrolledCourse) -> Unit,
 ) {
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(
