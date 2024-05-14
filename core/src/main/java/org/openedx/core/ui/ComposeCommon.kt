@@ -49,6 +49,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -200,8 +201,8 @@ fun Toolbar(
                 onClick = { onSettingsClick() }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.core_ic_settings),
-                    tint = MaterialTheme.appColors.primary,
+                    imageVector = Icons.Default.ManageAccounts,
+                    tint = MaterialTheme.appColors.textAccent,
                     contentDescription = stringResource(id = R.string.core_accessibility_settings)
                 )
             }

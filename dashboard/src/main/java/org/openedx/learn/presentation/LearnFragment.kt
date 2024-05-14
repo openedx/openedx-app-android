@@ -2,6 +2,7 @@ package org.openedx.learn.presentation
 
 import android.os.Bundle
 import android.view.View
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,9 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -157,8 +159,8 @@ private fun Title(
             }
         ) {
             Icon(
-                painter = painterResource(id = CoreR.drawable.core_ic_settings),
-                tint = MaterialTheme.appColors.primary,
+                imageVector = Icons.Default.ManageAccounts,
+                tint = MaterialTheme.appColors.textAccent,
                 contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
             )
         }
@@ -173,6 +175,10 @@ private fun LearnDropdownMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var currentValue by remember { mutableStateOf(LearnType.COURSES) }
+    val iconRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = ""
+    )
 
     LaunchedEffect(currentValue) {
         viewPager.setCurrentItem(
@@ -199,6 +205,7 @@ private fun LearnDropdownMenu(
                 style = MaterialTheme.appTypography.titleSmall
             )
             Icon(
+                modifier = Modifier.rotate(iconRotation),
                 imageVector = Icons.Default.ExpandMore,
                 tint = MaterialTheme.appColors.textDark,
                 contentDescription = null

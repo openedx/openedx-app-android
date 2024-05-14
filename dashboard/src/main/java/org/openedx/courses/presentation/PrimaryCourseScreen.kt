@@ -677,7 +677,9 @@ private fun PrimaryCourseTitle(
             modifier = Modifier.fillMaxWidth(),
             text = primaryCourse.course.name,
             style = MaterialTheme.appTypography.titleLarge,
-            color = MaterialTheme.appColors.textDark
+            color = MaterialTheme.appColors.textDark,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 3
         )
         Text(
             modifier = Modifier.fillMaxWidth(),
