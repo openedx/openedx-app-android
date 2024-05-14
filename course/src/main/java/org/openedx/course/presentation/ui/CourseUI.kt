@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -64,27 +63,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
@@ -98,7 +94,6 @@ import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -113,83 +108,101 @@ import java.util.Date
 import org.openedx.core.R as coreR
 
 @Composable
-fun CourseImageHeader(
-    modifier: Modifier,
-    apiHostUrl: String,
-    courseImage: String?,
-    courseCertificate: Certificate?,
-    onCertificateClick: (String) -> Unit = {},
-    courseName: String,
+fun CourseSectionCard(
+    block: Block,
+    downloadedState: DownloadedState?,
+    onItemClick: (Block) -> Unit,
+    onDownloadClick: (Block) -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val windowSize = rememberWindowSize()
-    val contentScale =
-        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            ContentScale.Fit
-        } else {
-            ContentScale.Crop
-        }
-    val imageUrl = if (courseImage?.isLinkValid() == true) {
-        courseImage
-    } else {
-        apiHostUrl.dropLast(1) + courseImage
-    }
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .error(coreR.drawable.core_no_image_course)
-                .placeholder(coreR.drawable.core_no_image_course)
-                .build(),
-            contentDescription = stringResource(
-                id = coreR.string.core_accessibility_header_image_for,
-                courseName
-            ),
-            contentScale = contentScale,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(MaterialTheme.appShapes.cardShape)
-        )
-        if (courseCertificate?.isCertificateEarned() == true) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .clip(MaterialTheme.appShapes.cardShape)
-                    .background(MaterialTheme.appColors.certificateForeground),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+    val iconModifier = Modifier.size(24.dp)
+
+    Column(Modifier.clickable { onItemClick(block) }) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 24.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val completedIconPainter =
+                if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+                    R.drawable.ic_course_chapter_icon
+                )
+            val completedIconColor =
+                if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+            val completedIconDescription = if (block.isCompleted()) {
+                stringResource(id = R.string.course_accessibility_section_completed)
+            } else {
+                stringResource(id = R.string.course_accessibility_section_uncompleted)
+            }
+            Icon(
+                painter = completedIconPainter,
+                contentDescription = completedIconDescription,
+                tint = completedIconColor
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                modifier = Modifier.weight(1f),
+                text = block.displayName,
+                style = MaterialTheme.appTypography.titleSmall,
+                color = MaterialTheme.appColors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Row(
+                modifier = Modifier.fillMaxHeight(),
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    modifier = Modifier.testTag("ic_congratulations"),
-                    painter = painterResource(id = R.drawable.ic_course_completed_mark),
-                    contentDescription = stringResource(id = R.string.course_congratulations),
-                    tint = Color.White
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_congratulations"),
-                    text = stringResource(id = R.string.course_congratulations),
-                    style = MaterialTheme.appTypography.headlineMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_course_passed"),
-                    text = stringResource(id = R.string.course_passed),
-                    style = MaterialTheme.appTypography.bodyMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(20.dp))
-                OpenEdXOutlinedButton(
-                    modifier = Modifier,
-                    borderColor = Color.White,
-                    textColor = MaterialTheme.appColors.buttonText,
-                    text = stringResource(id = R.string.course_view_certificate),
-                    onClick = {
-                        courseCertificate.certificateURL?.let {
-                            onCertificateClick(it)
+                if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
+                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
+                        painterResource(id = R.drawable.course_ic_remove_download)
+                    } else {
+                        painterResource(id = R.drawable.course_ic_start_download)
+                    }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
                         }
-                    })
+                    IconButton(modifier = iconModifier,
+                        onClick = { onDownloadClick(block) }) {
+                        Icon(
+                            painter = downloadIconPainter,
+                            contentDescription = downloadIconDescription,
+                            tint = MaterialTheme.appColors.textPrimary
+                        )
+                    }
+                } else if (downloadedState != null) {
+                    Box(contentAlignment = Alignment.Center) {
+                        if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(34.dp),
+                                backgroundColor = Color.LightGray,
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.appColors.primary
+                            )
+                        }
+                        IconButton(
+                            modifier = iconModifier.padding(top = 2.dp),
+                            onClick = { onDownloadClick(block) }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                                tint = MaterialTheme.appColors.error
+                            )
+                        }
+                    }
+                }
+                CardArrow(
+                    degrees = 0f
+                )
             }
         }
     }
@@ -276,48 +289,6 @@ fun CardArrow(
         contentDescription = "Expandable Arrow",
         modifier = Modifier.rotate(degrees),
     )
-}
-
-@Composable
-fun SequentialItem(
-    block: Block,
-    onClick: (Block) -> Unit
-) {
-    val icon = if (block.isCompleted()) Icons.Filled.TaskAlt else Icons.Filled.Home
-    val iconColor =
-        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 12.dp
-            )
-            .clickable { onClick(block) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(Modifier.weight(1f)) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                block.displayName,
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.textPrimary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-        }
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            tint = MaterialTheme.appColors.onSurface,
-            contentDescription = "Expandable Arrow"
-        )
-    }
 }
 
 @Composable
@@ -1149,6 +1120,49 @@ fun DatesShiftedSnackBar(
     }
 }
 
+@Composable
+fun CourseMessage(
+    modifier: Modifier = Modifier,
+    icon: Painter,
+    message: String,
+    action: String? = null,
+    onActionClick: () -> Unit = {}
+) {
+    Column {
+        Row(
+            modifier
+                .semantics(mergeDescendants = true) {}
+                .noRippleClickable(onActionClick)
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.CenterVertically),
+                tint = MaterialTheme.appColors.textPrimary
+            )
+            Column(Modifier.padding(start = 12.dp)) {
+                Text(
+                    text = message,
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+                if (action != null) {
+                    Text(
+                        text = action,
+                        modifier = Modifier.padding(top = 4.dp),
+                        color = MaterialTheme.appColors.textPrimary,
+                        style = MaterialTheme.appTypography.labelLarge.copy(textDecoration = TextDecoration.Underline)
+                    )
+                }
+            }
+        }
+        Divider(
+            color = MaterialTheme.appColors.divider
+        )
+    }
+
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -1208,29 +1222,14 @@ private fun NavigationUnitsButtonsWithNextPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun SequentialItemPreview() {
+private fun CourseSectionCardPreview() {
     OpenEdXTheme {
         Surface(color = MaterialTheme.appColors.background) {
-            SequentialItem(block = mockChapterBlock, onClick = {})
-        }
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun CourseHeaderPreview() {
-    OpenEdXTheme {
-        Surface(color = MaterialTheme.appColors.background) {
-            CourseImageHeader(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(6.dp),
-                apiHostUrl = "",
-                courseCertificate = Certificate(""),
-                courseImage = "",
-                courseName = ""
+            CourseSectionCard(
+                mockChapterBlock,
+                DownloadedState.DOWNLOADED,
+                onItemClick = {},
+                onDownloadClick = {}
             )
         }
     }
@@ -1282,6 +1281,27 @@ private fun OfflineQueueCardPreview() {
                 progressValue = 10,
                 progressSize = 30,
                 onDownloadClick = {}
+            )
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseMessagePreview() {
+    OpenEdXTheme {
+        Surface(color = MaterialTheme.appColors.background) {
+            CourseMessage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                icon = painterResource(R.drawable.ic_course_certificate),
+                message = stringResource(
+                    R.string.course_you_earned_certificate,
+                    "Demo Course"
+                ),
+                action = stringResource(R.string.course_view_certificate),
             )
         }
     }

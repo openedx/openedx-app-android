@@ -5,12 +5,8 @@
     <string name="course_units">Course units</string>
     <string name="course_subsections">Course subsections</string>
     <string name="course_videos">Videos</string>
-    <string name="course_passed_course">You have passed the course! Now you can get the certificate</string>
-    <string name="course_passed">You’ve completed the course</string>
-    <string name="course_congratulations">Congratulations!</string>
-    <string name="course_view_certificate">View the certificate</string>
-    <string name="course_you_can_get_certificate">You can get a certificate after completing the course (earn required grade)</string>
-    <string name="course_get_certificate">Get the certificate</string>
+    <string name="course_you_earned_certificate">Congratulations, you have earned this course certificate in \"%s\".</string>
+    <string name="course_view_certificate">View certificate</string>
     <string name="course_navigation_prev">Prev</string>
     <string name="course_navigation_prev_unit">Previous Unit</string>
     <string name="course_navigation_next">Next</string>
