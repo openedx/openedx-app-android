@@ -5,12 +5,8 @@
     <string name="course_units">Одиниці курсу</string>
     <string name="course_subsections">Підрозділи курсу</string>
     <string name="course_videos">Відео</string>
-    <string name="course_passed_course">Ви успішно пройшли курс! Тепер ви можете отримати сертифікат</string>
-    <string name="course_passed">Ви успішно пройшли курс</string>
-    <string name="course_congratulations">Вітаємо!</string>
+    <string name="course_you_earned_certificate">Вітаємо, ви отримали сертифікат про проходження курсу \"%s\".</string>
     <string name="course_view_certificate">Переглянути сертифікат</string>
-    <string name="course_you_can_get_certificate">Ви можете отримати сертифікат після проходження курсу (заробіть необхідну оцінку)</string>
-    <string name="course_get_certificate">Отримати сертифікат</string>
     <string name="course_navigation_prev">Назад</string>
     <string name="course_navigation_prev_unit">Попередня одиниця</string>
     <string name="course_navigation_next">Далі</string>
