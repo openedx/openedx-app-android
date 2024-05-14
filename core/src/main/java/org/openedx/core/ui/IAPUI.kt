@@ -6,7 +6,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import org.openedx.core.presentation.iap.IAPAction
 import org.openedx.core.ui.theme.appColors
 
 @Composable
@@ -16,7 +15,8 @@ fun IAPDialog(
     isLoading: Boolean = false,
     isError: Boolean = false,
     onDismiss: () -> Unit,
-    iapCallback: (IAPAction) -> Unit = {}
+    onUpgradeNow: () -> Unit = {},
+    onGetHelp: () -> Unit = {}
 ) {
     val alertTitle = "Upgrade $courseTitle"
     AlertDialog(
@@ -28,13 +28,16 @@ fun IAPDialog(
                 }
 
                 isError -> {
-                    Text(text = "Product is not available")
+                    OpenEdXButton(text = "Get Help",
+                        onClick = {
+                            onGetHelp()
+                        })
                 }
 
                 TextUtils.isEmpty(formattedPrice).not() -> {
                     OpenEdXButton(text = "Upgrade now for $formattedPrice",
                         onClick = {
-                            iapCallback(IAPAction.START_PURCHASE_FLOW)
+                            onUpgradeNow()
                         })
                 }
             }

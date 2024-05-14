@@ -88,6 +88,7 @@ class MyCoursesScreenTest {
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
                 onSettingsClick = {},
                 iapCallback = { _, _ -> },
+                onGetHelp = {},
                 iapState = IAPUIState.Clear,
             )
         }
@@ -126,6 +127,7 @@ class MyCoursesScreenTest {
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
                 onSettingsClick = {},
                 iapCallback = { _, _ -> },
+                onGetHelp = {},
                 iapState = IAPUIState.Clear,
             )
         }
@@ -157,6 +159,7 @@ class MyCoursesScreenTest {
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
                 onSettingsClick = {},
                 iapCallback = { _, _ -> },
+                onGetHelp = {},
                 iapState = IAPUIState.Clear,
             )
         }

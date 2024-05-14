@@ -7,6 +7,7 @@ import org.openedx.app.analytics.SegmentAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.config.Config
 import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.presentation.IAPAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalytics
@@ -20,7 +21,7 @@ class AnalyticsManager(
     config: Config,
 ) : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAnalytics, CourseAnalytics,
     DashboardAnalytics, DiscoveryAnalytics, DiscussionAnalytics, ProfileAnalytics,
-    WhatsNewAnalytics {
+    WhatsNewAnalytics, IAPAnalytics {
 
     private val services: ArrayList<Analytics> = arrayListOf()
 

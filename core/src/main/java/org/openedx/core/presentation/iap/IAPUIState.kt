@@ -1,28 +1,38 @@
 package org.openedx.core.presentation.iap
 
-import org.openedx.core.domain.model.EnrolledCourse
-
 sealed class IAPUIState {
-    data class ProductData(val course: EnrolledCourse, val formattedPrice: String) : IAPUIState()
+    data class ProductData(val courseName: String, val formattedPrice: String) : IAPUIState()
 
-    data class PurchaseProduct(val course: EnrolledCourse) : IAPUIState()
+    data object PurchaseProduct : IAPUIState()
 
-    data object PurchaseComplete : IAPUIState()
-    data class Loading(val loaderType: IAPLoaderType, val course: EnrolledCourse) : IAPUIState()
+    data object FlowComplete : IAPUIState()
+    data class Loading(val courseName: String, val loaderType: IAPLoaderType) : IAPUIState()
 
     data class Error(
-        val course: EnrolledCourse,
+        val courseName: String,
         val requestType: Int = -1,
-        val throwable: Throwable
+        val feedbackErrorMessage: String = ""
     ) : IAPUIState()
 
     data object Clear : IAPUIState()
 }
 
 enum class IAPAction {
-    LOAD_PRICE, START_PURCHASE_FLOW, PURCHASE_PRODUCT, CLEAR
+    LOAD_PRICE, START_PURCHASE_FLOW, PURCHASE_PRODUCT, FLOW_COMPLETE, CLEAR
 }
 
 enum class IAPLoaderType {
     PRICE, PURCHASE_FLOW, FULL_SCREEN
+}
+
+enum class IAPFlow {
+    RESTORE,
+    SILENT,
+    USER_INITIATED;
+
+    fun value(): String {
+        return this.name.lowercase()
+    }
+
+    fun isSilentMode() = (this == RESTORE || this == SILENT)
 }

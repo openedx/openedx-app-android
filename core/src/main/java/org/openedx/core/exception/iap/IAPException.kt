@@ -10,5 +10,7 @@ package org.openedx.core.exception.iap
  *                      cause some at some service return error code `0`.
  * @param errorMessage stores the error messages received from BillingClient & ecommerce end-points.
  * */
+
+// TODO: Remove if no use in future
 class IAPException(val httpErrorCode: Int = -1, val errorMessage: String? = null) :
     Exception(errorMessage)

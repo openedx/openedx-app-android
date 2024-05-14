@@ -384,7 +384,17 @@ val screenModule = module {
 
     factory { IAPRepository(get()) }
 
-    viewModel { IAPViewModel(versionName = BuildConfig.VERSION_NAME, get(), get(), get()) }
+    viewModel { (screenName: String) ->
+        IAPViewModel(
+            screenName = screenName,
+            versionName = BuildConfig.VERSION_NAME,
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
 
     viewModel { (descendants: List<String>) ->
         DownloadQueueViewModel(

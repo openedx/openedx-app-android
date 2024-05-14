@@ -71,6 +71,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
@@ -79,6 +80,7 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.ProductInfo
+import org.openedx.core.presentation.IAPAnalyticsScreen
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.presentation.iap.IAPAction
 import org.openedx.core.presentation.iap.IAPUIState
@@ -108,7 +110,9 @@ import org.openedx.core.R as CoreR
 class DashboardFragment : Fragment() {
 
     private val viewModel by viewModel<DashboardViewModel>()
-    private val iapViewModel by viewModel<IAPViewModel>()
+    private val iapViewModel by viewModel<IAPViewModel> {
+        parametersOf(IAPAnalyticsScreen.COURSE_ENROLLMENT.screenName)
+    }
     private val router by inject<DashboardRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -173,10 +177,20 @@ class DashboardFragment : Fragment() {
                                 iapViewModel.purchaseItem(requireActivity())
                             }
 
+                            IAPAction.FLOW_COMPLETE -> {
+                                if (iapViewModel.isInProgress()) {
+                                    iapViewModel.upgradeSuccessEvent()
+                                    iapViewModel.clearIAPFLow()
+                                }
+                            }
+
                             IAPAction.CLEAR -> {
                                 iapViewModel.clearIAPFLow()
                             }
                         }
+                    },
+                    onGetHelp = { message ->
+                        iapViewModel.showFeedbackScreen(requireContext(), message)
                     },
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
@@ -210,6 +224,7 @@ internal fun MyCoursesScreen(
     onSettingsClick: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
     iapCallback: (IAPAction, EnrolledCourse?) -> Unit,
+    onGetHelp: (String) -> Unit,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -294,7 +309,7 @@ internal fun MyCoursesScreen(
                     when (iapState) {
                         is IAPUIState.Loading -> {
                             IAPDialog(
-                                courseTitle = iapState.course.course.name,
+                                courseTitle = iapState.courseName,
                                 isLoading = true,
                                 onDismiss = {
                                     iapCallback(IAPAction.CLEAR, null)
@@ -303,10 +318,10 @@ internal fun MyCoursesScreen(
 
                         is IAPUIState.ProductData -> {
                             IAPDialog(
-                                courseTitle = iapState.course.course.name,
+                                courseTitle = iapState.courseName,
                                 formattedPrice = iapState.formattedPrice,
-                                iapCallback = { action ->
-                                    iapCallback(action, null)
+                                onUpgradeNow = {
+                                    iapCallback(IAPAction.START_PURCHASE_FLOW, null)
                                 }, onDismiss = {
                                     iapCallback(IAPAction.CLEAR, null)
                                 })
@@ -314,9 +329,12 @@ internal fun MyCoursesScreen(
 
                         is IAPUIState.Error -> {
                             IAPDialog(
-                                courseTitle = iapState.course.course.name,
+                                courseTitle = iapState.courseName,
                                 isError = true,
                                 onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                }, onGetHelp = {
+                                    onGetHelp(iapState.feedbackErrorMessage)
                                     iapCallback(IAPAction.CLEAR, null)
                                 })
                         }
@@ -325,9 +343,9 @@ internal fun MyCoursesScreen(
                             iapCallback(IAPAction.PURCHASE_PRODUCT, null)
                         }
 
-                        is IAPUIState.PurchaseComplete -> {
+                        is IAPUIState.FlowComplete -> {
                             onSwipeRefresh()
-                            iapCallback(IAPAction.CLEAR, null)
+                            iapCallback(IAPAction.FLOW_COMPLETE, null)
                         }
 
                         else -> {
@@ -668,6 +686,7 @@ private fun MyCoursesScreenDay() {
             onSettingsClick = {},
             onItemClick = {},
             iapCallback = { _, _ -> },
+            onGetHelp = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -702,6 +721,7 @@ private fun MyCoursesScreenTabletPreview() {
             onSettingsClick = {},
             onItemClick = {},
             iapCallback = { _, _ -> },
+            onGetHelp = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
