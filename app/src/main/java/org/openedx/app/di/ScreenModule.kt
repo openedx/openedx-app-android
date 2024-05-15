@@ -154,10 +154,23 @@ val screenModule = module {
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        SettingsViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
 
-    single { CourseRepository(get(), get(), get(), get()) }
+    single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
@@ -288,8 +301,10 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (enrollmentMode: String) ->
+    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
         CourseDatesViewModel(
+            courseId,
+            courseTitle,
             enrollmentMode,
             get(),
             get(),
@@ -315,8 +330,10 @@ val screenModule = module {
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel {
+    viewModel { (courseId: String, courseTitle: String) ->
         DiscussionTopicsViewModel(
+            courseId,
+            courseTitle,
             get(),
             get(),
             get(),

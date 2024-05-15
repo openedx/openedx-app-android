@@ -76,10 +76,30 @@ class CourseUnitContainerViewModel(
     var hasNextBlock = false
 
     private var currentMode: CourseViewMode? = null
+    private var currentComponentId = ""
     private var courseName = ""
 
     private val _descendantsBlocks = MutableStateFlow<List<Block>>(listOf())
     val descendantsBlocks = _descendantsBlocks.asStateFlow()
+
+    fun loadBlocks(mode: CourseViewMode, componentId: String = "") {
+        currentMode = mode
+        viewModelScope.launch {
+            try {
+                val courseStructure = when (mode) {
+                    CourseViewMode.FULL -> interactor.getCourseStructure(courseId)
+                    CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos(courseId)
+                }
+                val blocks = courseStructure.blockData
+                courseName = courseStructure.name
+                this@CourseUnitContainerViewModel.blocks.clearAndAddAll(blocks)
+
+                setupCurrentIndex(componentId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     init {
         _indexInContainer.value = 0
@@ -89,7 +109,7 @@ class CourseUnitContainerViewModel(
                 if (event is CourseStructureUpdated) {
                     if (event.courseId != courseId) return@collect
 
-                    currentMode?.let { loadBlocks(it) }
+                    currentMode?.let { loadBlocks(it, currentComponentId) }
                     val blockId = blocks[currentVerticalIndex].id
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(blockId))
@@ -98,25 +118,10 @@ class CourseUnitContainerViewModel(
         }
     }
 
-    fun loadBlocks(mode: CourseViewMode) {
-        currentMode = mode
-        try {
-            val courseStructure = when (mode) {
-                CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
-                CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
-            }
-            val blocks = courseStructure.blockData
-            courseName = courseStructure.name
-            this.blocks.clearAndAddAll(blocks)
-        } catch (e: Exception) {
-            //ignore e.printStackTrace()
-        }
-    }
+    private fun setupCurrentIndex(componentId: String = "") {
+        if (currentSectionIndex != -1) return
+        currentComponentId = componentId
 
-    fun setupCurrentIndex(componentId: String = "") {
-        if (currentSectionIndex != -1) {
-            return
-        }
         blocks.forEachIndexed { index, block ->
             if (block.id == unitId) {
                 currentVerticalIndex = index

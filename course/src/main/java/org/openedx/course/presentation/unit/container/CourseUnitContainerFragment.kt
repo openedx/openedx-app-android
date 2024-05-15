@@ -134,8 +134,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
-        viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
-        viewModel.setupCurrentIndex(componentId)
+        viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!, componentId)
         viewModel.courseUnitContainerShowedEvent()
     }
 

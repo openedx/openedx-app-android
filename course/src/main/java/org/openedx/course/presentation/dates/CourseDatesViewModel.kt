@@ -19,6 +19,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseBannerType
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
@@ -26,7 +27,6 @@ import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
@@ -42,6 +42,8 @@ import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
+    val courseId: String,
+    courseTitle: String,
     private val enrollmentMode: String,
     private val courseNotifier: CourseNotifier,
     private val interactor: CourseInteractor,
@@ -53,8 +55,6 @@ class CourseDatesViewModel(
     val courseRouter: CourseRouter
 ) : BaseViewModel() {
 
-    var courseId = ""
-    var courseName = ""
     var isSelfPaced = true
 
     private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)
@@ -68,7 +68,7 @@ class CourseDatesViewModel(
     private val _calendarSyncUIState = MutableStateFlow(
         CalendarSyncUIState(
             isCalendarSyncEnabled = isCalendarSyncEnabled(),
-            calendarTitle = calendarManager.getCourseCalendarTitle(courseName),
+            calendarTitle = calendarManager.getCourseCalendarTitle(courseTitle),
             isSynced = false,
         )
     )
@@ -76,6 +76,7 @@ class CourseDatesViewModel(
         _calendarSyncUIState.asStateFlow()
 
     private var courseBannerType: CourseBannerType = CourseBannerType.BLANK
+    private var courseStructure: CourseStructure? = null
 
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
@@ -92,22 +93,19 @@ class CourseDatesViewModel(
                             loadingCourseDatesInternal()
                         }
                     }
-
-                    is CourseDataReady -> {
-                        courseId = event.courseStructure.id
-                        courseName = event.courseStructure.name
-                        isSelfPaced = event.courseStructure.isSelfPaced
-                        loadingCourseDatesInternal()
-                        updateAndFetchCalendarSyncState()
-                    }
                 }
             }
         }
+
+        loadingCourseDatesInternal()
+        updateAndFetchCalendarSyncState()
     }
 
     private fun loadingCourseDatesInternal() {
         viewModelScope.launch {
             try {
+                courseStructure = interactor.getCourseStructure(courseId = courseId)
+                isSelfPaced = courseStructure?.isSelfPaced ?: false
                 val datesResponse = interactor.getCourseDates(courseId = courseId)
                 if (datesResponse.datesSection.isEmpty()) {
                     _uiState.value = DatesUIState.Empty
@@ -148,8 +146,8 @@ class CourseDatesViewModel(
 
     fun getVerticalBlock(blockId: String): Block? {
         return try {
-            val courseStructure = interactor.getCourseStructureFromCache()
-            courseStructure.blockData.getVerticalBlocks().find { it.descendants.contains(blockId) }
+            courseStructure?.blockData?.getVerticalBlocks()
+                ?.find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
             null
         }
@@ -157,9 +155,8 @@ class CourseDatesViewModel(
 
     fun getSequentialBlock(blockId: String): Block? {
         return try {
-            val courseStructure = interactor.getCourseStructureFromCache()
-            courseStructure.blockData.getSequentialBlocks()
-                .find { it.descendants.contains(blockId) }
+            courseStructure?.blockData?.getSequentialBlocks()
+                ?.find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
             null
         }

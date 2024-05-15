@@ -58,7 +58,7 @@ import org.openedx.discussion.R as discussionR
 
 @Composable
 fun DiscussionTopicsScreen(
-    discussionTopicsViewModel: DiscussionTopicsViewModel = koinViewModel(),
+    discussionTopicsViewModel: DiscussionTopicsViewModel,
     windowSize: WindowSize,
     fragmentManager: FragmentManager
 ) {

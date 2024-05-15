@@ -20,7 +20,6 @@ import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -77,12 +76,8 @@ class CourseVideoViewModel(
                 when (event) {
                     is CourseStructureUpdated -> {
                         if (event.courseId == courseId) {
-                            updateVideos()
+                            getVideos()
                         }
-                    }
-
-                    is CourseDataReady -> {
-                        getVideos()
                     }
                 }
             }
@@ -116,6 +111,8 @@ class CourseVideoViewModel(
         }
 
         _videoSettings.value = preferencesManager.videoSettings
+
+        getVideos()
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -143,13 +140,9 @@ class CourseVideoViewModel(
         super.saveAllDownloadModels(folder)
     }
 
-    private fun updateVideos() {
-        getVideos()
-    }
-
     fun getVideos() {
         viewModelScope.launch {
-            var courseStructure = interactor.getCourseStructureForVideos()
+            var courseStructure = interactor.getCourseStructureForVideos(courseId)
             val blocks = courseStructure.blockData
             if (blocks.isEmpty()) {
                 _uiState.value = CourseVideosUIState.Empty(

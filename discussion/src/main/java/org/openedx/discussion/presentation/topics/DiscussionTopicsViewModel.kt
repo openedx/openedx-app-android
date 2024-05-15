@@ -13,7 +13,6 @@ import org.openedx.core.UIMessage
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseRefresh
@@ -22,15 +21,14 @@ import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
 
 class DiscussionTopicsViewModel(
+    val courseId: String,
+    private val courseTitle: String,
     private val interactor: DiscussionInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscussionAnalytics,
     private val courseNotifier: CourseNotifier,
     val discussionRouter: DiscussionRouter,
 ) : BaseViewModel() {
-
-    var courseId: String = ""
-    var courseName: String = ""
 
     private val _uiState = MutableLiveData<DiscussionTopicsUIState>()
     val uiState: LiveData<DiscussionTopicsUIState>
@@ -42,6 +40,8 @@ class DiscussionTopicsViewModel(
 
     init {
         collectCourseNotifier()
+
+        getCourseTopic()
     }
 
     private fun getCourseTopic() {
@@ -64,15 +64,15 @@ class DiscussionTopicsViewModel(
     fun discussionClickedEvent(action: String, data: String, title: String) {
         when (action) {
             ALL_POSTS -> {
-                analytics.discussionAllPostsClickedEvent(courseId, courseName)
+                analytics.discussionAllPostsClickedEvent(courseId, courseTitle)
             }
 
             FOLLOWING_POSTS -> {
-                analytics.discussionFollowingClickedEvent(courseId, courseName)
+                analytics.discussionFollowingClickedEvent(courseId, courseTitle)
             }
 
             TOPIC -> {
-                analytics.discussionTopicClickedEvent(courseId, courseName, data, title)
+                analytics.discussionTopicClickedEvent(courseId, courseTitle, data, title)
             }
         }
     }
@@ -81,12 +81,6 @@ class DiscussionTopicsViewModel(
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
                 when (event) {
-                    is CourseDataReady -> {
-                        courseId = event.courseStructure.id
-                        courseName = event.courseStructure.name
-                        getCourseTopic()
-                    }
-
                     is CourseRefresh -> {
                         if (event.courseContainerTab == CourseContainerTab.DISCUSSIONS) {
                             getCourseTopic()

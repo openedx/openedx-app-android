@@ -220,7 +220,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `getCourseDataInternal no internet connection exception`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         coEvery { interactor.getCourseStatus(any()) } throws UnknownHostException()
@@ -247,8 +247,8 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assertEquals(noInternet, message.await()?.message)
         assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
@@ -256,7 +256,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `getCourseDataInternal unknown exception`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         coEvery { interactor.getCourseStatus(any()) } throws Exception()
@@ -282,8 +282,8 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assertEquals(somethingWrong, message.await()?.message)
         assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
@@ -291,7 +291,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `getCourseDataInternal success with internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         coEvery { downloadDao.readAllData() } returns flow {
             emit(
@@ -326,11 +326,12 @@ class CourseOutlineViewModelTest {
                 viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
             }
         }
+
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
         assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
@@ -338,7 +339,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `getCourseDataInternal success without internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns false
         coEvery { downloadDao.readAllData() } returns flow {
             emit(
@@ -376,7 +377,7 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
@@ -385,7 +386,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `updateCourseData success with internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         coEvery { downloadDao.readAllData() } returns flow {
             emit(
@@ -424,8 +425,8 @@ class CourseOutlineViewModelTest {
         viewModel.updateCourseData()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 3) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 3) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
         assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
@@ -450,7 +451,7 @@ class CourseOutlineViewModelTest {
             workerController
         )
         coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("")) }
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
 
@@ -462,14 +463,14 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
     }
 
     @Test
     fun `saveDownloadModels test`() = runTest(UnconfinedTestDispatcher()) {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
         every {
@@ -517,7 +518,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
@@ -555,7 +556,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
         every { networkConnection.isOnline() } returns false

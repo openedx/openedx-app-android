@@ -30,7 +30,6 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
@@ -98,10 +97,6 @@ class CourseOutlineViewModel(
                         }
                     }
 
-                    is CourseDataReady -> {
-                        getCourseData()
-                    }
-
                     is CourseOpenBlock -> {
                         _openBlock.emit(event.blockId)
                     }
@@ -125,6 +120,8 @@ class CourseOutlineViewModel(
                 }
             }
         }
+
+        getCourseData()
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -178,7 +175,7 @@ class CourseOutlineViewModel(
     private fun getCourseDataInternal() {
         viewModelScope.launch {
             try {
-                var courseStructure = interactor.getCourseStructureFromCache()
+                var courseStructure = interactor.getCourseStructure(courseId)
                 val blocks = courseStructure.blockData
 
                 val courseStatus = if (networkConnection.isOnline()) {
@@ -292,10 +289,12 @@ class CourseOutlineViewModel(
     }
 
     fun openBlock(fragmentManager: FragmentManager, blockId: String) {
-        val courseStructure = interactor.getCourseStructureFromCache()
-        val blocks = courseStructure.blockData
-        getResumeBlock(blocks, blockId)
-        resumeBlock(fragmentManager, blockId)
+        viewModelScope.launch {
+            val courseStructure = interactor.getCourseStructure(courseId, false)
+            val blocks = courseStructure.blockData
+            getResumeBlock(blocks, blockId)
+            resumeBlock(fragmentManager, blockId)
+        }
     }
 
     private fun resumeBlock(fragmentManager: FragmentManager, blockId: String) {
