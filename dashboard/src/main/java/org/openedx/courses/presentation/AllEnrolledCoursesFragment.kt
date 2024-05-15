@@ -447,7 +447,7 @@ private fun CourseItem(
             },
         backgroundColor = MaterialTheme.appColors.background,
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 2.dp
+        elevation = 4.dp
     ) {
         Box {
             Column {
@@ -463,11 +463,16 @@ private fun CourseItem(
                         .fillMaxWidth()
                         .height(90.dp)
                 )
+                val progress: Float = try {
+                    course.progress.assignmentsCompleted.toFloat() / course.progress.totalAssignmentsCount.toFloat()
+                } catch (_: ArithmeticException) {
+                    0f
+                }
                 LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    progress = course.progress.assignmentsCompleted.toFloat(),
+                    progress = progress,
                     color = MaterialTheme.appColors.primary,
                     backgroundColor = MaterialTheme.appColors.divider
                 )

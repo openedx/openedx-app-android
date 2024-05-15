@@ -194,60 +194,63 @@ private fun PrimaryCourseScreen(
             color = MaterialTheme.appColors.background
         ) {
             Box(
-                Modifier
-                    .fillMaxSize()
-                    .pullRefresh(pullRefreshState)
-                    .verticalScroll(rememberScrollState()),
+                Modifier.fillMaxSize()
             ) {
-                when (uiState) {
-                    is PrimaryCourseUIState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.appColors.primary
-                        )
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .pullRefresh(pullRefreshState)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    when (uiState) {
+                        is PrimaryCourseUIState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.appColors.primary
+                            )
+                        }
+
+                        is PrimaryCourseUIState.Courses -> {
+                            UserCourses(
+                                modifier = Modifier.fillMaxSize(),
+                                userCourses = uiState.userCourses,
+                                apiHostUrl = apiHostUrl,
+                                openCourse = {
+                                    onAction(PrimaryCourseScreenAction.OpenCourse(it))
+                                },
+                                onViewAllClick = {
+                                    onAction(PrimaryCourseScreenAction.ViewAll)
+                                },
+                                navigateToDates = {
+                                    onAction(PrimaryCourseScreenAction.NavigateToDates(it))
+                                },
+                                openBlock = { course, blockId ->
+                                    onAction(PrimaryCourseScreenAction.OpenBlock(course, blockId))
+                                }
+                            )
+                        }
+
+                        is PrimaryCourseUIState.Empty -> {
+                            NoCoursesInfo(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                            FindACourseButton(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter),
+                                findACourseClick = {
+                                    onAction(PrimaryCourseScreenAction.NavigateToDiscovery)
+                                }
+                            )
+                        }
                     }
 
-                    is PrimaryCourseUIState.Courses -> {
-                        UserCourses(
-                            modifier = Modifier.fillMaxSize(),
-                            userCourses = uiState.userCourses,
-                            apiHostUrl = apiHostUrl,
-                            openCourse = {
-                                onAction(PrimaryCourseScreenAction.OpenCourse(it))
-                            },
-                            onViewAllClick = {
-                                onAction(PrimaryCourseScreenAction.ViewAll)
-                            },
-                            navigateToDates = {
-                                onAction(PrimaryCourseScreenAction.NavigateToDates(it))
-                            },
-                            openBlock = { course, blockId ->
-                                onAction(PrimaryCourseScreenAction.OpenBlock(course, blockId))
-                            }
-                        )
-                    }
-
-                    is PrimaryCourseUIState.Empty -> {
-                        NoCoursesInfo(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                        )
-                        FindACourseButton(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter),
-                            findACourseClick = {
-                                onAction(PrimaryCourseScreenAction.NavigateToDiscovery)
-                            }
-                        )
-                    }
+                    PullRefreshIndicator(
+                        updating,
+                        pullRefreshState,
+                        Modifier.align(Alignment.TopCenter)
+                    )
                 }
-
-                PullRefreshIndicator(
-                    updating,
-                    pullRefreshState,
-                    Modifier.align(Alignment.TopCenter)
-                )
-
                 if (!isInternetConnectionShown && !hasInternetConnection) {
                     OfflineModeDialog(
                         Modifier
@@ -258,7 +261,7 @@ private fun PrimaryCourseScreen(
                         },
                         onReloadClick = {
                             isInternetConnectionShown = true
-                            onAction(PrimaryCourseScreenAction.Reload)
+                            onAction(PrimaryCourseScreenAction.SwipeRefresh)
                         }
                     )
                 }
@@ -369,7 +372,7 @@ private fun ViewAllItem(
             ),
         backgroundColor = MaterialTheme.appColors.cardViewBackground,
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 2.dp,
+        elevation = 4.dp,
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -408,7 +411,7 @@ private fun CourseListItem(
             },
         backgroundColor = MaterialTheme.appColors.background,
         shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 2.dp
+        elevation = 4.dp
     ) {
         Box {
             Column {
@@ -512,7 +515,12 @@ private fun PrimaryCourseCard(
         shape = MaterialTheme.appShapes.courseImageShape,
         elevation = 4.dp
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .clickable {
+                    openCourse(primaryCourse)
+                }
+        ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(apiHostUrl + primaryCourse.course.courseImage)
@@ -526,7 +534,7 @@ private fun PrimaryCourseCard(
                     .height(140.dp)
             )
             val progress: Float = try {
-                (primaryCourse.progress.assignmentsCompleted / primaryCourse.progress.totalAssignmentsCount).toFloat()
+                primaryCourse.progress.assignmentsCompleted.toFloat() / primaryCourse.progress.totalAssignmentsCount.toFloat()
             } catch (_: ArithmeticException) {
                 0f
             }

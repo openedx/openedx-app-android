@@ -38,7 +38,7 @@ class DashboardRepository(
     suspend fun getMainUserCourses(): UserCourses {
         val user = preferencesManager.user
         val result = api.getUserCourses(
-            username = user?.username ?: ""
+            username = user?.username ?: "",
         )
         preferencesManager.appConfig = result.configs.mapToDomain()
 
@@ -56,7 +56,7 @@ class DashboardRepository(
             username = user?.username ?: "",
             page = page,
             status = status?.key,
-            fields = listOf("progress")
+            fields = listOf("course_progress")
         )
         preferencesManager.appConfig = result.configs.mapToDomain()
 

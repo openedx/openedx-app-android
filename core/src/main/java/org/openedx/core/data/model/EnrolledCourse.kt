@@ -19,7 +19,7 @@ data class EnrolledCourse(
     val course: EnrolledCourseData?,
     @SerializedName("certificate")
     val certificate: Certificate?,
-    @SerializedName("progress")
+    @SerializedName("course_progress")
     val progress: Progress?,
     @SerializedName("course_status")
     val courseStatus: CourseStatus?,

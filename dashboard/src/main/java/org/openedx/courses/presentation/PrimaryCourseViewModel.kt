@@ -61,7 +61,7 @@ class PrimaryCourseViewModel(
             try {
                 if (networkConnection.isOnline()) {
                     val response = interactor.getMainUserCourses()
-                    if (response.primary == null && response.enrollments.isNotEmpty()) {
+                    if (response.primary == null && response.enrollments.isEmpty()) {
                         _uiState.value = PrimaryCourseUIState.Empty
                     } else {
                         _uiState.value = PrimaryCourseUIState.Courses(response)
