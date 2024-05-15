@@ -9,18 +9,18 @@ class CourseInteractor(
     private val repository: CourseRepository
 ) {
 
-    suspend fun preloadCourseStructure(courseId: String) =
-        repository.preloadCourseStructure(courseId)
+    suspend fun getCourseStructure(
+        courseId: String,
+        isNeedRefresh: Boolean = false
+    ): CourseStructure {
+        return repository.getCourseStructure(courseId, isNeedRefresh)
+    }
 
-    suspend fun preloadCourseStructureFromCache(courseId: String) =
-        repository.preloadCourseStructureFromCache(courseId)
-
-    @Throws(IllegalStateException::class)
-    fun getCourseStructureFromCache() = repository.getCourseStructureFromCache()
-
-    @Throws(IllegalStateException::class)
-    fun getCourseStructureForVideos(): CourseStructure {
-        val courseStructure = repository.getCourseStructureFromCache()
+    suspend fun getCourseStructureForVideos(
+        courseId: String,
+        isNeedRefresh: Boolean = false
+    ): CourseStructure {
+        val courseStructure = repository.getCourseStructure(courseId, isNeedRefresh)
         val blocks = courseStructure.blockData
         val videoBlocks = blocks.filter { it.type == BlockType.VIDEO }
         val resultBlocks = ArrayList<Block>()

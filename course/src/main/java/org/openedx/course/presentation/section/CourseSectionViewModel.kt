@@ -89,8 +89,8 @@ class CourseSectionViewModel(
         viewModelScope.launch {
             try {
                 val courseStructure = when (mode) {
-                    CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
-                    CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
+                    CourseViewMode.FULL -> interactor.getCourseStructure(courseId)
+                    CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos(courseId)
                 }
                 val blocks = courseStructure.blockData
                 setBlocks(blocks)

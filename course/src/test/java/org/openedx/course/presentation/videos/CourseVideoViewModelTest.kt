@@ -46,7 +46,7 @@ import org.openedx.core.module.db.FileType
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDataReady
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.VideoNotifier
@@ -171,7 +171,7 @@ class CourseVideoViewModelTest {
         every { resourceManager.getString(R.string.course_can_download_only_with_wifi) } returns cantDownload
         Dispatchers.setMain(dispatcher)
         every { config.getApiHostURL() } returns "http://localhost:8000"
-        every { courseNotifier.notifier } returns flowOf(CourseDataReady(courseStructure))
+        every { courseNotifier.notifier } returns flowOf(CourseLoading(false))
     }
 
     @After
@@ -182,7 +182,8 @@ class CourseVideoViewModelTest {
     @Test
     fun `getVideos empty list`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
-        every { interactor.getCourseStructureForVideos() } returns courseStructure.copy(blockData = emptyList())
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns
+                courseStructure.copy(blockData = emptyList())
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
@@ -204,7 +205,7 @@ class CourseVideoViewModelTest {
         viewModel.getVideos()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
 
         assert(viewModel.uiState.value is CourseVideosUIState.Empty)
     }
@@ -212,7 +213,7 @@ class CourseVideoViewModelTest {
     @Test
     fun `getVideos success`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
-        every { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { preferencesManager.videoSettings } returns VideoSettings.default
 
@@ -236,7 +237,7 @@ class CourseVideoViewModelTest {
         viewModel.getVideos()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
 
         assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
     }
@@ -244,10 +245,9 @@ class CourseVideoViewModelTest {
     @Test
     fun `updateVideos success`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
-        every { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { courseNotifier.notifier } returns flow {
             emit(CourseStructureUpdated(""))
-            emit(CourseDataReady(courseStructure))
         }
         every { downloadDao.readAllData() } returns flow {
             repeat(5) {
@@ -279,7 +279,7 @@ class CourseVideoViewModelTest {
 
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 2) { interactor.getCourseStructureForVideos(any()) }
 
         assert(viewModel.uiState.value is CourseVideosUIState.CourseData)
     }
@@ -288,7 +288,7 @@ class CourseVideoViewModelTest {
     fun `setIsUpdating success`() = runTest {
         every { config.isCourseNestedListEnabled() } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         advanceUntilIdle()
     }
@@ -312,7 +312,7 @@ class CourseVideoViewModelTest {
             downloadDao,
             workerController
         )
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
@@ -348,7 +348,7 @@ class CourseVideoViewModelTest {
             downloadDao,
             workerController
         )
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
@@ -391,7 +391,7 @@ class CourseVideoViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
         every { networkConnection.isOnline() } returns false
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
         coEvery { workerController.saveModels(any()) } returns Unit
         val message = async {

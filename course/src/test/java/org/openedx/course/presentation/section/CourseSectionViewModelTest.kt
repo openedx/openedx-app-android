@@ -185,14 +185,14 @@ class CourseSectionViewModelTest {
             downloadDao,
         )
 
-        coEvery { interactor.getCourseStructureFromCache() } throws UnknownHostException()
-        coEvery { interactor.getCourseStructureForVideos() } throws UnknownHostException()
+        coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
+        coEvery { interactor.getCourseStructureForVideos(any()) } throws UnknownHostException()
 
         viewModel.getBlocks("", CourseViewMode.FULL)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 0) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -215,14 +215,14 @@ class CourseSectionViewModelTest {
             downloadDao,
         )
 
-        coEvery { interactor.getCourseStructureFromCache() } throws Exception()
-        coEvery { interactor.getCourseStructureForVideos() } throws Exception()
+        coEvery { interactor.getCourseStructure(any()) } throws Exception()
+        coEvery { interactor.getCourseStructureForVideos(any()) } throws Exception()
 
         viewModel.getBlocks("id2", CourseViewMode.FULL)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 0) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -247,14 +247,17 @@ class CourseSectionViewModelTest {
             downloadDao,
         )
 
-        coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { downloadDao.readAllData() } returns flow {
+            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+        }
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
 
         viewModel.getBlocks("id", CourseViewMode.VIDEOS)
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructureForVideos(any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
@@ -366,8 +369,8 @@ class CourseSectionViewModelTest {
         )
 
         coEvery { notifier.notifier } returns flow { }
-        coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

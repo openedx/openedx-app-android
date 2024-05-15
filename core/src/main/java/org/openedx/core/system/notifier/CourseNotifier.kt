@@ -18,6 +18,5 @@ class CourseNotifier {
     suspend fun send(event: CalendarSyncEvent) = channel.emit(event)
     suspend fun send(event: CourseDatesShifted) = channel.emit(event)
     suspend fun send(event: CourseLoading) = channel.emit(event)
-    suspend fun send(event: CourseDataReady) = channel.emit(event)
     suspend fun send(event: CourseRefresh) = channel.emit(event)
 }

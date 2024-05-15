@@ -31,7 +31,6 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
@@ -169,12 +168,7 @@ class CourseContainerViewModel(
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                if (networkConnection.isOnline()) {
-                    interactor.preloadCourseStructure(courseId)
-                } else {
-                    interactor.preloadCourseStructureFromCache(courseId)
-                }
-                val courseStructure = interactor.getCourseStructureFromCache()
+                val courseStructure = interactor.getCourseStructure(courseId)
                 courseName = courseStructure.name
                 _organization = courseStructure.org
                 _isSelfPaced = courseStructure.isSelfPaced
@@ -183,7 +177,6 @@ class CourseContainerViewModel(
                     val isReady = start < Date()
                     if (isReady) {
                         _isNavigationEnabled.value = true
-                        courseNotifier.send(CourseDataReady(courseStructure))
                     }
                     isReady
                 }
@@ -248,7 +241,7 @@ class CourseContainerViewModel(
     fun updateData() {
         viewModelScope.launch {
             try {
-                interactor.preloadCourseStructure(courseId)
+                interactor.getCourseStructure(courseId, isNeedRefresh = true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _errorMessage.value =
