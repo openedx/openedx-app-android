@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.container
 
+import android.graphics.Bitmap
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -21,8 +22,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.ImageProcessor
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.data.api.CourseApi
+import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AppConfig
@@ -38,6 +42,8 @@ import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
+import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.calendarsync.CalendarManager
 import java.net.UnknownHostException
 import java.util.Date
 
@@ -58,6 +64,10 @@ class CourseContainerViewModelTest {
     private val analytics = mockk<CourseAnalytics>()
     private val corePreferences = mockk<CorePreferences>()
     private val coursePreferences = mockk<CoursePreferences>()
+    private val mockBitmap = mockk<Bitmap>()
+    private val imageProcessor = mockk<ImageProcessor>()
+    private val courseRouter = mockk<CourseRouter>()
+    private val courseApi = mockk<CourseApi>()
 
     private val openEdx = "OpenEdx"
     private val calendarTitle = "OpenEdx - Abc"
@@ -102,6 +112,23 @@ class CourseContainerViewModelTest {
         isSelfPaced = false
     )
 
+    private val courseStructureModel = CourseStructureModel(
+        root = "",
+        blockData = mapOf(),
+        id = "id",
+        name = "Course name",
+        number = "",
+        org = "Org",
+        start = "",
+        startDisplay = "",
+        startType = "",
+        end = null,
+        coursewareAccess = null,
+        media = null,
+        certificate = null,
+        isSelfPaced = false
+    )
+
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
@@ -112,6 +139,9 @@ class CourseContainerViewModelTest {
         every { corePreferences.appConfig } returns appConfig
         every { notifier.notifier } returns emptyFlow()
         every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
+        every { config.getApiHostURL() } returns "baseUrl"
+        every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
+        every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
     }
 
     @After
@@ -120,7 +150,7 @@ class CourseContainerViewModelTest {
     }
 
     @Test
-    fun `preloadCourseStructure internet connection exception`() = runTest {
+    fun `getCourseStructure internet connection exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
@@ -134,24 +164,26 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
+        coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
         every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value == null)
     }
 
     @Test
-    fun `preloadCourseStructure unknown exception`() = runTest {
+    fun `getCourseStructure unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
@@ -165,24 +197,26 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
+        coEvery { interactor.getCourseStructure(any()) } throws Exception()
         every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value == null)
     }
 
     @Test
-    fun `preloadCourseStructure success with internet`() = runTest {
+    fun `getCourseStructure success with internet`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
@@ -196,24 +230,25 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.preloadCourseStructure(any()) } returns Unit
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         assert(viewModel.errorMessage.value == null)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value != null)
     }
 
     @Test
-    fun `preloadCourseStructure success without internet`() = runTest {
+    fun `getCourseStructure success without internet`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
             "",
@@ -227,20 +262,23 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
         every { networkConnection.isOnline() } returns false
-        coEvery { interactor.preloadCourseStructureFromCache(any()) } returns Unit
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { analytics.logEvent(any(), any()) } returns Unit
+        coEvery {
+            courseApi.getCourseStructure(any(), any(), any(), any())
+        } returns courseStructureModel
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { interactor.preloadCourseStructure(any()) }
-        coVerify(exactly = 1) { interactor.preloadCourseStructureFromCache(any()) }
+        coVerify(exactly = 0) { courseApi.getCourseStructure(any(), any(), any(), any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         assert(viewModel.errorMessage.value == null)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
         assert(viewModel.dataReady.value != null)
     }
 
@@ -259,17 +297,19 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
-        coEvery { interactor.preloadCourseStructure(any()) } throws UnknownHostException()
-        coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
-        viewModel.updateData(false)
+        coEvery { interactor.getCourseStructure(any(), true) } throws UnknownHostException()
+        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        viewModel.updateData()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any(), true) }
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
     }
 
     @Test
@@ -287,17 +327,19 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
-        coEvery { interactor.preloadCourseStructure(any()) } throws Exception()
-        coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
-        viewModel.updateData(false)
+        coEvery { interactor.getCourseStructure(any(), true) } throws Exception()
+        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        viewModel.updateData()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any(), true) }
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
     }
 
     @Test
@@ -315,15 +357,17 @@ class CourseContainerViewModelTest {
             corePreferences,
             coursePreferences,
             analytics,
+            imageProcessor,
+            courseRouter
         )
-        coEvery { interactor.preloadCourseStructure(any()) } returns Unit
-        coEvery { notifier.send(CourseStructureUpdated("", false)) } returns Unit
-        viewModel.updateData(false)
+        coEvery { interactor.getCourseStructure(any(), true) } returns courseStructure
+        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        viewModel.updateData()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.preloadCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any(), true) }
 
         assert(viewModel.errorMessage.value == null)
-        assert(viewModel.showProgress.value == false)
+        assert(!viewModel.refreshing.value)
     }
 }

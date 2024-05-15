@@ -149,11 +149,24 @@ val screenModule = module {
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        SettingsViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
     viewModel { CalendarViewModel(get()) }
 
-    single { CourseRepository(get(), get(), get(), get()) }
+    single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
@@ -195,11 +208,14 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get()
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseOutlineViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -236,9 +252,10 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         CourseVideoViewModel(
             courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -277,13 +294,11 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, courseName: String, isSelfPaced: Boolean, enrollmentMode: String) ->
+    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
         CourseDatesViewModel(
             courseId,
-            courseName,
-            isSelfPaced,
+            courseTitle,
             enrollmentMode,
-            get(),
             get(),
             get(),
             get(),
@@ -307,13 +322,15 @@ val screenModule = module {
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel { (courseId: String) ->
+    viewModel { (courseId: String, courseTitle: String) ->
         DiscussionTopicsViewModel(
+            courseId,
+            courseTitle,
             get(),
             get(),
             get(),
             get(),
-            courseId
+            get()
         )
     }
     viewModel { (courseId: String, topicId: String, threadType: String) ->

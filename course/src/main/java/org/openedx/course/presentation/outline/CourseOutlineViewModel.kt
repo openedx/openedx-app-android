@@ -1,13 +1,15 @@
 package org.openedx.course.presentation.outline
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -27,9 +29,10 @@ import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogTyp
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDatesShifted
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -38,10 +41,11 @@ import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
+    private val courseTitle: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
@@ -55,34 +59,20 @@ class CourseOutlineViewModel(
     workerController,
     coreAnalytics
 ) {
-
-    val apiHostUrl get() = config.getApiHostURL()
-
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
-    val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
+    private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
+    val uiState: StateFlow<CourseOutlineUIState>
+        get() = _uiState.asStateFlow()
 
-    private val _uiState = MutableLiveData<CourseOutlineUIState>(CourseOutlineUIState.Loading)
-    val uiState: LiveData<CourseOutlineUIState>
-        get() = _uiState
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
-
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
-
-    var courseTitle = ""
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     var resumeSectionBlock: Block? = null
         private set
     var resumeVerticalBlock: Block? = null
         private set
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
 
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
@@ -90,13 +80,14 @@ class CourseOutlineViewModel(
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
 
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
+    init {
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
-                if (event is CourseStructureUpdated) {
-                    if (event.courseId == courseId) {
-                        updateCourseData(event.withSwipeRefresh)
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CourseStructureUpdated -> {
+                        if (event.courseId == courseId) {
+                            updateCourseData()
+                        }
                     }
                 }
             }
@@ -118,14 +109,8 @@ class CourseOutlineViewModel(
                 }
             }
         }
-    }
 
-    init {
         getCourseData()
-    }
-
-    fun setIsUpdating() {
-        _isUpdating.value = true
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -133,21 +118,23 @@ class CourseOutlineViewModel(
             if (networkConnection.isWifiConnected()) {
                 super.saveDownloadModels(folder, id)
             } else {
-                _uiMessage.value =
-                    UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi))
+                viewModelScope.launch {
+                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi)))
+                }
             }
         } else {
             super.saveDownloadModels(folder, id)
         }
     }
 
-    fun updateCourseData(withSwipeRefresh: Boolean) {
-        _isUpdating.value = withSwipeRefresh
+    fun updateCourseData() {
         getCourseDataInternal()
     }
 
-    private fun getCourseData() {
-        _uiState.value = CourseOutlineUIState.Loading
+    fun getCourseData() {
+        viewModelScope.launch {
+            courseNotifier.send(CourseLoading(true))
+        }
         getCourseDataInternal()
     }
 
@@ -177,7 +164,7 @@ class CourseOutlineViewModel(
     private fun getCourseDataInternal() {
         viewModelScope.launch {
             try {
-                var courseStructure = interactor.getCourseStructureFromCache()
+                var courseStructure = interactor.getCourseStructure(courseId)
                 val blocks = courseStructure.blockData
 
                 val courseStatus = if (networkConnection.isOnline()) {
@@ -222,18 +209,14 @@ class CourseOutlineViewModel(
                     subSectionsDownloadsCount = subSectionsDownloadsCount,
                     datesBannerInfo = datesBannerInfo,
                 )
+                courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value = UIMessage.SnackBarMessage(
-                        resourceManager.getString(R.string.core_error_no_connection)
-                    )
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value = UIMessage.SnackBarMessage(
-                        resourceManager.getString(R.string.core_error_unknown_error)
-                    )
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
-            _isUpdating.value = false
         }
     }
 
@@ -280,16 +263,14 @@ class CourseOutlineViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
-                updateCourseData(false)
-                _uiMessage.value = DatesShiftedSnackBar()
+                updateCourseData()
+                courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)))
                 }
                 onResetDates(false)
             }
@@ -354,7 +335,7 @@ class CourseOutlineViewModel(
 
     private fun checkIfCalendarOutOfDate(courseDates: List<CourseDateBlock>) {
         viewModelScope.launch {
-            notifier.send(
+            courseNotifier.send(
                 CreateCalendarSyncEvent(
                     courseDates = courseDates,
                     dialogType = CalendarSyncDialogType.NONE.name,

@@ -3,40 +3,82 @@ package org.openedx.course.presentation.container
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarData
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.viewpager2.widget.ViewPager2
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
-import org.koin.android.ext.android.inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.takeIfNotEmpty
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialog
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.RoundTabsBar
+import org.openedx.core.ui.WindowSize
+import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
-import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.presentation.container.CourseContainerTab
-import org.openedx.course.presentation.dates.CourseDatesFragment
-import org.openedx.course.presentation.handouts.HandoutsFragment
-import org.openedx.course.presentation.outline.CourseOutlineFragment
-import org.openedx.course.presentation.ui.CourseToolbar
-import org.openedx.course.presentation.videos.CourseVideosFragment
-import org.openedx.discussion.presentation.topics.DiscussionTopicsFragment
-import org.openedx.course.presentation.container.CourseContainerTab as Tabs
+import org.openedx.course.presentation.dates.CourseDatesScreen
+import org.openedx.course.presentation.handouts.HandoutsScreen
+import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.outline.CourseOutlineScreen
+import org.openedx.course.presentation.ui.CourseVideosScreen
+import org.openedx.course.presentation.ui.DatesShiftedSnackBar
+import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private val binding by viewBinding(FragmentCourseContainerBinding::bind)
+
     private val viewModel by viewModel<CourseContainerViewModel> {
         parametersOf(
             requireArguments().getString(ARG_COURSE_ID, ""),
@@ -44,9 +86,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_ENROLLMENT_MODE, "")
         )
     }
-    private val router by inject<CourseRouter>()
-
-    private var adapter: CourseContainerAdapter? = null
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -66,7 +105,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupToolbar(viewModel.courseName)
+        initCourseView()
         if (viewModel.calendarSyncUIState.value.isCalendarSyncEnabled) {
             setUpCourseCalendar()
         }
@@ -80,11 +119,8 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
     private fun observe() {
         viewModel.dataReady.observe(viewLifecycleOwner) { isReady ->
-            if (isReady == true) {
-                setupToolbar(viewModel.courseName)
-                initViewPager()
-            } else {
-                router.navigateToNoAccess(
+            if (isReady == false) {
+                viewModel.courseRouter.navigateToNoAccess(
                     requireActivity().supportFragmentManager,
                     viewModel.courseName
                 )
@@ -98,86 +134,31 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             snackBar?.show()
 
         }
-        viewModel.showProgress.observe(viewLifecycleOwner) {
-            binding.progressBar.isVisible = it
-        }
-    }
-
-    private fun setupToolbar(courseName: String) {
-        binding.toolbar.setContent {
-            CourseToolbar(
-                title = courseName,
-                onBackClick = {
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-            )
-        }
-    }
-
-    private fun initViewPager() {
-        binding.viewPager.isVisible = true
-        binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
-        adapter = CourseContainerAdapter(this).apply {
-            addFragment(
-                Tabs.COURSE,
-                CourseOutlineFragment.newInstance(viewModel.courseId, viewModel.courseName)
-            )
-            addFragment(
-                Tabs.VIDEOS,
-                CourseVideosFragment.newInstance(viewModel.courseId, viewModel.courseName)
-            )
-            addFragment(
-                Tabs.DISCUSSION,
-                DiscussionTopicsFragment.newInstance(viewModel.courseId, viewModel.courseName)
-            )
-            addFragment(
-                Tabs.DATES,
-                CourseDatesFragment.newInstance(
-                    viewModel.courseId,
-                    viewModel.courseName,
-                    viewModel.isSelfPaced,
-                    viewModel.enrollmentMode,
-                )
-            )
-            addFragment(
-                Tabs.HANDOUTS,
-                HandoutsFragment.newInstance(viewModel.courseId)
-            )
-        }
-        binding.viewPager.offscreenPageLimit = adapter?.itemCount ?: 1
-        binding.viewPager.adapter = adapter
-
-        if (viewModel.isCourseTopTabBarEnabled) {
-            TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-                tab.text = getString(
-                    Tabs.entries.find { it.ordinal == position }?.titleResId
-                        ?: R.string.course_navigation_course
-                )
-            }.attach()
-            binding.tabLayout.isVisible = true
-            binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                override fun onTabSelected(tab: TabLayout.Tab?) {
-                    tab?.let {
-                        viewModel.courseContainerTabClickedEvent(Tabs.entries[it.position])
-                    }
-                }
-
-                override fun onTabUnselected(p0: TabLayout.Tab?) {}
-
-                override fun onTabReselected(p0: TabLayout.Tab?) {}
-            })
-        } else {
-            binding.viewPager.isUserInputEnabled = false
-            binding.bottomNavView.setOnItemSelectedListener { menuItem ->
-                Tabs.entries.find { menuItem.itemId == it.itemId }?.let { tab ->
-                    viewModel.courseContainerTabClickedEvent(tab)
-                    binding.viewPager.setCurrentItem(tab.ordinal, false)
-                }
-                true
+        lifecycleScope.launch {
+            viewModel.showProgress.collect {
+                binding.progressBar.isVisible = it
             }
-            binding.bottomNavView.isVisible = true
         }
-        viewModel.courseContainerTabClickedEvent(Tabs.entries[binding.viewPager.currentItem])
+    }
+
+    private fun onRefresh(currentPage: Int) {
+        viewModel.onRefresh(CourseContainerTab.entries[currentPage])
+    }
+
+    private fun initCourseView() {
+        binding.composeCollapsingLayout.setContent {
+            val isNavigationEnabled by viewModel.isNavigationEnabled.collectAsState()
+            CourseDashboard(
+                viewModel = viewModel,
+                isNavigationEnabled = isNavigationEnabled,
+                isResumed = isResumed,
+                fragmentManager = requireActivity().supportFragmentManager,
+                bundle = requireArguments(),
+                onRefresh = { page ->
+                    onRefresh(page)
+                }
+            )
+        }
     }
 
     private fun setUpCourseCalendar() {
@@ -270,26 +251,10 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 
-    fun updateCourseStructure(withSwipeRefresh: Boolean) {
-        viewModel.updateData(withSwipeRefresh)
-    }
-
-    fun updateCourseDates() {
-        adapter?.getFragment(Tabs.DATES)?.let {
-            (it as CourseDatesFragment).updateData()
-        }
-    }
-
-    fun navigateToTab(tab: CourseContainerTab) {
-        adapter?.getFragment(tab)?.let {
-            binding.viewPager.setCurrentItem(tab.ordinal, true)
-        }
-    }
-
     companion object {
-        private const val ARG_COURSE_ID = "courseId"
-        private const val ARG_TITLE = "title"
-        private const val ARG_ENROLLMENT_MODE = "enrollmentMode"
+        const val ARG_COURSE_ID = "courseId"
+        const val ARG_TITLE = "title"
+        const val ARG_ENROLLMENT_MODE = "enrollmentMode"
         fun newInstance(
             courseId: String,
             courseTitle: String,
@@ -306,3 +271,262 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@Composable
+fun CourseDashboard(
+    viewModel: CourseContainerViewModel,
+    onRefresh: (page: Int) -> Unit,
+    isNavigationEnabled: Boolean,
+    isResumed: Boolean,
+    fragmentManager: FragmentManager,
+    bundle: Bundle
+) {
+    OpenEdXTheme {
+        val windowSize = rememberWindowSize()
+        val scope = rememberCoroutineScope()
+        val scaffoldState = rememberScaffoldState()
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
+            scaffoldState = scaffoldState,
+            backgroundColor = MaterialTheme.appColors.background
+        ) { paddingValues ->
+            val refreshing by viewModel.refreshing.collectAsState(true)
+            val courseImage by viewModel.courseImage.collectAsState()
+            val uiMessage by viewModel.uiMessage.collectAsState(null)
+            val dataReady = viewModel.dataReady.observeAsState()
+
+            val pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
+            val tabState = rememberLazyListState()
+            val snackState = remember { SnackbarHostState() }
+            val pullRefreshState = rememberPullRefreshState(
+                refreshing = refreshing,
+                onRefresh = { onRefresh(pagerState.currentPage) }
+            )
+            if (uiMessage is DatesShiftedSnackBar) {
+                val datesShiftedMessage = stringResource(id = R.string.course_dates_shifted_message)
+                LaunchedEffect(uiMessage) {
+                    snackState.showSnackbar(
+                        message = datesShiftedMessage,
+                        duration = SnackbarDuration.Long
+                    )
+                }
+            }
+            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+
+            LaunchedEffect(pagerState.currentPage) {
+                tabState.animateScrollToItem(pagerState.currentPage)
+            }
+
+            Box {
+                CollapsingLayout(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddingValues)
+                        .pullRefresh(pullRefreshState),
+                    courseImage = courseImage,
+                    imageHeight = 200,
+                    expandedTop = {
+                        ExpandedHeaderContent(
+                            courseTitle = viewModel.courseName,
+                            org = viewModel.organization
+                        )
+                    },
+                    collapsedTop = {
+                        CollapsedHeaderContent(
+                            courseTitle = viewModel.courseName
+                        )
+                    },
+                    navigation = {
+                        if (isNavigationEnabled) {
+                            RoundTabsBar(
+                                items = CourseContainerTab.entries,
+                                rowState = tabState,
+                                pagerState = pagerState,
+                                onPageChange = viewModel::courseContainerTabClickedEvent
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.height(52.dp))
+                        }
+                    },
+                    onBackClick = {
+                        fragmentManager.popBackStack()
+                    },
+                    bodyContent = {
+                        if (dataReady.value == true) {
+                            DashboardPager(
+                                windowSize = windowSize,
+                                viewModel = viewModel,
+                                pagerState = pagerState,
+                                isNavigationEnabled = isNavigationEnabled,
+                                isResumed = isResumed,
+                                fragmentManager = fragmentManager,
+                                bundle = bundle
+                            )
+                        }
+                    }
+                )
+                PullRefreshIndicator(
+                    refreshing,
+                    pullRefreshState,
+                    Modifier.align(Alignment.TopCenter)
+                )
+
+                var isInternetConnectionShown by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                if (!isInternetConnectionShown && !viewModel.hasInternetConnection) {
+                    OfflineModeDialog(
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        onDismissCLick = {
+                            isInternetConnectionShown = true
+                        },
+                        onReloadClick = {
+                            isInternetConnectionShown = true
+                            onRefresh(pagerState.currentPage)
+                        }
+                    )
+                }
+
+                SnackbarHost(
+                    modifier = Modifier.align(Alignment.BottomStart),
+                    hostState = snackState
+                ) { snackbarData: SnackbarData ->
+                    DatesShiftedSnackBar(
+                        showAction = CourseContainerTab.entries[pagerState.currentPage] != CourseContainerTab.DATES,
+                        onViewDates = {
+                            scrollToDates(scope, pagerState)
+                        },
+                        onClose = {
+                            snackbarData.dismiss()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun DashboardPager(
+    windowSize: WindowSize,
+    viewModel: CourseContainerViewModel,
+    pagerState: PagerState,
+    isNavigationEnabled: Boolean,
+    isResumed: Boolean,
+    fragmentManager: FragmentManager,
+    bundle: Bundle,
+) {
+    HorizontalPager(
+        state = pagerState,
+        userScrollEnabled = isNavigationEnabled,
+        beyondBoundsPageCount = CourseContainerTab.entries.size
+    ) { page ->
+        when (CourseContainerTab.entries[page]) {
+            CourseContainerTab.HOME -> {
+                CourseOutlineScreen(
+                    windowSize = windowSize,
+                    courseOutlineViewModel = koinViewModel(
+                        parameters = {
+                            parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, "")
+                            )
+                        }
+                    ),
+                    courseRouter = viewModel.courseRouter,
+                    fragmentManager = fragmentManager,
+                    onResetDatesClick = {
+                        viewModel.onRefresh(CourseContainerTab.DATES)
+                    }
+                )
+            }
+
+            CourseContainerTab.VIDEOS -> {
+                CourseVideosScreen(
+                    windowSize = windowSize,
+                    courseVideoViewModel = koinViewModel(
+                        parameters = {
+                            parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, "")
+                            )
+                        }
+                    ),
+                    fragmentManager = fragmentManager,
+                    courseRouter = viewModel.courseRouter,
+                )
+            }
+
+            CourseContainerTab.DATES -> {
+                CourseDatesScreen(
+                    courseDatesViewModel = koinViewModel(
+                        parameters = {
+                            parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, ""),
+                                bundle.getString(CourseContainerFragment.ARG_ENROLLMENT_MODE, "")
+                            )
+                        }
+                    ),
+                    windowSize = windowSize,
+                    courseRouter = viewModel.courseRouter,
+                    fragmentManager = fragmentManager,
+                    isFragmentResumed = isResumed,
+                    updateCourseStructure = {
+                        viewModel.updateData()
+                    }
+                )
+            }
+
+            CourseContainerTab.DISCUSSIONS -> {
+                DiscussionTopicsScreen(
+                    discussionTopicsViewModel = koinViewModel(
+                        parameters = {
+                            parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, ""),
+                            )
+                        }
+                    ),
+                    windowSize = windowSize,
+                    fragmentManager = fragmentManager
+                )
+            }
+
+            CourseContainerTab.MORE -> {
+                val announcementsString = stringResource(id = R.string.course_announcements)
+                val handoutsString = stringResource(id = R.string.course_handouts)
+                HandoutsScreen(
+                    windowSize = windowSize,
+                    onHandoutsClick = {
+                        viewModel.courseRouter.navigateToHandoutsWebView(
+                            fragmentManager,
+                            bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                            handoutsString,
+                            HandoutsType.Handouts
+                        )
+                    },
+                    onAnnouncementsClick = {
+                        viewModel.courseRouter.navigateToHandoutsWebView(
+                            fragmentManager,
+                            bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                            announcementsString,
+                            HandoutsType.Announcements
+                        )
+                    })
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
+    scope.launch {
+        pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.DATES))
+    }
+}

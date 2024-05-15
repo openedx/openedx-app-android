@@ -171,6 +171,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `getBlocks no internet connection exception`() = runTest {
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -184,14 +185,14 @@ class CourseSectionViewModelTest {
             downloadDao,
         )
 
-        coEvery { interactor.getCourseStructureFromCache() } throws UnknownHostException()
-        coEvery { interactor.getCourseStructureForVideos() } throws UnknownHostException()
+        coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
+        coEvery { interactor.getCourseStructureForVideos(any()) } throws UnknownHostException()
 
         viewModel.getBlocks("", CourseViewMode.FULL)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 0) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(noInternet, message?.message)
@@ -200,6 +201,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `getBlocks unknown exception`() = runTest {
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -213,14 +215,14 @@ class CourseSectionViewModelTest {
             downloadDao,
         )
 
-        coEvery { interactor.getCourseStructureFromCache() } throws Exception()
-        coEvery { interactor.getCourseStructureForVideos() } throws Exception()
+        coEvery { interactor.getCourseStructure(any()) } throws Exception()
+        coEvery { interactor.getCourseStructureForVideos(any()) } throws Exception()
 
         viewModel.getBlocks("id2", CourseViewMode.FULL)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 0) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         assertEquals(somethingWrong, message?.message)
@@ -229,6 +231,9 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `getBlocks success`() = runTest {
+        coEvery { downloadDao.readAllData() } returns flow {
+            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+        }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -245,14 +250,14 @@ class CourseSectionViewModelTest {
         coEvery { downloadDao.readAllData() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
-        coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
 
         viewModel.getBlocks("id", CourseViewMode.VIDEOS)
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStructureForVideos() }
+        coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructureForVideos(any()) }
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
@@ -260,6 +265,9 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest {
+        coEvery { downloadDao.readAllData() } returns flow {
+            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+        }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -275,9 +283,6 @@ class CourseSectionViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
-        coEvery { downloadDao.readAllData() } returns flow {
-            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
-        }
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
@@ -288,6 +293,9 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest {
+        coEvery { downloadDao.readAllData() } returns flow {
+            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
+        }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -303,9 +311,6 @@ class CourseSectionViewModelTest {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
-        coEvery { downloadDao.readAllData() } returns flow {
-            emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
-        }
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         viewModel.saveDownloadModels("", "")
@@ -316,6 +321,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without connection`() = runTest {
+        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -343,6 +349,12 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
+        every { downloadDao.readAllData() } returns flow {
+            repeat(5) {
+                delay(10000)
+                emit(emptyList())
+            }
+        }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -356,15 +368,9 @@ class CourseSectionViewModelTest {
             downloadDao,
         )
 
-        every { downloadDao.readAllData() } returns flow {
-            repeat(5) {
-                delay(10000)
-                emit(emptyList())
-            }
-        }
         coEvery { notifier.notifier } returns flow { }
-        coEvery { interactor.getCourseStructureFromCache() } returns courseStructure
-        coEvery { interactor.getCourseStructureForVideos() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

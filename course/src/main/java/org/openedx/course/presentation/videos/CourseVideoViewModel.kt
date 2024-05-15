@@ -1,13 +1,14 @@
 package org.openedx.course.presentation.videos
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
@@ -19,6 +20,7 @@ import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.VideoNotifier
@@ -29,6 +31,7 @@ import org.openedx.course.presentation.CourseAnalytics
 
 class CourseVideoViewModel(
     val courseId: String,
+    val courseTitle: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -48,31 +51,18 @@ class CourseVideoViewModel(
     coreAnalytics
 ) {
 
-    val apiHostUrl get() = config.getApiHostURL()
-
     val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
-    val isCourseBannerEnabled get() = config.isCourseBannerEnabled()
+    private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
+    val uiState: StateFlow<CourseVideosUIState>
+        get() = _uiState.asStateFlow()
 
-    private val _uiState = MutableLiveData<CourseVideosUIState>()
-    val uiState: LiveData<CourseVideosUIState>
-        get() = _uiState
-
-    var courseTitle = ""
-
-    private val _isUpdating = MutableLiveData<Boolean>()
-    val isUpdating: LiveData<Boolean>
-        get() = _isUpdating
-
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     private val _videoSettings = MutableStateFlow(VideoSettings.default)
     val videoSettings = _videoSettings.asStateFlow()
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
@@ -81,9 +71,11 @@ class CourseVideoViewModel(
     init {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
-                if (event is CourseStructureUpdated) {
-                    if (event.courseId == courseId) {
-                        updateVideos()
+                when (event) {
+                    is CourseStructureUpdated -> {
+                        if (event.courseId == courseId) {
+                            getVideos()
+                        }
                     }
                 }
             }
@@ -116,9 +108,9 @@ class CourseVideoViewModel(
             }
         }
 
-        getVideos()
-
         _videoSettings.value = preferencesManager.videoSettings
+
+        getVideos()
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -126,8 +118,9 @@ class CourseVideoViewModel(
             if (networkConnection.isWifiConnected()) {
                 super.saveDownloadModels(folder, id)
             } else {
-                _uiMessage.value =
-                    UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
+                viewModelScope.launch {
+                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi)))
+                }
             }
         } else {
             super.saveDownloadModels(folder, id)
@@ -136,26 +129,18 @@ class CourseVideoViewModel(
 
     override fun saveAllDownloadModels(folder: String) {
         if (preferencesManager.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected()) {
-            _uiMessage.value =
-                UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
+            viewModelScope.launch {
+                _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi)))
+            }
             return
         }
 
         super.saveAllDownloadModels(folder)
     }
 
-    fun setIsUpdating() {
-        _isUpdating.value = true
-    }
-
-    private fun updateVideos() {
-        getVideos()
-        _isUpdating.value = false
-    }
-
     fun getVideos() {
         viewModelScope.launch {
-            var courseStructure = interactor.getCourseStructureForVideos()
+            var courseStructure = interactor.getCourseStructureForVideos(courseId)
             val blocks = courseStructure.blockData
             if (blocks.isEmpty()) {
                 _uiState.value = CourseVideosUIState.Empty(
@@ -177,6 +162,7 @@ class CourseVideoViewModel(
                         courseSectionsState, subSectionsDownloadsCount, getDownloadModelsSize()
                     )
             }
+            courseNotifier.send(CourseLoading(false))
         }
     }
 
@@ -198,9 +184,9 @@ class CourseVideoViewModel(
     }
 
     fun onChangingVideoQualityWhileDownloading() {
-        _uiMessage.value = UIMessage.SnackBarMessage(
-            resourceManager.getString(R.string.course_change_quality_when_downloading)
-        )
+        viewModelScope.launch {
+            _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.course_change_quality_when_downloading)))
+        }
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {

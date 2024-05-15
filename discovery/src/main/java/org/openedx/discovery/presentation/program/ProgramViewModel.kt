@@ -34,6 +34,8 @@ class ProgramViewModel(
 
     val programConfig get() = config.getProgramConfig().webViewConfig
 
+    val cookieManager get() = edxCookieManager
+
     val hasInternetConnection: Boolean get() = networkConnection.isOnline()
 
     private val _uiState = MutableSharedFlow<ProgramUIState>(
@@ -103,9 +105,5 @@ class ProgramViewModel(
 
     fun navigateToSettings(fragmentManager: FragmentManager) {
         router.navigateToSettings(fragmentManager)
-    }
-
-    fun refreshCookie() {
-        viewModelScope.launch { edxCookieManager.tryToRefreshSessionCookie() }
     }
 }

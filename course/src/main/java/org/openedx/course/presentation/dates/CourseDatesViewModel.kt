@@ -3,32 +3,37 @@ package org.openedx.course.presentation.dates
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseBannerType
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.CalendarManager
+import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
+import org.openedx.core.system.notifier.CourseDatesShifted
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.course.DatesShiftedSnackBar
+import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -37,70 +42,68 @@ import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
     val courseId: String,
-    val courseName: String,
-    val isSelfPaced: Boolean,
+    courseTitle: String,
     private val enrollmentMode: String,
-    private val notifier: CourseNotifier,
+    private val courseNotifier: CourseNotifier,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
-    private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
     private val corePreferences: CorePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val config: Config,
 ) : BaseViewModel() {
 
+    var isSelfPaced = true
+
     private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)
     val uiState: LiveData<DatesUIState>
         get() = _uiState
 
-    private val _uiMessage = SingleEventLiveData<UIMessage>()
-    val uiMessage: LiveData<UIMessage>
-        get() = _uiMessage
+    private val _uiMessage = MutableSharedFlow<UIMessage>()
+    val uiMessage: SharedFlow<UIMessage>
+        get() = _uiMessage.asSharedFlow()
 
     private val _calendarSyncUIState = MutableStateFlow(
         CalendarSyncUIState(
             isCalendarSyncEnabled = isCalendarSyncEnabled(),
-            calendarTitle = calendarManager.getCourseCalendarTitle(courseName),
+            calendarTitle = calendarManager.getCourseCalendarTitle(courseTitle),
             isSynced = false,
         )
     )
     val calendarSyncUIState: StateFlow<CalendarSyncUIState> =
         _calendarSyncUIState.asStateFlow()
 
-    private val _updating = MutableLiveData<Boolean>()
-    val updating: LiveData<Boolean>
-        get() = _updating
-
-    val hasInternetConnection: Boolean
-        get() = networkConnection.isOnline()
-
     private var courseBannerType: CourseBannerType = CourseBannerType.BLANK
+    private var courseStructure: CourseStructure? = null
 
     val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
     init {
-        getCourseDates()
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
-                if (event is CheckCalendarSyncEvent) {
-                    _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
+            courseNotifier.notifier.collect { event ->
+                when (event) {
+                    is CheckCalendarSyncEvent -> {
+                        _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
+                    }
+
+                    is CourseRefresh -> {
+                        if (event.courseContainerTab == CourseContainerTab.DATES) {
+                            loadingCourseDatesInternal()
+                        }
+                    }
                 }
             }
         }
-    }
 
-    fun getCourseDates(swipeToRefresh: Boolean = false) {
-        if (!swipeToRefresh) {
-            _uiState.value = DatesUIState.Loading
-        }
-        _updating.value = swipeToRefresh
         loadingCourseDatesInternal()
+        updateAndFetchCalendarSyncState()
     }
 
     private fun loadingCourseDatesInternal() {
         viewModelScope.launch {
             try {
+                courseStructure = interactor.getCourseStructure(courseId = courseId)
+                isSelfPaced = courseStructure?.isSelfPaced ?: false
                 val datesResponse = interactor.getCourseDates(courseId = courseId)
                 if (datesResponse.datesSection.isEmpty()) {
                     _uiState.value = DatesUIState.Empty
@@ -111,14 +114,13 @@ class CourseDatesViewModel(
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
+            } finally {
+                courseNotifier.send(CourseLoading(false))
             }
-            _updating.value = false
         }
     }
 
@@ -126,16 +128,14 @@ class CourseDatesViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
-                getCourseDates()
-                _uiMessage.value = DatesShiftedSnackBar()
+                loadingCourseDatesInternal()
+                courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
                 } else {
-                    _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg))
+                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)))
                 }
                 onResetDates(false)
             }
@@ -144,8 +144,8 @@ class CourseDatesViewModel(
 
     fun getVerticalBlock(blockId: String): Block? {
         return try {
-            val courseStructure = interactor.getCourseStructureFromCache()
-            courseStructure.blockData.getVerticalBlocks().find { it.descendants.contains(blockId) }
+            courseStructure?.blockData?.getVerticalBlocks()
+                ?.find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
             null
         }
@@ -153,9 +153,8 @@ class CourseDatesViewModel(
 
     fun getSequentialBlock(blockId: String): Block? {
         return try {
-            val courseStructure = interactor.getCourseStructureFromCache()
-            courseStructure.blockData.getSequentialBlocks()
-                .find { it.descendants.contains(blockId) }
+            courseStructure?.blockData?.getSequentialBlocks()
+                ?.find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
             null
         }
@@ -172,7 +171,7 @@ class CourseDatesViewModel(
         )
     }
 
-    fun updateAndFetchCalendarSyncState(): Boolean {
+    private fun updateAndFetchCalendarSyncState(): Boolean {
         val isCalendarSynced = calendarManager.isCalendarExists(
             calendarTitle = _calendarSyncUIState.value.calendarTitle
         )
@@ -184,7 +183,7 @@ class CourseDatesViewModel(
         val value = _uiState.value
         if (value is DatesUIState.Dates) {
             viewModelScope.launch {
-                notifier.send(
+                courseNotifier.send(
                     CreateCalendarSyncEvent(
                         courseDates = value.courseDatesResult.datesSection.values.flatten(),
                         dialogType = dialog.name,
@@ -199,7 +198,7 @@ class CourseDatesViewModel(
         val value = _uiState.value
         if (value is DatesUIState.Dates) {
             viewModelScope.launch {
-                notifier.send(
+                courseNotifier.send(
                     CreateCalendarSyncEvent(
                         courseDates = value.courseDatesResult.datesSection.values.flatten(),
                         dialogType = CalendarSyncDialogType.NONE.name,
