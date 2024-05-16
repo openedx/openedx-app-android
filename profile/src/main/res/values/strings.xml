@@ -43,5 +43,8 @@
     <string name="profile_calendar_sync">Calendar Sync</string>
     <string name="profile_calendar_sync_description">Set up calendar sync to show your upcoming assignments and course milestones on your calendar. New assignments and shifted course dates will sync automatically</string>
     <string name="profile_set_up_calendar_sync">Set Up Calendar Sync</string>
+    <string name="profile_calendar_access_dialog_title">Calendar Access</string>
+    <string name="profile_calendar_access_dialog_description">To show upcoming assignments and course milestones on your calendar, we need permission to access your calendar.</string>
+    <string name="profile_grant_access_calendar">Grant Calendar Access</string>
 
 </resources>

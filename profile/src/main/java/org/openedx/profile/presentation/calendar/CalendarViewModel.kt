@@ -9,10 +9,6 @@ class CalendarViewModel(
 ) : BaseViewModel() {
 
     fun setUpCalendarSync(permissionLauncher: ActivityResultLauncher<Array<String>>) {
-        if (!calendarManager.hasPermissions()) {
-            permissionLauncher.launch(calendarManager.permissions)
-        } else {
-
-        }
+        permissionLauncher.launch(calendarManager.permissions)
     }
 }
