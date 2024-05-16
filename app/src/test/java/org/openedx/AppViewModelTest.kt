@@ -60,6 +60,7 @@ class AppViewModelTest {
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { notifier.notifier } returns flow { }
+        every { preferencesManager.canResetAppDirectory } returns true
         val viewModel =
             AppViewModel(config, notifier, room, preferencesManager, dispatcher, analytics)
 
@@ -82,6 +83,7 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
+        every { preferencesManager.canResetAppDirectory } returns true
         val viewModel =
             AppViewModel(config, notifier, room, preferencesManager, dispatcher, analytics)
 
@@ -106,6 +108,7 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
+        every { preferencesManager.canResetAppDirectory } returns true
         val viewModel =
             AppViewModel(config, notifier, room, preferencesManager, dispatcher, analytics)
 

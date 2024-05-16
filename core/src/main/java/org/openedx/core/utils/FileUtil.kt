@@ -43,7 +43,7 @@ class FileUtil(val context: Context) {
      */
     fun deleteOldAppDirectory(context: Context) {
         val externalFilesDir = context.getExternalFilesDir(null)
-        val externalAppDir: File = File(externalFilesDir?.parentFile, Directories.VIDEOS.name)
+        val externalAppDir = File(externalFilesDir?.parentFile, Directories.VIDEOS.name)
         if (externalAppDir.isDirectory) {
             deleteRecursive(externalAppDir, Collections.emptyList())
         }
