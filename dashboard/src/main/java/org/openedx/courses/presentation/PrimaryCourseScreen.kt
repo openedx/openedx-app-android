@@ -78,7 +78,6 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
@@ -142,7 +141,7 @@ fun PrimaryCourseScreen(
                         courseId = action.enrolledCourse.course.id,
                         courseTitle = action.enrolledCourse.course.name,
                         enrollmentMode = action.enrolledCourse.mode,
-                        requiredTab = CourseContainerTab.DATES
+                        openDates = true
                     )
                 }
 

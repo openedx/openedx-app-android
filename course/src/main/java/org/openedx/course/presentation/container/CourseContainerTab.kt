@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.course
+package org.openedx.course.presentation.container
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons

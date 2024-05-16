@@ -23,14 +23,13 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseRefresh
+import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -88,11 +87,7 @@ class CourseDatesViewModel(
                         _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
                     }
 
-                    is CourseRefresh -> {
-                        if (event.courseContainerTab == CourseContainerTab.DATES) {
-                            loadingCourseDatesInternal()
-                        }
-                    }
+                    is RefreshDates -> loadingCourseDatesInternal()
                 }
             }
         }

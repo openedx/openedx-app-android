@@ -25,7 +25,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
@@ -35,8 +34,9 @@ import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
-import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.system.notifier.RefreshDates
+import org.openedx.core.system.notifier.RefreshDiscussions
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
@@ -228,13 +228,13 @@ class CourseContainerViewModel(
 
             CourseContainerTab.DATES -> {
                 viewModelScope.launch {
-                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                    courseNotifier.send(RefreshDates)
                 }
             }
 
             CourseContainerTab.DISCUSSIONS -> {
                 viewModelScope.launch {
-                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                    courseNotifier.send(RefreshDiscussions)
                 }
             }
 

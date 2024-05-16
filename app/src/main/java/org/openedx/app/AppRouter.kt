@@ -9,7 +9,6 @@ import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.FragmentViewType
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
@@ -160,12 +159,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         courseTitle: String,
         enrollmentMode: String,
-        requiredTab: CourseContainerTab,
+        openDates: Boolean,
         openBlock: String
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, requiredTab, openBlock)
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, openDates, openBlock)
         )
     }
 

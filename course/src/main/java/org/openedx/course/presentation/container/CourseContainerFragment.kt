@@ -53,9 +53,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.serializable
 import org.openedx.core.extension.takeIfNotEmpty
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -258,13 +256,13 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         const val ARG_COURSE_ID = "courseId"
         const val ARG_TITLE = "title"
         const val ARG_ENROLLMENT_MODE = "enrollmentMode"
-        const val ARG_REQUIRED_TAB = "requiredTab"
+        const val ARG_OPEN_DATES = "open_dates"
         const val ARG_OPEN_BLOCK = "resume_block"
         fun newInstance(
             courseId: String,
             courseTitle: String,
             enrollmentMode: String,
-            requiredTab: CourseContainerTab = CourseContainerTab.HOME,
+            openDates: Boolean = false,
             openBlock: String = ""
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
@@ -272,7 +270,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 ARG_COURSE_ID to courseId,
                 ARG_TITLE to courseTitle,
                 ARG_ENROLLMENT_MODE to enrollmentMode,
-                ARG_REQUIRED_TAB to requiredTab,
+                ARG_OPEN_DATES to openDates,
                 ARG_OPEN_BLOCK to openBlock
             )
             return fragment
@@ -304,7 +302,11 @@ fun CourseDashboard(
             val refreshing by viewModel.refreshing.collectAsState(true)
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
-            val requiredTab = bundle.serializable<CourseContainerTab>(CourseContainerFragment.ARG_REQUIRED_TAB)
+            val requiredTab = if (bundle.getBoolean(CourseContainerFragment.ARG_OPEN_DATES)) {
+                CourseContainerTab.DATES
+            } else {
+                CourseContainerTab.HOME
+            }
             val pagerState = rememberPagerState(
                 initialPage = CourseContainerTab.entries.indexOf(requiredTab),
                 pageCount = { CourseContainerTab.entries.size }
