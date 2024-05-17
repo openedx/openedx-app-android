@@ -67,7 +67,11 @@ class CalendarFragment : Fragment() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted ->
         if (!isGranted.containsValue(false)) {
-            //TODO
+            val dialog = NewCalendarDialogFragment.newInstance()
+            dialog.show(
+                requireActivity().supportFragmentManager,
+                NewCalendarDialogFragment::class.simpleName
+            )
         } else {
             val dialog = CalendarAccessDialogFragment.newInstance()
             dialog.show(

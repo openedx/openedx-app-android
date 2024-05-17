@@ -1,6 +1,7 @@
 package org.openedx.profile.presentation.calendar
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -38,7 +39,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.profile.R
 import org.openedx.core.R as CoreR
-
 
 class CalendarAccessDialogFragment : DialogFragment() {
 
@@ -106,13 +106,15 @@ private fun CalendarAccessDialog(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(id = R.string.profile_calendar_access_dialog_title),
-                    style = MaterialTheme.appTypography.titleLarge
+                    style = MaterialTheme.appTypography.titleLarge,
+                    color = MaterialTheme.appColors.textDark
                 )
             }
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.profile_calendar_access_dialog_description),
-                style = MaterialTheme.appTypography.bodyMedium
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = MaterialTheme.appColors.textDark
             )
             OpenEdXButton(
                 modifier = Modifier.fillMaxWidth(),
@@ -143,7 +145,8 @@ private fun CalendarAccessDialog(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CalendarAccessDialogPreview() {
     OpenEdXTheme {
