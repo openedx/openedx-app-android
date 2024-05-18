@@ -1,6 +1,6 @@
 package org.openedx.core.domain.model.iap
 
-import org.openedx.core.domain.model.ProductInfo
+import org.openedx.core.domain.ProductInfo
 import org.openedx.core.presentation.iap.IAPFlow
 
 data class PurchaseFlowData(

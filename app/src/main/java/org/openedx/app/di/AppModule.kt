@@ -28,6 +28,7 @@ import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ImageProcessor
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
@@ -89,6 +90,10 @@ val appModule = module {
     single<Gson> {
         GsonBuilder()
             .registerTypeAdapter(CourseEnrollments::class.java, CourseEnrollments.Deserializer())
+            .registerTypeAdapter(
+                CourseStructureModel::class.java,
+                CourseStructureModel.Deserializer(get())
+            )
             .create()
     }
 

@@ -2,6 +2,7 @@ package org.openedx.core.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.openedx.core.domain.ProductInfo
 import java.util.Date
 
 @Parcelize
@@ -25,9 +26,3 @@ data class EnrolledCourse(
                 course.isUpgradeDeadlinePassed.not() &&
                 productInfo != null && isAuditAccessExpired.not()
 }
-
-@Parcelize
-data class ProductInfo(
-    val courseSku: String,
-    val storeSku: String,
-) : Parcelable

@@ -5,7 +5,9 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.openedx.core.data.model.room.discovery.CertificateDb
+import org.openedx.core.data.model.room.discovery.CourseAccessDetailsDb
 import org.openedx.core.data.model.room.discovery.CoursewareAccessDb
+import org.openedx.core.data.model.room.discovery.EnrollmentDetailsDB
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.utils.TimeUtils
 
@@ -37,7 +39,11 @@ data class CourseStructureEntity(
     @Embedded
     val media: MediaDb?,
     @Embedded
+    val courseAccessDetails: CourseAccessDetailsDb,
+    @Embedded
     val certificate: CertificateDb?,
+    @Embedded
+    val enrollmentDetails: EnrollmentDetailsDB,
     @ColumnInfo("isSelfPaced")
     val isSelfPaced: Boolean
 ) {
@@ -56,8 +62,11 @@ data class CourseStructureEntity(
             TimeUtils.iso8601ToDate(end ?: ""),
             coursewareAccess?.mapToDomain(),
             media?.mapToDomain(),
+            courseAccessDetails.mapToDomain(),
             certificate?.mapToDomain(),
-            isSelfPaced
+            enrollmentDetails.mapToDomain(),
+            isSelfPaced,
+            null,
         )
     }
 

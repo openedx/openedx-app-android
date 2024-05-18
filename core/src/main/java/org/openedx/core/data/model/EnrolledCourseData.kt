@@ -24,7 +24,7 @@ data class EnrolledCourseData(
     @SerializedName("end")
     var end: String?,
     @SerializedName("dynamic_upgrade_deadline")
-    var dynamicUpgradeDeadline: String?,
+    var upgradeDeadline: String?,
     @SerializedName("subscription_id")
     var subscriptionId: String?,
     @SerializedName("courseware_access")
@@ -59,7 +59,7 @@ data class EnrolledCourseData(
             startDisplay = startDisplay ?: "",
             startType = startType ?: "",
             end = TimeUtils.iso8601ToDate(end ?: ""),
-            dynamicUpgradeDeadline = dynamicUpgradeDeadline ?: "",
+            upgradeDeadline = upgradeDeadline ?: "",
             subscriptionId = subscriptionId ?: "",
             coursewareAccess = coursewareAccess?.mapToDomain(),
             media = media?.mapToDomain(),
@@ -84,7 +84,7 @@ data class EnrolledCourseData(
             startDisplay = startDisplay ?: "",
             startType = startType ?: "",
             end = end ?: "",
-            dynamicUpgradeDeadline = dynamicUpgradeDeadline ?: "",
+            upgradeDeadline = upgradeDeadline ?: "",
             subscriptionId = subscriptionId ?: "",
             coursewareAccess = coursewareAccess?.mapToRoomEntity(),
             media = MediaDb.createFrom(media),

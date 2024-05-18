@@ -18,5 +18,6 @@ data class CourseDatesCalendarSync(
 class IAPConfig(
     val isEnabled: Boolean = false,
     val isExperimentEnabled: Boolean = false,
+    val productPrefix: String? = null,
     val disableVersions: List<String> = listOf()
 ) : Serializable

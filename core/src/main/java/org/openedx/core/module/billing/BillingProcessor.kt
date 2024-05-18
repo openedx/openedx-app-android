@@ -21,7 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import org.openedx.core.domain.model.ProductInfo
+import org.openedx.core.domain.ProductInfo
 import org.openedx.core.extension.decodeToString
 import org.openedx.core.extension.encodeToString
 import org.openedx.core.extension.safeResume

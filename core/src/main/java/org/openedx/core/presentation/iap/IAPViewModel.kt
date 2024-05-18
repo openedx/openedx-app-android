@@ -14,7 +14,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.data.repository.iap.IAPRepository
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.ProductInfo
 import org.openedx.core.domain.model.iap.PurchaseFlowData
 import org.openedx.core.exception.iap.IAPErrorMessage
 import org.openedx.core.module.billing.BillingProcessor
@@ -114,12 +114,17 @@ class IAPViewModel(
         billingProcessor.setPurchaseListener(purchaseListeners)
     }
 
-    fun loadPrice(course: EnrolledCourse) {
+    fun loadPrice(
+        courseId: String,
+        courseName: String = "",
+        isSelfPaced: Boolean = false,
+        productInfo: ProductInfo
+    ) {
         purchaseFlowData = PurchaseFlowData(
-            courseId = course.course.id,
-            courseName = course.course.name,
-            isSelfPaced = course.course.isSelfPaced,
-            productInfo = course.productInfo
+            courseId = courseId,
+            courseName = courseName,
+            isSelfPaced = isSelfPaced,
+            productInfo = productInfo
         )
         if (isIAPEnabledForUser(isOddUserId = preferencesManager.user?.isOddUserId == true).not()) {
             updateErrorState(

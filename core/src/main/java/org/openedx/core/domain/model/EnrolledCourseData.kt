@@ -15,7 +15,7 @@ data class EnrolledCourseData(
     val startDisplay: String,
     val startType: String,
     val end: Date?,
-    val dynamicUpgradeDeadline: String,
+    val upgradeDeadline: String,
     val subscriptionId: String,
     val coursewareAccess: CoursewareAccess?,
     val media: Media?,
@@ -32,5 +32,5 @@ data class EnrolledCourseData(
         get() = TimeUtils.isDatePassed(Date(), start)
 
     val isUpgradeDeadlinePassed: Boolean
-        get() = TimeUtils.isDatePassed(Date(), TimeUtils.iso8601ToDate(dynamicUpgradeDeadline))
+        get() = TimeUtils.isDatePassed(Date(), TimeUtils.iso8601ToDate(upgradeDeadline))
 }

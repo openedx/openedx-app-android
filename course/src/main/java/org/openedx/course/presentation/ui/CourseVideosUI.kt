@@ -61,8 +61,10 @@ import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
@@ -306,8 +308,10 @@ private fun CourseVideosUI(
 
                                     if (isCourseNestedListEnabled) {
                                         uiState.courseStructure.blockData.forEach { section ->
-                                            val courseSubSections = uiState.courseSubSections[section.id]
-                                            val courseSectionsState = uiState.courseSectionsState[section.id]
+                                            val courseSubSections =
+                                                uiState.courseSubSections[section.id]
+                                            val courseSectionsState =
+                                                uiState.courseSectionsState[section.id]
 
                                             item {
                                                 Column {
@@ -829,6 +833,11 @@ private val mockSequentialBlock = Block(
     containsGatedContent = false
 )
 
+private val mockEnrollmentDetails =
+    EnrollmentDetails(created = Date(), mode = "audit", isActive = false, upgradeDeadline = Date())
+
+private val mockCourseAccessDetails = CourseAccessDetails(Date())
+
 private val mockCourseStructure = CourseStructure(
     root = "",
     blockData = listOf(mockSequentialBlock, mockChapterBlock),
@@ -849,6 +858,9 @@ private val mockCourseStructure = CourseStructure(
         ""
     ),
     media = null,
+    courseAccessDetails = mockCourseAccessDetails,
     certificate = null,
-    isSelfPaced = false
+    isSelfPaced = false,
+    productInfo = null,
+    enrollmentDetails = mockEnrollmentDetails
 )

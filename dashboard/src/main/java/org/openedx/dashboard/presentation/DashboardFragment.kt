@@ -74,12 +74,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.ProductInfo
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.domain.model.ProductInfo
 import org.openedx.core.presentation.IAPAnalyticsScreen
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.presentation.iap.IAPAction
@@ -166,7 +166,14 @@ class DashboardFragment : Fragment() {
                     iapCallback = { action, course ->
                         when (action) {
                             IAPAction.LOAD_PRICE -> {
-                                course?.let { iapViewModel.loadPrice(course = it) }
+                                course?.takeIf { it.productInfo != null }?.let {
+                                    iapViewModel.loadPrice(
+                                        courseId = course.course.id,
+                                        courseName = course.course.name,
+                                        isSelfPaced = course.course.isSelfPaced,
+                                        productInfo = course.productInfo!!
+                                    )
+                                }
                             }
 
                             IAPAction.START_PURCHASE_FLOW -> {
@@ -742,7 +749,7 @@ private val mockCourseEnrolled = EnrolledCourse(
         startDisplay = "",
         startType = "",
         end = Date(),
-        dynamicUpgradeDeadline = "",
+        upgradeDeadline = "",
         subscriptionId = "",
         coursewareAccess = CoursewareAccess(
             true,

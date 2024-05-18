@@ -25,6 +25,7 @@ data class IAPConfig(
         return DomainIAPConfig(
             isEnabled = isEnabled,
             isExperimentEnabled = isExperimentEnabled,
+            productPrefix = productPrefix,
             disableVersions = disableVersions
         )
     }

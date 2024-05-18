@@ -43,7 +43,7 @@ class MyCoursesScreenTest {
             startDisplay = "",
             startType = "",
             end = null,
-            dynamicUpgradeDeadline = "",
+            upgradeDeadline = "",
             subscriptionId = "",
             coursewareAccess = CoursewareAccess(
                 true,
