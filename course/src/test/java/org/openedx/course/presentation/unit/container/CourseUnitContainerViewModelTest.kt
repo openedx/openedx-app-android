@@ -22,8 +22,10 @@ import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -132,8 +134,16 @@ class CourseUnitContainerViewModelTest {
             ""
         ),
         media = null,
+        courseAccessDetails = CourseAccessDetails(Date()),
         certificate = null,
-        isSelfPaced = false
+        enrollmentDetails = EnrollmentDetails(
+            created = Date(),
+            mode = "audit",
+            isActive = false,
+            upgradeDeadline = Date()
+        ),
+        isSelfPaced = false,
+        productInfo = null
     )
 
     @Before

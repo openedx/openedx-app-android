@@ -34,8 +34,10 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
@@ -147,8 +149,16 @@ class CourseVideoViewModelTest {
             ""
         ),
         media = null,
+        courseAccessDetails = CourseAccessDetails(Date()),
         certificate = null,
-        isSelfPaced = false
+        enrollmentDetails = EnrollmentDetails(
+            created = Date(),
+            mode = "audit",
+            isActive = false,
+            upgradeDeadline = Date()
+        ),
+        isSelfPaced = false,
+        productInfo = null
     )
 
     private val downloadModelEntity =
