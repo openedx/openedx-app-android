@@ -66,6 +66,7 @@ import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
+import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
 import java.io.File
@@ -272,6 +273,28 @@ private fun CourseOutlineUI(
                                         }
                                     }
                                 }
+
+                                val certificate = uiState.courseStructure.certificate
+                                if (certificate?.isCertificateEarned() == true) {
+                                    item {
+                                        CourseMessage(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 12.dp)
+                                                .then(listPadding),
+                                            icon = painterResource(R.drawable.ic_course_certificate),
+                                            message = stringResource(
+                                                R.string.course_you_earned_certificate,
+                                                uiState.courseStructure.name
+                                            ),
+                                            action = stringResource(R.string.course_view_certificate),
+                                            onActionClick = {
+                                                onCertificateClick(certificate.certificateURL ?: "")
+                                            }
+                                        )
+                                    }
+                                }
+
                                 if (uiState.resumeComponent != null) {
                                     item {
                                         Box(listPadding) {
