@@ -16,5 +16,6 @@ data class CourseStructure(
     val coursewareAccess: CoursewareAccess?,
     val media: Media?,
     val certificate: Certificate?,
-    val isSelfPaced: Boolean
+    val isSelfPaced: Boolean,
+    val progress: Progress?,
 )

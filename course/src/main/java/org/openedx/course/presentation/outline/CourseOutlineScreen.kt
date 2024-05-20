@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -32,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,6 +52,7 @@ import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
@@ -272,6 +276,19 @@ private fun CourseOutlineUI(
                                         }
                                     }
                                 }
+
+                                val progress = uiState.courseStructure.progress
+                                if (progress != null && progress.totalAssignmentsCount > 0) {
+                                    item {
+                                        CourseProgress(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 16.dp, start = 24.dp, end = 24.dp),
+                                            progress = progress
+                                        )
+                                    }
+                                }
+
                                 if (uiState.resumeComponent != null) {
                                     item {
                                         Box(listPadding) {
@@ -484,6 +501,36 @@ private fun ResumeCourseTablet(
     }
 }
 
+@Composable
+private fun CourseProgress(
+    modifier: Modifier = Modifier,
+    progress: Progress
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(10.dp)
+                .clip(CircleShape),
+            progress = progress.getProgress(),
+            color = MaterialTheme.appColors.progressBarColor,
+            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+        )
+        Text(
+            text = stringResource(
+                R.string.course_assignments_complete,
+                progress.assignmentsCompleted,
+                progress.totalAssignmentsCount
+            ),
+            color = MaterialTheme.appColors.textDark,
+            style = MaterialTheme.appTypography.labelSmall
+        )
+    }
+}
+
 fun getUnitBlockIcon(block: Block): Int {
     return when (block.type) {
         BlockType.VIDEO -> R.drawable.ic_course_video
@@ -628,5 +675,6 @@ private val mockCourseStructure = CourseStructure(
     ),
     media = null,
     certificate = null,
-    isSelfPaced = false
+    isSelfPaced = false,
+    progress = Progress(1, 3)
 )

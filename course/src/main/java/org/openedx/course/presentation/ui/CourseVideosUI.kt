@@ -63,6 +63,7 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
@@ -849,5 +850,6 @@ private val mockCourseStructure = CourseStructure(
     ),
     media = null,
     certificate = null,
-    isSelfPaced = false
+    isSelfPaced = false,
+    progress = Progress(1, 3)
 )

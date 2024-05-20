@@ -5,7 +5,12 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.openedx.core.data.model.room.MediaDb
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.utils.TimeUtils
 
 @Entity(tableName = "course_enrolled_table")
@@ -133,6 +138,19 @@ data class CoursewareAccessDb(
         )
     }
 
+}
+
+data class ProgressDb(
+    @ColumnInfo("assignments_completed")
+    val assignmentsCompleted: Int,
+    @ColumnInfo("total_assignments_count")
+    val totalAssignmentsCount: Int,
+) {
+    companion object {
+        val DEFAULT_PROGRESS = ProgressDb(0, 0)
+    }
+
+    fun mapToDomain() = Progress(assignmentsCompleted, totalAssignmentsCount)
 }
 
 data class CertificateDb(
