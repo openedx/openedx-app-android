@@ -50,9 +50,6 @@ class CourseVideoViewModel(
     workerController,
     coreAnalytics
 ) {
-
-    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
-
     private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
     val uiState: StateFlow<CourseVideosUIState>
         get() = _uiState.asStateFlow()
@@ -197,15 +194,10 @@ class CourseVideoViewModel(
                 resultBlocks.add(block)
                 block.descendants.forEach { descendant ->
                     blocks.find { it.id == descendant }?.let {
-                        if (isCourseNestedListEnabled) {
-                            courseSubSections.getOrPut(block.id) { mutableListOf() }
-                                .add(it)
-                            courseSubSectionUnit[it.id] = it.getFirstDescendantBlock(blocks)
-                            subSectionsDownloadsCount[it.id] = it.getDownloadsCount(blocks)
-
-                        } else {
-                            resultBlocks.add(it)
-                        }
+                        courseSubSections.getOrPut(block.id) { mutableListOf() }
+                            .add(it)
+                        courseSubSectionUnit[it.id] = it.getFirstDescendantBlock(blocks)
+                        subSectionsDownloadsCount[it.id] = it.getDownloadsCount(blocks)
                         addDownloadableChildrenForSequentialBlock(it)
                     }
                 }

@@ -522,7 +522,7 @@ private fun AppVersionItemAppToDate(versionName: String) {
                 ),
                 painter = painterResource(id = R.drawable.core_ic_check),
                 contentDescription = null,
-                tint = MaterialTheme.appColors.accessGreen
+                tint = MaterialTheme.appColors.successGreen
             )
             Text(
                 modifier = Modifier.testTag("txt_up_to_date"),

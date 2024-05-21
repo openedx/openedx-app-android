@@ -3,7 +3,12 @@ package org.openedx.core.data.model.room
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import org.openedx.core.BlockType
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.EncodedVideos
+import org.openedx.core.domain.model.StudentViewData
+import org.openedx.core.domain.model.VideoInfo
+import org.openedx.core.utils.TimeUtils
 
 data class BlockDb(
     @ColumnInfo("id")
@@ -33,7 +38,11 @@ data class BlockDb(
     @ColumnInfo("completion")
     val completion: Double,
     @ColumnInfo("contains_gated_content")
-    val containsGatedContent: Boolean
+    val containsGatedContent: Boolean,
+    @Embedded
+    val assignmentProgress: AssignmentProgressDb?,
+    @ColumnInfo("due")
+    val due: String?
 ) {
     fun mapToDomain(blocks: List<BlockDb>): Block {
         val blockType = BlockType.getBlockType(type)
@@ -62,7 +71,9 @@ data class BlockDb(
             descendants = descendants,
             descendantsType = descendantsType,
             completion = completion,
-            containsGatedContent = containsGatedContent
+            containsGatedContent = containsGatedContent,
+            assignmentProgress = assignmentProgress?.mapToDomain(),
+            due = TimeUtils.iso8601ToDate(due ?: ""),
         )
     }
 
@@ -86,7 +97,9 @@ data class BlockDb(
                     studentViewMultiDevice = studentViewMultiDevice ?: false,
                     blockCounts = BlockCountsDb.createFrom(blockCounts),
                     completion = completion ?: 0.0,
-                    containsGatedContent = containsGatedContent ?: false
+                    containsGatedContent = containsGatedContent ?: false,
+                    assignmentProgress = assignmentProgress?.mapToRoomEntity(),
+                    due = due
                 )
             }
         }
@@ -200,4 +213,19 @@ data class BlockCountsDb(
             return BlockCountsDb(blocksCounts?.video ?: 0)
         }
     }
+}
+
+data class AssignmentProgressDb(
+    @ColumnInfo("assignment_type")
+    val assignmentType: String?,
+    @ColumnInfo("num_points_earned")
+    val numPointsEarned: Float?,
+    @ColumnInfo("num_points_possible")
+    val numPointsPossible: Float?,
+) {
+    fun mapToDomain() = org.openedx.core.domain.model.AssignmentProgress(
+        assignmentType = assignmentType ?: "",
+        numPointsEarned = numPointsEarned ?: 0f,
+        numPointsPossible = numPointsPossible ?: 0f
+    )
 }

@@ -1,8 +1,10 @@
 package org.openedx.course.presentation.ui
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -77,6 +79,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.Certificate
@@ -102,6 +105,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.dates.mockedCourseBannerInfo
 import org.openedx.course.presentation.outline.getUnitBlockIcon
@@ -194,107 +198,6 @@ fun CourseImageHeader(
 }
 
 @Composable
-fun CourseSectionCard(
-    block: Block,
-    downloadedState: DownloadedState?,
-    onItemClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
-) {
-    val iconModifier = Modifier.size(24.dp)
-
-    Column(Modifier.clickable { onItemClick(block) }) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .padding(
-                    horizontal = 20.dp,
-                    vertical = 24.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            val completedIconPainter =
-                if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-                    R.drawable.ic_course_chapter_icon
-                )
-            val completedIconColor =
-                if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
-            val completedIconDescription = if (block.isCompleted()) {
-                stringResource(id = R.string.course_accessibility_section_completed)
-            } else {
-                stringResource(id = R.string.course_accessibility_section_uncompleted)
-            }
-            Icon(
-                painter = completedIconPainter,
-                contentDescription = completedIconDescription,
-                tint = completedIconColor
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                modifier = Modifier.weight(1f),
-                text = block.displayName,
-                style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Row(
-                modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        painterResource(id = R.drawable.course_ic_remove_download)
-                    } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
-                    }
-                    val downloadIconDescription =
-                        if (downloadedState == DownloadedState.DOWNLOADED) {
-                            stringResource(id = R.string.course_accessibility_remove_course_section)
-                        } else {
-                            stringResource(id = R.string.course_accessibility_download_course_section)
-                        }
-                    IconButton(modifier = iconModifier,
-                        onClick = { onDownloadClick(block) }) {
-                        Icon(
-                            painter = downloadIconPainter,
-                            contentDescription = downloadIconDescription,
-                            tint = MaterialTheme.appColors.textPrimary
-                        )
-                    }
-                } else if (downloadedState != null) {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(34.dp),
-                                backgroundColor = Color.LightGray,
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
-                        IconButton(
-                            modifier = iconModifier.padding(top = 2.dp),
-                            onClick = { onDownloadClick(block) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                                tint = MaterialTheme.appColors.error
-                            )
-                        }
-                    }
-                }
-                CardArrow(
-                    degrees = 0f
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun OfflineQueueCard(
     downloadModel: DownloadModel,
     progressValue: Long,
@@ -371,7 +274,7 @@ fun CardArrow(
 ) {
     Icon(
         imageVector = Icons.Filled.ChevronRight,
-        tint = MaterialTheme.appColors.primary,
+        tint = MaterialTheme.appColors.textDark,
         contentDescription = "Expandable Arrow",
         modifier = Modifier.rotate(degrees),
     )
@@ -706,81 +609,173 @@ fun VideoSubtitles(
 }
 
 @Composable
-fun CourseExpandableChapterCard(
-    modifier: Modifier,
+fun CourseSection(
+    modifier: Modifier = Modifier,
     block: Block,
     onItemClick: (Block) -> Unit,
-    arrowDegrees: Float = 0f
+    courseSectionsState: Boolean?,
+    courseSubSections: List<Block>?,
+    downloadedStateMap: Map<String, DownloadedState>,
+    onSubSectionClick: (Block) -> Unit,
+    onDownloadClick: (blocksIds: List<String>) -> Unit
 ) {
-    Column(modifier = Modifier
-        .clickable { onItemClick(block) }
-        .background(if (block.isCompleted()) MaterialTheme.appColors.surface else Color.Transparent)
-    ) {
-        Row(
-            modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(
-                    vertical = 8.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            if (block.isCompleted()) {
-                val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
-                val completedIconColor = MaterialTheme.appColors.primary
-                val completedIconDescription =
-                    stringResource(id = R.string.course_accessibility_section_completed)
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (courseSectionsState == true) -90f else 90f, label = ""
+    )
+    val subsectionsDownloadedStates = downloadedStateMap.filterKeys { key ->
+        key in (courseSubSections?.map { it.id } ?: emptyList())
+    }.values.toList()
+    val downloadedState =
+        if (subsectionsDownloadedStates.isNotEmpty() && subsectionsDownloadedStates.all { it.isDownloaded }) {
+            DownloadedState.DOWNLOADED
+        } else if (subsectionsDownloadedStates.firstOrNull { it.isWaitingOrDownloading } != null) {
+            DownloadedState.DOWNLOADING
+        } else if (subsectionsDownloadedStates.isNotEmpty()) {
+            DownloadedState.NOT_DOWNLOADED
+        } else {
+            null
+        }
 
-                Icon(
-                    painter = completedIconPainter,
-                    contentDescription = completedIconDescription,
-                    tint = completedIconColor
-                )
-                Spacer(modifier = Modifier.width(16.dp))
+    Column(modifier = modifier
+        .clip(MaterialTheme.appShapes.cardShape)
+        .clickable { onItemClick(block) }
+        .background(MaterialTheme.appColors.cardViewBackground)
+        .border(
+            1.dp,
+            MaterialTheme.appColors.cardViewBorder,
+            MaterialTheme.appShapes.cardShape
+        )
+    ) {
+        CourseExpandableChapterCard(
+            block = block,
+            arrowDegrees = arrowRotation,
+            downloadedState = downloadedState,
+            onDownloadClick = {
+                onDownloadClick(downloadedStateMap.keys.toList())
             }
-            Text(
-                modifier = Modifier.weight(1f),
-                text = block.displayName,
-                style = MaterialTheme.appTypography.titleSmall,
-                color = MaterialTheme.appColors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+        )
+        courseSubSections?.forEach { subSectionBlock ->
+            AnimatedVisibility(
+                visible = courseSectionsState == true
+            ) {
+                CourseSubSectionItem(
+                    block = subSectionBlock,
+                    onClick = onSubSectionClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CourseExpandableChapterCard(
+    modifier: Modifier = Modifier,
+    block: Block,
+    arrowDegrees: Float = 0f,
+    downloadedState: DownloadedState?,
+    onDownloadClick: () -> Unit
+) {
+    val iconModifier = Modifier.size(24.dp)
+    Row(
+        modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .padding(vertical = 8.dp)
+            .padding(start = 16.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        CardArrow(degrees = arrowDegrees)
+        if (block.isCompleted()) {
+            val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
+            val completedIconColor = MaterialTheme.appColors.successGreen
+            val completedIconDescription = stringResource(id = R.string.course_accessibility_section_completed)
+
+            Icon(
+                painter = completedIconPainter,
+                contentDescription = completedIconDescription,
+                tint = completedIconColor
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            CardArrow(degrees = arrowDegrees)
+        }
+        Text(
+            modifier = Modifier.weight(1f),
+            text = block.displayName,
+            style = MaterialTheme.appTypography.titleSmall,
+            color = MaterialTheme.appColors.textPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Row(
+            modifier = Modifier.fillMaxHeight(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
+                val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    painterResource(id = R.drawable.course_ic_remove_download)
+                } else {
+                    painterResource(id = R.drawable.course_ic_start_download)
+                }
+                val downloadIconDescription =
+                    if (downloadedState == DownloadedState.DOWNLOADED) {
+                        stringResource(id = R.string.course_accessibility_remove_course_section)
+                    } else {
+                        stringResource(id = R.string.course_accessibility_download_course_section)
+                    }
+                IconButton(modifier = iconModifier,
+                    onClick = { onDownloadClick() }) {
+                    Icon(
+                        painter = downloadIconPainter,
+                        contentDescription = downloadIconDescription,
+                        tint = MaterialTheme.appColors.primary
+                    )
+                }
+            } else if (downloadedState != null) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            backgroundColor = Color.LightGray,
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.appColors.primary
+                        )
+                    }
+                    IconButton(
+                        modifier = iconModifier.padding(2.dp),
+                        onClick = { onDownloadClick() }) {
+                        Text(
+                            modifier = Modifier
+                                .padding(bottom = 4.dp),
+                            text = "i",
+                            style = MaterialTheme.appTypography.titleMedium,
+                            color = MaterialTheme.appColors.primary
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 fun CourseSubSectionItem(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     block: Block,
-    downloadedState: DownloadedState?,
-    downloadsCount: Int,
-    onClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onClick: (Block) -> Unit
 ) {
     val icon =
-        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-            R.drawable.ic_course_chapter_icon
-        )
+        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
     val iconColor =
-        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+        if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
 
-    val iconModifier = Modifier.size(24.dp)
-
-    Column(Modifier
-        .clickable { onClick(block) }
-        .background(if (block.isCompleted()) MaterialTheme.appColors.surface else Color.Transparent)
+    val due = block.due?.let { TimeUtils.getCourseFormattedDate(LocalContext.current, it) }
+    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick(block) }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
-            modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(vertical = 16.dp)
-                .padding(start = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -789,7 +784,7 @@ fun CourseSubSectionItem(
                 contentDescription = null,
                 tint = iconColor
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 modifier = Modifier.weight(1f),
                 text = block.displayName,
@@ -799,62 +794,24 @@ fun CourseSubSectionItem(
                 maxLines = 1
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Row(
-                modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(if (downloadsCount > 0) 8.dp else 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        painterResource(id = R.drawable.course_ic_remove_download)
-                    } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
-                    }
-                    val downloadIconDescription =
-                        if (downloadedState == DownloadedState.DOWNLOADED) {
-                            stringResource(id = R.string.course_accessibility_remove_course_section)
-                        } else {
-                            stringResource(id = R.string.course_accessibility_download_course_section)
-                        }
-                    IconButton(modifier = iconModifier,
-                        onClick = { onDownloadClick(block) }) {
-                        Icon(
-                            painter = downloadIconPainter,
-                            contentDescription = downloadIconDescription,
-                            tint = MaterialTheme.appColors.textPrimary
-                        )
-                    }
-                } else if (downloadedState != null) {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                backgroundColor = Color.LightGray,
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
-                        IconButton(
-                            modifier = iconModifier.padding(2.dp),
-                            onClick = { onDownloadClick(block) }) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(bottom = 4.dp),
-                                text = "i",
-                                style = MaterialTheme.appTypography.titleMedium,
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
-                    }
-                }
-                if (downloadsCount > 0) {
-                    Text(
-                        text = downloadsCount.toString(),
-                        style = MaterialTheme.appTypography.titleSmall,
-                        color = MaterialTheme.appColors.textPrimary
-                    )
-                }
+            if (isAssignmentEnable) {
+                Icon(
+                    imageVector = Icons.Filled.ChevronRight,
+                    tint = MaterialTheme.appColors.onSurface,
+                    contentDescription = null
+                )
             }
+        }
+
+        if (isAssignmentEnable) {
+            val assignmentString =
+                "${block.assignmentProgress?.assignmentType} - $due - ${block.assignmentProgress?.numPointsEarned?.toInt()} / ${block.assignmentProgress?.numPointsPossible?.toInt()}"
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = assignmentString,
+                style = MaterialTheme.appTypography.bodySmall,
+                color = MaterialTheme.appColors.textPrimary
+            )
         }
     }
 }
@@ -1277,22 +1234,6 @@ private fun SequentialItemPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun CourseChapterItemPreview() {
-    OpenEdXTheme {
-        Surface(color = MaterialTheme.appColors.background) {
-            CourseSectionCard(
-                mockChapterBlock,
-                DownloadedState.DOWNLOADED,
-                onItemClick = {},
-                onDownloadClick = {}
-            )
-        }
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
 private fun CourseHeaderPreview() {
     OpenEdXTheme {
         Surface(color = MaterialTheme.appColors.background) {
@@ -1412,5 +1353,7 @@ private val mockChapterBlock = Block(
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
     completion = 0.0,
-    containsGatedContent = false
+    containsGatedContent = false,
+    assignmentProgress = AssignmentProgress("", 1f, 2f),
+    due = Date()
 )

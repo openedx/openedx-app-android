@@ -36,7 +36,7 @@ data class AppColors(
     val inactiveButtonBackground: Color,
     val inactiveButtonText: Color,
 
-    val accessGreen: Color,
+    val successGreen: Color,
 
     val datesSectionBarPastDue: Color,
     val datesSectionBarToday: Color,

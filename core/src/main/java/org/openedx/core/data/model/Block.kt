@@ -3,6 +3,7 @@ package org.openedx.core.data.model
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
+import org.openedx.core.utils.TimeUtils
 
 data class Block(
     @SerializedName("id")
@@ -33,6 +34,10 @@ data class Block(
     val completion: Double?,
     @SerializedName("contains_gated_content")
     val containsGatedContent: Boolean?,
+    @SerializedName("assignment_progress")
+    val assignmentProgress: AssignmentProgress?,
+    @SerializedName("due")
+    val due: String?
 ) {
     fun mapToDomain(blockData: Map<String, org.openedx.core.data.model.Block>): Block {
         val blockType = BlockType.getBlockType(type ?: "")
@@ -61,7 +66,9 @@ data class Block(
             studentViewMultiDevice = studentViewMultiDevice ?: false,
             blockCounts = blockCounts?.mapToDomain()!!,
             completion = completion ?: 0.0,
-            containsGatedContent = containsGatedContent ?: false
+            containsGatedContent = containsGatedContent ?: false,
+            assignmentProgress = assignmentProgress?.mapToDomain(),
+            due = TimeUtils.iso8601ToDate(due ?: ""),
         )
     }
 }

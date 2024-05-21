@@ -59,7 +59,6 @@ class CourseOutlineViewModel(
     workerController,
     coreAnalytics
 ) {
-    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
     private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: StateFlow<CourseOutlineUIState>
@@ -73,8 +72,6 @@ class CourseOutlineViewModel(
         private set
     var resumeVerticalBlock: Block? = null
         private set
-
-    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
 
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
@@ -228,17 +225,12 @@ class CourseOutlineViewModel(
                 resultBlocks.add(block)
                 block.descendants.forEach { descendant ->
                     blocks.find { it.id == descendant }?.let { sequentialBlock ->
-                        if (isCourseNestedListEnabled) {
-                            courseSubSections.getOrPut(block.id) { mutableListOf() }
-                                .add(sequentialBlock)
-                            courseSubSectionUnit[sequentialBlock.id] =
-                                sequentialBlock.getFirstDescendantBlock(blocks)
-                            subSectionsDownloadsCount[sequentialBlock.id] =
-                                sequentialBlock.getDownloadsCount(blocks)
-
-                        } else {
-                            resultBlocks.add(sequentialBlock)
-                        }
+                        courseSubSections.getOrPut(block.id) { mutableListOf() }
+                            .add(sequentialBlock)
+                        courseSubSectionUnit[sequentialBlock.id] =
+                            sequentialBlock.getFirstDescendantBlock(blocks)
+                        subSectionsDownloadsCount[sequentialBlock.id] =
+                            sequentialBlock.getDownloadsCount(blocks)
                         addDownloadableChildrenForSequentialBlock(sequentialBlock)
                     }
                 }
