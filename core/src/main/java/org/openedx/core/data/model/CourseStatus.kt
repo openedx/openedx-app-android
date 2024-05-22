@@ -2,6 +2,7 @@ package org.openedx.core.data.model
 
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.data.model.room.discovery.CourseStatusDb
+import org.openedx.core.domain.model.CourseStatus
 
 data class CourseStatus(
     @SerializedName("last_visited_module_id")
@@ -13,13 +14,12 @@ data class CourseStatus(
     @SerializedName("last_visited_unit_display_name")
     val lastVisitedUnitDisplayName: String?
 ) {
-    fun mapToDomain(): org.openedx.core.domain.model.CourseStatus =
-        org.openedx.core.domain.model.CourseStatus(
-            lastVisitedModuleId = lastVisitedModuleId ?: "",
-            lastVisitedModulePath = lastVisitedModulePath ?: emptyList(),
-            lastVisitedBlockId = lastVisitedBlockId ?: "",
-            lastVisitedUnitDisplayName = lastVisitedUnitDisplayName ?: ""
-        )
+    fun mapToDomain() = CourseStatus(
+        lastVisitedModuleId = lastVisitedModuleId ?: "",
+        lastVisitedModulePath = lastVisitedModulePath ?: emptyList(),
+        lastVisitedBlockId = lastVisitedBlockId ?: "",
+        lastVisitedUnitDisplayName = lastVisitedUnitDisplayName ?: ""
+    )
 
     fun mapToRoomEntity() = CourseStatusDb(
         lastVisitedModuleId = lastVisitedModuleId ?: "",

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 import org.openedx.core.data.model.room.discovery.CourseDateBlockDb
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.utils.TimeUtils
 import java.util.Date
 
@@ -31,7 +32,7 @@ data class CourseDateBlock(
     @SerializedName("first_component_block_id")
     val blockId: String = "",
 ): Parcelable {
-    fun mapToDomain() = org.openedx.core.domain.model.CourseDateBlock(
+    fun mapToDomain() = CourseDateBlock(
         complete = complete,
         date = TimeUtils.iso8601ToDate(date) ?: Date(),
         assignmentType = assignmentType,

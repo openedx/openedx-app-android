@@ -12,6 +12,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -20,7 +21,6 @@ import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.core.utils.FileUtil
-import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardRouter
 
@@ -61,17 +61,17 @@ class PrimaryCourseViewModel(
             try {
                 if (networkConnection.isOnline()) {
                     val response = interactor.getMainUserCourses()
-                    if (response.primary == null && response.enrollments.isEmpty()) {
+                    if (response.primary == null && response.enrollments.courses.isEmpty()) {
                         _uiState.value = PrimaryCourseUIState.Empty
                     } else {
                         _uiState.value = PrimaryCourseUIState.Courses(response)
                     }
                 } else {
-                    val cachedUserCourses = fileUtil.getObjectFromFile<UserCourses>()
-                    if (cachedUserCourses == null) {
+                    val courseEnrollments = fileUtil.getObjectFromFile<CourseEnrollments>()
+                    if (courseEnrollments == null) {
                         _uiState.value = PrimaryCourseUIState.Empty
                     } else {
-                        _uiState.value = PrimaryCourseUIState.Courses(cachedUserCourses)
+                        _uiState.value = PrimaryCourseUIState.Courses(courseEnrollments.mapToDomain())
                     }
                 }
             } catch (e: Exception) {

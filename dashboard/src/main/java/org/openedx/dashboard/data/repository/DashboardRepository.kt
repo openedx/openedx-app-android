@@ -2,10 +2,10 @@ package org.openedx.dashboard.data.repository
 
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CourseEnrollments
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.utils.FileUtil
-import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.data.DashboardDao
 import org.openedx.dashboard.domain.CourseStatusFilter
 
@@ -35,19 +35,15 @@ class DashboardRepository(
         return list.map { it.mapToDomain() }
     }
 
-    suspend fun getMainUserCourses(): UserCourses {
+    suspend fun getMainUserCourses(): CourseEnrollments {
         val user = preferencesManager.user
         val result = api.getUserCourses(
             username = user?.username ?: "",
         )
         preferencesManager.appConfig = result.configs.mapToDomain()
 
-        val userCourses = UserCourses(
-            enrollments = result.enrollments.mapToDomain().courses,
-            primary = result.primary?.mapToDomain()
-        )
-        fileUtil.saveObjectToFile(userCourses)
-        return userCourses
+        fileUtil.saveObjectToFile(result)
+        return result.mapToDomain()
     }
 
     suspend fun getAllUserCourses(page: Int, status: CourseStatusFilter?): DashboardCourseList {

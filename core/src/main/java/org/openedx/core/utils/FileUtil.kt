@@ -31,8 +31,6 @@ class FileUtil(val context: Context) {
             null
         }
     }
-
-
 }
 
 enum class Directories {

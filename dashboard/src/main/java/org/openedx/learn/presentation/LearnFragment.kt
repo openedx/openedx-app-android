@@ -148,7 +148,7 @@ private fun Title(
                 .padding(start = 16.dp),
             text = label,
             color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.headlineBolt
+            style = MaterialTheme.appTypography.headlineBold
         )
         IconButton(
             modifier = Modifier

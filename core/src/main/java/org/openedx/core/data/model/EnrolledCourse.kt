@@ -5,6 +5,7 @@ import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
 import org.openedx.core.data.model.room.discovery.ProgressDb
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.utils.TimeUtils
+import org.openedx.core.domain.model.Progress as ProgressDomain
 
 data class EnrolledCourse(
     @SerializedName("audit_access_expires")
@@ -34,7 +35,7 @@ data class EnrolledCourse(
             isActive = isActive ?: false,
             course = course?.mapToDomain()!!,
             certificate = certificate?.mapToDomain(),
-            progress = progress?.mapToDomain() ?: org.openedx.core.domain.model.Progress.DEFAULT_PROGRESS,
+            progress = progress?.mapToDomain() ?: ProgressDomain.DEFAULT_PROGRESS,
             courseStatus = courseStatus?.mapToDomain(),
             courseAssignments = courseAssignments?.mapToDomain()
         )

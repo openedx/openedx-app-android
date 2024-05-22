@@ -67,9 +67,12 @@ import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
 import org.openedx.Lock
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseAssignments
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseDatesCalendarSync
+import org.openedx.core.domain.model.CourseEnrollments
 import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
@@ -88,7 +91,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
-import org.openedx.courses.domain.model.UserCourses
 import org.openedx.dashboard.R
 import java.util.Date
 import org.openedx.core.R as CoreR
@@ -272,7 +274,7 @@ private fun PrimaryCourseScreen(
 @Composable
 private fun UserCourses(
     modifier: Modifier = Modifier,
-    userCourses: UserCourses,
+    userCourses: CourseEnrollments,
     apiHostUrl: String,
     openCourse: (EnrolledCourse) -> Unit,
     navigateToDates: (EnrolledCourse) -> Unit,
@@ -283,18 +285,19 @@ private fun UserCourses(
         modifier = modifier
             .padding(vertical = 12.dp)
     ) {
-        if (userCourses.primary != null) {
+        val primaryCourse = userCourses.primary
+        if (primaryCourse != null) {
             PrimaryCourseCard(
-                primaryCourse = userCourses.primary,
+                primaryCourse = primaryCourse,
                 apiHostUrl = apiHostUrl,
                 navigateToDates = navigateToDates,
                 openBlock = openBlock,
                 openCourse = openCourse
             )
         }
-        if (userCourses.enrollments.isNotEmpty()) {
+        if (userCourses.enrollments.courses.isNotEmpty()) {
             SecondaryCourses(
-                courses = userCourses.enrollments,
+                courses = userCourses.enrollments.courses,
                 apiHostUrl = apiHostUrl,
                 onCourseClick = openCourse,
                 onViewAllClick = onViewAllClick
@@ -821,8 +824,10 @@ private val mockDashboardCourseList = DashboardCourseList(
     pagination = mockPagination,
     courses = listOf(mockCourse, mockCourse, mockCourse, mockCourse, mockCourse, mockCourse)
 )
-private val mockUserCourses = UserCourses(
-    enrollments = mockDashboardCourseList.courses,
+
+private val mockUserCourses = CourseEnrollments(
+    enrollments = mockDashboardCourseList,
+    configs = AppConfig(CourseDatesCalendarSync(true, true, true, true)),
     primary = mockCourse
 )
 

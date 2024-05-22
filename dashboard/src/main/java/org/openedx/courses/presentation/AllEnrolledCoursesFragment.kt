@@ -530,7 +530,7 @@ private fun Header(
             modifier = Modifier.align(Alignment.CenterStart),
             text = stringResource(id = R.string.dashboard_all_courses),
             color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.headlineBolt
+            style = MaterialTheme.appTypography.headlineBold
         )
         IconButton(
             modifier = Modifier
