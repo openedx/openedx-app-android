@@ -34,11 +34,14 @@ class AppViewModel(
     private var logoutHandledAt: Long = 0
 
     val isBranchEnabled get() = config.getBranchConfig().enabled
-    val canResetAppDirectory = preferencesManager.canResetAppDirectory
+    private val canResetAppDirectory get() = preferencesManager.canResetAppDirectory
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         setUserId()
+        if(canResetAppDirectory) {
+            resetAppDirectory(owner as Context)
+        }
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
@@ -63,7 +66,7 @@ class AppViewModel(
         )
     }
 
-    fun resetAppDirectory(context: Context) {
+    private fun resetAppDirectory(context: Context) {
         FileUtil.deleteOldAppDirectory(context)
         preferencesManager.canResetAppDirectory = false
     }
