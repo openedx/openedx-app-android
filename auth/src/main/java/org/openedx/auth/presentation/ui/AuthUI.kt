@@ -254,7 +254,7 @@ fun LoginTextField(
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textFieldText,
             backgroundColor = MaterialTheme.appColors.textFieldBackground,
-            focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.textFieldText,
         ),
         shape = MaterialTheme.appShapes.textFieldShape,

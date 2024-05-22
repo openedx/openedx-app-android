@@ -1046,25 +1046,6 @@ fun OfflineModeDialog(
 }
 
 @Composable
-fun OpenEdXSecondaryButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    text: String = "",
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    content: (@Composable RowScope.() -> Unit)? = null
-) {
-    OpenEdXButton(
-        modifier = modifier,
-        text = text,
-        onClick = onClick,
-        enabled = enabled,
-        textColor = MaterialTheme.appColors.primaryButtonText,
-        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-        content = content
-    )
-}
-
-@Composable
 fun OpenEdXButton(
     modifier: Modifier = Modifier.fillMaxWidth(),
     text: String = "",
@@ -1097,26 +1078,6 @@ fun OpenEdXButton(
             content()
         }
     }
-}
-
-@Composable
-fun OpenEdXSecondaryOutlinedButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    text: String = "",
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    content: (@Composable RowScope.() -> Unit)? = null
-) {
-    OpenEdXOutlinedButton(
-        modifier = modifier,
-        text = text,
-        onClick = onClick,
-        enabled = enabled,
-        textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
-        backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
-        borderColor = MaterialTheme.appColors.secondaryButtonBorder,
-        content = content
-    )
 }
 
 @Composable
@@ -1203,11 +1164,13 @@ fun ConnectionErrorView(
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
-        OpenEdXSecondaryButton(
+        OpenEdXButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = R.string.core_reload),
-            onClick = onReloadClick
+            textColor = MaterialTheme.appColors.primaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+            onClick = onReloadClick,
         )
     }
 }
@@ -1218,22 +1181,27 @@ fun AuthButtonsPanel(
     onSignInClick: () -> Unit,
 ) {
     Row {
-        OpenEdXSecondaryButton(
+        OpenEdXButton(
             modifier = Modifier
                 .testTag("btn_register")
                 .width(0.dp)
                 .weight(1f),
             text = stringResource(id = R.string.core_register),
+            textColor = MaterialTheme.appColors.primaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = { onRegisterClick() }
         )
 
-        OpenEdXSecondaryOutlinedButton(
+        OpenEdXOutlinedButton(
             modifier = Modifier
                 .testTag("btn_sign_in")
                 .width(100.dp)
                 .padding(start = 16.dp),
             text = stringResource(id = R.string.core_sign_in),
-            onClick = { onSignInClick() }
+            onClick = { onSignInClick() },
+            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
+            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
         )
     }
 }
