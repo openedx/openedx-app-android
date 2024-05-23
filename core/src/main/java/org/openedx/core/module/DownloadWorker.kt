@@ -23,6 +23,7 @@ import org.openedx.core.module.download.CurrentProgress
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
+import org.openedx.core.utils.FileUtil
 import java.io.File
 
 class DownloadWorker(
@@ -41,11 +42,7 @@ class DownloadWorker(
 
     private var downloadEnqueue = listOf<DownloadModel>()
 
-    private val folder = File(
-        context.externalCacheDir.toString() + File.separator +
-                context.getString(R.string.app_name)
-                    .replace(Regex("\\s"), "_")
-    )
+    private val folder = FileUtil(context).getExternalAppDir()
 
     private var currentDownload: DownloadModel? = null
     private var lastUpdateTime = 0L

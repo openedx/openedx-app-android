@@ -1,5 +1,6 @@
 package org.openedx.courses.presentation
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,20 +25,24 @@ import org.openedx.core.utils.FileUtil
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardRouter
 
-class PrimaryCourseViewModel(
+class DashboardGalleryViewModel(
     private val config: Config,
     private val interactor: DashboardInteractor,
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val networkConnection: NetworkConnection,
     private val fileUtil: FileUtil,
-    val dashboardRouter: DashboardRouter
+    private val dashboardRouter: DashboardRouter
 ) : BaseViewModel() {
+
+    companion object {
+        private const val DATES_TAB = "dates"
+    }
 
     val apiHostUrl get() = config.getApiHostURL()
 
-    private val _uiState = MutableStateFlow<PrimaryCourseUIState>(PrimaryCourseUIState.Loading)
-    val uiState: StateFlow<PrimaryCourseUIState>
+    private val _uiState = MutableStateFlow<DashboardGalleryUIState>(DashboardGalleryUIState.Loading)
+    val uiState: StateFlow<DashboardGalleryUIState>
         get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
@@ -62,16 +67,16 @@ class PrimaryCourseViewModel(
                 if (networkConnection.isOnline()) {
                     val response = interactor.getMainUserCourses()
                     if (response.primary == null && response.enrollments.courses.isEmpty()) {
-                        _uiState.value = PrimaryCourseUIState.Empty
+                        _uiState.value = DashboardGalleryUIState.Empty
                     } else {
-                        _uiState.value = PrimaryCourseUIState.Courses(response)
+                        _uiState.value = DashboardGalleryUIState.Courses(response)
                     }
                 } else {
                     val courseEnrollments = fileUtil.getObjectFromFile<CourseEnrollments>()
                     if (courseEnrollments == null) {
-                        _uiState.value = PrimaryCourseUIState.Empty
+                        _uiState.value = DashboardGalleryUIState.Empty
                     } else {
-                        _uiState.value = PrimaryCourseUIState.Courses(courseEnrollments.mapToDomain())
+                        _uiState.value = DashboardGalleryUIState.Courses(courseEnrollments.mapToDomain())
                     }
                 }
             } catch (e: Exception) {
@@ -95,6 +100,26 @@ class PrimaryCourseViewModel(
         viewModelScope.launch { discoveryNotifier.send(NavigationToDiscovery()) }
     }
 
+    fun navigateToAllEnrolledCourses(fragmentManager: FragmentManager) {
+        dashboardRouter.navigateToAllEnrolledCourses(fragmentManager)
+    }
+
+    fun navigateToCourseOutline(
+        fragmentManager: FragmentManager,
+        enrolledCourse: EnrolledCourse,
+        openDates: Boolean = false,
+        resumeBlockId: String = ""
+    ) {
+        dashboardRouter.navigateToCourseOutline(
+            fm = fragmentManager,
+            courseId = enrolledCourse.course.id,
+            courseTitle = enrolledCourse.course.name,
+            enrollmentMode = enrolledCourse.mode,
+            openTab = if (openDates) DATES_TAB else "",
+            resumeBlockId = resumeBlockId
+        )
+    }
+
     private fun collectDiscoveryNotifier() {
         viewModelScope.launch {
             discoveryNotifier.notifier.collect {
@@ -106,12 +131,12 @@ class PrimaryCourseViewModel(
     }
 }
 
-interface PrimaryCourseScreenAction {
-    object SwipeRefresh : PrimaryCourseScreenAction
-    object ViewAll : PrimaryCourseScreenAction
-    object Reload : PrimaryCourseScreenAction
-    object NavigateToDiscovery : PrimaryCourseScreenAction
-    data class OpenBlock(val enrolledCourse: EnrolledCourse, val blockId: String) : PrimaryCourseScreenAction
-    data class OpenCourse(val enrolledCourse: EnrolledCourse) : PrimaryCourseScreenAction
-    data class NavigateToDates(val enrolledCourse: EnrolledCourse) : PrimaryCourseScreenAction
+interface DashboardGalleryScreenAction {
+    object SwipeRefresh : DashboardGalleryScreenAction
+    object ViewAll : DashboardGalleryScreenAction
+    object Reload : DashboardGalleryScreenAction
+    object NavigateToDiscovery : DashboardGalleryScreenAction
+    data class OpenBlock(val enrolledCourse: EnrolledCourse, val blockId: String) : DashboardGalleryScreenAction
+    data class OpenCourse(val enrolledCourse: EnrolledCourse) : DashboardGalleryScreenAction
+    data class NavigateToDates(val enrolledCourse: EnrolledCourse) : DashboardGalleryScreenAction
 }

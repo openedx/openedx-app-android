@@ -15,7 +15,7 @@ class FileUtil(val context: Context) {
         return file
     }
 
-    inline fun < reified T> saveObjectToFile(obj: T, fileName: String = "${T::class.java.simpleName}.json") {
+    inline fun <reified T> saveObjectToFile(obj: T, fileName: String = "${T::class.java.simpleName}.json") {
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
         val jsonString = gson.toJson(obj)
         File(getExternalAppDir().path + fileName).writeText(jsonString)

@@ -11,19 +11,19 @@ data class CourseAssignments(
     val pastAssignments: List<CourseDateBlock>?
 ) {
     fun mapToDomain() = CourseAssignments(
-        futureAssignments = futureAssignments?.map {
+        futureAssignments = futureAssignments?.mapNotNull {
             it.mapToDomain()
         },
-        pastAssignments = pastAssignments?.map {
+        pastAssignments = pastAssignments?.mapNotNull {
             it.mapToDomain()
         }
     )
 
     fun mapToRoomEntity() = CourseAssignmentsDb(
-        futureAssignments = futureAssignments?.map {
+        futureAssignments = futureAssignments?.mapNotNull {
             it.mapToRoomEntity()
         },
-        pastAssignments = pastAssignments?.map {
+        pastAssignments = pastAssignments?.mapNotNull {
             it.mapToRoomEntity()
         }
     )

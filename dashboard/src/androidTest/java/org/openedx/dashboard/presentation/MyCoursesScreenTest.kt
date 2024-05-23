@@ -68,7 +68,7 @@ class MyCoursesScreenTest {
     @Test
     fun dashboardScreenLoading() {
         composeTestRule.setContent {
-            ListDashboardScreen(
+            DashboardListView(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
                 state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
@@ -101,7 +101,7 @@ class MyCoursesScreenTest {
     @Test
     fun dashboardScreenLoaded() {
         composeTestRule.setContent {
-            ListDashboardScreen(
+            DashboardListView(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
                 state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
@@ -127,7 +127,7 @@ class MyCoursesScreenTest {
     @Test
     fun dashboardScreenRefreshing() {
         composeTestRule.setContent {
-            ListDashboardScreen(
+            DashboardListView(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
                 state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),

@@ -78,6 +78,12 @@
 
     <string name="course_assignment_due_tag" tools:ignore="MissingTranslation">Assignment Due</string>
 
+    <string name="course_container_nav_home">Home</string>
+    <string name="course_container_nav_videos">Videos</string>
+    <string name="course_container_nav_discussions">Discussions</string>
+    <string name="course_container_nav_more">More</string>
+    <string name="course_container_nav_dates">Dates</string>
+
     <!-- endregion -->
 
     <!-- Accessibility -->

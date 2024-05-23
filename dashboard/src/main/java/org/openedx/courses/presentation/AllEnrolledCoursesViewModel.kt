@@ -1,5 +1,6 @@
 package org.openedx.courses.presentation
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.R
@@ -31,7 +33,7 @@ class AllEnrolledCoursesViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
-    val dashboardRouter: DashboardRouter
+    private val dashboardRouter: DashboardRouter
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -42,22 +44,13 @@ class AllEnrolledCoursesViewModel(
     private var page = 1
     private var isLoading = false
 
-    private val _uiState = MutableStateFlow<AllEnrolledCoursesUIState>(AllEnrolledCoursesUIState.Loading)
+    private val _uiState = MutableStateFlow(AllEnrolledCoursesUIState())
     val uiState: StateFlow<AllEnrolledCoursesUIState>
         get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
-
-    private val _updating = MutableStateFlow<Boolean>(false)
-    val updating: StateFlow<Boolean>
-        get() = _updating.asStateFlow()
-
-
-    private val _canLoadMore = MutableStateFlow<Boolean>(false)
-    val canLoadMore: StateFlow<Boolean>
-        get() = _canLoadMore.asStateFlow()
 
     private val currentFilter: MutableStateFlow<CourseStatusFilter> = MutableStateFlow(CourseStatusFilter.ALL)
 
@@ -69,7 +62,7 @@ class AllEnrolledCoursesViewModel(
     }
 
     fun getCourses(courseStatusFilter: CourseStatusFilter? = null) {
-        _uiState.value = AllEnrolledCoursesUIState.Loading
+        _uiState.update { it.copy(showProgress = true) }
         coursesList.clear()
         internalLoadingCourses(courseStatusFilter ?: currentFilter.value)
     }
@@ -77,24 +70,20 @@ class AllEnrolledCoursesViewModel(
     fun updateCourses() {
         viewModelScope.launch {
             try {
-                _updating.value = true
+                _uiState.update { it.copy(refreshing = true) }
                 isLoading = true
                 page = 1
                 val response = interactor.getAllUserCourses(page, currentFilter.value)
                 if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
-                    _canLoadMore.value = true
+                    _uiState.update { it.copy(canLoadMore = true) }
                     page++
                 } else {
-                    _canLoadMore.value = false
+                    _uiState.update { it.copy(canLoadMore = false) }
                     page = -1
                 }
                 coursesList.clear()
                 coursesList.addAll(response.courses)
-                if (coursesList.isEmpty()) {
-                    _uiState.value = AllEnrolledCoursesUIState.Empty
-                } else {
-                    _uiState.value = AllEnrolledCoursesUIState.Courses(ArrayList(coursesList))
-                }
+                _uiState.update { it.copy(courses = coursesList) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
@@ -102,7 +91,7 @@ class AllEnrolledCoursesViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
-            _updating.value = false
+            _uiState.update { it.copy(refreshing = false, showProgress = false) }
             isLoading = false
         }
     }
@@ -123,24 +112,20 @@ class AllEnrolledCoursesViewModel(
                 }
                 if (response != null) {
                     if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
-                        _canLoadMore.value = true
+                        _uiState.update { it.copy(canLoadMore = true) }
                         page++
                     } else {
-                        _canLoadMore.value = false
+                        _uiState.update { it.copy(canLoadMore = false) }
                         page = -1
                     }
                     coursesList.addAll(response.courses)
                 } else {
                     val cachedList = interactor.getEnrolledCoursesFromCache()
-                    _canLoadMore.value = false
+                    _uiState.update { it.copy(canLoadMore = false) }
                     page = -1
                     coursesList.addAll(cachedList)
                 }
-                if (coursesList.isEmpty()) {
-                    _uiState.value = AllEnrolledCoursesUIState.Empty
-                } else {
-                    _uiState.value = AllEnrolledCoursesUIState.Courses(ArrayList(coursesList))
-                }
+                _uiState.update { it.copy(courses = coursesList) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
@@ -148,7 +133,7 @@ class AllEnrolledCoursesViewModel(
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             }
-            _updating.value = false
+            _uiState.update { it.copy(refreshing = false, showProgress = false) }
             isLoading = false
         }
     }
@@ -159,7 +144,7 @@ class AllEnrolledCoursesViewModel(
         }
     }
 
-    fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
+    private fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
         analytics.dashboardCourseClickedEvent(courseId, courseName)
     }
 
@@ -171,6 +156,27 @@ class AllEnrolledCoursesViewModel(
                 }
             }
         }
+    }
+
+    fun navigateToCourseSearch(fragmentManager: FragmentManager) {
+        dashboardRouter.navigateToCourseSearch(
+            fragmentManager, ""
+        )
+    }
+
+    fun navigateToCourseOutline(
+        fragmentManager: FragmentManager,
+        courseId: String,
+        courseName: String,
+        mode: String
+    ) {
+        dashboardCourseClickedEvent(courseId, courseName)
+        dashboardRouter.navigateToCourseOutline(
+            fragmentManager,
+            courseId,
+            courseName,
+            mode
+        )
     }
 }
 

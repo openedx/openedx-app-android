@@ -13,11 +13,10 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.adapter.NavigationFragmentAdapter
-import org.openedx.core.config.Config
 import org.openedx.core.config.DashboardConfig
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dashboard.presentation.ListDashboardFragment
+import org.openedx.dashboard.presentation.DashboardListFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.learn.presentation.LearnFragment
@@ -28,7 +27,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val binding by viewBinding(FragmentMainBinding::bind)
     private val viewModel by viewModel<MainViewModel>()
     private val router by inject<DiscoveryRouter>()
-    private val config by inject<Config>()
 
     private lateinit var adapter: NavigationFragmentAdapter
 
@@ -53,7 +51,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     binding.viewPager.setCurrentItem(0, false)
                 }
 
-                R.id.fragmentHome -> {
+                R.id.fragmentDiscover -> {
                     viewModel.logDiscoveryTabClickedEvent()
                     binding.viewPager.setCurrentItem(1, false)
                 }
@@ -75,7 +73,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.navigateToDiscovery.collect { shouldNavigateToDiscovery ->
                 if (shouldNavigateToDiscovery) {
-                    binding.bottomNavView.selectedItemId = R.id.fragmentHome
+                    binding.bottomNavView.selectedItemId = R.id.fragmentDiscover
                 }
             }
         }
@@ -84,7 +82,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             getString(ARG_COURSE_ID).takeIf { it.isNullOrBlank().not() }?.let { courseId ->
                 val infoType = getString(ARG_INFO_TYPE)
 
-                if (config.getDiscoveryConfig().isViewTypeWebView() && infoType != null) {
+                if (viewModel.isDiscoveryTypeWebView && infoType != null) {
                     router.navigateToCourseInfo(parentFragmentManager, courseId, infoType)
                 } else {
                     router.navigateToCourseDetail(parentFragmentManager, courseId)
@@ -102,9 +100,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.viewPager.offscreenPageLimit = 4
 
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView).getDiscoveryFragment()
-        val dashboardFragment = when (config.getDashboardConfig().getType()) {
-            DashboardConfig.DashboardType.LIST -> ListDashboardFragment()
-            DashboardConfig.DashboardType.PRIMARY_COURSE -> LearnFragment()
+        val dashboardFragment = when (viewModel.dashboardType) {
+            DashboardConfig.DashboardType.LIST -> DashboardListFragment()
+            DashboardConfig.DashboardType.GALLERY -> LearnFragment()
         }
 
         adapter = NavigationFragmentAdapter(this).apply {

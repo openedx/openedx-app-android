@@ -4,7 +4,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -31,8 +30,8 @@ class MainViewModel(
         get() = _navigateToDiscovery.asSharedFlow()
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
+    val dashboardType get() = config.getDashboardConfig().getType()
 
-    @OptIn(FlowPreview::class)
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         notifier.notifier
@@ -55,10 +54,6 @@ class MainViewModel(
 
     fun logMyCoursesTabClickedEvent() {
         logEvent(AppAnalyticsEvent.MY_COURSES)
-    }
-
-    fun logMyProgramsTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.MY_PROGRAMS)
     }
 
     fun logProfileTabClickedEvent() {

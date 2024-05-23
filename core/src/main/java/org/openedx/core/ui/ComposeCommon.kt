@@ -1244,6 +1244,7 @@ fun RoundTabsBar(
                     .clickable {
                         scope.launch {
                             pagerState.scrollToPage(index)
+                            rowState.animateScrollToItem(index)
                             onTabClicked(index)
                         }
                     }

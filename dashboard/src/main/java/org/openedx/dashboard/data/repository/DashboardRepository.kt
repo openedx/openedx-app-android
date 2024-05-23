@@ -36,9 +36,8 @@ class DashboardRepository(
     }
 
     suspend fun getMainUserCourses(): CourseEnrollments {
-        val user = preferencesManager.user
         val result = api.getUserCourses(
-            username = user?.username ?: "",
+            username = preferencesManager.user?.username ?: "",
         )
         preferencesManager.appConfig = result.configs.mapToDomain()
 

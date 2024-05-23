@@ -9,6 +9,6 @@ data class Progress(
     val totalAssignmentsCount: Int,
 ) : Parcelable {
     companion object {
-        val DEFAULT_PROGRESS = Progress(0,0)
+        val DEFAULT_PROGRESS = Progress(0, 0)
     }
 }

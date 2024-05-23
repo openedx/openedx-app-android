@@ -96,15 +96,15 @@ import java.util.Date
 import org.openedx.core.R as CoreR
 
 @Composable
-fun PrimaryCourseScreen(
-    viewModel: PrimaryCourseViewModel = koinViewModel(),
+fun DashboardGalleryView(
+    viewModel: DashboardGalleryViewModel = koinViewModel(),
     fragmentManager: FragmentManager,
 ) {
     val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val uiState by viewModel.uiState.collectAsState(PrimaryCourseUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(DashboardGalleryUIState.Loading)
 
-    PrimaryCourseScreen(
+    DashboardGalleryView(
         uiMessage = uiMessage,
         uiState = uiState,
         updating = updating,
@@ -112,48 +112,42 @@ fun PrimaryCourseScreen(
         hasInternetConnection = viewModel.hasInternetConnection,
         onAction = { action ->
             when (action) {
-                PrimaryCourseScreenAction.SwipeRefresh -> {
+                DashboardGalleryScreenAction.SwipeRefresh -> {
                     viewModel.updateCourses()
                 }
 
-                PrimaryCourseScreenAction.ViewAll -> {
-                    viewModel.dashboardRouter.navigateToAllEnrolledCourses(fragmentManager)
+                DashboardGalleryScreenAction.ViewAll -> {
+                    viewModel.navigateToAllEnrolledCourses(fragmentManager)
                 }
 
-                PrimaryCourseScreenAction.Reload -> {
+                DashboardGalleryScreenAction.Reload -> {
                     viewModel.getCourses()
                 }
 
-                PrimaryCourseScreenAction.NavigateToDiscovery -> {
+                DashboardGalleryScreenAction.NavigateToDiscovery -> {
                     viewModel.navigateToDiscovery()
                 }
 
-                is PrimaryCourseScreenAction.OpenCourse -> {
-                    viewModel.dashboardRouter.navigateToCourseOutline(
-                        fm = fragmentManager,
-                        courseId = action.enrolledCourse.course.id,
-                        courseTitle = action.enrolledCourse.course.name,
-                        enrollmentMode = action.enrolledCourse.mode
+                is DashboardGalleryScreenAction.OpenCourse -> {
+                    viewModel.navigateToCourseOutline(
+                        fragmentManager = fragmentManager,
+                        enrolledCourse = action.enrolledCourse
                     )
                 }
 
-                is PrimaryCourseScreenAction.NavigateToDates -> {
-                    viewModel.dashboardRouter.navigateToCourseOutline(
-                        fm = fragmentManager,
-                        courseId = action.enrolledCourse.course.id,
-                        courseTitle = action.enrolledCourse.course.name,
-                        enrollmentMode = action.enrolledCourse.mode,
+                is DashboardGalleryScreenAction.NavigateToDates -> {
+                    viewModel.navigateToCourseOutline(
+                        fragmentManager = fragmentManager,
+                        enrolledCourse = action.enrolledCourse,
                         openDates = true
                     )
                 }
 
-                is PrimaryCourseScreenAction.OpenBlock -> {
-                    viewModel.dashboardRouter.navigateToCourseOutline(
-                        fm = fragmentManager,
-                        courseId = action.enrolledCourse.course.id,
-                        courseTitle = action.enrolledCourse.course.name,
-                        enrollmentMode = action.enrolledCourse.mode,
-                        openBlock = action.blockId
+                is DashboardGalleryScreenAction.OpenBlock -> {
+                    viewModel.navigateToCourseOutline(
+                        fragmentManager = fragmentManager,
+                        enrolledCourse = action.enrolledCourse,
+                        resumeBlockId = action.blockId
                     )
                 }
             }
@@ -163,18 +157,18 @@ fun PrimaryCourseScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun PrimaryCourseScreen(
+private fun DashboardGalleryView(
     uiMessage: UIMessage?,
-    uiState: PrimaryCourseUIState,
+    uiState: DashboardGalleryUIState,
     updating: Boolean,
     apiHostUrl: String,
-    onAction: (PrimaryCourseScreenAction) -> Unit,
+    onAction: (DashboardGalleryScreenAction) -> Unit,
     hasInternetConnection: Boolean
 ) {
     val scaffoldState = rememberScaffoldState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = updating,
-        onRefresh = { onAction(PrimaryCourseScreenAction.SwipeRefresh) }
+        onRefresh = { onAction(DashboardGalleryScreenAction.SwipeRefresh) }
     )
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
@@ -204,34 +198,34 @@ private fun PrimaryCourseScreen(
                         .verticalScroll(rememberScrollState()),
                 ) {
                     when (uiState) {
-                        is PrimaryCourseUIState.Loading -> {
+                        is DashboardGalleryUIState.Loading -> {
                             CircularProgressIndicator(
                                 modifier = Modifier.align(Alignment.Center),
                                 color = MaterialTheme.appColors.primary
                             )
                         }
 
-                        is PrimaryCourseUIState.Courses -> {
+                        is DashboardGalleryUIState.Courses -> {
                             UserCourses(
                                 modifier = Modifier.fillMaxSize(),
                                 userCourses = uiState.userCourses,
                                 apiHostUrl = apiHostUrl,
                                 openCourse = {
-                                    onAction(PrimaryCourseScreenAction.OpenCourse(it))
+                                    onAction(DashboardGalleryScreenAction.OpenCourse(it))
                                 },
                                 onViewAllClick = {
-                                    onAction(PrimaryCourseScreenAction.ViewAll)
+                                    onAction(DashboardGalleryScreenAction.ViewAll)
                                 },
                                 navigateToDates = {
-                                    onAction(PrimaryCourseScreenAction.NavigateToDates(it))
+                                    onAction(DashboardGalleryScreenAction.NavigateToDates(it))
                                 },
-                                openBlock = { course, blockId ->
-                                    onAction(PrimaryCourseScreenAction.OpenBlock(course, blockId))
+                                resumeBlockId = { course, blockId ->
+                                    onAction(DashboardGalleryScreenAction.OpenBlock(course, blockId))
                                 }
                             )
                         }
 
-                        is PrimaryCourseUIState.Empty -> {
+                        is DashboardGalleryUIState.Empty -> {
                             NoCoursesInfo(
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -240,7 +234,7 @@ private fun PrimaryCourseScreen(
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter),
                                 findACourseClick = {
-                                    onAction(PrimaryCourseScreenAction.NavigateToDiscovery)
+                                    onAction(DashboardGalleryScreenAction.NavigateToDiscovery)
                                 }
                             )
                         }
@@ -262,7 +256,7 @@ private fun PrimaryCourseScreen(
                         },
                         onReloadClick = {
                             isInternetConnectionShown = true
-                            onAction(PrimaryCourseScreenAction.SwipeRefresh)
+                            onAction(DashboardGalleryScreenAction.SwipeRefresh)
                         }
                     )
                 }
@@ -279,7 +273,7 @@ private fun UserCourses(
     openCourse: (EnrolledCourse) -> Unit,
     navigateToDates: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit,
-    openBlock: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
+    resumeBlockId: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -291,7 +285,7 @@ private fun UserCourses(
                 primaryCourse = primaryCourse,
                 apiHostUrl = apiHostUrl,
                 navigateToDates = navigateToDates,
-                openBlock = openBlock,
+                resumeBlockId = resumeBlockId,
                 openCourse = openCourse
             )
         }
@@ -504,7 +498,7 @@ private fun PrimaryCourseCard(
     primaryCourse: EnrolledCourse,
     apiHostUrl: String,
     navigateToDates: (EnrolledCourse) -> Unit,
-    openBlock: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
+    resumeBlockId: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
     openCourse: (EnrolledCourse) -> Unit,
 ) {
     val context = LocalContext.current
@@ -563,7 +557,7 @@ private fun PrimaryCourseCard(
                 AssignmentItem(
                     modifier = Modifier.clickable {
                         if (pastAssignments.size == 1) {
-                            openBlock(primaryCourse, nearestAssignment.blockId)
+                            resumeBlockId(primaryCourse, nearestAssignment.blockId)
                         } else {
                             navigateToDates(primaryCourse)
                         }
@@ -581,7 +575,7 @@ private fun PrimaryCourseCard(
                 AssignmentItem(
                     modifier = Modifier.clickable {
                         if (futureAssignments.size == 1) {
-                            openBlock(primaryCourse, nearestAssignment.blockId)
+                            resumeBlockId(primaryCourse, nearestAssignment.blockId)
                         } else {
                             navigateToDates(primaryCourse)
                         }
@@ -601,7 +595,7 @@ private fun PrimaryCourseCard(
                     if (primaryCourse.courseStatus == null) {
                         openCourse(primaryCourse)
                     } else {
-                        openBlock(primaryCourse, primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
+                        resumeBlockId(primaryCourse, primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
                     }
                 }
             )
@@ -847,10 +841,10 @@ private fun ViewAllItemPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
-private fun PrimaryCourseScreenPreview() {
+private fun DashboardGalleryViewPreview() {
     OpenEdXTheme {
-        PrimaryCourseScreen(
-            uiState = PrimaryCourseUIState.Courses(mockUserCourses),
+        DashboardGalleryView(
+            uiState = DashboardGalleryUIState.Courses(mockUserCourses),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,

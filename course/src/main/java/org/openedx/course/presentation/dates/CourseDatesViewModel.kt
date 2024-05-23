@@ -87,7 +87,9 @@ class CourseDatesViewModel(
                         _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
                     }
 
-                    is RefreshDates -> loadingCourseDatesInternal()
+                    is RefreshDates -> {
+                        loadingCourseDatesInternal()
+                    }
                 }
             }
         }

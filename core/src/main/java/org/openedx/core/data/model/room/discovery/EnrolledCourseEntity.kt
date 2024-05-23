@@ -225,8 +225,8 @@ data class CourseDateBlockDb(
     val learnerHasAccess: Boolean = false,
     @ColumnInfo("complete")
     val complete: Boolean = false,
-    @ColumnInfo("date")
-    val date: String,
+    @Embedded
+    val date: Date,
     @ColumnInfo("dateType")
     val dateType: DateType = DateType.NONE,
     @ColumnInfo("assignmentType")
@@ -239,7 +239,7 @@ data class CourseDateBlockDb(
         blockId = blockId,
         learnerHasAccess = learnerHasAccess,
         complete = complete,
-        date = TimeUtils.iso8601ToDate(date) ?: Date(),
+        date = date,
         dateType = dateType,
         assignmentType = assignmentType
     )

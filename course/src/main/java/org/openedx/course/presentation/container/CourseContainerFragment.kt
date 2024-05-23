@@ -84,7 +84,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_COURSE_ID, ""),
             requireArguments().getString(ARG_TITLE, ""),
             requireArguments().getString(ARG_ENROLLMENT_MODE, ""),
-            requireArguments().getString(ARG_OPEN_BLOCK, "")
+            requireArguments().getString(ARG_RESUME_BLOCK, "")
         )
     }
 
@@ -256,22 +256,23 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         const val ARG_COURSE_ID = "courseId"
         const val ARG_TITLE = "title"
         const val ARG_ENROLLMENT_MODE = "enrollmentMode"
-        const val ARG_OPEN_DATES = "open_dates"
-        const val ARG_OPEN_BLOCK = "resume_block"
+        const val ARG_OPEN_TAB = "open_tab"
+        const val ARG_RESUME_BLOCK = "resume_block"
+        const val DEFAULT_TAB = "home"
         fun newInstance(
             courseId: String,
             courseTitle: String,
             enrollmentMode: String,
-            openDates: Boolean = false,
-            openBlock: String = ""
+            openTab: String = DEFAULT_TAB,
+            resumeBlockId: String = ""
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
             fragment.arguments = bundleOf(
                 ARG_COURSE_ID to courseId,
                 ARG_TITLE to courseTitle,
                 ARG_ENROLLMENT_MODE to enrollmentMode,
-                ARG_OPEN_DATES to openDates,
-                ARG_OPEN_BLOCK to openBlock
+                ARG_OPEN_TAB to openTab,
+                ARG_RESUME_BLOCK to resumeBlockId
             )
             return fragment
         }
@@ -302,11 +303,16 @@ fun CourseDashboard(
             val refreshing by viewModel.refreshing.collectAsState(true)
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
-            val requiredTab = if (bundle.getBoolean(CourseContainerFragment.ARG_OPEN_DATES)) {
-                CourseContainerTab.DATES
-            } else {
-                CourseContainerTab.HOME
+            val openTab = bundle.getString(CourseContainerFragment.ARG_OPEN_TAB, CourseContainerFragment.DEFAULT_TAB)
+            val requiredTab = when (openTab.uppercase()) {
+                CourseContainerTab.HOME.name -> CourseContainerTab.HOME
+                CourseContainerTab.VIDEOS.name -> CourseContainerTab.VIDEOS
+                CourseContainerTab.DATES.name -> CourseContainerTab.DATES
+                CourseContainerTab.DISCUSSIONS.name -> CourseContainerTab.DISCUSSIONS
+                CourseContainerTab.MORE.name -> CourseContainerTab.MORE
+                else -> CourseContainerTab.HOME
             }
+
             val pagerState = rememberPagerState(
                 initialPage = CourseContainerTab.entries.indexOf(requiredTab),
                 pageCount = { CourseContainerTab.entries.size }

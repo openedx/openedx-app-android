@@ -7,7 +7,7 @@
     <string name="dashboard_learn">Learn</string>
     <string name="dashboard_programs">Programs</string>
     <string name="dashboard_course_date">Course %1$s</string>
-    <string name="dashboard_start_course">Start course</string>
+    <string name="dashboard_start_course">Start Course</string>
     <string name="dashboard_resume_course">Resume Course</string>
     <string name="dashboard_past_due_assignment">%1$d Past Due Assignments</string>
     <string name="dashboard_view_all_with_count">View All Courses (%1$d)</string>
@@ -18,7 +18,6 @@
     <string name="dashboard_course_filter_completed">Completed</string>
     <string name="dashboard_course_filter_expired">Expired</string>
     <string name="dashboard_all_courses">All Courses</string>
-    <string name="dashboard_all">All</string>
     <string name="dashboard_all_courses_empty_title">No Courses</string>
     <string name="dashboard_all_courses_empty_description">You are not currently enrolled in any courses, would you like to explore the course catalog?</string>
     <string name="dashboard_find_a_course">Find a Course</string>

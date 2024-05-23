@@ -125,5 +125,4 @@ class TranscriptManager(
         }
         return null
     }
-
 }

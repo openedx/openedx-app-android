@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import org.openedx.core.ui.theme.OpenEdXTheme
 
-class PrimaryCourseFragment : Fragment() {
+class DashboardGalleryFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -17,7 +17,7 @@ class PrimaryCourseFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                PrimaryCourseScreen(fragmentManager = requireActivity().supportFragmentManager)
+                DashboardGalleryView(fragmentManager = requireActivity().supportFragmentManager)
             }
         }
     }

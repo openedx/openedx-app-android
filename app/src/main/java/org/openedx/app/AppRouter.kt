@@ -159,17 +159,17 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         courseTitle: String,
         enrollmentMode: String,
-        openDates: Boolean,
-        openBlock: String
+        openTab: String,
+        resumeBlockId: String
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, openDates, openBlock)
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, openTab, resumeBlockId)
         )
     }
 
     override fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String) {
-        replaceFragmentWithBackStack(fm, ProgramFragment(true))
+        replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
     }
 
     override fun navigateToNoAccess(

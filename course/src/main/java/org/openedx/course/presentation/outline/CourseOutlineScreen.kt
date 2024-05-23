@@ -62,13 +62,13 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
-import java.io.File
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -81,12 +81,12 @@ fun CourseOutlineScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val openBlock by viewModel.openBlock.collectAsState("")
+    val resumeBlockId by viewModel.resumeBlockId.collectAsState("")
     val context = LocalContext.current
 
-    LaunchedEffect(openBlock) {
-        if (openBlock.isNotEmpty()) {
-            viewModel.openBlock(fragmentManager, openBlock)
+    LaunchedEffect(resumeBlockId) {
+        if (resumeBlockId.isNotEmpty()) {
+            viewModel.openBlock(fragmentManager, resumeBlockId)
         }
     }
 
@@ -146,11 +146,7 @@ fun CourseOutlineScreen(
                 viewModel.removeDownloadModels(it.id)
             } else {
                 viewModel.saveDownloadModels(
-                    context.externalCacheDir.toString() +
-                            File.separator +
-                            context
-                                .getString(CoreR.string.app_name)
-                                .replace(Regex("\\s"), "_"), it.id
+                    FileUtil(context).getExternalAppDir().path, it.id
                 )
             }
         },

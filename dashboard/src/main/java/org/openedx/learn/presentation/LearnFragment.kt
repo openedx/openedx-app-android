@@ -3,7 +3,6 @@ package org.openedx.learn.presentation
 import android.os.Bundle
 import android.view.View
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -52,7 +51,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.courses.presentation.PrimaryCourseFragment
+import org.openedx.courses.presentation.DashboardGalleryFragment
 import org.openedx.dashboard.R
 import org.openedx.dashboard.databinding.FragmentLearnBinding
 import org.openedx.dashboard.presentation.DashboardRouter
@@ -83,7 +82,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         binding.viewPager.offscreenPageLimit = 2
 
         adapter = NavigationFragmentAdapter(this).apply {
-            addFragment(PrimaryCourseFragment())
+            addFragment(DashboardGalleryFragment())
             addFragment(router.getProgramFragmentInstance())
         }
         binding.viewPager.adapter = adapter
@@ -167,7 +166,6 @@ private fun Title(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LearnDropdownMenu(
     modifier: Modifier = Modifier,
@@ -264,7 +262,6 @@ private fun HeaderPreview() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
 private fun LearnDropdownMenuPreview() {

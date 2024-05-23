@@ -30,10 +30,10 @@ import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
 import org.openedx.courses.presentation.AllEnrolledCoursesViewModel
-import org.openedx.courses.presentation.PrimaryCourseViewModel
+import org.openedx.courses.presentation.DashboardGalleryViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.ListDashboardViewModel
+import org.openedx.dashboard.presentation.DashboardListViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -119,8 +119,8 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { ListDashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { PrimaryCourseViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardGalleryViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { LearnViewModel(get(), get()) }
 
@@ -198,11 +198,11 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String, openBlock: String) ->
+    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String, resumeBlockId: String) ->
         CourseContainerViewModel(
             courseId,
             courseTitle,
-            openBlock,
+            resumeBlockId,
             enrollmentMode,
             get(),
             get(),

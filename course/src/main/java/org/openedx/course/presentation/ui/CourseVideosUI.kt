@@ -76,10 +76,10 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.presentation.videos.CourseVideosUIState
-import java.io.File
 import java.util.Date
 
 @Composable
@@ -136,11 +136,7 @@ fun CourseVideosScreen(
                 viewModel.removeDownloadModels(it.id)
             } else {
                 viewModel.saveDownloadModels(
-                    context.externalCacheDir.toString() +
-                            File.separator +
-                            context
-                                .getString(org.openedx.core.R.string.app_name)
-                                .replace(Regex("\\s"), "_"), it.id
+                    FileUtil(context).getExternalAppDir().path, it.id
                 )
             }
         },
@@ -150,11 +146,7 @@ fun CourseVideosScreen(
                 viewModel.removeAllDownloadModels()
             } else {
                 viewModel.saveAllDownloadModels(
-                    context.externalCacheDir.toString() +
-                            File.separator +
-                            context
-                                .getString(org.openedx.core.R.string.app_name)
-                                .replace(Regex("\\s"), "_")
+                    FileUtil(context).getExternalAppDir().path
                 )
             }
         },

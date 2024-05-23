@@ -74,9 +74,9 @@ class CourseOutlineViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private val _openBlock = MutableSharedFlow<String>()
-    val openBlock: SharedFlow<String>
-        get() = _openBlock.asSharedFlow()
+    private val _resumeBlockId = MutableSharedFlow<String>()
+    val resumeBlockId: SharedFlow<String>
+        get() = _resumeBlockId.asSharedFlow()
 
     private var resumeSectionBlock: Block? = null
     private var resumeVerticalBlock: Block? = null
@@ -98,7 +98,7 @@ class CourseOutlineViewModel(
                     }
 
                     is CourseOpenBlock -> {
-                        _openBlock.emit(event.blockId)
+                        _resumeBlockId.emit(event.blockId)
                     }
                 }
             }

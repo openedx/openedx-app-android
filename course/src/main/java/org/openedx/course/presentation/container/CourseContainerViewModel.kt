@@ -58,7 +58,7 @@ import org.openedx.core.R as CoreR
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
-    private var openBlock: String,
+    private var resumeBlockId: String,
     private val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
@@ -182,9 +182,9 @@ class CourseContainerViewModel(
                     }
                     isReady
                 }
-                if (_dataReady.value == true && openBlock.isNotEmpty()) {
+                if (_dataReady.value == true && resumeBlockId.isNotEmpty()) {
                     delay(500L)
-                    courseNotifier.send(CourseOpenBlock(openBlock))
+                    courseNotifier.send(CourseOpenBlock(resumeBlockId))
                 }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {

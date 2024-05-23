@@ -9,4 +9,4 @@ data class CourseStatus(
     val lastVisitedModulePath: List<String>,
     val lastVisitedBlockId: String,
     val lastVisitedUnitDisplayName: String
-): Parcelable
+) : Parcelable

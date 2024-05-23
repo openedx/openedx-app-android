@@ -6,12 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,9 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -29,18 +25,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -56,28 +45,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
-import org.openedx.Lock
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseAssignments
@@ -98,13 +77,9 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
-import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.utils.TimeUtils
-import org.openedx.dashboard.R
 import org.openedx.dashboard.domain.CourseStatusFilter
 import java.util.Date
-import org.openedx.core.R as CoreR
 
 class AllEnrolledCoursesFragment : Fragment() {
 
@@ -116,7 +91,7 @@ class AllEnrolledCoursesFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                AllEnrolledCoursesScreen(
+                AllEnrolledCoursesView(
                     fragmentManager = requireActivity().supportFragmentManager
                 )
             }
@@ -125,21 +100,17 @@ class AllEnrolledCoursesFragment : Fragment() {
 }
 
 @Composable
-private fun AllEnrolledCoursesScreen(
+private fun AllEnrolledCoursesView(
     viewModel: AllEnrolledCoursesViewModel = koinViewModel(),
     fragmentManager: FragmentManager
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val refreshing by viewModel.updating.collectAsState(false)
-    val canLoadMore by viewModel.canLoadMore.collectAsState(false)
 
-    AllEnrolledCoursesScreen(
+    AllEnrolledCoursesView(
         apiHostUrl = viewModel.apiHostUrl,
         state = uiState,
         uiMessage = uiMessage,
-        canLoadMore = canLoadMore,
-        refreshing = refreshing,
         hasInternetConnection = viewModel.hasInternetConnection,
         onAction = { action ->
             when (action) {
@@ -160,15 +131,12 @@ private fun AllEnrolledCoursesScreen(
                 }
 
                 AllEnrolledCoursesAction.Search -> {
-                    viewModel.dashboardRouter.navigateToCourseSearch(
-                        fragmentManager, ""
-                    )
+                    viewModel.navigateToCourseSearch(fragmentManager)
                 }
 
                 is AllEnrolledCoursesAction.OpenCourse -> {
                     with(action.enrolledCourse) {
-                        viewModel.dashboardCourseClickedEvent(course.id, course.name)
-                        viewModel.dashboardRouter.navigateToCourseOutline(
+                        viewModel.navigateToCourseOutline(
                             fragmentManager,
                             course.id,
                             course.name,
@@ -187,12 +155,10 @@ private fun AllEnrolledCoursesScreen(
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
-private fun AllEnrolledCoursesScreen(
+private fun AllEnrolledCoursesView(
     apiHostUrl: String,
     state: AllEnrolledCoursesUIState,
     uiMessage: UIMessage?,
-    canLoadMore: Boolean,
-    refreshing: Boolean,
     hasInternetConnection: Boolean,
     onAction: (AllEnrolledCoursesAction) -> Unit
 ) {
@@ -202,7 +168,7 @@ private fun AllEnrolledCoursesScreen(
     val scrollState = rememberLazyGridState()
     val columns = if (windowSize.isTablet) 3 else 2
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = refreshing,
+        refreshing = state.refreshing,
         onRefresh = { onAction(AllEnrolledCoursesAction.SwipeRefresh) }
     )
     val tabPagerState = rememberPagerState(pageCount = {
@@ -324,8 +290,8 @@ private fun AllEnrolledCoursesScreen(
                                     onAction(AllEnrolledCoursesAction.FilterChange(newFilter))
                                 }
                             )
-                            when (state) {
-                                is AllEnrolledCoursesUIState.Loading -> {
+                            when {
+                                state.showProgress -> {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize(),
@@ -335,7 +301,7 @@ private fun AllEnrolledCoursesScreen(
                                     }
                                 }
 
-                                is AllEnrolledCoursesUIState.Courses -> {
+                                !state.courses.isNullOrEmpty() -> {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -364,7 +330,7 @@ private fun AllEnrolledCoursesScreen(
                                                         )
                                                     }
                                                     item {
-                                                        if (canLoadMore) {
+                                                        if (state.canLoadMore) {
                                                             Box(
                                                                 modifier = Modifier
                                                                     .fillMaxWidth()
@@ -386,7 +352,7 @@ private fun AllEnrolledCoursesScreen(
                                     }
                                 }
 
-                                is AllEnrolledCoursesUIState.Empty -> {
+                                state.courses?.isEmpty() == true -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
@@ -405,7 +371,7 @@ private fun AllEnrolledCoursesScreen(
                             }
                         }
                         PullRefreshIndicator(
-                            refreshing,
+                            state.refreshing,
                             pullRefreshState,
                             Modifier.align(Alignment.TopCenter)
                         )
@@ -431,158 +397,6 @@ private fun AllEnrolledCoursesScreen(
     }
 }
 
-@Composable
-private fun CourseItem(
-    modifier: Modifier = Modifier,
-    course: EnrolledCourse,
-    apiHostUrl: String,
-    onClick: (EnrolledCourse) -> Unit,
-) {
-    Card(
-        modifier = modifier
-            .width(170.dp)
-            .height(180.dp)
-            .clickable {
-                onClick(course)
-            },
-        backgroundColor = MaterialTheme.appColors.background,
-        shape = MaterialTheme.appShapes.courseImageShape,
-        elevation = 4.dp
-    ) {
-        Box {
-            Column {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(apiHostUrl + course.course.courseImage)
-                        .error(CoreR.drawable.core_no_image_course)
-                        .placeholder(CoreR.drawable.core_no_image_course)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(90.dp)
-                )
-                val progress: Float = try {
-                    course.progress.assignmentsCompleted.toFloat() / course.progress.totalAssignmentsCount.toFloat()
-                } catch (_: ArithmeticException) {
-                    0f
-                }
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp),
-                    progress = progress,
-                    color = MaterialTheme.appColors.primary,
-                    backgroundColor = MaterialTheme.appColors.divider
-                )
-
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .padding(top = 4.dp),
-                    style = MaterialTheme.appTypography.labelMedium,
-                    color = MaterialTheme.appColors.textFieldHint,
-                    overflow = TextOverflow.Ellipsis,
-                    minLines = 1,
-                    maxLines = 2,
-                    text = stringResource(
-                        R.string.dashboard_course_date,
-                        TimeUtils.getCourseFormattedDate(
-                            LocalContext.current,
-                            Date(),
-                            course.auditAccessExpires,
-                            course.course.start,
-                            course.course.end,
-                            course.course.startType,
-                            course.course.startDisplay
-                        )
-                    )
-                )
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    text = course.course.name,
-                    style = MaterialTheme.appTypography.titleSmall,
-                    color = MaterialTheme.appColors.textDark,
-                    overflow = TextOverflow.Ellipsis,
-                    minLines = 1,
-                    maxLines = 2
-                )
-            }
-            if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
-                Lock()
-            }
-        }
-    }
-}
-
-@Composable
-private fun Header(
-    modifier: Modifier = Modifier,
-    onSearchClick: () -> Unit
-) {
-    Box(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Text(
-            modifier = Modifier.align(Alignment.CenterStart),
-            text = stringResource(id = R.string.dashboard_all_courses),
-            color = MaterialTheme.appColors.textDark,
-            style = MaterialTheme.appTypography.headlineBold
-        )
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .offset(x = 12.dp),
-            onClick = {
-                onSearchClick()
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textDark
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptyState(
-    currentCourseStatus: CourseStatusFilter
-) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            Modifier.width(200.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.dashboard_ic_book),
-                tint = MaterialTheme.appColors.textFieldBorder,
-                contentDescription = null
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                modifier = Modifier
-                    .testTag("txt_empty_state_title")
-                    .fillMaxWidth(),
-                text = stringResource(
-                    id = R.string.dashboard_no_status_courses,
-                    stringResource(currentCourseStatus.labelResId)
-                ),
-                color = MaterialTheme.appColors.textDark,
-                style = MaterialTheme.appTypography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
@@ -590,10 +404,10 @@ private fun EmptyState(
 @Composable
 private fun AllEnrolledCoursesPreview() {
     OpenEdXTheme {
-        AllEnrolledCoursesScreen(
+        AllEnrolledCoursesView(
             apiHostUrl = "http://localhost:8000",
-            state = AllEnrolledCoursesUIState.Courses(
-                listOf(
+            state = AllEnrolledCoursesUIState(
+                courses = listOf(
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
@@ -604,8 +418,6 @@ private fun AllEnrolledCoursesPreview() {
             ),
             uiMessage = null,
             hasInternetConnection = true,
-            refreshing = false,
-            canLoadMore = false,
             onAction = {}
         )
     }
