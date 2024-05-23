@@ -587,11 +587,10 @@ fun ThreadItem(
                 thread.commentCount - 1
             ),
             painter = painterResource(id = R.drawable.discussion_ic_responses),
-            color = MaterialTheme.appColors.textAccent,
+            color = MaterialTheme.appColors.textPrimary,
             textStyle = MaterialTheme.appTypography.labelLarge
         )
     }
-
 }
 
 

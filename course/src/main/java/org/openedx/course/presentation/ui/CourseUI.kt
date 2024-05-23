@@ -348,7 +348,7 @@ fun NavigationUnitsButtons(
                 colors = ButtonDefaults.outlinedButtonColors(
                     backgroundColor = MaterialTheme.appColors.background
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.primaryButtonBorder),
                 elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onPrevClick,
@@ -377,7 +377,7 @@ fun NavigationUnitsButtons(
             modifier = Modifier
                 .height(42.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.buttonBackground
+                backgroundColor = MaterialTheme.appColors.primaryButtonBackground
             ),
             elevation = null,
             shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -389,7 +389,7 @@ fun NavigationUnitsButtons(
             ) {
                 Text(
                     text = nextButtonText,
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.labelLarge
                 )
                 Spacer(Modifier.width(8.dp))
@@ -397,7 +397,7 @@ fun NavigationUnitsButtons(
                     modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
                     painter = nextButtonIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.buttonText
+                    tint = MaterialTheme.appColors.primaryButtonText
                 )
             }
         }
@@ -525,7 +525,11 @@ fun VideoSubtitles(
         val scaffoldState = rememberScaffoldState()
         val subtitles = timedTextObject.captions.values.toList()
         Scaffold(scaffoldState = scaffoldState) {
-            Column(Modifier.padding(it)) {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .background(color = MaterialTheme.appColors.background)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,

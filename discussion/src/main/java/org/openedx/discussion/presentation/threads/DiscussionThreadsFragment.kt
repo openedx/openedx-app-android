@@ -393,7 +393,7 @@ private fun DiscussionThreadsScreen(
                                                     text = filterType.first,
                                                     painter = painterResource(id = discussionR.drawable.discussion_ic_filter),
                                                     textStyle = MaterialTheme.appTypography.labelMedium,
-                                                    color = MaterialTheme.appColors.textAccent,
+                                                    color = MaterialTheme.appColors.textPrimary,
                                                     onClick = {
                                                         currentSelectedList = FilterType.type
                                                         expandedList = listOf(
@@ -423,7 +423,7 @@ private fun DiscussionThreadsScreen(
                                                     text = sortType.first,
                                                     painter = painterResource(id = discussionR.drawable.discussion_ic_sort),
                                                     textStyle = MaterialTheme.appTypography.labelMedium,
-                                                    color = MaterialTheme.appColors.textAccent,
+                                                    color = MaterialTheme.appColors.textPrimary,
                                                     onClick = {
                                                         currentSelectedList = SortType.type
                                                         expandedList = listOf(
@@ -475,7 +475,7 @@ private fun DiscussionThreadsScreen(
                                                                 Modifier
                                                                     .size(40.dp)
                                                                     .clip(CircleShape)
-                                                                    .background(MaterialTheme.appColors.primary)
+                                                                    .background(MaterialTheme.appColors.secondaryButtonBackground)
                                                                     .clickable {
                                                                         onCreatePostClick()
                                                                     },
@@ -485,7 +485,7 @@ private fun DiscussionThreadsScreen(
                                                                     modifier = Modifier.size(16.dp),
                                                                     painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
                                                                     contentDescription = stringResource(id = discussionR.string.discussion_add_comment),
-                                                                    tint = MaterialTheme.appColors.buttonText
+                                                                    tint = MaterialTheme.appColors.primaryButtonText
                                                                 )
                                                             }
                                                         }

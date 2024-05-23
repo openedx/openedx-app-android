@@ -174,7 +174,7 @@ internal fun ManageAccountView(
                                         onClick = {
                                             onAction(ManageAccountViewAction.EditAccountClick)
                                         },
-                                        borderColor = MaterialTheme.appColors.buttonBackground,
+                                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
                                         textColor = MaterialTheme.appColors.textAccent
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
