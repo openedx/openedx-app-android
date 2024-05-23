@@ -137,4 +137,14 @@
     <string name="core_course_container_nav_discussions">Discussions</string>
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
+
+    <!-- IAP -->
+    <string name="iap_upgrade_access_course">Upgrade to access more features</string>
+    <string name="iap_upgrade_course">Upgrade %s</string>
+    <string name="iap_upgrade_price">Upgrade now for %s</string>
+    <string name="iap_upgrading">Unlocking\n full access\n to your course</string>
+    <string name="iap_get_help">Get help</string>
+    <string name="iap_earn_certificate">Earn a verified certificate of completion to showcase on your resume</string>
+    <string name="iap_unlock_access">Unlock access to all course activities, including graded assignments</string>
+    <string name="iap_full_access_course">Full access to course content and course material even after the course ends</string>
 </resources>

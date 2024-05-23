@@ -89,8 +89,8 @@ import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IAPDialog
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
+import org.openedx.core.ui.UpgradeToAccessView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -313,53 +313,6 @@ internal fun MyCoursesScreen(
                         .fillMaxWidth()
                         .pullRefresh(pullRefreshState),
                 ) {
-                    when (iapState) {
-                        is IAPUIState.Loading -> {
-                            IAPDialog(
-                                courseTitle = iapState.courseName,
-                                isLoading = true,
-                                onDismiss = {
-                                    iapCallback(IAPAction.CLEAR, null)
-                                })
-                        }
-
-                        is IAPUIState.ProductData -> {
-                            IAPDialog(
-                                courseTitle = iapState.courseName,
-                                formattedPrice = iapState.formattedPrice,
-                                onUpgradeNow = {
-                                    iapCallback(IAPAction.START_PURCHASE_FLOW, null)
-                                }, onDismiss = {
-                                    iapCallback(IAPAction.CLEAR, null)
-                                })
-                        }
-
-                        is IAPUIState.Error -> {
-                            IAPDialog(
-                                courseTitle = iapState.courseName,
-                                isError = true,
-                                onDismiss = {
-                                    iapCallback(IAPAction.CLEAR, null)
-                                }, onGetHelp = {
-                                    onGetHelp(iapState.feedbackErrorMessage)
-                                    iapCallback(IAPAction.CLEAR, null)
-                                })
-                        }
-
-                        is IAPUIState.PurchaseProduct -> {
-                            iapCallback(IAPAction.PURCHASE_PRODUCT, null)
-                        }
-
-                        is IAPUIState.FlowComplete -> {
-                            onSwipeRefresh()
-                            iapCallback(IAPAction.FLOW_COMPLETE, null)
-                        }
-
-                        else -> {
-                            iapCallback(IAPAction.CLEAR, null)
-                        }
-                    }
-
                     when (state) {
                         is DashboardUIState.Loading -> {
                             Box(
@@ -395,19 +348,11 @@ internal fun MyCoursesScreen(
                                                 windowSize,
                                                 onClick = { onItemClick(it) })
                                             if (course.isUpgradeable && state.isValuePropEnabled) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(vertical = 16.dp),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    OpenEdXButton(text = "Upgrade to access more features",
-                                                        onClick = {
-                                                            iapCallback(
-                                                                IAPAction.LOAD_PRICE,
-                                                                course
-                                                            )
-                                                        })
+                                                UpgradeToAccessView(modifier = Modifier.padding(bottom = 16.dp)) {
+                                                    iapCallback(
+                                                        IAPAction.LOAD_PRICE,
+                                                        course
+                                                    )
                                                 }
                                             }
                                             Divider()
@@ -481,6 +426,52 @@ internal fun MyCoursesScreen(
                                     onReloadClick()
                                 }
                             )
+                        }
+                    }
+                    when (iapState) {
+                        is IAPUIState.Loading -> {
+                            IAPDialog(
+                                courseTitle = iapState.courseName,
+                                isLoading = true,
+                                onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                })
+                        }
+
+                        is IAPUIState.ProductData -> {
+                            IAPDialog(
+                                courseTitle = iapState.courseName,
+                                formattedPrice = iapState.formattedPrice,
+                                onUpgradeNow = {
+                                    iapCallback(IAPAction.START_PURCHASE_FLOW, null)
+                                }, onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                })
+                        }
+
+                        is IAPUIState.Error -> {
+                            IAPDialog(
+                                courseTitle = iapState.courseName,
+                                isError = true,
+                                onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null)
+                                }, onGetHelp = {
+                                    onGetHelp(iapState.feedbackErrorMessage)
+                                    iapCallback(IAPAction.CLEAR, null)
+                                })
+                        }
+
+                        is IAPUIState.PurchaseProduct -> {
+                            iapCallback(IAPAction.PURCHASE_PRODUCT, null)
+                        }
+
+                        is IAPUIState.FlowComplete -> {
+                            onSwipeRefresh()
+                            iapCallback(IAPAction.FLOW_COMPLETE, null)
+                        }
+
+                        else -> {
+                            iapCallback(IAPAction.CLEAR, null)
                         }
                     }
                 }

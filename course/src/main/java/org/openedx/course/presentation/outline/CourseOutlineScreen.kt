@@ -62,6 +62,8 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IAPDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.TextIcon
+import org.openedx.core.ui.UpgradeToAccessView
+import org.openedx.core.ui.UpgradeToAccessViewType
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -301,58 +303,6 @@ private fun CourseOutlineUI(
                 color = MaterialTheme.appColors.background
             ) {
                 Box {
-                    when (iapState) {
-                        is IAPUIState.Loading -> {
-                            IAPDialog(
-                                courseTitle = iapState.courseName,
-                                isLoading = true,
-                                onDismiss = {
-                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
-                                })
-                        }
-
-                        is IAPUIState.ProductData -> {
-                            IAPDialog(
-                                courseTitle = iapState.courseName,
-                                formattedPrice = iapState.formattedPrice,
-                                onUpgradeNow = {
-                                    iapCallback(
-                                        IAPAction.START_PURCHASE_FLOW,
-                                        null,
-                                        null,
-                                        null,
-                                        null
-                                    )
-                                }, onDismiss = {
-                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
-                                })
-                        }
-
-                        is IAPUIState.Error -> {
-                            IAPDialog(
-                                courseTitle = iapState.courseName,
-                                isError = true,
-                                onDismiss = {
-                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
-                                }, onGetHelp = {
-                                    onGetHelp(iapState.feedbackErrorMessage)
-                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
-                                })
-                        }
-
-                        is IAPUIState.PurchaseProduct -> {
-                            iapCallback(IAPAction.PURCHASE_PRODUCT, null, null, null, null)
-                        }
-
-                        is IAPUIState.FlowComplete -> {
-                            updateCourseDataPostIAP()
-                            iapCallback(IAPAction.FLOW_COMPLETE, null, null, null, null)
-                        }
-
-                        else -> {
-                            iapCallback(IAPAction.CLEAR, null, null, null, null)
-                        }
-                    }
                     when (uiState) {
                         is CourseOutlineUIState.CourseData -> {
                             LazyColumn(
@@ -422,22 +372,17 @@ private fun CourseOutlineUI(
                                 }
                                 if (uiState.courseStructure.isUpgradeable && uiState.isValuePropEnabled) {
                                     item {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 16.dp, horizontal = 24.dp),
-                                            contentAlignment = Alignment.Center
+                                        UpgradeToAccessView(
+                                            modifier = Modifier.padding(all = 16.dp),
+                                            type = UpgradeToAccessViewType.COURSE,
                                         ) {
-                                            OpenEdXButton(text = "Upgrade to access more features",
-                                                onClick = {
-                                                    iapCallback(
-                                                        IAPAction.LOAD_PRICE,
-                                                        uiState.courseStructure.id,
-                                                        uiState.courseStructure.name,
-                                                        uiState.courseStructure.isSelfPaced,
-                                                        uiState.courseStructure.productInfo
-                                                    )
-                                                })
+                                            iapCallback(
+                                                IAPAction.LOAD_PRICE,
+                                                uiState.courseStructure.id,
+                                                uiState.courseStructure.name,
+                                                uiState.courseStructure.isSelfPaced,
+                                                uiState.courseStructure.productInfo
+                                            )
                                         }
                                     }
                                 }
@@ -517,6 +462,58 @@ private fun CourseOutlineUI(
                         }
 
                         CourseOutlineUIState.Loading -> {}
+                    }
+                    when (iapState) {
+                        is IAPUIState.Loading -> {
+                            IAPDialog(
+                                courseTitle = iapState.courseName,
+                                isLoading = true,
+                                onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
+                                })
+                        }
+
+                        is IAPUIState.ProductData -> {
+                            IAPDialog(
+                                courseTitle = iapState.courseName,
+                                formattedPrice = iapState.formattedPrice,
+                                onUpgradeNow = {
+                                    iapCallback(
+                                        IAPAction.START_PURCHASE_FLOW,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                    )
+                                }, onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
+                                })
+                        }
+
+                        is IAPUIState.Error -> {
+                            IAPDialog(
+                                courseTitle = iapState.courseName,
+                                isError = true,
+                                onDismiss = {
+                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
+                                }, onGetHelp = {
+                                    onGetHelp(iapState.feedbackErrorMessage)
+                                    iapCallback(IAPAction.CLEAR, null, null, null, null)
+                                })
+                        }
+
+                        is IAPUIState.PurchaseProduct -> {
+                            iapCallback(IAPAction.PURCHASE_PRODUCT, null, null, null, null)
+                        }
+
+                        is IAPUIState.FlowComplete -> {
+                            updateCourseDataPostIAP()
+                            iapCallback(IAPAction.FLOW_COMPLETE, null, null, null, null)
+                        }
+
+                        else -> {
+                            iapCallback(IAPAction.CLEAR, null, null, null, null)
+                        }
                     }
                 }
             }
