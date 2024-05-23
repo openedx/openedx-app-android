@@ -26,6 +26,8 @@ data class AppColors(
     val primaryButtonBorder: Color,
     val primaryButtonBorderedText: Color,
 
+    // The default secondary button styling is identical to the primary button styling.
+    // However, you can customize it if your brand utilizes two accent colors.
     val secondaryButtonBackground: Color,
     val secondaryButtonText: Color,
     val secondaryButtonBorder: Color,
