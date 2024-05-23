@@ -648,7 +648,7 @@ private fun EditProfileScreen(
                                         },
                                     painter = painterResource(id = R.drawable.profile_ic_edit_image),
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.appColors.onPrimary
                                 )
                             }
                             Spacer(modifier = Modifier.height(20.dp))
@@ -949,10 +949,12 @@ private fun SelectableField(
         )
     } else {
         TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
-            disabledTextColor = MaterialTheme.appColors.textPrimary,
+            textColor = MaterialTheme.appColors.textFieldText,
             backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.textFieldText,
+            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
+            disabledTextColor = MaterialTheme.appColors.textFieldHint,
             disabledPlaceholderColor = MaterialTheme.appColors.textFieldHint
         )
     }
@@ -991,7 +993,7 @@ private fun SelectableField(
                 Text(
                     modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textFieldText,
                     style = MaterialTheme.appTypography.bodyMedium
                 )
             }
@@ -1029,8 +1031,10 @@ private fun InputEditField(
                 onValueChanged(it)
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground
+                cursorColor = MaterialTheme.appColors.textFieldText,
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
@@ -1116,14 +1120,14 @@ private fun LeaveProfile(
                 OpenEdXButton(
                     text = stringResource(id = R.string.profile_leave),
                     onClick = onLeaveClick,
-                    backgroundColor = MaterialTheme.appColors.warning,
+                    backgroundColor = MaterialTheme.appColors.primary,
                     content = {
                         Text(
                             modifier = Modifier
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.textWarning,
+                            color = MaterialTheme.appColors.primaryButtonText,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )
@@ -1131,7 +1135,7 @@ private fun LeaveProfile(
                 )
                 Spacer(Modifier.height(24.dp))
                 OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textPrimary,
+                    borderColor = MaterialTheme.appColors.textFieldBorder,
                     textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
@@ -1208,20 +1212,20 @@ private fun LeaveProfileLandscape(
                     ) {
                         OpenEdXButton(
                             text = stringResource(id = R.string.profile_leave),
-                            backgroundColor = MaterialTheme.appColors.warning,
+                            backgroundColor = MaterialTheme.appColors.primary,
                             content = {
                                 AutoSizeText(
                                     modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),
                                     text = stringResource(id = R.string.profile_leave),
                                     style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.textDark
+                                    color = MaterialTheme.appColors.primaryButtonText
                                 )
                             },
                             onClick = onLeaveClick
                         )
                         Spacer(Modifier.height(16.dp))
                         OpenEdXOutlinedButton(
-                            borderColor = MaterialTheme.appColors.textPrimary,
+                            borderColor = MaterialTheme.appColors.textFieldBorder,
                             textColor = MaterialTheme.appColors.textPrimary,
                             text = stringResource(id = R.string.profile_keep_editing),
                             onClick = onDismissRequest,

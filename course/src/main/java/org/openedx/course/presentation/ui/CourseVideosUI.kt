@@ -630,6 +630,7 @@ private fun AllVideosDownloadItem(
                 }
             },
             colors = SwitchDefaults.colors(
+                uncheckedThumbColor = MaterialTheme.appColors.primary,
                 checkedThumbColor = MaterialTheme.appColors.primary,
                 checkedTrackColor = MaterialTheme.appColors.primary
             )

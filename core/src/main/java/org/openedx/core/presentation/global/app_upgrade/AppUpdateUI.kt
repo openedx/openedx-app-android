@@ -292,7 +292,7 @@ fun DefaultTextButton(
             .testTag("btn_primary")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.appColors.buttonBackground
+            backgroundColor = MaterialTheme.appColors.primaryButtonBackground
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -305,7 +305,7 @@ fun DefaultTextButton(
             Text(
                 modifier = Modifier.testTag("txt_primary"),
                 text = text,
-                color = MaterialTheme.appColors.buttonText,
+                color = MaterialTheme.appColors.primaryButtonText,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }

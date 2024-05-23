@@ -329,7 +329,7 @@ internal fun SignUpView(
                                             modifier = Modifier
                                                 .testTag("txt_sign_up_title")
                                                 .fillMaxWidth(),
-                                            text = stringResource(id = R.string.auth_sign_up),
+                                            text = stringResource(id = coreR.string.core_register),
                                             color = MaterialTheme.appColors.textPrimary,
                                             style = MaterialTheme.appTypography.displaySmall
                                         )
@@ -437,6 +437,8 @@ internal fun SignUpView(
                                     OpenEdXButton(
                                         modifier = buttonWidth.testTag("btn_create_account"),
                                         text = stringResource(id = R.string.auth_create_account),
+                                        textColor = MaterialTheme.appColors.primaryButtonText,
+                                        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                                         onClick = {
                                             showErrorMap.clear()
                                             onRegisterClick(AuthType.PASSWORD)
