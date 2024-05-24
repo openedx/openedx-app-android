@@ -41,7 +41,7 @@ fun UpgradeToAccessView(
         modifier = modifier
             .clip(shape = shape)
             .fillMaxWidth()
-            .background(color = MaterialTheme.appColors.buttonBackground)
+            .background(color = MaterialTheme.appColors.primaryButtonBackground)
             .clickable {
                 onClick()
             }
@@ -52,19 +52,19 @@ fun UpgradeToAccessView(
             modifier = Modifier.padding(end = 16.dp),
             imageVector = Icons.Filled.Lock,
             contentDescription = null,
-            tint = MaterialTheme.appColors.buttonText
+            tint = MaterialTheme.appColors.primaryButtonText
         )
         Text(
             modifier = Modifier.weight(1f),
             text = stringResource(id = R.string.iap_upgrade_access_course),
-            color = MaterialTheme.appColors.buttonText,
+            color = MaterialTheme.appColors.primaryButtonText,
             style = MaterialTheme.appTypography.labelLarge
         )
         Icon(
             modifier = Modifier.padding(start = 16.dp),
             imageVector = Icons.Filled.Info,
             contentDescription = null,
-            tint = MaterialTheme.appColors.buttonText
+            tint = MaterialTheme.appColors.primaryButtonText
         )
     }
 }
