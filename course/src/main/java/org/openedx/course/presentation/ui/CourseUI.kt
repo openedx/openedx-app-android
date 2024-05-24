@@ -47,6 +47,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.rememberScaffoldState
@@ -62,6 +63,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -84,10 +86,6 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.toFileSize
@@ -710,44 +708,55 @@ fun CourseExpandableChapterCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                    painterResource(id = R.drawable.course_ic_remove_download)
-                } else {
-                    painterResource(id = R.drawable.course_ic_start_download)
-                }
+                val downloadIconPainter =
+                    if (downloadedState == DownloadedState.DOWNLOADED) {
+                        rememberVectorPainter(Icons.Default.CloudDone)
+                    } else {
+                        painterResource(id = R.drawable.course_ic_start_download)
+                    }
                 val downloadIconDescription =
                     if (downloadedState == DownloadedState.DOWNLOADED) {
                         stringResource(id = R.string.course_accessibility_remove_course_section)
                     } else {
                         stringResource(id = R.string.course_accessibility_download_course_section)
                     }
+                val downloadIconTint =
+                    if (downloadedState == DownloadedState.DOWNLOADED) {
+                        MaterialTheme.appColors.successGreen
+                    } else {
+                        MaterialTheme.appColors.primary
+                    }
                 IconButton(modifier = iconModifier,
                     onClick = { onDownloadClick() }) {
                     Icon(
                         painter = downloadIconPainter,
                         contentDescription = downloadIconDescription,
-                        tint = MaterialTheme.appColors.primary
+                        tint = downloadIconTint
                     )
                 }
             } else if (downloadedState != null) {
                 Box(contentAlignment = Alignment.Center) {
-                    if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
+                    if (downloadedState == DownloadedState.DOWNLOADING) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(28.dp),
                             backgroundColor = Color.LightGray,
                             strokeWidth = 2.dp,
                             color = MaterialTheme.appColors.primary
                         )
+                    } else if (downloadedState == DownloadedState.WAITING) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.course_download_waiting),
+                            contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                            tint = MaterialTheme.appColors.error
+                        )
                     }
                     IconButton(
                         modifier = iconModifier.padding(2.dp),
                         onClick = { onDownloadClick() }) {
-                        Text(
-                            modifier = Modifier
-                                .padding(bottom = 4.dp),
-                            text = "i",
-                            style = MaterialTheme.appTypography.titleMedium,
-                            color = MaterialTheme.appColors.primary
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                            tint = MaterialTheme.appColors.error
                         )
                     }
                 }
@@ -811,36 +820,6 @@ fun CourseSubSectionItem(
                 text = assignmentString,
                 style = MaterialTheme.appTypography.bodySmall,
                 color = MaterialTheme.appColors.textPrimary
-            )
-        }
-    }
-}
-
-@Composable
-fun CourseToolbar(
-    title: String,
-    onBackClick: () -> Unit
-) {
-    OpenEdXTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .displayCutoutForLandscape()
-                .zIndex(1f)
-                .statusBarsPadding(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            BackBtn { onBackClick() }
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 56.dp),
-                text = title,
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
             )
         }
     }
@@ -1302,42 +1281,6 @@ private fun OfflineQueueCardPreview() {
     }
 }
 
-private val mockCourse = EnrolledCourse(
-    auditAccessExpires = Date(),
-    created = "created",
-    certificate = Certificate(""),
-    mode = "mode",
-    isActive = true,
-    course = EnrolledCourseData(
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        dynamicUpgradeDeadline = "",
-        subscriptionId = "",
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        courseImage = "",
-        courseAbout = "",
-        courseSharingUtmParameters = CourseSharingUtmParameters("", ""),
-        courseUpdates = "",
-        courseHandouts = "",
-        discussionUrl = "",
-        videoOutline = "",
-        isSelfPaced = false
-    )
-)
 private val mockChapterBlock = Block(
     id = "id",
     blockId = "blockId",
