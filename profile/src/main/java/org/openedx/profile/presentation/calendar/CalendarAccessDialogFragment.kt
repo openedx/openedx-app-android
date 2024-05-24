@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,9 +50,7 @@ class CalendarAccessDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
-        if (dialog != null && dialog!!.window != null) {
-            dialog!!.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        }
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
@@ -64,6 +64,7 @@ class CalendarAccessDialogFragment : DialogFragment() {
                             Uri.parse("package:" + config.getAppId())
                         )
                         startActivity(intent)
+                        dismiss()
                     }
                 )
             }
@@ -71,6 +72,8 @@ class CalendarAccessDialogFragment : DialogFragment() {
     }
 
     companion object {
+        const val DIALOG_TAG = "CalendarAccessDialogFragment"
+
         fun newInstance(): CalendarAccessDialogFragment {
             return CalendarAccessDialogFragment()
         }
@@ -124,7 +127,7 @@ private fun CalendarAccessDialog(
                 content = {
                     TextIcon(
                         text = stringResource(id = R.string.profile_grant_access_calendar),
-                        painter = painterResource(id = CoreR.drawable.core_ic_external_link),
+                        icon = Icons.AutoMirrored.Filled.OpenInNew,
                         color = MaterialTheme.appColors.buttonText,
                         textStyle = MaterialTheme.appTypography.labelLarge,
                         iconModifier = Modifier.padding(start = 4.dp)

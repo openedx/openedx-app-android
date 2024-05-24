@@ -78,9 +78,7 @@ class NewCalendarDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
-        if (dialog != null && dialog!!.window != null) {
-            dialog!!.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        }
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
@@ -89,7 +87,7 @@ class NewCalendarDialogFragment : DialogFragment() {
                         dismiss()
                     },
                     onBeginSyncingClick = { calendarName, calendarColor ->
-                        //TODO
+                        //TODO Create calendar and sync events
                     }
                 )
             }
@@ -97,6 +95,8 @@ class NewCalendarDialogFragment : DialogFragment() {
     }
 
     companion object {
+        const val DIALOG_TAG = "NewCalendarDialogFragment"
+
         fun newInstance(): NewCalendarDialogFragment {
             return NewCalendarDialogFragment()
         }
