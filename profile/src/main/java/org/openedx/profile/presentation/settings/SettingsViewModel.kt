@@ -189,7 +189,6 @@ class SettingsViewModel(
         router.navigateToCalendarSettings(fragmentManager)
     }
 
-
     fun restartApp(fragmentManager: FragmentManager) {
         router.restartApp(
             fragmentManager,

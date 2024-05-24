@@ -70,13 +70,13 @@ class CalendarFragment : Fragment() {
             val dialog = NewCalendarDialogFragment.newInstance()
             dialog.show(
                 requireActivity().supportFragmentManager,
-                NewCalendarDialogFragment::class.simpleName
+                NewCalendarDialogFragment.DIALOG_TAG
             )
         } else {
             val dialog = CalendarAccessDialogFragment.newInstance()
             dialog.show(
                 requireActivity().supportFragmentManager,
-                CalendarAccessDialogFragment::class.simpleName
+                CalendarAccessDialogFragment.DIALOG_TAG
             )
         }
     }

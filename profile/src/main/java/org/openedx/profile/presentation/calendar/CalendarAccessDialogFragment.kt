@@ -48,9 +48,7 @@ class CalendarAccessDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
-        if (dialog != null && dialog!!.window != null) {
-            dialog!!.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        }
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
@@ -71,6 +69,8 @@ class CalendarAccessDialogFragment : DialogFragment() {
     }
 
     companion object {
+        const val DIALOG_TAG = "CalendarAccessDialogFragment"
+
         fun newInstance(): CalendarAccessDialogFragment {
             return CalendarAccessDialogFragment()
         }
