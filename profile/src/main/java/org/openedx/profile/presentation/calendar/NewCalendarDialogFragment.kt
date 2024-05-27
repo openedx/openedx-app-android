@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -72,6 +73,8 @@ import androidx.compose.ui.graphics.Color as ComposeColor
 import org.openedx.core.R as CoreR
 
 class NewCalendarDialogFragment : DialogFragment() {
+
+    private val viewModel by viewModel<NewCalendarDialogViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,7 +90,7 @@ class NewCalendarDialogFragment : DialogFragment() {
                         dismiss()
                     },
                     onBeginSyncingClick = { calendarName, calendarColor ->
-                        //TODO Create calendar and sync events
+                        viewModel.syncCalendar(calendarName, calendarColor)
                     }
                 )
             }

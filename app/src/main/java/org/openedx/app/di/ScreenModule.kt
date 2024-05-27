@@ -54,6 +54,7 @@ import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import org.openedx.profile.presentation.calendar.CalendarViewModel
+import org.openedx.profile.presentation.calendar.NewCalendarDialogViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.manageaccount.ManageAccountViewModel
@@ -165,6 +166,7 @@ val screenModule = module {
     }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
     viewModel { CalendarViewModel(get()) }
+    viewModel { NewCalendarDialogViewModel(get()) }
 
     single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }

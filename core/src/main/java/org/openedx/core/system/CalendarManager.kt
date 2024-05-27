@@ -56,7 +56,8 @@ class CalendarManager(
      * Create or update the calendar if it is already existed in mobile calendar app
      */
     fun createOrUpdateCalendar(
-        calendarTitle: String
+        calendarTitle: String,
+        calendarColor: Long
     ): Long {
         val calendarId = getCalendarId(
             calendarTitle = calendarTitle
@@ -67,7 +68,8 @@ class CalendarManager(
         }
 
         return createCalendar(
-            calendarTitle = calendarTitle
+            calendarTitle = calendarTitle,
+            calendarColor = calendarColor
         )
     }
 
@@ -75,7 +77,8 @@ class CalendarManager(
      * Method to create a separate calendar based on course name in mobile calendar app
      */
     private fun createCalendar(
-        calendarTitle: String
+        calendarTitle: String,
+        calendarColor: Long
     ): Long {
         val contentValues = ContentValues()
         contentValues.put(CalendarContract.Calendars.NAME, calendarTitle)
@@ -94,7 +97,7 @@ class CalendarManager(
         contentValues.put(CalendarContract.Calendars.VISIBLE, 1)
         contentValues.put(
             CalendarContract.Calendars.CALENDAR_COLOR,
-            ContextCompat.getColor(context, org.openedx.core.R.color.primary)
+            calendarColor
         )
         val creationUri: Uri? = asSyncAdapter(
             Uri.parse(CalendarContract.Calendars.CONTENT_URI.toString()),
