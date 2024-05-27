@@ -226,7 +226,7 @@ private fun LearnDropdownMenu(
                     val textColor: Color
                     if (currentValue == learnType) {
                         background = MaterialTheme.appColors.primary
-                        textColor = MaterialTheme.appColors.buttonText
+                        textColor = MaterialTheme.appColors.primaryButtonText
                     } else {
                         background = Color.Transparent
                         textColor = MaterialTheme.appColors.textDark

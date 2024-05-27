@@ -67,6 +67,7 @@ import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseExpandableChapterCard
+import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
 import java.util.Date
@@ -255,6 +256,28 @@ private fun CourseOutlineUI(
                                         }
                                     }
                                 }
+
+                                val certificate = uiState.courseStructure.certificate
+                                if (certificate?.isCertificateEarned() == true) {
+                                    item {
+                                        CourseMessage(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 12.dp)
+                                                .then(listPadding),
+                                            icon = painterResource(R.drawable.ic_course_certificate),
+                                            message = stringResource(
+                                                R.string.course_you_earned_certificate,
+                                                uiState.courseStructure.name
+                                            ),
+                                            action = stringResource(R.string.course_view_certificate),
+                                            onActionClick = {
+                                                onCertificateClick(certificate.certificateURL ?: "")
+                                            }
+                                        )
+                                    }
+                                }
+
                                 if (uiState.resumeComponent != null) {
                                     item {
                                         Box(listPadding) {
@@ -400,7 +423,7 @@ private fun ResumeCourse(
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
                     painter = painterResource(id = CoreR.drawable.core_ic_forward),
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
@@ -459,7 +482,7 @@ private fun ResumeCourseTablet(
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
                     painter = painterResource(id = CoreR.drawable.core_ic_forward),
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }

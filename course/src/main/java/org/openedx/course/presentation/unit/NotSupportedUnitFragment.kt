@@ -139,14 +139,14 @@ private fun NotSupportedUnitScreen(
                     .height(42.dp),
                     shape = MaterialTheme.appShapes.buttonShape,
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.appColors.buttonBackground
+                        backgroundColor = MaterialTheme.appColors.primaryButtonBackground
                     ),
                     onClick = {
                         uriHandler.openUri(uri)
                     }) {
                     Text(
                         text = stringResource(id = courseR.string.course_open_in_browser),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
                         style = MaterialTheme.appTypography.labelLarge
                     )
                 }

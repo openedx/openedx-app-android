@@ -3,9 +3,11 @@ package org.openedx.discovery.presentation.catalog
 import android.annotation.SuppressLint
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import org.openedx.core.extension.applyDarkModeIfEnabled
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
@@ -20,7 +22,7 @@ fun CatalogWebViewScreen(
     onUriClick: (String, linkAuthority) -> Unit,
 ): WebView {
     val context = LocalContext.current
-
+    val isDarkTheme = isSystemInDarkTheme()
     return remember {
         WebView(context).apply {
             webViewClient = object : DefaultWebViewClient(
@@ -93,6 +95,7 @@ fun CatalogWebViewScreen(
             isHorizontalScrollBarEnabled = false
 
             loadUrl(url)
+            applyDarkModeIfEnabled(isDarkTheme)
         }
     }
 }

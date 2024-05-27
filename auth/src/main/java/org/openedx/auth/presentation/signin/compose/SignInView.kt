@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -195,7 +196,8 @@ internal fun LoginScreen(
                                 modifier = Modifier.testTag("txt_${state.agreement.name}"),
                                 fullText = linkedText.text,
                                 hyperLinks = linkedText.links,
-                                linkTextColor = MaterialTheme.appColors.primary,
+                                linkTextColor = MaterialTheme.appColors.textHyperLink,
+                                linkTextDecoration = TextDecoration.Underline,
                                 action = { link ->
                                     onEvent(AuthEvent.OpenLink(linkedText.links, link))
                                 },
@@ -264,7 +266,7 @@ private fun AuthForm(
                         onEvent(AuthEvent.ForgotPasswordClick)
                     },
                 text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.primary,
+                color = MaterialTheme.appColors.info_variant,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
@@ -275,6 +277,8 @@ private fun AuthForm(
             OpenEdXButton(
                 modifier = buttonWidth.testTag("btn_sign_in"),
                 text = stringResource(id = coreR.string.core_sign_in),
+                textColor = MaterialTheme.appColors.primaryButtonText,
+                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                 onClick = {
                     onEvent(AuthEvent.SignIn(login = login, password = password))
                 }
@@ -323,8 +327,10 @@ private fun PasswordTextField(
             onValueChanged(it.text.trim())
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.appColors.textFieldText,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground
+            cursorColor = MaterialTheme.appColors.textFieldText,
         ),
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {

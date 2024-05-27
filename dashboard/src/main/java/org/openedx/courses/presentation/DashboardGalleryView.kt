@@ -622,19 +622,19 @@ private fun ResumeButton(
         if (primaryCourse.courseStatus == null) {
             Icon(
                 imageVector = Icons.Default.School,
-                tint = MaterialTheme.appColors.buttonText,
+                tint = MaterialTheme.appColors.primaryButtonText,
                 contentDescription = null
             )
             Text(
                 modifier = Modifier.weight(1f),
                 text = stringResource(R.string.dashboard_start_course),
-                color = MaterialTheme.appColors.buttonText,
+                color = MaterialTheme.appColors.primaryButtonText,
                 style = MaterialTheme.appTypography.titleSmall
             )
         } else {
             Icon(
                 imageVector = Icons.Default.School,
-                tint = MaterialTheme.appColors.buttonText,
+                tint = MaterialTheme.appColors.primaryButtonText,
                 contentDescription = null
             )
             Column(
@@ -643,12 +643,12 @@ private fun ResumeButton(
             ) {
                 Text(
                     text = stringResource(R.string.dashboard_resume_course),
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.labelSmall
                 )
                 Text(
                     text = primaryCourse.courseStatus?.lastVisitedUnitDisplayName ?: "",
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.titleSmall
                 )
             }
@@ -656,7 +656,7 @@ private fun ResumeButton(
         Icon(
             modifier = Modifier.size(16.dp),
             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-            tint = MaterialTheme.appColors.buttonText,
+            tint = MaterialTheme.appColors.primaryButtonText,
             contentDescription = null
         )
     }
@@ -719,7 +719,7 @@ private fun FindACourseButton(
         }
     ) {
         Text(
-            color = MaterialTheme.appColors.buttonText,
+            color = MaterialTheme.appColors.primaryButtonText,
             text = stringResource(id = R.string.dashboard_find_a_course)
         )
     }

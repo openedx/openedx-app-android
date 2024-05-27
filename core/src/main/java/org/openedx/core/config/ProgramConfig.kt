@@ -14,7 +14,7 @@ data class ProgramConfig(
 }
 
 data class ProgramWebViewConfig(
-    @SerializedName("PROGRAM_URL")
+    @SerializedName("BASE_URL")
     val programUrl: String = "",
     @SerializedName("PROGRAM_DETAIL_URL_TEMPLATE")
     val programDetailUrlTemplate: String = "",

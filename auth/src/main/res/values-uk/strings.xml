@@ -5,7 +5,6 @@
     <string name="auth_email">Електронна пошта</string>
     <string name="auth_invalid_email">Неправильна E-mail адреса</string>
     <string name="auth_invalid_password">Пароль занадто короткий</string>
-    <string name="auth_welcome_back">Ласкаво просимо! Будь ласка, авторизуйтесь, щоб продовжити.</string>
     <string name="auth_show_optional_fields">Показати додаткові поля</string>
     <string name="auth_hide_optional_fields">Приховати додаткові поля</string>
     <string name="auth_create_account">Створити акаунт</string>
@@ -15,6 +14,5 @@
     <string name="auth_check_your_email">Перевірте свою електронну пошту</string>
     <string name="auth_restore_password_success">Ми надіслали інструкції щодо відновлення пароля на вашу електронну пошту %s</string>
     <string name="auth_enter_password">Введіть пароль</string>
-    <string name="auth_create_new_account">Створити новий аккаунт.</string>
 
 </resources>

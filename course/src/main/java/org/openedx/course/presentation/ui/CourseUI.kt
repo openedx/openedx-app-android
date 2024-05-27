@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -45,8 +44,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,28 +57,24 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.db.DownloadModel
@@ -93,7 +86,6 @@ import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -105,89 +97,6 @@ import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.core.R as coreR
-
-@Composable
-fun CourseImageHeader(
-    modifier: Modifier,
-    apiHostUrl: String,
-    courseImage: String?,
-    courseCertificate: Certificate?,
-    onCertificateClick: (String) -> Unit = {},
-    courseName: String,
-) {
-    val configuration = LocalConfiguration.current
-    val windowSize = rememberWindowSize()
-    val contentScale =
-        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            ContentScale.Fit
-        } else {
-            ContentScale.Crop
-        }
-    val imageUrl = if (courseImage?.isLinkValid() == true) {
-        courseImage
-    } else {
-        apiHostUrl.dropLast(1) + courseImage
-    }
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .error(coreR.drawable.core_no_image_course)
-                .placeholder(coreR.drawable.core_no_image_course)
-                .build(),
-            contentDescription = stringResource(
-                id = coreR.string.core_accessibility_header_image_for,
-                courseName
-            ),
-            contentScale = contentScale,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(MaterialTheme.appShapes.cardShape)
-        )
-        if (courseCertificate?.isCertificateEarned() == true) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .clip(MaterialTheme.appShapes.cardShape)
-                    .background(MaterialTheme.appColors.certificateForeground),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    modifier = Modifier.testTag("ic_congratulations"),
-                    painter = painterResource(id = R.drawable.ic_course_completed_mark),
-                    contentDescription = stringResource(id = R.string.course_congratulations),
-                    tint = Color.White
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_congratulations"),
-                    text = stringResource(id = R.string.course_congratulations),
-                    style = MaterialTheme.appTypography.headlineMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_course_passed"),
-                    text = stringResource(id = R.string.course_passed),
-                    style = MaterialTheme.appTypography.bodyMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(20.dp))
-                OpenEdXOutlinedButton(
-                    modifier = Modifier,
-                    borderColor = Color.White,
-                    textColor = MaterialTheme.appColors.buttonText,
-                    text = stringResource(id = R.string.course_view_certificate),
-                    onClick = {
-                        courseCertificate.certificateURL?.let {
-                            onCertificateClick(it)
-                        }
-                    })
-            }
-        }
-    }
-}
 
 @Composable
 fun CourseSectionCard(
@@ -374,48 +283,6 @@ fun CardArrow(
 }
 
 @Composable
-fun SequentialItem(
-    block: Block,
-    onClick: (Block) -> Unit
-) {
-    val icon = if (block.isCompleted()) Icons.Filled.TaskAlt else Icons.Filled.Home
-    val iconColor =
-        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = 20.dp,
-                vertical = 12.dp
-            )
-            .clickable { onClick(block) },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(Modifier.weight(1f)) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                block.displayName,
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.textPrimary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-        }
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            tint = MaterialTheme.appColors.onSurface,
-            contentDescription = "Expandable Arrow"
-        )
-    }
-}
-
-@Composable
 fun VideoTitle(
     text: String,
     modifier: Modifier = Modifier,
@@ -472,7 +339,7 @@ fun NavigationUnitsButtons(
                 colors = ButtonDefaults.outlinedButtonColors(
                     backgroundColor = MaterialTheme.appColors.background
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.appColors.primary),
+                border = BorderStroke(1.dp, MaterialTheme.appColors.primaryButtonBorder),
                 elevation = null,
                 shape = MaterialTheme.appShapes.navigationButtonShape,
                 onClick = onPrevClick,
@@ -501,7 +368,7 @@ fun NavigationUnitsButtons(
             modifier = Modifier
                 .height(42.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.buttonBackground
+                backgroundColor = MaterialTheme.appColors.primaryButtonBackground
             ),
             elevation = null,
             shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -513,7 +380,7 @@ fun NavigationUnitsButtons(
             ) {
                 Text(
                     text = nextButtonText,
-                    color = MaterialTheme.appColors.buttonText,
+                    color = MaterialTheme.appColors.primaryButtonText,
                     style = MaterialTheme.appTypography.labelLarge
                 )
                 Spacer(Modifier.width(8.dp))
@@ -521,7 +388,7 @@ fun NavigationUnitsButtons(
                     modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
                     painter = nextButtonIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.buttonText
+                    tint = MaterialTheme.appColors.primaryButtonText
                 )
             }
         }
@@ -649,7 +516,11 @@ fun VideoSubtitles(
         val scaffoldState = rememberScaffoldState()
         val subtitles = timedTextObject.captions.values.toList()
         Scaffold(scaffoldState = scaffoldState) {
-            Column(Modifier.padding(it)) {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .background(color = MaterialTheme.appColors.background)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -851,36 +722,6 @@ fun CourseSubSectionItem(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun CourseToolbar(
-    title: String,
-    onBackClick: () -> Unit
-) {
-    OpenEdXTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .displayCutoutForLandscape()
-                .zIndex(1f)
-                .statusBarsPadding(),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            BackBtn { onBackClick() }
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 56.dp),
-                text = title,
-                color = MaterialTheme.appColors.textPrimary,
-                style = MaterialTheme.appTypography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
@@ -1203,6 +1044,49 @@ fun DatesShiftedSnackBar(
     }
 }
 
+@Composable
+fun CourseMessage(
+    modifier: Modifier = Modifier,
+    icon: Painter,
+    message: String,
+    action: String? = null,
+    onActionClick: () -> Unit = {}
+) {
+    Column {
+        Row(
+            modifier
+                .semantics(mergeDescendants = true) {}
+                .noRippleClickable(onActionClick)
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.CenterVertically),
+                tint = MaterialTheme.appColors.textPrimary
+            )
+            Column(Modifier.padding(start = 12.dp)) {
+                Text(
+                    text = message,
+                    color = MaterialTheme.appColors.textPrimary,
+                    style = MaterialTheme.appTypography.labelLarge
+                )
+                if (action != null) {
+                    Text(
+                        text = action,
+                        modifier = Modifier.padding(top = 4.dp),
+                        color = MaterialTheme.appColors.textPrimary,
+                        style = MaterialTheme.appTypography.labelLarge.copy(textDecoration = TextDecoration.Underline)
+                    )
+                }
+            }
+        }
+        Divider(
+            color = MaterialTheme.appColors.divider
+        )
+    }
+
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -1262,17 +1146,6 @@ private fun NavigationUnitsButtonsWithNextPreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun SequentialItemPreview() {
-    OpenEdXTheme {
-        Surface(color = MaterialTheme.appColors.background) {
-            SequentialItem(block = mockChapterBlock, onClick = {})
-        }
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
 private fun CourseChapterItemPreview() {
     OpenEdXTheme {
         Surface(color = MaterialTheme.appColors.background) {
@@ -1281,26 +1154,6 @@ private fun CourseChapterItemPreview() {
                 DownloadedState.DOWNLOADED,
                 onItemClick = {},
                 onDownloadClick = {}
-            )
-        }
-    }
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun CourseHeaderPreview() {
-    OpenEdXTheme {
-        Surface(color = MaterialTheme.appColors.background) {
-            CourseImageHeader(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(6.dp),
-                apiHostUrl = "",
-                courseCertificate = Certificate(""),
-                courseImage = "",
-                courseName = ""
             )
         }
     }
@@ -1352,6 +1205,27 @@ private fun OfflineQueueCardPreview() {
                 progressValue = 10,
                 progressSize = 30,
                 onDownloadClick = {}
+            )
+        }
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseMessagePreview() {
+    OpenEdXTheme {
+        Surface(color = MaterialTheme.appColors.background) {
+            CourseMessage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                icon = painterResource(R.drawable.ic_course_certificate),
+                message = stringResource(
+                    R.string.course_you_earned_certificate,
+                    "Demo Course"
+                ),
+                action = stringResource(R.string.course_view_certificate),
             )
         }
     }

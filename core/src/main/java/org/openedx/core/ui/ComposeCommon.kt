@@ -436,7 +436,7 @@ fun HyperlinkText(
         append(fullText)
         addStyle(
             style = SpanStyle(
-                color = MaterialTheme.appColors.textPrimary,
+                color = MaterialTheme.appColors.textPrimaryLight,
                 fontSize = fontSize
             ),
             start = 0,
@@ -452,7 +452,7 @@ fun HyperlinkText(
                     color = linkTextColor,
                     fontSize = fontSize,
                     fontWeight = linkTextFontWeight,
-                    textDecoration = linkTextDecoration
+                    textDecoration = linkTextDecoration,
                 ),
                 start = startIndex,
                 end = endIndex
@@ -637,7 +637,8 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = title
+            text = title,
+            color = MaterialTheme.appColors.onBackground
         )
         SearchBarStateless(
             modifier = Modifier
@@ -669,6 +670,7 @@ fun SheetContent(
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
+                    color = MaterialTheme.appColors.onBackground,
                     text = item.name,
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
@@ -1053,8 +1055,9 @@ fun OpenEdXButton(
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
-    backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null,
+    textColor: Color = MaterialTheme.appColors.primaryButtonText,
+    backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
+    content: (@Composable RowScope.() -> Unit)? = null
 ) {
     Button(
         modifier = Modifier
@@ -1072,7 +1075,7 @@ fun OpenEdXButton(
             Text(
                 modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
-                color = MaterialTheme.appColors.buttonText,
+                color = textColor,
                 style = MaterialTheme.appTypography.labelLarge
             )
         } else {
@@ -1088,6 +1091,7 @@ fun OpenEdXOutlinedButton(
     borderColor: Color,
     textColor: Color,
     text: String = "",
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -1097,6 +1101,7 @@ fun OpenEdXOutlinedButton(
             .then(modifier)
             .height(42.dp),
         onClick = onClick,
+        enabled = enabled,
         border = BorderStroke(1.dp, borderColor),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
@@ -1167,7 +1172,9 @@ fun ConnectionErrorView(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = R.string.core_reload),
-            onClick = onReloadClick
+            textColor = MaterialTheme.appColors.primaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+            onClick = onReloadClick,
         )
     }
 }
@@ -1184,6 +1191,8 @@ fun AuthButtonsPanel(
                 .width(0.dp)
                 .weight(1f),
             text = stringResource(id = R.string.core_register),
+            textColor = MaterialTheme.appColors.primaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = { onRegisterClick() }
         )
 
@@ -1194,8 +1203,9 @@ fun AuthButtonsPanel(
                 .padding(start = 16.dp),
             text = stringResource(id = R.string.core_sign_in),
             onClick = { onSignInClick() },
-            borderColor = MaterialTheme.appColors.textFieldBorder,
-            textColor = MaterialTheme.appColors.primary
+            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
+            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
         )
     }
 }
