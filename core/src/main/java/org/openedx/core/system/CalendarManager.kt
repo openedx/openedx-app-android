@@ -97,7 +97,7 @@ class CalendarManager(
         contentValues.put(CalendarContract.Calendars.VISIBLE, 1)
         contentValues.put(
             CalendarContract.Calendars.CALENDAR_COLOR,
-            calendarColor
+            calendarColor.toInt()
         )
         val creationUri: Uri? = asSyncAdapter(
             Uri.parse(CalendarContract.Calendars.CONTENT_URI.toString()),

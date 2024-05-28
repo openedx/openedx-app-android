@@ -8,6 +8,20 @@ class NewCalendarDialogViewModel(
 ) : BaseViewModel() {
 
     fun syncCalendar(calendarName: String, calendarColor: CalendarColor) {
-        calendarManager.createOrUpdateCalendar(calendarName, calendarColor.color)
+        val calendarId = calendarManager.createOrUpdateCalendar(calendarName, calendarColor.color)
+//        if (calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
+//
+//        }
+//        val courseDateBlock =  CourseDateBlock(
+//            title = "Homework 1: ABCD",
+//            description = "After this date, course content will be archived",
+//            date = Date(),
+//        )
+//        calendarManager.addEventsIntoCalendar(
+//            calendarId = calendarId,
+//            courseId = "",
+//            courseName = "",
+//            courseDateBlock = courseDateBlock
+//        )
     }
 }

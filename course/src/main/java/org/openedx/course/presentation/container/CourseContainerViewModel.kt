@@ -375,6 +375,9 @@ class CourseContainerViewModel(
     }
 
     private fun getCalendarId(): Long {
+//        return calendarManager.createOrUpdateCalendar(
+//            calendarTitle = _calendarSyncUIState.value.calendarTitle
+//        )
         return calendarManager.getCalendarId(
             calendarTitle = _calendarSyncUIState.value.calendarTitle
         )
