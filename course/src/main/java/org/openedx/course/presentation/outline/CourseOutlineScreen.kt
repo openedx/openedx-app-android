@@ -88,18 +88,6 @@ fun CourseOutlineScreen(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        onItemClick = { block ->
-            courseOutlineViewModel.sequentialClickedEvent(
-                block.blockId,
-                block.displayName
-            )
-            courseRouter.navigateToCourseSubsections(
-                fm = fragmentManager,
-                courseId = courseOutlineViewModel.courseId,
-                subSectionId = block.id,
-                mode = CourseViewMode.FULL
-            )
-        },
         onExpandClick = { block ->
             if (courseOutlineViewModel.switchCourseSections(block.id)) {
                 courseOutlineViewModel.sequentialClickedEvent(
@@ -109,15 +97,28 @@ fun CourseOutlineScreen(
             }
         },
         onSubSectionClick = { subSectionBlock ->
-            courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                courseOutlineViewModel.logUnitDetailViewedEvent(
-                    unit.blockId,
-                    unit.displayName
+            if (courseOutlineViewModel.isCourseNestedListEnabled) {
+                courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    courseOutlineViewModel.logUnitDetailViewedEvent(
+                        unit.blockId,
+                        unit.displayName
+                    )
+                    courseRouter.navigateToCourseContainer(
+                        fragmentManager,
+                        courseId = courseOutlineViewModel.courseId,
+                        unitId = unit.id,
+                        mode = CourseViewMode.FULL
+                    )
+                }
+            } else {
+                courseOutlineViewModel.sequentialClickedEvent(
+                    subSectionBlock.blockId,
+                    subSectionBlock.displayName
                 )
-                courseRouter.navigateToCourseContainer(
-                    fragmentManager,
+                courseRouter.navigateToCourseSubsections(
+                    fm = fragmentManager,
                     courseId = courseOutlineViewModel.courseId,
-                    unitId = unit.id,
+                    subSectionId = subSectionBlock.id,
                     mode = CourseViewMode.FULL
                 )
             }
@@ -177,7 +178,6 @@ private fun CourseOutlineUI(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
     uiMessage: UIMessage?,
-    onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
@@ -499,7 +499,6 @@ private fun CourseOutlineScreenPreview() {
                 )
             ),
             uiMessage = null,
-            onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
@@ -533,7 +532,6 @@ private fun CourseOutlineScreenTabletPreview() {
                 )
             ),
             uiMessage = null,
-            onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},

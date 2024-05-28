@@ -59,6 +59,7 @@ class CourseOutlineViewModel(
     workerController,
     coreAnalytics
 ) {
+    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
 
     private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: StateFlow<CourseOutlineUIState>
