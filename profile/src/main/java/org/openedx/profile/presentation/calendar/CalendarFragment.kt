@@ -253,7 +253,7 @@ private fun CalendarScreen(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun VideoQualityScreenPreview() {
+private fun CalendarScreenPreview() {
     OpenEdXTheme {
         CalendarScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
