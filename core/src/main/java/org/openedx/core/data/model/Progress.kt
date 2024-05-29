@@ -8,7 +8,7 @@ data class Progress(
     @SerializedName("assignments_completed")
     val assignmentsCompleted: Int?,
     @SerializedName("total_assignments_count")
-    val totalAssignmentsCount: Int?
+    val totalAssignmentsCount: Int?,
 ) {
     fun mapToDomain() = Progress(
         assignmentsCompleted = assignmentsCompleted ?: 0,

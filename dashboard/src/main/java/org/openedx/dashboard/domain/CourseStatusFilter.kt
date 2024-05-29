@@ -9,7 +9,7 @@ enum class CourseStatusFilter(
     val key: String,
     @StringRes
     override val labelResId: Int,
-    override val icon: ImageVector? = null
+    override val icon: ImageVector? = null,
 ) : TabItem {
     ALL("all", R.string.dashboard_course_filter_all),
     IN_PROGRESS("in_progress", R.string.dashboard_course_filter_in_progress),

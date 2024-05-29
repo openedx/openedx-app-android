@@ -40,7 +40,7 @@ data class EnrolledCourseEntity(
     @Embedded
     val courseStatus: CourseStatusDb?,
     @Embedded
-    val courseAssignments: CourseAssignmentsDb?
+    val courseAssignments: CourseAssignmentsDb?,
 ) {
 
     fun mapToDomain(): EnrolledCourse {
@@ -98,7 +98,7 @@ data class EnrolledCourseDataDb(
     @ColumnInfo("videoOutline")
     val videoOutline: String,
     @ColumnInfo("isSelfPaced")
-    val isSelfPaced: Boolean
+    val isSelfPaced: Boolean,
 ) {
     fun mapToDomain(): EnrolledCourseData {
         return EnrolledCourseData(
@@ -138,7 +138,7 @@ data class CoursewareAccessDb(
     @ColumnInfo("additionalContextUserMessage")
     val additionalContextUserMessage: String,
     @ColumnInfo("userFragment")
-    val userFragment: String
+    val userFragment: String,
 ) {
 
     fun mapToDomain(): CoursewareAccess {
@@ -156,7 +156,7 @@ data class CoursewareAccessDb(
 
 data class CertificateDb(
     @ColumnInfo("certificateURL")
-    val certificateURL: String?
+    val certificateURL: String?,
 ) {
     fun mapToDomain() = Certificate(certificateURL)
 }
@@ -165,7 +165,7 @@ data class CourseSharingUtmParametersDb(
     @ColumnInfo("facebook")
     val facebook: String,
     @ColumnInfo("twitter")
-    val twitter: String
+    val twitter: String,
 ) {
     fun mapToDomain() = CourseSharingUtmParameters(
         facebook, twitter
@@ -204,7 +204,7 @@ data class CourseAssignmentsDb(
     @ColumnInfo("futureAssignments")
     val futureAssignments: List<CourseDateBlockDb>?,
     @ColumnInfo("pastAssignments")
-    val pastAssignments: List<CourseDateBlockDb>?
+    val pastAssignments: List<CourseDateBlockDb>?,
 ) {
     fun mapToDomain() = CourseAssignments(
         futureAssignments = futureAssignments?.map { it.mapToDomain() },

@@ -101,9 +101,9 @@ class AllEnrolledCoursesFragment : Fragment() {
 
 @Composable
 private fun AllEnrolledCoursesView(
-    viewModel: AllEnrolledCoursesViewModel = koinViewModel(),
     fragmentManager: FragmentManager
 ) {
+    val viewModel: AllEnrolledCoursesViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
 
@@ -455,8 +455,8 @@ private val mockCourseEnrolled = EnrolledCourse(
         dynamicUpgradeDeadline = "",
         subscriptionId = "",
         coursewareAccess = CoursewareAccess(
-            true,
-            "",
+            false,
+            "204",
             "",
             "",
             "",

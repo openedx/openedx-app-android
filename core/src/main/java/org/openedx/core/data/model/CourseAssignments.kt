@@ -8,7 +8,7 @@ data class CourseAssignments(
     @SerializedName("future_assignments")
     val futureAssignments: List<CourseDateBlock>?,
     @SerializedName("past_assignments")
-    val pastAssignments: List<CourseDateBlock>?
+    val pastAssignments: List<CourseDateBlock>?,
 ) {
     fun mapToDomain() = CourseAssignments(
         futureAssignments = futureAssignments?.mapNotNull {

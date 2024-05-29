@@ -5,7 +5,7 @@ import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.CourseStatusFilter
 
 class DashboardInteractor(
-    private val repository: DashboardRepository
+    private val repository: DashboardRepository,
 ) {
 
     suspend fun getEnrolledCourses(page: Int): DashboardCourseList {
@@ -16,7 +16,10 @@ class DashboardInteractor(
 
     suspend fun getMainUserCourses() = repository.getMainUserCourses()
 
-    suspend fun getAllUserCourses(page: Int = 1, status: CourseStatusFilter? = null): DashboardCourseList {
+    suspend fun getAllUserCourses(
+        page: Int = 1,
+        status: CourseStatusFilter? = null,
+    ): DashboardCourseList {
         return repository.getAllUserCourses(
             page,
             status

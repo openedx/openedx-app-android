@@ -70,7 +70,7 @@ class CourseContainerViewModel(
     private val coursePreferences: CoursePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val imageProcessor: ImageProcessor,
-    val courseRouter: CourseRouter
+    val courseRouter: CourseRouter,
 ) : BaseViewModel() {
 
     private val _dataReady = MutableLiveData<Boolean?>()

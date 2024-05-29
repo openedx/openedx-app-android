@@ -258,12 +258,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         const val ARG_ENROLLMENT_MODE = "enrollmentMode"
         const val ARG_OPEN_TAB = "open_tab"
         const val ARG_RESUME_BLOCK = "resume_block"
-        const val DEFAULT_TAB = "home"
         fun newInstance(
             courseId: String,
             courseTitle: String,
             enrollmentMode: String,
-            openTab: String = DEFAULT_TAB,
+            openTab: String = CourseContainerTab.HOME.name,
             resumeBlockId: String = ""
         ): CourseContainerFragment {
             val fragment = CourseContainerFragment()
@@ -303,7 +302,7 @@ fun CourseDashboard(
             val refreshing by viewModel.refreshing.collectAsState(true)
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
-            val openTab = bundle.getString(CourseContainerFragment.ARG_OPEN_TAB, CourseContainerFragment.DEFAULT_TAB)
+            val openTab = bundle.getString(CourseContainerFragment.ARG_OPEN_TAB, CourseContainerTab.HOME.name)
             val requiredTab = when (openTab.uppercase()) {
                 CourseContainerTab.HOME.name -> CourseContainerTab.HOME
                 CourseContainerTab.VIDEOS.name -> CourseContainerTab.VIDEOS

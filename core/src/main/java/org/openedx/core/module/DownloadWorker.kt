@@ -28,7 +28,7 @@ import java.io.File
 
 class DownloadWorker(
     val context: Context,
-    parameters: WorkerParameters
+    parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters), CoroutineScope {
 
     private val notificationManager =

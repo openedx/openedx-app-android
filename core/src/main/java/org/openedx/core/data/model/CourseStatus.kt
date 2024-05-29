@@ -12,7 +12,7 @@ data class CourseStatus(
     @SerializedName("last_visited_block_id")
     val lastVisitedBlockId: String?,
     @SerializedName("last_visited_unit_display_name")
-    val lastVisitedUnitDisplayName: String?
+    val lastVisitedUnitDisplayName: String?,
 ) {
     fun mapToDomain() = CourseStatus(
         lastVisitedModuleId = lastVisitedModuleId ?: "",

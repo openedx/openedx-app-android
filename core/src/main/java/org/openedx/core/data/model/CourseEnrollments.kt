@@ -29,7 +29,7 @@ data class CourseEnrollments(
         override fun deserialize(
             json: JsonElement?,
             typeOfT: Type?,
-            context: JsonDeserializationContext?
+            context: JsonDeserializationContext?,
         ): CourseEnrollments {
             val enrollments = deserializeEnrollments(json)
             val appConfig = deserializeAppConfig(json)
