@@ -103,8 +103,8 @@ class Config(context: Context) {
         return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
     }
 
-    fun isCourseNestedListEnabled(): Boolean {
-        return getBoolean(COURSE_NESTED_LIST_ENABLED, false)
+    fun isCourseDropdownNavigationEnabled(): Boolean {
+        return getBoolean(COURSE_DROPDOWN_NAVIGATION_ENABLED, false)
     }
 
     fun isCourseUnitProgressEnabled(): Boolean {
@@ -165,7 +165,7 @@ class Config(context: Context) {
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
         private const val BRANCH = "BRANCH"
-        private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
+        private const val COURSE_DROPDOWN_NAVIGATION_ENABLED = "COURSE_DROPDOWN_NAVIGATION_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
     }

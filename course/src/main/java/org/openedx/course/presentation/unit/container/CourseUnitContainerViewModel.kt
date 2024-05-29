@@ -37,7 +37,7 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseExpandableSectionsEnabled get() = config.isCourseDropdownNavigationEnabled()
 
     val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
 

@@ -76,5 +76,5 @@ WHATS_NEW_ENABLED: false
 #feature flag enable Social Login buttons
 SOCIAL_AUTH_ENABLED: false
 #Course navigation feature flags
-COURSE_NESTED_LIST_ENABLED: false
+COURSE_DROPDOWN_NAVIGATION_ENABLED: false
 COURSE_UNIT_PROGRESS_ENABLED: false

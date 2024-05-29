@@ -88,7 +88,7 @@ android:
 - **PRE_LOGIN_EXPERIENCE_ENABLED:** Enables the pre login courses discovery experience.
 - **WHATS_NEW_ENABLED:** Enables the "What's New" feature to present the latest changes to the user.
 - **SOCIAL_AUTH_ENABLED:** Enables SSO buttons on the SignIn and SignUp screens.
-- **COURSE_NESTED_LIST_ENABLED:** Enables an alternative visual representation for the course structure.
+- **COURSE_DROPDOWN_NAVIGATION_ENABLED:** Enables an alternative visual representation for the course structure.
 - **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware. 
 
 ## Future Support

@@ -108,7 +108,8 @@ class CourseContainerViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     private val courseStructureModel = CourseStructureModel(
@@ -125,7 +126,8 @@ class CourseContainerViewModelTest {
         coursewareAccess = null,
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     @Before
@@ -167,12 +169,12 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
+        coEvery { interactor.getCourseStructure(any(), any()) } throws UnknownHostException()
         every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any(), any()) }
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
@@ -200,12 +202,12 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any()) } throws Exception()
+        coEvery { interactor.getCourseStructure(any(), any()) } throws Exception()
         every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any(), any()) }
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
@@ -233,12 +235,12 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
         every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getCourseStructure(any(), any()) }
         verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         assert(viewModel.errorMessage.value == null)
@@ -265,7 +267,7 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns false
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
         every { analytics.logEvent(any(), any()) } returns Unit
         coEvery {
             courseApi.getCourseStructure(any(), any(), any(), any())
