@@ -11,15 +11,13 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.DashboardNavigator
 import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.core.adapter.NavigationFragmentAdapter
-import org.openedx.core.config.DashboardConfig
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dashboard.presentation.DashboardListFragment
 import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
-import org.openedx.learn.presentation.LearnFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -100,10 +98,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.viewPager.offscreenPageLimit = 4
 
         val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView).getDiscoveryFragment()
-        val dashboardFragment = when (viewModel.dashboardType) {
-            DashboardConfig.DashboardType.LIST -> DashboardListFragment()
-            DashboardConfig.DashboardType.GALLERY -> LearnFragment()
-        }
+        val dashboardFragment = DashboardNavigator(viewModel.dashboardType).getDashboardFragment()
 
         adapter = NavigationFragmentAdapter(this).apply {
             addFragment(dashboardFragment)

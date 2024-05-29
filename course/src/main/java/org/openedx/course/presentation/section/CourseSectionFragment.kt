@@ -78,10 +78,10 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
-import java.io.File
 import org.openedx.core.R as CoreR
 
 class CourseSectionFragment : Fragment() {
@@ -134,11 +134,7 @@ class CourseSectionFragment : Fragment() {
                             viewModel.removeDownloadModels(it.id)
                         } else {
                             viewModel.saveDownloadModels(
-                                requireContext().externalCacheDir.toString() +
-                                        File.separator +
-                                        requireContext()
-                                            .getString(org.openedx.core.R.string.app_name)
-                                            .replace(Regex("\\s"), "_"), it.id
+                                FileUtil(context).getExternalAppDir().path, it.id
                             )
                         }
                     }

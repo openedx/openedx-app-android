@@ -29,7 +29,7 @@ PROGRAM:
     PROGRAM_DETAIL_URL_TEMPLATE: ''
 
 DASHBOARD:
-  TYPE: 'primary_course'
+  TYPE: 'gallery'
 
 FIREBASE:
   ENABLED: false

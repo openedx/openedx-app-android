@@ -17,7 +17,7 @@ import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 class TranscriptManager(
-    val context: Context
+    val context: Context,
 ) {
 
     private val transcriptDownloader = object : AbstractDownloader() {
@@ -31,7 +31,9 @@ class TranscriptManager(
         val transcriptDir = getTranscriptDir() ?: return false
         val hash = Sha1Util.SHA1(url)
         val file = File(transcriptDir, hash)
-        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(5)
+        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(
+            5
+        )
     }
 
     fun get(url: String): String? {

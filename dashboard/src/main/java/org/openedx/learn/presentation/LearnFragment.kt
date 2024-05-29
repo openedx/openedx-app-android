@@ -92,10 +92,10 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
 
 @Composable
 private fun Header(
-    viewModel: LearnViewModel = koinViewModel(),
     fragmentManager: FragmentManager,
     viewPager: ViewPager2
 ) {
+    val viewModel: LearnViewModel = koinViewModel()
     val windowSize = rememberWindowSize()
     val contentWidth by remember(key1 = windowSize) {
         mutableStateOf(

@@ -14,7 +14,7 @@ import org.openedx.course.R
 enum class CourseContainerTab(
     @StringRes
     override val labelResId: Int,
-    override val icon: ImageVector
+    override val icon: ImageVector,
 ) : TabItem {
     HOME(R.string.course_container_nav_home, Icons.Default.Home),
     VIDEOS(R.string.course_container_nav_videos, Icons.Rounded.PlayCircleFilled),

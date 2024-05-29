@@ -97,9 +97,9 @@ import org.openedx.core.R as CoreR
 
 @Composable
 fun DashboardGalleryView(
-    viewModel: DashboardGalleryViewModel = koinViewModel(),
     fragmentManager: FragmentManager,
 ) {
+    val viewModel: DashboardGalleryViewModel = koinViewModel()
     val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val uiState by viewModel.uiState.collectAsState(DashboardGalleryUIState.Loading)
