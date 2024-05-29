@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.settings
+package org.openedx.core.presentation.settings.video
 
 import android.content.res.Configuration
 import android.os.Bundle

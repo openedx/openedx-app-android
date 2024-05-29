@@ -67,7 +67,7 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType

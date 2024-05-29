@@ -13,8 +13,8 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
-import org.openedx.core.presentation.settings.VideoQualityFragment
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityFragment
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
@@ -44,6 +44,7 @@ import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileFragment
+import org.openedx.profile.presentation.calendar.CalendarFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
@@ -369,6 +370,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToManageAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, ManageAccountFragment())
+    }
+
+    override fun navigateToCalendarSettings(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, CalendarFragment())
     }
     //endregion
 
