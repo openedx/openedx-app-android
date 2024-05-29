@@ -73,6 +73,7 @@ import org.openedx.core.extension.isNotEmptyThenLet
 import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -85,7 +86,6 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
 import org.openedx.course.R
-import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import java.util.concurrent.atomic.AtomicReference
@@ -352,7 +352,7 @@ fun CalendarSyncCard(
                 modifier = Modifier
                     .padding(start = 8.dp, end = 8.dp)
                     .weight(1f),
-                text = stringResource(id = R.string.course_header_sync_to_calendar),
+                text = stringResource(id = CoreR.string.core_header_sync_to_calendar),
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark
             )
@@ -372,7 +372,7 @@ fun CalendarSyncCard(
                 .fillMaxWidth()
                 .padding(top = 8.dp)
                 .height(40.dp),
-            text = stringResource(id = R.string.course_body_sync_to_calendar),
+            text = stringResource(id = CoreR.string.core_body_sync_to_calendar),
             style = MaterialTheme.appTypography.bodyMedium,
             color = MaterialTheme.appColors.textDark,
         )

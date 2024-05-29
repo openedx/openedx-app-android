@@ -37,7 +37,28 @@
     <string name="profile_contact_support">Contact Support</string>
     <string name="profile_support_info">Support</string>
     <string name="profile_video">Video</string>
+    <string name="profile_dates_and_calendar">Dates &amp; Calendar</string>
     <string name="profile_wifi_only_download">Wi-fi only download</string>
     <string name="profile_only_download_when_wifi_turned_on">Only download content when wi-fi is turned on</string>
+    <string name="profile_calendar_sync">Calendar Sync</string>
+    <string name="profile_calendar_sync_description">Set up calendar sync to show your upcoming assignments and course milestones on your calendar. New assignments and shifted course dates will sync automatically</string>
+    <string name="profile_set_up_calendar_sync">Set Up Calendar Sync</string>
+    <string name="profile_calendar_access_dialog_title">Calendar Access</string>
+    <string name="profile_calendar_access_dialog_description">To show upcoming assignments and course milestones on your calendar, we need permission to access your calendar.</string>
+    <string name="profile_grant_access_calendar">Grant Calendar Access</string>
+    <string name="profile_new_calendar">New Calendar</string>
+    <string name="profile_new_calendar_description">Upcoming assignments for active courses will appear on this calendar</string>
+    <string name="profile_begin_syncing">Begin Syncing</string>
+    <string name="profile_calendar_name">Calendar Name</string>
+    <string name="calendar_color_red">Red</string>
+    <string name="calendar_color_orange">Orange</string>
+    <string name="calendar_color_yellow">Yellow</string>
+    <string name="calendar_color_green">Green</string>
+    <string name="calendar_color_blue">Blue</string>
+    <string name="calendar_color_purple">Purple</string>
+    <string name="calendar_color_brown">Brown</string>
+    <string name="calendar_color_accent">Accent</string>
+    <string name="profile_course_dates">Course Dates</string>
+    <string name="profile_color">Color</string>
 
 </resources>

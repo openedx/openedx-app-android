@@ -25,6 +25,9 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
@@ -39,7 +42,6 @@ import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.core.system.notifier.RefreshDiscussions
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
-import org.openedx.course.R
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CalendarSyncDialog
@@ -48,9 +50,6 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.presentation.calendarsync.CalendarManager
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
-import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
@@ -288,7 +287,7 @@ class CourseContainerViewModel(
         val calendarId = getCalendarId()
 
         if (calendarId == CalendarManager.CALENDAR_DOES_NOT_EXIST) {
-            setUiMessage(R.string.course_snackbar_course_calendar_error)
+            setUiMessage(CoreR.string.core_snackbar_course_calendar_error)
             setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
 
             return
@@ -319,10 +318,10 @@ class CourseContainerViewModel(
 
             if (updatedEvent) {
                 logCalendarSyncSnackbar(CalendarSyncSnackbar.UPDATED)
-                setUiMessage(R.string.course_snackbar_course_calendar_updated)
+                setUiMessage(CoreR.string.core_snackbar_course_calendar_updated)
             } else if (coursePreferences.isCalendarSyncEventsDialogShown(courseName)) {
                 logCalendarSyncSnackbar(CalendarSyncSnackbar.ADDED)
-                setUiMessage(R.string.course_snackbar_course_calendar_added)
+                setUiMessage(CoreR.string.core_snackbar_course_calendar_added)
             } else {
                 coursePreferences.setCalendarSyncEventsDialogShown(courseName)
                 setCalendarSyncDialogType(CalendarSyncDialogType.EVENTS_DIALOG)
@@ -366,7 +365,7 @@ class CourseContainerViewModel(
 
             }
             logCalendarSyncSnackbar(CalendarSyncSnackbar.REMOVED)
-            setUiMessage(R.string.course_snackbar_course_calendar_removed)
+            setUiMessage(CoreR.string.core_snackbar_course_calendar_removed)
         }
     }
 

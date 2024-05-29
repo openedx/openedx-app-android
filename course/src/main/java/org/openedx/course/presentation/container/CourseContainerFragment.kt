@@ -55,6 +55,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialog
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.RoundTabsBar
@@ -65,8 +67,6 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentCourseContainerBinding
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialog
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
 import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType

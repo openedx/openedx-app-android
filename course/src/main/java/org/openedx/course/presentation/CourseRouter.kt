@@ -2,7 +2,7 @@ package org.openedx.course.presentation
 
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.course.presentation.handouts.HandoutsType
 
 interface CourseRouter {

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -38,7 +39,10 @@ fun SettingsItem(
             .testTag("btn_${text.tagId()}")
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(20.dp),
+            .padding(
+                vertical = 24.dp,
+                horizontal = 20.dp
+            ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -58,4 +62,15 @@ fun SettingsItem(
             contentDescription = null
         )
     }
+}
+
+@Composable
+fun SettingsDivider() {
+    Divider(
+        modifier = Modifier
+            .padding(
+                horizontal = 20.dp
+            ),
+        color = MaterialTheme.appColors.divider
+    )
 }

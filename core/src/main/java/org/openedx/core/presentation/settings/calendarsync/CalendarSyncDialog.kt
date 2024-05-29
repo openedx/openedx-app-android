@@ -1,4 +1,4 @@
-package org.openedx.course.presentation.calendarsync
+package org.openedx.core.presentation.settings.calendarsync
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -23,13 +23,13 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import org.openedx.core.R
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.course.R
 import androidx.compose.ui.window.DialogProperties as AlertDialogProperties
 import org.openedx.core.R as CoreR
 
@@ -192,7 +192,7 @@ private fun SyncDialog() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = stringResource(id = R.string.course_title_syncing_calendar),
+                        text = stringResource(id = R.string.core_title_syncing_calendar),
                         color = MaterialTheme.appColors.textPrimary,
                         style = MaterialTheme.appTypography.titleMedium,
                         maxLines = 2,
