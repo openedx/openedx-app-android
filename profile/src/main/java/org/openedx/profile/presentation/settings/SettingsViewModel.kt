@@ -185,6 +185,10 @@ class SettingsViewModel(
         router.navigateToManageAccount(fragmentManager)
     }
 
+    fun calendarSettingsClicked(fragmentManager: FragmentManager) {
+        router.navigateToCalendarSettings(fragmentManager)
+    }
+
     fun restartApp(fragmentManager: FragmentManager) {
         router.restartApp(
             fragmentManager,

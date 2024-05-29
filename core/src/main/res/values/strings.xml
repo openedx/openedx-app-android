@@ -132,6 +132,41 @@
     <string name="core_video_download_quality">Video download quality</string>
     <string name="core_manage_account">Manage Account</string>
 
+    <string name="core_assignment_due_tag" tools:ignore="MissingTranslation">Assignment Due</string>
+    <string name="core_title_syncing_calendar" tools:ignore="MissingTranslation">Syncing calendar…</string>
+
+    <!-- region: Calendar Sync -->
+    <string name="core_header_sync_to_calendar" tools:ignore="MissingTranslation">Sync to calendar</string>
+    <string name="core_body_sync_to_calendar" tools:ignore="MissingTranslation">Automatically sync all deadlines and due dates for this course to your calendar.</string>
+
+    <string name="core_title_request_calendar_permission" tools:ignore="MissingTranslation">\“%s\” Would Like to Access Your Calendar</string>
+    <string name="core_message_request_calendar_permission" tools:ignore="MissingTranslation">%s would like to use your calendar list to subscribe to your personalized %s calendar for this course.</string>
+    <string name="core_label_do_not_allow" tools:ignore="MissingTranslation">Don’t allow</string>
+
+    <string name="core_title_add_course_calendar" tools:ignore="MissingTranslation">Add Course Dates to Calendar</string>
+    <string name="core_message_add_course_calendar" tools:ignore="MissingTranslation">Would you like to add \“%s\” dates to your calendar? \n\nYou can edit or remove your course dates at any time from your calendar or settings.</string>
+
+    <string name="core_message_course_calendar_added" tools:ignore="MissingTranslation">\“%s\” has been added to your phone\'s calendar.</string>
+    <string name="core_label_view_events" tools:ignore="MissingTranslation">View Events</string>
+    <string name="core_label_done" tools:ignore="MissingTranslation">Done</string>
+
+    <string name="core_title_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Dates from Calendar</string>
+    <string name="core_message_remove_course_calendar" tools:ignore="MissingTranslation">Would you like to remove the \“%s\” dates from your calendar?</string>
+    <string name="core_label_remove" tools:ignore="MissingTranslation">Remove</string>
+
+    <string name="core_title_calendar_out_of_date" tools:ignore="MissingTranslation">Your course calendar is out of date</string>
+    <string name="core_message_calendar_out_of_date" tools:ignore="MissingTranslation">Your course dates have been shifted and your course calendar is no longer up to date with your new schedule.</string>
+    <string name="core_label_update_now" tools:ignore="MissingTranslation">Update Now</string>
+    <string name="core_label_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Calendar</string>
+
+    <string name="core_snackbar_course_calendar_added" tools:ignore="MissingTranslation">Your course calendar has been added.</string>
+    <string name="core_snackbar_course_calendar_removed" tools:ignore="MissingTranslation">Your course calendar has been removed.</string>
+    <string name="core_snackbar_course_calendar_updated" tools:ignore="MissingTranslation">Your course calendar has been updated.</string>
+    <string name="core_snackbar_course_calendar_error" tools:ignore="MissingTranslation">Error Adding Calendar, Please try later</string>
+
+    <!-- endregion -->
+
+
     <string name="core_course_container_nav_home">Home</string>
     <string name="core_course_container_nav_videos">Videos</string>
     <string name="core_course_container_nav_discussions">Discussions</string>

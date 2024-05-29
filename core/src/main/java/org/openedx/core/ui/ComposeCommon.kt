@@ -939,6 +939,7 @@ fun TextIcon(
     icon: ImageVector,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
+    iconModifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     val modifier = if (onClick == null) {
@@ -953,7 +954,7 @@ fun TextIcon(
     ) {
         Text(text = text, color = color, style = textStyle)
         Icon(
-            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = iconModifier.size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color

@@ -23,6 +23,9 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
@@ -35,9 +38,6 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
-import org.openedx.course.presentation.calendarsync.CalendarManager
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
-import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
 import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
