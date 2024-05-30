@@ -99,94 +99,11 @@ import java.util.Date
 import org.openedx.core.R as coreR
 
 @Composable
-fun CourseImageHeader(
-    modifier: Modifier,
-    apiHostUrl: String,
-    courseImage: String?,
-    courseCertificate: Certificate?,
-    onCertificateClick: (String) -> Unit = {},
-    courseName: String,
-) {
-    val configuration = LocalConfiguration.current
-    val windowSize = rememberWindowSize()
-    val contentScale =
-        if (!windowSize.isTablet && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            ContentScale.Fit
-        } else {
-            ContentScale.Crop
-        }
-    val imageUrl = if (courseImage?.isLinkValid() == true) {
-        courseImage
-    } else {
-        apiHostUrl + courseImage
-    }
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .error(coreR.drawable.core_no_image_course)
-                .placeholder(coreR.drawable.core_no_image_course)
-                .build(),
-            contentDescription = stringResource(
-                id = coreR.string.core_accessibility_header_image_for,
-                courseName
-            ),
-            contentScale = contentScale,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(MaterialTheme.appShapes.cardShape)
-        )
-        if (courseCertificate?.isCertificateEarned() == true) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .clip(MaterialTheme.appShapes.cardShape)
-                    .background(MaterialTheme.appColors.certificateForeground),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    modifier = Modifier.testTag("ic_congratulations"),
-                    painter = painterResource(id = R.drawable.ic_course_completed_mark),
-                    contentDescription = stringResource(id = R.string.course_congratulations),
-                    tint = Color.White
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_congratulations"),
-                    text = stringResource(id = R.string.course_congratulations),
-                    style = MaterialTheme.appTypography.headlineMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    modifier = Modifier.testTag("txt_course_passed"),
-                    text = stringResource(id = R.string.course_passed),
-                    style = MaterialTheme.appTypography.bodyMedium,
-                    color = Color.White
-                )
-                Spacer(Modifier.height(20.dp))
-                OpenEdXOutlinedButton(
-                    modifier = Modifier,
-                    borderColor = Color.White,
-                    textColor = MaterialTheme.appColors.buttonText,
-                    text = stringResource(id = R.string.course_view_certificate),
-                    onClick = {
-                        courseCertificate.certificateURL?.let {
-                            onCertificateClick(it)
-                        }
-                    })
-            }
-        }
-    }
-}
-
-@Composable
 fun CourseSectionCard(
     block: Block,
     downloadedState: DownloadedState?,
     onItemClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
 
@@ -287,7 +204,7 @@ fun OfflineQueueCard(
     downloadModel: DownloadModel,
     progressValue: Long,
     progressSize: Long,
-    onDownloadClick: (DownloadModel) -> Unit
+    onDownloadClick: (DownloadModel) -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
 
@@ -355,7 +272,7 @@ fun OfflineQueueCard(
 
 @Composable
 fun CardArrow(
-    degrees: Float
+    degrees: Float,
 ) {
     Icon(
         imageVector = Icons.Filled.ChevronRight,
@@ -387,7 +304,7 @@ fun NavigationUnitsButtons(
     hasNextBlock: Boolean,
     isVerticalNavigation: Boolean,
     onPrevClick: () -> Unit,
-    onNextClick: () -> Unit
+    onNextClick: () -> Unit,
 ) {
     val nextButtonIcon = if (hasNextBlock) {
         painterResource(id = coreR.drawable.core_ic_down)
@@ -486,7 +403,7 @@ fun HorizontalPageIndicator(
     completedAndSelectedColor: Color = Color.Green,
     completedColor: Color = Color.Green,
     selectedColor: Color = Color.White,
-    defaultColor: Color = Color.Gray
+    defaultColor: Color = Color.Gray,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(1.dp),
@@ -551,7 +468,7 @@ fun Indicator(
     defaultColor: Color,
     defaultRadius: Dp,
     selectedSize: Dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val size by animateDpAsState(
         targetValue = if (isSelected) selectedSize else defaultRadius,
@@ -580,7 +497,7 @@ fun VideoSubtitles(
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
     onTranscriptClick: (Caption) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     timedTextObject?.let {
         val autoScrollDelay = 3000L
@@ -660,7 +577,7 @@ fun CourseExpandableChapterCard(
     modifier: Modifier,
     block: Block,
     onItemClick: (Block) -> Unit,
-    arrowDegrees: Float = 0f
+    arrowDegrees: Float = 0f,
 ) {
     Column(modifier = Modifier
         .clickable { onItemClick(block) }
@@ -710,7 +627,7 @@ fun CourseSubSectionItem(
     downloadedState: DownloadedState?,
     downloadsCount: Int,
     onClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
 ) {
     val icon =
         if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
@@ -812,7 +729,7 @@ fun CourseSubSectionItem(
 @Composable
 fun CourseUnitToolbar(
     title: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     OpenEdXTheme {
         Box(
@@ -842,7 +759,7 @@ fun SubSectionUnitsTitle(
     unitName: String,
     unitsCount: Int,
     unitsListShowed: Boolean,
-    onUnitsClick: () -> Unit
+    onUnitsClick: () -> Unit,
 ) {
     val textStyle = MaterialTheme.appTypography.titleMedium
     val hasUnits = unitsCount > 0
@@ -888,7 +805,7 @@ fun SubSectionUnitsTitle(
 fun SubSectionUnitsList(
     unitBlocks: List<Block>,
     selectedUnitIndex: Int = 0,
-    onUnitClick: (index: Int, unit: Block) -> Unit
+    onUnitClick: (index: Int, unit: Block) -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -1133,7 +1050,7 @@ fun CourseMessage(
     icon: Painter,
     message: String,
     action: String? = null,
-    onActionClick: () -> Unit = {}
+    onActionClick: () -> Unit = {},
 ) {
     Column {
         Row(

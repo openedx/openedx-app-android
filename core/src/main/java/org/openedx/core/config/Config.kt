@@ -107,8 +107,8 @@ class Config(context: Context) {
         return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
     }
 
-    fun getUIComponentConfig(): UIConfig {
-        return getObjectOrNewInstance(UI_COMPONENT, UIConfig::class.java)
+    fun getCourseUIConfig(): UIConfig {
+        return getObjectOrNewInstance(UI_COMPONENTS, UIConfig::class.java)
     }
 
     private fun getString(key: String, defaultValue: String = ""): String {
@@ -167,7 +167,7 @@ class Config(context: Context) {
         private const val PROGRAM = "PROGRAM"
         private const val DASHBOARD = "DASHBOARD"
         private const val BRANCH = "BRANCH"
-        private const val UI_COMPONENT = "UI_COMPONENT"
+        private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
     }
 
