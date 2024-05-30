@@ -96,6 +96,10 @@
     <string name="core_date_format_tomorrow" tools:ignore="MissingTranslation">Tomorrow</string>
     <string name="core_date_format_yesterday" tools:ignore="MissingTranslation">Yesterday</string>
     <string name="core_date_format_days_ago" tools:ignore="MissingTranslation">%1$s days ago</string>
+    <string name="core_date_format_past_due_assignment" tools:ignore="MissingTranslation">Past due assignment</string>
+    <string name="core_date_format_assignment_due_today" tools:ignore="MissingTranslation">Due Today</string>
+    <string name="core_date_format_assignment_due_tomorrow" tools:ignore="MissingTranslation">Due Tomorrow</string>
+    <string name="core_date_format_assignment_due_in" tools:ignore="MissingTranslation">Due in %1$s days</string>
     <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">
         <item quantity="one">%d Item Hidden</item>
         <item quantity="other">%d Items Hidden</item>

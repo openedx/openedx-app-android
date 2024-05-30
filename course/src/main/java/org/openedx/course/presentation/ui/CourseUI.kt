@@ -751,7 +751,7 @@ fun CourseSubSectionItem(
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
 
-    val due = block.due?.let { TimeUtils.getCourseFormattedDate(LocalContext.current, it) }
+    val due = block.due?.let { TimeUtils.getAssignmentFormattedDate(LocalContext.current, it) }
     val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(
         modifier = modifier

@@ -242,6 +242,35 @@ object TimeUtils {
         }
     }
 
+    fun getAssignmentFormattedDate(context: Context, date: Date): String {
+        val inputDate = Calendar.getInstance().also {
+            it.time = date
+            it.clearTimeComponents()
+        }
+        val daysDifference = getDayDifference(inputDate)
+
+        return when {
+            daysDifference == 0 -> {
+                context.getString(R.string.core_date_format_assignment_due_today)
+            }
+
+            daysDifference == 1 -> {
+                context.getString(R.string.core_date_format_assignment_due_tomorrow)
+            }
+
+            daysDifference <= -1 -> {
+                context.getString(R.string.core_date_format_past_due_assignment)
+            }
+
+            else -> {
+                context.getString(
+                    R.string.core_date_format_assignment_due_in,
+                    ceil(daysDifference.toDouble()).toInt().toString()
+                )
+            }
+        }
+    }
+
     /**
      * Returns the number of days difference between the given date and the current date.
      */
