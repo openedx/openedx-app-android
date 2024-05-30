@@ -7,6 +7,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import java.lang.reflect.Type
+import org.openedx.core.domain.model.CourseEnrollments as DomainCourseEnrollments
 
 data class CourseEnrollments(
     @SerializedName("enrollments")
@@ -14,17 +15,38 @@ data class CourseEnrollments(
 
     @SerializedName("config")
     val configs: AppConfig,
+
+    @SerializedName("primary")
+    val primary: EnrolledCourse?,
 ) {
+    fun mapToDomain() = DomainCourseEnrollments(
+        enrollments = enrollments.mapToDomain(),
+        configs = configs.mapToDomain(),
+        primary = primary?.mapToDomain()
+    )
+
     class Deserializer : JsonDeserializer<CourseEnrollments> {
         override fun deserialize(
             json: JsonElement?,
             typeOfT: Type?,
-            context: JsonDeserializationContext?
+            context: JsonDeserializationContext?,
         ): CourseEnrollments {
             val enrollments = deserializeEnrollments(json)
             val appConfig = deserializeAppConfig(json)
+            val primaryCourse = deserializePrimaryCourse(json)
 
-            return CourseEnrollments(enrollments, appConfig)
+            return CourseEnrollments(enrollments, appConfig, primaryCourse)
+        }
+
+        private fun deserializePrimaryCourse(json: JsonElement?): EnrolledCourse? {
+            return try {
+                Gson().fromJson(
+                    (json as JsonObject).get("primary"),
+                    EnrolledCourse::class.java
+                )
+            } catch (ex: Exception) {
+                null
+            }
         }
 
         private fun deserializeEnrollments(json: JsonElement?): DashboardCourseList {

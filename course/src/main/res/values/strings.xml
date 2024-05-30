@@ -41,6 +41,12 @@
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 
+    <string name="course_container_nav_home">Home</string>
+    <string name="course_container_nav_videos">Videos</string>
+    <string name="course_container_nav_discussions">Discussions</string>
+    <string name="course_container_nav_more">More</string>
+    <string name="course_container_nav_dates">Dates</string>
+
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>
     <string name="course_accessibility_remove_course_section">Remove course section</string>

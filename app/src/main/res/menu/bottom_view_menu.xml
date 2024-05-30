@@ -2,27 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/fragmentHome"
-        android:title="@string/app_navigation_discovery"
+        android:id="@+id/fragmentLearn"
         android:enabled="true"
-        android:icon="@drawable/app_ic_home"/>
+        android:icon="@drawable/app_ic_rows"
+        android:title="@string/app_navigation_learn" />
 
     <item
-        android:id="@+id/fragmentDashboard"
-        android:title="@string/app_navigation_dashboard"
+        android:id="@+id/fragmentDiscover"
         android:enabled="true"
-        android:icon="@drawable/app_ic_rows"/>
-
-    <item
-        android:id="@+id/fragmentPrograms"
-        android:title="@string/app_navigation_programs"
-        android:enabled="true"
-        android:icon="@drawable/app_ic_book"/>
+        android:icon="@drawable/app_ic_home"
+        android:title="@string/app_navigation_discovery" />
 
     <item
         android:id="@+id/fragmentProfile"
-        android:title="@string/app_navigation_profile"
         android:enabled="true"
-        android:icon="@drawable/app_ic_profile"/>
+        android:icon="@drawable/app_ic_profile"
+        android:title="@string/app_navigation_profile" />
 
 </menu>

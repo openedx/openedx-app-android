@@ -68,7 +68,10 @@ import org.openedx.discovery.presentation.catalog.WebViewLink
 import org.openedx.core.R as coreR
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
-class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
+class ProgramFragment(
+    private val myPrograms: Boolean = false,
+    private val isNestedFragment: Boolean = false
+) : Fragment() {
 
     private val viewModel by viewModel<ProgramViewModel>()
 
@@ -127,6 +130,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     cookieManager = viewModel.cookieManager,
                     canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
                         ?.isNotEmpty() == true,
+                    isNestedFragment = isNestedFragment,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
                     checkInternetConnection = {
@@ -224,6 +228,7 @@ private fun ProgramInfoScreen(
     cookieManager: AppCookieManager,
     uriScheme: String,
     canShowBackBtn: Boolean,
+    isNestedFragment: Boolean,
     hasInternetConnection: Boolean,
     checkInternetConnection: () -> Unit,
     onWebPageLoaded: () -> Unit,
@@ -250,7 +255,7 @@ private fun ProgramInfoScreen(
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true },
         backgroundColor = MaterialTheme.appColors.background
-    ) {
+    ) { paddingValues ->
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -264,21 +269,29 @@ private fun ProgramInfoScreen(
             )
         }
 
+        val statusBarPadding = if (isNestedFragment) {
+            Modifier
+        } else {
+            Modifier.statusBarsInset()
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
-                .statusBarsInset()
+                .padding(paddingValues)
+                .then(statusBarPadding)
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Toolbar(
-                label = stringResource(id = R.string.discovery_programs),
-                canShowBackBtn = canShowBackBtn,
-                canShowSettingsIcon = !canShowBackBtn,
-                onBackClick = onBackClick,
-                onSettingsClick = onSettingsClick
-            )
+            if (!isNestedFragment) {
+                Toolbar(
+                    label = stringResource(id = R.string.discovery_programs),
+                    canShowBackBtn = canShowBackBtn,
+                    canShowSettingsIcon = !canShowBackBtn,
+                    onBackClick = onBackClick,
+                    onSettingsClick = onSettingsClick
+                )
+            }
 
             Surface {
                 Box(
@@ -349,6 +362,7 @@ fun MyProgramsPreview() {
             cookieManager = koinViewModel<ProgramViewModel>().cookieManager,
             uriScheme = "",
             canShowBackBtn = false,
+            isNestedFragment = false,
             hasInternetConnection = false,
             checkInternetConnection = {},
             onBackClick = {},

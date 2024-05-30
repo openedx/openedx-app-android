@@ -29,9 +29,11 @@ import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
+import org.openedx.courses.presentation.AllEnrolledCoursesViewModel
+import org.openedx.courses.presentation.DashboardGalleryViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.DashboardViewModel
+import org.openedx.dashboard.presentation.DashboardListViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -49,6 +51,7 @@ import org.openedx.discussion.presentation.search.DiscussionSearchThreadViewMode
 import org.openedx.discussion.presentation.threads.DiscussionAddThreadViewModel
 import org.openedx.discussion.presentation.threads.DiscussionThreadsViewModel
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
+import org.openedx.learn.presentation.LearnViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
@@ -115,9 +118,12 @@ val screenModule = module {
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
-    factory { DashboardRepository(get(), get(), get()) }
+    factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardGalleryViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { LearnViewModel(get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -194,10 +200,11 @@ val screenModule = module {
             get()
         )
     }
-    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
+    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String, resumeBlockId: String) ->
         CourseContainerViewModel(
             courseId,
             courseTitle,
+            resumeBlockId,
             enrollmentMode,
             get(),
             get(),
@@ -226,6 +233,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String) ->
@@ -267,6 +275,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
@@ -306,6 +315,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->

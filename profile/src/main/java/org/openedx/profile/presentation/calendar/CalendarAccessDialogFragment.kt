@@ -128,7 +128,7 @@ private fun CalendarAccessDialog(
                     TextIcon(
                         text = stringResource(id = R.string.profile_grant_access_calendar),
                         icon = Icons.AutoMirrored.Filled.OpenInNew,
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
                         textStyle = MaterialTheme.appTypography.labelLarge,
                         iconModifier = Modifier.padding(start = 4.dp)
                     )
@@ -138,8 +138,8 @@ private fun CalendarAccessDialog(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = CoreR.string.core_cancel),
                 backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.buttonBackground,
-                textColor = MaterialTheme.appColors.buttonBackground,
+                borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }

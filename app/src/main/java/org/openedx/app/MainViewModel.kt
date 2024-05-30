@@ -30,16 +30,18 @@ class MainViewModel(
         get() = _navigateToDiscovery.asSharedFlow()
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
-
-    val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
+    val dashboardType get() = config.getDashboardConfig().getType()
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        notifier.notifier.onEach {
-            if (it is NavigationToDiscovery) {
-                _navigateToDiscovery.emit(true)
+        notifier.notifier
+            .onEach {
+                if (it is NavigationToDiscovery) {
+                    _navigateToDiscovery.emit(true)
+                }
             }
-        }.distinctUntilChanged().launchIn(viewModelScope)
+            .distinctUntilChanged()
+            .launchIn(viewModelScope)
     }
 
     fun enableBottomBar(enable: Boolean) {
@@ -52,10 +54,6 @@ class MainViewModel(
 
     fun logMyCoursesTabClickedEvent() {
         logEvent(AppAnalyticsEvent.MY_COURSES)
-    }
-
-    fun logMyProgramsTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.MY_PROGRAMS)
     }
 
     fun logProfileTabClickedEvent() {

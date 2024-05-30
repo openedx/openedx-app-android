@@ -1,9 +1,12 @@
 package org.openedx.core.module
 
 import android.content.Context
-import org.openedx.core.module.download.AbstractDownloader
-import org.openedx.core.utils.*
 import okhttp3.OkHttpClient
+import org.openedx.core.module.download.AbstractDownloader
+import org.openedx.core.utils.Directories
+import org.openedx.core.utils.FileUtil
+import org.openedx.core.utils.IOUtils
+import org.openedx.core.utils.Sha1Util
 import subtitleFile.FormatSRT
 import subtitleFile.TimedTextObject
 import java.io.File
@@ -14,7 +17,7 @@ import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 class TranscriptManager(
-    val context: Context
+    val context: Context,
 ) {
 
     private val transcriptDownloader = object : AbstractDownloader() {
@@ -28,7 +31,9 @@ class TranscriptManager(
         val transcriptDir = getTranscriptDir() ?: return false
         val hash = Sha1Util.SHA1(url)
         val file = File(transcriptDir, hash)
-        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(5)
+        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(
+            5
+        )
     }
 
     fun get(url: String): String? {
@@ -113,7 +118,7 @@ class TranscriptManager(
     }
 
     private fun getTranscriptDir(): File? {
-        val externalAppDir: File = FileUtil.getExternalAppDir(context)
+        val externalAppDir: File = FileUtil(context).getExternalAppDir()
         if (externalAppDir.exists()) {
             val videosDir = File(externalAppDir, Directories.VIDEOS.name)
             val transcriptDir = File(videosDir, Directories.SUBTITLES.name)
@@ -122,5 +127,4 @@ class TranscriptManager(
         }
         return null
     }
-
 }

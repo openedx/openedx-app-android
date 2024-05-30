@@ -48,6 +48,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
@@ -181,4 +182,6 @@ val appModule = module {
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
     factory { OAuthHelper(get(), get(), get()) }
+
+    factory { FileUtil(get()) }
 }
