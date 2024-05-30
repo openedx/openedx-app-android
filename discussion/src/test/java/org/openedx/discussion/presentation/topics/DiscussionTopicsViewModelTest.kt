@@ -26,6 +26,7 @@ import org.junit.rules.TestRule
 import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -56,6 +57,12 @@ class DiscussionTopicsViewModelTest {
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
+    private val assignmentProgress = AssignmentProgress(
+        assignmentType = "Homework",
+        numPointsEarned = 1f,
+        numPointsPossible = 3f
+    )
+
     private val blocks = listOf(
         Block(
             id = "id",
@@ -71,7 +78,9 @@ class DiscussionTopicsViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id1",
@@ -87,7 +96,9 @@ class DiscussionTopicsViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id2",
@@ -103,7 +114,9 @@ class DiscussionTopicsViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         )
     )
     private val courseStructure = CourseStructure(
@@ -127,7 +140,8 @@ class DiscussionTopicsViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     @Before
