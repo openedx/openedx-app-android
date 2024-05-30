@@ -1,6 +1,5 @@
 package org.openedx.app
 
-import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -23,6 +22,7 @@ class AppViewModel(
     private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
     private val analytics: AppAnalytics,
+    private val fileUtil: FileUtil,
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
@@ -39,8 +39,8 @@ class AppViewModel(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         setUserId()
-        if(canResetAppDirectory) {
-            resetAppDirectory(owner as Context)
+        if (canResetAppDirectory) {
+            resetAppDirectory()
         }
         viewModelScope.launch {
             notifier.notifier.collect { event ->
@@ -66,8 +66,8 @@ class AppViewModel(
         )
     }
 
-    private fun resetAppDirectory(context: Context) {
-        FileUtil.deleteOldAppDirectory(context)
+    private fun resetAppDirectory() {
+        fileUtil.deleteOldAppDirectory()
         preferencesManager.canResetAppDirectory = false
     }
 

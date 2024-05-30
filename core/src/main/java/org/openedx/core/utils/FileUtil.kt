@@ -38,10 +38,8 @@ class FileUtil(val context: Context) {
 
     /**
      * Deletes all the files and directories in the app's external storage directory.
-     *
-     * @param context The current context.
      */
-    fun deleteOldAppDirectory(context: Context) {
+    fun deleteOldAppDirectory() {
         val externalFilesDir = context.getExternalFilesDir(null)
         val externalAppDir = File(externalFilesDir?.parentFile, Directories.VIDEOS.name)
         if (externalAppDir.isDirectory) {
