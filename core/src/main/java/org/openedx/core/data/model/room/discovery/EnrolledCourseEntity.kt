@@ -7,7 +7,10 @@ import androidx.room.PrimaryKey
 import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAssignments
+import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData

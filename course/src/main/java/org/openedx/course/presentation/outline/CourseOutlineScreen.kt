@@ -68,11 +68,8 @@ import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
-import org.openedx.course.presentation.ui.CourseSection
-import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseMessage
-import org.openedx.course.presentation.ui.CourseSectionCard
-import org.openedx.course.presentation.ui.CourseSubSectionItem
+import org.openedx.course.presentation.ui.CourseSection
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -151,7 +148,7 @@ fun CourseOutlineScreen(
                     viewModel.removeDownloadModels(blockId)
                 } else {
                     viewModel.saveDownloadModels(
-                        FileUtil.getExternalAppDir(context).path, blockId
+                        FileUtil(context).getExternalAppDir().path, blockId
                     )
                 }
             }

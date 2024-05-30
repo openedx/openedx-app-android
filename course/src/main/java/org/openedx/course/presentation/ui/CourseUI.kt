@@ -47,8 +47,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,9 +60,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -82,7 +81,6 @@ import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.db.DownloadModel
@@ -747,7 +745,7 @@ fun CourseSubSectionItem(
     onClick: (Block) -> Unit
 ) {
     val icon =
-        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(R.drawable.ic_course_chapter_icon)
+        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
 
