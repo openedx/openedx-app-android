@@ -130,7 +130,7 @@ fun CourseSectionCard(
         ) {
             val completedIconPainter =
                 if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-                    R.drawable.ic_course_chapter_icon
+                    coreR.drawable.ic_core_chapter_icon
                 )
             val completedIconColor =
                 if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface

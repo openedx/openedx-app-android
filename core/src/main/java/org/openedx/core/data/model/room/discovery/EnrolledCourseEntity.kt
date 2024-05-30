@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseSharingUtmParameters
@@ -12,6 +13,7 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.utils.TimeUtils
+import java.util.Date
 
 @Entity(tableName = "course_enrolled_table")
 data class EnrolledCourseEntity(
@@ -30,6 +32,12 @@ data class EnrolledCourseEntity(
     val course: EnrolledCourseDataDb,
     @Embedded
     val certificate: CertificateDb?,
+    @Embedded
+    val progress: ProgressDb,
+    @Embedded
+    val courseStatus: CourseStatusDb?,
+    @Embedded
+    val courseAssignments: CourseAssignmentsDb?,
 ) {
 
     fun mapToDomain(): EnrolledCourse {
@@ -39,7 +47,10 @@ data class EnrolledCourseEntity(
             mode,
             isActive,
             course.mapToDomain(),
-            certificate?.mapToDomain()
+            certificate?.mapToDomain(),
+            progress.mapToDomain(),
+            courseStatus?.mapToDomain(),
+            courseAssignments?.mapToDomain()
         )
     }
 }
@@ -84,7 +95,7 @@ data class EnrolledCourseDataDb(
     @ColumnInfo("videoOutline")
     val videoOutline: String,
     @ColumnInfo("isSelfPaced")
-    val isSelfPaced: Boolean
+    val isSelfPaced: Boolean,
 ) {
     fun mapToDomain(): EnrolledCourseData {
         return EnrolledCourseData(
@@ -124,7 +135,7 @@ data class CoursewareAccessDb(
     @ColumnInfo("additionalContextUserMessage")
     val additionalContextUserMessage: String,
     @ColumnInfo("userFragment")
-    val userFragment: String
+    val userFragment: String,
 ) {
 
     fun mapToDomain(): CoursewareAccess {
@@ -140,6 +151,24 @@ data class CoursewareAccessDb(
 
 }
 
+data class CertificateDb(
+    @ColumnInfo("certificateURL")
+    val certificateURL: String?,
+) {
+    fun mapToDomain() = Certificate(certificateURL)
+}
+
+data class CourseSharingUtmParametersDb(
+    @ColumnInfo("facebook")
+    val facebook: String,
+    @ColumnInfo("twitter")
+    val twitter: String,
+) {
+    fun mapToDomain() = CourseSharingUtmParameters(
+        facebook, twitter
+    )
+}
+
 data class ProgressDb(
     @ColumnInfo("assignments_completed")
     val assignmentsCompleted: Int,
@@ -153,20 +182,62 @@ data class ProgressDb(
     fun mapToDomain() = Progress(assignmentsCompleted, totalAssignmentsCount)
 }
 
-data class CertificateDb(
-    @ColumnInfo("certificateURL")
-    val certificateURL: String?
+data class CourseStatusDb(
+    @ColumnInfo("lastVisitedModuleId")
+    val lastVisitedModuleId: String,
+    @ColumnInfo("lastVisitedModulePath")
+    val lastVisitedModulePath: List<String>,
+    @ColumnInfo("lastVisitedBlockId")
+    val lastVisitedBlockId: String,
+    @ColumnInfo("lastVisitedUnitDisplayName")
+    val lastVisitedUnitDisplayName: String,
 ) {
-    fun mapToDomain() = Certificate(certificateURL)
+    fun mapToDomain() = CourseStatus(
+        lastVisitedModuleId, lastVisitedModulePath, lastVisitedBlockId, lastVisitedUnitDisplayName
+    )
 }
 
-data class CourseSharingUtmParametersDb(
-    @ColumnInfo("facebook")
-    val facebook: String,
-    @ColumnInfo("twitter")
-    val twitter: String
+data class CourseAssignmentsDb(
+    @ColumnInfo("futureAssignments")
+    val futureAssignments: List<CourseDateBlockDb>?,
+    @ColumnInfo("pastAssignments")
+    val pastAssignments: List<CourseDateBlockDb>?,
 ) {
-    fun mapToDomain() = CourseSharingUtmParameters(
-        facebook, twitter
+    fun mapToDomain() = CourseAssignments(
+        futureAssignments = futureAssignments?.map { it.mapToDomain() },
+        pastAssignments = pastAssignments?.map { it.mapToDomain() }
+    )
+}
+
+data class CourseDateBlockDb(
+    @ColumnInfo("title")
+    val title: String = "",
+    @ColumnInfo("description")
+    val description: String = "",
+    @ColumnInfo("link")
+    val link: String = "",
+    @ColumnInfo("blockId")
+    val blockId: String = "",
+    @ColumnInfo("learnerHasAccess")
+    val learnerHasAccess: Boolean = false,
+    @ColumnInfo("complete")
+    val complete: Boolean = false,
+    @Embedded
+    val date: Date,
+    @ColumnInfo("dateType")
+    val dateType: DateType = DateType.NONE,
+    @ColumnInfo("assignmentType")
+    val assignmentType: String? = "",
+) {
+    fun mapToDomain() = CourseDateBlock(
+        title = title,
+        description = description,
+        link = link,
+        blockId = blockId,
+        learnerHasAccess = learnerHasAccess,
+        complete = complete,
+        date = date,
+        dateType = dateType,
+        assignmentType = assignmentType
     )
 }

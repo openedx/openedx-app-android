@@ -25,6 +25,7 @@ import org.openedx.course.presentation.unit.container.CourseUnitContainerFragmen
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
+import org.openedx.courses.presentation.AllEnrolledCoursesFragment
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
@@ -123,12 +124,32 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
     }
 
+    override fun navigateToAllEnrolledCourses(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
+    }
+
+    override fun getProgramFragmentInstance(): Fragment {
+        return ProgramFragment(myPrograms = true, isNestedFragment = true)
+    }
+
     override fun navigateToCourseInfo(
         fm: FragmentManager,
         courseId: String,
         infoType: String,
     ) {
         replaceFragmentWithBackStack(fm, CourseInfoFragment.newInstance(courseId, infoType))
+    }
+
+    override fun navigateToCourseOutline(
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String,
+        enrollmentMode: String
+    ) {
+        replaceFragmentWithBackStack(
+            fm,
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
+        )
     }
     //endregion
 
@@ -139,10 +160,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         courseTitle: String,
         enrollmentMode: String,
+        openTab: String,
+        resumeBlockId: String
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
+            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, openTab, resumeBlockId)
         )
     }
 

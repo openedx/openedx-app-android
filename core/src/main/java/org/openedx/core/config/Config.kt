@@ -95,6 +95,10 @@ class Config(context: Context) {
         return getObjectOrNewInstance(PROGRAM, ProgramConfig::class.java)
     }
 
+    fun getDashboardConfig(): DashboardConfig {
+        return getObjectOrNewInstance(DASHBOARD, DashboardConfig::class.java)
+    }
+
     fun getBranchConfig(): BranchConfig {
         return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
@@ -169,6 +173,7 @@ class Config(context: Context) {
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
+        private const val DASHBOARD = "DASHBOARD"
         private const val BRANCH = "BRANCH"
         private const val COURSE_DROPDOWN_NAVIGATION_ENABLED = "COURSE_DROPDOWN_NAVIGATION_ENABLED"
         private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"

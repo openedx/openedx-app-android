@@ -28,6 +28,9 @@ PROGRAM:
     PROGRAM_URL: ''
     PROGRAM_DETAIL_URL_TEMPLATE: ''
 
+DASHBOARD:
+  TYPE: 'gallery'
+
 FIREBASE:
   ENABLED: false
   ANALYTICS_SOURCE: '' # segment | none

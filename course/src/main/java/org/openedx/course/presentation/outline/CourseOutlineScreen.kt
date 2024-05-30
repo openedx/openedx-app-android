@@ -25,6 +25,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,8 +64,8 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseSection
@@ -72,105 +73,98 @@ import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.CourseSectionCard
 import org.openedx.course.presentation.ui.CourseSubSectionItem
-import java.io.File
 import java.util.Date
 import org.openedx.core.R as CoreR
 
 @Composable
 fun CourseOutlineScreen(
     windowSize: WindowSize,
-    courseOutlineViewModel: CourseOutlineViewModel,
-    courseRouter: CourseRouter,
+    viewModel: CourseOutlineViewModel,
     fragmentManager: FragmentManager,
     onResetDatesClick: () -> Unit
 ) {
-    val uiState by courseOutlineViewModel.uiState.collectAsState()
-    val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
+    val uiState by viewModel.uiState.collectAsState()
+    val uiMessage by viewModel.uiMessage.collectAsState(null)
+    val resumeBlockId by viewModel.resumeBlockId.collectAsState("")
     val context = LocalContext.current
+
+    LaunchedEffect(resumeBlockId) {
+        if (resumeBlockId.isNotEmpty()) {
+            viewModel.openBlock(fragmentManager, resumeBlockId)
+        }
+    }
 
     CourseOutlineUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
         onExpandClick = { block ->
-            if (courseOutlineViewModel.switchCourseSections(block.id)) {
-                courseOutlineViewModel.sequentialClickedEvent(
+            if (viewModel.switchCourseSections(block.id)) {
+                viewModel.sequentialClickedEvent(
                     block.blockId,
                     block.displayName
                 )
             }
         },
         onSubSectionClick = { subSectionBlock ->
-            if (courseOutlineViewModel.isCourseNestedListEnabled) {
-                courseOutlineViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                    courseOutlineViewModel.logUnitDetailViewedEvent(
+            if (viewModel.isCourseNestedListEnabled) {
+                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    viewModel.logUnitDetailViewedEvent(
                         unit.blockId,
                         unit.displayName
                     )
-                    courseRouter.navigateToCourseContainer(
+                    viewModel.courseRouter.navigateToCourseContainer(
                         fragmentManager,
-                        courseId = courseOutlineViewModel.courseId,
+                        courseId = viewModel.courseId,
                         unitId = unit.id,
                         mode = CourseViewMode.FULL
                     )
                 }
             } else {
-                courseOutlineViewModel.sequentialClickedEvent(
+                viewModel.sequentialClickedEvent(
                     subSectionBlock.blockId,
                     subSectionBlock.displayName
                 )
-                courseRouter.navigateToCourseSubsections(
+                viewModel.courseRouter.navigateToCourseSubsections(
                     fm = fragmentManager,
-                    courseId = courseOutlineViewModel.courseId,
+                    courseId = viewModel.courseId,
                     subSectionId = subSectionBlock.id,
                     mode = CourseViewMode.FULL
                 )
             }
         },
         onResumeClick = { componentId ->
-            courseOutlineViewModel.resumeSectionBlock?.let { subSection ->
-                courseOutlineViewModel.resumeCourseTappedEvent(subSection.id)
-                courseOutlineViewModel.resumeVerticalBlock?.let { unit ->
-                    courseRouter.navigateToCourseContainer(
-                        fm = fragmentManager,
-                        courseId = courseOutlineViewModel.courseId,
-                        unitId = unit.id,
-                        componentId = componentId,
-                        mode = CourseViewMode.FULL
-                    )
-                }
-            }
+            viewModel.openBlock(
+                fragmentManager,
+                componentId
+            )
         },
         onDownloadClick = { blocksIds ->
             blocksIds.forEach { blockId ->
-                if (courseOutlineViewModel.isBlockDownloading(blockId)) {
-                    courseRouter.navigateToDownloadQueue(
+                if (viewModel.isBlockDownloading(blockId)) {
+                    viewModel.courseRouter.navigateToDownloadQueue(
                         fm = fragmentManager,
-                        courseOutlineViewModel.getDownloadableChildren(blockId)
+                        viewModel.getDownloadableChildren(blockId)
                             ?: arrayListOf()
                     )
-                } else if (courseOutlineViewModel.isBlockDownloaded(blockId)) {
-                    courseOutlineViewModel.removeDownloadModels(blockId)
+                } else if (viewModel.isBlockDownloaded(blockId)) {
+                    viewModel.removeDownloadModels(blockId)
                 } else {
-                    courseOutlineViewModel.saveDownloadModels(
-                        context.externalCacheDir.toString() +
-                                File.separator +
-                                context
-                                    .getString(CoreR.string.app_name)
-                                    .replace(Regex("\\s"), "_"), blockId
+                    viewModel.saveDownloadModels(
+                        FileUtil.getExternalAppDir(context).path, blockId
                     )
                 }
             }
         },
         onResetDatesClick = {
-            courseOutlineViewModel.resetCourseDatesBanner(
+            viewModel.resetCourseDatesBanner(
                 onResetDates = {
                     onResetDatesClick()
                 }
             )
         },
         onCertificateClick = {
-            courseOutlineViewModel.viewCertificateTappedEvent()
+            viewModel.viewCertificateTappedEvent()
             it.takeIfNotEmpty()
                 ?.let { url -> AndroidUriHandler(context).openUri(url) }
         }

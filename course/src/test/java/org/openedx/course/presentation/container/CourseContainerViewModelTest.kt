@@ -156,6 +156,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -186,6 +187,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `getCourseStructure unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             "",
             "",
@@ -222,6 +224,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -251,6 +254,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `getCourseStructure success without internet`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             "",
             "",
@@ -289,6 +293,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -319,6 +324,7 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            "",
             config,
             interactor,
             calendarManager,
@@ -346,6 +352,7 @@ class CourseContainerViewModelTest {
     @Test
     fun `updateData success`() = runTest {
         val viewModel = CourseContainerViewModel(
+            "",
             "",
             "",
             "",

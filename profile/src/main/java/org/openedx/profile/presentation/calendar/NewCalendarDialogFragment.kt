@@ -172,8 +172,8 @@ private fun NewCalendarDialog(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = CoreR.string.core_cancel),
                 backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.buttonBackground,
-                textColor = MaterialTheme.appColors.buttonBackground,
+                borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }

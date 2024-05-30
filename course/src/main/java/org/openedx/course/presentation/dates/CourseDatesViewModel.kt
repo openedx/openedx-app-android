@@ -26,18 +26,18 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.CalendarManager
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseRefresh
+import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.CourseRouter
 import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
@@ -51,6 +51,7 @@ class CourseDatesViewModel(
     private val corePreferences: CorePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val config: Config,
+    val courseRouter: CourseRouter
 ) : BaseViewModel() {
 
     var isSelfPaced = true
@@ -86,10 +87,8 @@ class CourseDatesViewModel(
                         _calendarSyncUIState.update { it.copy(isSynced = event.isSynced) }
                     }
 
-                    is CourseRefresh -> {
-                        if (event.courseContainerTab == CourseContainerTab.DATES) {
-                            loadingCourseDatesInternal()
-                        }
+                    is RefreshDates -> {
+                        loadingCourseDatesInternal()
                     }
                 }
             }

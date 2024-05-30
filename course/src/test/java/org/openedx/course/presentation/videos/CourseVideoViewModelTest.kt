@@ -54,6 +54,7 @@ import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseRouter
 import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -74,6 +75,7 @@ class CourseVideoViewModelTest {
     private val networkConnection = mockk<NetworkConnection>()
     private val downloadDao = mockk<DownloadDao>()
     private val workerController = mockk<DownloadWorkerController>()
+    private val courseRouter = mockk<CourseRouter>()
 
     private val cantDownload = "You can download content only from Wi-fi"
 
@@ -211,9 +213,10 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
         )
 
         viewModel.getVideos()
@@ -242,6 +245,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -281,6 +285,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -322,6 +327,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -358,6 +364,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController
@@ -398,6 +405,7 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController

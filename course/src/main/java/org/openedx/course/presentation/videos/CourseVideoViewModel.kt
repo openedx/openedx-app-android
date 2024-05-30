@@ -28,6 +28,7 @@ import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseRouter
 
 class CourseVideoViewModel(
     val courseId: String,
@@ -40,6 +41,7 @@ class CourseVideoViewModel(
     private val courseNotifier: CourseNotifier,
     private val videoNotifier: VideoNotifier,
     private val analytics: CourseAnalytics,
+    val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController

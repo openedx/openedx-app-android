@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -48,6 +49,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -199,8 +201,8 @@ fun Toolbar(
                 onClick = { onSettingsClick() }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.core_ic_settings),
-                    tint = MaterialTheme.appColors.primary,
+                    imageVector = Icons.Default.ManageAccounts,
+                    tint = MaterialTheme.appColors.textAccent,
                     contentDescription = stringResource(id = R.string.core_accessibility_settings)
                 )
             }
@@ -939,22 +941,23 @@ fun TextIcon(
     icon: ImageVector,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
-    iconModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
+    iconModifier: Modifier? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val modifier = if (onClick == null) {
-        Modifier
+    val rowModifier = if (onClick == null) {
+        modifier
     } else {
-        Modifier.noRippleClickable { onClick.invoke() }
+        modifier.clickable { onClick.invoke() }
     }
     Row(
-        modifier = modifier,
+        modifier = rowModifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(text = text, color = color, style = textStyle)
         Icon(
-            modifier = iconModifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = iconModifier ?: Modifier.size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
@@ -1213,17 +1216,22 @@ fun RoundTabsBar(
     modifier: Modifier = Modifier,
     items: List<TabItem>,
     pagerState: PagerState,
+    contentPadding: PaddingValues = PaddingValues(),
+    withPager: Boolean = false,
     rowState: LazyListState = rememberLazyListState(),
-    onPageChange: (Int) -> Unit
+    onTabClicked: (Int) -> Unit = { }
 ) {
+    // The pager state does not work without the pager and the tabs do not change.
+    if (!withPager) {
+        HorizontalPager(state = pagerState) { }
+    }
+
     val scope = rememberCoroutineScope()
-    val windowSize = rememberWindowSize()
-    val horizontalPadding = if (!windowSize.isTablet) 12.dp else 98.dp
     LazyRow(
         modifier = modifier,
         state = rowState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
+        contentPadding = contentPadding,
     ) {
         itemsIndexed(items) { index, item ->
             val isSelected = pagerState.currentPage == index
@@ -1246,10 +1254,11 @@ fun RoundTabsBar(
                     .clickable {
                         scope.launch {
                             pagerState.scrollToPage(index)
-                            onPageChange(index)
+                            rowState.animateScrollToItem(index)
+                            onTabClicked(index)
                         }
                     }
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 16.dp),
                 item = item,
                 contentColor = contentColor
             )
@@ -1268,12 +1277,15 @@ private fun RoundTab(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = rememberVectorPainter(item.icon),
-            tint = contentColor,
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.width(4.dp))
+        val icon = item.icon
+        if (icon != null) {
+            Icon(
+                painter = rememberVectorPainter(icon),
+                tint = contentColor,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
         Text(
             text = stringResource(item.labelResId),
             color = contentColor
@@ -1374,7 +1386,7 @@ private fun RoundTabsBarPreview() {
             items = listOf(mockTab, mockTab, mockTab),
             rowState = rememberLazyListState(),
             pagerState = rememberPagerState(pageCount = { 3 }),
-            onPageChange = { }
+            onTabClicked = { }
         )
     }
 }
