@@ -9,10 +9,9 @@
     <string name="dashboard_course_date">Course %1$s</string>
     <string name="dashboard_start_course">Start Course</string>
     <string name="dashboard_resume_course">Resume Course</string>
-    <string name="dashboard_past_due_assignment">%1$d Past Due Assignments</string>
     <string name="dashboard_view_all_with_count">View All Courses (%1$d)</string>
     <string name="dashboard_view_all">View All</string>
-    <string name="dashboard_assignment_due_in_days">%1$s Due in %2$s</string>
+    <string name="dashboard_assignment_due" translatable="false">%1$s %2$s</string>
     <string name="dashboard_course_filter_all">All</string>
     <string name="dashboard_course_filter_in_progress">In Progress</string>
     <string name="dashboard_course_filter_completed">Completed</string>
@@ -22,4 +21,13 @@
     <string name="dashboard_all_courses_empty_description">You are not currently enrolled in any courses, would you like to explore the course catalog?</string>
     <string name="dashboard_find_a_course">Find a Course</string>
     <string name="dashboard_no_status_courses">No %1$s Courses</string>
+
+    <plurals name="dashboard_past_due_assignment">
+        <item quantity="zero">%1$d Past Due Assignments</item>
+        <item quantity="one">%1$d Past Due Assignment</item>
+        <item quantity="two">%1$d Past Due Assignments</item>
+        <item quantity="few">%1$d Past Due Assignments</item>
+        <item quantity="many">%1$d Past Due Assignments</item>
+        <item quantity="other">%1$d Past Due Assignments</item>
+    </plurals>
 </resources>
