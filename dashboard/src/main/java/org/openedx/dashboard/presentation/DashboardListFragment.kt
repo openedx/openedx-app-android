@@ -381,7 +381,7 @@ private fun CourseItem(
     apiHostUrl: String,
     enrolledCourse: EnrolledCourse,
     windowSize: WindowSize,
-    onClick: (EnrolledCourse) -> Unit
+    onClick: (EnrolledCourse) -> Unit,
 ) {
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(

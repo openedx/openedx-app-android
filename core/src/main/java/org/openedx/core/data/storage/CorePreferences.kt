@@ -11,6 +11,7 @@ interface CorePreferences {
     var user: User?
     var videoSettings: VideoSettings
     var appConfig: AppConfig
+    var canResetAppDirectory: Boolean
 
     fun clear()
 }
