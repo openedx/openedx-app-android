@@ -103,7 +103,7 @@ fun CourseSectionCard(
     block: Block,
     downloadedState: DownloadedState?,
     onItemClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
 
@@ -204,7 +204,7 @@ fun OfflineQueueCard(
     downloadModel: DownloadModel,
     progressValue: Long,
     progressSize: Long,
-    onDownloadClick: (DownloadModel) -> Unit
+    onDownloadClick: (DownloadModel) -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
 
@@ -272,7 +272,7 @@ fun OfflineQueueCard(
 
 @Composable
 fun CardArrow(
-    degrees: Float
+    degrees: Float,
 ) {
     Icon(
         imageVector = Icons.Filled.ChevronRight,
@@ -304,7 +304,7 @@ fun NavigationUnitsButtons(
     hasNextBlock: Boolean,
     isVerticalNavigation: Boolean,
     onPrevClick: () -> Unit,
-    onNextClick: () -> Unit
+    onNextClick: () -> Unit,
 ) {
     val nextButtonIcon = if (hasNextBlock) {
         painterResource(id = coreR.drawable.core_ic_down)
@@ -403,7 +403,7 @@ fun HorizontalPageIndicator(
     completedAndSelectedColor: Color = Color.Green,
     completedColor: Color = Color.Green,
     selectedColor: Color = Color.White,
-    defaultColor: Color = Color.Gray
+    defaultColor: Color = Color.Gray,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(1.dp),
@@ -468,7 +468,7 @@ fun Indicator(
     defaultColor: Color,
     defaultRadius: Dp,
     selectedSize: Dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val size by animateDpAsState(
         targetValue = if (isSelected) selectedSize else defaultRadius,
@@ -497,7 +497,7 @@ fun VideoSubtitles(
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
     onTranscriptClick: (Caption) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     timedTextObject?.let {
         val autoScrollDelay = 3000L
@@ -577,7 +577,7 @@ fun CourseExpandableChapterCard(
     modifier: Modifier,
     block: Block,
     onItemClick: (Block) -> Unit,
-    arrowDegrees: Float = 0f
+    arrowDegrees: Float = 0f,
 ) {
     Column(modifier = Modifier
         .clickable { onItemClick(block) }
@@ -627,7 +627,7 @@ fun CourseSubSectionItem(
     downloadedState: DownloadedState?,
     downloadsCount: Int,
     onClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
 ) {
     val icon =
         if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
@@ -729,7 +729,7 @@ fun CourseSubSectionItem(
 @Composable
 fun CourseUnitToolbar(
     title: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     OpenEdXTheme {
         Box(
@@ -759,7 +759,7 @@ fun SubSectionUnitsTitle(
     unitName: String,
     unitsCount: Int,
     unitsListShowed: Boolean,
-    onUnitsClick: () -> Unit
+    onUnitsClick: () -> Unit,
 ) {
     val textStyle = MaterialTheme.appTypography.titleMedium
     val hasUnits = unitsCount > 0
@@ -805,7 +805,7 @@ fun SubSectionUnitsTitle(
 fun SubSectionUnitsList(
     unitBlocks: List<Block>,
     selectedUnitIndex: Int = 0,
-    onUnitClick: (index: Int, unit: Block) -> Unit
+    onUnitClick: (index: Int, unit: Block) -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -1050,7 +1050,7 @@ fun CourseMessage(
     icon: Painter,
     message: String,
     action: String? = null,
-    onActionClick: () -> Unit = {}
+    onActionClick: () -> Unit = {},
 ) {
     Column {
         Row(
