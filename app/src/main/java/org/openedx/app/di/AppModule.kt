@@ -62,6 +62,7 @@ import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
+import org.openedx.profile.presentation.calendar.CalendarNotifier
 import org.openedx.profile.system.notifier.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
@@ -99,6 +100,7 @@ val appModule = module {
     single { DownloadNotifier() }
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
+    single { CalendarNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }

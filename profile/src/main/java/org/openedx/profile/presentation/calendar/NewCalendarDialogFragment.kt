@@ -90,7 +90,7 @@ class NewCalendarDialogFragment : DialogFragment() {
                         dismiss()
                     },
                     onBeginSyncingClick = { calendarName, calendarColor ->
-                        viewModel.syncCalendar(calendarName, calendarColor)
+                        viewModel.createCalendar(calendarName, calendarColor)
                         dismiss()
                     }
                 )

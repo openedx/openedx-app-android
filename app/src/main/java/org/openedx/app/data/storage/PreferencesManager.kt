@@ -10,6 +10,7 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.replaceSpace
+import org.openedx.core.system.CalendarManager
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
@@ -37,7 +38,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }.apply()
     }
 
-    private fun getLong(key: String): Long = sharedPreferences.getLong(key, 0L)
+    private fun getLong(key: String, defValue: Long = 0): Long = sharedPreferences.getLong(key, defValue)
 
     private fun saveBoolean(key: String, value: Boolean) {
         sharedPreferences.edit().apply {
@@ -75,6 +76,18 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             saveLong(EXPIRES_IN, value)
         }
         get() = getLong(EXPIRES_IN)
+
+    override var calendarId: Long
+        set(value) {
+            saveLong(CALENDAR_ID, value)
+        }
+        get() = getLong(CALENDAR_ID, CalendarManager.CALENDAR_DOES_NOT_EXIST)
+
+    override var lastCalendarSync: Long
+        set(value) {
+            saveLong(LAST_CALENDAR_SYNC, value)
+        }
+        get() = getLong(LAST_CALENDAR_SYNC)
 
     override var user: User?
         set(value) {
@@ -172,5 +185,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val VIDEO_SETTINGS_STREAMING_QUALITY = "video_settings_streaming_quality"
         private const val VIDEO_SETTINGS_DOWNLOAD_QUALITY = "video_settings_download_quality"
         private const val APP_CONFIG = "app_config"
+        private const val CALENDAR_ID = "CALENDAR_ID"
+        private const val LAST_CALENDAR_SYNC = "LAST_CALENDAR_SYNC"
     }
 }

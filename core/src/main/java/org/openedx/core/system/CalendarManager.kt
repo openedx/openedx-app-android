@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.service.CalendarSyncService
 import org.openedx.core.utils.Logger
 import org.openedx.core.utils.toCalendar
 import java.util.Calendar
@@ -401,6 +402,11 @@ class CalendarManager(
      */
     fun getCourseCalendarTitle(courseName: String): String {
         return "${resourceManager.getString(id = CoreR.string.platform_name)} - $courseName"
+    }
+
+    fun startSyncCalendarService() {
+        val intent = Intent(context, CalendarSyncService::class.java)
+        context.startService(intent)
     }
 
     companion object {

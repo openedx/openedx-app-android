@@ -11,5 +11,4 @@ class AppUpgradeNotifier {
     val notifier: Flow<AppUpgradeEvent> = channel.asSharedFlow()
 
     suspend fun send(event: AppUpgradeEvent) = channel.emit(event)
-
 }

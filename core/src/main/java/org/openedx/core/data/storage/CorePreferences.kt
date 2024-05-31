@@ -11,6 +11,8 @@ interface CorePreferences {
     var user: User?
     var videoSettings: VideoSettings
     var appConfig: AppConfig
+    var calendarId: Long
+    var lastCalendarSync: Long
 
     fun clear()
 }

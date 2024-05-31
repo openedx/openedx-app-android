@@ -24,12 +24,15 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.utils.Logger
+import org.openedx.core.utils.isToday
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
+import java.util.Date
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
@@ -48,6 +51,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
+    private val calendarManager by inject<CalendarManager>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -139,6 +143,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         viewModel.logoutUser.observe(this) {
             profileRouter.restartApp(supportFragmentManager, viewModel.isLogistrationEnabled)
         }
+
+        tryToSyncCalendar()
     }
 
     override fun onStart() {
@@ -210,6 +216,14 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             Configuration.UI_MODE_NIGHT_NO -> false
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
+        }
+    }
+
+    private fun tryToSyncCalendar() {
+        val isCalendarCreated = corePreferencesManager.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
+        val isCalendarSyncRequired = !Date(corePreferencesManager.lastCalendarSync).isToday()
+        if (isCalendarCreated && isCalendarSyncRequired) {
+            calendarManager.startSyncCalendarService()
         }
     }
 

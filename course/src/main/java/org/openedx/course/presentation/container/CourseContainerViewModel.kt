@@ -25,7 +25,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
-import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.CalendarManager
