@@ -381,7 +381,7 @@ private fun CourseItem(
     apiHostUrl: String,
     enrolledCourse: EnrolledCourse,
     windowSize: WindowSize,
-    onClick: (EnrolledCourse) -> Unit
+    onClick: (EnrolledCourse) -> Unit,
 ) {
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(
@@ -391,7 +391,7 @@ private fun CourseItem(
             )
         )
     }
-    val imageUrl = apiHostUrl.dropLast(1) + enrolledCourse.course.courseImage
+    val imageUrl = apiHostUrl + enrolledCourse.course.courseImage
     val context = LocalContext.current
     Surface(
         modifier = Modifier

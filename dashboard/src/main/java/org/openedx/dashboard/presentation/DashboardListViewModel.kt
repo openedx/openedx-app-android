@@ -27,7 +27,7 @@ class DashboardListViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appUpgradeNotifier: AppUpgradeNotifier,
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()

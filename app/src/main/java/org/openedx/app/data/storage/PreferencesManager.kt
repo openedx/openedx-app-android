@@ -165,6 +165,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getBoolean(APP_WAS_POSITIVE_RATED)
 
+    override var canResetAppDirectory: Boolean
+        set(value) {
+            saveBoolean(RESET_APP_DIRECTORY, value)
+        }
+        get() = getBoolean(RESET_APP_DIRECTORY, true)
+
     override fun setCalendarSyncEventsDialogShown(courseName: String) {
         saveBoolean(courseName.replaceSpace("_"), true)
     }
@@ -187,5 +193,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val APP_CONFIG = "app_config"
         private const val CALENDAR_ID = "CALENDAR_ID"
         private const val LAST_CALENDAR_SYNC = "LAST_CALENDAR_SYNC"
+        private const val RESET_APP_DIRECTORY = "reset_app_directory"
     }
 }

@@ -70,7 +70,7 @@ fun ImageHeader(
     val imageUrl = if (courseImage?.isLinkValid() == true) {
         courseImage
     } else {
-        apiHostUrl.dropLast(1) + courseImage
+        apiHostUrl + courseImage
     }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AsyncImage(
@@ -108,7 +108,7 @@ fun DiscoveryCourseItem(
         )
     }
 
-    val imageUrl = apiHostUrl.dropLast(1) + course.media.courseImage?.uri
+    val imageUrl = apiHostUrl + course.media.courseImage?.uri
     Surface(
         modifier = Modifier
             .testTag("btn_course_card")

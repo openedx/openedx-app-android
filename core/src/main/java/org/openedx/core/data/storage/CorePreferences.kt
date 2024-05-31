@@ -13,6 +13,7 @@ interface CorePreferences {
     var appConfig: AppConfig
     var calendarId: Long
     var lastCalendarSync: Long
+    var canResetAppDirectory: Boolean
 
     fun clear()
 }
