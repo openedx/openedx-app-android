@@ -197,7 +197,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos empty list`() = runTest {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns
                 courseStructure.copy(blockData = emptyList())
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
@@ -229,7 +229,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos success`() = runTest {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { preferencesManager.videoSettings } returns VideoSettings.default
@@ -262,7 +262,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { courseNotifier.notifier } returns flow {
             emit(CourseStructureUpdated(""))
@@ -305,7 +305,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `setIsUpdating success`() = runTest {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
@@ -314,7 +314,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
@@ -351,7 +351,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
@@ -392,7 +392,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",

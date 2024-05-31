@@ -37,9 +37,9 @@ class CourseUnitContainerViewModel(
 
     private val blocks = ArrayList<Block>()
 
-    val isCourseExpandableSectionsEnabled get() = config.isCourseDropdownNavigationEnabled()
+    val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
-    val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+    val isCourseUnitProgressEnabled get() = config.getCourseUIConfig().isCourseUnitProgressEnabled
 
     private var currentIndex = 0
     private var currentVerticalIndex = 0

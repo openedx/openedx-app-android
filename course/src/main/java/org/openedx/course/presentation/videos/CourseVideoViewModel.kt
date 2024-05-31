@@ -52,6 +52,9 @@ class CourseVideoViewModel(
     workerController,
     coreAnalytics
 ) {
+
+    val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
+
     private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
     val uiState: StateFlow<CourseVideosUIState>
         get() = _uiState.asStateFlow()

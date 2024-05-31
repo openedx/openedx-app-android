@@ -317,7 +317,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -365,7 +365,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -412,7 +412,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -496,7 +496,7 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -539,7 +539,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         val viewModel = CourseOutlineViewModel(
@@ -576,7 +576,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns false
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseDropdownNavigationEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",

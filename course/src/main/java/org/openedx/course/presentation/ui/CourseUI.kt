@@ -112,7 +112,7 @@ fun CourseSectionCard(
     block: Block,
     downloadedState: DownloadedState?,
     onItemClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
+    onDownloadClick: (Block) -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
 
@@ -213,7 +213,7 @@ fun OfflineQueueCard(
     downloadModel: DownloadModel,
     progressValue: Long,
     progressSize: Long,
-    onDownloadClick: (DownloadModel) -> Unit
+    onDownloadClick: (DownloadModel) -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
 
@@ -281,7 +281,7 @@ fun OfflineQueueCard(
 
 @Composable
 fun CardArrow(
-    degrees: Float
+    degrees: Float,
 ) {
     Icon(
         imageVector = Icons.Filled.ChevronRight,
@@ -313,7 +313,7 @@ fun NavigationUnitsButtons(
     hasNextBlock: Boolean,
     isVerticalNavigation: Boolean,
     onPrevClick: () -> Unit,
-    onNextClick: () -> Unit
+    onNextClick: () -> Unit,
 ) {
     val nextButtonIcon = if (hasNextBlock) {
         painterResource(id = coreR.drawable.core_ic_down)
@@ -412,7 +412,7 @@ fun HorizontalPageIndicator(
     completedAndSelectedColor: Color = Color.Green,
     completedColor: Color = Color.Green,
     selectedColor: Color = Color.White,
-    defaultColor: Color = Color.Gray
+    defaultColor: Color = Color.Gray,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(1.dp),
@@ -477,7 +477,7 @@ fun Indicator(
     defaultColor: Color,
     defaultRadius: Dp,
     selectedSize: Dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val size by animateDpAsState(
         targetValue = if (isSelected) selectedSize else defaultRadius,
@@ -506,7 +506,7 @@ fun VideoSubtitles(
     showSubtitleLanguage: Boolean,
     currentIndex: Int,
     onTranscriptClick: (Caption) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     timedTextObject?.let {
         val autoScrollDelay = 3000L
@@ -590,7 +590,7 @@ fun CourseSection(
     courseSubSections: List<Block>?,
     downloadedStateMap: Map<String, DownloadedState>,
     onSubSectionClick: (Block) -> Unit,
-    onDownloadClick: (blocksIds: List<String>) -> Unit
+    onDownloadClick: (blocksIds: List<String>) -> Unit,
 ) {
     val arrowRotation by animateFloatAsState(
         targetValue = if (courseSectionsState == true) -90f else 90f, label = ""
@@ -646,7 +646,7 @@ fun CourseExpandableChapterCard(
     block: Block,
     arrowDegrees: Float = 0f,
     downloadedState: DownloadedState?,
-    onDownloadClick: () -> Unit
+    onDownloadClick: () -> Unit,
 ) {
     val iconModifier = Modifier.size(24.dp)
     Row(
@@ -744,7 +744,7 @@ fun CourseExpandableChapterCard(
 fun CourseSubSectionItem(
     modifier: Modifier = Modifier,
     block: Block,
-    onClick: (Block) -> Unit
+    onClick: (Block) -> Unit,
 ) {
     val context = LocalContext.current
     val icon =
@@ -811,7 +811,7 @@ fun CourseSubSectionItem(
 @Composable
 fun CourseUnitToolbar(
     title: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     OpenEdXTheme {
         Box(
@@ -841,7 +841,7 @@ fun SubSectionUnitsTitle(
     unitName: String,
     unitsCount: Int,
     unitsListShowed: Boolean,
-    onUnitsClick: () -> Unit
+    onUnitsClick: () -> Unit,
 ) {
     val textStyle = MaterialTheme.appTypography.titleMedium
     val hasUnits = unitsCount > 0
@@ -887,7 +887,7 @@ fun SubSectionUnitsTitle(
 fun SubSectionUnitsList(
     unitBlocks: List<Block>,
     selectedUnitIndex: Int = 0,
-    onUnitClick: (index: Int, unit: Block) -> Unit
+    onUnitClick: (index: Int, unit: Block) -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -1132,7 +1132,7 @@ fun CourseMessage(
     icon: Painter,
     message: String,
     action: String? = null,
-    onActionClick: () -> Unit = {}
+    onActionClick: () -> Unit = {},
 ) {
     Column {
         Row(

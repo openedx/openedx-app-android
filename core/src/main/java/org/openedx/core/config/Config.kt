@@ -10,17 +10,13 @@ import java.io.InputStreamReader
 
 class Config(context: Context) {
 
-    private var configProperties: JsonObject
-
-    init {
-        configProperties = try {
-            val inputStream = context.assets.open("config/config.json")
-            val parser = JsonParser()
-            val config = parser.parse(InputStreamReader(inputStream))
-            config.asJsonObject
-        } catch (e: Exception) {
-            JsonObject()
-        }
+    private var configProperties: JsonObject = try {
+        val inputStream = context.assets.open("config/config.json")
+        val parser = JsonParser()
+        val config = parser.parse(InputStreamReader(inputStream))
+        config.asJsonObject
+    } catch (e: Exception) {
+        JsonObject()
     }
 
     fun getAppId(): String {
@@ -28,31 +24,31 @@ class Config(context: Context) {
     }
 
     fun getApiHostURL(): String {
-        return getString(API_HOST_URL, "")
+        return getString(API_HOST_URL)
     }
 
     fun getUriScheme(): String {
-        return getString(URI_SCHEME, "")
+        return getString(URI_SCHEME)
     }
 
     fun getOAuthClientId(): String {
-        return getString(OAUTH_CLIENT_ID, "")
+        return getString(OAUTH_CLIENT_ID)
     }
 
     fun getAccessTokenType(): String {
-        return getString(TOKEN_TYPE, "")
+        return getString(TOKEN_TYPE)
     }
 
     fun getFaqUrl(): String {
-        return getString(FAQ_URL, "")
+        return getString(FAQ_URL)
     }
 
     fun getFeedbackEmailAddress(): String {
-        return getString(FEEDBACK_EMAIL_ADDRESS, "")
+        return getString(FEEDBACK_EMAIL_ADDRESS)
     }
 
     fun getPlatformName(): String {
-        return getString(PLATFORM_NAME, "")
+        return getString(PLATFORM_NAME)
     }
 
     fun getAgreement(locale: String): AgreementUrls {
@@ -111,15 +107,11 @@ class Config(context: Context) {
         return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
     }
 
-    fun isCourseDropdownNavigationEnabled(): Boolean {
-        return getBoolean(COURSE_DROPDOWN_NAVIGATION_ENABLED, false)
+    fun getCourseUIConfig(): UIConfig {
+        return getObjectOrNewInstance(UI_COMPONENTS, UIConfig::class.java)
     }
 
-    fun isCourseUnitProgressEnabled(): Boolean {
-        return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
-    }
-
-    private fun getString(key: String, defaultValue: String): String {
+    private fun getString(key: String, defaultValue: String = ""): String {
         val element = getObject(key)
         return if (element != null) {
             element.asString
@@ -175,8 +167,7 @@ class Config(context: Context) {
         private const val PROGRAM = "PROGRAM"
         private const val DASHBOARD = "DASHBOARD"
         private const val BRANCH = "BRANCH"
-        private const val COURSE_DROPDOWN_NAVIGATION_ENABLED = "COURSE_DROPDOWN_NAVIGATION_ENABLED"
-        private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
+        private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
     }
 

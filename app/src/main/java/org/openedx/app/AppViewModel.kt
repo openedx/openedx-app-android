@@ -13,6 +13,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.utils.FileUtil
 
 class AppViewModel(
     private val config: Config,
@@ -21,6 +22,7 @@ class AppViewModel(
     private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
     private val analytics: AppAnalytics,
+    private val fileUtil: FileUtil,
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
@@ -32,10 +34,14 @@ class AppViewModel(
     private var logoutHandledAt: Long = 0
 
     val isBranchEnabled get() = config.getBranchConfig().enabled
+    private val canResetAppDirectory get() = preferencesManager.canResetAppDirectory
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         setUserId()
+        if (canResetAppDirectory) {
+            resetAppDirectory()
+        }
         viewModelScope.launch {
             notifier.notifier.collect { event ->
                 if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
@@ -58,6 +64,11 @@ class AppViewModel(
                 put(AppAnalyticsKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
             }
         )
+    }
+
+    private fun resetAppDirectory() {
+        fileUtil.deleteOldAppDirectory()
+        preferencesManager.canResetAppDirectory = false
     }
 
     private fun setUserId() {

@@ -28,6 +28,7 @@ import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
+import org.openedx.core.utils.FileUtil
 
 @ExperimentalCoroutinesApi
 class AppViewModelTest {
@@ -42,6 +43,7 @@ class AppViewModelTest {
     private val room = mockk<AppDatabase>()
     private val preferencesManager = mockk<PreferencesManager>()
     private val analytics = mockk<AppAnalytics>()
+    private val fileUtil = mockk<FileUtil>()
 
     private val user = User(0, "", "", "")
 
@@ -60,8 +62,17 @@ class AppViewModelTest {
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { notifier.notifier } returns flow { }
+        every { preferencesManager.canResetAppDirectory } returns false
         val viewModel =
-            AppViewModel(config, notifier, room, preferencesManager, dispatcher, analytics)
+            AppViewModel(
+                config,
+                notifier,
+                room,
+                preferencesManager,
+                dispatcher,
+                analytics,
+                fileUtil
+            )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -82,8 +93,17 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
+        every { preferencesManager.canResetAppDirectory } returns false
         val viewModel =
-            AppViewModel(config, notifier, room, preferencesManager, dispatcher, analytics)
+            AppViewModel(
+                config,
+                notifier,
+                room,
+                preferencesManager,
+                dispatcher,
+                analytics,
+                fileUtil
+            )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -106,8 +126,17 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
+        every { preferencesManager.canResetAppDirectory } returns false
         val viewModel =
-            AppViewModel(config, notifier, room, preferencesManager, dispatcher, analytics)
+            AppViewModel(
+                config,
+                notifier,
+                room,
+                preferencesManager,
+                dispatcher,
+                analytics,
+                fileUtil
+            )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
