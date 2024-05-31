@@ -258,8 +258,15 @@ object TimeUtils {
                 context.getString(R.string.core_date_format_assignment_due_tomorrow)
             }
 
-            daysDifference <= -1 -> {
-                context.getString(R.string.core_date_format_past_due_assignment)
+            daysDifference == -1 -> {
+                context.getString(R.string.core_date_format_assignment_due_yesterday)
+            }
+
+            daysDifference <= -2 -> {
+                context.getString(
+                    R.string.core_date_format_assignment_due_days_ago,
+                    ceil(-daysDifference.toDouble()).toInt().toString()
+                )
             }
 
             else -> {
