@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -468,13 +469,14 @@ private fun CourseProgress(
                 .fillMaxWidth()
                 .height(10.dp)
                 .clip(CircleShape),
-            progress = progress.getProgress(),
+            progress = progress.value,
             color = MaterialTheme.appColors.progressBarColor,
             backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
         )
         Text(
-            text = stringResource(
-                R.string.course_assignments_complete,
+            text = pluralStringResource(
+                R.plurals.course_assignments_complete,
+                progress.assignmentsCompleted,
                 progress.assignmentsCompleted,
                 progress.totalAssignmentsCount
             ),

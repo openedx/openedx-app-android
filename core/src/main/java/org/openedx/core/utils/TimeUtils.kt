@@ -263,16 +263,20 @@ object TimeUtils {
             }
 
             daysDifference <= -2 -> {
-                context.getString(
-                    R.string.core_date_format_assignment_due_days_ago,
-                    ceil(-daysDifference.toDouble()).toInt().toString()
+                val numberOfDays = ceil(-daysDifference.toDouble()).toInt()
+                context.resources.getQuantityString(
+                    R.plurals.core_date_format_assignment_due_days_ago,
+                    numberOfDays,
+                    numberOfDays
                 )
             }
 
             else -> {
-                context.getString(
-                    R.string.core_date_format_assignment_due_in,
-                    ceil(daysDifference.toDouble()).toInt().toString()
+                val numberOfDays = ceil(daysDifference.toDouble()).toInt()
+                context.resources.getQuantityString(
+                    R.plurals.core_date_format_assignment_due_in,
+                    numberOfDays,
+                    numberOfDays
                 )
             }
         }

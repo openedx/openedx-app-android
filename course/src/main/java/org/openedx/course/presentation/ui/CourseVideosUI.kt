@@ -129,8 +129,7 @@ fun CourseVideosScreen(
                 if (viewModel.isBlockDownloading(blockId)) {
                     viewModel.courseRouter.navigateToDownloadQueue(
                         fm = fragmentManager,
-                        viewModel.getDownloadableChildren(blockId)
-                            ?: arrayListOf()
+                        viewModel.getDownloadableChildren(blockId) ?: arrayListOf()
                     )
                 } else if (viewModel.isBlockDownloaded(blockId)) {
                     viewModel.removeDownloadModels(blockId)

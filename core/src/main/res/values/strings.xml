@@ -96,12 +96,25 @@
     <string name="core_date_format_tomorrow" tools:ignore="MissingTranslation">Tomorrow</string>
     <string name="core_date_format_yesterday" tools:ignore="MissingTranslation">Yesterday</string>
     <string name="core_date_format_days_ago" tools:ignore="MissingTranslation">%1$s days ago</string>
-    <string name="core_date_format_past_due_assignment" tools:ignore="MissingTranslation">Past due assignment</string>
     <string name="core_date_format_assignment_due_today" tools:ignore="MissingTranslation">Due Today</string>
     <string name="core_date_format_assignment_due_tomorrow" tools:ignore="MissingTranslation">Due Tomorrow</string>
     <string name="core_date_format_assignment_due_yesterday" tools:ignore="MissingTranslation">Due Yesterday</string>
-    <string name="core_date_format_assignment_due_in" tools:ignore="MissingTranslation">Due in %1$s days</string>
-    <string name="core_date_format_assignment_due_days_ago" tools:ignore="MissingTranslation">Due %1$s days ago</string>
+    <plurals name="core_date_format_assignment_due_days_ago" tools:ignore="MissingTranslation">
+        <item quantity="zero">Due %1$d days ago</item>
+        <item quantity="one">Due %1$d day ago</item>
+        <item quantity="two">Due %1$d days ago</item>
+        <item quantity="few">Due %1$d days ago</item>
+        <item quantity="many">Due %1$d days ago</item>
+        <item quantity="other">Due %1$d days ago</item>
+    </plurals>
+    <plurals name="core_date_format_assignment_due_in" tools:ignore="MissingTranslation">
+        <item quantity="zero">Due in %1$d days</item>
+        <item quantity="one">Due in %1$d day</item>
+        <item quantity="two">Due in %1$d days</item>
+        <item quantity="few">Due in %1$d days</item>
+        <item quantity="many">Due in %1$d days</item>
+        <item quantity="other">Due in %1$d days</item>
+    </plurals>
     <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">
         <item quantity="one">%d Item Hidden</item>
         <item quantity="other">%d Items Hidden</item>

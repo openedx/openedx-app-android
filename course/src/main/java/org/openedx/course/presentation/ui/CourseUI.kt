@@ -52,7 +52,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -609,7 +611,7 @@ fun CourseSection(
 
     Column(modifier = modifier
         .clip(MaterialTheme.appShapes.cardShape)
-        .clickable { onItemClick(block) }
+        .noRippleClickable { onItemClick(block) }
         .background(MaterialTheme.appColors.cardViewBackground)
         .border(
             1.dp,
@@ -744,12 +746,14 @@ fun CourseSubSectionItem(
     block: Block,
     onClick: (Block) -> Unit
 ) {
+    val context = LocalContext.current
     val icon =
         if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
-
-    val due = block.due?.let { TimeUtils.getAssignmentFormattedDate(LocalContext.current, it) }
+    val due by rememberSaveable {
+        mutableStateOf(block.due?.let { TimeUtils.getAssignmentFormattedDate(context, it) })
+    }
     val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(
         modifier = modifier
