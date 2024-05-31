@@ -37,8 +37,10 @@ import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseRefresh
+import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.system.notifier.RefreshDates
+import org.openedx.core.system.notifier.RefreshDiscussions
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.data.storage.CoursePreferences
@@ -56,6 +58,7 @@ import org.openedx.core.R as CoreR
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
+    private var resumeBlockId: String,
     private val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
@@ -67,7 +70,7 @@ class CourseContainerViewModel(
     private val coursePreferences: CoursePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val imageProcessor: ImageProcessor,
-    val courseRouter: CourseRouter
+    val courseRouter: CourseRouter,
 ) : BaseViewModel() {
 
     private val _dataReady = MutableLiveData<Boolean?>()
@@ -179,6 +182,10 @@ class CourseContainerViewModel(
                     }
                     isReady
                 }
+                if (_dataReady.value == true && resumeBlockId.isNotEmpty()) {
+                    delay(500L)
+                    courseNotifier.send(CourseOpenBlock(resumeBlockId))
+                }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
                     _errorMessage.value =
@@ -221,13 +228,13 @@ class CourseContainerViewModel(
 
             CourseContainerTab.DATES -> {
                 viewModelScope.launch {
-                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                    courseNotifier.send(RefreshDates)
                 }
             }
 
             CourseContainerTab.DISCUSSIONS -> {
                 viewModelScope.launch {
-                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                    courseNotifier.send(RefreshDiscussions)
                 }
             }
 
@@ -264,7 +271,6 @@ class CourseContainerViewModel(
             CourseContainerTab.MORE -> moreTabClickedEvent()
         }
     }
-
 
     fun setCalendarSyncDialogType(dialogType: CalendarSyncDialogType) {
         val currentState = _calendarSyncUIState.value

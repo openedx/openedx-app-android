@@ -14,6 +14,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,6 +81,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Media
+import org.openedx.core.extension.applyDarkModeIfEnabled
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
@@ -625,6 +627,7 @@ private fun CourseDescription(
     onWebPageLoaded: () -> Unit
 ) {
     val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
     AndroidView(modifier = Modifier.then(modifier), factory = {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
@@ -674,6 +677,7 @@ private fun CourseDescription(
                 StandardCharsets.UTF_8.name(),
                 null
             )
+            applyDarkModeIfEnabled(isDarkTheme)
         }
     })
 }

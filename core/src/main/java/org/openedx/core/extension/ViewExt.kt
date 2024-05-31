@@ -3,12 +3,15 @@ package org.openedx.core.extension
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
+import android.os.Build
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.openedx.core.system.AppCookieManager
@@ -59,5 +62,27 @@ fun WebView.loadUrl(url: String, scope: CoroutineScope, cookieManager: AppCookie
         }
     } else {
         loadUrl(url)
+    }
+}
+
+fun WebView.applyDarkModeIfEnabled(isDarkTheme: Boolean) {
+    if (isDarkTheme && WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            settings.setAlgorithmicDarkeningAllowed(true)
+        } else {
+            // Switch WebView to dark mode; uses default dark theme
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                WebSettingsCompat.setForceDark(
+                    settings,
+                    WebSettingsCompat.FORCE_DARK_ON
+                )
+            }
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
+                WebSettingsCompat.setForceDarkStrategy(
+                    settings,
+                    WebSettingsCompat.DARK_STRATEGY_PREFER_WEB_THEME_OVER_USER_AGENT_DARKENING
+                )
+            }
+        }
     }
 }

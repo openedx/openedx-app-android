@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -48,6 +49,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -199,8 +201,8 @@ fun Toolbar(
                 onClick = { onSettingsClick() }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.core_ic_settings),
-                    tint = MaterialTheme.appColors.primary,
+                    imageVector = Icons.Default.ManageAccounts,
+                    tint = MaterialTheme.appColors.textAccent,
                     contentDescription = stringResource(id = R.string.core_accessibility_settings)
                 )
             }
@@ -434,7 +436,7 @@ fun HyperlinkText(
         append(fullText)
         addStyle(
             style = SpanStyle(
-                color = MaterialTheme.appColors.textPrimary,
+                color = MaterialTheme.appColors.textPrimaryLight,
                 fontSize = fontSize
             ),
             start = 0,
@@ -450,7 +452,7 @@ fun HyperlinkText(
                     color = linkTextColor,
                     fontSize = fontSize,
                     fontWeight = linkTextFontWeight,
-                    textDecoration = linkTextDecoration
+                    textDecoration = linkTextDecoration,
                 ),
                 start = startIndex,
                 end = endIndex
@@ -635,7 +637,8 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = title
+            text = title,
+            color = MaterialTheme.appColors.onBackground
         )
         SearchBarStateless(
             modifier = Modifier
@@ -667,6 +670,7 @@ fun SheetContent(
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
+                    color = MaterialTheme.appColors.onBackground,
                     text = item.name,
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
@@ -937,22 +941,23 @@ fun TextIcon(
     icon: ImageVector,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
-    iconModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
+    iconModifier: Modifier? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val modifier = if (onClick == null) {
-        Modifier
+    val rowModifier = if (onClick == null) {
+        modifier
     } else {
-        Modifier.noRippleClickable { onClick.invoke() }
+        modifier.clickable { onClick.invoke() }
     }
     Row(
-        modifier = modifier,
+        modifier = rowModifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(text = text, color = color, style = textStyle)
         Icon(
-            modifier = iconModifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = iconModifier ?: Modifier.size((textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
@@ -1050,8 +1055,9 @@ fun OpenEdXButton(
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
-    backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null,
+    textColor: Color = MaterialTheme.appColors.primaryButtonText,
+    backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
+    content: (@Composable RowScope.() -> Unit)? = null
 ) {
     Button(
         modifier = Modifier
@@ -1069,7 +1075,7 @@ fun OpenEdXButton(
             Text(
                 modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
-                color = MaterialTheme.appColors.buttonText,
+                color = textColor,
                 style = MaterialTheme.appTypography.labelLarge
             )
         } else {
@@ -1085,6 +1091,7 @@ fun OpenEdXOutlinedButton(
     borderColor: Color,
     textColor: Color,
     text: String = "",
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -1094,6 +1101,7 @@ fun OpenEdXOutlinedButton(
             .then(modifier)
             .height(42.dp),
         onClick = onClick,
+        enabled = enabled,
         border = BorderStroke(1.dp, borderColor),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
@@ -1164,7 +1172,9 @@ fun ConnectionErrorView(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = R.string.core_reload),
-            onClick = onReloadClick
+            textColor = MaterialTheme.appColors.primaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+            onClick = onReloadClick,
         )
     }
 }
@@ -1181,6 +1191,8 @@ fun AuthButtonsPanel(
                 .width(0.dp)
                 .weight(1f),
             text = stringResource(id = R.string.core_register),
+            textColor = MaterialTheme.appColors.primaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = { onRegisterClick() }
         )
 
@@ -1191,8 +1203,9 @@ fun AuthButtonsPanel(
                 .padding(start = 16.dp),
             text = stringResource(id = R.string.core_sign_in),
             onClick = { onSignInClick() },
-            borderColor = MaterialTheme.appColors.textFieldBorder,
-            textColor = MaterialTheme.appColors.primary
+            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
+            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
         )
     }
 }
@@ -1203,17 +1216,22 @@ fun RoundTabsBar(
     modifier: Modifier = Modifier,
     items: List<TabItem>,
     pagerState: PagerState,
+    contentPadding: PaddingValues = PaddingValues(),
+    withPager: Boolean = false,
     rowState: LazyListState = rememberLazyListState(),
-    onPageChange: (Int) -> Unit
+    onTabClicked: (Int) -> Unit = { }
 ) {
+    // The pager state does not work without the pager and the tabs do not change.
+    if (!withPager) {
+        HorizontalPager(state = pagerState) { }
+    }
+
     val scope = rememberCoroutineScope()
-    val windowSize = rememberWindowSize()
-    val horizontalPadding = if (!windowSize.isTablet) 12.dp else 98.dp
     LazyRow(
         modifier = modifier,
         state = rowState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
+        contentPadding = contentPadding,
     ) {
         itemsIndexed(items) { index, item ->
             val isSelected = pagerState.currentPage == index
@@ -1236,10 +1254,11 @@ fun RoundTabsBar(
                     .clickable {
                         scope.launch {
                             pagerState.scrollToPage(index)
-                            onPageChange(index)
+                            rowState.animateScrollToItem(index)
+                            onTabClicked(index)
                         }
                     }
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 16.dp),
                 item = item,
                 contentColor = contentColor
             )
@@ -1258,12 +1277,15 @@ private fun RoundTab(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = rememberVectorPainter(item.icon),
-            tint = contentColor,
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.width(4.dp))
+        val icon = item.icon
+        if (icon != null) {
+            Icon(
+                painter = rememberVectorPainter(icon),
+                tint = contentColor,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
         Text(
             text = stringResource(item.labelResId),
             color = contentColor
@@ -1364,7 +1386,7 @@ private fun RoundTabsBarPreview() {
             items = listOf(mockTab, mockTab, mockTab),
             rowState = rememberLazyListState(),
             pagerState = rememberPagerState(pageCount = { 3 }),
-            onPageChange = { }
+            onTabClicked = { }
         )
     }
 }

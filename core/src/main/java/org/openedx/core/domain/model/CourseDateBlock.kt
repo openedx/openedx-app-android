@@ -1,10 +1,13 @@
 package org.openedx.core.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import org.openedx.core.data.model.DateType
 import org.openedx.core.utils.isTimeLessThan24Hours
 import org.openedx.core.utils.isToday
 import java.util.Date
 
+@Parcelize
 data class CourseDateBlock(
     val title: String = "",
     val description: String = "",
@@ -15,7 +18,7 @@ data class CourseDateBlock(
     val date: Date,
     val dateType: DateType = DateType.NONE,
     val assignmentType: String? = "",
-) {
+) : Parcelable {
     fun isCompleted(): Boolean {
         return complete || (dateType in setOf(
             DateType.COURSE_START_DATE,

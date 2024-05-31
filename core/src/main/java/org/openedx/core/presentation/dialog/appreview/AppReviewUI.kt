@@ -277,8 +277,8 @@ fun DefaultTextButton(
     val textColor: Color
     val backgroundColor: Color
     if (isEnabled) {
-        textColor = MaterialTheme.appColors.buttonText
-        backgroundColor = MaterialTheme.appColors.buttonBackground
+        textColor = MaterialTheme.appColors.primaryButtonText
+        backgroundColor = MaterialTheme.appColors.primaryButtonBackground
     } else {
         textColor = MaterialTheme.appColors.inactiveButtonText
         backgroundColor = MaterialTheme.appColors.inactiveButtonBackground

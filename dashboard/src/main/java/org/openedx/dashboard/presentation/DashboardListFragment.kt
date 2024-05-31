@@ -73,10 +73,13 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAssignments
 import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
@@ -98,9 +101,9 @@ import org.openedx.dashboard.R
 import java.util.Date
 import org.openedx.core.R as CoreR
 
-class DashboardFragment : Fragment() {
+class DashboardListFragment : Fragment() {
 
-    private val viewModel by viewModel<DashboardViewModel>()
+    private val viewModel by viewModel<DashboardListViewModel>()
     private val router by inject<DashboardRouter>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,7 +126,7 @@ class DashboardFragment : Fragment() {
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
 
-                MyCoursesScreen(
+                DashboardListView(
                     windowSize = windowSize,
                     viewModel.apiHostUrl,
                     uiState!!,
@@ -166,7 +169,7 @@ class DashboardFragment : Fragment() {
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
-internal fun MyCoursesScreen(
+internal fun DashboardListView(
     windowSize: WindowSize,
     apiHostUrl: String,
     state: DashboardUIState,
@@ -551,9 +554,9 @@ private fun CourseItemPreview() {
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun MyCoursesScreenDay() {
+private fun DashboardListViewPreview() {
     OpenEdXTheme {
-        MyCoursesScreen(
+        DashboardListView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
@@ -583,9 +586,9 @@ private fun MyCoursesScreenDay() {
 @Preview(uiMode = UI_MODE_NIGHT_NO, device = Devices.NEXUS_9)
 @Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
-private fun MyCoursesScreenTabletPreview() {
+private fun DashboardListViewTabletPreview() {
     OpenEdXTheme {
-        MyCoursesScreen(
+        DashboardListView(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
@@ -612,12 +615,16 @@ private fun MyCoursesScreenTabletPreview() {
     }
 }
 
+private val mockCourseAssignments = CourseAssignments(null, emptyList())
 private val mockCourseEnrolled = EnrolledCourse(
     auditAccessExpires = Date(),
     created = "created",
     certificate = Certificate(""),
     mode = "mode",
     isActive = true,
+    progress = Progress.DEFAULT_PROGRESS,
+    courseStatus = CourseStatus("", emptyList(), "", ""),
+    courseAssignments = mockCourseAssignments,
     course = EnrolledCourseData(
         id = "id",
         name = "name",

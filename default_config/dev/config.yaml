@@ -28,6 +28,9 @@ PROGRAM:
     PROGRAM_URL: ''
     PROGRAM_DETAIL_URL_TEMPLATE: ''
 
+DASHBOARD:
+  TYPE: 'gallery'
+
 FIREBASE:
   ENABLED: false
   ANALYTICS_SOURCE: '' # segment | none
@@ -78,4 +81,3 @@ SOCIAL_AUTH_ENABLED: false
 #Course navigation feature flags
 COURSE_NESTED_LIST_ENABLED: false
 COURSE_UNIT_PROGRESS_ENABLED: false
-

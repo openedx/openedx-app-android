@@ -8,6 +8,8 @@ data class AppColors(
 
     val textPrimary: Color,
     val textPrimaryVariant: Color,
+    val textPrimaryLight: Color,
+    val textHyperLink: Color,
     val textSecondary: Color,
     val textDark: Color,
     val textAccent: Color,
@@ -19,9 +21,18 @@ data class AppColors(
     val textFieldText: Color,
     val textFieldHint: Color,
 
-    val buttonBackground: Color,
-    val buttonSecondaryBackground: Color,
-    val buttonText: Color,
+    val primaryButtonBackground: Color,
+    val primaryButtonText: Color,
+    val primaryButtonBorder: Color,
+    val primaryButtonBorderedText: Color,
+
+    // The default secondary button styling is identical to the primary button styling.
+    // However, you can customize it if your brand utilizes two accent colors.
+    val secondaryButtonBackground: Color,
+    val secondaryButtonText: Color,
+    val secondaryButtonBorder: Color,
+    val secondaryButtonBorderedBackground: Color,
+    val secondaryButtonBorderedText: Color,
 
     val cardViewBackground: Color,
     val cardViewBorder: Color,
@@ -31,6 +42,9 @@ data class AppColors(
     val bottomSheetToggle: Color,
     val warning: Color,
     val info: Color,
+    val info_variant: Color,
+    val onWarning: Color,
+    val onInfo: Color,
 
     val rateStars: Color,
     val inactiveButtonBackground: Color,
@@ -44,6 +58,7 @@ data class AppColors(
     val datesSectionBarNextWeek: Color,
     val datesSectionBarUpcoming: Color,
 
+    val authGoogleButtonBackground: Color,
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
 

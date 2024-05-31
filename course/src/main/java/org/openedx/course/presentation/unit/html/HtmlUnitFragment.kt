@@ -49,6 +49,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.extension.applyDarkModeIfEnabled
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
@@ -212,6 +213,8 @@ private fun HTMLContentView(
         )
     }
 
+    val isDarkTheme = isSystemInDarkTheme()
+
     AndroidView(
         modifier = Modifier
             .then(screenWidth)
@@ -287,11 +290,13 @@ private fun HTMLContentView(
                     setSupportZoom(true)
                     loadsImagesAutomatically = true
                     domStorageEnabled = true
+
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
 
                 loadUrl(url, coroutineScope, cookieManager)
+                applyDarkModeIfEnabled(isDarkTheme)
             }
         },
         update = { webView ->

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
+import org.openedx.core.extension.applyDarkModeIfEnabled
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.replaceLinkTags
 import org.openedx.core.ui.theme.appColors
@@ -195,6 +196,7 @@ private fun WebViewContent(
                 contentUrl?.let {
                     loadUrl(it)
                 }
+                applyDarkModeIfEnabled(isDarkTheme)
             }
         },
         update = { webView ->

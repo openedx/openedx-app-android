@@ -95,50 +95,49 @@ import org.openedx.core.R as CoreR
 @Composable
 fun CourseDatesScreen(
     windowSize: WindowSize,
-    courseDatesViewModel: CourseDatesViewModel,
-    courseRouter: CourseRouter,
+    viewModel: CourseDatesViewModel,
     fragmentManager: FragmentManager,
     isFragmentResumed: Boolean,
     updateCourseStructure: () -> Unit
 ) {
-    val uiState by courseDatesViewModel.uiState.observeAsState(DatesUIState.Loading)
-    val uiMessage by courseDatesViewModel.uiMessage.collectAsState(null)
-    val calendarSyncUIState by courseDatesViewModel.calendarSyncUIState.collectAsState()
+    val uiState by viewModel.uiState.observeAsState(DatesUIState.Loading)
+    val uiMessage by viewModel.uiMessage.collectAsState(null)
+    val calendarSyncUIState by viewModel.calendarSyncUIState.collectAsState()
     val context = LocalContext.current
 
     CourseDatesUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        isSelfPaced = courseDatesViewModel.isSelfPaced,
+        isSelfPaced = viewModel.isSelfPaced,
         calendarSyncUIState = calendarSyncUIState,
         onItemClick = { block ->
             if (block.blockId.isNotEmpty()) {
-                courseDatesViewModel.getVerticalBlock(block.blockId)
+                viewModel.getVerticalBlock(block.blockId)
                     ?.let { verticalBlock ->
-                        courseDatesViewModel.logCourseComponentTapped(true, block)
-                        if (courseDatesViewModel.isCourseExpandableSectionsEnabled) {
-                            courseRouter.navigateToCourseContainer(
+                        viewModel.logCourseComponentTapped(true, block)
+                        if (viewModel.isCourseExpandableSectionsEnabled) {
+                            viewModel.courseRouter.navigateToCourseContainer(
                                 fm = fragmentManager,
-                                courseId = courseDatesViewModel.courseId,
+                                courseId = viewModel.courseId,
                                 unitId = verticalBlock.id,
                                 componentId = "",
                                 mode = CourseViewMode.FULL
                             )
                         } else {
-                            courseDatesViewModel.getSequentialBlock(verticalBlock.id)
+                            viewModel.getSequentialBlock(verticalBlock.id)
                                 ?.let { sequentialBlock ->
-                                    courseRouter.navigateToCourseSubsections(
+                                    viewModel.courseRouter.navigateToCourseSubsections(
                                         fm = fragmentManager,
                                         subSectionId = sequentialBlock.id,
-                                        courseId = courseDatesViewModel.courseId,
+                                        courseId = viewModel.courseId,
                                         unitId = verticalBlock.id,
                                         mode = CourseViewMode.FULL
                                     )
                                 }
                         }
                     } ?: {
-                    courseDatesViewModel.logCourseComponentTapped(false, block)
+                    viewModel.logCourseComponentTapped(false, block)
                     ActionDialogFragment.newInstance(
                         title = context.getString(CoreR.string.core_leaving_the_app),
                         message = context.getString(
@@ -157,20 +156,20 @@ fun CourseDatesScreen(
         },
         onPLSBannerViewed = {
             if (isFragmentResumed) {
-                courseDatesViewModel.logPlsBannerViewed()
+                viewModel.logPlsBannerViewed()
             }
         },
         onSyncDates = {
-            courseDatesViewModel.logPlsShiftButtonClicked()
-            courseDatesViewModel.resetCourseDatesBanner {
-                courseDatesViewModel.logPlsShiftDates(it)
+            viewModel.logPlsShiftButtonClicked()
+            viewModel.resetCourseDatesBanner {
+                viewModel.logPlsShiftDates(it)
                 if (it) {
                     updateCourseStructure()
                 }
             }
         },
         onCalendarSyncSwitch = { isChecked ->
-            courseDatesViewModel.handleCalendarSyncState(isChecked)
+            viewModel.handleCalendarSyncState(isChecked)
         },
     )
 }
