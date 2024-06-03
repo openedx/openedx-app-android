@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
@@ -62,6 +63,7 @@ fun CalendarSettingsView(
     uiState: CalendarUIState,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
     onRelativeDateSwitchClick: (Boolean) -> Unit,
+    onChangeSyncOptionClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -136,7 +138,8 @@ fun CalendarSettingsView(
                                 isCourseCalendarSyncEnabled = uiState.isCalendarSyncEnabled,
                                 calendarData = uiState.calendarData,
                                 calendarSyncState = uiState.calendarSyncState,
-                                onCalendarSyncSwitchClick = onCalendarSyncSwitchClick
+                                onCalendarSyncSwitchClick = onCalendarSyncSwitchClick,
+                                onChangeSyncOptionClick = onChangeSyncOptionClick
                             )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
@@ -162,7 +165,8 @@ fun CalendarSyncSection(
     isCourseCalendarSyncEnabled: Boolean,
     calendarData: CalendarData,
     calendarSyncState: CalendarSyncState,
-    onCalendarSyncSwitchClick: (Boolean) -> Unit
+    onCalendarSyncSwitchClick: (Boolean) -> Unit,
+    onChangeSyncOptionClick: () -> Unit
 ) {
     Column {
         SectionTitle(stringResource(id = R.string.profile_calendar_sync))
@@ -197,11 +201,19 @@ fun CalendarSyncSection(
                     color = MaterialTheme.appColors.textFieldHint
                 )
             }
-            Icon(
-                imageVector = calendarSyncState.icon,
-                tint = calendarSyncState.tint,
-                contentDescription = null
-            )
+            if (calendarSyncState == CalendarSyncState.SYNCHRONIZATION) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.appColors.primary
+                )
+            } else {
+                Icon(
+                    imageVector = calendarSyncState.icon,
+                    tint = calendarSyncState.tint,
+                    contentDescription = null
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
@@ -229,12 +241,16 @@ fun CalendarSyncSection(
             color = MaterialTheme.appColors.textPrimaryVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
-        SyncOptionsButton()
+        SyncOptionsButton(
+            onChangeSyncOptionClick = onChangeSyncOptionClick
+        )
     }
 }
 
 @Composable
-fun SyncOptionsButton() {
+fun SyncOptionsButton(
+    onChangeSyncOptionClick: () -> Unit
+) {
     OpenEdXOutlinedButton(
         modifier = Modifier.fillMaxWidth(),
         text = stringResource(R.string.profile_change_sync_options),
@@ -242,7 +258,7 @@ fun SyncOptionsButton() {
         borderColor = MaterialTheme.appColors.primaryButtonBackground,
         textColor = MaterialTheme.appColors.primaryButtonBackground,
         onClick = {
-            // TODO
+            onChangeSyncOptionClick()
         }
     )
 }
@@ -330,7 +346,8 @@ private fun CalendarSettingsViewPreview() {
             ),
             onBackClick = {},
             onCalendarSyncSwitchClick = {},
-            onRelativeDateSwitchClick = {}
+            onRelativeDateSwitchClick = {},
+            onChangeSyncOptionClick = {}
         )
     }
 }

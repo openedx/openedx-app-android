@@ -33,7 +33,6 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
@@ -57,7 +56,6 @@ class CourseContainerViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val config = mockk<Config>()
     private val interactor = mockk<CourseInteractor>()
-    private val calendarManager = mockk<CalendarManager>()
     private val networkConnection = mockk<NetworkConnection>()
     private val notifier = spyk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
@@ -137,7 +135,6 @@ class CourseContainerViewModelTest {
         every { corePreferences.user } returns user
         every { corePreferences.appConfig } returns appConfig
         every { notifier.notifier } returns emptyFlow()
-        every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
         every { config.getApiHostURL() } returns "baseUrl"
         every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
         every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
@@ -157,7 +154,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
@@ -191,7 +187,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
@@ -225,7 +220,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
@@ -258,7 +252,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
@@ -294,7 +287,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
@@ -325,7 +317,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
@@ -356,7 +347,6 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,

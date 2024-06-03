@@ -14,7 +14,6 @@ import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.service.CalendarSyncService
 import org.openedx.core.utils.Logger
 import org.openedx.core.utils.toCalendar
 import java.util.Calendar
@@ -58,13 +57,10 @@ class CalendarManager(
      * Create or update the calendar if it is already existed in mobile calendar app
      */
     fun createOrUpdateCalendar(
+        calendarId: Long = CALENDAR_DOES_NOT_EXIST,
         calendarTitle: String,
         calendarColor: Long
     ): Long {
-        val calendarId = getCalendarId(
-            calendarTitle = calendarTitle
-        )
-
         if (calendarId != CALENDAR_DOES_NOT_EXIST) {
             deleteCalendar(calendarId = calendarId)
         }
@@ -403,11 +399,6 @@ class CalendarManager(
      */
     fun getCourseCalendarTitle(courseName: String): String {
         return "${resourceManager.getString(id = CoreR.string.platform_name)} - $courseName"
-    }
-
-    fun startSyncCalendarService() {
-        val intent = Intent(context, CalendarSyncService::class.java)
-        context.startService(intent)
     }
 
     fun getCalendarData(calendarId: Long): CalendarData? {

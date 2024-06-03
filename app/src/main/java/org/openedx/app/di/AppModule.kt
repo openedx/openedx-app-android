@@ -25,6 +25,7 @@ import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
+import org.openedx.core.CalendarSyncServiceInitiator
 import org.openedx.core.ImageProcessor
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
@@ -63,7 +64,7 @@ import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.presentation.calendar.CalendarNotifier
+import org.openedx.profile.system.notifier.CalendarNotifier
 import org.openedx.profile.system.notifier.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
@@ -85,6 +86,7 @@ val appModule = module {
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get(), get()) }
+    single { CalendarSyncServiceInitiator(get()) }
 
     single { ImageProcessor(get()) }
 

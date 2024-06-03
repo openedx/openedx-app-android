@@ -8,11 +8,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
+import org.openedx.core.CalendarSyncServiceInitiator
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.profile.system.notifier.CalendarNotifier
 
 class CalendarViewModel(
+    private val calendarSyncServiceInitiator: CalendarSyncServiceInitiator,
     private val calendarManager: CalendarManager,
     private val calendarPreferences: CalendarPreferences,
     private val calendarNotifier: CalendarNotifier,
@@ -36,8 +39,9 @@ class CalendarViewModel(
             calendarNotifier.notifier.collect { calendarEvent ->
                 when (calendarEvent) {
                     CalendarCreated -> {
-                        calendarManager.startSyncCalendarService()
+                        calendarSyncServiceInitiator.startSyncCalendarService()
                         _uiState.update { it.copy(isCalendarExist = true) }
+                        getCalendarData()
                     }
                 }
             }
@@ -53,6 +57,7 @@ class CalendarViewModel(
     fun setCalendarSyncEnabled(isEnabled: Boolean) {
         calendarPreferences.isCalendarSyncEnabled = isEnabled
         _uiState.update { it.copy(isCalendarSyncEnabled = isEnabled) }
+        calendarSyncServiceInitiator.startSyncCalendarService()
     }
 
     fun setRelativeDateEnabled(isEnabled: Boolean) {

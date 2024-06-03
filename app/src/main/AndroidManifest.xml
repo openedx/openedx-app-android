@@ -115,7 +115,7 @@
         </service>
 
         <service
-            android:name="org.openedx.core.service.CalendarSyncService"
+            android:name="org.openedx.core.system.CalendarSyncService"
             android:enabled="true"
             android:exported="true" />
     </application>

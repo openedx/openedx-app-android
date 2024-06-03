@@ -20,6 +20,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
+import org.openedx.core.CalendarSyncServiceInitiator
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
@@ -53,7 +54,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val corePreferencesManager by inject<CorePreferences>()
     private val calendarPreferencesManager by inject<CalendarPreferences>()
     private val profileRouter by inject<ProfileRouter>()
-    private val calendarManager by inject<CalendarManager>()
+    private val calendarSyncServiceInitiator by inject<CalendarSyncServiceInitiator>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -226,7 +227,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         val isCalendarSyncRequired = !Date(calendarPreferencesManager.lastCalendarSync).isToday()
         val isCalendarSyncEnabled = calendarPreferencesManager.isCalendarSyncEnabled
         if (isCalendarCreated && isCalendarSyncRequired && isCalendarSyncEnabled) {
-            calendarManager.startSyncCalendarService()
+            calendarSyncServiceInitiator.startSyncCalendarService()
         }
     }
 

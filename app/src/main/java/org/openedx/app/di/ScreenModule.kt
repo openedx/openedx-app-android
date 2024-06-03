@@ -171,7 +171,7 @@ val screenModule = module {
         )
     }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
-    viewModel { CalendarViewModel(get(), get(), get(), get()) }
+    viewModel { CalendarViewModel(get(), get(), get(), get(), get()) }
     viewModel { NewCalendarDialogViewModel(get(), get(), get()) }
 
     single { CourseRepository(get(), get(), get(), get(), get()) }
@@ -208,7 +208,6 @@ val screenModule = module {
             courseTitle,
             resumeBlockId,
             enrollmentMode,
-            get(),
             get(),
             get(),
             get(),
@@ -310,7 +309,6 @@ val screenModule = module {
             courseId,
             courseTitle,
             enrollmentMode,
-            get(),
             get(),
             get(),
             get(),

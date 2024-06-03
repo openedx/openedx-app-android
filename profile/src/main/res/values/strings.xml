@@ -71,6 +71,6 @@
     <string name="profile_offline">Offline</string>
     <string name="profile_syncing_failed">Sync Failed</string>
     <string name="profile_synced">Synced</string>
-    <string name="profile_synchronization">Synchronization</string>
+    <string name="profile_syncing_to_calendar">Syncing to calendar</string>
 
 </resources>

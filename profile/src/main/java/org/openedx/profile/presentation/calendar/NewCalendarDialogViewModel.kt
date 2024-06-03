@@ -7,6 +7,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.extension.toastMessage
 import org.openedx.core.system.CalendarManager
+import org.openedx.profile.system.notifier.CalendarNotifier
 import org.openedx.core.R as coreR
 
 class NewCalendarDialogViewModel(
@@ -17,10 +18,13 @@ class NewCalendarDialogViewModel(
 
     fun createCalendar(
         context: Context,
-        calendarName: String,
+        calendarTitle: String,
         calendarColor: CalendarColor,
     ) {
-        val calendarId = calendarManager.createOrUpdateCalendar(calendarName, calendarColor.color)
+        val calendarId = calendarManager.createOrUpdateCalendar(
+            calendarTitle = calendarTitle,
+            calendarColor = calendarColor.color
+        )
         if (calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
             calendarPreferences.calendarId = calendarId
             viewModelScope.launch {

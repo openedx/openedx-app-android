@@ -1,4 +1,4 @@
-package org.openedx.core.service
+package org.openedx.core.system
 
 import android.app.Service
 import android.content.Intent
@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import org.openedx.core.system.CalendarManager
 
 class CalendarSyncService : Service() {
 

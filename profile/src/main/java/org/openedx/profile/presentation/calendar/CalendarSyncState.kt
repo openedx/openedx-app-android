@@ -21,7 +21,7 @@ enum class CalendarSyncState(
     OFFLINE(R.string.profile_offline, Icons.Default.SyncDisabled),
     SYNC_FAILED(R.string.profile_syncing_failed, Icons.Rounded.FreeCancellation),
     SYNCED(R.string.profile_synced, Icons.Rounded.EventRepeat),
-    SYNCHRONIZATION(R.string.profile_synchronization, Icons.Default.CloudSync);
+    SYNCHRONIZATION(R.string.profile_syncing_to_calendar, Icons.Default.CloudSync);
 
     val tint: Color
         @Composable

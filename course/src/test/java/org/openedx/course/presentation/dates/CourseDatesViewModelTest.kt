@@ -37,7 +37,6 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
-import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseLoading
@@ -58,7 +57,6 @@ class CourseDatesViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val notifier = mockk<CourseNotifier>()
     private val interactor = mockk<CourseInteractor>()
-    private val calendarManager = mockk<CalendarManager>()
     private val corePreferences = mockk<CorePreferences>()
     private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
@@ -148,8 +146,6 @@ class CourseDatesViewModelTest {
         every { corePreferences.user } returns user
         every { corePreferences.appConfig } returns appConfig
         every { notifier.notifier } returns flowOf(CourseLoading(false))
-        every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
-        every { calendarManager.isCalendarExists(any()) } returns true
         coEvery { notifier.send(any<CreateCalendarSyncEvent>()) } returns Unit
         coEvery { notifier.send(any<CourseLoading>()) } returns Unit
         coEvery { notifier.send(any<CourseLoading>()) } returns Unit
@@ -168,7 +164,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            calendarManager,
             resourceManager,
             corePreferences,
             analytics,
@@ -197,7 +192,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            calendarManager,
             resourceManager,
             corePreferences,
             analytics,
@@ -226,7 +220,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            calendarManager,
             resourceManager,
             corePreferences,
             analytics,
@@ -255,7 +248,6 @@ class CourseDatesViewModelTest {
             "",
             notifier,
             interactor,
-            calendarManager,
             resourceManager,
             corePreferences,
             analytics,

@@ -1,4 +1,4 @@
-package org.openedx.profile.presentation.calendar
+package org.openedx.profile.system.notifier
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

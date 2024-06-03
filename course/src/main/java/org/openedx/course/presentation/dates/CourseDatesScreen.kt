@@ -86,7 +86,6 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.core.utils.clearTime
 import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import java.util.concurrent.atomic.AtomicReference
@@ -102,7 +101,6 @@ fun CourseDatesScreen(
 ) {
     val uiState by viewModel.uiState.observeAsState(DatesUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val calendarSyncUIState by viewModel.calendarSyncUIState.collectAsState()
     val context = LocalContext.current
 
     CourseDatesUI(
@@ -110,7 +108,6 @@ fun CourseDatesScreen(
         uiState = uiState,
         uiMessage = uiMessage,
         isSelfPaced = viewModel.isSelfPaced,
-        calendarSyncUIState = calendarSyncUIState,
         onItemClick = { block ->
             if (block.blockId.isNotEmpty()) {
                 viewModel.getVerticalBlock(block.blockId)
@@ -167,10 +164,7 @@ fun CourseDatesScreen(
                     updateCourseStructure()
                 }
             }
-        },
-        onCalendarSyncSwitch = { isChecked ->
-            viewModel.handleCalendarSyncState(isChecked)
-        },
+        }
     )
 }
 
@@ -180,11 +174,9 @@ private fun CourseDatesUI(
     uiState: DatesUIState,
     uiMessage: UIMessage?,
     isSelfPaced: Boolean,
-    calendarSyncUIState: CalendarSyncUIState,
     onItemClick: (CourseDateBlock) -> Unit,
     onPLSBannerViewed: () -> Unit,
-    onSyncDates: () -> Unit,
-    onCalendarSyncSwitch: (Boolean) -> Unit = {},
+    onSyncDates: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -237,16 +229,6 @@ private fun CourseDatesUI(
                             ) {
                                 val courseBanner = uiState.courseDatesResult.courseBanner
                                 val datesSection = uiState.courseDatesResult.datesSection
-
-                                if (calendarSyncUIState.isCalendarSyncEnabled) {
-                                    item {
-                                        CalendarSyncCard(
-                                            modifier = Modifier.padding(top = 24.dp),
-                                            checked = calendarSyncUIState.isSynced,
-                                            onCalendarSync = onCalendarSyncSwitch
-                                        )
-                                    }
-                                }
 
                                 if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
                                     item {
@@ -643,11 +625,9 @@ private fun CourseDatesScreenPreview() {
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
             isSelfPaced = true,
-            calendarSyncUIState = mockCalendarSyncUIState,
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
-            onCalendarSyncSwitch = {},
         )
     }
 }
@@ -662,11 +642,9 @@ private fun CourseDatesScreenTabletPreview() {
             uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
             uiMessage = null,
             isSelfPaced = true,
-            calendarSyncUIState = mockCalendarSyncUIState,
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
-            onCalendarSyncSwitch = {},
         )
     }
 }

@@ -21,7 +21,7 @@ class CalendarFragment : Fragment() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted ->
         if (!isGranted.containsValue(false)) {
-            val dialog = NewCalendarDialogFragment.newInstance()
+            val dialog = NewCalendarDialogFragment.newInstance(DialogType.CREATE_NEW)
             dialog.show(
                 requireActivity().supportFragmentManager,
                 NewCalendarDialogFragment.DIALOG_TAG
@@ -61,6 +61,13 @@ class CalendarFragment : Fragment() {
                     },
                     onRelativeDateSwitchClick = {
                         viewModel.setRelativeDateEnabled(it)
+                    },
+                    onChangeSyncOptionClick = {
+                        val dialog = NewCalendarDialogFragment.newInstance(DialogType.UPDATE)
+                        dialog.show(
+                            requireActivity().supportFragmentManager,
+                            NewCalendarDialogFragment.DIALOG_TAG
+                        )
                     }
                 )
             }
@@ -74,6 +81,7 @@ private fun CalendarView(
     uiState: CalendarUIState,
     setUpCalendarSync: () -> Unit,
     onBackClick: () -> Unit,
+    onChangeSyncOptionClick: () -> Unit,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
     onRelativeDateSwitchClick: (Boolean) -> Unit
 ) {
@@ -89,7 +97,8 @@ private fun CalendarView(
             uiState = uiState,
             onBackClick = onBackClick,
             onCalendarSyncSwitchClick = onCalendarSyncSwitchClick,
-            onRelativeDateSwitchClick = onRelativeDateSwitchClick
+            onRelativeDateSwitchClick = onRelativeDateSwitchClick,
+            onChangeSyncOptionClick = onChangeSyncOptionClick
         )
     }
 }
