@@ -60,5 +60,17 @@
     <string name="calendar_color_accent">Accent</string>
     <string name="profile_course_dates">Course Dates</string>
     <string name="profile_color">Color</string>
+    <string name="profile_course_calendar_sync">Course Calendar Sync</string>
+    <string name="profile_currently_syncing_events">Currently syncing events to your calendar</string>
+    <string name="profile_change_sync_options">Change Sync Options</string>
+    <string name="profile_courses_to_sync">Courses to Sync</string>
+    <string name="profile_syncing_courses">Syncing %1$s Courses</string>
+    <string name="profile_options">Options</string>
+    <string name="profile_use_relative_dates">Use relative dates</string>
+    <string name="profile_show_relative_dates">Show relative dates like “Tomorrow” and “Yesterday”</string>
+    <string name="profile_offline">Offline</string>
+    <string name="profile_syncing_failed">Sync Failed</string>
+    <string name="profile_synced">Synced</string>
+    <string name="profile_synchronization">Synchronization</string>
 
 </resources>

@@ -55,6 +55,12 @@ class CalendarFragment : Fragment() {
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
+                    },
+                    onCalendarSyncSwitchClick = {
+                        viewModel.setCalendarSyncEnabled(it)
+                    },
+                    onRelativeDateSwitchClick = {
+                        viewModel.setRelativeDateEnabled(it)
                     }
                 )
             }
@@ -67,7 +73,9 @@ private fun CalendarView(
     windowSize: WindowSize,
     uiState: CalendarUIState,
     setUpCalendarSync: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCalendarSyncSwitchClick: (Boolean) -> Unit,
+    onRelativeDateSwitchClick: (Boolean) -> Unit
 ) {
     if (!uiState.isCalendarExist) {
         CalendarSetUpView(
@@ -78,7 +86,10 @@ private fun CalendarView(
     } else {
         CalendarSettingsView(
             windowSize = windowSize,
-            onBackClick = onBackClick
+            uiState = uiState,
+            onBackClick = onBackClick,
+            onCalendarSyncSwitchClick = onCalendarSyncSwitchClick,
+            onRelativeDateSwitchClick = onRelativeDateSwitchClick
         )
     }
 }

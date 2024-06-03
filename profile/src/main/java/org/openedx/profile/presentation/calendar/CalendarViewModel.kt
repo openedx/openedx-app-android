@@ -8,18 +8,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
-import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.system.CalendarManager
+import org.openedx.core.system.connection.NetworkConnection
 
 class CalendarViewModel(
     private val calendarManager: CalendarManager,
-    private val corePreferences: CorePreferences,
-    private val calendarNotifier: CalendarNotifier
+    private val calendarPreferences: CalendarPreferences,
+    private val calendarNotifier: CalendarNotifier,
+    private val networkConnection: NetworkConnection
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(
         CalendarUIState(
-            isCalendarExist = corePreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
+            isCalendarExist = calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST,
+            calendarData = null,
+            calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCHRONIZATION else CalendarSyncState.OFFLINE,
+            isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
+            isRelativeDateEnabled = calendarPreferences.isRelativeDateEnabled
         )
     )
     val uiState: StateFlow<CalendarUIState>
@@ -36,9 +42,26 @@ class CalendarViewModel(
                 }
             }
         }
+
+        getCalendarData()
     }
 
     fun setUpCalendarSync(permissionLauncher: ActivityResultLauncher<Array<String>>) {
         permissionLauncher.launch(calendarManager.permissions)
+    }
+
+    fun setCalendarSyncEnabled(isEnabled: Boolean) {
+        calendarPreferences.isCalendarSyncEnabled = isEnabled
+        _uiState.update { it.copy(isCalendarSyncEnabled = isEnabled) }
+    }
+
+    fun setRelativeDateEnabled(isEnabled: Boolean) {
+        calendarPreferences.isRelativeDateEnabled = isEnabled
+        _uiState.update { it.copy(isRelativeDateEnabled = isEnabled) }
+    }
+
+    private fun getCalendarData() {
+        val calendarData = calendarManager.getCalendarData(calendarId = calendarPreferences.calendarId)
+        _uiState.update { it.copy(calendarData = calendarData) }
     }
 }

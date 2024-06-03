@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import org.openedx.app.BuildConfig
 import org.openedx.core.data.model.User
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.model.AppConfig
@@ -17,7 +18,7 @@ import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,
-    WhatsNewPreferences, InAppReviewPreferences, CoursePreferences {
+    WhatsNewPreferences, InAppReviewPreferences, CoursePreferences, CalendarPreferences {
 
     private val sharedPreferences =
         context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
@@ -171,6 +172,18 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getBoolean(RESET_APP_DIRECTORY, true)
 
+    override var isCalendarSyncEnabled: Boolean
+        set(value) {
+            saveBoolean(IS_CALENDAR_SYNC_ENABLED, value)
+        }
+        get() = getBoolean(IS_CALENDAR_SYNC_ENABLED, false)
+
+    override var isRelativeDateEnabled: Boolean
+        set(value) {
+            saveBoolean(IS_RELATIVE_DATES_ENABLED, value)
+        }
+        get() = getBoolean(IS_RELATIVE_DATES_ENABLED, true)
+
     override fun setCalendarSyncEventsDialogShown(courseName: String) {
         saveBoolean(courseName.replaceSpace("_"), true)
     }
@@ -194,5 +207,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val CALENDAR_ID = "CALENDAR_ID"
         private const val LAST_CALENDAR_SYNC = "LAST_CALENDAR_SYNC"
         private const val RESET_APP_DIRECTORY = "reset_app_directory"
+        private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
+        private const val IS_RELATIVE_DATES_ENABLED = "IS_RELATIVE_DATES_ENABLED"
     }
 }

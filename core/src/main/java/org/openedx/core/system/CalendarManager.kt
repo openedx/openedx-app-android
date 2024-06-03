@@ -12,6 +12,7 @@ import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
 import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.service.CalendarSyncService
 import org.openedx.core.utils.Logger
@@ -407,6 +408,36 @@ class CalendarManager(
     fun startSyncCalendarService() {
         val intent = Intent(context, CalendarSyncService::class.java)
         context.startService(intent)
+    }
+
+    fun getCalendarData(calendarId: Long): CalendarData? {
+        val projection = arrayOf(
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.CALENDAR_COLOR
+        )
+        val selection = "${CalendarContract.Calendars._ID} = ?"
+        val selectionArgs = arrayOf(calendarId.toString())
+
+        val cursor: Cursor? = context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+
+        return cursor?.use {
+            if (it.moveToFirst()) {
+                val title = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME))
+                val color = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_COLOR))
+                CalendarData(
+                    title = title,
+                    color = color
+                )
+            } else {
+                null
+            }
+        }
     }
 
     companion object {

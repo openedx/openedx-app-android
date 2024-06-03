@@ -2,16 +2,29 @@ package org.openedx.profile.presentation.calendar
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Switch
+import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,12 +32,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.openedx.core.domain.model.CalendarData
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -34,13 +50,18 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
+import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.R
+import org.openedx.profile.presentation.ui.SettingsItem
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CalendarSettingsView(
     windowSize: WindowSize,
+    uiState: CalendarUIState,
+    onCalendarSyncSwitchClick: (Boolean) -> Unit,
+    onRelativeDateSwitchClick: (Boolean) -> Unit,
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -108,12 +129,189 @@ fun CalendarSettingsView(
                     Column(
                         modifier = contentWidth.padding(vertical = 28.dp),
                     ) {
-                        //TODO
+                        val coursesSynced = 5
+
+                        if (uiState.calendarData != null) {
+                            CalendarSyncSection(
+                                isCourseCalendarSyncEnabled = uiState.isCalendarSyncEnabled,
+                                calendarData = uiState.calendarData,
+                                calendarSyncState = uiState.calendarSyncState,
+                                onCalendarSyncSwitchClick = onCalendarSyncSwitchClick
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CoursesToSyncSection(
+                            coursesSynced = coursesSynced,
+                            onSyncingCoursesClick = {}
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        OptionsSection(
+                            isRelativeDatesEnabled = uiState.isRelativeDateEnabled,
+                            onRelativeDateSwitchClick = onRelativeDateSwitchClick
+                        )
                     }
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun CalendarSyncSection(
+    isCourseCalendarSyncEnabled: Boolean,
+    calendarData: CalendarData,
+    calendarSyncState: CalendarSyncState,
+    onCalendarSyncSwitchClick: (Boolean) -> Unit
+) {
+    Column {
+        SectionTitle(stringResource(id = R.string.profile_calendar_sync))
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.appShapes.cardShape)
+                .background(MaterialTheme.appColors.cardViewBackground)
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clip(CircleShape)
+                    .background(Color(calendarData.color))
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = calendarData.title,
+                    style = MaterialTheme.appTypography.labelLarge,
+                    color = MaterialTheme.appColors.textDark
+                )
+                Text(
+                    text = stringResource(id = calendarSyncState.title),
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = MaterialTheme.appColors.textFieldHint
+                )
+            }
+            Icon(
+                imageVector = calendarSyncState.icon,
+                tint = calendarSyncState.tint,
+                contentDescription = null
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.profile_course_calendar_sync),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textDark
+            )
+            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                Switch(
+                    modifier = Modifier
+                        .padding(0.dp),
+                    checked = isCourseCalendarSyncEnabled,
+                    onCheckedChange = onCalendarSyncSwitchClick
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.profile_currently_syncing_events),
+            style = MaterialTheme.appTypography.labelMedium,
+            color = MaterialTheme.appColors.textPrimaryVariant
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        SyncOptionsButton()
+    }
+}
+
+@Composable
+fun SyncOptionsButton() {
+    OpenEdXOutlinedButton(
+        modifier = Modifier.fillMaxWidth(),
+        text = stringResource(R.string.profile_change_sync_options),
+        backgroundColor = MaterialTheme.appColors.background,
+        borderColor = MaterialTheme.appColors.primaryButtonBackground,
+        textColor = MaterialTheme.appColors.primaryButtonBackground,
+        onClick = {
+            // TODO
+        }
+    )
+}
+
+@Composable
+fun CoursesToSyncSection(
+    coursesSynced: Int,
+    onSyncingCoursesClick: () -> Unit
+) {
+    Column {
+        SectionTitle(stringResource(R.string.profile_courses_to_sync))
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier,
+            shape = MaterialTheme.appShapes.cardShape,
+            elevation = 0.dp,
+            backgroundColor = MaterialTheme.appColors.cardViewBackground
+        ) {
+            SettingsItem(
+                text = stringResource(R.string.profile_syncing_courses, coursesSynced),
+                onClick = onSyncingCoursesClick
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun OptionsSection(
+    isRelativeDatesEnabled: Boolean,
+    onRelativeDateSwitchClick: (Boolean) -> Unit
+) {
+    Column {
+        SectionTitle(stringResource(R.string.profile_options))
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.profile_use_relative_dates),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textDark
+            )
+            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
+                Switch(
+                    modifier = Modifier
+                        .padding(0.dp),
+                    checked = isRelativeDatesEnabled,
+                    onCheckedChange = onRelativeDateSwitchClick
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.profile_show_relative_dates),
+            style = MaterialTheme.appTypography.labelMedium,
+            color = MaterialTheme.appColors.textPrimaryVariant
+        )
+    }
+}
+
+@Composable
+fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.appTypography.labelLarge,
+        color = MaterialTheme.appColors.textSecondary
+    )
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
@@ -123,7 +321,16 @@ private fun CalendarSettingsViewPreview() {
     OpenEdXTheme {
         CalendarSettingsView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            onBackClick = {}
+            uiState = CalendarUIState(
+                isCalendarExist = true,
+                calendarData = null,
+                calendarSyncState = CalendarSyncState.SYNCHRONIZATION,
+                isCalendarSyncEnabled = false,
+                isRelativeDateEnabled = true
+            ),
+            onBackClick = {},
+            onCalendarSyncSwitchClick = {},
+            onRelativeDateSwitchClick = {}
         )
     }
 }

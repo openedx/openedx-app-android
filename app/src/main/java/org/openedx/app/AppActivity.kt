@@ -20,6 +20,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.InsetHolder
@@ -50,6 +51,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val viewModel by viewModel<AppViewModel>()
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
+    private val calendarPreferencesManager by inject<CalendarPreferences>()
     private val profileRouter by inject<ProfileRouter>()
     private val calendarManager by inject<CalendarManager>()
 
@@ -220,9 +222,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     }
 
     private fun tryToSyncCalendar() {
-        val isCalendarCreated = corePreferencesManager.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
-        val isCalendarSyncRequired = !Date(corePreferencesManager.lastCalendarSync).isToday()
-        if (isCalendarCreated && isCalendarSyncRequired) {
+        val isCalendarCreated = calendarPreferencesManager.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
+        val isCalendarSyncRequired = !Date(calendarPreferencesManager.lastCalendarSync).isToday()
+        val isCalendarSyncEnabled = calendarPreferencesManager.isCalendarSyncEnabled
+        if (isCalendarCreated && isCalendarSyncRequired && isCalendarSyncEnabled) {
             calendarManager.startSyncCalendarService()
         }
     }
