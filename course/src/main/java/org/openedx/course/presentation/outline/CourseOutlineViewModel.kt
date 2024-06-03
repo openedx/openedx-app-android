@@ -104,8 +104,7 @@ class CourseOutlineViewModel(
                         courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        datesBannerInfo = state.datesBannerInfo,
-                        isValuePropEnabled = preferencesManager.appConfig.isValuePropEnabled
+                        datesBannerInfo = state.datesBannerInfo
                     )
                 }
             }
@@ -152,8 +151,7 @@ class CourseOutlineViewModel(
                 courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
                 subSectionsDownloadsCount = subSectionsDownloadsCount,
-                datesBannerInfo = state.datesBannerInfo,
-                isValuePropEnabled = preferencesManager.appConfig.isValuePropEnabled
+                datesBannerInfo = state.datesBannerInfo
             )
 
             courseSectionsState[blockId] ?: false
@@ -209,8 +207,7 @@ class CourseOutlineViewModel(
                     courseSubSections = courseSubSections,
                     courseSectionsState = courseSectionsState,
                     subSectionsDownloadsCount = subSectionsDownloadsCount,
-                    datesBannerInfo = datesBannerInfo,
-                    isValuePropEnabled = preferencesManager.appConfig.isValuePropEnabled
+                    datesBannerInfo = datesBannerInfo
                 )
                 courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {

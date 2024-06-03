@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,6 +67,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.ui.RoundTabsBar
+import org.openedx.core.ui.UpgradeToAccessView
+import org.openedx.core.ui.UpgradeToAccessViewType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
@@ -80,6 +83,7 @@ internal fun CollapsingLayout(
     imageHeight: Int,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
+    upgradeButton: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
     bodyContent: @Composable BoxScope.() -> Unit,
     onBackClick: () -> Unit,
@@ -105,7 +109,8 @@ internal fun CollapsingLayout(
     val factor = if (rawFactor.isNaN() || rawFactor < 0) 0f else rawFactor
     val blurImagePadding = 40.dp
     val blurImagePaddingPx = with(localDensity) { blurImagePadding.toPx() }
-    val toolbarOffset = (offset.value + backgroundImageHeight.floatValue - blurImagePaddingPx).roundToInt()
+    val toolbarOffset =
+        (offset.value + backgroundImageHeight.floatValue - blurImagePaddingPx).roundToInt()
     val imageStartY = (backgroundImageHeight.floatValue - blurImagePaddingPx) * 0.5f
     val imageOffsetY = -(offset.value + imageStartY)
     val toolbarBackgroundOffset = if (toolbarOffset >= 0) {
@@ -221,6 +226,7 @@ internal fun CollapsingLayout(
                 imageHeight = imageHeight,
                 onBackClick = onBackClick,
                 expandedTop = expandedTop,
+                upgradeButton = upgradeButton,
                 navigation = navigation,
                 bodyContent = bodyContent
             )
@@ -245,6 +251,7 @@ internal fun CollapsingLayout(
                 onBackClick = onBackClick,
                 expandedTop = expandedTop,
                 collapsedTop = collapsedTop,
+                upgradeButton = upgradeButton,
                 navigation = navigation,
                 bodyContent = bodyContent
             )
@@ -265,6 +272,7 @@ private fun CollapsingLayoutTablet(
     imageHeight: Int,
     onBackClick: () -> Unit,
     expandedTop: @Composable BoxScope.() -> Unit,
+    upgradeButton: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
     bodyContent: @Composable BoxScope.() -> Unit,
 ) {
@@ -391,15 +399,19 @@ private fun CollapsingLayoutTablet(
         contentDescription = null
     )
 
-
-    Box(
-        modifier = Modifier
-            .offset { IntOffset(x = 0, y = (backgroundImageHeight.value + expandedTopHeight.value).roundToInt()) }
-            .onSizeChanged { size ->
-                navigationHeight.value = size.height.toFloat()
-            },
-        content = navigation,
-    )
+    Column(modifier = Modifier
+        .offset {
+            IntOffset(
+                x = 0,
+                y = (backgroundImageHeight.value + expandedTopHeight.value).roundToInt()
+            )
+        }
+        .onSizeChanged { size ->
+            navigationHeight.value = size.height.toFloat()
+        }) {
+        Box(content = upgradeButton)
+        Box(content = navigation)
+    }
 
     Box(
         modifier = Modifier
@@ -435,6 +447,7 @@ private fun CollapsingLayoutMobile(
     onBackClick: () -> Unit,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
+    upgradeButton: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
     bodyContent: @Composable BoxScope.() -> Unit,
 ) {
@@ -526,15 +539,15 @@ private fun CollapsingLayoutMobile(
         }
 
 
-        Box(
-            modifier = Modifier
-                .displayCutoutForLandscape()
-                .offset { IntOffset(x = 0, y = (collapsedTopHeight.value).roundToInt()) }
-                .onSizeChanged { size ->
-                    navigationHeight.value = size.height.toFloat()
-                },
-            content = navigation,
-        )
+        Column(modifier = Modifier
+            .displayCutoutForLandscape()
+            .offset { IntOffset(x = 0, y = (collapsedTopHeight.value).roundToInt()) }
+            .onSizeChanged { size ->
+                navigationHeight.value = size.height.toFloat()
+            }) {
+            Box(content = upgradeButton)
+            Box(content = navigation)
+        }
 
         Box(
             modifier = Modifier
@@ -691,19 +704,19 @@ private fun CollapsingLayoutMobile(
         }
 
         val adaptiveImagePadding = blurImagePaddingPx * factor
-        Box(
-            modifier = Modifier
-                .offset {
-                    IntOffset(
-                        x = 0,
-                        y = (offset.value + backgroundImageHeight.value + expandedTopHeight.value - adaptiveImagePadding).roundToInt()
-                    )
-                }
-                .onSizeChanged { size ->
-                    navigationHeight.value = size.height.toFloat()
-                },
-            content = navigation,
-        )
+        Column(modifier = Modifier
+            .offset {
+                IntOffset(
+                    x = 0,
+                    y = (offset.value + backgroundImageHeight.value + expandedTopHeight.value - adaptiveImagePadding).roundToInt()
+                )
+            }
+            .onSizeChanged { size ->
+                navigationHeight.value = size.height.toFloat()
+            }) {
+            Box(content = upgradeButton)
+            Box(content = navigation)
+        }
 
         Box(
             modifier = Modifier
@@ -722,8 +735,14 @@ private fun CollapsingLayoutMobile(
 @OptIn(ExperimentalFoundationApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = "spec:parent=pixel_5,orientation=landscape")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = "spec:parent=pixel_5,orientation=landscape")
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = "spec:parent=pixel_5,orientation=landscape"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:parent=pixel_5,orientation=landscape"
+)
 @Preview(device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -743,6 +762,18 @@ private fun CollapsingLayoutPreview() {
                 CollapsedHeaderContent(
                     courseTitle = "courseName"
                 )
+            },
+            upgradeButton = {
+                val windowSize = rememberWindowSize()
+                val horizontalPadding = if (!windowSize.isTablet) 16.dp else 98.dp
+                UpgradeToAccessView(
+                    modifier = Modifier.padding(
+                        start = horizontalPadding,
+                        end = 16.dp,
+                        top = 16.dp
+                    ),
+                    type = UpgradeToAccessViewType.COURSE,
+                ) {}
             },
             navigation = {
                 RoundTabsBar(

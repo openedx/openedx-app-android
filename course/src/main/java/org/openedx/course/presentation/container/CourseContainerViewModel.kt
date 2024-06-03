@@ -23,6 +23,7 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.course.CourseContainerTab
@@ -98,13 +99,12 @@ class CourseContainerViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private var _isSelfPaced: Boolean = true
-    val isSelfPaced: Boolean
-        get() = _isSelfPaced
+    val isValuePropEnabled: Boolean
+        get() = corePreferences.appConfig.isValuePropEnabled
 
-    private var _organization: String = ""
-    val organization: String
-        get() = _organization
+    private var _courseStructure: CourseStructure? = null
+    val courseStructure: CourseStructure?
+        get() = _courseStructure
 
     val calendarPermissions: Array<String>
         get() = calendarManager.permissions
@@ -167,21 +167,29 @@ class CourseContainerViewModel(
         if (_dataReady.value != null) {
             return
         }
+        loadCourseStructure()
+    }
 
+    fun forceReloadCourseStructure() {
+        _dataReady.value = null
+        loadCourseStructure(true)
+    }
+
+    private fun loadCourseStructure(forceReload: Boolean = false) {
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                val courseStructure = interactor.getCourseStructure(courseId)
-                courseName = courseStructure.name
-                _organization = courseStructure.org
-                _isSelfPaced = courseStructure.isSelfPaced
-                loadCourseImage(courseStructure.media?.image?.large)
-                _dataReady.value = courseStructure.start?.let { start ->
-                    val isReady = start < Date()
-                    if (isReady) {
-                        _isNavigationEnabled.value = true
+                _courseStructure = interactor.getCourseStructure(courseId, forceReload)
+                _courseStructure?.let {
+                    courseName = it.name
+                    loadCourseImage(courseStructure?.media?.image?.large)
+                    _dataReady.value = courseStructure?.start?.let { start ->
+                        val isReady = start < Date()
+                        if (isReady) {
+                            _isNavigationEnabled.value = true
+                        }
+                        isReady
                     }
-                    isReady
                 }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
@@ -392,8 +400,8 @@ class CourseContainerViewModel(
 
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
-                (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
+        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && _courseStructure?.isSelfPaced == true) ||
+                (calendarSync.isInstructorPacedEnabled && _courseStructure?.isSelfPaced == false))
     }
 
     private fun courseDashboardViewed() {
@@ -485,7 +493,7 @@ class CourseContainerViewModel(
                 put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
+                    if (_courseStructure?.isSelfPaced == true) CourseAnalyticsKey.SELF_PACED.key
                     else CourseAnalyticsKey.INSTRUCTOR_PACED.key
                 )
                 putAll(param)

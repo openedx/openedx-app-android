@@ -57,9 +57,14 @@ import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.IAPAnalyticsScreen
 import org.openedx.core.presentation.course.CourseContainerTab
 import org.openedx.core.presentation.global.viewBinding
+import org.openedx.core.presentation.iap.IAPUIState
+import org.openedx.core.presentation.iap.IAPViewModel
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.IAPDialog
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.RoundTabsBar
+import org.openedx.core.ui.UpgradeToAccessView
+import org.openedx.core.ui.UpgradeToAccessViewType
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -87,6 +92,10 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_TITLE, ""),
             requireArguments().getString(ARG_ENROLLMENT_MODE, "")
         )
+    }
+
+    private val iapViewModel by viewModel<IAPViewModel> {
+        parametersOf(IAPAnalyticsScreen.COURSE_DASHBOARD.screenName)
     }
 
     private val permissionLauncher = registerForActivityResult(
@@ -152,6 +161,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             val isNavigationEnabled by viewModel.isNavigationEnabled.collectAsState()
             CourseDashboard(
                 viewModel = viewModel,
+                iapViewModel = iapViewModel,
                 isNavigationEnabled = isNavigationEnabled,
                 isResumed = isResumed,
                 fragmentManager = requireActivity().supportFragmentManager,
@@ -278,6 +288,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 @Composable
 fun CourseDashboard(
     viewModel: CourseContainerViewModel,
+    iapViewModel: IAPViewModel,
     onRefresh: (page: Int) -> Unit,
     isNavigationEnabled: Boolean,
     isResumed: Boolean,
@@ -300,6 +311,7 @@ fun CourseDashboard(
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
             val dataReady = viewModel.dataReady.observeAsState()
+            val iapState by iapViewModel.uiState.collectAsState()
 
             val pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
             val tabState = rememberLazyListState()
@@ -324,6 +336,59 @@ fun CourseDashboard(
             }
 
             Box {
+                when (iapState) {
+                    is IAPUIState.Loading -> {
+                        IAPDialog(
+                            courseTitle = (iapState as IAPUIState.Loading).courseName,
+                            isLoading = true,
+                            onDismiss = {
+                                iapViewModel.clearIAPFLow()
+                            })
+                    }
+
+                    is IAPUIState.ProductData -> {
+                        IAPDialog(
+                            courseTitle = (iapState as IAPUIState.ProductData).courseName,
+                            formattedPrice = (iapState as IAPUIState.ProductData).formattedPrice,
+                            onUpgradeNow = {
+                                iapViewModel.startPurchaseFlow()
+                            }, onDismiss = {
+                                iapViewModel.clearIAPFLow()
+                            })
+                    }
+
+                    is IAPUIState.Error -> {
+                        IAPDialog(
+                            courseTitle = (iapState as IAPUIState.Error).courseName,
+                            isError = true,
+                            onDismiss = {
+                                iapViewModel.clearIAPFLow()
+                            }, onGetHelp = {
+                                iapViewModel.showFeedbackScreen(
+                                    requireActivity(),
+                                    (iapState as IAPUIState.Error).feedbackErrorMessage
+                                )
+                                iapViewModel.clearIAPFLow()
+                            })
+                    }
+
+                    is IAPUIState.PurchaseProduct -> {
+                        iapViewModel.purchaseItem(requireActivity())
+                    }
+
+                    is IAPUIState.FlowComplete -> {
+                        viewModel.forceReloadCourseStructure()
+                        viewModel.updateEnrolledCourses()
+                        if (iapViewModel.isInProgress()) {
+                            iapViewModel.upgradeSuccessEvent()
+                        }
+                    }
+
+                    else -> {
+                        iapViewModel.clearIAPFLow()
+                    }
+                }
+
                 CollapsingLayout(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -332,15 +397,49 @@ fun CourseDashboard(
                     courseImage = courseImage,
                     imageHeight = 200,
                     expandedTop = {
-                        ExpandedHeaderContent(
-                            courseTitle = viewModel.courseName,
-                            org = viewModel.organization
-                        )
+                        if (dataReady.value == true) {
+                            ExpandedHeaderContent(
+                                courseTitle = viewModel.courseName,
+                                org = viewModel.courseStructure?.org!!
+                            )
+                        }
                     },
                     collapsedTop = {
                         CollapsedHeaderContent(
                             courseTitle = viewModel.courseName
                         )
+                    },
+                    upgradeButton = {
+                        if (dataReady.value == true) {
+                            if (viewModel.courseStructure?.isUpgradeable == true &&
+                                viewModel.isValuePropEnabled
+                            ) {
+                                val horizontalPadding = if (!windowSize.isTablet) 16.dp else 98.dp
+                                UpgradeToAccessView(
+                                    modifier = Modifier.padding(
+                                        start = horizontalPadding,
+                                        end = 16.dp,
+                                        top = 16.dp
+                                    ),
+                                    type = UpgradeToAccessViewType.COURSE,
+                                ) {
+                                    viewModel.courseStructure?.takeIf { it.productInfo != null }
+                                        ?.let {
+                                            iapViewModel.loadPrice(
+                                                viewModel.courseId,
+                                                viewModel.courseName,
+                                                it.isSelfPaced,
+                                                it.productInfo!!
+                                            )
+                                        }
+                                }
+                            } else if (iapViewModel.isInProgress()) {
+                                iapViewModel.clearIAPFLow()
+                                for (page in 0..<pagerState.pageCount) {
+                                    onRefresh(page)
+                                }
+                            }
+                        }
                     },
                     navigation = {
                         if (isNavigationEnabled) {
@@ -358,7 +457,6 @@ fun CourseDashboard(
                         fragmentManager.popBackStack()
                     },
                     bodyContent = {
-
                         if (dataReady.value == true) {
                             DashboardPager(
                                 windowSize = windowSize,
@@ -367,8 +465,7 @@ fun CourseDashboard(
                                 isNavigationEnabled = isNavigationEnabled,
                                 isResumed = isResumed,
                                 fragmentManager = fragmentManager,
-                                bundle = bundle,
-                                requireActivity = requireActivity,
+                                bundle = bundle
                             )
                         }
                     }
@@ -425,8 +522,7 @@ fun DashboardPager(
     isNavigationEnabled: Boolean,
     isResumed: Boolean,
     fragmentManager: FragmentManager,
-    bundle: Bundle,
-    requireActivity: () -> FragmentActivity,
+    bundle: Bundle
 ) {
     HorizontalPager(
         state = pagerState,
@@ -445,20 +541,10 @@ fun DashboardPager(
                             )
                         }
                     ),
-                    iapViewModel = koinViewModel(
-                        parameters = {
-                            parametersOf(IAPAnalyticsScreen.COURSE_DASHBOARD.screenName)
-                        }
-                    ),
                     courseRouter = viewModel.courseRouter,
                     fragmentManager = fragmentManager,
                     onResetDatesClick = {
                         viewModel.onRefresh(CourseContainerTab.DATES)
-                    },
-                    requireActivity = requireActivity,
-                    updateCourseDataPostIAP = {
-                        viewModel.onRefresh(CourseContainerTab.HOME)
-                        viewModel.updateEnrolledCourses()
                     }
                 )
             }

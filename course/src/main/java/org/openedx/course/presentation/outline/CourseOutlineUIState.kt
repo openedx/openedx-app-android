@@ -14,7 +14,6 @@ sealed class CourseOutlineUIState {
         val courseSectionsState: Map<String, Boolean>,
         val subSectionsDownloadsCount: Map<String, Int>,
         val datesBannerInfo: CourseDatesBannerInfo,
-        val isValuePropEnabled: Boolean
     ) : CourseOutlineUIState()
 
     data object Loading : CourseOutlineUIState()
