@@ -11,10 +11,10 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.replaceSpace
-import org.openedx.core.system.CalendarManager
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
+import org.openedx.profile.system.CalendarManager
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,

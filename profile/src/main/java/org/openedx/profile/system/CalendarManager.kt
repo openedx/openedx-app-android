@@ -1,4 +1,4 @@
-package org.openedx.core.system
+package org.openedx.profile.system
 
 import android.annotation.SuppressLint
 import android.content.ContentUris
@@ -14,6 +14,7 @@ import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.system.ResourceManager
 import org.openedx.core.utils.Logger
 import org.openedx.core.utils.toCalendar
 import java.util.Calendar

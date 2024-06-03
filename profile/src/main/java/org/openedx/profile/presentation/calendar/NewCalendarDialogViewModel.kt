@@ -6,7 +6,8 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.extension.toastMessage
-import org.openedx.core.system.CalendarManager
+import org.openedx.profile.system.CalendarManager
+import org.openedx.profile.system.notifier.CalendarCreated
 import org.openedx.profile.system.notifier.CalendarNotifier
 import org.openedx.core.R as coreR
 

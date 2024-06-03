@@ -12,8 +12,10 @@ import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
+import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
 import org.openedx.core.presentation.settings.video.VideoQualityViewModel
+import org.openedx.core.repository.CalendarRepository
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
@@ -173,9 +175,12 @@ val screenModule = module {
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
     viewModel { CalendarViewModel(get(), get(), get(), get(), get()) }
     viewModel { NewCalendarDialogViewModel(get(), get(), get()) }
+    single { CalendarRepository(get(), get()) }
+    factory { CalendarInteractor(get()) }
 
     single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
+
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
             pathId,

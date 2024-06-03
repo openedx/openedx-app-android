@@ -8,11 +8,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
-import org.openedx.core.CalendarSyncServiceInitiator
 import org.openedx.core.data.storage.CalendarPreferences
-import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.profile.system.CalendarManager
+import org.openedx.profile.system.CalendarSyncServiceInitiator
+import org.openedx.profile.system.notifier.CalendarCreated
 import org.openedx.profile.system.notifier.CalendarNotifier
+import org.openedx.profile.system.notifier.CalendarSyncFailed
+import org.openedx.profile.system.notifier.CalendarSynced
+import org.openedx.profile.system.notifier.CalendarSyncing
 
 class CalendarViewModel(
     private val calendarSyncServiceInitiator: CalendarSyncServiceInitiator,
@@ -26,7 +30,7 @@ class CalendarViewModel(
         CalendarUIState(
             isCalendarExist = calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST,
             calendarData = null,
-            calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCHRONIZATION else CalendarSyncState.OFFLINE,
+            calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCED else CalendarSyncState.OFFLINE,
             isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
             isRelativeDateEnabled = calendarPreferences.isRelativeDateEnabled
         )
@@ -43,6 +47,18 @@ class CalendarViewModel(
                         _uiState.update { it.copy(isCalendarExist = true) }
                         getCalendarData()
                     }
+
+                    CalendarSyncing -> {
+                        _uiState.update { it.copy(calendarSyncState = CalendarSyncState.SYNCHRONIZATION) }
+                    }
+
+                    CalendarSynced -> {
+                        _uiState.update { it.copy(calendarSyncState = CalendarSyncState.SYNCED) }
+                    }
+
+                    CalendarSyncFailed -> {
+                        _uiState.update { it.copy(calendarSyncState = CalendarSyncState.SYNC_FAILED) }
+                    }
                 }
             }
         }
@@ -57,7 +73,9 @@ class CalendarViewModel(
     fun setCalendarSyncEnabled(isEnabled: Boolean) {
         calendarPreferences.isCalendarSyncEnabled = isEnabled
         _uiState.update { it.copy(isCalendarSyncEnabled = isEnabled) }
-        calendarSyncServiceInitiator.startSyncCalendarService()
+        if (isEnabled) {
+            calendarSyncServiceInitiator.startSyncCalendarService()
+        }
     }
 
     fun setRelativeDateEnabled(isEnabled: Boolean) {
