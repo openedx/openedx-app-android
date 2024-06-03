@@ -155,7 +155,7 @@ class CourseOutlineViewModelTest {
             ""
         ),
         media = null,
-        courseAccessDetails = CourseAccessDetails(Date()),
+        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
         enrollmentDetails = EnrollmentDetails(Date(), "audit", false, Date()),
         certificate = null,
         isSelfPaced = false,

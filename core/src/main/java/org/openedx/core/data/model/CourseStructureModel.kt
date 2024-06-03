@@ -37,8 +37,6 @@ data class CourseStructureModel(
     var startType: String?,
     @SerializedName("end")
     var end: String?,
-    @SerializedName("courseware_access")
-    var coursewareAccess: CoursewareAccess?,
     @SerializedName("media")
     var media: Media?,
     @SerializedName("course_access_details")
@@ -66,7 +64,6 @@ data class CourseStructureModel(
             startDisplay = startDisplay ?: "",
             startType = startType ?: "",
             end = TimeUtils.iso8601ToDate(end ?: ""),
-            coursewareAccess = coursewareAccess?.mapToDomain(),
             media = media?.mapToDomain(),
             courseAccessDetails = courseAccessDetails.mapToDomain(),
             certificate = certificate?.mapToDomain(),
@@ -94,7 +91,6 @@ data class CourseStructureModel(
             startDisplay = startDisplay ?: "",
             startType = startType ?: "",
             end = end ?: "",
-            coursewareAccess = coursewareAccess?.mapToRoomEntity(),
             media = MediaDb.createFrom(media),
             courseAccessDetails = courseAccessDetails.mapToRoomEntity(),
             certificate = certificate?.mapToRoomEntity(),

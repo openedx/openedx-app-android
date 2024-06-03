@@ -15,7 +15,6 @@ data class CourseStructure(
     val startDisplay: String,
     val startType: String,
     val end: Date?,
-    val coursewareAccess: CoursewareAccess?,
     val media: Media?,
     val courseAccessDetails: CourseAccessDetails,
     val certificate: Certificate?,
@@ -29,5 +28,6 @@ data class CourseStructure(
         get() = enrollmentDetails.isAuditMode &&
                 isStarted &&
                 enrollmentDetails.isUpgradeDeadlinePassed.not() &&
-                productInfo != null && courseAccessDetails.isAuditAccessExpired.not()
+                courseAccessDetails.coursewareAccess?.hasAccess == true &&
+                productInfo != null
 }

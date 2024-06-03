@@ -181,8 +181,13 @@ data class EnrollmentDetailsDB(
 data class CourseAccessDetailsDb(
     @ColumnInfo("auditAccessExpires")
     var auditAccessExpires: String?,
+    @Embedded
+    val coursewareAccess: CoursewareAccessDb?,
 ) {
     fun mapToDomain(): CourseAccessDetails {
-        return CourseAccessDetails(TimeUtils.iso8601ToDate(auditAccessExpires ?: ""))
+        return CourseAccessDetails(
+            TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
+            coursewareAccess?.mapToDomain()
+        )
     }
 }

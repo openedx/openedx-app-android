@@ -8,10 +8,13 @@ import org.openedx.core.domain.model.CourseAccessDetails as DomainCourseAccessDe
 data class CourseAccessDetails(
     @SerializedName("audit_access_expires")
     val auditAccessExpires: String?,
+    @SerializedName("courseware_access")
+    var coursewareAccess: CoursewareAccess?,
 ) {
     fun mapToDomain(): DomainCourseAccessDetails =
-        DomainCourseAccessDetails(TimeUtils.iso8601ToDate(auditAccessExpires ?: ""))
+        DomainCourseAccessDetails(TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
+            coursewareAccess?.mapToDomain())
 
     fun mapToRoomEntity(): CourseAccessDetailsDb =
-        CourseAccessDetailsDb(auditAccessExpires)
+        CourseAccessDetailsDb(auditAccessExpires, coursewareAccess?.mapToRoomEntity())
 }

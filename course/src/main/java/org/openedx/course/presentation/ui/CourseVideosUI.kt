@@ -836,7 +836,17 @@ private val mockSequentialBlock = Block(
 private val mockEnrollmentDetails =
     EnrollmentDetails(created = Date(), mode = "audit", isActive = false, upgradeDeadline = Date())
 
-private val mockCourseAccessDetails = CourseAccessDetails(Date())
+private val mockCourseAccessDetails = CourseAccessDetails(
+    Date(),
+    coursewareAccess = CoursewareAccess(
+        true,
+        "",
+        "",
+        "",
+        "",
+        ""
+    )
+)
 
 private val mockCourseStructure = CourseStructure(
     root = "",
@@ -849,14 +859,6 @@ private val mockCourseStructure = CourseStructure(
     startDisplay = "",
     startType = "",
     end = Date(),
-    coursewareAccess = CoursewareAccess(
-        true,
-        "",
-        "",
-        "",
-        "",
-        ""
-    ),
     media = null,
     courseAccessDetails = mockCourseAccessDetails,
     certificate = null,

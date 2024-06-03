@@ -212,6 +212,10 @@ class IAPViewModel(
     }
 
     fun purchaseItem(activity: FragmentActivity) {
+        _uiState.value = IAPUIState.Loading(
+            courseName = purchaseFlowData.courseName!!,
+            loaderType = IAPLoaderType.PURCHASE_FLOW,
+        )
         viewModelScope.launch {
             takeIf {
                 preferencesManager.user?.id != null && purchaseFlowData.productInfo != null

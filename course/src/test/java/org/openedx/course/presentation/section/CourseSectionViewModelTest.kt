@@ -143,7 +143,7 @@ class CourseSectionViewModelTest {
             ""
         ),
         media = null,
-        courseAccessDetails = CourseAccessDetails(Date()),
+        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
             created = Date(),

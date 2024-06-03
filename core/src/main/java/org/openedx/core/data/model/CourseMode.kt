@@ -28,12 +28,4 @@ data class CourseMode(
             storeSku = "$storeProductPrefix$ceilPrice"
         }
     }
-
-    fun mapToDomain(): CourseMode {
-        return CourseMode(
-            slug = slug,
-            androidSku = androidSku,
-            storeSku = storeSku
-        )
-    }
 }

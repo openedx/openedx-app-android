@@ -24,5 +24,5 @@ data class EnrolledCourse(
         get() = isAuditMode &&
                 course.isStarted &&
                 course.isUpgradeDeadlinePassed.not() &&
-                productInfo != null && isAuditAccessExpired.not()
+                productInfo != null
 }
