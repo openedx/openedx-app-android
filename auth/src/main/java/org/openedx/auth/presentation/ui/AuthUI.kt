@@ -73,7 +73,10 @@ fun RequiredFields(
 ) {
     fields.forEach { field ->
         when (field.type) {
-            RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
+            RegistrationFieldType.TEXT,
+            RegistrationFieldType.EMAIL,
+            RegistrationFieldType.CONFIRM_EMAIL,
+            RegistrationFieldType.PASSWORD -> {
                 InputRegistrationField(
                     modifier = Modifier.fillMaxWidth(),
                     isErrorShown = showErrorMap[field.name] ?: true,
@@ -438,6 +441,7 @@ fun SelectableRegisterField(
         OutlinedTextField(
             readOnly = true,
             enabled = false,
+            singleLine = true,
             value = initialValue,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
