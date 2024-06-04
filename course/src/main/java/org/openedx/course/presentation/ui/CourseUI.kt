@@ -699,7 +699,7 @@ fun CourseExpandableChapterCard(
                     if (downloadedState == DownloadedState.DOWNLOADED) {
                         MaterialTheme.appColors.successGreen
                     } else {
-                        MaterialTheme.appColors.primary
+                        MaterialTheme.appColors.textAccent
                     }
                 IconButton(modifier = iconModifier,
                     onClick = { onDownloadClick() }) {
