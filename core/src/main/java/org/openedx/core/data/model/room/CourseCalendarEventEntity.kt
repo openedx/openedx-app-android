@@ -1,4 +1,4 @@
-package org.openedx.core.data.storage
+package org.openedx.core.data.model.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded

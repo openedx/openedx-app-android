@@ -64,6 +64,7 @@ fun CalendarSettingsView(
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
     onRelativeDateSwitchClick: (Boolean) -> Unit,
     onChangeSyncOptionClick: () -> Unit,
+    onCourseToSyncClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -142,10 +143,10 @@ fun CalendarSettingsView(
                                 onChangeSyncOptionClick = onChangeSyncOptionClick
                             )
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
                         CoursesToSyncSection(
                             coursesSynced = coursesSynced,
-                            onSyncingCoursesClick = {}
+                            onCourseToSyncClick = onCourseToSyncClick
                         )
                         Spacer(modifier = Modifier.height(32.dp))
                         OptionsSection(
@@ -266,7 +267,7 @@ fun SyncOptionsButton(
 @Composable
 fun CoursesToSyncSection(
     coursesSynced: Int,
-    onSyncingCoursesClick: () -> Unit
+    onCourseToSyncClick: () -> Unit
 ) {
     Column {
         SectionTitle(stringResource(R.string.profile_courses_to_sync))
@@ -279,7 +280,7 @@ fun CoursesToSyncSection(
         ) {
             SettingsItem(
                 text = stringResource(R.string.profile_syncing_courses, coursesSynced),
-                onClick = onSyncingCoursesClick
+                onClick = onCourseToSyncClick
             )
         }
     }
@@ -347,7 +348,8 @@ private fun CalendarSettingsViewPreview() {
             onBackClick = {},
             onCalendarSyncSwitchClick = {},
             onRelativeDateSwitchClick = {},
-            onChangeSyncOptionClick = {}
+            onChangeSyncOptionClick = {},
+            onCourseToSyncClick = {}
         )
     }
 }

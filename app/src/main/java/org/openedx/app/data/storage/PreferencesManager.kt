@@ -184,6 +184,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getBoolean(IS_RELATIVE_DATES_ENABLED, true)
 
+    override var isHideInactiveCourses: Boolean
+        set(value) {
+            saveBoolean(HIDE_INACTIVE_COURSES, value)
+        }
+        get() = getBoolean(HIDE_INACTIVE_COURSES, true)
+
     override fun setCalendarSyncEventsDialogShown(courseName: String) {
         saveBoolean(courseName.replaceSpace("_"), true)
     }
@@ -209,5 +215,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val RESET_APP_DIRECTORY = "reset_app_directory"
         private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
         private const val IS_RELATIVE_DATES_ENABLED = "IS_RELATIVE_DATES_ENABLED"
+        private const val HIDE_INACTIVE_COURSES = "HIDE_INACTIVE_COURSES"
     }
 }

@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import org.openedx.core.data.storage.CourseCalendarEventEntity
+import org.openedx.core.data.model.room.CourseCalendarEventEntity
 
 @Dao
 interface CalendarDao {

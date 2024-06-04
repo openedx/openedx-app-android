@@ -1,6 +1,7 @@
 package org.openedx.profile.presentation.calendar
 
 import androidx.activity.result.ActivityResultLauncher
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.CalendarManager
 import org.openedx.profile.system.CalendarSyncServiceInitiator
 import org.openedx.profile.system.notifier.CalendarCreated
@@ -23,7 +25,8 @@ class CalendarViewModel(
     private val calendarManager: CalendarManager,
     private val calendarPreferences: CalendarPreferences,
     private val calendarNotifier: CalendarNotifier,
-    private val networkConnection: NetworkConnection
+    private val networkConnection: NetworkConnection,
+    private val profileRouter: ProfileRouter
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -81,6 +84,10 @@ class CalendarViewModel(
     fun setRelativeDateEnabled(isEnabled: Boolean) {
         calendarPreferences.isRelativeDateEnabled = isEnabled
         _uiState.update { it.copy(isRelativeDateEnabled = isEnabled) }
+    }
+
+    fun navigateToCoursesToSync(fragmentManager: FragmentManager) {
+        profileRouter.navigateToCoursesToSync(fragmentManager)
     }
 
     private fun getCalendarData() {

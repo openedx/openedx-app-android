@@ -10,8 +10,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.storage.CalendarPreferences
-import org.openedx.core.data.storage.CourseCalendarEventEntity
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.profile.system.CalendarManager
 import org.openedx.profile.system.notifier.CalendarNotifier
@@ -73,7 +73,7 @@ class CalendarSyncService : Service() {
                 calendarSyncDeferred.awaitAll()
                 calendarPreferences.lastCalendarSync = Date().time
                 calendarNotifier.send(CalendarSynced)
-                Log.e("___", "${calendarInteractor.readAllData()}")
+                Log.e("___", "${calendarInteractor.getCourseCalendarEventEntityFromCache()}")
             } catch (e: Exception) {
                 Log.e("___", "$e")
                 calendarNotifier.send(CalendarSyncFailed)

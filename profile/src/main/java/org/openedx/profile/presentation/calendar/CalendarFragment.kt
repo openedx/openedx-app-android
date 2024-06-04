@@ -68,6 +68,9 @@ class CalendarFragment : Fragment() {
                             requireActivity().supportFragmentManager,
                             NewCalendarDialogFragment.DIALOG_TAG
                         )
+                    },
+                    onCourseToSyncClick = {
+                        viewModel.navigateToCoursesToSync(requireActivity().supportFragmentManager)
                     }
                 )
             }
@@ -82,6 +85,7 @@ private fun CalendarView(
     setUpCalendarSync: () -> Unit,
     onBackClick: () -> Unit,
     onChangeSyncOptionClick: () -> Unit,
+    onCourseToSyncClick: () -> Unit,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
     onRelativeDateSwitchClick: (Boolean) -> Unit
 ) {
@@ -98,7 +102,8 @@ private fun CalendarView(
             onBackClick = onBackClick,
             onCalendarSyncSwitchClick = onCalendarSyncSwitchClick,
             onRelativeDateSwitchClick = onRelativeDateSwitchClick,
-            onChangeSyncOptionClick = onChangeSyncOptionClick
+            onChangeSyncOptionClick = onChangeSyncOptionClick,
+            onCourseToSyncClick = onCourseToSyncClick
         )
     }
 }

@@ -3,9 +3,9 @@ package org.openedx.app.room
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
-import org.openedx.core.data.storage.CourseCalendarEventEntity
 import org.openedx.core.module.db.CalendarDao
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModelEntity

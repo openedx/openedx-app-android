@@ -5,4 +5,5 @@ interface CalendarPreferences {
     var lastCalendarSync: Long
     var isCalendarSyncEnabled: Boolean
     var isRelativeDateEnabled: Boolean
+    var isHideInactiveCourses: Boolean
 }

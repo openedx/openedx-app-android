@@ -46,6 +46,7 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileFragment
 import org.openedx.profile.presentation.calendar.CalendarFragment
+import org.openedx.profile.presentation.calendar.CoursesToSyncFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
@@ -397,6 +398,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToCalendarSettings(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, CalendarFragment())
+    }
+
+    override fun navigateToCoursesToSync(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, CoursesToSyncFragment())
     }
     //endregion
 

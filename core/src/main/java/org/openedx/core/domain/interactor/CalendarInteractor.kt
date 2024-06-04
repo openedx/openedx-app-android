@@ -1,6 +1,6 @@
 package org.openedx.core.domain.interactor
 
-import org.openedx.core.data.storage.CourseCalendarEventEntity
+import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.repository.CalendarRepository
 
 class CalendarInteractor(
@@ -15,7 +15,7 @@ class CalendarInteractor(
         repository.insertCourseCalendarEntity(*courseCalendarEntity)
     }
 
-    suspend fun readAllData(): List<CourseCalendarEventEntity> {
-        return repository.readAllData()
+    suspend fun getCourseCalendarEventEntityFromCache(): List<CourseCalendarEventEntity> {
+        return repository.getCourseCalendarEventEntityFromCache()
     }
 }

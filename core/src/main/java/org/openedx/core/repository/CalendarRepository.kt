@@ -1,8 +1,8 @@
 package org.openedx.core.repository
 
 import org.openedx.core.data.api.CourseApi
+import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.data.storage.CourseCalendarEventEntity
 import org.openedx.core.domain.model.EnrollmentStatus
 import org.openedx.core.module.db.CalendarDao
 
@@ -23,7 +23,7 @@ class CalendarRepository(
         calendarDao.insertCourseCalendarEntity(*courseCalendarEntity)
     }
 
-    suspend fun readAllData(): List<CourseCalendarEventEntity> {
+    suspend fun getCourseCalendarEventEntityFromCache(): List<CourseCalendarEventEntity> {
         return calendarDao.readAllData()
     }
 }
