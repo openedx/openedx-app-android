@@ -175,7 +175,7 @@ val screenModule = module {
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
     viewModel { CalendarViewModel(get(), get(), get(), get(), get()) }
     viewModel { NewCalendarDialogViewModel(get(), get(), get()) }
-    single { CalendarRepository(get(), get()) }
+    single { CalendarRepository(get(), get(), get()) }
     factory { CalendarInteractor(get()) }
 
     single { CourseRepository(get(), get(), get(), get(), get()) }

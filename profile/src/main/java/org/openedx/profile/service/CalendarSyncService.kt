@@ -3,6 +3,7 @@ package org.openedx.profile.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -10,6 +11,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.openedx.core.data.storage.CalendarPreferences
+import org.openedx.core.data.storage.CourseCalendarEventEntity
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.profile.system.CalendarManager
 import org.openedx.profile.system.notifier.CalendarNotifier
@@ -21,7 +23,7 @@ import java.util.Date
 class CalendarSyncService : Service() {
 
     private val calendarManager: CalendarManager by inject()
-    private val calendarRepository: CalendarInteractor by inject()
+    private val calendarInteractor: CalendarInteractor by inject()
     private val calendarNotifier: CalendarNotifier by inject()
     private val calendarPreferences: CalendarPreferences by inject()
 
@@ -38,32 +40,42 @@ class CalendarSyncService : Service() {
         CoroutineScope(Dispatchers.IO).launch {
             calendarNotifier.send(CalendarSyncing)
             try {
-                val courseDatesDeferredResults = calendarRepository.getEnrollmentsStatus()
+                val courseDatesDeferredResults = calendarInteractor.getEnrollmentsStatus()
                     .filter { it.isActive }
                     .map { enrollmentStatus ->
                         async(Dispatchers.IO) {
-                            Pair(enrollmentStatus, calendarRepository.getCourseDates(enrollmentStatus.courseId))
+                            Pair(enrollmentStatus, calendarInteractor.getCourseDates(enrollmentStatus.courseId))
                         }
                     }
-                val courseDates = courseDatesDeferredResults.awaitAll().filterNotNull()
-                val calendarSyncDeferred = courseDates.map { (enrollmentStatus, courseDatesResult) ->
-                    async {
-                        courseDatesResult.courseDateBlocks.forEach { courseDateBlock ->
-                            courseDateBlock.mapToDomain()?.let { domainCourseDateBlock ->
-                                calendarManager.addEventsIntoCalendar(
-                                    calendarId = calendarPreferences.calendarId,
-                                    courseId = enrollmentStatus.courseId,
-                                    courseName = enrollmentStatus.courseName,
-                                    courseDateBlock = domainCourseDateBlock
-                                )
+                val calendarSyncDeferred =
+                    courseDatesDeferredResults.awaitAll().map { (enrollmentStatus, courseDatesResult) ->
+                        async {
+                            courseDatesResult.courseDateBlocks.forEach { courseDateBlock ->
+                                courseDateBlock.mapToDomain()?.let { domainCourseDateBlock ->
+                                    val eventId = calendarManager.addEventsIntoCalendar(
+                                        calendarId = calendarPreferences.calendarId,
+                                        courseId = enrollmentStatus.courseId,
+                                        courseName = enrollmentStatus.courseName,
+                                        courseDateBlock = domainCourseDateBlock
+                                    )
+                                    courseDateBlock.mapToRoomEntity()?.let { courseDateBlockDb ->
+                                        val courseCalendarEventEntity = CourseCalendarEventEntity(
+                                            courseId = enrollmentStatus.courseId,
+                                            eventId = eventId,
+                                            courseDateBlockDb = courseDateBlockDb
+                                        )
+                                        calendarInteractor.insertCourseCalendarEntity(courseCalendarEventEntity)
+                                    }
+                                }
                             }
                         }
                     }
-                }
                 calendarSyncDeferred.awaitAll()
                 calendarPreferences.lastCalendarSync = Date().time
                 calendarNotifier.send(CalendarSynced)
+                Log.e("___", "${calendarInteractor.readAllData()}")
             } catch (e: Exception) {
+                Log.e("___", "$e")
                 calendarNotifier.send(CalendarSyncFailed)
             }
         }

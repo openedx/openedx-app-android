@@ -157,6 +157,11 @@ val appModule = module {
     }
 
     single {
+        val room = get<AppDatabase>()
+        room.calendarDao()
+    }
+
+    single {
         FileDownloader()
     }
 

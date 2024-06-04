@@ -154,7 +154,7 @@ class CalendarManager(
         courseId: String,
         courseName: String,
         courseDateBlock: CourseDateBlock
-    ) {
+    ): Long {
         val date = courseDateBlock.date.toCalendar()
         // start time of the event, adjusted 1 hour earlier for a 1-hour duration
         val startMillis: Long = date.timeInMillis - TimeUnit.HOURS.toMillis(1)
@@ -181,6 +181,8 @@ class CalendarManager(
         }
         val uri = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
         uri?.let { addReminderToEvent(uri = it) }
+        val eventId = uri?.lastPathSegment?.toLong() ?: EVENT_DOES_NOT_EXIST
+        return eventId
     }
 
     /**
@@ -434,6 +436,7 @@ class CalendarManager(
 
     companion object {
         const val CALENDAR_DOES_NOT_EXIST = -1L
+        const val EVENT_DOES_NOT_EXIST = -1L
         private const val TAG = "CalendarManager"
         private const val LOCAL_USER = "local_user"
     }

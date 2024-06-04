@@ -84,7 +84,9 @@ class CalendarViewModel(
     }
 
     private fun getCalendarData() {
-        val calendarData = calendarManager.getCalendarData(calendarId = calendarPreferences.calendarId)
-        _uiState.update { it.copy(calendarData = calendarData) }
+        if (calendarManager.hasPermissions()) {
+            val calendarData = calendarManager.getCalendarData(calendarId = calendarPreferences.calendarId)
+            _uiState.update { it.copy(calendarData = calendarData) }
+        }
     }
 }
