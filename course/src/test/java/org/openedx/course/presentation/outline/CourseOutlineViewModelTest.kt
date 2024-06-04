@@ -146,16 +146,17 @@ class CourseOutlineViewModelTest {
         startDisplay = "",
         startType = "",
         end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
         media = null,
-        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
+        courseAccessDetails = CourseAccessDetails(
+            Date(), CoursewareAccess(
+                true,
+                "",
+                "",
+                "",
+                "",
+                ""
+            )
+        ),
         enrollmentDetails = EnrollmentDetails(Date(), "audit", false, Date()),
         certificate = null,
         isSelfPaced = false,
@@ -222,39 +223,40 @@ class CourseOutlineViewModelTest {
     }
 
     @Test
-    fun `getCourseDataInternal no internet connection exception`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        every { networkConnection.isOnline() } returns true
-        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        coEvery { interactor.getCourseStatus(any()) } throws UnknownHostException()
+    fun `getCourseDataInternal no internet connection exception`() =
+        runTest(UnconfinedTestDispatcher()) {
+            coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+            every { networkConnection.isOnline() } returns true
+            every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+            coEvery { interactor.getCourseStatus(any()) } throws UnknownHostException()
 
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController,
-        )
+            val viewModel = CourseOutlineViewModel(
+                "",
+                "",
+                config,
+                interactor,
+                resourceManager,
+                notifier,
+                networkConnection,
+                preferencesManager,
+                analytics,
+                coreAnalytics,
+                downloadDao,
+                workerController,
+            )
 
-        val message = async {
-            viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            val message = async {
+                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            }
+            viewModel.getCourseData()
+            advanceUntilIdle()
+
+            coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+            coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
+
+            assertEquals(noInternet, message.await()?.message)
+            assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
         }
-        viewModel.getCourseData()
-        advanceUntilIdle()
-
-        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
-        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
-
-        assertEquals(noInternet, message.await()?.message)
-        assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
-    }
 
     @Test
     fun `getCourseDataInternal unknown exception`() = runTest(UnconfinedTestDispatcher()) {
@@ -291,147 +293,150 @@ class CourseOutlineViewModelTest {
     }
 
     @Test
-    fun `getCourseDataInternal success with internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        every { networkConnection.isOnline() } returns true
-        every { preferencesManager.appConfig.isValuePropEnabled } returns false
-        coEvery { downloadDao.readAllData() } returns flow {
-            emit(
-                listOf(
-                    DownloadModelEntity.createFrom(
-                        downloadModel
+    fun `getCourseDataInternal success with internet connection`() =
+        runTest(UnconfinedTestDispatcher()) {
+            coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+            every { networkConnection.isOnline() } returns true
+            every { preferencesManager.appConfig.isValuePropEnabled } returns false
+            coEvery { downloadDao.readAllData() } returns flow {
+                emit(
+                    listOf(
+                        DownloadModelEntity.createFrom(
+                            downloadModel
+                        )
                     )
                 )
-            )
-        }
-        coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseNestedListEnabled() } returns false
-
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
-
-        val message = async {
-            withTimeoutOrNull(5000) {
-                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
             }
+            coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+            every { config.isCourseNestedListEnabled() } returns false
+
+            val viewModel = CourseOutlineViewModel(
+                "",
+                "",
+                config,
+                interactor,
+                resourceManager,
+                notifier,
+                networkConnection,
+                preferencesManager,
+                analytics,
+                coreAnalytics,
+                downloadDao,
+                workerController
+            )
+
+            val message = async {
+                withTimeoutOrNull(5000) {
+                    viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+                }
+            }
+
+            viewModel.getCourseData()
+            advanceUntilIdle()
+
+            coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+            coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
+
+            assert(message.await() == null)
+            assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
         }
-
-        viewModel.getCourseData()
-        advanceUntilIdle()
-
-        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
-        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
-
-        assert(message.await() == null)
-        assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
-    }
 
     @Test
-    fun `getCourseDataInternal success without internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        every { networkConnection.isOnline() } returns false
-        every { preferencesManager.appConfig.isValuePropEnabled } returns false
-        coEvery { downloadDao.readAllData() } returns flow {
-            emit(
-                listOf(
-                    DownloadModelEntity.createFrom(
-                        downloadModel
+    fun `getCourseDataInternal success without internet connection`() =
+        runTest(UnconfinedTestDispatcher()) {
+            coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+            every { networkConnection.isOnline() } returns false
+            every { preferencesManager.appConfig.isValuePropEnabled } returns false
+            coEvery { downloadDao.readAllData() } returns flow {
+                emit(
+                    listOf(
+                        DownloadModelEntity.createFrom(
+                            downloadModel
+                        )
                     )
                 )
-            )
-        }
-        coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseNestedListEnabled() } returns false
-
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
-
-        val message = async {
-            withTimeoutOrNull(5000) {
-                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
             }
+            coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+            every { config.isCourseNestedListEnabled() } returns false
+
+            val viewModel = CourseOutlineViewModel(
+                "",
+                "",
+                config,
+                interactor,
+                resourceManager,
+                notifier,
+                networkConnection,
+                preferencesManager,
+                analytics,
+                coreAnalytics,
+                downloadDao,
+                workerController
+            )
+
+            val message = async {
+                withTimeoutOrNull(5000) {
+                    viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+                }
+            }
+            viewModel.getCourseData()
+            advanceUntilIdle()
+
+            coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+            coVerify(exactly = 0) { interactor.getCourseStatus(any()) }
+
+            assert(message.await() == null)
+            assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
         }
-        viewModel.getCourseData()
-        advanceUntilIdle()
-
-        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
-        coVerify(exactly = 0) { interactor.getCourseStatus(any()) }
-
-        assert(message.await() == null)
-        assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
-    }
 
     @Test
-    fun `updateCourseData success with internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        every { networkConnection.isOnline() } returns true
-        every { preferencesManager.appConfig.isValuePropEnabled } returns false
-        coEvery { downloadDao.readAllData() } returns flow {
-            emit(
-                listOf(
-                    DownloadModelEntity.createFrom(
-                        downloadModel
+    fun `updateCourseData success with internet connection`() =
+        runTest(UnconfinedTestDispatcher()) {
+            coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+            every { networkConnection.isOnline() } returns true
+            every { preferencesManager.appConfig.isValuePropEnabled } returns false
+            coEvery { downloadDao.readAllData() } returns flow {
+                emit(
+                    listOf(
+                        DownloadModelEntity.createFrom(
+                            downloadModel
+                        )
                     )
                 )
-            )
-        }
-        coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseNestedListEnabled() } returns false
-
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
-
-        val message = async {
-            withTimeoutOrNull(5000) {
-                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
             }
+            coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+            every { config.isCourseNestedListEnabled() } returns false
+
+            val viewModel = CourseOutlineViewModel(
+                "",
+                "",
+                config,
+                interactor,
+                resourceManager,
+                notifier,
+                networkConnection,
+                preferencesManager,
+                analytics,
+                coreAnalytics,
+                downloadDao,
+                workerController
+            )
+
+            val message = async {
+                withTimeoutOrNull(5000) {
+                    viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+                }
+            }
+            viewModel.getCourseData()
+            viewModel.updateCourseData()
+            advanceUntilIdle()
+
+            coVerify(exactly = 3) { interactor.getCourseStructure(any()) }
+            coVerify(exactly = 3) { interactor.getCourseStatus(any()) }
+
+            assert(message.await() == null)
+            assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
         }
-        viewModel.getCourseData()
-        viewModel.updateCourseData()
-        advanceUntilIdle()
-
-        coVerify(exactly = 3) { interactor.getCourseStructure(any()) }
-        coVerify(exactly = 3) { interactor.getCourseStatus(any()) }
-
-        assert(message.await() == null)
-        assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
-    }
 
     @Test
     fun `CourseStructureUpdated notifier test`() = runTest(UnconfinedTestDispatcher()) {
@@ -516,75 +521,77 @@ class CourseOutlineViewModelTest {
     }
 
     @Test
-    fun `saveDownloadModels only wifi download, with connection`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
-        every { networkConnection.isWifiConnected() } returns true
-        every { networkConnection.isOnline() } returns true
-        coEvery { workerController.saveModels(any()) } returns Unit
-        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseNestedListEnabled() } returns false
-        every { coreAnalytics.logEvent(any(), any()) } returns Unit
+    fun `saveDownloadModels only wifi download, with connection`() =
+        runTest(UnconfinedTestDispatcher()) {
+            coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+            coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
+            every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
+            every { networkConnection.isWifiConnected() } returns true
+            every { networkConnection.isOnline() } returns true
+            coEvery { workerController.saveModels(any()) } returns Unit
+            coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+            every { config.isCourseNestedListEnabled() } returns false
+            every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
-        val message = async {
-            withTimeoutOrNull(5000) {
-                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            val viewModel = CourseOutlineViewModel(
+                "",
+                "",
+                config,
+                interactor,
+                resourceManager,
+                notifier,
+                networkConnection,
+                preferencesManager,
+                analytics,
+                coreAnalytics,
+                downloadDao,
+                workerController
+            )
+            val message = async {
+                withTimeoutOrNull(5000) {
+                    viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+                }
             }
-        }
-        viewModel.saveDownloadModels("", "")
-        advanceUntilIdle()
+            viewModel.saveDownloadModels("", "")
+            advanceUntilIdle()
 
-        assert(message.await()?.message.isNullOrEmpty())
-    }
+            assert(message.await()?.message.isNullOrEmpty())
+        }
 
     @Test
-    fun `saveDownloadModels only wifi download, without connection`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
-        every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
-        every { networkConnection.isWifiConnected() } returns false
-        every { networkConnection.isOnline() } returns false
-        coEvery { workerController.saveModels(any()) } returns Unit
-        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseNestedListEnabled() } returns false
+    fun `saveDownloadModels only wifi download, without connection`() =
+        runTest(UnconfinedTestDispatcher()) {
+            coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+            every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
+            every { networkConnection.isWifiConnected() } returns false
+            every { networkConnection.isOnline() } returns false
+            coEvery { workerController.saveModels(any()) } returns Unit
+            coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+            every { config.isCourseNestedListEnabled() } returns false
 
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
-        val message = async {
-            withTimeoutOrNull(5000) {
-                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+            val viewModel = CourseOutlineViewModel(
+                "",
+                "",
+                config,
+                interactor,
+                resourceManager,
+                notifier,
+                networkConnection,
+                preferencesManager,
+                analytics,
+                coreAnalytics,
+                downloadDao,
+                workerController
+            )
+            val message = async {
+                withTimeoutOrNull(5000) {
+                    viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
+                }
             }
+            viewModel.saveDownloadModels("", "")
+
+            advanceUntilIdle()
+
+            assert(message.await()?.message.isNullOrEmpty())
         }
-        viewModel.saveDownloadModels("", "")
-
-        advanceUntilIdle()
-
-        assert(message.await()?.message.isNullOrEmpty())
-    }
 }

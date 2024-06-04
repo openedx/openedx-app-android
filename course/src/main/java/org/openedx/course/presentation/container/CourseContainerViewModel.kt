@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
@@ -32,13 +35,14 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
-import org.openedx.core.system.notifier.CourseDashboardUpdate
+import org.openedx.core.system.notifier.CourseDataUpdated
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseRefresh
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.IAPNotifier
+import org.openedx.core.system.notifier.UpdateCourseData
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.R
@@ -61,12 +65,13 @@ class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
     private val enrollmentMode: String,
+    private val versionName: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
     private val courseNotifier: CourseNotifier,
-    private val discoveryNotifier: DiscoveryNotifier,
+    private val iapNotifier: IAPNotifier,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
@@ -99,8 +104,19 @@ class CourseContainerViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    val isValuePropEnabled: Boolean
+    private val isValuePropEnabled: Boolean
         get() = corePreferences.appConfig.isValuePropEnabled
+
+    private val iapConfig
+        get() = corePreferences.appConfig.iapConfig
+
+    private val isIAPEnabled
+        get() = iapConfig.isEnabled &&
+                iapConfig.disableVersions.contains(versionName).not()
+
+    private var _canShowUpgradeButton = MutableStateFlow(false)
+    val canShowUpgradeButton: StateFlow<Boolean>
+        get() = _canShowUpgradeButton.asStateFlow()
 
     private var _courseStructure: CourseStructure? = null
     val courseStructure: CourseStructure?
@@ -160,6 +176,14 @@ class CourseContainerViewModel(
                 }
             }
         }
+
+        iapNotifier.notifier.onEach { event ->
+            when (event) {
+                is UpdateCourseData -> {
+                    updateData()
+                }
+            }
+        }.distinctUntilChanged().launchIn(viewModelScope)
     }
 
     fun preloadCourseStructure() {
@@ -167,19 +191,10 @@ class CourseContainerViewModel(
         if (_dataReady.value != null) {
             return
         }
-        loadCourseStructure()
-    }
-
-    fun forceReloadCourseStructure() {
-        _dataReady.value = null
-        loadCourseStructure(true)
-    }
-
-    private fun loadCourseStructure(forceReload: Boolean = false) {
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                _courseStructure = interactor.getCourseStructure(courseId, forceReload)
+                _courseStructure = interactor.getCourseStructure(courseId)
                 _courseStructure?.let {
                     courseName = it.name
                     loadCourseImage(courseStructure?.media?.image?.large)
@@ -190,6 +205,10 @@ class CourseContainerViewModel(
                         }
                         isReady
                     }
+                    _canShowUpgradeButton.value = isIAPEnabled &&
+                            isValuePropEnabled &&
+                            courseStructure?.productInfo != null &&
+                            courseStructure?.isUpgradeable == true
                 }
             } catch (e: Exception) {
                 if (e.isInternetError() || e is NoCachedDataException) {
@@ -252,7 +271,11 @@ class CourseContainerViewModel(
     fun updateData() {
         viewModelScope.launch {
             try {
-                interactor.getCourseStructure(courseId, isNeedRefresh = true)
+                _courseStructure = interactor.getCourseStructure(courseId, isNeedRefresh = true)
+                _canShowUpgradeButton.value = isIAPEnabled &&
+                        isValuePropEnabled &&
+                        courseStructure?.productInfo != null &&
+                        courseStructure?.isUpgradeable == true
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _errorMessage.value =
@@ -264,12 +287,7 @@ class CourseContainerViewModel(
             }
             _refreshing.value = false
             courseNotifier.send(CourseStructureUpdated(courseId))
-        }
-    }
-
-    fun updateEnrolledCourses() {
-        viewModelScope.launch {
-            discoveryNotifier.send(CourseDashboardUpdate())
+            iapNotifier.send(CourseDataUpdated())
         }
     }
 

@@ -11,9 +11,6 @@ data class IAPConfig(
     @SerializedName("enabled")
     val isEnabled: Boolean = false,
 
-    @SerializedName("experiment_enabled")
-    val isExperimentEnabled: Boolean = false,
-
     @SerializedName("android_product_prefix")
     val productPrefix: String = "",
 
@@ -24,7 +21,6 @@ data class IAPConfig(
     fun mapToDomain(): DomainIAPConfig {
         return DomainIAPConfig(
             isEnabled = isEnabled,
-            isExperimentEnabled = isExperimentEnabled,
             productPrefix = productPrefix,
             disableVersions = disableVersions
         )

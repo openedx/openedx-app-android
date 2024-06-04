@@ -72,15 +72,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.jsoup.Jsoup
 import org.openedx.core.BlockType
-import org.openedx.core.domain.ProductInfo
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.domain.model.CourseSharingUtmParameters
-import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.domain.model.EnrolledCourseData
-import org.openedx.core.extension.isLinkValid
 import org.openedx.core.extension.nonZero
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.db.DownloadModel

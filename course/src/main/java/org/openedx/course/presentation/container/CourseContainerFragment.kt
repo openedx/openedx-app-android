@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
@@ -56,11 +55,10 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.IAPAnalyticsScreen
 import org.openedx.core.presentation.course.CourseContainerTab
+import org.openedx.core.presentation.dialog.IAPDialogFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.core.presentation.iap.IAPUIState
-import org.openedx.core.presentation.iap.IAPViewModel
+import org.openedx.core.presentation.iap.IAPAction
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.IAPDialog
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.UpgradeToAccessView
@@ -92,10 +90,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_TITLE, ""),
             requireArguments().getString(ARG_ENROLLMENT_MODE, "")
         )
-    }
-
-    private val iapViewModel by viewModel<IAPViewModel> {
-        parametersOf(IAPAnalyticsScreen.COURSE_DASHBOARD.screenName)
     }
 
     private val permissionLauncher = registerForActivityResult(
@@ -161,15 +155,13 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             val isNavigationEnabled by viewModel.isNavigationEnabled.collectAsState()
             CourseDashboard(
                 viewModel = viewModel,
-                iapViewModel = iapViewModel,
                 isNavigationEnabled = isNavigationEnabled,
                 isResumed = isResumed,
                 fragmentManager = requireActivity().supportFragmentManager,
                 bundle = requireArguments(),
                 onRefresh = { page ->
                     onRefresh(page)
-                },
-                requireActivity = { requireActivity() }
+                }
             )
         }
     }
@@ -288,13 +280,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 @Composable
 fun CourseDashboard(
     viewModel: CourseContainerViewModel,
-    iapViewModel: IAPViewModel,
     onRefresh: (page: Int) -> Unit,
     isNavigationEnabled: Boolean,
     isResumed: Boolean,
     fragmentManager: FragmentManager,
     bundle: Bundle,
-    requireActivity: () -> FragmentActivity
 ) {
     OpenEdXTheme {
         val windowSize = rememberWindowSize()
@@ -311,7 +301,7 @@ fun CourseDashboard(
             val courseImage by viewModel.courseImage.collectAsState()
             val uiMessage by viewModel.uiMessage.collectAsState(null)
             val dataReady = viewModel.dataReady.observeAsState()
-            val iapState by iapViewModel.uiState.collectAsState()
+            val canShowUpgradeButton by viewModel.canShowUpgradeButton.collectAsState()
 
             val pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
             val tabState = rememberLazyListState()
@@ -336,59 +326,6 @@ fun CourseDashboard(
             }
 
             Box {
-                when (iapState) {
-                    is IAPUIState.Loading -> {
-                        IAPDialog(
-                            courseTitle = (iapState as IAPUIState.Loading).courseName,
-                            isLoading = true,
-                            onDismiss = {
-                                iapViewModel.clearIAPFLow()
-                            })
-                    }
-
-                    is IAPUIState.ProductData -> {
-                        IAPDialog(
-                            courseTitle = (iapState as IAPUIState.ProductData).courseName,
-                            formattedPrice = (iapState as IAPUIState.ProductData).formattedPrice,
-                            onUpgradeNow = {
-                                iapViewModel.startPurchaseFlow()
-                            }, onDismiss = {
-                                iapViewModel.clearIAPFLow()
-                            })
-                    }
-
-                    is IAPUIState.Error -> {
-                        IAPDialog(
-                            courseTitle = (iapState as IAPUIState.Error).courseName,
-                            isError = true,
-                            onDismiss = {
-                                iapViewModel.clearIAPFLow()
-                            }, onGetHelp = {
-                                iapViewModel.showFeedbackScreen(
-                                    requireActivity(),
-                                    (iapState as IAPUIState.Error).feedbackErrorMessage
-                                )
-                                iapViewModel.clearIAPFLow()
-                            })
-                    }
-
-                    is IAPUIState.PurchaseProduct -> {
-                        iapViewModel.purchaseItem(requireActivity())
-                    }
-
-                    is IAPUIState.FlowComplete -> {
-                        viewModel.forceReloadCourseStructure()
-                        viewModel.updateEnrolledCourses()
-                        if (iapViewModel.isInProgress()) {
-                            iapViewModel.upgradeSuccessEvent()
-                        }
-                    }
-
-                    else -> {
-                        iapViewModel.clearIAPFLow()
-                    }
-                }
-
                 CollapsingLayout(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -410,34 +347,27 @@ fun CourseDashboard(
                         )
                     },
                     upgradeButton = {
-                        if (dataReady.value == true) {
-                            if (viewModel.courseStructure?.isUpgradeable == true &&
-                                viewModel.isValuePropEnabled
+                        if (dataReady.value == true && canShowUpgradeButton) {
+                            val horizontalPadding = if (!windowSize.isTablet) 16.dp else 98.dp
+                            UpgradeToAccessView(
+                                modifier = Modifier.padding(
+                                    start = horizontalPadding,
+                                    end = 16.dp,
+                                    top = 16.dp
+                                ),
+                                type = UpgradeToAccessViewType.COURSE,
                             ) {
-                                val horizontalPadding = if (!windowSize.isTablet) 16.dp else 98.dp
-                                UpgradeToAccessView(
-                                    modifier = Modifier.padding(
-                                        start = horizontalPadding,
-                                        end = 16.dp,
-                                        top = 16.dp
-                                    ),
-                                    type = UpgradeToAccessViewType.COURSE,
-                                ) {
-                                    viewModel.courseStructure?.takeIf { it.productInfo != null }
-                                        ?.let {
-                                            iapViewModel.loadPrice(
-                                                viewModel.courseId,
-                                                viewModel.courseName,
-                                                it.isSelfPaced,
-                                                it.productInfo!!
-                                            )
-                                        }
-                                }
-                            } else if (iapViewModel.isInProgress()) {
-                                iapViewModel.clearIAPFLow()
-                                for (page in 0..<pagerState.pageCount) {
-                                    onRefresh(page)
-                                }
+                                IAPDialogFragment.newInstance(
+                                    iapAction = IAPAction.LOAD_PRICE,
+                                    screenName = IAPAnalyticsScreen.COURSE_DASHBOARD.screenName,
+                                    courseId = viewModel.courseId,
+                                    courseName = viewModel.courseName,
+                                    isSelfPaced = viewModel.courseStructure?.isSelfPaced!!,
+                                    productInfo = viewModel.courseStructure?.productInfo!!
+                                ).show(
+                                    fragmentManager,
+                                    IAPDialogFragment::class.simpleName
+                                )
                             }
                         }
                     },

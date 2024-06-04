@@ -81,7 +81,7 @@ fun CourseOutlineScreen(
     courseOutlineViewModel: CourseOutlineViewModel,
     courseRouter: CourseRouter,
     fragmentManager: FragmentManager,
-    onResetDatesClick: () -> Unit,
+    onResetDatesClick: () -> Unit
 ) {
     val uiState by courseOutlineViewModel.uiState.collectAsState()
     val uiMessage by courseOutlineViewModel.uiMessage.collectAsState(null)
@@ -197,7 +197,7 @@ private fun CourseOutlineUI(
     onResumeClick: (String) -> Unit,
     onDownloadClick: (Block) -> Unit,
     onResetDatesClick: () -> Unit,
-    onCertificateClick: (String) -> Unit,
+    onCertificateClick: (String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -573,7 +573,7 @@ private fun CourseOutlineScreenTabletPreview() {
                     verifiedUpgradeLink = "",
                     contentTypeGatingEnabled = false,
                     hasEnded = false
-                ),
+                )
             ),
             isCourseNestedListEnabled = true,
             uiMessage = null,

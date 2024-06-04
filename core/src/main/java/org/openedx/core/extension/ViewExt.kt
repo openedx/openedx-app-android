@@ -50,6 +50,15 @@ fun DialogFragment.setWidthPercent(percentage: Int) {
     dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
 }
 
+fun DialogFragment.setFullScreen(percentage: Int) {
+    val percent = percentage.toFloat() / 100
+    val dm = Resources.getSystem().displayMetrics
+    val rect = dm.run { Rect(0, 0, widthPixels, heightPixels) }
+    val percentWidth = rect.width() * percent
+    val percentHeight = rect.height() * percent
+    dialog?.window?.setLayout(percentWidth.toInt(), percentHeight.toInt())
+}
+
 fun Context.toastMessage(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }

@@ -39,7 +39,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.IAPNotifier
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -62,8 +62,8 @@ class CourseContainerViewModelTest {
     private val interactor = mockk<CourseInteractor>()
     private val calendarManager = mockk<CalendarManager>()
     private val networkConnection = mockk<NetworkConnection>()
-    private val notifier = spyk<CourseNotifier>()
-    private val discoveryNotifier = spyk<DiscoveryNotifier>()
+    private val courseNotifier = spyk<CourseNotifier>()
+    private val iapNotifier = spyk<IAPNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val corePreferences = mockk<CorePreferences>()
     private val coursePreferences = mockk<CoursePreferences>()
@@ -102,16 +102,17 @@ class CourseContainerViewModelTest {
         startDisplay = "",
         startType = "",
         end = null,
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
         media = null,
-        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
+        courseAccessDetails = CourseAccessDetails(
+            Date(), coursewareAccess = CoursewareAccess(
+                true,
+                "",
+                "",
+                "",
+                "",
+                ""
+            )
+        ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
             created = Date(),
@@ -134,8 +135,10 @@ class CourseContainerViewModelTest {
         startDisplay = "",
         startType = "",
         end = null,
-        coursewareAccess = null,
-        courseAccessDetails = org.openedx.core.data.model.CourseAccessDetails(""),
+        courseAccessDetails = org.openedx.core.data.model.CourseAccessDetails(
+            "",
+            coursewareAccess = null
+        ),
         media = null,
         certificate = null,
         enrollmentDetails = org.openedx.core.data.model.EnrollmentDetails("", "", false, ""),
@@ -151,7 +154,7 @@ class CourseContainerViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { corePreferences.user } returns user
         every { corePreferences.appConfig } returns appConfig
-        every { notifier.notifier } returns emptyFlow()
+        every { courseNotifier.notifier } returns emptyFlow()
         every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
         every { config.getApiHostURL() } returns "baseUrl"
         every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
@@ -169,12 +172,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -203,12 +207,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -237,12 +242,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -270,12 +276,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -306,12 +313,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -320,7 +328,7 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         coEvery { interactor.getCourseStructure(any(), true) } throws UnknownHostException()
-        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        coEvery { courseNotifier.send(CourseStructureUpdated("")) } returns Unit
         viewModel.updateData()
         advanceUntilIdle()
 
@@ -337,12 +345,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -351,7 +360,7 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         coEvery { interactor.getCourseStructure(any(), true) } throws Exception()
-        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        coEvery { courseNotifier.send(CourseStructureUpdated("")) } returns Unit
         viewModel.updateData()
         advanceUntilIdle()
 
@@ -368,12 +377,13 @@ class CourseContainerViewModelTest {
             "",
             "",
             "",
+            versionName = "",
             config,
             interactor,
             calendarManager,
             resourceManager,
-            notifier,
-            discoveryNotifier,
+            courseNotifier,
+            iapNotifier,
             networkConnection,
             corePreferences,
             coursePreferences,
@@ -382,7 +392,7 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         coEvery { interactor.getCourseStructure(any(), true) } returns courseStructure
-        coEvery { notifier.send(CourseStructureUpdated("")) } returns Unit
+        coEvery { courseNotifier.send(CourseStructureUpdated("")) } returns Unit
         viewModel.updateData()
         advanceUntilIdle()
 

@@ -1,7 +1,7 @@
 package org.openedx.core.data.api.iap
 
 import org.openedx.core.data.model.iap.CheckoutResponse
-import org.edx.mobile.model.iap.ExecuteOrderResponse
+import org.openedx.core.data.model.iap.ExecuteOrderResponse
 import org.openedx.core.data.model.iap.AddToBasketResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded

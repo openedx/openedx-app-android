@@ -15,8 +15,6 @@ data class EnrolledCourse(
     val certificate: Certificate?,
     val productInfo: ProductInfo?,
 ) : Parcelable {
-    private val isAuditAccessExpired: Boolean
-        get() = auditAccessExpires == null || Date().after(auditAccessExpires)
 
     private val isAuditMode: Boolean
         get() = EnrollmentMode.AUDIT.toString().equals(mode, ignoreCase = true)

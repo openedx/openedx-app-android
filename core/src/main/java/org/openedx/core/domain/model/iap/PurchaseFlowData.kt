@@ -4,11 +4,12 @@ import org.openedx.core.domain.ProductInfo
 import org.openedx.core.presentation.iap.IAPFlow
 
 data class PurchaseFlowData(
+    val screenName: String? = null,
     val courseId: String? = null,
     val courseName: String? = null,
     val isSelfPaced: Boolean? = null,
-    val productInfo: ProductInfo? = null,
     val componentId: String? = null,
+    val productInfo: ProductInfo? = null,
     val flow: String = IAPFlow.USER_INITIATED.value()
 ) {
     var currencyCode: String = ""

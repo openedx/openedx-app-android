@@ -34,7 +34,11 @@ fun UpgradeToAccessView(
     onClick: () -> Unit,
 ) {
     val shape = when (type) {
-        UpgradeToAccessViewType.DASHBOARD -> RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+        UpgradeToAccessViewType.DASHBOARD -> RoundedCornerShape(
+            bottomStart = 16.dp,
+            bottomEnd = 16.dp
+        )
+
         UpgradeToAccessViewType.COURSE -> MaterialTheme.appShapes.buttonShape
     }
     Row(
@@ -84,7 +88,8 @@ private fun UpgradeToAccessViewPreview(
     }
 }
 
-private class UpgradeToAccessViewTypeParameterProvider : PreviewParameterProvider<UpgradeToAccessViewType> {
+private class UpgradeToAccessViewTypeParameterProvider :
+    PreviewParameterProvider<UpgradeToAccessViewType> {
     override val values = sequenceOf(
         UpgradeToAccessViewType.DASHBOARD,
         UpgradeToAccessViewType.COURSE,

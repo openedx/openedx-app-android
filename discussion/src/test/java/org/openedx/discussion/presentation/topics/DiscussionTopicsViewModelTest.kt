@@ -119,16 +119,17 @@ class DiscussionTopicsViewModelTest {
         startDisplay = "",
         startType = "",
         end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
         media = null,
-        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
+        courseAccessDetails = CourseAccessDetails(
+            Date(), coursewareAccess = CoursewareAccess(
+                true,
+                "",
+                "",
+                "",
+                "",
+                ""
+            )
+        ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
             created = Date(),

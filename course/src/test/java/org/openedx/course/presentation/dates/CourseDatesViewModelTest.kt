@@ -125,16 +125,15 @@ class CourseDatesViewModelTest {
         startDisplay = "",
         startType = "",
         end = null,
-        coursewareAccess = CoursewareAccess(
+        media = null,
+        courseAccessDetails = CourseAccessDetails(Date(), CoursewareAccess(
             true,
             "",
             "",
             "",
             "",
             ""
-        ),
-        media = null,
-        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
+        )),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
             created = Date(),

@@ -18,7 +18,4 @@ data class User(
             id, username, email, name ?: ""
         )
     }
-
-    val isOddUserId: Boolean
-        get() = id % 2 == 1L
 }

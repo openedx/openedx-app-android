@@ -2,12 +2,10 @@ package org.openedx.core.presentation.iap
 
 sealed class IAPUIState {
     data class ProductData(val courseName: String, val formattedPrice: String) : IAPUIState()
-
     data object PurchaseProduct : IAPUIState()
-
     data object FlowComplete : IAPUIState()
+    data object CourseDataUpdated : IAPUIState()
     data class Loading(val courseName: String, val loaderType: IAPLoaderType) : IAPUIState()
-
     data class Error(
         val courseName: String,
         val requestType: Int = -1,

@@ -147,4 +147,8 @@
     <string name="iap_earn_certificate">Earn a verified certificate of completion to showcase on your resume</string>
     <string name="iap_unlock_access">Unlock access to all course activities, including graded assignments</string>
     <string name="iap_full_access_course">Full access to course content and course material even after the course ends</string>
+    <string name="iap_error_title">An Error occurred</string>
+    <string name="iap_general_upgrade_error_message">It looks like something went wrong when upgrading your course. If this error continues, please contact Support.</string>
+    <string name="iap_email_subject_upgrade_error">Error upgrading course in app</string>
+    <string name="label_refresh_to_retry">Refresh to retry</string>
 </resources>

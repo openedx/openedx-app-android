@@ -12,8 +12,10 @@ data class CourseAccessDetails(
     var coursewareAccess: CoursewareAccess?,
 ) {
     fun mapToDomain(): DomainCourseAccessDetails =
-        DomainCourseAccessDetails(TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
-            coursewareAccess?.mapToDomain())
+        DomainCourseAccessDetails(
+            TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
+            coursewareAccess?.mapToDomain()
+        )
 
     fun mapToRoomEntity(): CourseAccessDetailsDb =
         CourseAccessDetailsDb(auditAccessExpires, coursewareAccess?.mapToRoomEntity())

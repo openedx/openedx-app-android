@@ -49,6 +49,7 @@ import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.IAPNotifier
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
@@ -105,6 +106,7 @@ val appModule = module {
     single { DownloadNotifier() }
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
+    single { IAPNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }

@@ -125,16 +125,17 @@ class CourseUnitContainerViewModelTest {
         startDisplay = "",
         startType = "",
         end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
         media = null,
-        courseAccessDetails = CourseAccessDetails(Date(), coursewareAccess?.mapToDomain()),
+        courseAccessDetails = CourseAccessDetails(
+            Date(), CoursewareAccess(
+                true,
+                "",
+                "",
+                "",
+                "",
+                ""
+            )
+        ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
             created = Date(),

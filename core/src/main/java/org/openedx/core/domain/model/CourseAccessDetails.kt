@@ -8,7 +8,4 @@ import java.util.Date
 data class CourseAccessDetails(
     val auditAccessExpires: Date?,
     val coursewareAccess: CoursewareAccess?,
-) : Parcelable {
-    val isAuditAccessExpired: Boolean
-        get() = auditAccessExpires == null || Date().after(auditAccessExpires)
-}
+) : Parcelable

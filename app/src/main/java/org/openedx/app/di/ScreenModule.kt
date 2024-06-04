@@ -14,7 +14,10 @@ import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
 import org.openedx.core.data.repository.iap.IAPRepository
+import org.openedx.core.domain.interactor.IAPInteractor
+import org.openedx.core.domain.model.iap.PurchaseFlowData
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
+import org.openedx.core.presentation.iap.IAPAction
 import org.openedx.core.presentation.iap.IAPViewModel
 import org.openedx.core.presentation.settings.VideoQualityViewModel
 import org.openedx.course.data.repository.CourseRepository
@@ -119,7 +122,7 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -200,6 +203,7 @@ val screenModule = module {
             courseId,
             courseTitle,
             enrollmentMode,
+            versionName = BuildConfig.VERSION_NAME,
             get(),
             get(),
             get(),
@@ -383,11 +387,12 @@ val screenModule = module {
         )
     }
 
-    factory { IAPRepository(get()) }
-
-    viewModel { (screenName: String) ->
+    single { IAPRepository(get()) }
+    factory { IAPInteractor(get(), get()) }
+    viewModel { (iapAction: IAPAction, purchaseFlowData: PurchaseFlowData) ->
         IAPViewModel(
-            screenName = screenName,
+            iapAction = iapAction,
+            purchaseFlowData = purchaseFlowData,
             versionName = BuildConfig.VERSION_NAME,
             get(),
             get(),

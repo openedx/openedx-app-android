@@ -1,8 +1,9 @@
-package org.edx.mobile.model.iap
+package org.openedx.core.data.model.iap
 
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.domain.model.iap.ExecuteOrderResponse
 import org.openedx.core.domain.model.iap.ExecuteOrderResponse as ExecuteOrderResponseDomain
+
 data class ExecuteOrderResponse(
     @SerializedName("order_data") val orderData: OrderData
 ) {
