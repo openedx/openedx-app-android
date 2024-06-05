@@ -77,5 +77,7 @@
     <string name="profile_not_synced">Not Synced</string>
     <string name="profile_inactive">Inactive</string>
     <string name="profile_hide_inactive_courses">Hide Inactive Courses</string>
+    <string name="profile_disable_calendar_dialog_title">Disable Calendar Sync</string>
+    <string name="profile_disable_calendar_dialog_description">Disabling calendar sync will delete the calendar “My Assignments.” You can turn calendar sync back on at any time.</string>
 
 </resources>

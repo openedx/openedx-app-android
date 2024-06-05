@@ -16,6 +16,7 @@ import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.CalendarManager
 import org.openedx.profile.system.notifier.CalendarCreated
 import org.openedx.profile.system.notifier.CalendarNotifier
+import org.openedx.profile.system.notifier.CalendarSyncDisabled
 import org.openedx.profile.system.notifier.CalendarSyncFailed
 import org.openedx.profile.system.notifier.CalendarSynced
 import org.openedx.profile.system.notifier.CalendarSyncing
@@ -67,6 +68,10 @@ class CalendarViewModel(
                     CalendarSyncFailed -> {
                         _uiState.update { it.copy(calendarSyncState = CalendarSyncState.SYNC_FAILED) }
                     }
+
+                    CalendarSyncDisabled -> {
+                        _uiState.update { it.copy(isCalendarSyncEnabled = false) }
+                    }
                 }
             }
         }
@@ -79,10 +84,18 @@ class CalendarViewModel(
         permissionLauncher.launch(calendarManager.permissions)
     }
 
-    fun setCalendarSyncEnabled(isEnabled: Boolean) {
-        calendarPreferences.isCalendarSyncEnabled = isEnabled
-        _uiState.update { it.copy(isCalendarSyncEnabled = isEnabled) }
-        if (isEnabled) {
+    fun setCalendarSyncEnabled(isEnabled: Boolean, fragmentManager: FragmentManager) {
+        if (!isEnabled) {
+            _uiState.value.calendarData?.let {
+                val dialog = DisableCalendarSyncDialogFragment.newInstance(it)
+                dialog.show(
+                    fragmentManager,
+                    DisableCalendarSyncDialogFragment.DIALOG_TAG
+                )
+            }
+        } else {
+            calendarPreferences.isCalendarSyncEnabled = true
+            _uiState.update { it.copy(isCalendarSyncEnabled = true) }
             calendarSyncScheduler.requestImmediateSync()
         }
     }

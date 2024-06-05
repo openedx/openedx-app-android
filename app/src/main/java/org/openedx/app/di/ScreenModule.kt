@@ -60,6 +60,7 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import org.openedx.profile.presentation.calendar.CalendarViewModel
 import org.openedx.profile.presentation.calendar.CoursesToSyncViewModel
+import org.openedx.profile.presentation.calendar.DisableCalendarSyncDialogViewModel
 import org.openedx.profile.presentation.calendar.NewCalendarDialogViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
@@ -177,6 +178,7 @@ val screenModule = module {
     viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { CoursesToSyncViewModel(get(), get(), get()) }
     viewModel { NewCalendarDialogViewModel(get(), get(), get()) }
+    viewModel { DisableCalendarSyncDialogViewModel(get(), get()) }
     single { CalendarRepository(get(), get(), get()) }
     factory { CalendarInteractor(get()) }
 

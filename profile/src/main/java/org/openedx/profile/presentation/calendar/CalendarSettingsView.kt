@@ -34,6 +34,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -340,8 +341,8 @@ private fun CalendarSettingsViewPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = CalendarUIState(
                 isCalendarExist = true,
-                calendarData = null,
-                calendarSyncState = CalendarSyncState.SYNCHRONIZATION,
+                calendarData = CalendarData("calendar", Color.Red.toArgb()),
+                calendarSyncState = CalendarSyncState.SYNCED,
                 isCalendarSyncEnabled = false,
                 isRelativeDateEnabled = true,
                 coursesSynced = 5

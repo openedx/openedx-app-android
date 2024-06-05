@@ -171,4 +171,5 @@
     <string name="core_course_container_nav_discussions">Discussions</string>
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
+    <string name="profile_disable_syncing">Disable Syncing</string>
 </resources>

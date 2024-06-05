@@ -57,7 +57,7 @@ class CalendarFragment : Fragment() {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
                     onCalendarSyncSwitchClick = {
-                        viewModel.setCalendarSyncEnabled(it)
+                        viewModel.setCalendarSyncEnabled(it, requireActivity().supportFragmentManager)
                     },
                     onRelativeDateSwitchClick = {
                         viewModel.setRelativeDateEnabled(it)
