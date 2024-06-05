@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
+import org.openedx.core.data.model.room.CourseCalendarStateEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
 import org.openedx.core.module.db.CalendarDao
@@ -25,7 +26,8 @@ const val DATABASE_NAME = "OpenEdX_db"
         EnrolledCourseEntity::class,
         CourseStructureEntity::class,
         DownloadModelEntity::class,
-        CourseCalendarEventEntity::class
+        CourseCalendarEventEntity::class,
+        CourseCalendarStateEntity::class
     ],
     version = DATABASE_VERSION,
     exportSchema = false

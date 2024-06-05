@@ -9,15 +9,18 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.profile.worker.CalendarSyncScheduler
 
 class CoursesToSyncViewModel(
     private val calendarInteractor: CalendarInteractor,
-    private val calendarPreferences: CalendarPreferences
+    private val calendarPreferences: CalendarPreferences,
+    private val calendarSyncScheduler: CalendarSyncScheduler,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(
         CoursesToSyncUIState(
             enrollmentsStatus = emptyList(),
+            coursesCalendarState = emptyList(),
             isHideInactiveCourses = calendarPreferences.isHideInactiveCourses
         )
     )
@@ -26,11 +29,30 @@ class CoursesToSyncViewModel(
 
     init {
         getEnrollmentsStatus()
+        getCourseCalendarState()
     }
 
     fun setHideInactiveCoursesEnabled(isEnabled: Boolean) {
         calendarPreferences.isHideInactiveCourses = isEnabled
         _uiState.update { it.copy(isHideInactiveCourses = isEnabled) }
+    }
+
+    fun setCourseSyncEnabled(isEnabled: Boolean, courseId: String) {
+        viewModelScope.launch {
+            calendarInteractor.updateCourseCalendarStateById(
+                courseId = courseId,
+                isCourseSyncEnabled = isEnabled
+            )
+            getCourseCalendarState()
+            calendarSyncScheduler.requestImmediateSync(courseId)
+        }
+    }
+
+    private fun getCourseCalendarState() {
+        viewModelScope.launch {
+            val coursesCalendarState = calendarInteractor.getAllCourseCalendarState().map { it.mapToDomain() }
+            _uiState.update { it.copy(coursesCalendarState = coursesCalendarState) }
+        }
     }
 
     private fun getEnrollmentsStatus() {

@@ -2,6 +2,7 @@ package org.openedx.core.repository
 
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
+import org.openedx.core.data.model.room.CourseCalendarStateEntity
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.EnrollmentStatus
 import org.openedx.core.module.db.CalendarDao
@@ -23,7 +24,31 @@ class CalendarRepository(
         calendarDao.insertCourseCalendarEntity(*courseCalendarEntity)
     }
 
-    suspend fun getCourseCalendarEventEntityFromCache(): List<CourseCalendarEventEntity> {
-        return calendarDao.readAllData()
+    suspend fun getCourseCalendarEventsById(courseId: String): List<CourseCalendarEventEntity> {
+        return calendarDao.readCourseCalendarEventsById(courseId)
+    }
+
+    suspend fun deleteCourseCalendarEntitiesById(courseId: String) {
+        calendarDao.deleteCourseCalendarEntitiesById(courseId)
+    }
+
+    suspend fun insertCourseCalendarStateEntity(vararg courseCalendarStateEntity: CourseCalendarStateEntity) {
+        calendarDao.insertCourseCalendarStateEntity(*courseCalendarStateEntity)
+    }
+
+    suspend fun getCourseCalendarStateById(courseId: String): CourseCalendarStateEntity? {
+        return calendarDao.readCourseCalendarStateById(courseId)
+    }
+
+    suspend fun getAllCourseCalendarState(): List<CourseCalendarStateEntity> {
+        return calendarDao.readAllCourseCalendarState()
+    }
+
+    suspend fun updateCourseCalendarStateById(
+        courseId: String,
+        checksum: Int? = null,
+        isCourseSyncEnabled: Boolean? = null
+    ) {
+        return calendarDao.updateCourseCalendarStateById(courseId, checksum, isCourseSyncEnabled)
     }
 }

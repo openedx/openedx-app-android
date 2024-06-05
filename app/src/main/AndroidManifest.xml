@@ -114,10 +114,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name="org.openedx.profile.service.CalendarSyncService"
-            android:enabled="true"
-            android:exported="true" />
     </application>
 
 </manifest>

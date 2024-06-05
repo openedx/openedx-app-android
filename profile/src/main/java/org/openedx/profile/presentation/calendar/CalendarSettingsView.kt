@@ -132,7 +132,7 @@ fun CalendarSettingsView(
                     Column(
                         modifier = contentWidth.padding(vertical = 28.dp),
                     ) {
-                        val coursesSynced = 5
+                        val coursesSynced = uiState.coursesSynced
 
                         if (uiState.calendarData != null) {
                             CalendarSyncSection(
@@ -343,7 +343,8 @@ private fun CalendarSettingsViewPreview() {
                 calendarData = null,
                 calendarSyncState = CalendarSyncState.SYNCHRONIZATION,
                 isCalendarSyncEnabled = false,
-                isRelativeDateEnabled = true
+                isRelativeDateEnabled = true,
+                coursesSynced = 5
             ),
             onBackClick = {},
             onCalendarSyncSwitchClick = {},

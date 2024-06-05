@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import org.koin.androidx.compose.koinViewModel
-import org.openedx.core.domain.model.EnrollmentStatus
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -87,6 +86,9 @@ class CoursesToSyncFragment : Fragment() {
                     onHideInactiveCoursesSwitchClick = {
                         viewModel.setHideInactiveCoursesEnabled(it)
                     },
+                    onCourseSyncCheckChange = { isEnabled, courseId ->
+                        viewModel.setCourseSyncEnabled(isEnabled, courseId)
+                    },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     }
@@ -97,11 +99,12 @@ class CoursesToSyncFragment : Fragment() {
 }
 
 @Composable
-fun CoursesToSyncView(
+private fun CoursesToSyncView(
     windowSize: WindowSize,
     onBackClick: () -> Unit,
     uiState: CoursesToSyncUIState,
-    onHideInactiveCoursesSwitchClick: (Boolean) -> Unit
+    onHideInactiveCoursesSwitchClick: (Boolean) -> Unit,
+    onCourseSyncCheckChange: (Boolean, String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -176,7 +179,10 @@ fun CoursesToSyncView(
                             onHideInactiveCoursesSwitchClick = onHideInactiveCoursesSwitchClick
                         )
                         Spacer(modifier = Modifier.height(20.dp))
-                        SyncCourseTabRow(uiState.enrollmentsStatus)
+                        SyncCourseTabRow(
+                            uiState = uiState,
+                            onCourseSyncCheckChange = onCourseSyncCheckChange
+                        )
                     }
                 }
             }
@@ -185,8 +191,9 @@ fun CoursesToSyncView(
 }
 
 @Composable
-fun SyncCourseTabRow(
-    enrollmentsStatus: List<EnrollmentStatus>
+private fun SyncCourseTabRow(
+    uiState: CoursesToSyncUIState,
+    onCourseSyncCheckChange: (Boolean, String) -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(SyncCourseTab.SYNCED) }
     val selectedTabIndex = SyncCourseTab.entries.indexOf(selectedTab)
@@ -224,7 +231,8 @@ fun SyncCourseTabRow(
 
         CourseCheckboxList(
             selectedTab = selectedTab,
-            enrollmentsStatus = enrollmentsStatus
+            uiState = uiState,
+            onCourseSyncCheckChange = onCourseSyncCheckChange
         )
     }
 }
@@ -233,12 +241,20 @@ fun SyncCourseTabRow(
 @Composable
 private fun CourseCheckboxList(
     selectedTab: SyncCourseTab,
-    enrollmentsStatus: List<EnrollmentStatus>
+    uiState: CoursesToSyncUIState,
+    onCourseSyncCheckChange: (Boolean, String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.padding(8.dp),
     ) {
-        items(enrollmentsStatus) { course ->
+        val courseList = uiState.run {
+            val isSyncEnabled = selectedTab == SyncCourseTab.SYNCED
+            val courseIds = coursesCalendarState.filter { it.isCourseSyncEnabled == isSyncEnabled }.map { it.courseId }
+            enrollmentsStatus.filter { it.courseId in courseIds }
+        }
+        items(courseList) { course ->
+            val isCourseSyncEnabled =
+                uiState.coursesCalendarState.find { it.courseId == course.courseId }?.isCourseSyncEnabled ?: false
             val annotatedString = buildAnnotatedString {
                 append(course.courseName)
                 if (!course.isActive) {
@@ -257,6 +273,7 @@ private fun CourseCheckboxList(
                 }
             }
 
+            if (uiState.isHideInactiveCourses && !course.isActive) return@items
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -269,10 +286,10 @@ private fun CourseCheckboxList(
                         checkedColor = MaterialTheme.appColors.primary,
                         uncheckedColor = MaterialTheme.appColors.textFieldText
                     ),
-                    checked = true,
+                    checked = isCourseSyncEnabled,
                     enabled = course.isActive,
-                    onCheckedChange = {
-                        //TODO
+                    onCheckedChange = { isEnabled ->
+                        onCourseSyncCheckChange(isEnabled, course.courseId)
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -288,7 +305,7 @@ private fun CourseCheckboxList(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HideInactiveCoursesView(
+private fun HideInactiveCoursesView(
     isHideInactiveCourses: Boolean,
     onHideInactiveCoursesSwitchClick: (Boolean) -> Unit
 ) {
@@ -328,9 +345,11 @@ private fun CoursesToSyncViewPreview() {
             windowSize = rememberWindowSize(),
             uiState = CoursesToSyncUIState(
                 enrollmentsStatus = emptyList(),
+                coursesCalendarState = emptyList(),
                 isHideInactiveCourses = true
             ),
             onHideInactiveCoursesSwitchClick = {},
+            onCourseSyncCheckChange = { _, _ -> },
             onBackClick = {}
         )
     }

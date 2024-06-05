@@ -326,7 +326,7 @@ class CalendarManager(
     /**
      * Method to delete the course calendar from the mobile calendar app
      */
-    fun deleteCalendar(calendarId: Long) {
+    private fun deleteCalendar(calendarId: Long) {
         context.contentResolver.delete(
             Uri.parse("content://com.android.calendar/calendars/$calendarId"),
             null,
@@ -431,6 +431,16 @@ class CalendarManager(
             } else {
                 null
             }
+        }
+    }
+
+    fun deleteEvent(eventId: Long) {
+        val deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId)
+        val rows = context.contentResolver.delete(deleteUri, null, null)
+        if (rows > 0) {
+            logger.d { "Event deleted successfully" }
+        } else {
+            logger.d { "Event deletion failed" }
         }
     }
 

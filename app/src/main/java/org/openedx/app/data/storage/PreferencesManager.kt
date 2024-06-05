@@ -84,12 +84,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getLong(CALENDAR_ID, CalendarManager.CALENDAR_DOES_NOT_EXIST)
 
-    override var lastCalendarSync: Long
-        set(value) {
-            saveLong(LAST_CALENDAR_SYNC, value)
-        }
-        get() = getLong(LAST_CALENDAR_SYNC)
-
     override var user: User?
         set(value) {
             val userJson = Gson().toJson(value)
@@ -176,7 +170,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         set(value) {
             saveBoolean(IS_CALENDAR_SYNC_ENABLED, value)
         }
-        get() = getBoolean(IS_CALENDAR_SYNC_ENABLED, false)
+        get() = getBoolean(IS_CALENDAR_SYNC_ENABLED, true)
 
     override var isRelativeDateEnabled: Boolean
         set(value) {
@@ -211,7 +205,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val VIDEO_SETTINGS_DOWNLOAD_QUALITY = "video_settings_download_quality"
         private const val APP_CONFIG = "app_config"
         private const val CALENDAR_ID = "CALENDAR_ID"
-        private const val LAST_CALENDAR_SYNC = "LAST_CALENDAR_SYNC"
         private const val RESET_APP_DIRECTORY = "reset_app_directory"
         private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
         private const val IS_RELATIVE_DATES_ENABLED = "IS_RELATIVE_DATES_ENABLED"

@@ -20,7 +20,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
-import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.InsetHolder
@@ -28,13 +27,10 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.utils.Logger
-import org.openedx.core.utils.isToday
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.CalendarManager
-import org.openedx.profile.system.CalendarSyncServiceInitiator
+import org.openedx.profile.worker.CalendarSyncScheduler
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
-import java.util.Date
 
 class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
@@ -52,9 +48,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val viewModel by viewModel<AppViewModel>()
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
-    private val calendarPreferencesManager by inject<CalendarPreferences>()
     private val profileRouter by inject<ProfileRouter>()
-    private val calendarSyncServiceInitiator by inject<CalendarSyncServiceInitiator>()
+    private val calendarSyncScheduler by inject<CalendarSyncScheduler>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -147,7 +142,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             profileRouter.restartApp(supportFragmentManager, viewModel.isLogistrationEnabled)
         }
 
-        tryToSyncCalendar()
+        calendarSyncScheduler.scheduleDailySync()
     }
 
     override fun onStart() {
@@ -219,15 +214,6 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             Configuration.UI_MODE_NIGHT_NO -> false
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
-        }
-    }
-
-    private fun tryToSyncCalendar() {
-        val isCalendarCreated = calendarPreferencesManager.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
-        val isCalendarSyncRequired = !Date(calendarPreferencesManager.lastCalendarSync).isToday()
-        val isCalendarSyncEnabled = calendarPreferencesManager.isCalendarSyncEnabled
-        if (isCalendarCreated && isCalendarSyncRequired && isCalendarSyncEnabled) {
-            calendarSyncServiceInitiator.startSyncCalendarService()
         }
     }
 

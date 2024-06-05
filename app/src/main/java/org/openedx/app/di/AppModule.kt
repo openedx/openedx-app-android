@@ -63,9 +63,9 @@ import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.system.CalendarManager
-import org.openedx.profile.system.CalendarSyncServiceInitiator
 import org.openedx.profile.system.notifier.CalendarNotifier
 import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.profile.worker.CalendarSyncScheduler
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
@@ -86,7 +86,6 @@ val appModule = module {
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get(), get()) }
-    single { CalendarSyncServiceInitiator(get()) }
 
     single { ImageProcessor(get()) }
 
@@ -195,4 +194,6 @@ val appModule = module {
     factory { OAuthHelper(get(), get(), get()) }
 
     factory { FileUtil(get()) }
+
+    single { CalendarSyncScheduler(get()) }
 }
