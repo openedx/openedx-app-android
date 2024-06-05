@@ -34,7 +34,7 @@ class CalendarViewModel(
 
     private val _uiState = MutableStateFlow(
         CalendarUIState(
-            isCalendarExist = calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST,
+            isCalendarExist = isCalendarExist(),
             calendarData = null,
             calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCED else CalendarSyncState.OFFLINE,
             isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
@@ -118,5 +118,10 @@ class CalendarViewModel(
                     _uiState.update { it.copy(coursesSynced = coursesSynced) }
                 }
         }
+    }
+
+    private fun isCalendarExist(): Boolean {
+        return calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST &&
+                calendarManager.isCalendarExist(calendarPreferences.calendarId)
     }
 }

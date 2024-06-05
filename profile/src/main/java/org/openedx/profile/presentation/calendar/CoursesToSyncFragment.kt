@@ -258,13 +258,12 @@ private fun CourseCheckboxList(
         LazyColumn(
             modifier = Modifier.padding(8.dp),
         ) {
-            val courseList = uiState.run {
-                val isSyncEnabled = selectedTab == SyncCourseTab.SYNCED
-                val courseIds =
-                    coursesCalendarState.filter { it.isCourseSyncEnabled == isSyncEnabled }.map { it.courseId }
-                enrollmentsStatus.filter { it.courseId in courseIds }
-            }
-            items(courseList) { course ->
+            val courseIds = uiState.coursesCalendarState
+                .filter { it.isCourseSyncEnabled == (selectedTab == SyncCourseTab.SYNCED) }
+                .map { it.courseId }
+            val filteredEnrollments = uiState.enrollmentsStatus
+                .filter { it.courseId in courseIds }
+            items(filteredEnrollments) { course ->
                 val isCourseSyncEnabled =
                     uiState.coursesCalendarState.find { it.courseId == course.courseId }?.isCourseSyncEnabled ?: false
                 val annotatedString = buildAnnotatedString {
