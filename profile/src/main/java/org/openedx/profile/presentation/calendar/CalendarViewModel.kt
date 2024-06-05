@@ -38,7 +38,6 @@ class CalendarViewModel(
             calendarData = null,
             calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCED else CalendarSyncState.OFFLINE,
             isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
-            isRelativeDateEnabled = calendarPreferences.isRelativeDateEnabled,
             coursesSynced = 0
         )
     )
@@ -100,11 +99,6 @@ class CalendarViewModel(
         }
     }
 
-    fun setRelativeDateEnabled(isEnabled: Boolean) {
-        calendarPreferences.isRelativeDateEnabled = isEnabled
-        _uiState.update { it.copy(isRelativeDateEnabled = isEnabled) }
-    }
-
     fun navigateToCoursesToSync(fragmentManager: FragmentManager) {
         profileRouter.navigateToCoursesToSync(fragmentManager)
     }
@@ -118,7 +112,7 @@ class CalendarViewModel(
 
     private fun updateSyncedCoursesCount() {
         viewModelScope.launch {
-            calendarInteractor.getAllCourseCalendarState()
+            calendarInteractor.getAllCourseCalendarStateFromCache()
                 .count { it.isCourseSyncEnabled }
                 .let { coursesSynced ->
                     _uiState.update { it.copy(coursesSynced = coursesSynced) }

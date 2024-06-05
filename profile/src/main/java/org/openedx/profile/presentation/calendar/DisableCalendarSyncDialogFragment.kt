@@ -88,7 +88,7 @@ class DisableCalendarSyncDialogFragment : DialogFragment() {
 }
 
 @Composable
-fun DisableCalendarSyncDialogView(
+private fun DisableCalendarSyncDialogView(
     modifier: Modifier = Modifier,
     calendarData: CalendarData?,
     onCancelClick: () -> Unit,
@@ -177,7 +177,7 @@ fun DisableCalendarSyncDialogView(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun NewCalendarDialogPreview() {
+private fun DisableCalendarSyncDialogPreview() {
     OpenEdXTheme {
         DisableCalendarSyncDialogView(
             calendarData = CalendarData("calendar", Color.GREEN),

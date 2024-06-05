@@ -20,11 +20,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
@@ -244,60 +246,71 @@ private fun CourseCheckboxList(
     uiState: CoursesToSyncUIState,
     onCourseSyncCheckChange: (Boolean, String) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.padding(8.dp),
-    ) {
-        val courseList = uiState.run {
-            val isSyncEnabled = selectedTab == SyncCourseTab.SYNCED
-            val courseIds = coursesCalendarState.filter { it.isCourseSyncEnabled == isSyncEnabled }.map { it.courseId }
-            enrollmentsStatus.filter { it.courseId in courseIds }
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         }
-        items(courseList) { course ->
-            val isCourseSyncEnabled =
-                uiState.coursesCalendarState.find { it.courseId == course.courseId }?.isCourseSyncEnabled ?: false
-            val annotatedString = buildAnnotatedString {
-                append(course.courseName)
-                if (!course.isActive) {
-                    append(" ")
-                    withStyle(
-                        style = SpanStyle(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Normal,
-                            letterSpacing = 0.sp,
-                            fontFamily = fontFamily,
-                            color = MaterialTheme.appColors.textFieldHint,
-                        )
-                    ) {
-                        append(stringResource(R.string.profile_inactive))
+    } else {
+        LazyColumn(
+            modifier = Modifier.padding(8.dp),
+        ) {
+            val courseList = uiState.run {
+                val isSyncEnabled = selectedTab == SyncCourseTab.SYNCED
+                val courseIds =
+                    coursesCalendarState.filter { it.isCourseSyncEnabled == isSyncEnabled }.map { it.courseId }
+                enrollmentsStatus.filter { it.courseId in courseIds }
+            }
+            items(courseList) { course ->
+                val isCourseSyncEnabled =
+                    uiState.coursesCalendarState.find { it.courseId == course.courseId }?.isCourseSyncEnabled ?: false
+                val annotatedString = buildAnnotatedString {
+                    append(course.courseName)
+                    if (!course.isActive) {
+                        append(" ")
+                        withStyle(
+                            style = SpanStyle(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Normal,
+                                letterSpacing = 0.sp,
+                                fontFamily = fontFamily,
+                                color = MaterialTheme.appColors.textFieldHint,
+                            )
+                        ) {
+                            append(stringResource(R.string.profile_inactive))
+                        }
                     }
                 }
-            }
 
-            if (uiState.isHideInactiveCourses && !course.isActive) return@items
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    modifier = Modifier.size(24.dp),
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.appColors.primary,
-                        uncheckedColor = MaterialTheme.appColors.textFieldText
-                    ),
-                    checked = isCourseSyncEnabled,
-                    enabled = course.isActive,
-                    onCheckedChange = { isEnabled ->
-                        onCourseSyncCheckChange(isEnabled, course.courseId)
-                    }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = annotatedString,
-                    style = MaterialTheme.appTypography.labelLarge,
-                    color = MaterialTheme.appColors.textDark
-                )
+                if (uiState.isHideInactiveCourses && !course.isActive) return@items
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        modifier = Modifier.size(24.dp),
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.appColors.primary,
+                            uncheckedColor = MaterialTheme.appColors.textFieldText
+                        ),
+                        checked = isCourseSyncEnabled,
+                        enabled = course.isActive,
+                        onCheckedChange = { isEnabled ->
+                            onCourseSyncCheckChange(isEnabled, course.courseId)
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = annotatedString,
+                        style = MaterialTheme.appTypography.labelLarge,
+                        color = MaterialTheme.appColors.textDark
+                    )
+                }
             }
         }
     }
@@ -324,7 +337,10 @@ private fun HideInactiveCoursesView(
                     modifier = Modifier
                         .padding(0.dp),
                     checked = isHideInactiveCourses,
-                    onCheckedChange = onHideInactiveCoursesSwitchClick
+                    onCheckedChange = onHideInactiveCoursesSwitchClick,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.appColors.textAccent
+                    )
                 )
             }
         }
@@ -346,7 +362,8 @@ private fun CoursesToSyncViewPreview() {
             uiState = CoursesToSyncUIState(
                 enrollmentsStatus = emptyList(),
                 coursesCalendarState = emptyList(),
-                isHideInactiveCourses = true
+                isHideInactiveCourses = true,
+                isLoading = false
             ),
             onHideInactiveCoursesSwitchClick = {},
             onCourseSyncCheckChange = { _, _ -> },

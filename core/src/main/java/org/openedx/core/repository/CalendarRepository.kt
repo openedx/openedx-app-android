@@ -4,6 +4,8 @@ import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CourseCalendarEvent
+import org.openedx.core.domain.model.CourseCalendarState
 import org.openedx.core.domain.model.EnrollmentStatus
 import org.openedx.core.module.db.CalendarDao
 
@@ -20,35 +22,35 @@ class CalendarRepository(
 
     suspend fun getCourseDates(courseId: String) = api.getCourseDates(courseId)
 
-    suspend fun insertCourseCalendarEntity(vararg courseCalendarEntity: CourseCalendarEventEntity) {
+    suspend fun insertCourseCalendarEntityToCache(vararg courseCalendarEntity: CourseCalendarEventEntity) {
         calendarDao.insertCourseCalendarEntity(*courseCalendarEntity)
     }
 
-    suspend fun getCourseCalendarEventsById(courseId: String): List<CourseCalendarEventEntity> {
-        return calendarDao.readCourseCalendarEventsById(courseId)
+    suspend fun getCourseCalendarEventsByIdFromCache(courseId: String): List<CourseCalendarEvent> {
+        return calendarDao.readCourseCalendarEventsById(courseId).map { it.mapToDomain() }
     }
 
-    suspend fun deleteCourseCalendarEntitiesById(courseId: String) {
+    suspend fun deleteCourseCalendarEntitiesByIdFromCache(courseId: String) {
         calendarDao.deleteCourseCalendarEntitiesById(courseId)
     }
 
-    suspend fun insertCourseCalendarStateEntity(vararg courseCalendarStateEntity: CourseCalendarStateEntity) {
+    suspend fun insertCourseCalendarStateEntityToCache(vararg courseCalendarStateEntity: CourseCalendarStateEntity) {
         calendarDao.insertCourseCalendarStateEntity(*courseCalendarStateEntity)
     }
 
-    suspend fun getCourseCalendarStateById(courseId: String): CourseCalendarStateEntity? {
-        return calendarDao.readCourseCalendarStateById(courseId)
+    suspend fun getCourseCalendarStateByIdFromCache(courseId: String): CourseCalendarState? {
+        return calendarDao.readCourseCalendarStateById(courseId)?.mapToDomain()
     }
 
-    suspend fun getAllCourseCalendarState(): List<CourseCalendarStateEntity> {
-        return calendarDao.readAllCourseCalendarState()
+    suspend fun getAllCourseCalendarStateFromCache(): List<CourseCalendarState> {
+        return calendarDao.readAllCourseCalendarState().map { it.mapToDomain() }
     }
 
-    suspend fun updateCourseCalendarStateById(
+    suspend fun updateCourseCalendarStateByIdInCache(
         courseId: String,
         checksum: Int? = null,
         isCourseSyncEnabled: Boolean? = null
     ) {
-        return calendarDao.updateCourseCalendarStateById(courseId, checksum, isCourseSyncEnabled)
+        calendarDao.updateCourseCalendarStateById(courseId, checksum, isCourseSyncEnabled)
     }
 }

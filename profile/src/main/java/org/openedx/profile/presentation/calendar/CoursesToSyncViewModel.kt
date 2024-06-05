@@ -21,7 +21,8 @@ class CoursesToSyncViewModel(
         CoursesToSyncUIState(
             enrollmentsStatus = emptyList(),
             coursesCalendarState = emptyList(),
-            isHideInactiveCourses = calendarPreferences.isHideInactiveCourses
+            isHideInactiveCourses = calendarPreferences.isHideInactiveCourses,
+            isLoading = true
         )
     )
     val uiState: StateFlow<CoursesToSyncUIState>
@@ -39,7 +40,7 @@ class CoursesToSyncViewModel(
 
     fun setCourseSyncEnabled(isEnabled: Boolean, courseId: String) {
         viewModelScope.launch {
-            calendarInteractor.updateCourseCalendarStateById(
+            calendarInteractor.updateCourseCalendarStateByIdInCache(
                 courseId = courseId,
                 isCourseSyncEnabled = isEnabled
             )
@@ -50,7 +51,7 @@ class CoursesToSyncViewModel(
 
     private fun getCourseCalendarState() {
         viewModelScope.launch {
-            val coursesCalendarState = calendarInteractor.getAllCourseCalendarState().map { it.mapToDomain() }
+            val coursesCalendarState = calendarInteractor.getAllCourseCalendarStateFromCache()
             _uiState.update { it.copy(coursesCalendarState = coursesCalendarState) }
         }
     }
@@ -58,7 +59,7 @@ class CoursesToSyncViewModel(
     private fun getEnrollmentsStatus() {
         viewModelScope.launch {
             val enrollmentsStatus = calendarInteractor.getEnrollmentsStatus()
-            _uiState.update { it.copy(enrollmentsStatus = enrollmentsStatus) }
+            _uiState.update { it.copy(enrollmentsStatus = enrollmentsStatus, isLoading = false) }
         }
     }
 }

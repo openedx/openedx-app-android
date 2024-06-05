@@ -22,6 +22,7 @@ import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -63,7 +64,6 @@ fun CalendarSettingsView(
     windowSize: WindowSize,
     uiState: CalendarUIState,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
-    onRelativeDateSwitchClick: (Boolean) -> Unit,
     onChangeSyncOptionClick: () -> Unit,
     onCourseToSyncClick: () -> Unit,
     onBackClick: () -> Unit
@@ -149,11 +149,6 @@ fun CalendarSettingsView(
                             coursesSynced = coursesSynced,
                             onCourseToSyncClick = onCourseToSyncClick
                         )
-                        Spacer(modifier = Modifier.height(32.dp))
-                        OptionsSection(
-                            isRelativeDatesEnabled = uiState.isRelativeDateEnabled,
-                            onRelativeDateSwitchClick = onRelativeDateSwitchClick
-                        )
                     }
                 }
             }
@@ -232,7 +227,10 @@ fun CalendarSyncSection(
                     modifier = Modifier
                         .padding(0.dp),
                     checked = isCourseCalendarSyncEnabled,
-                    onCheckedChange = onCalendarSyncSwitchClick
+                    onCheckedChange = onCalendarSyncSwitchClick,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.appColors.textAccent
+                    )
                 )
             }
         }
@@ -287,42 +285,6 @@ fun CoursesToSyncSection(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun OptionsSection(
-    isRelativeDatesEnabled: Boolean,
-    onRelativeDateSwitchClick: (Boolean) -> Unit
-) {
-    Column {
-        SectionTitle(stringResource(R.string.profile_options))
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                modifier = Modifier.weight(1f),
-                text = stringResource(R.string.profile_use_relative_dates),
-                style = MaterialTheme.appTypography.titleMedium,
-                color = MaterialTheme.appColors.textDark
-            )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentEnforcement provides false) {
-                Switch(
-                    modifier = Modifier
-                        .padding(0.dp),
-                    checked = isRelativeDatesEnabled,
-                    onCheckedChange = onRelativeDateSwitchClick
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.profile_show_relative_dates),
-            style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textPrimaryVariant
-        )
-    }
-}
-
 @Composable
 fun SectionTitle(title: String) {
     Text(
@@ -344,12 +306,10 @@ private fun CalendarSettingsViewPreview() {
                 calendarData = CalendarData("calendar", Color.Red.toArgb()),
                 calendarSyncState = CalendarSyncState.SYNCED,
                 isCalendarSyncEnabled = false,
-                isRelativeDateEnabled = true,
                 coursesSynced = 5
             ),
             onBackClick = {},
             onCalendarSyncSwitchClick = {},
-            onRelativeDateSwitchClick = {},
             onChangeSyncOptionClick = {},
             onCourseToSyncClick = {}
         )

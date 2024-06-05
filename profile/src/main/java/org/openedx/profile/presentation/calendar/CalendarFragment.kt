@@ -21,7 +21,7 @@ class CalendarFragment : Fragment() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted ->
         if (!isGranted.containsValue(false)) {
-            val dialog = NewCalendarDialogFragment.newInstance(DialogType.CREATE_NEW)
+            val dialog = NewCalendarDialogFragment.newInstance(NewCalendarDialogType.CREATE_NEW)
             dialog.show(
                 requireActivity().supportFragmentManager,
                 NewCalendarDialogFragment.DIALOG_TAG
@@ -59,11 +59,8 @@ class CalendarFragment : Fragment() {
                     onCalendarSyncSwitchClick = {
                         viewModel.setCalendarSyncEnabled(it, requireActivity().supportFragmentManager)
                     },
-                    onRelativeDateSwitchClick = {
-                        viewModel.setRelativeDateEnabled(it)
-                    },
                     onChangeSyncOptionClick = {
-                        val dialog = NewCalendarDialogFragment.newInstance(DialogType.UPDATE)
+                        val dialog = NewCalendarDialogFragment.newInstance(NewCalendarDialogType.UPDATE)
                         dialog.show(
                             requireActivity().supportFragmentManager,
                             NewCalendarDialogFragment.DIALOG_TAG
@@ -87,7 +84,6 @@ private fun CalendarView(
     onChangeSyncOptionClick: () -> Unit,
     onCourseToSyncClick: () -> Unit,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
-    onRelativeDateSwitchClick: (Boolean) -> Unit
 ) {
     if (!uiState.isCalendarExist) {
         CalendarSetUpView(
@@ -101,7 +97,6 @@ private fun CalendarView(
             uiState = uiState,
             onBackClick = onBackClick,
             onCalendarSyncSwitchClick = onCalendarSyncSwitchClick,
-            onRelativeDateSwitchClick = onRelativeDateSwitchClick,
             onChangeSyncOptionClick = onChangeSyncOptionClick,
             onCourseToSyncClick = onCourseToSyncClick
         )

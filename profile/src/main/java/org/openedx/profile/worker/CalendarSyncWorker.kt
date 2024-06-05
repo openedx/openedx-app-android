@@ -89,18 +89,18 @@ class CalendarSyncWorker(
                 createEvent(domainCourseDateBlock, enrollmentStatus)
             }
         }
-        calendarInteractor.updateCourseCalendarStateById(
+        calendarInteractor.updateCourseCalendarStateByIdInCache(
             courseId = enrollmentStatus.courseId,
             checksum = getCourseChecksum(courseDates)
         )
     }
 
     private suspend fun removeCalendarEvents(courseId: String) {
-        calendarInteractor.getCourseCalendarEventsById(courseId).forEach {
+        calendarInteractor.getCourseCalendarEventsByIdFromCache(courseId).forEach {
             calendarManager.deleteEvent(it.eventId)
         }
-        calendarInteractor.deleteCourseCalendarEntitiesById(courseId)
-        calendarInteractor.updateCourseCalendarStateById(courseId = courseId, checksum = 0)
+        calendarInteractor.deleteCourseCalendarEntitiesByIdFromCache(courseId)
+        calendarInteractor.updateCourseCalendarStateByIdInCache(courseId = courseId, checksum = 0)
     }
 
     private suspend fun createEvent(courseDateBlock: CourseDateBlock, enrollmentStatus: EnrollmentStatus) {
@@ -114,7 +114,7 @@ class CalendarSyncWorker(
             courseId = enrollmentStatus.courseId,
             eventId = eventId
         )
-        calendarInteractor.insertCourseCalendarEntity(courseCalendarEventEntity)
+        calendarInteractor.insertCourseCalendarEntityToCache(courseCalendarEventEntity)
     }
 
     private suspend fun createCalendarState(enrollmentStatus: EnrollmentStatus) {
@@ -124,7 +124,7 @@ class CalendarSyncWorker(
                 courseId = enrollmentStatus.courseId,
                 isCourseSyncEnabled = enrollmentStatus.isActive
             )
-            calendarInteractor.insertCourseCalendarStateEntity(courseCalendarStateEntity)
+            calendarInteractor.insertCourseCalendarStateEntityToCache(courseCalendarStateEntity)
         }
     }
 
@@ -135,7 +135,7 @@ class CalendarSyncWorker(
     }
 
     private suspend fun isCourseSyncEnabled(courseId: String): Boolean {
-        return calendarInteractor.getCourseCalendarStateById(courseId)?.mapToDomain()?.isCourseSyncEnabled ?: true
+        return calendarInteractor.getCourseCalendarStateByIdFromCache(courseId)?.isCourseSyncEnabled ?: true
     }
 
     private fun getCourseChecksum(courseDates: CourseDates): Int {
@@ -143,7 +143,7 @@ class CalendarSyncWorker(
     }
 
     private suspend fun getCourseCalendarStateChecksum(courseId: String): Int? {
-        return calendarInteractor.getCourseCalendarStateById(courseId)?.mapToDomain()?.checksum
+        return calendarInteractor.getCourseCalendarStateByIdFromCache(courseId)?.checksum
     }
 
     companion object {

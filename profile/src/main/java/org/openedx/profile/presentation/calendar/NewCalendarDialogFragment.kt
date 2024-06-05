@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.core.animateFloatAsState
@@ -61,7 +60,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import kotlinx.parcelize.Parcelize
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.parcelable
 import org.openedx.core.presentation.dialog.DefaultDialogBox
@@ -90,7 +88,8 @@ class NewCalendarDialogFragment : DialogFragment() {
         setContent {
             OpenEdXTheme {
                 NewCalendarDialog(
-                    dialogType = requireArguments().parcelable<DialogType>(ARG_DIALOG_TYPE) ?: DialogType.CREATE_NEW,
+                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(ARG_DIALOG_TYPE)
+                        ?: NewCalendarDialogType.CREATE_NEW,
                     onCancelClick = {
                         dismiss()
                     },
@@ -108,11 +107,11 @@ class NewCalendarDialogFragment : DialogFragment() {
         const val ARG_DIALOG_TYPE = "ARG_DIALOG_TYPE"
 
         fun newInstance(
-            dialogType: DialogType
+            newCalendarDialogType: NewCalendarDialogType
         ): NewCalendarDialogFragment {
             val fragment = NewCalendarDialogFragment()
             fragment.arguments = bundleOf(
-                ARG_DIALOG_TYPE to dialogType
+                ARG_DIALOG_TYPE to newCalendarDialogType
             )
             return fragment
         }
@@ -123,22 +122,17 @@ class NewCalendarDialogFragment : DialogFragment() {
     }
 }
 
-@Parcelize
-enum class DialogType : Parcelable {
-    CREATE_NEW, UPDATE
-}
-
 @Composable
 private fun NewCalendarDialog(
     modifier: Modifier = Modifier,
-    dialogType: DialogType,
+    newCalendarDialogType: NewCalendarDialogType,
     onCancelClick: () -> Unit,
     onBeginSyncingClick: (calendarTitle: String, calendarColor: CalendarColor) -> Unit
 ) {
     val context = LocalContext.current
-    val title = when (dialogType) {
-        DialogType.CREATE_NEW -> stringResource(id = R.string.profile_new_calendar)
-        DialogType.UPDATE -> stringResource(id = R.string.profile_change_sync_options)
+    val title = when (newCalendarDialogType) {
+        NewCalendarDialogType.CREATE_NEW -> stringResource(id = R.string.profile_new_calendar)
+        NewCalendarDialogType.UPDATE -> stringResource(id = R.string.profile_change_sync_options)
     }
     var calendarTitle by rememberSaveable {
         mutableStateOf("")
@@ -409,7 +403,7 @@ private fun ColorCircle(
 private fun NewCalendarDialogPreview() {
     OpenEdXTheme {
         NewCalendarDialog(
-            dialogType = DialogType.CREATE_NEW,
+            newCalendarDialogType = NewCalendarDialogType.CREATE_NEW,
             onCancelClick = { },
             onBeginSyncingClick = { _, _ -> }
         )
