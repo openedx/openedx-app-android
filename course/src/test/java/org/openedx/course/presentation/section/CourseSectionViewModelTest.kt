@@ -27,6 +27,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -69,6 +70,11 @@ class CourseSectionViewModelTest {
     private val somethingWrong = "Something went wrong"
     private val cantDownload = "You can download content only from Wi-fi"
 
+    private val assignmentProgress = AssignmentProgress(
+        assignmentType = "Homework",
+        numPointsEarned = 1f,
+        numPointsPossible = 3f
+    )
 
     private val blocks = listOf(
         Block(
@@ -85,7 +91,9 @@ class CourseSectionViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id1",
@@ -101,7 +109,9 @@ class CourseSectionViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id2",
@@ -117,7 +127,9 @@ class CourseSectionViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         )
     )
 
@@ -142,7 +154,8 @@ class CourseSectionViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     private val downloadModel = DownloadModel(

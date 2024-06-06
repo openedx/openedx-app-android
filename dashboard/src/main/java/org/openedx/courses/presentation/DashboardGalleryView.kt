@@ -55,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -564,7 +565,11 @@ private fun PrimaryCourseCard(
                     },
                     painter = rememberVectorPainter(Icons.Default.Warning),
                     title = title,
-                    info = stringResource(R.string.dashboard_past_due_assignment, pastAssignments.size)
+                    info = pluralStringResource(
+                        R.plurals.dashboard_past_due_assignment,
+                        pastAssignments.size,
+                        pastAssignments.size
+                    )
                 )
             }
             val futureAssignments = primaryCourse.courseAssignments?.futureAssignments
@@ -583,9 +588,9 @@ private fun PrimaryCourseCard(
                     painter = painterResource(id = CoreR.drawable.ic_core_chapter_icon),
                     title = title,
                     info = stringResource(
-                        R.string.dashboard_assignment_due_in_days,
+                        R.string.dashboard_assignment_due,
                         nearestAssignment.assignmentType ?: "",
-                        TimeUtils.getCourseFormattedDate(context, nearestAssignment.date)
+                        TimeUtils.getAssignmentFormattedDate(context, nearestAssignment.date)
                     )
                 )
             }
@@ -769,7 +774,7 @@ private fun NoCoursesInfo(
 private val mockCourseDateBlock = CourseDateBlock(
     title = "Homework 1: ABCD",
     description = "After this date, course content will be archived",
-    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
+    date = TimeUtils.iso8601ToDate("2024-05-31T15:08:07Z")!!,
     assignmentType = "Homework"
 )
 private val mockCourseAssignments =

@@ -169,7 +169,7 @@ class CourseContainerViewModel(
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                val courseStructure = interactor.getCourseStructure(courseId)
+                val courseStructure = interactor.getCourseStructure(courseId, true)
                 courseName = courseStructure.name
                 _organization = courseStructure.org
                 _isSelfPaced = courseStructure.isSelfPaced

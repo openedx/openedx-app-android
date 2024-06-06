@@ -136,6 +136,7 @@ class CourseDatesViewModelTest {
         media = null,
         certificate = null,
         isSelfPaced = true,
+        progress = null
     )
 
     @Before

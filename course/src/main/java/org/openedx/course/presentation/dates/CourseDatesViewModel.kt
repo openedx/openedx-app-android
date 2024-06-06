@@ -77,7 +77,7 @@ class CourseDatesViewModel(
     private var courseBannerType: CourseBannerType = CourseBannerType.BLANK
     private var courseStructure: CourseStructure? = null
 
-    val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseNestedListEnabled
+    val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
     init {
         viewModelScope.launch {

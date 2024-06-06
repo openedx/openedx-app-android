@@ -7,6 +7,7 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.utils.VideoUtil
+import java.util.Date
 
 
 data class Block(
@@ -25,7 +26,9 @@ data class Block(
     val descendantsType: BlockType,
     val completion: Double,
     val containsGatedContent: Boolean = false,
-    val downloadModel: DownloadModel? = null
+    val downloadModel: DownloadModel? = null,
+    val assignmentProgress: AssignmentProgress?,
+    val due: Date?
 ) {
     val isDownloadable: Boolean
         get() {
