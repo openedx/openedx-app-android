@@ -20,5 +20,5 @@ interface DashboardRouter {
 
     fun navigateToAllEnrolledCourses(fm: FragmentManager)
 
-    fun getProgramFragmentInstance(): Fragment
+    fun getProgramFragment(): Fragment
 }

@@ -128,8 +128,8 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
     }
 
-    override fun getProgramFragmentInstance(): Fragment {
-        return ProgramFragment(myPrograms = true, isNestedFragment = true)
+    override fun getProgramFragment(): Fragment {
+        return ProgramFragment.newInstance(isNestedFragment = true)
     }
 
     override fun navigateToCourseInfo(
@@ -144,7 +144,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        enrollmentMode: String
+        enrollmentMode: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -161,21 +161,30 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseTitle: String,
         enrollmentMode: String,
         openTab: String,
-        resumeBlockId: String
+        resumeBlockId: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode, openTab, resumeBlockId)
+            CourseContainerFragment.newInstance(
+                courseId,
+                courseTitle,
+                enrollmentMode,
+                openTab,
+                resumeBlockId
+            )
         )
     }
 
     override fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String) {
-        replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
+        replaceFragmentWithBackStack(
+            fm,
+            ProgramFragment.newInstance(pathId = pathId, isNestedFragment = false)
+        )
     }
 
     override fun navigateToNoAccess(
         fm: FragmentManager,
-        title: String
+        title: String,
     ) {
         replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title))
     }
@@ -189,7 +198,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         subSectionId: String,
         unitId: String,
         componentId: String,
-        mode: CourseViewMode
+        mode: CourseViewMode,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -208,7 +217,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         unitId: String,
         componentId: String,
-        mode: CourseViewMode
+        mode: CourseViewMode,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -226,7 +235,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         unitId: String,
         componentId: String,
-        mode: CourseViewMode
+        mode: CourseViewMode,
     ) {
         replaceFragment(
             fm,
@@ -246,7 +255,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoTime: Long,
         blockId: String,
         courseId: String,
-        isPlaying: Boolean
+        isPlaying: Boolean,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -260,7 +269,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoTime: Long,
         blockId: String,
         courseId: String,
-        isPlaying: Boolean
+        isPlaying: Boolean,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -278,7 +287,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         title: String,
-        type: HandoutsType
+        type: HandoutsType,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -294,7 +303,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         topicId: String,
         title: String,
-        viewType: FragmentViewType
+        viewType: FragmentViewType,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -312,7 +321,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToDiscussionResponses(
         fm: FragmentManager,
         comment: DiscussionComment,
-        isClosed: Boolean
+        isClosed: Boolean,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -340,7 +349,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToAnothersProfile(
         fm: FragmentManager,
-        username: String
+        username: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -410,7 +419,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     private fun replaceFragment(
         fm: FragmentManager,
         fragment: Fragment,
-        transaction: Int = FragmentTransaction.TRANSIT_NONE
+        transaction: Int = FragmentTransaction.TRANSIT_NONE,
     ) {
         fm.beginTransaction()
             .setTransition(transaction)

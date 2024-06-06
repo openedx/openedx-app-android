@@ -14,6 +14,8 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
+import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.discovery.presentation.DiscoveryNavigator
 
 class MainViewModel(
     private val config: Config,
@@ -30,7 +32,7 @@ class MainViewModel(
         get() = _navigateToDiscovery.asSharedFlow()
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
-    val dashboardType get() = config.getDashboardConfig().getType()
+    val getDiscoveryFragment get() = DiscoveryNavigator(isDiscoveryTypeWebView).getDiscoveryFragment()
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
