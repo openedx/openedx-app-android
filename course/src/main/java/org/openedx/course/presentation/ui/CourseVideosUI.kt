@@ -125,20 +125,11 @@ fun CourseVideosScreen(
             }
         },
         onDownloadClick = { blocksIds ->
-            blocksIds.forEach { blockId ->
-                if (viewModel.isBlockDownloading(blockId)) {
-                    viewModel.courseRouter.navigateToDownloadQueue(
-                        fm = fragmentManager,
-                        viewModel.getDownloadableChildren(blockId) ?: arrayListOf()
-                    )
-                } else if (viewModel.isBlockDownloaded(blockId)) {
-                    viewModel.removeDownloadModels(blockId)
-                } else {
-                    viewModel.saveDownloadModels(
-                        FileUtil(context).getExternalAppDir().path, blockId
-                    )
-                }
-            }
+            viewModel.downloadBlocks(
+                blocksIds = blocksIds,
+                fragmentManager = fragmentManager,
+                context = context
+            )
         },
         onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
             viewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)

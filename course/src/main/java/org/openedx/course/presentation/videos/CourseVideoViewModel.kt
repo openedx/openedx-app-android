@@ -1,5 +1,7 @@
 package org.openedx.course.presentation.videos
 
+import android.content.Context
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -209,5 +212,22 @@ class CourseVideoViewModel(
             }
         }
         return resultBlocks.toList()
+    }
+
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
+        blocksIds.forEach { blockId ->
+            if (isBlockDownloading(blockId)) {
+                courseRouter.navigateToDownloadQueue(
+                    fm = fragmentManager,
+                    getDownloadableChildren(blockId) ?: arrayListOf()
+                )
+            } else if (isBlockDownloaded(blockId)) {
+                removeDownloadModels(blockId)
+            } else {
+                saveDownloadModels(
+                    FileUtil(context).getExternalAppDir().path, blockId
+                )
+            }
+        }
     }
 }
