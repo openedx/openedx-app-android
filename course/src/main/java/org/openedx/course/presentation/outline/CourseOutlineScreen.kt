@@ -2,7 +2,6 @@ package org.openedx.course.presentation.outline
 
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,9 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -33,9 +32,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.AndroidUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -45,11 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
@@ -66,10 +69,8 @@ import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
-import org.openedx.course.presentation.ui.CourseExpandableChapterCard
 import org.openedx.course.presentation.ui.CourseMessage
-import org.openedx.course.presentation.ui.CourseSectionCard
-import org.openedx.course.presentation.ui.CourseSubSectionItem
+import org.openedx.course.presentation.ui.CourseSection
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -94,20 +95,7 @@ fun CourseOutlineScreen(
     CourseOutlineUI(
         windowSize = windowSize,
         uiState = uiState,
-        isCourseNestedListEnabled = viewModel.isCourseNestedListEnabled,
         uiMessage = uiMessage,
-        onItemClick = { block ->
-            viewModel.sequentialClickedEvent(
-                block.blockId,
-                block.displayName
-            )
-            viewModel.courseRouter.navigateToCourseSubsections(
-                fm = fragmentManager,
-                courseId = viewModel.courseId,
-                subSectionId = block.id,
-                mode = CourseViewMode.FULL
-            )
-        },
         onExpandClick = { block ->
             if (viewModel.switchCourseSections(block.id)) {
                 viewModel.sequentialClickedEvent(
@@ -117,15 +105,28 @@ fun CourseOutlineScreen(
             }
         },
         onSubSectionClick = { subSectionBlock ->
-            viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                viewModel.logUnitDetailViewedEvent(
-                    unit.blockId,
-                    unit.displayName
+            if (viewModel.isCourseNestedListEnabled) {
+                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    viewModel.logUnitDetailViewedEvent(
+                        unit.blockId,
+                        unit.displayName
+                    )
+                    viewModel.courseRouter.navigateToCourseContainer(
+                        fragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = unit.id,
+                        mode = CourseViewMode.FULL
+                    )
+                }
+            } else {
+                viewModel.sequentialClickedEvent(
+                    subSectionBlock.blockId,
+                    subSectionBlock.displayName
                 )
-                viewModel.courseRouter.navigateToCourseContainer(
-                    fragmentManager,
+                viewModel.courseRouter.navigateToCourseSubsections(
+                    fm = fragmentManager,
                     courseId = viewModel.courseId,
-                    unitId = unit.id,
+                    subSectionId = subSectionBlock.id,
                     mode = CourseViewMode.FULL
                 )
             }
@@ -136,19 +137,21 @@ fun CourseOutlineScreen(
                 componentId
             )
         },
-        onDownloadClick = {
-            if (viewModel.isBlockDownloading(it.id)) {
-                viewModel.courseRouter.navigateToDownloadQueue(
-                    fm = fragmentManager,
-                    viewModel.getDownloadableChildren(it.id)
-                        ?: arrayListOf()
-                )
-            } else if (viewModel.isBlockDownloaded(it.id)) {
-                viewModel.removeDownloadModels(it.id)
-            } else {
-                viewModel.saveDownloadModels(
-                    FileUtil(context).getExternalAppDir().path, it.id
-                )
+        onDownloadClick = { blocksIds ->
+            blocksIds.forEach { blockId ->
+                if (viewModel.isBlockDownloading(blockId)) {
+                    viewModel.courseRouter.navigateToDownloadQueue(
+                        fm = fragmentManager,
+                        viewModel.getDownloadableChildren(blockId)
+                            ?: arrayListOf()
+                    )
+                } else if (viewModel.isBlockDownloaded(blockId)) {
+                    viewModel.removeDownloadModels(blockId)
+                } else {
+                    viewModel.saveDownloadModels(
+                        FileUtil(context).getExternalAppDir().path, blockId
+                    )
+                }
             }
         },
         onResetDatesClick = {
@@ -170,13 +173,11 @@ fun CourseOutlineScreen(
 private fun CourseOutlineUI(
     windowSize: WindowSize,
     uiState: CourseOutlineUIState,
-    isCourseNestedListEnabled: Boolean,
     uiMessage: UIMessage?,
-    onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onResumeClick: (String) -> Unit,
-    onDownloadClick: (Block) -> Unit,
+    onDownloadClick: (blockIds: List<String>) -> Unit,
     onResetDatesClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
 ) {
@@ -278,6 +279,19 @@ private fun CourseOutlineUI(
                                     }
                                 }
 
+
+                                val progress = uiState.courseStructure.progress
+                                if (progress != null && progress.totalAssignmentsCount > 0) {
+                                    item {
+                                        CourseProgress(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 16.dp, start = 24.dp, end = 24.dp),
+                                            progress = progress
+                                        )
+                                    }
+                                }
+
                                 if (uiState.resumeComponent != null) {
                                     item {
                                         Box(listPadding) {
@@ -298,75 +312,26 @@ private fun CourseOutlineUI(
                                     }
                                 }
 
-                                if (isCourseNestedListEnabled) {
-                                    uiState.courseStructure.blockData.forEach { section ->
-                                        val courseSubSections =
-                                            uiState.courseSubSections[section.id]
-                                        val courseSectionsState =
-                                            uiState.courseSectionsState[section.id]
-
-                                        item {
-                                            Column {
-                                                CourseExpandableChapterCard(
-                                                    modifier = listPadding,
-                                                    block = section,
-                                                    onItemClick = onExpandClick,
-                                                    arrowDegrees = if (courseSectionsState == true) -90f else 90f
-                                                )
-                                                Divider()
-                                            }
-                                        }
-
-                                        courseSubSections?.forEach { subSectionBlock ->
-                                            item {
-                                                Column {
-                                                    AnimatedVisibility(
-                                                        visible = courseSectionsState == true
-                                                    ) {
-                                                        Column {
-                                                            val downloadsCount =
-                                                                uiState.subSectionsDownloadsCount[subSectionBlock.id]
-                                                                    ?: 0
-
-                                                            CourseSubSectionItem(
-                                                                modifier = listPadding,
-                                                                block = subSectionBlock,
-                                                                downloadedState = uiState.downloadedState[subSectionBlock.id],
-                                                                downloadsCount = downloadsCount,
-                                                                onClick = onSubSectionClick,
-                                                                onDownloadClick = onDownloadClick
-                                                            )
-                                                            Divider()
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    return@LazyColumn
+                                item {
+                                    Spacer(modifier = Modifier.height(12.dp))
                                 }
+                                uiState.courseStructure.blockData.forEach { section ->
+                                    val courseSubSections =
+                                        uiState.courseSubSections[section.id]
+                                    val courseSectionsState =
+                                        uiState.courseSectionsState[section.id]
 
-                                items(uiState.courseStructure.blockData) { block ->
-                                    Column(listPadding) {
-                                        if (block.type == BlockType.CHAPTER) {
-                                            Text(
-                                                modifier = Modifier.padding(
-                                                    top = 36.dp,
-                                                    bottom = 8.dp
-                                                ),
-                                                text = block.displayName,
-                                                style = MaterialTheme.appTypography.titleMedium,
-                                                color = MaterialTheme.appColors.textPrimaryVariant
-                                            )
-                                        } else {
-                                            CourseSectionCard(
-                                                block = block,
-                                                downloadedState = uiState.downloadedState[block.id],
-                                                onItemClick = onItemClick,
-                                                onDownloadClick = onDownloadClick
-                                            )
-                                            Divider()
-                                        }
+                                    item {
+                                        CourseSection(
+                                            modifier = listPadding.padding(vertical = 4.dp),
+                                            block = section,
+                                            onItemClick = onExpandClick,
+                                            courseSectionsState = courseSectionsState,
+                                            courseSubSections = courseSubSections,
+                                            downloadedStateMap = uiState.downloadedState,
+                                            onSubSectionClick = onSubSectionClick,
+                                            onDownloadClick = onDownloadClick
+                                        )
                                     }
                                 }
                             }
@@ -490,6 +455,37 @@ private fun ResumeCourseTablet(
     }
 }
 
+@Composable
+private fun CourseProgress(
+    modifier: Modifier = Modifier,
+    progress: Progress
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(10.dp)
+                .clip(CircleShape),
+            progress = progress.value,
+            color = MaterialTheme.appColors.progressBarColor,
+            backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
+        )
+        Text(
+            text = pluralStringResource(
+                R.plurals.course_assignments_complete,
+                progress.assignmentsCompleted,
+                progress.assignmentsCompleted,
+                progress.totalAssignmentsCount
+            ),
+            color = MaterialTheme.appColors.textDark,
+            style = MaterialTheme.appTypography.labelSmall
+        )
+    }
+}
+
 fun getUnitBlockIcon(block: Block): Int {
     return when (block.type) {
         BlockType.VIDEO -> R.drawable.ic_course_video
@@ -521,9 +517,7 @@ private fun CourseOutlineScreenPreview() {
                     hasEnded = false
                 )
             ),
-            isCourseNestedListEnabled = true,
             uiMessage = null,
-            onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
@@ -556,9 +550,7 @@ private fun CourseOutlineScreenTabletPreview() {
                     hasEnded = false
                 )
             ),
-            isCourseNestedListEnabled = true,
             uiMessage = null,
-            onItemClick = {},
             onExpandClick = {},
             onSubSectionClick = {},
             onResumeClick = {},
@@ -578,6 +570,11 @@ private fun ResumeCoursePreview() {
     }
 }
 
+private val mockAssignmentProgress = AssignmentProgress(
+    assignmentType = "Home",
+    numPointsEarned = 1f,
+    numPointsPossible = 3f
+)
 private val mockChapterBlock = Block(
     id = "id",
     blockId = "blockId",
@@ -593,7 +590,9 @@ private val mockChapterBlock = Block(
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
     completion = 0.0,
-    containsGatedContent = false
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date()
 )
 private val mockSequentialBlock = Block(
     id = "id",
@@ -610,7 +609,9 @@ private val mockSequentialBlock = Block(
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
     completion = 0.0,
-    containsGatedContent = false
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date()
 )
 
 private val mockCourseStructure = CourseStructure(
@@ -634,5 +635,6 @@ private val mockCourseStructure = CourseStructure(
     ),
     media = null,
     certificate = null,
-    isSelfPaced = false
+    isSelfPaced = false,
+    progress = Progress(1, 3)
 )

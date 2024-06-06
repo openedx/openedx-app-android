@@ -32,6 +32,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -78,6 +79,12 @@ class CourseVideoViewModelTest {
 
     private val cantDownload = "You can download content only from Wi-fi"
 
+    private val assignmentProgress = AssignmentProgress(
+        assignmentType = "Homework",
+        numPointsEarned = 1f,
+        numPointsPossible = 3f
+    )
+
     private val blocks = listOf(
         Block(
             id = "id",
@@ -93,7 +100,9 @@ class CourseVideoViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id1",
@@ -109,7 +118,9 @@ class CourseVideoViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id2",
@@ -125,7 +136,9 @@ class CourseVideoViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         )
     )
 
@@ -150,7 +163,8 @@ class CourseVideoViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     private val downloadModelEntity =
@@ -183,7 +197,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos empty list`() = runTest {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns
                 courseStructure.copy(blockData = emptyList())
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
@@ -215,7 +229,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos success`() = runTest {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { preferencesManager.videoSettings } returns VideoSettings.default
@@ -248,7 +262,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { courseNotifier.notifier } returns flow {
             emit(CourseStructureUpdated(""))
@@ -291,7 +305,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `setIsUpdating success`() = runTest {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
@@ -300,7 +314,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
@@ -337,7 +351,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
@@ -378,7 +392,7 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",

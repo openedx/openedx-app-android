@@ -61,6 +61,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.extension.serializable
@@ -78,10 +79,13 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
+import java.io.File
+import java.util.Date
 import org.openedx.core.R as CoreR
 
 class CourseSectionFragment : Fragment() {
@@ -476,5 +480,7 @@ private val mockBlock = Block(
     descendants = emptyList(),
     descendantsType = BlockType.HTML,
     completion = 0.0,
-    containsGatedContent = false
+    containsGatedContent = false,
+    assignmentProgress = AssignmentProgress("", 1f, 2f),
+    due = Date()
 )

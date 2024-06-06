@@ -33,6 +33,7 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.DateType
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseComponentStatus
@@ -84,6 +85,12 @@ class CourseOutlineViewModelTest {
     private val somethingWrong = "Something went wrong"
     private val cantDownload = "You can download content only from Wi-fi"
 
+    private val assignmentProgress = AssignmentProgress(
+        assignmentType = "Homework",
+        numPointsEarned = 1f,
+        numPointsPossible = 3f
+    )
+
     private val blocks = listOf(
         Block(
             id = "id",
@@ -99,7 +106,9 @@ class CourseOutlineViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id1",
@@ -115,7 +124,9 @@ class CourseOutlineViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id2",
@@ -131,7 +142,9 @@ class CourseOutlineViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         )
     )
 
@@ -156,7 +169,8 @@ class CourseOutlineViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     private val dateBlock = CourseDateBlock(
@@ -303,7 +317,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -351,7 +365,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -398,7 +412,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -482,7 +496,7 @@ class CourseOutlineViewModelTest {
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -525,7 +539,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         val viewModel = CourseOutlineViewModel(
@@ -562,7 +576,7 @@ class CourseOutlineViewModelTest {
         every { networkConnection.isOnline() } returns false
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.getCourseUIConfig().isCourseNestedListEnabled } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",

@@ -20,6 +20,7 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
@@ -44,6 +45,12 @@ class CourseUnitContainerViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
 
+    private val assignmentProgress = AssignmentProgress(
+        assignmentType = "Homework",
+        numPointsEarned = 1f,
+        numPointsPossible = 3f
+    )
+
     private val blocks = listOf(
         Block(
             id = "id",
@@ -59,7 +66,9 @@ class CourseUnitContainerViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2", "id1"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id1",
@@ -75,7 +84,9 @@ class CourseUnitContainerViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2", "id"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id2",
@@ -91,7 +102,9 @@ class CourseUnitContainerViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         ),
         Block(
             id = "id3",
@@ -107,7 +120,9 @@ class CourseUnitContainerViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date()
         )
 
     )
@@ -133,7 +148,8 @@ class CourseUnitContainerViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     @Before

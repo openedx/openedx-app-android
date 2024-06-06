@@ -62,5 +62,15 @@
     <string name="course_delete_while_downloading_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
     <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
     <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
+    <string name="course_subsection_assignment_info" translatable="false">%1$s - %2$s - %3$d / %4$d</string>
+
+    <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
+        <item quantity="zero">%1$s of %2$s  assignments complete</item>
+        <item quantity="one">%1$s of %2$s  assignment complete</item>
+        <item quantity="two">%1$s of %2$s  assignments complete</item>
+        <item quantity="few">%1$s of %2$s  assignments complete</item>
+        <item quantity="many">%1$s of %2$s  assignments complete</item>
+        <item quantity="other">%1$s of %2$s  assignments complete</item>
+    </plurals>
 
 </resources>

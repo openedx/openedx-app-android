@@ -68,7 +68,7 @@ private val DarkColorPalette = AppColors(
     inactiveButtonBackground = dark_inactive_button_background,
     inactiveButtonText = dark_primary_button_text,
 
-    accessGreen = dark_access_green,
+    successGreen = dark_success_green,
 
     datesSectionBarPastDue = dark_dates_section_bar_past_due,
     datesSectionBarToday = dark_dates_section_bar_today,
@@ -91,7 +91,10 @@ private val DarkColorPalette = AppColors(
     courseHomeHeaderShade = dark_course_home_header_shade,
     courseHomeBackBtnBackground = dark_course_home_back_btn_background,
 
-    settingsTitleContent = dark_settings_title_content
+    settingsTitleContent = dark_settings_title_content,
+
+    progressBarColor = dark_progress_bar_color,
+    progressBarBackgroundColor = dark_progress_bar_background_color
 )
 
 private val LightColorPalette = AppColors(
@@ -152,7 +155,7 @@ private val LightColorPalette = AppColors(
     inactiveButtonBackground = light_inactive_button_background,
     inactiveButtonText = light_primary_button_text,
 
-    accessGreen = light_access_green,
+    successGreen = light_success_green,
 
     datesSectionBarPastDue = light_dates_section_bar_past_due,
     datesSectionBarToday = light_dates_section_bar_today,
@@ -175,7 +178,10 @@ private val LightColorPalette = AppColors(
     courseHomeHeaderShade = light_course_home_header_shade,
     courseHomeBackBtnBackground = light_course_home_back_btn_background,
 
-    settingsTitleContent = light_settings_title_content
+    settingsTitleContent = light_settings_title_content,
+
+    progressBarColor = light_progress_bar_color,
+    progressBarBackgroundColor = light_progress_bar_background_color
 )
 
 val MaterialTheme.appColors: AppColors
