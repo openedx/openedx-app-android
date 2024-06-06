@@ -1,10 +1,21 @@
-package org.openedx.profile.worker
+package org.openedx.core.service
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Context
-import androidx.work.CoroutineWorker
-import androidx.work.WorkerParameters
+import android.content.Intent
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+import android.os.Build
+import android.os.IBinder
+import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.openedx.core.R
 import org.openedx.core.data.model.CourseDates
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
@@ -12,44 +23,71 @@ import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.EnrollmentStatus
-import org.openedx.profile.system.CalendarManager
-import org.openedx.profile.system.notifier.CalendarNotifier
-import org.openedx.profile.system.notifier.CalendarSyncFailed
-import org.openedx.profile.system.notifier.CalendarSynced
-import org.openedx.profile.system.notifier.CalendarSyncing
+import org.openedx.core.system.CalendarManager
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
+import org.openedx.core.system.notifier.calendar.CalendarSyncFailed
+import org.openedx.core.system.notifier.calendar.CalendarSynced
+import org.openedx.core.system.notifier.calendar.CalendarSyncing
 
-class CalendarSyncWorker(
-    context: Context,
-    workerParams: WorkerParameters
-) : CoroutineWorker(context, workerParams), KoinComponent {
+class CalendarSyncForegroundService : Service(), KoinComponent {
 
     private val calendarManager: CalendarManager by inject()
     private val calendarInteractor: CalendarInteractor by inject()
     private val calendarNotifier: CalendarNotifier by inject()
     private val calendarPreferences: CalendarPreferences by inject()
 
-    override suspend fun doWork(): Result {
-        return try {
-            val courseId = inputData.getString(ARG_COURSE_ID)
-            tryToSyncCalendar(courseId)
-            Result.success()
-        } catch (e: Exception) {
-            calendarNotifier.send(CalendarSyncFailed)
-            Result.failure()
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            startForeground(NOTIFICATION_ID, createNotification())
+        } else {
+            startForeground(NOTIFICATION_ID, createNotification(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         }
+        val courseId = intent?.getStringExtra(ARG_COURSE_ID)
+        CoroutineScope(Dispatchers.Main).launch {
+            tryToSyncCalendar(courseId)
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+        }
+        return START_NOT_STICKY
+    }
+
+    private fun createNotification(): Notification {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANEL_ID,
+                getString(R.string.core_calendar_notification_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        return NotificationCompat.Builder(this, NOTIFICATION_CHANEL_ID)
+            .setSmallIcon(R.drawable.core_ic_calendar)
+            .setContentTitle(getString(R.string.core_calendar_notification_channel_name))
+            .setContentText(getString(R.string.core_title_syncing_calendar))
+            .build()
     }
 
     private suspend fun tryToSyncCalendar(courseId: String?) {
-        val isCalendarCreated = calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
-        val isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled
-        if (isCalendarCreated && isCalendarSyncEnabled) {
-            calendarNotifier.send(CalendarSyncing)
-            if (courseId.isNullOrEmpty()) {
-                syncCalendar()
-            } else {
-                syncCalendar(courseId)
+        try {
+            val isCalendarCreated = calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
+            val isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled
+            if (isCalendarCreated && isCalendarSyncEnabled) {
+                calendarNotifier.send(CalendarSyncing)
+                if (courseId.isNullOrEmpty()) {
+                    syncCalendar()
+                } else {
+                    syncCalendar(courseId)
+                }
+                calendarNotifier.send(CalendarSynced)
             }
-            calendarNotifier.send(CalendarSynced)
+        } catch (e: Exception) {
+            calendarNotifier.send(CalendarSyncFailed)
         }
     }
 
@@ -147,7 +185,8 @@ class CalendarSyncWorker(
     }
 
     companion object {
+        const val NOTIFICATION_ID = 1234
         const val ARG_COURSE_ID = "ARG_COURSE_ID"
-        const val WORKER_TAG = "calendar_sync_worker_tag"
+        const val NOTIFICATION_CHANEL_ID = "calendar_sync_channel"
     }
 }

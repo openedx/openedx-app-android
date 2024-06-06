@@ -46,7 +46,7 @@ class AppViewModel(
             notifier.notifier.collect { event ->
                 if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
                     logoutHandledAt = System.currentTimeMillis()
-                    preferencesManager.clear()
+                    preferencesManager.clearCorePreferences()
                     withContext(dispatcher) {
                         room.clearAllTables()
                     }

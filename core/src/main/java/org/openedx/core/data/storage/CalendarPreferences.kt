@@ -4,4 +4,6 @@ interface CalendarPreferences {
     var calendarId: Long
     var isCalendarSyncEnabled: Boolean
     var isHideInactiveCourses: Boolean
+
+    fun clearCalendarPreferences()
 }

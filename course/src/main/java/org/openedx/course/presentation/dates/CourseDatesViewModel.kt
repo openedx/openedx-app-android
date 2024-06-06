@@ -11,7 +11,6 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
-import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseBannerType
 import org.openedx.core.domain.model.CourseDateBlock
@@ -35,12 +34,10 @@ import org.openedx.core.R as CoreR
 
 class CourseDatesViewModel(
     val courseId: String,
-    courseTitle: String,
     private val enrollmentMode: String,
     private val courseNotifier: CourseNotifier,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
-    private val corePreferences: CorePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val config: Config,
     val courseRouter: CourseRouter
@@ -136,21 +133,6 @@ class CourseDatesViewModel(
         }
     }
 
-    private fun setCalendarSyncDialogType(dialog: CalendarSyncDialogType) {
-        val value = _uiState.value
-        if (value is DatesUIState.Dates) {
-            viewModelScope.launch {
-                courseNotifier.send(
-                    CreateCalendarSyncEvent(
-                        courseDates = value.courseDatesResult.datesSection.values.flatten(),
-                        dialogType = dialog.name,
-                        checkOutOfSync = false,
-                    )
-                )
-            }
-        }
-    }
-
     private fun checkIfCalendarOutOfDate() {
         val value = _uiState.value
         if (value is DatesUIState.Dates) {
@@ -164,12 +146,6 @@ class CourseDatesViewModel(
                 )
             }
         }
-    }
-
-    private fun isCalendarSyncEnabled(): Boolean {
-        val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
-                (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
     }
 
     fun logPlsBannerViewed() {
@@ -193,18 +169,6 @@ class CourseDatesViewModel(
         }
 
         logDatesEvent(CourseAnalyticsEvent.DATES_COURSE_COMPONENT_CLICKED, params)
-    }
-
-    private fun logCalendarSyncToggle(isChecked: Boolean) {
-        logDatesEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_TOGGLE,
-            buildMap {
-                put(
-                    CourseAnalyticsKey.ACTION.key,
-                    if (isChecked) CourseAnalyticsKey.ON.key else CourseAnalyticsKey.OFF.key
-                )
-            }
-        )
     }
 
     private fun logDatesEvent(

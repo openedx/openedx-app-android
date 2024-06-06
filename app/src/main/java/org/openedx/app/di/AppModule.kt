@@ -41,6 +41,7 @@ import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.system.AppCookieManager
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.AppUpgradeNotifier
@@ -48,7 +49,9 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.utils.FileUtil
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
@@ -62,10 +65,7 @@ import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.CalendarManager
-import org.openedx.profile.system.notifier.CalendarNotifier
-import org.openedx.profile.system.notifier.ProfileNotifier
-import org.openedx.profile.worker.CalendarSyncScheduler
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences

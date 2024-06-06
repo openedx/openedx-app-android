@@ -20,6 +20,9 @@ interface CalendarDao {
     @Query("SELECT * FROM course_calendar_event_table WHERE course_id=:courseId")
     suspend fun readCourseCalendarEventsById(courseId: String): List<CourseCalendarEventEntity>
 
+    @Query("DELETE FROM course_calendar_event_table")
+    suspend fun clearCourseCalendarEventsCachedData()
+
     // region CourseCalendarStateEntity
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCourseCalendarStateEntity(vararg courseCalendarStateEntity: CourseCalendarStateEntity)
@@ -29,6 +32,12 @@ interface CalendarDao {
 
     @Query("SELECT * FROM course_calendar_state_table")
     suspend fun readAllCourseCalendarState(): List<CourseCalendarStateEntity>
+
+    @Query("DELETE FROM course_calendar_state_table")
+    suspend fun clearCourseCalendarStateCachedData()
+
+    @Query("UPDATE course_calendar_state_table SET checksum = 0")
+    suspend fun resetChecksums()
 
     @Query(
         """

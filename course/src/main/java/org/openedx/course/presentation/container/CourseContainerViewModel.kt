@@ -3,7 +3,6 @@ package org.openedx.course.presentation.container
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
-import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -37,11 +36,10 @@ import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.core.system.notifier.RefreshDiscussions
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.DatesShiftedSnackBar
-import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CalendarSyncDialog
-import org.openedx.course.presentation.CalendarSyncSnackbar
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
@@ -61,9 +59,9 @@ class CourseContainerViewModel(
     private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
-    private val coursePreferences: CoursePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val imageProcessor: ImageProcessor,
+    private val calendarSyncScheduler: CalendarSyncScheduler,
     val courseRouter: CourseRouter,
 ) : BaseViewModel() {
 
@@ -137,6 +135,7 @@ class CourseContainerViewModel(
                     }
 
                     is CourseDatesShifted -> {
+                        calendarSyncScheduler.requestImmediateSync(courseId)
                         _uiMessage.emit(DatesShiftedSnackBar())
                     }
 
@@ -269,12 +268,6 @@ class CourseContainerViewModel(
         }
     }
 
-    private fun setUiMessage(@StringRes stringResId: Int) {
-        _calendarSyncUIState.update {
-            it.copy(uiMessage = AtomicReference(resourceManager.getString(stringResId)))
-        }
-    }
-
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
         return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
@@ -320,41 +313,6 @@ class CourseContainerViewModel(
         logCalendarSyncEvent(
             CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
             CalendarSyncDialog.PERMISSION.getBuildMap(isAllowed)
-        )
-    }
-
-    fun logCalendarAddDates(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.ADD.getBuildMap(action)
-        )
-    }
-
-    fun logCalendarRemoveDates(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.REMOVE.getBuildMap(action)
-        )
-    }
-
-    fun logCalendarSyncedConfirmation(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.CONFIRMED.getBuildMap(action)
-        )
-    }
-
-    fun logCalendarSyncUpdate(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.UPDATE.getBuildMap(action)
-        )
-    }
-
-    private fun logCalendarSyncSnackbar(snackbar: CalendarSyncSnackbar) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_SNACKBAR,
-            snackbar.getBuildMap()
         )
     }
 

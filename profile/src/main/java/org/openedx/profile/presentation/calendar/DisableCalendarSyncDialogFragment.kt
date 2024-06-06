@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -94,6 +96,7 @@ private fun DisableCalendarSyncDialogView(
     onCancelClick: () -> Unit,
     onDisableSyncingClick: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     DefaultDialogBox(
         modifier = modifier,
         onDismissClick = onCancelClick
@@ -101,6 +104,7 @@ private fun DisableCalendarSyncDialogView(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(scrollState)
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -148,11 +152,13 @@ private fun DisableCalendarSyncDialogView(
             }
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = org.openedx.profile.R.string.profile_disable_calendar_dialog_description),
+                text = stringResource(
+                    id = org.openedx.profile.R.string.profile_disable_calendar_dialog_description,
+                    calendarData?.title ?: ""
+                ),
                 style = MaterialTheme.appTypography.bodyMedium,
                 color = MaterialTheme.appColors.textDark
             )
-
             OpenEdXOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.profile_disable_syncing),

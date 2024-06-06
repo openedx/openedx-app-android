@@ -1,5 +1,9 @@
 package org.openedx.core.repository
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
@@ -44,6 +48,19 @@ class CalendarRepository(
 
     suspend fun getAllCourseCalendarStateFromCache(): List<CourseCalendarState> {
         return calendarDao.readAllCourseCalendarState().map { it.mapToDomain() }
+    }
+
+    suspend fun resetChecksums() {
+        calendarDao.resetChecksums()
+    }
+
+    suspend fun clearCalendarCachedData() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val clearCourseCalendarStateDeferred = async { calendarDao.clearCourseCalendarStateCachedData() }
+            val clearCourseCalendarEventsDeferred = async { calendarDao.clearCourseCalendarEventsCachedData() }
+            clearCourseCalendarStateDeferred.await()
+            clearCourseCalendarEventsDeferred.await()
+        }
     }
 
     suspend fun updateCourseCalendarStateByIdInCache(

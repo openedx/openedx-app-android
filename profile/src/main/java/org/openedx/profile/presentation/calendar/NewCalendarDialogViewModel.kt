@@ -1,38 +1,40 @@
 package org.openedx.profile.presentation.calendar
 
-import android.content.Context
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
-import org.openedx.core.extension.toastMessage
-import org.openedx.profile.system.CalendarManager
-import org.openedx.profile.system.notifier.CalendarCreated
-import org.openedx.profile.system.notifier.CalendarNotifier
-import org.openedx.core.R as coreR
+import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.system.CalendarManager
+import org.openedx.core.system.notifier.calendar.CalendarCreated
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
 
 class NewCalendarDialogViewModel(
     private val calendarManager: CalendarManager,
     private val calendarPreferences: CalendarPreferences,
-    private val calendarNotifier: CalendarNotifier
+    private val calendarNotifier: CalendarNotifier,
+    private val calendarInteractor: CalendarInteractor
 ) : BaseViewModel() {
 
     fun createCalendar(
-        context: Context,
         calendarTitle: String,
         calendarColor: CalendarColor,
-    ) {
+    ): Boolean {
+        viewModelScope.launch {
+            calendarInteractor.resetChecksums()
+        }
         val calendarId = calendarManager.createOrUpdateCalendar(
             calendarTitle = calendarTitle,
             calendarColor = calendarColor.color
         )
-        if (calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
+        return if (calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
             calendarPreferences.calendarId = calendarId
             viewModelScope.launch {
                 calendarNotifier.send(CalendarCreated)
             }
+            true
         } else {
-            context.toastMessage(context.getString(coreR.string.core_error_unknown_error))
+            false
         }
     }
 }

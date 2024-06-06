@@ -1,4 +1,4 @@
-package org.openedx.profile.system
+package org.openedx.core.system
 
 import android.content.ContentUris
 import android.content.ContentValues
@@ -12,7 +12,6 @@ import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.utils.Logger
 import org.openedx.core.utils.toCalendar
 import java.util.TimeZone
@@ -225,7 +224,7 @@ class CalendarManager(
     /**
      * Method to delete the course calendar from the mobile calendar app
      */
-    private fun deleteCalendar(calendarId: Long) {
+    fun deleteCalendar(calendarId: Long) {
         context.contentResolver.delete(
             Uri.parse("content://com.android.calendar/calendars/$calendarId"),
             null,

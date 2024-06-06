@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
@@ -69,6 +71,7 @@ fun CalendarSettingsView(
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
+    val scrollState = rememberScrollState()
 
     Scaffold(
         modifier = Modifier
@@ -131,10 +134,10 @@ fun CalendarSettingsView(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Column(
-                        modifier = contentWidth.padding(vertical = 28.dp),
+                        modifier = contentWidth
+                            .verticalScroll(scrollState)
+                            .padding(vertical = 28.dp),
                     ) {
-                        val coursesSynced = uiState.coursesSynced
-
                         if (uiState.calendarData != null) {
                             CalendarSyncSection(
                                 isCourseCalendarSyncEnabled = uiState.isCalendarSyncEnabled,
@@ -145,10 +148,12 @@ fun CalendarSettingsView(
                             )
                         }
                         Spacer(modifier = Modifier.height(20.dp))
-                        CoursesToSyncSection(
-                            coursesSynced = coursesSynced,
-                            onCourseToSyncClick = onCourseToSyncClick
-                        )
+                        if (uiState.coursesSynced != null) {
+                            CoursesToSyncSection(
+                                coursesSynced = uiState.coursesSynced,
+                                onCourseToSyncClick = onCourseToSyncClick
+                            )
+                        }
                     }
                 }
             }

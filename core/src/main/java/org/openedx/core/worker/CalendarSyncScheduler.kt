@@ -1,4 +1,4 @@
-package org.openedx.profile.worker
+package org.openedx.core.worker
 
 import android.content.Context
 import androidx.work.Data

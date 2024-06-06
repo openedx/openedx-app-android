@@ -11,10 +11,10 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.extension.replaceSpace
+import org.openedx.core.system.CalendarManager
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
-import org.openedx.profile.system.CalendarManager
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
 class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,
@@ -51,12 +51,20 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         return sharedPreferences.getBoolean(key, defValue)
     }
 
-    override fun clear() {
+    override fun clearCorePreferences() {
         sharedPreferences.edit().apply {
             remove(ACCESS_TOKEN)
             remove(REFRESH_TOKEN)
             remove(USER)
             remove(EXPIRES_IN)
+        }.apply()
+    }
+
+    override fun clearCalendarPreferences() {
+        sharedPreferences.edit().apply {
+            remove(CALENDAR_ID)
+            remove(IS_CALENDAR_SYNC_ENABLED)
+            remove(HIDE_INACTIVE_COURSES)
         }.apply()
     }
 

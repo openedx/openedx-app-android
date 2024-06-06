@@ -27,8 +27,8 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.utils.Logger
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.worker.CalendarSyncScheduler
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 

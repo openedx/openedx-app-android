@@ -32,8 +32,8 @@ import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.notifier.AccountDeactivated
-import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.account.AccountDeactivated
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 
 class SettingsViewModel(
     private val appData: AppData,

@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -62,6 +64,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.parcelable
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -94,7 +97,10 @@ class NewCalendarDialogFragment : DialogFragment() {
                         dismiss()
                     },
                     onBeginSyncingClick = { calendarTitle, calendarColor ->
-                        viewModel.createCalendar(requireContext(), calendarTitle, calendarColor)
+                        val isCalendarCreated = viewModel.createCalendar(calendarTitle, calendarColor)
+                        if (!isCalendarCreated) {
+                            requireContext().toastMessage(context.getString(CoreR.string.core_error_unknown_error))
+                        }
                         dismiss()
                     }
                 )
@@ -130,6 +136,7 @@ private fun NewCalendarDialog(
     onBeginSyncingClick: (calendarTitle: String, calendarColor: CalendarColor) -> Unit
 ) {
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
     val title = when (newCalendarDialogType) {
         NewCalendarDialogType.CREATE_NEW -> stringResource(id = R.string.profile_new_calendar)
         NewCalendarDialogType.UPDATE -> stringResource(id = R.string.profile_change_sync_options)
@@ -147,6 +154,7 @@ private fun NewCalendarDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(scrollState)
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -218,6 +226,7 @@ private fun CalendarTitleTextField(
     onValueChanged: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val maxChar = 40
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
             TextFieldValue("")
@@ -238,7 +247,7 @@ private fun CalendarTitleTextField(
                 .height(48.dp),
             value = textFieldValue,
             onValueChange = {
-                textFieldValue = it
+                if (it.text.length <= maxChar) textFieldValue = it
                 onValueChanged(it.text.trim())
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(

@@ -168,7 +168,8 @@ private fun CoursesToSyncView(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Column(
-                        modifier = contentWidth.padding(vertical = 28.dp),
+                        modifier = contentWidth
+                            .padding(vertical = 28.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.profile_courses_to_sync_title),

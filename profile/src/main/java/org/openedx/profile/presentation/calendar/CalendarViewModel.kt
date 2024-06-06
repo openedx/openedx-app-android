@@ -11,16 +11,16 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.system.notifier.calendar.CalendarCreated
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
+import org.openedx.core.system.notifier.calendar.CalendarSyncDisabled
+import org.openedx.core.system.notifier.calendar.CalendarSyncFailed
+import org.openedx.core.system.notifier.calendar.CalendarSynced
+import org.openedx.core.system.notifier.calendar.CalendarSyncing
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.CalendarManager
-import org.openedx.profile.system.notifier.CalendarCreated
-import org.openedx.profile.system.notifier.CalendarNotifier
-import org.openedx.profile.system.notifier.CalendarSyncDisabled
-import org.openedx.profile.system.notifier.CalendarSyncFailed
-import org.openedx.profile.system.notifier.CalendarSynced
-import org.openedx.profile.system.notifier.CalendarSyncing
-import org.openedx.profile.worker.CalendarSyncScheduler
 
 class CalendarViewModel(
     private val calendarSyncScheduler: CalendarSyncScheduler,
@@ -29,18 +29,19 @@ class CalendarViewModel(
     private val calendarNotifier: CalendarNotifier,
     private val calendarInteractor: CalendarInteractor,
     private val profileRouter: ProfileRouter,
-    networkConnection: NetworkConnection,
+    private val networkConnection: NetworkConnection,
 ) : BaseViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        CalendarUIState(
+    private val calendarInitState: CalendarUIState
+        get() = CalendarUIState(
             isCalendarExist = isCalendarExist(),
             calendarData = null,
             calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCED else CalendarSyncState.OFFLINE,
             isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
-            coursesSynced = 0
+            coursesSynced = null
         )
-    )
+
+    private val _uiState = MutableStateFlow(calendarInitState)
     val uiState: StateFlow<CalendarUIState>
         get() = _uiState.asStateFlow()
 
@@ -49,7 +50,6 @@ class CalendarViewModel(
             calendarNotifier.notifier.collect { calendarEvent ->
                 when (calendarEvent) {
                     CalendarCreated -> {
-                        calendarSyncScheduler.scheduleDailySync()
                         calendarSyncScheduler.requestImmediateSync()
                         _uiState.update { it.copy(isCalendarExist = true) }
                         getCalendarData()
@@ -69,7 +69,7 @@ class CalendarViewModel(
                     }
 
                     CalendarSyncDisabled -> {
-                        _uiState.update { it.copy(isCalendarSyncEnabled = false) }
+                        _uiState.update { calendarInitState }
                     }
                 }
             }
@@ -112,13 +112,14 @@ class CalendarViewModel(
 
     private fun updateSyncedCoursesCount() {
         viewModelScope.launch {
-            calendarInteractor.getAllCourseCalendarStateFromCache()
-                .count { it.isCourseSyncEnabled }
-                .let { coursesSynced ->
-                    _uiState.update { it.copy(coursesSynced = coursesSynced) }
-                }
+            val courseStates = calendarInteractor.getAllCourseCalendarStateFromCache()
+            if (courseStates.isNotEmpty()) {
+                val syncedCoursesCount = courseStates.count { it.isCourseSyncEnabled }
+                _uiState.update { it.copy(coursesSynced = syncedCoursesCount) }
+            }
         }
     }
+
 
     private fun isCalendarExist(): Boolean {
         return calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST &&

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -57,6 +59,7 @@ fun CalendarSetUpView(
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
+    val scrollState = rememberScrollState()
 
     Scaffold(
         modifier = Modifier
@@ -119,11 +122,13 @@ fun CalendarSetUpView(
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Column(
-                        modifier = contentWidth.padding(vertical = 28.dp),
+                        modifier = contentWidth
+                            .verticalScroll(scrollState)
+                            .padding(vertical = 28.dp),
                     ) {
                         Text(
-                            modifier = Modifier.testTag("txt_settings"),
-                            text = stringResource(id = org.openedx.core.R.string.core_settings),
+                            modifier = Modifier.testTag("txt_calendar_sync"),
+                            text = stringResource(id = R.string.profile_calendar_sync),
                             style = MaterialTheme.appTypography.labelLarge,
                             color = MaterialTheme.appColors.textSecondary
                         )

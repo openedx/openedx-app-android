@@ -38,6 +38,14 @@ class CalendarInteractor(
         return repository.getAllCourseCalendarStateFromCache()
     }
 
+    suspend fun clearCalendarCachedData() {
+        repository.clearCalendarCachedData()
+    }
+
+    suspend fun resetChecksums() {
+        repository.resetChecksums()
+    }
+
     suspend fun updateCourseCalendarStateByIdInCache(
         courseId: String,
         checksum: Int? = null,

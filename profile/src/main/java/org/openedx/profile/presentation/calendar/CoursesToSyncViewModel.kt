@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
-import org.openedx.profile.worker.CalendarSyncScheduler
+import org.openedx.core.worker.CalendarSyncScheduler
 
 class CoursesToSyncViewModel(
     private val calendarInteractor: CalendarInteractor,

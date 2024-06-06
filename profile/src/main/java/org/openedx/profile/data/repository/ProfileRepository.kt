@@ -5,7 +5,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.CalendarManager
 import org.openedx.profile.data.api.ProfileApi
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.domain.model.Account
@@ -17,6 +19,8 @@ class ProfileRepository(
     private val room: RoomDatabase,
     private val profilePreferences: ProfilePreferences,
     private val corePreferences: CorePreferences,
+    private val calendarPreferences: CalendarPreferences,
+    private val calendarManager: CalendarManager
 ) {
 
     suspend fun getAccount(): Account {
@@ -61,7 +65,9 @@ class ProfileRepository(
                 ApiConstants.TOKEN_TYPE_REFRESH
             )
         } finally {
-            corePreferences.clear()
+            corePreferences.clearCorePreferences()
+            calendarManager.deleteCalendar(calendarPreferences.calendarId)
+            calendarPreferences.clearCalendarPreferences()
             room.clearAllTables()
         }
     }
