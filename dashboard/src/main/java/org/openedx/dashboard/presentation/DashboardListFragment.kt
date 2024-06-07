@@ -139,7 +139,7 @@ class DashboardListFragment : Fragment() {
                     onItemClick = {
                         viewModel.dashboardCourseClickedEvent(it.course.id, it.course.name)
                         router.navigateToCourseOutline(
-                            requireParentFragment().parentFragmentManager,
+                            requireActivity().supportFragmentManager,
                             it.course.id,
                             it.course.name,
                             it.mode
