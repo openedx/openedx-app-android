@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.R
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.extension.parcelable
 import org.openedx.core.presentation.dialog.DefaultDialogBox
@@ -44,7 +43,9 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.profile.R
 import androidx.compose.ui.graphics.Color as ComposeColor
+import org.openedx.core.R as coreR
 
 class DisableCalendarSyncDialogFragment : DialogFragment() {
 
@@ -115,12 +116,12 @@ private fun DisableCalendarSyncDialogView(
             ) {
                 Image(
                     modifier = Modifier.size(24.dp),
-                    painter = painterResource(id = R.drawable.core_ic_warning),
+                    painter = painterResource(id = coreR.drawable.core_ic_warning),
                     contentDescription = null
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = org.openedx.profile.R.string.profile_disable_calendar_dialog_title),
+                    text = stringResource(id = R.string.profile_disable_calendar_dialog_title),
                     style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textDark
                 )
@@ -153,7 +154,7 @@ private fun DisableCalendarSyncDialogView(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(
-                    id = org.openedx.profile.R.string.profile_disable_calendar_dialog_description,
+                    id = R.string.profile_disable_calendar_dialog_description,
                     calendarData?.title ?: ""
                 ),
                 style = MaterialTheme.appTypography.bodyMedium,
@@ -171,7 +172,7 @@ private fun DisableCalendarSyncDialogView(
             )
             OpenEdXButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.core_cancel),
+                text = stringResource(id = coreR.string.core_cancel),
                 onClick = {
                     onCancelClick()
                 }

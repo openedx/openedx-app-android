@@ -79,5 +79,6 @@
     <string name="profile_hide_inactive_courses">Hide Inactive Courses</string>
     <string name="profile_disable_calendar_dialog_title">Disable Calendar Sync</string>
     <string name="profile_disable_calendar_dialog_description">Disabling calendar sync will delete the calendar “%1$s.” You can turn calendar sync back on at any time.</string>
+    <string name="profile_disable_syncing">Disable Syncing</string>
 
 </resources>

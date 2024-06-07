@@ -102,6 +102,10 @@ class SignInViewModel(
                 interactor.login(username, password)
                 _uiState.update { it.copy(loginSuccess = true) }
                 setUserId()
+                if (calendarPreferences.calendarUser != username) {
+                    calendarPreferences.clearCalendarPreferences()
+                    calendarInteractor.clearCalendarCachedData()
+                }
                 logEvent(
                     AuthAnalyticsEvent.SIGN_IN_SUCCESS,
                     buildMap {
@@ -111,10 +115,6 @@ class SignInViewModel(
                         )
                     }
                 )
-                if (calendarPreferences.calendarUser != username) {
-                    calendarPreferences.clearCalendarPreferences()
-                    calendarInteractor.clearCalendarCachedData()
-                }
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =

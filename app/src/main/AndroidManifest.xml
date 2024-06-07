@@ -114,10 +114,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name="org.openedx.core.service.CalendarSyncForegroundService"
-            android:foregroundServiceType="dataSync" />
-
     </application>
 
 </manifest>

@@ -2,7 +2,6 @@ package org.openedx.course.presentation.container
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,7 +54,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.RoundTabsBar
@@ -85,15 +83,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_ENROLLMENT_MODE, ""),
             requireArguments().getString(ARG_RESUME_BLOCK, "")
         )
-    }
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { isGranted ->
-        viewModel.logCalendarPermissionAccess(!isGranted.containsValue(false))
-        if (!isGranted.containsValue(false)) {
-            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.SYNC_DIALOG)
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
