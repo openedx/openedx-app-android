@@ -42,6 +42,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -84,13 +85,11 @@ import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.shouldLoadMore
-import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -158,9 +157,6 @@ class DashboardListFragment : Fragment() {
                             AppUpdateState.openPlayMarket(requireContext())
                         },
                     ),
-                    onSettingsClick = {
-                        router.navigateToSettings(requireActivity().supportFragmentManager)
-                    }
                 )
             }
         }
@@ -180,7 +176,6 @@ internal fun DashboardListView(
     onReloadClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
-    onSettingsClick: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
@@ -193,7 +188,7 @@ internal fun DashboardListView(
     }
     val scrollState = rememberLazyListState()
     val firstVisibleIndex = remember {
-        mutableStateOf(scrollState.firstVisibleItemIndex)
+        mutableIntStateOf(scrollState.firstVisibleItemIndex)
     }
 
     Scaffold(
@@ -244,15 +239,9 @@ internal fun DashboardListView(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .statusBarsInset()
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Toolbar(
-                label = stringResource(id = R.string.dashboard_title),
-                canShowSettingsIcon = true,
-                onSettingsClick = onSettingsClick
-            )
 
             Surface(
                 color = MaterialTheme.appColors.background,
@@ -285,12 +274,6 @@ internal fun DashboardListView(
                                     state = scrollState,
                                     contentPadding = contentPaddings,
                                     content = {
-                                        item() {
-                                            Column {
-                                                Header()
-                                                Spacer(modifier = Modifier.height(16.dp))
-                                            }
-                                        }
                                         items(state.courses) { course ->
                                             CourseItem(
                                                 apiHostUrl,
@@ -329,7 +312,6 @@ internal fun DashboardListView(
                                         .then(contentWidth)
                                         .then(emptyStatePaddings)
                                 ) {
-                                    Header()
                                     EmptyState()
                                 }
                             }
@@ -492,24 +474,6 @@ private fun CourseItem(
 }
 
 @Composable
-private fun Header() {
-    Text(
-        modifier = Modifier.testTag("txt_courses_title"),
-        text = stringResource(id = R.string.dashboard_courses),
-        color = MaterialTheme.appColors.textPrimary,
-        style = MaterialTheme.appTypography.displaySmall
-    )
-    Text(
-        modifier = Modifier
-            .testTag("txt_courses_description")
-            .padding(top = 4.dp),
-        text = stringResource(id = R.string.dashboard_welcome_back),
-        color = MaterialTheme.appColors.textPrimaryVariant,
-        style = MaterialTheme.appTypography.titleSmall
-    )
-}
-
-@Composable
 private fun EmptyState() {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -542,7 +506,7 @@ private fun EmptyState() {
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun CourseItemPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         CourseItem(
             "http://localhost:8000",
             mockCourseEnrolled,
@@ -577,7 +541,6 @@ private fun DashboardListViewPreview() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
-            onSettingsClick = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -609,7 +572,6 @@ private fun DashboardListViewTabletPreview() {
             refreshing = false,
             canLoadMore = false,
             paginationCallback = {},
-            onSettingsClick = {},
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }

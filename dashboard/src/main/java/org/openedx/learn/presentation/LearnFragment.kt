@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.widget.ViewPager2
-import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.adapter.NavigationFragmentAdapter
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.crop
@@ -51,17 +51,15 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.courses.presentation.DashboardGalleryFragment
 import org.openedx.dashboard.R
 import org.openedx.dashboard.databinding.FragmentLearnBinding
-import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.learn.LearnType
 import org.openedx.core.R as CoreR
 
 class LearnFragment : Fragment(R.layout.fragment_learn) {
 
     private val binding by viewBinding(FragmentLearnBinding::bind)
-    private val router by inject<DashboardRouter>()
+    private val viewModel by viewModel<LearnViewModel>()
     private lateinit var adapter: NavigationFragmentAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,8 +80,8 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         binding.viewPager.offscreenPageLimit = 2
 
         adapter = NavigationFragmentAdapter(this).apply {
-            addFragment(DashboardGalleryFragment())
-            addFragment(router.getProgramFragmentInstance())
+            addFragment(viewModel.getDashboardFragment)
+            addFragment(viewModel.getProgramFragment)
         }
         binding.viewPager.adapter = adapter
         binding.viewPager.setUserInputEnabled(false)
@@ -93,7 +91,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
 @Composable
 private fun Header(
     fragmentManager: FragmentManager,
-    viewPager: ViewPager2
+    viewPager: ViewPager2,
 ) {
     val viewModel: LearnViewModel = koinViewModel()
     val windowSize = rememberWindowSize()
@@ -120,7 +118,6 @@ private fun Header(
                 viewModel.onSettingsClick(fragmentManager)
             }
         )
-
         if (viewModel.isProgramTypeWebView) {
             LearnDropdownMenu(
                 modifier = Modifier
@@ -136,7 +133,7 @@ private fun Header(
 private fun Title(
     modifier: Modifier = Modifier,
     label: String,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
 ) {
     Box(
         modifier = modifier.fillMaxWidth()
@@ -169,7 +166,7 @@ private fun Title(
 @Composable
 private fun LearnDropdownMenu(
     modifier: Modifier = Modifier,
-    viewPager: ViewPager2
+    viewPager: ViewPager2,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var currentValue by remember { mutableStateOf(LearnType.COURSES) }
@@ -212,7 +209,12 @@ private fun LearnDropdownMenu(
 
         MaterialTheme(
             colors = MaterialTheme.colors.copy(surface = MaterialTheme.appColors.background),
-            shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+            shapes = MaterialTheme.shapes.copy(
+                medium = RoundedCornerShape(
+                    bottomStart = 8.dp,
+                    bottomEnd = 8.dp
+                )
+            )
         ) {
             DropdownMenu(
                 modifier = Modifier
