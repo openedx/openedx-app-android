@@ -72,6 +72,8 @@ BRANCH:
 #Platform names
 PLATFORM_NAME: "OpenEdX"
 PLATFORM_FULL_NAME: "OpenEdX"
+#App sourceSets dir
+THEME_DIRECTORY: "openedx"
 #tokenType enum accepts JWT and BEARER only
 TOKEN_TYPE: "JWT"
 #feature flag for activating What’s New feature
