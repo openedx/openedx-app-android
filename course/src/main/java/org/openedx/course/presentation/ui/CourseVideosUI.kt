@@ -99,14 +99,6 @@ fun CourseVideosScreen(
         uiMessage = uiMessage,
         courseTitle = viewModel.courseTitle,
         videoSettings = videoSettings,
-        onItemClick = { block ->
-            viewModel.courseRouter.navigateToCourseSubsections(
-                fm = fragmentManager,
-                courseId = viewModel.courseId,
-                subSectionId = block.id,
-                mode = CourseViewMode.VIDEOS
-            )
-        },
         onExpandClick = { block ->
             viewModel.switchCourseSections(block.id)
         },
@@ -166,7 +158,6 @@ private fun CourseVideosUI(
     uiMessage: UIMessage?,
     courseTitle: String,
     videoSettings: VideoSettings,
-    onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
     onDownloadClick: (blocksIds: List<String>) -> Unit,
@@ -636,7 +627,6 @@ private fun CourseVideosScreenPreview() {
                 )
             ),
             courseTitle = "",
-            onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
             videoSettings = VideoSettings.default,
@@ -660,7 +650,6 @@ private fun CourseVideosScreenEmptyPreview() {
                 "This course does not include any videos."
             ),
             courseTitle = "",
-            onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
             videoSettings = VideoSettings.default,
@@ -695,7 +684,6 @@ private fun CourseVideosScreenTabletPreview() {
                 )
             ),
             courseTitle = "",
-            onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
             videoSettings = VideoSettings.default,
