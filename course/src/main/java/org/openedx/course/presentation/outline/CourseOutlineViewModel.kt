@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.outline
 
+import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +37,7 @@ import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -383,6 +385,23 @@ class CourseOutlineViewModel(
                     checkOutOfSync = true,
                 )
             )
+        }
+    }
+
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
+        blocksIds.forEach { blockId ->
+            if (isBlockDownloading(blockId)) {
+                courseRouter.navigateToDownloadQueue(
+                    fm = fragmentManager,
+                    getDownloadableChildren(blockId) ?: arrayListOf()
+                )
+            } else if (isBlockDownloaded(blockId)) {
+                removeDownloadModels(blockId)
+            } else {
+                saveDownloadModels(
+                    FileUtil(context).getExternalAppDir().path, blockId
+                )
+            }
         }
     }
 }

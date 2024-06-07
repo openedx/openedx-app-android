@@ -65,7 +65,6 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
@@ -138,21 +137,11 @@ fun CourseOutlineScreen(
             )
         },
         onDownloadClick = { blocksIds ->
-            blocksIds.forEach { blockId ->
-                if (viewModel.isBlockDownloading(blockId)) {
-                    viewModel.courseRouter.navigateToDownloadQueue(
-                        fm = fragmentManager,
-                        viewModel.getDownloadableChildren(blockId)
-                            ?: arrayListOf()
-                    )
-                } else if (viewModel.isBlockDownloaded(blockId)) {
-                    viewModel.removeDownloadModels(blockId)
-                } else {
-                    viewModel.saveDownloadModels(
-                        FileUtil(context).getExternalAppDir().path, blockId
-                    )
-                }
-            }
+            viewModel.downloadBlocks(
+                blocksIds = blocksIds,
+                fragmentManager = fragmentManager,
+                context = context
+            )
         },
         onResetDatesClick = {
             viewModel.resetCourseDatesBanner(
