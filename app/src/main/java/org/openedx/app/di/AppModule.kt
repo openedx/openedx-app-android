@@ -17,6 +17,7 @@ import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
+import org.openedx.app.room.DatabaseManager
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
@@ -70,6 +71,7 @@ import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
+import org.openedx.core.DatabaseManager as IDatabaseManager
 
 val appModule = module {
 
@@ -86,6 +88,8 @@ val appModule = module {
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get(), get()) }
+    single { DatabaseManager(get(), get(), get(), get()) }
+    single<IDatabaseManager> { get<DatabaseManager>() }
 
     single { ImageProcessor(get()) }
 

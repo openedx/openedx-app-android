@@ -180,6 +180,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getBoolean(IS_CALENDAR_SYNC_ENABLED, true)
 
+    override var calendarUser: String
+        set(value) {
+            saveString(CALENDAR_USER, value)
+        }
+        get() = getString(CALENDAR_USER)
+
     override var isHideInactiveCourses: Boolean
         set(value) {
             saveBoolean(HIDE_INACTIVE_COURSES, value)
@@ -210,5 +216,6 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val RESET_APP_DIRECTORY = "reset_app_directory"
         private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
         private const val HIDE_INACTIVE_COURSES = "HIDE_INACTIVE_COURSES"
+        private const val CALENDAR_USER = "CALENDAR_USER"
     }
 }

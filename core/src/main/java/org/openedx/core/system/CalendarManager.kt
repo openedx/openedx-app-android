@@ -29,7 +29,7 @@ class CalendarManager(
         android.Manifest.permission.READ_CALENDAR
     )
 
-    private val accountName: String
+    val accountName: String
         get() = getUserAccountForSync()
 
     /**

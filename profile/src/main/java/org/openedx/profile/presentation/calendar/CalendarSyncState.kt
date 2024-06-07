@@ -29,7 +29,7 @@ enum class CalendarSyncState(
         get() = when (this) {
             OFFLINE -> MaterialTheme.appColors.textFieldHint
             SYNC_FAILED -> MaterialTheme.appColors.error
-            SYNCED -> MaterialTheme.appColors.accessGreen
+            SYNCED -> MaterialTheme.appColors.successGreen
             SYNCHRONIZATION -> MaterialTheme.appColors.primary
         }
 }

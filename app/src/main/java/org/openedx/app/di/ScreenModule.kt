@@ -101,6 +101,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
             courseId,
             infoType,
         )
@@ -144,7 +146,7 @@ val screenModule = module {
         )
     }
 
-    factory { ProfileRepository(get(), get(), get(), get(), get(), get(), get()) }
+    factory { ProfileRepository(get(), get(), get(), get(), get()) }
     factory { ProfileInteractor(get()) }
     viewModel {
         ProfileViewModel(

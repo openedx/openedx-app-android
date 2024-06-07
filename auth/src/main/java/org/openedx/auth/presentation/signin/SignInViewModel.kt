@@ -26,7 +26,9 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.createHonorCodeField
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
@@ -47,6 +49,8 @@ class SignInViewModel(
     private val oAuthHelper: OAuthHelper,
     private val router: AuthRouter,
     private val whatsNewGlobalManager: WhatsNewGlobalManager,
+    private val calendarPreferences: CalendarPreferences,
+    private val calendarInteractor: CalendarInteractor,
     agreementProvider: AgreementProvider,
     config: Config,
     val courseId: String?,
@@ -107,6 +111,10 @@ class SignInViewModel(
                         )
                     }
                 )
+                if (calendarPreferences.calendarUser != username) {
+                    calendarPreferences.clearCalendarPreferences()
+                    calendarInteractor.clearCalendarCachedData()
+                }
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =

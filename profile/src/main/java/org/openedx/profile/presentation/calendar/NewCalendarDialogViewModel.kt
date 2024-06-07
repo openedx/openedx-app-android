@@ -13,7 +13,7 @@ class NewCalendarDialogViewModel(
     private val calendarManager: CalendarManager,
     private val calendarPreferences: CalendarPreferences,
     private val calendarNotifier: CalendarNotifier,
-    private val calendarInteractor: CalendarInteractor
+    private val calendarInteractor: CalendarInteractor,
 ) : BaseViewModel() {
 
     fun createCalendar(
@@ -29,6 +29,7 @@ class NewCalendarDialogViewModel(
         )
         return if (calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
             calendarPreferences.calendarId = calendarId
+            calendarPreferences.calendarUser = calendarManager.accountName
             viewModelScope.launch {
                 calendarNotifier.send(CalendarCreated)
             }
