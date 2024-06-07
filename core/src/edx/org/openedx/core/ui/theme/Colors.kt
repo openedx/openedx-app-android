@@ -22,6 +22,9 @@ val light_onError = Color.White
 val light_onWarning = Color.White
 val light_onInfo = Color.White
 
+val light_success_green = Color(0xFFF2FAF7)
+val light_success_background = Color(0xFF0D7D4D)
+
 val light_text_primary = Color(0xFF00262B)   // Primary 500 | Dark 500 | Elm
 val light_text_primary_variant = Color(0xFF454545)  // Gray 700
 val light_text_primary_light = Color(0xFF707070) // Gray 500
@@ -45,7 +48,7 @@ val light_primary_button_border = Color(0xFFD7D3D1) // Light 700
 val light_primary_button_bordered_text = Color(0xFF00262B)   // Primary 500 | Dark 500 | Elm
 
 val light_secondary_button_background = Color(0xFFD23228) // Brand 500
-val light_secondary_button_text =  Color(0xFFD23228) // Brand 500
+val light_secondary_button_text = Color(0xFFD23228) // Brand 500
 val light_secondary_button_border = Color(0xFFD7D3D1) // Light 700
 val light_secondary_button_bordered_background = Color.White
 val light_secondary_button_bordered_text = Color(0xFFD23228) // Brand 500
@@ -65,6 +68,7 @@ val light_dates_section_bar_today = light_info
 val light_dates_section_bar_this_week = light_text_primary_variant
 val light_dates_section_bar_next_week = light_text_field_border
 val light_dates_section_bar_upcoming = Color(0xFFCCD4E0)
+val light_auth_sso_success_background = light_success_green
 val light_auth_google_button_background = Color.White
 val light_auth_facebook_button_background = Color(0xFF0866FF)
 val light_auth_microsoft_button_background = Color(0xFF2E2E2E)
@@ -94,6 +98,8 @@ val dark_onError = Color.White
 val dark_onWarning = Color.White
 val dark_onInfo = Color.White
 
+val dark_success_green = Color(0xFF0A5E3A)
+val dark_success_background = Color.White
 
 val dark_text_primary = Color.White
 val dark_text_primary_variant = Color(0xFFF2F0EF) // Light 300
@@ -136,6 +142,7 @@ val dark_dates_section_bar_today = Color(0xFF03C7E8)  // Accent A Isotope Blue
 val dark_dates_section_bar_this_week = Color(0xFFF2F0EF) // Light 300
 val dark_dates_section_bar_next_week = Color(0xFF707070) // Gray 500
 val dark_dates_section_bar_upcoming = Color(0xFFCCD4E0)
+val dark_auth_sso_success_background = dark_success_green
 val dark_auth_google_button_background = Color.White
 val dark_auth_facebook_button_background = Color(0xFF0866FF)
 val dark_auth_microsoft_button_background = Color(0xFF2E2E2E)
