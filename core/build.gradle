@@ -17,7 +17,7 @@ plugins {
 
 def currentFlavour = getCurrentFlavor()
 def config = configHelper.fetchConfig()
-def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
+def themeDirectory = config.getOrDefault("THEME_DIRECTORY", "openedx")
 
 android {
     compileSdk 34
@@ -50,16 +50,16 @@ android {
 
     sourceSets {
         prod {
-            java.srcDirs = ["src/$platformName"]
-            res.srcDirs = ["src/$platformName/res"]
+            java.srcDirs = ["src/$themeDirectory"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         develop {
-            java.srcDirs = ["src/$platformName"]
-            res.srcDirs = ["src/$platformName/res"]
+            java.srcDirs = ["src/$themeDirectory"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         stage {
-            java.srcDirs = ["src/$platformName"]
-            res.srcDirs = ["src/$platformName/res"]
+            java.srcDirs = ["src/$themeDirectory"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         main {
             assets {
