@@ -53,4 +53,8 @@ class CalendarInteractor(
     ) {
         repository.updateCourseCalendarStateByIdInCache(courseId, checksum, isCourseSyncEnabled)
     }
+
+    suspend fun deleteCourseCalendarStateByIdFromCache(courseId: String) {
+        repository.deleteCourseCalendarStateByIdFromCache(courseId)
+    }
 }

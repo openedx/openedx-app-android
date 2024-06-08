@@ -47,6 +47,7 @@ class CalendarViewModel(
 
     init {
         viewModelScope.launch {
+            calendarSyncScheduler.requestImmediateSync()
             calendarNotifier.notifier.collect { calendarEvent ->
                 when (calendarEvent) {
                     CalendarCreated -> {

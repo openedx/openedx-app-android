@@ -70,4 +70,8 @@ class CalendarRepository(
     ) {
         calendarDao.updateCourseCalendarStateById(courseId, checksum, isCourseSyncEnabled)
     }
+
+    suspend fun deleteCourseCalendarStateByIdFromCache(courseId: String) {
+        calendarDao.deleteCourseCalendarStateById(courseId)
+    }
 }

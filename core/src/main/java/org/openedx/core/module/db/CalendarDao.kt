@@ -36,6 +36,9 @@ interface CalendarDao {
     @Query("DELETE FROM course_calendar_state_table")
     suspend fun clearCourseCalendarStateCachedData()
 
+    @Query("DELETE FROM course_calendar_state_table WHERE course_id = :courseId")
+    suspend fun deleteCourseCalendarStateById(courseId: String)
+
     @Query("UPDATE course_calendar_state_table SET checksum = 0")
     suspend fun resetChecksums()
 

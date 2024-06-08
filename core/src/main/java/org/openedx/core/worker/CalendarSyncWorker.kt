@@ -86,28 +86,39 @@ class CalendarSyncWorker(
         val isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled
         if (isCalendarCreated && isCalendarSyncEnabled) {
             calendarNotifier.send(CalendarSyncing)
+            val enrollmentsStatus = calendarInteractor.getEnrollmentsStatus()
             if (courseId.isNullOrEmpty()) {
-                syncCalendar()
+                syncCalendar(enrollmentsStatus)
             } else {
-                syncCalendar(courseId)
+                syncCalendar(enrollmentsStatus, courseId)
             }
+            removeUnenrolledCourseEvents(enrollmentsStatus)
             calendarNotifier.send(CalendarSynced)
         }
     }
 
-    private suspend fun syncCalendar(courseId: String) {
-        calendarInteractor.getEnrollmentsStatus()
+    private suspend fun removeUnenrolledCourseEvents(enrollmentStatus: List<EnrollmentStatus>) {
+        val enrolledCourseIds = enrollmentStatus.map { it.courseId }
+        val cachedCourseIds = calendarInteractor.getAllCourseCalendarStateFromCache().map { it.courseId }
+        val unenrolledCourseIds = cachedCourseIds.filter { it !in enrolledCourseIds }
+        unenrolledCourseIds.forEach { courseId ->
+            removeCalendarEvents(courseId)
+            calendarInteractor.deleteCourseCalendarStateByIdFromCache(courseId)
+        }
+    }
+
+    private suspend fun syncCalendar(enrollmentsStatus: List<EnrollmentStatus>, courseId: String) {
+        enrollmentsStatus
             .find { it.courseId == courseId }
             ?.let { enrollmentStatus ->
                 syncCourseEvents(enrollmentStatus)
             }
     }
 
-    private suspend fun syncCalendar() {
-        calendarInteractor.getEnrollmentsStatus()
-            .forEach { enrollmentStatus ->
-                syncCourseEvents(enrollmentStatus)
-            }
+    private suspend fun syncCalendar(enrollmentsStatus: List<EnrollmentStatus>) {
+        enrollmentsStatus.forEach { enrollmentStatus ->
+            syncCourseEvents(enrollmentStatus)
+        }
     }
 
     private suspend fun syncCourseEvents(enrollmentStatus: EnrollmentStatus) {
