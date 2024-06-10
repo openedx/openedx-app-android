@@ -140,7 +140,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             snackBar?.show()
 
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.showProgress.collect {
                 binding.progressBar.isVisible = it
             }
@@ -522,15 +522,12 @@ fun DashboardPager(
             }
 
             CourseContainerTab.MORE -> {
-                val announcementsString = stringResource(id = R.string.course_announcements)
-                val handoutsString = stringResource(id = R.string.course_handouts)
                 HandoutsScreen(
                     windowSize = windowSize,
                     onHandoutsClick = {
                         viewModel.courseRouter.navigateToHandoutsWebView(
                             fragmentManager,
                             bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
-                            handoutsString,
                             HandoutsType.Handouts
                         )
                     },
@@ -538,7 +535,6 @@ fun DashboardPager(
                         viewModel.courseRouter.navigateToHandoutsWebView(
                             fragmentManager,
                             bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
-                            announcementsString,
                             HandoutsType.Announcements
                         )
                     })

@@ -58,6 +58,14 @@ class DiscussionRepository(
         return api.getCourseThreads(courseId, following, topicId, orderBy, view, page).mapToDomain()
     }
 
+    suspend fun getCourseThread(
+        threadId: String,
+        courseId: String,
+        topicId: String
+    ): org.openedx.discussion.domain.model.Thread {
+        return api.getCourseThread(threadId, courseId, topicId).mapToDomain()
+    }
+
     suspend fun searchThread(
         courseId: String,
         query: String,
@@ -71,6 +79,12 @@ class DiscussionRepository(
         page: Int
     ): CommentsData {
         return api.getThreadComments(threadId, page).mapToDomain()
+    }
+
+    suspend fun getThreadComment(
+        commentId: String
+    ): CommentsData {
+        return api.getThreadComment(commentId).mapToDomain()
     }
 
     suspend fun getThreadQuestionComments(

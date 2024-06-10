@@ -41,7 +41,8 @@
             android:exported="true"
             android:fitsSystemWindows="true"
             android:theme="@style/Theme.App.Starting"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

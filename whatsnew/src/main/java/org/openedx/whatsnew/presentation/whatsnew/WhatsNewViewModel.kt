@@ -41,7 +41,8 @@ class WhatsNewViewModel(
         router.navigateToMain(
             fm,
             courseId,
-            infoType
+            infoType,
+            ""
         )
     }
 

@@ -164,7 +164,7 @@ class CourseDetailsFragment : Fragment() {
                                         requireActivity().supportFragmentManager,
                                         currentState.course.courseId,
                                         currentState.course.name,
-                                        "",
+                                        enrollmentMode = ""
                                     )
                                 }
 

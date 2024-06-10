@@ -1,5 +1,6 @@
 package org.openedx.app
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,8 @@ import androidx.room.RoomDatabase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openedx.app.deeplink.DeepLink
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import org.openedx.core.BaseViewModel
@@ -22,6 +25,7 @@ class AppViewModel(
     private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
     private val analytics: AppAnalytics,
+    private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
 ) : BaseViewModel() {
 
@@ -69,6 +73,10 @@ class AppViewModel(
     private fun resetAppDirectory() {
         fileUtil.deleteOldAppDirectory()
         preferencesManager.canResetAppDirectory = false
+    }
+
+    fun makeExternalRoute(fm: FragmentManager, deepLink: DeepLink) {
+        deepLinkRouter.makeRoute(fm, deepLink)
     }
 
     private fun setUserId() {
