@@ -10,6 +10,9 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
+import io.branch.indexing.BranchUniversalObject
+import io.branch.referral.util.ContentMetadata
+import io.branch.referral.util.LinkProperties
 import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDateBlock
@@ -94,7 +97,7 @@ class CalendarManager(
         contentValues.put(CalendarContract.Calendars.VISIBLE, 1)
         contentValues.put(
             CalendarContract.Calendars.CALENDAR_COLOR,
-            ContextCompat.getColor(context, org.openedx.core.R.color.primary)
+            ContextCompat.getColor(context, R.color.primary)
         )
         val creationUri: Uri? = asSyncAdapter(
             Uri.parse(CalendarContract.Calendars.CONTENT_URI.toString()),
@@ -191,17 +194,16 @@ class CalendarManager(
         courseDateBlock: CourseDateBlock,
         isDeeplinkEnabled: Boolean
     ): String {
-        val eventDescription = courseDateBlock.title
-        // The following code for branch and deep links will be enabled after implementation
-        /*
-        if (isDeeplinkEnabled && !TextUtils.isEmpty(courseDateBlock.blockId)) {
+        var eventDescription = courseDateBlock.title
+
+        if (isDeeplinkEnabled && courseDateBlock.blockId.isNotEmpty()) {
             val metaData = ContentMetadata()
-                .addCustomMetadata(DeepLink.Keys.SCREEN_NAME, Screen.COURSE_COMPONENT)
-                .addCustomMetadata(DeepLink.Keys.COURSE_ID, courseId)
-                .addCustomMetadata(DeepLink.Keys.COMPONENT_ID, courseDateBlock.blockId)
+                .addCustomMetadata("screen_name", "course_component")
+                .addCustomMetadata("course_id", courseId)
+                .addCustomMetadata("component_id", courseDateBlock.blockId)
 
             val branchUniversalObject = BranchUniversalObject()
-                .setCanonicalIdentifier("${Screen.COURSE_COMPONENT}\n${courseDateBlock.blockId}")
+                .setCanonicalIdentifier("course_component\n${courseDateBlock.blockId}")
                 .setTitle(courseDateBlock.title)
                 .setContentDescription(courseDateBlock.title)
                 .setContentMetadata(metaData)
@@ -209,9 +211,10 @@ class CalendarManager(
             val linkProperties = LinkProperties()
                 .addControlParameter("\$desktop_url", courseDateBlock.link)
 
-            eventDescription += "\n" + branchUniversalObject.getShortUrl(context, linkProperties)
+            val shortUrl = branchUniversalObject.getShortUrl(context, linkProperties)
+            eventDescription += "\n$shortUrl"
         }
-         */
+
         return eventDescription
     }
 
