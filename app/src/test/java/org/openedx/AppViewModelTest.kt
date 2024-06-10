@@ -21,6 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.app.AppAnalytics
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppViewModel
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
@@ -44,6 +45,7 @@ class AppViewModelTest {
     private val preferencesManager = mockk<PreferencesManager>()
     private val analytics = mockk<AppAnalytics>()
     private val fileUtil = mockk<FileUtil>()
+    private val deepLinkRouter = mockk<DeepLinkRouter>()
 
     private val user = User(0, "", "", "")
 
@@ -71,6 +73,7 @@ class AppViewModelTest {
                 preferencesManager,
                 dispatcher,
                 analytics,
+                deepLinkRouter,
                 fileUtil
             )
 
@@ -102,6 +105,7 @@ class AppViewModelTest {
                 preferencesManager,
                 dispatcher,
                 analytics,
+                deepLinkRouter,
                 fileUtil
             )
 
@@ -135,6 +139,7 @@ class AppViewModelTest {
                 preferencesManager,
                 dispatcher,
                 analytics,
+                deepLinkRouter,
                 fileUtil
             )
 

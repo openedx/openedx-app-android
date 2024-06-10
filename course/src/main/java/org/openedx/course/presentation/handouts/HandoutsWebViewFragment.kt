@@ -22,6 +22,7 @@ import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.course.R
 import org.openedx.course.presentation.CourseAnalyticsEvent
 
 class HandoutsWebViewFragment : Fragment() {
@@ -39,6 +40,15 @@ class HandoutsWebViewFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
+        val title = if (HandoutsType.valueOf(viewModel.handoutsType) == HandoutsType.Handouts) {
+            viewModel.logEvent(CourseAnalyticsEvent.HANDOUTS)
+            getString(R.string.course_handouts)
+        } else {
+            viewModel.logEvent(CourseAnalyticsEvent.ANNOUNCEMENTS)
+            getString(R.string.course_announcements)
+        }
+
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
@@ -50,7 +60,7 @@ class HandoutsWebViewFragment : Fragment() {
                 WebContentScreen(
                     windowSize = windowSize,
                     apiHostUrl = viewModel.apiHostUrl,
-                    title = requireArguments().getString(ARG_TITLE, ""),
+                    title = title,
                     htmlBody = viewModel.injectDarkMode(
                         htmlBody,
                         colorBackgroundValue,
@@ -61,26 +71,18 @@ class HandoutsWebViewFragment : Fragment() {
                     })
             }
         }
-        if (HandoutsType.valueOf(viewModel.handoutsType) == HandoutsType.Handouts) {
-            viewModel.logEvent(CourseAnalyticsEvent.HANDOUTS)
-        } else {
-            viewModel.logEvent(CourseAnalyticsEvent.ANNOUNCEMENTS)
-        }
     }
 
     companion object {
-        private val ARG_TITLE = "argTitle"
         private val ARG_TYPE = "argType"
         private val ARG_COURSE_ID = "argCourse"
 
         fun newInstance(
-            title: String,
             type: String,
             courseId: String,
         ): HandoutsWebViewFragment {
             val fragment = HandoutsWebViewFragment()
             fragment.arguments = bundleOf(
-                ARG_TITLE to title,
                 ARG_TYPE to type,
                 ARG_COURSE_ID to courseId
             )

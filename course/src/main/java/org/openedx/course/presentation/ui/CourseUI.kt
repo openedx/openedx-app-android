@@ -595,14 +595,15 @@ fun CourseSection(
     val arrowRotation by animateFloatAsState(
         targetValue = if (courseSectionsState == true) -90f else 90f, label = ""
     )
-    val sectionIds = courseSubSections?.map { it.id }.orEmpty()
-    val filteredStatuses = downloadedStateMap.filterKeys { it in sectionIds }.values
+    val subSectionIds = courseSubSections?.map { it.id }.orEmpty()
+    val filteredStatuses = downloadedStateMap.filterKeys { it in subSectionIds }.values
     val downloadedState = when {
         filteredStatuses.isEmpty() -> null
         filteredStatuses.all { it.isDownloaded } -> DownloadedState.DOWNLOADED
         filteredStatuses.any { it.isWaitingOrDownloading } -> DownloadedState.DOWNLOADING
         else -> DownloadedState.NOT_DOWNLOADED
     }
+    val downloadBlockIds = downloadedStateMap.keys.filter { it in block.descendants }
 
     Column(modifier = modifier
         .clip(MaterialTheme.appShapes.cardShape)
@@ -619,7 +620,7 @@ fun CourseSection(
             arrowDegrees = arrowRotation,
             downloadedState = downloadedState,
             onDownloadClick = {
-                onDownloadClick(downloadedStateMap.keys.toList())
+                onDownloadClick(downloadBlockIds)
             }
         )
         courseSubSections?.forEach { subSectionBlock ->

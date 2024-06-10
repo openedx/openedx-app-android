@@ -1,6 +1,7 @@
 package org.openedx.discussion.domain.interactor
 
 import org.openedx.discussion.data.repository.DiscussionRepository
+import org.openedx.discussion.domain.model.CommentsData
 
 class DiscussionInteractor(
     private val repository: DiscussionRepository
@@ -31,11 +32,17 @@ class DiscussionInteractor(
     ) =
         repository.getCourseThreads(courseId, null, topicId, orderBy, view, page)
 
+    suspend fun getThread(threadId: String, courseId: String, topicId: String) =
+        repository.getCourseThread(threadId, courseId, topicId)
+
     suspend fun searchThread(courseId: String, query: String, page: Int) =
         repository.searchThread(courseId, query, page)
 
     suspend fun getThreadComments(threadId: String, page: Int) =
         repository.getThreadComments(threadId, page)
+
+    suspend fun getThreadComment(commentId: String): CommentsData =
+        repository.getThreadComment(commentId)
 
     suspend fun getThreadQuestionComments(threadId: String, endorsed: Boolean, page: Int) =
         repository.getThreadQuestionComments(threadId, endorsed, page)
@@ -87,5 +94,6 @@ class DiscussionInteractor(
         follow: Boolean
     ) = repository.createThread(topicId, courseId, type, title, rawBody, follow)
 
-    suspend fun markBlocksCompletion(courseId: String, blocksId: List<String>) = repository.markBlocksCompletion(courseId, blocksId)
+    suspend fun markBlocksCompletion(courseId: String, blocksId: List<String>) =
+        repository.markBlocksCompletion(courseId, blocksId)
 }

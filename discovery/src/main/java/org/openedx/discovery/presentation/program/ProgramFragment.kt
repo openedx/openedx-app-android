@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.loadUrl
+import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
@@ -68,16 +69,15 @@ import org.openedx.discovery.presentation.catalog.WebViewLink
 import org.openedx.core.R as coreR
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
-class ProgramFragment(
-    private val myPrograms: Boolean = false,
-    private val isNestedFragment: Boolean = false
-) : Fragment() {
+class ProgramFragment : Fragment() {
 
     private val viewModel by viewModel<ProgramViewModel>()
+    private var isNestedFragment = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (myPrograms.not()) {
+        isNestedFragment = arguments?.getBoolean(ARG_NESTED_FRAGMENT, false) ?: false
+        if (isNestedFragment.not()) {
             lifecycle.addObserver(viewModel)
         }
     }
@@ -85,7 +85,7 @@ class ProgramFragment(
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -96,7 +96,7 @@ class ProgramFragment(
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
 
-                if (myPrograms.not()) {
+                if (isNestedFragment.not()) {
                     DisposableEffect(uiState is ProgramUIState.CourseEnrolled) {
                         if (uiState is ProgramUIState.CourseEnrolled) {
 
@@ -157,7 +157,8 @@ class ProgramFragment(
                             }
 
                             linkAuthority.PROGRAM_INFO,
-                            linkAuthority.COURSE_INFO -> {
+                            linkAuthority.COURSE_INFO,
+                            -> {
                                 viewModel.onViewCourseClick(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     courseId = param,
@@ -198,23 +199,26 @@ class ProgramFragment(
     }
 
     private fun getInitialUrl(): String {
-        return arguments?.let { args ->
-            val pathId = args.getString(ARG_PATH_ID) ?: ""
-            viewModel.programConfig.programDetailUrlTemplate.replace("{$ARG_PATH_ID}", pathId)
+        val pathId = arguments?.getString(ARG_PATH_ID, "")
+        return pathId?.takeIfNotEmpty()?.let {
+            viewModel.programConfig.programDetailUrlTemplate.replace("{$ARG_PATH_ID}", it)
         } ?: viewModel.programConfig.programUrl
     }
 
     companion object {
         private const val ARG_PATH_ID = "path_id"
+        private const val ARG_NESTED_FRAGMENT = "nested_fragment"
 
         fun newInstance(
-            pathId: String,
+            pathId: String = "",
+            isNestedFragment: Boolean = false,
         ): ProgramFragment {
-            val fragment = ProgramFragment(false)
-            fragment.arguments = bundleOf(
-                ARG_PATH_ID to pathId,
-            )
-            return fragment
+            return ProgramFragment().apply {
+                arguments = bundleOf(
+                    ARG_PATH_ID to pathId,
+                    ARG_NESTED_FRAGMENT to isNestedFragment
+                )
+            }
         }
     }
 }
