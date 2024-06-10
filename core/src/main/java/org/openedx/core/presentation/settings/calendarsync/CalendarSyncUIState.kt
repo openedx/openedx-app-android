@@ -11,4 +11,7 @@ data class CalendarSyncUIState(
     val isSynced: Boolean = false,
     val checkForOutOfSync: AtomicReference<Boolean> = AtomicReference(false),
     val uiMessage: AtomicReference<String> = AtomicReference(""),
-)
+) {
+    val isDialogVisible: Boolean
+        get() = dialogType != CalendarSyncDialogType.NONE
+}
