@@ -1,6 +1,6 @@
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
-def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
+def themeDirectory = config.getOrDefault("THEME_DIRECTORY", "openedx")
 def firebaseConfig = config.get('FIREBASE')
 def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
 
@@ -63,13 +63,13 @@ android {
 
     sourceSets {
         prod {
-            res.srcDirs = ["src/$platformName/res"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         develop {
-            res.srcDirs = ["src/$platformName/res"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         stage {
-            res.srcDirs = ["src/$platformName/res"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
     }
 
