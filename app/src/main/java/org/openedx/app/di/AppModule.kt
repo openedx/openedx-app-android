@@ -12,10 +12,10 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
-import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.room.DatabaseManager
@@ -27,6 +27,7 @@ import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
+import org.openedx.core.CalendarRouter
 import org.openedx.core.ImageProcessor
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
@@ -119,6 +120,7 @@ val appModule = module {
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
+    single<CalendarRouter> { get<AppRouter>() }
     single { DeepLinkRouter(get(), get(), get(), get(), get()) }
 
     single { NetworkConnection(get()) }

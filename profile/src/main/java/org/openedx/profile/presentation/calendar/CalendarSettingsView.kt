@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.domain.model.CalendarData
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize

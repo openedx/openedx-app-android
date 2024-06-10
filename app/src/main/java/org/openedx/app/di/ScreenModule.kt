@@ -173,7 +173,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
@@ -324,7 +325,10 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->

@@ -23,10 +23,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.DateType
+import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.domain.model.CourseCalendarState
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
@@ -37,6 +40,9 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.core.system.notifier.calendar.CalendarEvent
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
+import org.openedx.core.system.notifier.calendar.CalendarSynced
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
@@ -56,6 +62,9 @@ class CourseDatesViewModelTest {
     private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
     private val courseRouter = mockk<CourseRouter>()
+    private val calendarRouter = mockk<CalendarRouter>()
+    private val calendarNotifier = mockk<CalendarNotifier>()
+    private val calendarInteractor = mockk<CalendarInteractor>()
 
     private val openEdx = "OpenEdx"
     private val noInternet = "Slow or no internet connection"
@@ -127,7 +136,13 @@ class CourseDatesViewModelTest {
         every { notifier.notifier } returns flowOf(CourseLoading(false))
         coEvery { notifier.send(any<CreateCalendarSyncEvent>()) } returns Unit
         coEvery { notifier.send(any<CourseLoading>()) } returns Unit
-        coEvery { notifier.send(any<CourseLoading>()) } returns Unit
+        every { calendarNotifier.notifier } returns flowOf(CalendarSynced)
+        coEvery { calendarNotifier.send(any<CalendarEvent>()) } returns Unit
+        coEvery { calendarInteractor.getCourseCalendarStateByIdFromCache(any()) } returns CourseCalendarState(
+            0,
+            "",
+            true
+        )
     }
 
     @After
@@ -145,7 +160,10 @@ class CourseDatesViewModelTest {
             resourceManager,
             analytics,
             config,
-            courseRouter
+            calendarInteractor,
+            calendarNotifier,
+            courseRouter,
+            calendarRouter,
         )
         coEvery { interactor.getCourseDates(any()) } throws UnknownHostException()
         val message = async {
@@ -171,7 +189,10 @@ class CourseDatesViewModelTest {
             resourceManager,
             analytics,
             config,
-            courseRouter
+            calendarInteractor,
+            calendarNotifier,
+            courseRouter,
+            calendarRouter,
         )
         coEvery { interactor.getCourseDates(any()) } throws Exception()
         val message = async {
@@ -197,7 +218,10 @@ class CourseDatesViewModelTest {
             resourceManager,
             analytics,
             config,
-            courseRouter
+            calendarInteractor,
+            calendarNotifier,
+            courseRouter,
+            calendarRouter,
         )
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
         val message = async {
@@ -223,7 +247,10 @@ class CourseDatesViewModelTest {
             resourceManager,
             analytics,
             config,
-            courseRouter
+            calendarInteractor,
+            calendarNotifier,
+            courseRouter,
+            calendarRouter,
         )
         coEvery { interactor.getCourseDates(any()) } returns CourseDatesResult(
             datesSection = linkedMapOf(),

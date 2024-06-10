@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.calendar.CalendarCreated
@@ -47,7 +48,6 @@ class CalendarViewModel(
 
     init {
         viewModelScope.launch {
-            calendarSyncScheduler.requestImmediateSync()
             calendarNotifier.notifier.collect { calendarEvent ->
                 when (calendarEvent) {
                     CalendarCreated -> {

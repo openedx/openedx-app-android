@@ -190,4 +190,11 @@
     <string name="core_course_container_nav_discussions">Discussions</string>
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
+
+    <string name="core_calendar_sync_failed">Calendar Sync Failed</string>
+    <string name="core_synced_to_calendar">Synced to Calendar</string>
+    <string name="core_syncing_failed">Sync Failed</string>
+    <string name="core_synced">Synced</string>
+    <string name="core_not_synced">Not Synced</string>
+    <string name="core_syncing_to_calendar">Syncing to calendar…</string>
 </resources>

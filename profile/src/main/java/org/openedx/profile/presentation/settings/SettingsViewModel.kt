@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.core.AppUpdateState
 import org.openedx.core.BaseViewModel
+import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
@@ -43,7 +44,8 @@ class SettingsViewModel(
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
-    private val router: ProfileRouter,
+    private val profileRouter: ProfileRouter,
+    private val calendarRouter: CalendarRouter,
     private val appUpgradeNotifier: AppUpgradeNotifier,
     private val profileNotifier: ProfileNotifier,
 ) : BaseViewModel() {
@@ -124,12 +126,12 @@ class SettingsViewModel(
     }
 
     fun videoSettingsClicked(fragmentManager: FragmentManager) {
-        router.navigateToVideoSettings(fragmentManager)
+        profileRouter.navigateToVideoSettings(fragmentManager)
         logProfileEvent(ProfileAnalyticsEvent.VIDEO_SETTING_CLICKED)
     }
 
     fun privacyPolicyClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_privacy_policy),
             url = configuration.agreementUrls.privacyPolicyUrl,
@@ -138,7 +140,7 @@ class SettingsViewModel(
     }
 
     fun cookiePolicyClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_cookie_policy),
             url = configuration.agreementUrls.cookiePolicyUrl,
@@ -147,7 +149,7 @@ class SettingsViewModel(
     }
 
     fun dataSellClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_data_sell),
             url = configuration.agreementUrls.dataSellConsentUrl,
@@ -160,7 +162,7 @@ class SettingsViewModel(
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_terms_of_use),
             url = configuration.agreementUrls.tosUrl,
@@ -182,15 +184,15 @@ class SettingsViewModel(
     }
 
     fun manageAccountClicked(fragmentManager: FragmentManager) {
-        router.navigateToManageAccount(fragmentManager)
+        profileRouter.navigateToManageAccount(fragmentManager)
     }
 
     fun calendarSettingsClicked(fragmentManager: FragmentManager) {
-        router.navigateToCalendarSettings(fragmentManager)
+        calendarRouter.navigateToCalendarSettings(fragmentManager)
     }
 
     fun restartApp(fragmentManager: FragmentManager) {
-        router.restartApp(
+        profileRouter.restartApp(
             fragmentManager,
             isLogistrationEnabled
         )

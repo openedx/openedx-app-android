@@ -68,13 +68,8 @@
     <string name="profile_options">Options</string>
     <string name="profile_use_relative_dates">Use relative dates</string>
     <string name="profile_show_relative_dates">Show relative dates like “Tomorrow” and “Yesterday”</string>
-    <string name="profile_offline">Offline</string>
-    <string name="profile_syncing_failed">Sync Failed</string>
-    <string name="profile_synced">Synced</string>
-    <string name="profile_syncing_to_calendar">Syncing to calendar…</string>
     <string name="profile_courses_to_sync_title">Disabling sync for a course will remove all events connected to the course from your synced calendar.</string>
     <string name="profile_automatically_remove_events">Automatically remove events from courses you haven’t viewed in the last month</string>
-    <string name="profile_not_synced">Not Synced</string>
     <string name="profile_inactive">Inactive</string>
     <string name="profile_hide_inactive_courses">Hide Inactive Courses</string>
     <string name="profile_disable_calendar_dialog_title">Disable Calendar Sync</string>

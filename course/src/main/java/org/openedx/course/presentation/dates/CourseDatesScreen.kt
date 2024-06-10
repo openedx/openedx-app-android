@@ -43,7 +43,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,6 +72,7 @@ import org.openedx.core.extension.isNotEmptyThenLet
 import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.WindowSize
@@ -99,7 +99,7 @@ fun CourseDatesScreen(
     isFragmentResumed: Boolean,
     updateCourseStructure: () -> Unit
 ) {
-    val uiState by viewModel.uiState.observeAsState(DatesUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(DatesUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val context = LocalContext.current
 
@@ -164,6 +164,9 @@ fun CourseDatesScreen(
                     updateCourseStructure()
                 }
             }
+        },
+        onCalendarSyncStateClick = {
+            viewModel.calendarRouter.navigateToCalendarSettings(fragmentManager)
         }
     )
 }
@@ -176,7 +179,8 @@ private fun CourseDatesUI(
     isSelfPaced: Boolean,
     onItemClick: (CourseDateBlock) -> Unit,
     onPLSBannerViewed: () -> Unit,
-    onSyncDates: () -> Unit
+    onSyncDates: () -> Unit,
+    onCalendarSyncStateClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -244,6 +248,46 @@ private fun CourseDatesUI(
                                                 modifier = Modifier.padding(top = 16.dp),
                                                 banner = courseBanner,
                                                 resetDates = onSyncDates
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Handle calendar sync state
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 16.dp)
+                                            .background(
+                                                MaterialTheme.appColors.cardViewBackground,
+                                                MaterialTheme.shapes.medium
+                                            )
+                                            .border(
+                                                0.75.dp,
+                                                MaterialTheme.appColors.cardViewBorder,
+                                                MaterialTheme.shapes.medium
+                                            )
+                                            .clickable {
+                                                onCalendarSyncStateClick()
+                                            }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 8.dp, start = 16.dp, end = 8.dp, bottom = 8.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = uiState.calendarSyncState.icon,
+                                                tint = uiState.calendarSyncState.tint,
+                                                contentDescription = null
+                                            )
+                                            Text(
+                                                text = stringResource(uiState.calendarSyncState.longTitle),
+                                                style = MaterialTheme.appTypography.labelLarge,
+                                                color = MaterialTheme.appColors.textDark
                                             )
                                         }
                                     }
@@ -622,12 +666,16 @@ private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
+            uiState = DatesUIState.Dates(
+                CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
+                CalendarSyncState.SYNCED
+            ),
             uiMessage = null,
             isSelfPaced = true,
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
+            onCalendarSyncStateClick = {},
         )
     }
 }
@@ -639,12 +687,16 @@ private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DatesUIState.Dates(CourseDatesResult(mockedResponse, mockedCourseBannerInfo)),
+            uiState = DatesUIState.Dates(
+                CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
+                CalendarSyncState.SYNCED
+            ),
             uiMessage = null,
             isSelfPaced = true,
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
+            onCalendarSyncStateClick = {},
         )
     }
 }

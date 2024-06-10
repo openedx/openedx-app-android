@@ -1,6 +1,7 @@
 package org.openedx.profile.presentation.calendar
 
 import org.openedx.core.domain.model.CalendarData
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 
 data class CalendarUIState(
     val isCalendarExist: Boolean,
