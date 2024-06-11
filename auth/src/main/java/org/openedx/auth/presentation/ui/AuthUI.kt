@@ -540,9 +540,9 @@ internal fun PasswordVisibilityIcon(
     onClick: () -> Unit
 ) {
     val (image, description) = if (isPasswordVisible) {
-        Icons.Filled.VisibilityOff to "Hide password"
+        Icons.Filled.VisibilityOff to stringResource(R.string.auth_accessibility_hide_password)
     } else {
-        Icons.Filled.Visibility to "Show password"
+        Icons.Filled.Visibility to stringResource(R.string.auth_accessibility_show_password)
     }
 
     IconButton(onClick = onClick) {
