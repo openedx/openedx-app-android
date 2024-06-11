@@ -911,7 +911,7 @@ fun SubSectionUnitsList(
                             modifier = Modifier
                                 .size(16.dp)
                                 .alpha(if (unit.isCompleted()) 1f else 0f),
-                            painter = painterResource(id = R.drawable.ic_course_check),
+                            painter = painterResource(id = coreR.drawable.ic_core_check),
                             contentDescription = "done"
                         )
                         Text(

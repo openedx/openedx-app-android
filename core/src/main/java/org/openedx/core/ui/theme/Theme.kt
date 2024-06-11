@@ -69,6 +69,7 @@ private val DarkColorPalette = AppColors(
     inactiveButtonText = dark_primary_button_text,
 
     successGreen = dark_success_green,
+    successBackground = dark_success_background,
 
     datesSectionBarPastDue = dark_dates_section_bar_past_due,
     datesSectionBarToday = dark_dates_section_bar_today,
@@ -76,6 +77,7 @@ private val DarkColorPalette = AppColors(
     datesSectionBarNextWeek = dark_dates_section_bar_next_week,
     datesSectionBarUpcoming = dark_dates_section_bar_upcoming,
 
+    authSSOSuccessBackground = dark_auth_sso_success_background,
     authGoogleButtonBackground = dark_auth_google_button_background,
     authFacebookButtonBackground = dark_auth_facebook_button_background,
     authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
@@ -156,6 +158,7 @@ private val LightColorPalette = AppColors(
     inactiveButtonText = light_primary_button_text,
 
     successGreen = light_success_green,
+    successBackground = light_success_background,
 
     datesSectionBarPastDue = light_dates_section_bar_past_due,
     datesSectionBarToday = light_dates_section_bar_today,
@@ -163,6 +166,7 @@ private val LightColorPalette = AppColors(
     datesSectionBarNextWeek = light_dates_section_bar_next_week,
     datesSectionBarUpcoming = light_dates_section_bar_upcoming,
 
+    authSSOSuccessBackground = light_auth_sso_success_background,
     authGoogleButtonBackground = light_auth_google_button_background,
     authFacebookButtonBackground = light_auth_facebook_button_background,
     authMicrosoftButtonBackground = light_auth_microsoft_button_background,

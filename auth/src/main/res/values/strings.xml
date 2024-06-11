@@ -39,4 +39,6 @@
     <string name="auth_agreement_creating_account" tools:ignore="ExtraTranslation">By creating an account, you agree to the %1$s and %2$s and you acknowledge that %3$s and each Member process your personal data in accordance with the %4$s.</string>
     <string name="auth_agreement_signin_in">By signing in to this app, you agree to the %1$s and %2$s and you acknowledge that %3$s and each Member process your personal data in accordance with the %4$s.</string>
     <string name="auth_cdata_template" translatable="false"><![CDATA[<a href="%1$s">%2$s</a>]]></string>
+    <string name="auth_accessibility_show_password">Show password</string>
+    <string name="auth_accessibility_hide_password">Hide password</string>
 </resources>

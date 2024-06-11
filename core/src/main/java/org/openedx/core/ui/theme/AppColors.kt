@@ -51,6 +51,7 @@ data class AppColors(
     val inactiveButtonText: Color,
 
     val successGreen: Color,
+    val successBackground: Color,
 
     val datesSectionBarPastDue: Color,
     val datesSectionBarToday: Color,
@@ -58,6 +59,7 @@ data class AppColors(
     val datesSectionBarNextWeek: Color,
     val datesSectionBarUpcoming: Color,
 
+    val authSSOSuccessBackground: Color,
     val authGoogleButtonBackground: Color,
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
