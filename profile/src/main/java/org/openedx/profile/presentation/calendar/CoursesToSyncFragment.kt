@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import org.koin.androidx.compose.koinViewModel
+import org.openedx.core.UIMessage
+import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -81,10 +83,12 @@ class CoursesToSyncFragment : Fragment() {
                 val windowSize = rememberWindowSize()
                 val viewModel: CoursesToSyncViewModel = koinViewModel()
                 val uiState by viewModel.uiState.collectAsState()
+                val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
 
                 CoursesToSyncView(
                     windowSize = windowSize,
                     uiState = uiState,
+                    uiMessage = uiMessage,
                     onHideInactiveCoursesSwitchClick = {
                         viewModel.setHideInactiveCoursesEnabled(it)
                     },
@@ -105,6 +109,7 @@ private fun CoursesToSyncView(
     windowSize: WindowSize,
     onBackClick: () -> Unit,
     uiState: CoursesToSyncUIState,
+    uiMessage: UIMessage?,
     onHideInactiveCoursesSwitchClick: (Boolean) -> Unit,
     onCourseSyncCheckChange: (Boolean, String) -> Unit
 ) {
@@ -136,6 +141,11 @@ private fun CoursesToSyncView(
                 )
             )
         }
+
+        HandleUIMessage(
+            uiMessage = uiMessage,
+            scaffoldState = scaffoldState
+        )
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -365,6 +375,7 @@ private fun CoursesToSyncViewPreview() {
                 isHideInactiveCourses = true,
                 isLoading = false
             ),
+            uiMessage = null,
             onHideInactiveCoursesSwitchClick = {},
             onCourseSyncCheckChange = { _, _ -> },
             onBackClick = {}
