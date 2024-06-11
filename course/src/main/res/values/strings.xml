@@ -63,6 +63,18 @@
     <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
     <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
     <string name="course_subsection_assignment_info" translatable="false">%1$s - %2$s - %3$d / %4$d</string>
+    <string name="course_download_no_internet_dialog_description">Downloading this content requires an active internet connection. Please connect to the internet and try again.</string>
+    <string name="course_wifi_required">Wi-Fi Required</string>
+    <string name="course_download_wifi_required_dialog_description">Downloading this content requires an active WiFi connection. Please connect to a WiFi network and try again.</string>
+    <string name="course_download_failed">Download Failed</string>
+    <string name="course_download_failed_dialog_description">Unfortunately, this content failed to download. Please try again later or report this issue.</string>
+    <string name="course_download_confirm_dialog_description">Downloading this %1$s of content will save available blocks offline.</string>
+    <string name="course_download_on_cellural">Download on Cellular?</string>
+    <string name="course_download_on_cellural_dialog_description">Downloading this content will use 99MB of cellular data.</string>
+    <string name="course_download_remove_offline_content">Remove Offline Content?</string>
+    <string name="course_download_remove_dialog_description">Removing this content will free up %1$s.</string>
+    <string name="course_download">Download</string>
+    <string name="course_remove">Remove</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="zero">%1$s of %2$s  assignments complete</item>

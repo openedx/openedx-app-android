@@ -28,7 +28,7 @@ abstract class BaseDownloadViewModel(
     private val analytics: CoreAnalytics,
 ) : BaseViewModel() {
 
-    private val allBlocks = hashMapOf<String, Block>()
+    val allBlocks = hashMapOf<String, Block>()
 
     private val downloadableChildrenMap = hashMapOf<String, List<String>>()
     private val downloadModelsStatus = hashMapOf<String, DownloadedState>()

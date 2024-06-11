@@ -12,10 +12,10 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
-import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
@@ -53,6 +53,7 @@ import org.openedx.core.utils.FileUtil
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogManager
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics
@@ -83,6 +84,7 @@ val appModule = module {
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get(), get()) }
+    single { DownloadDialogManager(get(), get(), get()) }
 
     single { ImageProcessor(get()) }
 

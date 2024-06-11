@@ -603,7 +603,6 @@ fun CourseSection(
         filteredStatuses.any { it.isWaitingOrDownloading } -> DownloadedState.DOWNLOADING
         else -> DownloadedState.NOT_DOWNLOADED
     }
-    val downloadBlockIds = downloadedStateMap.keys.filter { it in block.descendants }
 
     Column(modifier = modifier
         .clip(MaterialTheme.appShapes.cardShape)
@@ -620,7 +619,7 @@ fun CourseSection(
             arrowDegrees = arrowRotation,
             downloadedState = downloadedState,
             onDownloadClick = {
-                onDownloadClick(downloadBlockIds)
+                onDownloadClick(block.descendants)
             }
         )
         courseSubSections?.forEach { subSectionBlock ->

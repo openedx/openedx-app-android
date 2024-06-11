@@ -43,6 +43,7 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogManager
 import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
@@ -55,6 +56,7 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
+    private val downloadDialogManager: DownloadDialogManager,
     val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
@@ -388,20 +390,74 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
-        blocksIds.forEach { blockId ->
-            if (isBlockDownloading(blockId)) {
-                courseRouter.navigateToDownloadQueue(
-                    fm = fragmentManager,
-                    getDownloadableChildren(blockId) ?: arrayListOf()
-                )
-            } else if (isBlockDownloaded(blockId)) {
-                removeDownloadModels(blockId)
-            } else {
-                saveDownloadModels(
-                    FileUtil(context).getExternalAppDir().path, blockId
-                )
+    fun findBlocksAtBlockLevel(blockData: List<Block>, rootBlockId: String): List<Block> {
+        val rootBlock = blockData.find { it.id == rootBlockId } ?: return emptyList()
+        val blockLevelBlocks = mutableListOf<Block>()
+
+        fun dfs(block: Block) {
+            block.descendants.forEach { descendantId ->
+                val descendantBlock = blockData.find { it.id == descendantId }
+                if (descendantBlock != null) {
+                    if (descendantBlock.descendants.isEmpty()) {
+                        // Якщо поточний descendant блок не має нащадків,
+                        // то додаємо його до списку blockLevelBlocks
+                        blockLevelBlocks.add(descendantBlock)
+                    } else {
+                        // Інакше викликаємо dfs для рекурсивного перегляду нащадків descendant блоку
+                        dfs(descendantBlock)
+                    }
+                }
             }
         }
+
+        dfs(rootBlock)
+        return blockLevelBlocks
+    }
+
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
+        viewModelScope.launch {
+            val downloadingBlocks = blocksIds.filter { isBlockDownloading(it) }
+            val downloadedBlocks = blocksIds.filter { isBlockDownloaded(it) }
+            if (downloadingBlocks.isNotEmpty()) {
+                val downloadableChildren = downloadingBlocks.mapNotNull { getDownloadableChildren(it) }.flatten()
+                courseRouter.navigateToDownloadQueue(
+                    fm = fragmentManager,
+                    downloadableChildren
+                )
+            } else {
+                (_uiState.value as? CourseOutlineUIState.CourseData)?.let { courseData ->
+                    val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+                    downloadDialogManager.showPopup(
+                        subSectionsBlocks = subSectionsBlocks,
+                        courseId = courseId,
+                        isAllBlocksDownloaded = downloadedBlocks.isNotEmpty(),
+                        fm = fragmentManager,
+                        removeDownloadModels = { blockId ->
+                            removeDownloadModels(blockId)
+                        },
+                        saveDownloadModels = { blockId ->
+                            saveDownloadModels(
+                                FileUtil(context).getExternalAppDir().path, blockId
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
+//        blocksIds.forEach { blockId ->
+//            if (isBlockDownloading(blockId)) {
+//                courseRouter.navigateToDownloadQueue(
+//                    fm = fragmentManager,
+//                    getDownloadableChildren(blockId) ?: arrayListOf()
+//                )
+//            } else if (isBlockDownloaded(blockId)) {
+//                removeDownloadModels(blockId)
+//            } else {
+//                saveDownloadModels(
+//                    FileUtil(context).getExternalAppDir().path, blockId
+//                )
+//            }
+//        }
     }
 }
