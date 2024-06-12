@@ -7,13 +7,14 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
+import org.openedx.core.system.StorageManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.domain.interactor.CourseInteractor
 
 class DownloadDialogManager(
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
-    private val interactor: CourseInteractor,
+    private val interactor: CourseInteractor
 ) {
 
     companion object {
@@ -45,6 +46,16 @@ class DownloadDialogManager(
                             dialog.show(
                                 uiState.fragmentManager,
                                 DownloadErrorDialogFragment.DIALOG_TAG
+                            )
+                        }
+
+                        StorageManager.getFreeStorage() > uiState.sizeSum -> {
+                            val dialog = DownloadStorageErrorDialogFragment.newInstance(
+                                uiState = uiState
+                            )
+                            dialog.show(
+                                uiState.fragmentManager,
+                                DownloadStorageErrorDialogFragment.DIALOG_TAG
                             )
                         }
 
@@ -127,7 +138,7 @@ class DownloadDialogManager(
                 DownloadDialogUIState(
                     downloadDialogItems = downloadDialogItems,
                     isAllBlocksDownloaded = isAllBlocksDownloaded,
-                    sizeSum = downloadDialogItems.sumOf { it.size },
+                    sizeSum = downloadDialogItems.sumOf { it.size } * 2,
                     fragmentManager = fragmentManager,
                     removeDownloadModels = {
                         subSectionsBlocks.forEach {
