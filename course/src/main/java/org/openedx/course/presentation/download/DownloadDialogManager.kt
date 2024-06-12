@@ -49,7 +49,7 @@ class DownloadDialogManager(
                             )
                         }
 
-                        StorageManager.getFreeStorage() > uiState.sizeSum -> {
+                        StorageManager.getFreeStorage() < uiState.sizeSum -> {
                             val dialog = DownloadStorageErrorDialogFragment.newInstance(
                                 uiState = uiState
                             )

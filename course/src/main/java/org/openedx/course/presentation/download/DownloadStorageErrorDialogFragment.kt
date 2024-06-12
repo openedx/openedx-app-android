@@ -5,35 +5,40 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.R
@@ -136,10 +141,9 @@ private fun DownloadStorageErrorDialogView(
                 }
             }
             StorageBar(
-                usedSpace = StorageManager.getTotalStorage() - StorageManager.getFreeStorage(),
                 freeSpace = StorageManager.getFreeStorage(),
                 totalSpace = StorageManager.getTotalStorage(),
-                requiredSpace = (StorageManager.getFreeStorage() * 1.3f).toLong()
+                requiredSpace = uiState.sizeSum
             )
             Text(
                 text = downloadDialogResource.description,
@@ -162,62 +166,81 @@ private fun DownloadStorageErrorDialogView(
 
 @Composable
 private fun StorageBar(
-    usedSpace: Long,
     freeSpace: Long,
     totalSpace: Long,
     requiredSpace: Long
 ) {
+    val cornerRadius = 2.dp
+    val boxPadding = 1.dp
+    val usedSpace = totalSpace - freeSpace
     val usedPercentage = (totalSpace + requiredSpace - freeSpace) / totalSpace.toFloat()
-    val requiredPercentage = (requiredSpace - freeSpace) / totalSpace.toFloat()
+    val reqPercentage = (requiredSpace - freeSpace) / totalSpace.toFloat()
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(24.dp)
-            .background(androidx.compose.ui.graphics.Color.Gray)
+    val animReqPercentage = remember { Animatable(Float.MIN_VALUE) }
+    LaunchedEffect(Unit) {
+        animReqPercentage.animateTo(
+            targetValue = reqPercentage,
+            animationSpec = tween(
+                durationMillis = 1000,
+                easing = LinearOutSlowInEasing
+            )
+        )
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp)
+                .background(MaterialTheme.appColors.background)
+                .clip(RoundedCornerShape(cornerRadius))
+                .border(
+                    2.dp,
+                    MaterialTheme.appColors.cardViewBorder,
+                    RoundedCornerShape(cornerRadius * 2)
+                )
+                .padding(2.dp)
+                .background(MaterialTheme.appColors.background),
         ) {
-            Canvas(
+            Box(
                 modifier = Modifier
                     .weight(usedPercentage)
                     .fillMaxHeight()
-            ) {
-                drawRoundRect(color = androidx.compose.ui.graphics.Color.Gray)
-            }
-            Canvas(
-                modifier = Modifier
-                    .weight(requiredPercentage)
-                    .fillMaxHeight()
-            ) {
-                drawRoundRect(color = androidx.compose.ui.graphics.Color.Red)
-            }
-        }
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp)
-    ) {
-        Text(
-            text = stringResource(
-                org.openedx.course.R.string.course_used_free_storage,
-                usedSpace.toFileSize(0, false),
-                freeSpace.toFileSize(0, false)
-            ),
-            style = MaterialTheme.typography.body1.copy(fontSize = 14.sp),
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = requiredSpace.toFileSize(0, false),
-            style = MaterialTheme.typography.body1.copy(
-                color = androidx.compose.ui.graphics.Color.Red,
-                fontSize = 14.sp
+                    .padding(top = boxPadding, bottom = boxPadding, start = boxPadding, end = boxPadding / 2)
+                    .clip(RoundedCornerShape(topStart = cornerRadius, bottomStart = cornerRadius))
+                    .background(MaterialTheme.appColors.cardViewBorder)
             )
-        )
+            Box(
+                modifier = Modifier
+                    .weight(animReqPercentage.value)
+                    .fillMaxHeight()
+                    .padding(top = boxPadding, bottom = boxPadding, end = boxPadding, start = boxPadding / 2)
+                    .clip(RoundedCornerShape(topEnd = cornerRadius, bottomEnd = cornerRadius))
+                    .background(MaterialTheme.appColors.error)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(
+                    org.openedx.course.R.string.course_used_free_storage,
+                    usedSpace.toFileSize(0, false),
+                    freeSpace.toFileSize(0, false)
+                ),
+                style = MaterialTheme.appTypography.labelSmall,
+                color = MaterialTheme.appColors.textFieldHint,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = requiredSpace.toFileSize(0, false),
+                style = MaterialTheme.appTypography.labelSmall,
+                color = MaterialTheme.appColors.error,
+            )
+        }
     }
 }
 
