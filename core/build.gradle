@@ -114,6 +114,10 @@ dependencies {
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
+    // Fullstory
+    api 'com.fullstory:instrumentation-full:1.47.0@aar'
+    api 'com.fullstory:compose:1.47.0@aar'
+
     // Room
     api "androidx.room:room-runtime:$room_version"
     api "androidx.room:room-ktx:$room_version"
