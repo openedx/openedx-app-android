@@ -65,6 +65,10 @@ class Config(context: Context) {
         return getObjectOrNewInstance(SEGMENT_IO, SegmentConfig::class.java)
     }
 
+    fun getFullstoryConfig(): FullstoryConfig {
+        return getObjectOrNewInstance(FULLSTORY, FullstoryConfig::class.java)
+    }
+
     fun getBrazeConfig(): BrazeConfig {
         return getObjectOrNewInstance(BRAZE, BrazeConfig::class.java)
     }
@@ -158,6 +162,7 @@ class Config(context: Context) {
         private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
         private const val FIREBASE = "FIREBASE"
         private const val SEGMENT_IO = "SEGMENT_IO"
+        private const val FULLSTORY = "FULLSTORY"
         private const val BRAZE = "BRAZE"
         private const val FACEBOOK = "FACEBOOK"
         private const val GOOGLE = "GOOGLE"
