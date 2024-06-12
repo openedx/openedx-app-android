@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.extension.parcelable
 import org.openedx.core.presentation.dialog.DefaultDialogBox
@@ -49,8 +49,6 @@ import org.openedx.core.R as coreR
 
 class DisableCalendarSyncDialogFragment : DialogFragment() {
 
-    private val viewModel by viewModel<DisableCalendarSyncDialogViewModel>()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,6 +58,7 @@ class DisableCalendarSyncDialogFragment : DialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val viewModel: DisableCalendarSyncDialogViewModel = koinViewModel()
                 DisableCalendarSyncDialogView(
                     calendarData = requireArguments().parcelable<CalendarData>(ARG_CALENDAR_DATA),
                     onCancelClick = {

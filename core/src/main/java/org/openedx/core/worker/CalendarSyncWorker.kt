@@ -21,8 +21,10 @@ import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.EnrollmentStatus
 import org.openedx.core.system.CalendarManager
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.system.notifier.calendar.CalendarSyncFailed
+import org.openedx.core.system.notifier.calendar.CalendarSyncOffline
 import org.openedx.core.system.notifier.calendar.CalendarSynced
 import org.openedx.core.system.notifier.calendar.CalendarSyncing
 
@@ -35,6 +37,7 @@ class CalendarSyncWorker(
     private val calendarInteractor: CalendarInteractor by inject()
     private val calendarNotifier: CalendarNotifier by inject()
     private val calendarPreferences: CalendarPreferences by inject()
+    private val networkConnection: NetworkConnection by inject()
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANEL_ID)
@@ -84,7 +87,9 @@ class CalendarSyncWorker(
     private suspend fun tryToSyncCalendar(courseId: String?) {
         val isCalendarCreated = calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST
         val isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled
-        if (isCalendarCreated && isCalendarSyncEnabled) {
+        if (!networkConnection.isOnline()) {
+            calendarNotifier.send(CalendarSyncOffline)
+        } else if (isCalendarCreated && isCalendarSyncEnabled) {
             calendarNotifier.send(CalendarSyncing)
             val enrollmentsStatus = calendarInteractor.getEnrollmentsStatus()
             if (courseId.isNullOrEmpty()) {

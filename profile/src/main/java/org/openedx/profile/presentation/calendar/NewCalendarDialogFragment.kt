@@ -38,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,7 +63,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.DefaultDialogBox
@@ -79,8 +80,6 @@ import org.openedx.core.R as CoreR
 
 class NewCalendarDialogFragment : DialogFragment() {
 
-    private val viewModel by viewModel<NewCalendarDialogViewModel>()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -90,6 +89,24 @@ class NewCalendarDialogFragment : DialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val viewModel: NewCalendarDialogViewModel = koinViewModel()
+
+                LaunchedEffect(Unit) {
+                    viewModel.uiMessage.collect { message ->
+                        if (message.isNotEmpty()) {
+                            context.toastMessage(message)
+                        }
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    viewModel.isSuccess.collect { isSuccess ->
+                        if (isSuccess) {
+                            dismiss()
+                        }
+                    }
+                }
+
                 NewCalendarDialog(
                     newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(ARG_DIALOG_TYPE)
                         ?: NewCalendarDialogType.CREATE_NEW,
@@ -97,11 +114,7 @@ class NewCalendarDialogFragment : DialogFragment() {
                         dismiss()
                     },
                     onBeginSyncingClick = { calendarTitle, calendarColor ->
-                        val isCalendarCreated = viewModel.createCalendar(calendarTitle, calendarColor)
-                        if (!isCalendarCreated) {
-                            requireContext().toastMessage(context.getString(CoreR.string.core_error_unknown_error))
-                        }
-                        dismiss()
+                        viewModel.createCalendar(calendarTitle, calendarColor)
                     }
                 )
             }

@@ -18,6 +18,7 @@ import org.openedx.core.system.notifier.calendar.CalendarCreated
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.system.notifier.calendar.CalendarSyncDisabled
 import org.openedx.core.system.notifier.calendar.CalendarSyncFailed
+import org.openedx.core.system.notifier.calendar.CalendarSyncOffline
 import org.openedx.core.system.notifier.calendar.CalendarSynced
 import org.openedx.core.system.notifier.calendar.CalendarSyncing
 import org.openedx.core.worker.CalendarSyncScheduler
@@ -47,6 +48,7 @@ class CalendarViewModel(
         get() = _uiState.asStateFlow()
 
     init {
+        calendarSyncScheduler.requestImmediateSync()
         viewModelScope.launch {
             calendarNotifier.notifier.collect { calendarEvent ->
                 when (calendarEvent) {
@@ -67,6 +69,10 @@ class CalendarViewModel(
 
                     CalendarSyncFailed -> {
                         _uiState.update { it.copy(calendarSyncState = CalendarSyncState.SYNC_FAILED) }
+                    }
+
+                    CalendarSyncOffline -> {
+                        _uiState.update { it.copy(calendarSyncState = CalendarSyncState.OFFLINE) }
                     }
 
                     CalendarSyncDisabled -> {
@@ -120,7 +126,6 @@ class CalendarViewModel(
             }
         }
     }
-
 
     private fun isCalendarExist(): Boolean {
         return calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST &&

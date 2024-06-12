@@ -180,7 +180,7 @@ val screenModule = module {
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
     viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { CoursesToSyncViewModel(get(), get(), get(), get()) }
-    viewModel { NewCalendarDialogViewModel(get(), get(), get(), get()) }
+    viewModel { NewCalendarDialogViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { DisableCalendarSyncDialogViewModel(get(), get(), get(), get()) }
     factory { CalendarRepository(get(), get(), get()) }
     factory { CalendarInteractor(get()) }
@@ -211,7 +211,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String, courseTitle: String, enrollmentMode: String, resumeBlockId: String) ->

@@ -89,7 +89,7 @@ val appModule = module {
     single { ResourceManager(get()) }
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
-    single { CalendarManager(get(), get(), get()) }
+    single { CalendarManager(get(), get()) }
     single { DatabaseManager(get(), get(), get(), get()) }
     single<IDatabaseManager> { get<DatabaseManager>() }
 

@@ -8,7 +8,6 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit
 class CalendarManager(
     private val context: Context,
     private val corePreferences: CorePreferences,
-    private val resourceManager: ResourceManager,
 ) {
     private val logger = Logger(TAG)
 
@@ -140,7 +138,7 @@ class CalendarManager(
             put(CalendarContract.Events.DTEND, endMillis)
             put(
                 CalendarContract.Events.TITLE,
-                "${resourceManager.getString(R.string.core_assignment_due_tag)} : $courseName"
+                "${courseDateBlock.title} : $courseName"
             )
             put(
                 CalendarContract.Events.DESCRIPTION,
@@ -169,7 +167,7 @@ class CalendarManager(
         courseDateBlock: CourseDateBlock,
         isDeeplinkEnabled: Boolean
     ): String {
-        val eventDescription = courseDateBlock.title
+        val eventDescription = courseDateBlock.description
         // The following code for branch and deep links will be enabled after implementation
         /*
         if (isDeeplinkEnabled && !TextUtils.isEmpty(courseDateBlock.blockId)) {

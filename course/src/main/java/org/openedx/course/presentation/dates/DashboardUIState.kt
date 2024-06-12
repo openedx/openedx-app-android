@@ -3,12 +3,12 @@ package org.openedx.course.presentation.dates
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 
-sealed class DatesUIState {
+sealed interface DatesUIState {
     data class Dates(
         val courseDatesResult: CourseDatesResult,
         val calendarSyncState: CalendarSyncState
-    ) : DatesUIState()
+    ) : DatesUIState
 
-    object Empty : DatesUIState()
-    object Loading : DatesUIState()
+    data object Empty : DatesUIState
+    data object Loading : DatesUIState
 }
