@@ -21,12 +21,10 @@ class DownloadDialogManager(
     }
 
     private val uiState = MutableSharedFlow<DownloadDialogUIState>()
-    private var fragmentManager: FragmentManager? = null
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
             uiState.collect { uiState ->
-                fragmentManager?.let { fm ->
                     when {
                         uiState.isAllBlocksDownloaded -> {
                             val dialog = DownloadConfirmDialogFragment.newInstance(
@@ -34,7 +32,7 @@ class DownloadDialogManager(
                                 uiState = uiState
                             )
                             dialog.show(
-                                fm,
+                                uiState.fragmentManager,
                                 DownloadConfirmDialogFragment.DIALOG_TAG
                             )
                         }
@@ -45,7 +43,7 @@ class DownloadDialogManager(
                                 uiState = uiState
                             )
                             dialog.show(
-                                fm,
+                                uiState.fragmentManager,
                                 DownloadErrorDialogFragment.DIALOG_TAG
                             )
                         }
@@ -56,7 +54,7 @@ class DownloadDialogManager(
                                 uiState = uiState
                             )
                             dialog.show(
-                                fm,
+                                uiState.fragmentManager,
                                 DownloadErrorDialogFragment.DIALOG_TAG
                             )
                         }
@@ -67,7 +65,7 @@ class DownloadDialogManager(
                                 uiState = uiState
                             )
                             dialog.show(
-                                fm,
+                                uiState.fragmentManager,
                                 DownloadConfirmDialogFragment.DIALOG_TAG
                             )
                         }
@@ -78,11 +76,10 @@ class DownloadDialogManager(
                                 uiState = uiState
                             )
                             dialog.show(
-                                fm,
+                                uiState.fragmentManager,
                                 DownloadConfirmDialogFragment.DIALOG_TAG
                             )
                         }
-                    }
                 }
             }
         }
@@ -92,14 +89,14 @@ class DownloadDialogManager(
         subSectionsBlocks: List<Block>,
         courseId: String,
         isAllBlocksDownloaded: Boolean,
-        fm: FragmentManager,
+        fragmentManager: FragmentManager,
         removeDownloadModels: (blockId: String) -> Unit,
         saveDownloadModels: (blockId: String) -> Unit,
     ) {
-        fragmentManager = fm
         getDownloadItems(
             subSectionsBlocks = subSectionsBlocks,
             courseId = courseId,
+            fragmentManager = fragmentManager,
             isAllBlocksDownloaded = isAllBlocksDownloaded,
             removeDownloadModels = removeDownloadModels,
             saveDownloadModels = saveDownloadModels
@@ -109,6 +106,7 @@ class DownloadDialogManager(
     private fun getDownloadItems(
         subSectionsBlocks: List<Block>,
         courseId: String,
+        fragmentManager: FragmentManager,
         isAllBlocksDownloaded: Boolean,
         removeDownloadModels: (blockId: String) -> Unit,
         saveDownloadModels: (blockId: String) -> Unit,
@@ -130,6 +128,7 @@ class DownloadDialogManager(
                     downloadDialogItems = downloadDialogItems,
                     isAllBlocksDownloaded = isAllBlocksDownloaded,
                     sizeSum = downloadDialogItems.sumOf { it.size },
+                    fragmentManager = fragmentManager,
                     removeDownloadModels = {
                         subSectionsBlocks.forEach {
                             removeDownloadModels(it.id)

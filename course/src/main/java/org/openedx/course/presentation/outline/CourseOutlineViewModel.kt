@@ -431,7 +431,7 @@ class CourseOutlineViewModel(
                         subSectionsBlocks = subSectionsBlocks,
                         courseId = courseId,
                         isAllBlocksDownloaded = downloadedBlocks.isNotEmpty(),
-                        fm = fragmentManager,
+                        fragmentManager = fragmentManager,
                         removeDownloadModels = { blockId ->
                             removeDownloadModels(blockId)
                         },

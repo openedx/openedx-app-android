@@ -32,6 +32,7 @@ import androidx.fragment.app.DialogFragment
 import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
+import org.openedx.core.system.PreviewFragmentManager
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -188,6 +189,7 @@ private fun DownloadErrorDialogViewPreview() {
                 ),
                 sizeSum = 100000,
                 isAllBlocksDownloaded = false,
+                fragmentManager = PreviewFragmentManager,
                 removeDownloadModels = {},
                 saveDownloadModels = {}
             ),

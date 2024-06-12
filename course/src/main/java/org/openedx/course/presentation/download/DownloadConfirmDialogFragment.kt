@@ -36,6 +36,7 @@ import androidx.fragment.app.DialogFragment
 import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
+import org.openedx.core.system.PreviewFragmentManager
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -245,7 +246,8 @@ private fun DownloadConfirmDialogViewPreview() {
                 sizeSum = 1000000,
                 isAllBlocksDownloaded = false,
                 saveDownloadModels = {},
-                removeDownloadModels = {}
+                removeDownloadModels = {},
+                fragmentManager = PreviewFragmentManager
             ),
             dialogType = DownloadConfirmDialogType.CONFIRM,
             onConfirmClick = {},
