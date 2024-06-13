@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,6 +59,7 @@ import org.openedx.auth.R
 import org.openedx.auth.presentation.signin.AuthEvent
 import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
+import org.openedx.auth.presentation.ui.PasswordVisibilityIcon
 import org.openedx.auth.presentation.ui.SocialAuthView
 import org.openedx.core.UIMessage
 import org.openedx.core.extension.TextConverter
@@ -305,11 +307,11 @@ private fun PasswordTextField(
     onPressDone: () -> Unit,
 ) {
     var passwordTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(
-            TextFieldValue("")
-        )
+        mutableStateOf(TextFieldValue(""))
     }
+    var isPasswordVisible by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
     Text(
         modifier = Modifier
             .testTag("txt_password_label")
@@ -318,7 +320,9 @@ private fun PasswordTextField(
         color = MaterialTheme.appColors.textPrimary,
         style = MaterialTheme.appTypography.labelLarge
     )
+
     Spacer(modifier = Modifier.height(8.dp))
+
     OutlinedTextField(
         modifier = modifier.testTag("tf_password"),
         value = passwordTextFieldValue,
@@ -341,11 +345,18 @@ private fun PasswordTextField(
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
+        trailingIcon = {
+            PasswordVisibilityIcon(
+                isPasswordVisible = isPasswordVisible,
+                onClick = { isPasswordVisible = !isPasswordVisible }
+            )
+        },
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (isPasswordVisible) VisualTransformation.None
+        else PasswordVisualTransformation(),
         keyboardActions = KeyboardActions {
             focusManager.clearFocus()
             onPressDone()
