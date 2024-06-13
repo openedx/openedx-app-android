@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.outline
 
-import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -45,7 +44,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.download.DownloadDialogManager
-import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
@@ -58,6 +56,7 @@ class CourseOutlineViewModel(
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
     private val downloadDialogManager: DownloadDialogManager,
+    private val fileUtil: FileUtil,
     val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
@@ -129,20 +128,6 @@ class CourseOutlineViewModel(
         }
 
         getCourseData()
-    }
-
-    override fun saveDownloadModels(folder: String, id: String) {
-        if (preferencesManager.videoSettings.wifiDownloadOnly) {
-            if (networkConnection.isWifiConnected()) {
-                super.saveDownloadModels(folder, id)
-            } else {
-                viewModelScope.launch {
-                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi)))
-                }
-            }
-        } else {
-            super.saveDownloadModels(folder, id)
-        }
     }
 
     fun updateCourseData() {
@@ -393,7 +378,7 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
         viewModelScope.launch {
             val courseData = _uiState.value as? CourseOutlineUIState.CourseData ?: return@launch
 
@@ -431,7 +416,7 @@ class CourseOutlineViewModel(
                     fragmentManager = fragmentManager,
                     removeDownloadModels = ::removeDownloadModels,
                     saveDownloadModels = { blockId ->
-                        saveDownloadModels(FileUtil(context).getExternalAppDir().path, blockId)
+                        saveDownloadModels(fileUtil.getExternalAppDir().path, blockId)
                     }
                 )
             }

@@ -33,6 +33,15 @@ class CourseRepository(
         return courseStructure[courseId] != null
     }
 
+    suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
+        val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
+        if (cachedCourseStructure != null) {
+            return cachedCourseStructure.mapToDomain()
+        } else {
+            throw NoCachedDataException()
+        }
+    }
+
     suspend fun getCourseStructure(courseId: String, isNeedRefresh: Boolean): CourseStructure {
         if (!isNeedRefresh) courseStructure[courseId]?.let { return it }
 

@@ -10,7 +10,8 @@ data class DownloadDialogUIState(
     val downloadDialogItems: List<DownloadDialogItem> = emptyList(),
     val sizeSum: Long,
     val isAllBlocksDownloaded: Boolean,
-    var fragmentManager: @RawValue FragmentManager,
+    val isDownloadFailed: Boolean,
+    val fragmentManager: @RawValue FragmentManager,
     val removeDownloadModels: () -> Unit,
     val saveDownloadModels: () -> Unit
 ) : Parcelable

@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
@@ -20,7 +21,8 @@ import org.openedx.core.ui.theme.appTypography
 fun DownloadDialogItem(
     modifier: Modifier = Modifier,
     title: String,
-    size: String
+    size: String,
+    icon: Painter = painterResource(id = R.drawable.ic_core_chapter_icon)
 ) {
     Row(
         modifier = modifier.padding(vertical = 6.dp),
@@ -28,7 +30,7 @@ fun DownloadDialogItem(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_core_chapter_icon),
+            painter = icon,
             tint = MaterialTheme.appColors.textDark,
             contentDescription = null,
             modifier = Modifier.size(24.dp)

@@ -140,8 +140,7 @@ fun CourseOutlineScreen(
         onDownloadClick = { blocksIds ->
             viewModel.downloadBlocks(
                 blocksIds = blocksIds,
-                fragmentManager = fragmentManager,
-                context = context
+                fragmentManager = fragmentManager
             )
         },
         onResetDatesClick = {

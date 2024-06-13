@@ -245,6 +245,7 @@ private fun DownloadConfirmDialogViewPreview() {
                 ),
                 sizeSum = 1000000,
                 isAllBlocksDownloaded = false,
+                isDownloadFailed = false,
                 saveDownloadModels = {},
                 removeDownloadModels = {},
                 fragmentManager = PreviewFragmentManager

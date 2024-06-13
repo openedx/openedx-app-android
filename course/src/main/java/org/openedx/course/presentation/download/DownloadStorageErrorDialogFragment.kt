@@ -267,6 +267,7 @@ private fun DownloadStorageErrorDialogViewPreview() {
                 ),
                 sizeSum = 100000,
                 isAllBlocksDownloaded = false,
+                isDownloadFailed = false,
                 fragmentManager = PreviewFragmentManager,
                 removeDownloadModels = {},
                 saveDownloadModels = {}

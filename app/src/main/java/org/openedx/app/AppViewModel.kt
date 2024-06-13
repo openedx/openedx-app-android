@@ -16,17 +16,22 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.DownloadFailed
+import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.utils.FileUtil
+import org.openedx.course.presentation.download.DownloadDialogManager
 
 class AppViewModel(
     private val config: Config,
-    private val notifier: AppNotifier,
+    private val appNotifier: AppNotifier,
     private val room: RoomDatabase,
     private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
     private val analytics: AppAnalytics,
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
+    private val downloadNotifier: DownloadNotifier,
+    private val downloadDialogManager: DownloadDialogManager,
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
@@ -40,6 +45,8 @@ class AppViewModel(
     val isBranchEnabled get() = config.getBranchConfig().enabled
     private val canResetAppDirectory get() = preferencesManager.canResetAppDirectory
 
+    var fragmentManager: FragmentManager? = null
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         setUserId()
@@ -47,7 +54,7 @@ class AppViewModel(
             resetAppDirectory()
         }
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
+            appNotifier.notifier.collect { event ->
                 if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
                     logoutHandledAt = System.currentTimeMillis()
                     preferencesManager.clear()
@@ -56,6 +63,18 @@ class AppViewModel(
                     }
                     analytics.logoutEvent(true)
                     _logoutUser.value = Unit
+                }
+            }
+        }
+        viewModelScope.launch {
+            downloadNotifier.notifier.collect { event ->
+                if (event is DownloadFailed) {
+                    fragmentManager?.let {
+                        downloadDialogManager.showDownloadFailedPopup(
+                            downloadModel = event.downloadModel,
+                            fragmentManager = it,
+                        )
+                    }
                 }
             }
         }

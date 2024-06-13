@@ -16,6 +16,10 @@ class CourseInteractor(
         return repository.getCourseStructure(courseId, isNeedRefresh)
     }
 
+    suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
+        return repository.getCourseStructureFromCache(courseId)
+    }
+
     suspend fun getCourseStructureForVideos(
         courseId: String,
         isNeedRefresh: Boolean = false

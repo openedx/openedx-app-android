@@ -85,7 +85,7 @@ val appModule = module {
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
     single { CalendarManager(get(), get(), get()) }
-    single { DownloadDialogManager(get(), get(), get()) }
+    single { DownloadDialogManager(get(), get(), get(), get()) }
 
     single { ImageProcessor(get()) }
 

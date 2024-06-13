@@ -10,6 +10,7 @@ import org.openedx.course.presentation.unit.video.VideoUnitFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment
 import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
+import java.io.File
 
 class CourseUnitContainerAdapter(
     fragment: Fragment,
@@ -81,7 +82,7 @@ class CourseUnitContainerAdapter(
                     block.isLTIConsumerBlock ||
                     block.isSurveyBlock -> {
                 val downloadedModel = viewModel.getDownloadModelById(block.id)
-                val offlineUrl = downloadedModel?.path ?: ""
+                val offlineUrl = downloadedModel?.let { it.path + File.separator + "index.html" } ?: ""
                 val lastModified: String =
                     if (downloadedModel != null && !viewModel.hasNetworkConnection) {
                         downloadedModel.lastModified ?: ""

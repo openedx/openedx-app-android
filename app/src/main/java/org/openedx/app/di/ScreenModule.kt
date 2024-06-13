@@ -67,7 +67,20 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
 
-    viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get(), get(), get()) }
+    viewModel {
+        AppViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(named("IODispatcher")),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
     viewModel { MainViewModel(get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
@@ -223,6 +236,7 @@ val screenModule = module {
         CourseOutlineViewModel(
             courseId,
             courseTitle,
+            get(),
             get(),
             get(),
             get(),

@@ -22,6 +22,7 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.download.CurrentProgress
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
+import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
 import org.openedx.core.utils.FileUtil
@@ -31,10 +32,7 @@ class DownloadWorker(
     parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters), CoroutineScope {
 
-    private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as
-                NotificationManager
-
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
 
     private val notifier by inject<DownloadNotifier>(DownloadNotifier::class.java)
@@ -42,6 +40,7 @@ class DownloadWorker(
     private val downloadHelper: DownloadHelper by inject(DownloadHelper::class.java)
 
     private var downloadEnqueue = listOf<DownloadModel>()
+    private var downloadError = mutableListOf<DownloadModel>()
 
     private val folder = FileUtil(context).getExternalAppDir()
 
@@ -58,7 +57,6 @@ class DownloadWorker(
         fileDownloader.progressListener = null
         return Result.success()
     }
-
 
     private fun createForegroundInfo(): ForegroundInfo {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -140,9 +138,13 @@ class DownloadWorker(
                 )
             } else {
                 downloadDao.removeDownloadModel(downloadTask.id)
+                downloadError.add(downloadTask)
             }
             newDownload()
         } else {
+            if (downloadError.isNotEmpty()) {
+                notifier.send(DownloadFailed(downloadError))
+            }
             return
         }
     }

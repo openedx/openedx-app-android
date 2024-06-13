@@ -73,6 +73,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         viewModel.logAppLaunchEvent()
         setContentView(binding.root)
         val container = binding.rootLayout
+        viewModel.fragmentManager = supportFragmentManager
 
         container.addView(object : View(this) {
             override fun onConfigurationChanged(newConfig: Configuration?) {

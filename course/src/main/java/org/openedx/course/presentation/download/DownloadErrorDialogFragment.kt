@@ -33,6 +33,7 @@ import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.system.PreviewFragmentManager
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -78,6 +79,11 @@ class DownloadErrorDialogFragment : DialogFragment() {
                 DownloadErrorDialogView(
                     downloadDialogResource = downloadDialogResource,
                     uiState = uiState,
+                    dialogType = dialogType,
+                    onTryAgainClick = {
+                        uiState.saveDownloadModels()
+                        dismiss()
+                    },
                     onCancelClick = {
                         dismiss()
                     }
@@ -110,7 +116,9 @@ private fun DownloadErrorDialogView(
     modifier: Modifier = Modifier,
     uiState: DownloadDialogUIState,
     downloadDialogResource: DownloadDialogResource,
-    onCancelClick: () -> Unit
+    dialogType: DownloadErrorDialogType,
+    onTryAgainClick: () -> Unit,
+    onCancelClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     DefaultDialogBox(
@@ -152,6 +160,13 @@ private fun DownloadErrorDialogView(
                 style = MaterialTheme.appTypography.bodyMedium,
                 color = MaterialTheme.appColors.textDark
             )
+            if (dialogType == DownloadErrorDialogType.DOWNLOAD_FAILED) {
+                OpenEdXButton(
+                    text = stringResource(id = coreR.string.core_error_try_again),
+                    backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                    onClick = onTryAgainClick,
+                )
+            }
             OpenEdXOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = org.openedx.core.R.string.core_cancel),
@@ -189,11 +204,14 @@ private fun DownloadErrorDialogViewPreview() {
                 ),
                 sizeSum = 100000,
                 isAllBlocksDownloaded = false,
+                isDownloadFailed = false,
                 fragmentManager = PreviewFragmentManager,
                 removeDownloadModels = {},
                 saveDownloadModels = {}
             ),
-            onCancelClick = {}
+            onCancelClick = {},
+            onTryAgainClick = {},
+            dialogType = DownloadErrorDialogType.DOWNLOAD_FAILED
         )
     }
 }

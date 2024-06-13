@@ -8,6 +8,8 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
+import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.system.StorageManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -15,7 +17,8 @@ import org.openedx.course.domain.interactor.CourseInteractor
 class DownloadDialogManager(
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
-    private val interactor: CourseInteractor
+    private val interactor: CourseInteractor,
+    private val workerController: DownloadWorkerController
 ) {
 
     companion object {
@@ -28,6 +31,17 @@ class DownloadDialogManager(
         CoroutineScope(Dispatchers.IO).launch {
             uiState.collect { uiState ->
                 when {
+                    uiState.isDownloadFailed -> {
+                        val dialog = DownloadErrorDialogFragment.newInstance(
+                            dialogType = DownloadErrorDialogType.DOWNLOAD_FAILED,
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadErrorDialogFragment.DIALOG_TAG
+                        )
+                    }
+
                     uiState.isAllBlocksDownloaded -> {
                         val dialog = DownloadConfirmDialogFragment.newInstance(
                             dialogType = DownloadConfirmDialogType.REMOVE,
@@ -105,7 +119,7 @@ class DownloadDialogManager(
         removeDownloadModels: (blockId: String) -> Unit,
         saveDownloadModels: (blockId: String) -> Unit,
     ) {
-        getDownloadItems(
+        createDownloadItems(
             subSectionsBlocks = subSectionsBlocks,
             courseId = courseId,
             fragmentManager = fragmentManager,
@@ -115,7 +129,63 @@ class DownloadDialogManager(
         )
     }
 
-    private fun getDownloadItems(
+    fun showDownloadFailedPopup(
+        downloadModel: List<DownloadModel>,
+        fragmentManager: FragmentManager,
+    ) {
+        createDownloadItems(
+            downloadModel = downloadModel,
+            fragmentManager = fragmentManager,
+        )
+    }
+
+    private fun createDownloadItems(
+        downloadModel: List<DownloadModel>,
+        fragmentManager: FragmentManager,
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val courseIds = downloadModel.map { it.courseId }.distinct()
+            val blockIds = downloadModel.map { it.id }
+            val notDownloadedSubSections = mutableListOf<Block>()
+            val allDownloadDialogItems = mutableListOf<DownloadDialogItem>()
+            courseIds.forEach { courseId ->
+                val courseStructure = interactor.getCourseStructureFromCache(courseId)
+                val allSubSectionBlocks = courseStructure.blockData.filter { it.type == BlockType.SEQUENTIAL }
+                allSubSectionBlocks.forEach { subSectionsBlock ->
+                    val verticalBlocks = courseStructure.blockData.filter { it.id in subSectionsBlock.descendants }
+                    val blocks = courseStructure.blockData.filter {
+                        it.id in verticalBlocks.flatMap { it.descendants } && it.id in blockIds
+                    }
+                    val size = blocks.sumOf { getFileSize(it) * 2 }
+                    if (blocks.isNotEmpty()) notDownloadedSubSections.add(subSectionsBlock)
+                    if (size > 0) {
+                        val downloadDialogItem = DownloadDialogItem(
+                            title = subSectionsBlock.displayName,
+                            size = size
+                        )
+                        allDownloadDialogItems.add(downloadDialogItem)
+                    }
+                }
+            }
+            uiState.emit(
+                DownloadDialogUIState(
+                    downloadDialogItems = allDownloadDialogItems,
+                    isAllBlocksDownloaded = false,
+                    isDownloadFailed = true,
+                    sizeSum = allDownloadDialogItems.sumOf { it.size },
+                    fragmentManager = fragmentManager,
+                    removeDownloadModels = {},
+                    saveDownloadModels = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            workerController.saveModels(downloadModel)
+                        }
+                    }
+                )
+            )
+        }
+    }
+
+    private fun createDownloadItems(
         subSectionsBlocks: List<Block>,
         courseId: String,
         fragmentManager: FragmentManager,
@@ -128,35 +198,28 @@ class DownloadDialogManager(
             val downloadDialogItems = subSectionsBlocks.mapNotNull { subSectionsBlock ->
                 val verticalBlocks = courseStructure.blockData.filter { it.id in subSectionsBlock.descendants }
                 val blocks = courseStructure.blockData.filter { it.id in verticalBlocks.flatMap { it.descendants } }
-                val size = blocks.sumOf {
-                    getFileSize(it) * 2
-                }.toLong()
-                if (size > 0) {
-                    DownloadDialogItem(title = subSectionsBlock.displayName, size = size)
-                } else {
-                    null
-                }
+                val size = blocks.sumOf { getFileSize(it) * 2 }
+                if (size > 0) DownloadDialogItem(title = subSectionsBlock.displayName, size = size) else null
             }
+
             uiState.emit(
                 DownloadDialogUIState(
                     downloadDialogItems = downloadDialogItems,
                     isAllBlocksDownloaded = isAllBlocksDownloaded,
+                    isDownloadFailed = false,
                     sizeSum = downloadDialogItems.sumOf { it.size },
                     fragmentManager = fragmentManager,
                     removeDownloadModels = {
-                        subSectionsBlocks.forEach {
-                            removeDownloadModels(it.id)
-                        }
+                        subSectionsBlocks.forEach { removeDownloadModels(it.id) }
                     },
                     saveDownloadModels = {
-                        subSectionsBlocks.forEach {
-                            saveDownloadModels(it.id)
-                        }
+                        subSectionsBlocks.forEach { saveDownloadModels(it.id) }
                     }
                 )
             )
         }
     }
+
 
     private fun getFileSize(block: Block): Long {
         return when (block.type) {
