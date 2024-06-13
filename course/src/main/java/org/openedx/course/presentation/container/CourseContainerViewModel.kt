@@ -124,6 +124,10 @@ class CourseContainerViewModel(
                     }
 
                     is CreateCalendarSyncEvent -> {
+                        // Skip out-of-sync check if any calendar dialog is visible
+                        if (event.checkOutOfSync && _calendarSyncUIState.value.isDialogVisible) {
+                            return@collect
+                        }
                         _calendarSyncUIState.update {
                             val dialogType = CalendarSyncDialogType.valueOf(event.dialogType)
                             it.copy(

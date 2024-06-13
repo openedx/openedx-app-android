@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -23,6 +24,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +73,10 @@ fun RequiredFields(
 ) {
     fields.forEach { field ->
         when (field.type) {
-            RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
+            RegistrationFieldType.TEXT,
+            RegistrationFieldType.EMAIL,
+            RegistrationFieldType.CONFIRM_EMAIL,
+            RegistrationFieldType.PASSWORD -> {
                 InputRegistrationField(
                     modifier = Modifier.fillMaxWidth(),
                     isErrorShown = showErrorMap[field.name] ?: true,
@@ -289,11 +295,15 @@ fun InputRegistrationField(
     var inputRegistrationFieldValue by rememberSaveable {
         mutableStateOf(registrationField.placeholder)
     }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
-    val visualTransformation = if (registrationField.type == RegistrationFieldType.PASSWORD) {
-        PasswordVisualTransformation()
-    } else {
-        VisualTransformation.None
+    val visualTransformation = remember(isPasswordVisible) {
+        if (registrationField.type == RegistrationFieldType.PASSWORD && !isPasswordVisible) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        }
     }
     val keyboardType = when (registrationField.type) {
         RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.EMAIL -> KeyboardType.Email
@@ -315,6 +325,18 @@ fun InputRegistrationField(
     } else {
         registrationField.instructions
     }
+    val trailingIcon: @Composable (() -> Unit)? =
+        if (registrationField.type == RegistrationFieldType.PASSWORD) {
+            {
+                PasswordVisibilityIcon(
+                    isPasswordVisible = isPasswordVisible,
+                    onClick = { isPasswordVisible = !isPasswordVisible }
+                )
+            }
+        } else {
+            null
+        }
+
     Column {
         Text(
             modifier = Modifier
@@ -359,6 +381,7 @@ fun InputRegistrationField(
             keyboardActions = KeyboardActions {
                 focusManager.moveFocus(FocusDirection.Down)
             },
+            trailingIcon = trailingIcon,
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
             modifier = modifier.testTag("tf_${registrationField.name.tagId()}")
@@ -418,6 +441,7 @@ fun SelectableRegisterField(
         OutlinedTextField(
             readOnly = true,
             enabled = false,
+            singleLine = true,
             value = initialValue,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
@@ -506,6 +530,26 @@ fun ExpandableText(
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.appColors.background
+        )
+    }
+}
+
+@Composable
+internal fun PasswordVisibilityIcon(
+    isPasswordVisible: Boolean,
+    onClick: () -> Unit
+) {
+    val (image, description) = if (isPasswordVisible) {
+        Icons.Filled.VisibilityOff to stringResource(R.string.auth_accessibility_hide_password)
+    } else {
+        Icons.Filled.Visibility to stringResource(R.string.auth_accessibility_show_password)
+    }
+
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = image,
+            contentDescription = description,
+            tint = MaterialTheme.appColors.onSurface
         )
     }
 }

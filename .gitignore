@@ -16,3 +16,6 @@ local.properties
 /.idea/
 *.log
 /config_settings.yaml
+.venv/
+i18n/
+**/values-*/strings.xml

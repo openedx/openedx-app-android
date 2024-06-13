@@ -226,9 +226,14 @@ class SignUpViewModel(
             interactor.loginSocial(socialAuth.accessToken, socialAuth.authType)
         }.onFailure {
             val fields = uiState.value.allFields.toMutableList()
-                .filter { field -> field.type != RegistrationFieldType.PASSWORD }
-            updateField(ApiConstants.NAME, socialAuth.name)
-            updateField(ApiConstants.EMAIL, socialAuth.email)
+                .filter { it.type != RegistrationFieldType.PASSWORD }
+                .map { field ->
+                    when (field.name) {
+                        ApiConstants.NAME -> field.copy(placeholder = socialAuth.name)
+                        ApiConstants.EMAIL -> field.copy(placeholder = socialAuth.email)
+                        else -> field
+                    }
+                }
             setErrorInstructions(emptyMap())
             _uiState.update {
                 it.copy(
