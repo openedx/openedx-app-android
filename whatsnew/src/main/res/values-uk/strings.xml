@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="whats_new_title">Що нового</string>
-    <string name="whats_new_navigation_previous">Попередній</string>
-    <string name="whats_new_navigation_next">Наступний</string>
-    <string name="whats_new_navigation_done">Закрити</string>
-</resources>
