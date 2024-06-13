@@ -33,6 +33,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
@@ -188,4 +189,5 @@ val appModule = module {
     factory { OAuthHelper(get(), get(), get()) }
 
     factory { FileUtil(get()) }
+    single { DownloadHelper(get(), get()) }
 }

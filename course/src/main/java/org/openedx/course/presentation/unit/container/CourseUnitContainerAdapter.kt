@@ -80,7 +80,21 @@ class CourseUnitContainerAdapter(
                     block.isWordCloudBlock ||
                     block.isLTIConsumerBlock ||
                     block.isSurveyBlock -> {
-                HtmlUnitFragment.newInstance(block.id, block.studentViewUrl)
+                val downloadedModel = viewModel.getDownloadModelById(block.id)
+                val offlineUrl = downloadedModel?.path ?: ""
+                val lastModified: String =
+                    if (downloadedModel != null && !viewModel.hasNetworkConnection) {
+                        downloadedModel.lastModified ?: ""
+                    } else {
+                        ""
+                    }
+                HtmlUnitFragment.newInstance(
+                    block.id,
+                    block.studentViewUrl,
+                    block.displayName,
+                    offlineUrl,
+                    lastModified
+                )
             }
 
             else -> {

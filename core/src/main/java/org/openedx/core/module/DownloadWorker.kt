@@ -20,11 +20,11 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.download.CurrentProgress
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
 import org.openedx.core.utils.FileUtil
-import java.io.File
 
 class DownloadWorker(
     val context: Context,
@@ -39,6 +39,7 @@ class DownloadWorker(
 
     private val notifier by inject<DownloadNotifier>(DownloadNotifier::class.java)
     private val downloadDao: DownloadDao by inject(DownloadDao::class.java)
+    private val downloadHelper: DownloadHelper by inject(DownloadHelper::class.java)
 
     private var downloadEnqueue = listOf<DownloadModel>()
 
@@ -133,13 +134,9 @@ class DownloadWorker(
             )
             val isSuccess = fileDownloader.download(downloadTask.url, downloadTask.path)
             if (isSuccess) {
+                val updatedModel = downloadHelper.updateDownloadStatus(downloadTask)
                 downloadDao.updateDownloadModel(
-                    DownloadModelEntity.createFrom(
-                        downloadTask.copy(
-                            downloadedState = DownloadedState.DOWNLOADED,
-                            size = File(downloadTask.path).length().toInt()
-                        )
-                    )
+                    DownloadModelEntity.createFrom(updatedModel)
                 )
             } else {
                 downloadDao.removeDownloadModel(downloadTask.id)

@@ -31,22 +31,26 @@ data class Block(
     val containsGatedContent: Boolean = false,
     val downloadModel: DownloadModel? = null,
     val assignmentProgress: AssignmentProgress?,
-    val due: Date?
+    val due: Date?,
+    val offlineDownload: OfflineDownload?
 ) : Parcelable {
     val isDownloadable: Boolean
         get() {
-            return studentViewData != null && studentViewData.encodedVideos?.hasDownloadableVideo == true
+            return (studentViewData != null && studentViewData.encodedVideos?.hasDownloadableVideo == true) ||
+                    (!offlineDownload?.fileUrl.isNullOrEmpty())
         }
 
-    val downloadableType: FileType
+    val downloadableType: FileType?
         get() = when (type) {
             BlockType.VIDEO -> {
                 FileType.VIDEO
             }
 
-            else -> {
-                FileType.UNKNOWN
+            BlockType.HTML -> {
+                FileType.HTML
             }
+
+            else -> null
         }
 
     fun isDownloading(): Boolean {
@@ -192,10 +196,17 @@ data class EncodedVideos(
 @Parcelize
 data class VideoInfo(
     val url: String,
-    val fileSize: Int,
+    val fileSize: Long,
 ) : Parcelable
 
 @Parcelize
 data class BlockCounts(
     val video: Int,
+) : Parcelable
+
+@Parcelize
+data class OfflineDownload(
+    var fileUrl: String,
+    var lastModified: String?,
+    var fileSize: Long,
 ) : Parcelable

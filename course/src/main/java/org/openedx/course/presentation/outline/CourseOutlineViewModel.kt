@@ -26,6 +26,7 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
@@ -61,12 +62,14 @@ class CourseOutlineViewModel(
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
+    downloadHelper: DownloadHelper,
 ) : BaseDownloadViewModel(
     courseId,
     downloadDao,
     preferencesManager,
     workerController,
-    coreAnalytics
+    coreAnalytics,
+    downloadHelper
 ) {
     val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
@@ -390,74 +393,48 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun findBlocksAtBlockLevel(blockData: List<Block>, rootBlockId: String): List<Block> {
-        val rootBlock = blockData.find { it.id == rootBlockId } ?: return emptyList()
-        val blockLevelBlocks = mutableListOf<Block>()
-
-        fun dfs(block: Block) {
-            block.descendants.forEach { descendantId ->
-                val descendantBlock = blockData.find { it.id == descendantId }
-                if (descendantBlock != null) {
-                    if (descendantBlock.descendants.isEmpty()) {
-                        // Якщо поточний descendant блок не має нащадків,
-                        // то додаємо його до списку blockLevelBlocks
-                        blockLevelBlocks.add(descendantBlock)
-                    } else {
-                        // Інакше викликаємо dfs для рекурсивного перегляду нащадків descendant блоку
-                        dfs(descendantBlock)
-                    }
-                }
-            }
-        }
-
-        dfs(rootBlock)
-        return blockLevelBlocks
-    }
-
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
         viewModelScope.launch {
+            val courseData = _uiState.value as? CourseOutlineUIState.CourseData ?: return@launch
+
+            val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+
+            val blocks = subSectionsBlocks.flatMap { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                allBlocks.values.filter { it.id in verticalBlocks.flatMap { it.descendants } }
+            }
+
+            val downloadableBlocks = blocks.filter { it.isDownloadable }
             val downloadingBlocks = blocksIds.filter { isBlockDownloading(it) }
-            val downloadedBlocks = blocksIds.filter { isBlockDownloaded(it) }
-            if (downloadingBlocks.isNotEmpty()) {
-                val downloadableChildren = downloadingBlocks.mapNotNull { getDownloadableChildren(it) }.flatten()
-                courseRouter.navigateToDownloadQueue(
-                    fm = fragmentManager,
-                    downloadableChildren
-                )
-            } else {
-                (_uiState.value as? CourseOutlineUIState.CourseData)?.let { courseData ->
-                    val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
-                    downloadDialogManager.showPopup(
-                        subSectionsBlocks = subSectionsBlocks,
-                        courseId = courseId,
-                        isAllBlocksDownloaded = downloadedBlocks.isNotEmpty(),
-                        fragmentManager = fragmentManager,
-                        removeDownloadModels = { blockId ->
-                            removeDownloadModels(blockId)
-                        },
-                        saveDownloadModels = { blockId ->
-                            saveDownloadModels(
-                                FileUtil(context).getExternalAppDir().path, blockId
-                            )
-                        }
-                    )
+            val isAllBlocksDownloaded = downloadableBlocks.all { isBlockDownloaded(it.id) }
+
+            val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val notDownloadedBlocks = allBlocks.values.filter {
+                    it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(it.id)
                 }
+                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
+            }
+
+            val requiredSubSections = notDownloadedSubSectionBlocks.ifEmpty {
+                subSectionsBlocks
+            }
+
+            if (downloadingBlocks.isNotEmpty()) {
+                val downloadableChildren = downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
+                courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
+            } else {
+                downloadDialogManager.showPopup(
+                    subSectionsBlocks = requiredSubSections,
+                    courseId = courseId,
+                    isAllBlocksDownloaded = isAllBlocksDownloaded,
+                    fragmentManager = fragmentManager,
+                    removeDownloadModels = ::removeDownloadModels,
+                    saveDownloadModels = { blockId ->
+                        saveDownloadModels(FileUtil(context).getExternalAppDir().path, blockId)
+                    }
+                )
             }
         }
-
-//        blocksIds.forEach { blockId ->
-//            if (isBlockDownloading(blockId)) {
-//                courseRouter.navigateToDownloadQueue(
-//                    fm = fragmentManager,
-//                    getDownloadableChildren(blockId) ?: arrayListOf()
-//                )
-//            } else if (isBlockDownloaded(blockId)) {
-//                removeDownloadModels(blockId)
-//            } else {
-//                saveDownloadModels(
-//                    FileUtil(context).getExternalAppDir().path, blockId
-//                )
-//            }
-//        }
     }
 }

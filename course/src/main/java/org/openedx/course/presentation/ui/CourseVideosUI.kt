@@ -718,7 +718,8 @@ private val mockChapterBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )
 
 private val mockSequentialBlock = Block(
@@ -738,7 +739,8 @@ private val mockSequentialBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )
 
 private val mockCourseStructure = CourseStructure(

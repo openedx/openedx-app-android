@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import org.openedx.core.BlockType
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.system.StorageManager
@@ -18,7 +19,7 @@ class DownloadDialogManager(
 ) {
 
     companion object {
-        const val MAX_CELLURAL_SIZE = 100000000 // 100MB
+        const val MAX_CELLULAR_SIZE = 100000000 // 100MB
     }
 
     private val uiState = MutableSharedFlow<DownloadDialogUIState>()
@@ -26,71 +27,71 @@ class DownloadDialogManager(
     init {
         CoroutineScope(Dispatchers.IO).launch {
             uiState.collect { uiState ->
-                    when {
-                        uiState.isAllBlocksDownloaded -> {
-                            val dialog = DownloadConfirmDialogFragment.newInstance(
-                                dialogType = DownloadConfirmDialogType.REMOVE,
-                                uiState = uiState
-                            )
-                            dialog.show(
-                                uiState.fragmentManager,
-                                DownloadConfirmDialogFragment.DIALOG_TAG
-                            )
-                        }
+                when {
+                    uiState.isAllBlocksDownloaded -> {
+                        val dialog = DownloadConfirmDialogFragment.newInstance(
+                            dialogType = DownloadConfirmDialogType.REMOVE,
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadConfirmDialogFragment.DIALOG_TAG
+                        )
+                    }
 
-                        !networkConnection.isOnline() -> {
-                            val dialog = DownloadErrorDialogFragment.newInstance(
-                                dialogType = DownloadErrorDialogType.NO_CONNECTION,
-                                uiState = uiState
-                            )
-                            dialog.show(
-                                uiState.fragmentManager,
-                                DownloadErrorDialogFragment.DIALOG_TAG
-                            )
-                        }
+                    !networkConnection.isOnline() -> {
+                        val dialog = DownloadErrorDialogFragment.newInstance(
+                            dialogType = DownloadErrorDialogType.NO_CONNECTION,
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadErrorDialogFragment.DIALOG_TAG
+                        )
+                    }
 
-                        StorageManager.getFreeStorage() < uiState.sizeSum -> {
-                            val dialog = DownloadStorageErrorDialogFragment.newInstance(
-                                uiState = uiState
-                            )
-                            dialog.show(
-                                uiState.fragmentManager,
-                                DownloadStorageErrorDialogFragment.DIALOG_TAG
-                            )
-                        }
+                    StorageManager.getFreeStorage() < uiState.sizeSum -> {
+                        val dialog = DownloadStorageErrorDialogFragment.newInstance(
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadStorageErrorDialogFragment.DIALOG_TAG
+                        )
+                    }
 
-                        corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> {
-                            val dialog = DownloadErrorDialogFragment.newInstance(
-                                dialogType = DownloadErrorDialogType.WIFI_REQUIRED,
-                                uiState = uiState
-                            )
-                            dialog.show(
-                                uiState.fragmentManager,
-                                DownloadErrorDialogFragment.DIALOG_TAG
-                            )
-                        }
+                    corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> {
+                        val dialog = DownloadErrorDialogFragment.newInstance(
+                            dialogType = DownloadErrorDialogType.WIFI_REQUIRED,
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadErrorDialogFragment.DIALOG_TAG
+                        )
+                    }
 
-                        !corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() && uiState.sizeSum >= MAX_CELLURAL_SIZE -> {
-                            val dialog = DownloadConfirmDialogFragment.newInstance(
-                                dialogType = DownloadConfirmDialogType.DOWNLOAD_ON_CELLULAR,
-                                uiState = uiState
-                            )
-                            dialog.show(
-                                uiState.fragmentManager,
-                                DownloadConfirmDialogFragment.DIALOG_TAG
-                            )
-                        }
+                    !corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() && uiState.sizeSum >= MAX_CELLULAR_SIZE -> {
+                        val dialog = DownloadConfirmDialogFragment.newInstance(
+                            dialogType = DownloadConfirmDialogType.DOWNLOAD_ON_CELLULAR,
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadConfirmDialogFragment.DIALOG_TAG
+                        )
+                    }
 
-                        else -> {
-                            val dialog = DownloadConfirmDialogFragment.newInstance(
-                                dialogType = DownloadConfirmDialogType.CONFIRM,
-                                uiState = uiState
-                            )
-                            dialog.show(
-                                uiState.fragmentManager,
-                                DownloadConfirmDialogFragment.DIALOG_TAG
-                            )
-                        }
+                    else -> {
+                        val dialog = DownloadConfirmDialogFragment.newInstance(
+                            dialogType = DownloadConfirmDialogType.CONFIRM,
+                            uiState = uiState
+                        )
+                        dialog.show(
+                            uiState.fragmentManager,
+                            DownloadConfirmDialogFragment.DIALOG_TAG
+                        )
+                    }
                 }
             }
         }
@@ -127,7 +128,9 @@ class DownloadDialogManager(
             val downloadDialogItems = subSectionsBlocks.mapNotNull { subSectionsBlock ->
                 val verticalBlocks = courseStructure.blockData.filter { it.id in subSectionsBlock.descendants }
                 val blocks = courseStructure.blockData.filter { it.id in verticalBlocks.flatMap { it.descendants } }
-                val size = blocks.mapNotNull { it.downloadModel?.size }.sum().toLong()
+                val size = blocks.sumOf {
+                    getFileSize(it) * 2
+                }.toLong()
                 if (size > 0) {
                     DownloadDialogItem(title = subSectionsBlock.displayName, size = size)
                 } else {
@@ -138,7 +141,7 @@ class DownloadDialogManager(
                 DownloadDialogUIState(
                     downloadDialogItems = downloadDialogItems,
                     isAllBlocksDownloaded = isAllBlocksDownloaded,
-                    sizeSum = downloadDialogItems.sumOf { it.size } * 2,
+                    sizeSum = downloadDialogItems.sumOf { it.size },
                     fragmentManager = fragmentManager,
                     removeDownloadModels = {
                         subSectionsBlocks.forEach {
@@ -152,6 +155,14 @@ class DownloadDialogManager(
                     }
                 )
             )
+        }
+    }
+
+    private fun getFileSize(block: Block): Long {
+        return when (block.type) {
+            BlockType.VIDEO -> block.downloadModel?.size ?: 0
+            BlockType.HTML -> block.offlineDownload?.fileSize ?: 0
+            else -> 0
         }
     }
 }

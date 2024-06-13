@@ -7,12 +7,13 @@ import kotlinx.parcelize.Parcelize
 data class DownloadModel(
     val id: String,
     val title: String,
-    val size: Int,
+    val courseId: String,
+    val size: Long,
     val path: String,
     val url: String,
     val type: FileType,
     val downloadedState: DownloadedState,
-    val progress: Float?
+    val lastModified: String? = null,
 ) : Parcelable
 
 enum class DownloadedState {
@@ -30,5 +31,5 @@ enum class DownloadedState {
 }
 
 enum class FileType {
-    VIDEO, UNKNOWN
+    VIDEO, HTML
 }

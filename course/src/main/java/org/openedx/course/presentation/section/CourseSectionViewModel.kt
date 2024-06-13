@@ -15,6 +15,7 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.ResourceManager
@@ -37,12 +38,14 @@ class CourseSectionViewModel(
     coreAnalytics: CoreAnalytics,
     workerController: DownloadWorkerController,
     downloadDao: DownloadDao,
+    downloadHelper: DownloadHelper,
 ) : BaseDownloadViewModel(
     courseId,
     downloadDao,
     preferencesManager,
     workerController,
-    coreAnalytics
+    coreAnalytics,
+    downloadHelper,
 ) {
 
     private val _uiState = MutableLiveData<CourseSectionUIState>(CourseSectionUIState.Loading)

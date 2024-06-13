@@ -60,6 +60,7 @@ ext {
 
     configHelper = new ConfigHelper(projectDir, getCurrentFlavor())
 
+    zip_version = '2.6.3'
     //testing
     mockk_version = '1.13.3'
     android_arch_version = '2.2.0'

@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,11 +68,19 @@ class HtmlUnitFragment : Fragment() {
     private val viewModel by viewModel<HtmlUnitViewModel>()
     private var blockId: String = ""
     private var blockUrl: String = ""
+    private var offlineUrl: String = ""
+    private var blockTitle: String = ""
+    private var lastModified: String = ""
+    private var fromDownloadedContent: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         blockUrl = requireArguments().getString(ARG_BLOCK_URL, "")
+        offlineUrl = requireArguments().getString(ARG_OFFLINE_URL, "")
+        blockTitle = requireArguments().getString(ARG_BLOCK_TITLE, "")
+        lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
+        fromDownloadedContent = lastModified.isNotEmpty()
     }
 
     override fun onCreateView(
@@ -90,6 +99,16 @@ class HtmlUnitFragment : Fragment() {
 
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.isOnline)
+                }
+
+                val url by rememberSaveable {
+                    mutableStateOf(
+                        if (!hasInternetConnection && offlineUrl.isNotEmpty()) {
+                            offlineUrl
+                        } else {
+                            blockUrl
+                        }
+                    )
                 }
 
                 val injectJSList by viewModel.injectJSList.collectAsState()
@@ -125,10 +144,10 @@ class HtmlUnitFragment : Fragment() {
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        if (hasInternetConnection) {
+                        if (hasInternetConnection || fromDownloadedContent) {
                             HTMLContentView(
                                 windowSize = windowSize,
-                                url = blockUrl,
+                                url = url,
                                 cookieManager = viewModel.cookieManager,
                                 apiHostURL = viewModel.apiHostURL,
                                 isLoading = isLoading,
@@ -174,14 +193,23 @@ class HtmlUnitFragment : Fragment() {
     companion object {
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_BLOCK_URL = "blockUrl"
+        private const val ARG_OFFLINE_URL = "offlineUrl"
+        private const val ARG_BLOCK_TITLE = "blockTitle"
+        private const val ARG_LAST_MODIFIED = "lastModified"
         fun newInstance(
             blockId: String,
             blockUrl: String,
+            blockTitle: String,
+            offlineUrl: String = "",
+            lastModified: String = ""
         ): HtmlUnitFragment {
             val fragment = HtmlUnitFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_ID to blockId,
-                ARG_BLOCK_URL to blockUrl
+                ARG_BLOCK_URL to blockUrl,
+                ARG_OFFLINE_URL to offlineUrl,
+                ARG_LAST_MODIFIED to lastModified,
+                ARG_BLOCK_TITLE to blockTitle
             )
             return fragment
         }
@@ -290,7 +318,8 @@ private fun HTMLContentView(
                     setSupportZoom(true)
                     loadsImagesAutomatically = true
                     domStorageEnabled = true
-
+                    allowFileAccess = true
+                    allowContentAccess = true
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false

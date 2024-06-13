@@ -52,6 +52,7 @@ import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.OfflineDownload
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
@@ -581,7 +582,8 @@ private val mockChapterBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )
 private val mockSequentialBlock = Block(
     id = "id",
@@ -600,7 +602,8 @@ private val mockSequentialBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
-    due = Date()
+    due = Date(),
+    offlineDownload = OfflineDownload("fileUrl", "", 1)
 )
 
 private val mockCourseStructure = CourseStructure(

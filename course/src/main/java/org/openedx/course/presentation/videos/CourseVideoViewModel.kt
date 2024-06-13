@@ -19,6 +19,7 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -47,13 +48,15 @@ class CourseVideoViewModel(
     val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
-    workerController: DownloadWorkerController
+    workerController: DownloadWorkerController,
+    downloadHelper: DownloadHelper,
 ) : BaseDownloadViewModel(
     courseId,
     downloadDao,
     preferencesManager,
     workerController,
-    coreAnalytics
+    coreAnalytics,
+    downloadHelper,
 ) {
 
     val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled

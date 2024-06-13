@@ -223,6 +223,7 @@ private fun DownloadQueueScreenPreview() {
             uiState = DownloadQueueUIState.Models(
                 listOf(
                     DownloadModel(
+                        courseId = "",
                         id = "",
                         title = "1",
                         size = 0,
@@ -230,9 +231,9 @@ private fun DownloadQueueScreenPreview() {
                         url = "",
                         type = FileType.VIDEO,
                         downloadedState = DownloadedState.DOWNLOADING,
-                        progress = 0f
                     ),
                     DownloadModel(
+                        courseId = "",
                         id = "",
                         title = "2",
                         size = 0,
@@ -240,7 +241,6 @@ private fun DownloadQueueScreenPreview() {
                         url = "",
                         type = FileType.VIDEO,
                         downloadedState = DownloadedState.DOWNLOADING,
-                        progress = 0f
                     )
                 ),
                 currentProgressId = "",

@@ -17,8 +17,6 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.utils.Sha1Util
-import java.io.File
 
 abstract class BaseDownloadViewModel(
     private val courseId: String,
@@ -26,6 +24,7 @@ abstract class BaseDownloadViewModel(
     private val preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController,
     private val analytics: CoreAnalytics,
+    private val downloadHelper: DownloadHelper,
 ) : BaseViewModel() {
 
     val allBlocks = hashMapOf<String, Block>()
@@ -126,28 +125,11 @@ abstract class BaseDownloadViewModel(
         val downloadModelList = getDownloadModelList()
         for (blockId in saveBlocksIds) {
             allBlocks[blockId]?.let { block ->
-                val videoInfo =
-                    block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                        preferencesManager.videoSettings.videoDownloadQuality
-                    )
-                val size = videoInfo?.fileSize ?: 0
-                val url = videoInfo?.url ?: ""
-                val extension = url.split('.').lastOrNull() ?: "mp4"
-                val path =
-                    folder + File.separator + "${Sha1Util.SHA1(block.displayName)}.$extension"
-                if (downloadModelList.find { it.id == blockId && it.downloadedState.isDownloaded } == null) {
-                    downloadModels.add(
-                        DownloadModel(
-                            block.id,
-                            block.displayName,
-                            size,
-                            path,
-                            url,
-                            block.downloadableType,
-                            DownloadedState.WAITING,
-                            null
-                        )
-                    )
+                val downloadModel = downloadHelper.generateDownloadModelFromBlock(folder, block, courseId)
+                val isNotDownloaded =
+                    downloadModelList.find { it.id == blockId && it.downloadedState.isDownloaded } == null
+                if (isNotDownloaded && downloadModel != null) {
+                    downloadModels.add(downloadModel)
                 }
             }
         }

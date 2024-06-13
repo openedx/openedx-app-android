@@ -79,12 +79,10 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
-import java.io.File
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -482,5 +480,6 @@ private val mockBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = AssignmentProgress("", 1f, 2f),
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )

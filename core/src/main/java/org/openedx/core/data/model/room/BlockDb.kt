@@ -48,7 +48,9 @@ data class BlockDb(
     @Embedded
     val assignmentProgress: AssignmentProgressDb?,
     @ColumnInfo("due")
-    val due: String?
+    val due: String?,
+    @Embedded
+    val offlineDownload: OfflineDownloadDb?,
 ) {
     fun mapToDomain(blocks: List<BlockDb>): DomainBlock {
         val blockType = BlockType.getBlockType(type)
@@ -80,6 +82,7 @@ data class BlockDb(
             containsGatedContent = containsGatedContent,
             assignmentProgress = assignmentProgress?.mapToDomain(),
             due = TimeUtils.iso8601ToDate(due ?: ""),
+            offlineDownload = offlineDownload?.mapToDomain()
         )
     }
 
@@ -105,7 +108,8 @@ data class BlockDb(
                     completion = completion ?: 0.0,
                     containsGatedContent = containsGatedContent ?: false,
                     assignmentProgress = assignmentProgress?.mapToRoomEntity(),
-                    due = due
+                    due = due,
+                    offlineDownload = offlineDownload?.mapToRoomEntity()
                 )
             }
         }
@@ -193,7 +197,7 @@ data class VideoInfoDb(
     @ColumnInfo("url")
     val url: String,
     @ColumnInfo("fileSize")
-    val fileSize: Int
+    val fileSize: Long
 ) {
     fun mapToDomain() = DomainVideoInfo(url, fileSize)
 
@@ -234,4 +238,21 @@ data class AssignmentProgressDb(
         numPointsEarned = numPointsEarned ?: 0f,
         numPointsPossible = numPointsPossible ?: 0f
     )
+}
+
+data class OfflineDownloadDb(
+    @ColumnInfo("file_url")
+    var fileUrl: String?,
+    @ColumnInfo("last_modified")
+    var lastModified: String?,
+    @ColumnInfo("file_size")
+    var fileSize: Long?,
+) {
+    fun mapToDomain(): org.openedx.core.domain.model.OfflineDownload {
+        return org.openedx.core.domain.model.OfflineDownload(
+            fileUrl = fileUrl ?: "",
+            lastModified = lastModified,
+            fileSize = fileSize ?: 0
+        )
+    }
 }

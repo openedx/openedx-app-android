@@ -235,11 +235,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
     viewModel { (courseId: String) ->
         CourseSectionViewModel(
             courseId,
+            get(),
             get(),
             get(),
             get(),
@@ -255,6 +257,7 @@ val screenModule = module {
         CourseUnitContainerViewModel(
             courseId,
             unitId,
+            get(),
             get(),
             get(),
             get(),
@@ -276,7 +279,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
@@ -395,6 +399,7 @@ val screenModule = module {
     viewModel { (descendants: List<String>) ->
         DownloadQueueViewModel(
             descendants,
+            get(),
             get(),
             get(),
             get(),

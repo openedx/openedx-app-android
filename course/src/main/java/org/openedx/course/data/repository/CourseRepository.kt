@@ -39,7 +39,7 @@ class CourseRepository(
         if (networkConnection.isOnline()) {
             val response = api.getCourseStructure(
                 "stale-if-error=0",
-                "v3",
+                "v4",
                 preferencesManager.user?.username,
                 courseId
             )

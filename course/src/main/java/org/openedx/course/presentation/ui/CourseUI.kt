@@ -1270,6 +1270,7 @@ private fun OfflineQueueCardPreview() {
         Surface(color = MaterialTheme.appColors.background) {
             OfflineQueueCard(
                 downloadModel = DownloadModel(
+                    courseId = "",
                     id = "",
                     title = "Problems of society",
                     size = 4000,
@@ -1277,7 +1278,6 @@ private fun OfflineQueueCardPreview() {
                     url = "",
                     type = FileType.VIDEO,
                     downloadedState = DownloadedState.DOWNLOADING,
-                    progress = 0f
                 ),
                 progressValue = 10,
                 progressSize = 30,
@@ -1325,5 +1325,6 @@ private val mockChapterBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = AssignmentProgress("", 1f, 2f),
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )
