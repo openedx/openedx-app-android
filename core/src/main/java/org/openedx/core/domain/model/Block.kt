@@ -36,21 +36,19 @@ data class Block(
 ) : Parcelable {
     val isDownloadable: Boolean
         get() {
-            return (studentViewData != null && studentViewData.encodedVideos?.hasDownloadableVideo == true) ||
-                    (!offlineDownload?.fileUrl.isNullOrEmpty())
+            return (studentViewData != null && studentViewData.encodedVideos?.hasDownloadableVideo == true) || isxBlock
         }
 
+    val isxBlock: Boolean
+        get() = !offlineDownload?.fileUrl.isNullOrEmpty()
+
     val downloadableType: FileType?
-        get() = when (type) {
-            BlockType.VIDEO -> {
-                FileType.VIDEO
-            }
-
-            BlockType.HTML -> {
-                FileType.HTML
-            }
-
-            else -> null
+        get() = if (type == BlockType.VIDEO) {
+            FileType.VIDEO
+        } else if (isxBlock) {
+            FileType.X_BLOCK
+        } else {
+            null
         }
 
     fun isDownloading(): Boolean {

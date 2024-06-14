@@ -21,15 +21,17 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.app.AppAnalytics
-import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppViewModel
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.app.system.notifier.LogoutEvent
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
+import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.utils.FileUtil
+import org.openedx.course.presentation.download.DownloadDialogManager
 
 @ExperimentalCoroutinesApi
 class AppViewModelTest {
@@ -46,12 +48,16 @@ class AppViewModelTest {
     private val analytics = mockk<AppAnalytics>()
     private val fileUtil = mockk<FileUtil>()
     private val deepLinkRouter = mockk<DeepLinkRouter>()
+    private val downloadDialogManager = mockk<DownloadDialogManager>()
+    private val downloadNotifier = mockk<DownloadNotifier>()
 
     private val user = User(0, "", "", "")
 
     @Before
     fun before() {
         Dispatchers.setMain(dispatcher)
+        every { downloadDialogManager.showDownloadFailedPopup(any(), any()) } returns Unit
+        every { downloadNotifier.notifier } returns flow { }
     }
 
     @After
@@ -74,7 +80,9 @@ class AppViewModelTest {
                 dispatcher,
                 analytics,
                 deepLinkRouter,
-                fileUtil
+                fileUtil,
+                downloadNotifier,
+                downloadDialogManager,
             )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -106,7 +114,9 @@ class AppViewModelTest {
                 dispatcher,
                 analytics,
                 deepLinkRouter,
-                fileUtil
+                fileUtil,
+                downloadNotifier,
+                downloadDialogManager,
             )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -140,7 +150,9 @@ class AppViewModelTest {
                 dispatcher,
                 analytics,
                 deepLinkRouter,
-                fileUtil
+                fileUtil,
+                downloadNotifier,
+                downloadDialogManager,
             )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

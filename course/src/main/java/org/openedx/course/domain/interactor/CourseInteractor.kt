@@ -76,4 +76,5 @@ class CourseInteractor(
 
     fun getDownloadModels() = repository.getDownloadModels()
 
+    suspend fun getAllDownloadModels() = repository.getAllDownloadModels()
 }

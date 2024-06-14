@@ -115,7 +115,7 @@ class DownloadWorker(
             folder.mkdir()
         }
 
-        downloadEnqueue = downloadDao.readAllData().first()
+        downloadEnqueue = downloadDao.getAllDataFlow().first()
             .map { it.mapToDomain() }
             .filter { it.downloadedState == DownloadedState.WAITING }
 

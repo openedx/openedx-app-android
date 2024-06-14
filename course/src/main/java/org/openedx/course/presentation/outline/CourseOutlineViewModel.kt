@@ -19,6 +19,7 @@ import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
@@ -92,6 +93,8 @@ class CourseOutlineViewModel(
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
+
+    private var isOfflineBlocksUpToDate = false
 
     init {
         viewModelScope.launch {
@@ -193,6 +196,7 @@ class CourseOutlineViewModel(
                 val datesBannerInfo = courseDatesResult.courseBanner
 
                 checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
+                updateOutdatedOfflineXBlocks(courseStructure)
 
                 setBlocks(blocks)
                 courseSubSections.clear()
@@ -419,6 +423,33 @@ class CourseOutlineViewModel(
                         saveDownloadModels(fileUtil.getExternalAppDir().path, blockId)
                     }
                 )
+            }
+        }
+    }
+
+    private fun updateOutdatedOfflineXBlocks(courseStructure: CourseStructure) {
+        viewModelScope.launch {
+            if (!isOfflineBlocksUpToDate) {
+                val xBlocks = courseStructure.blockData.filter { it.isxBlock }
+                if (xBlocks.isNotEmpty()) {
+                    val xBlockIds = xBlocks.map { it.id }.toSet()
+                    val savedDownloadModelsMap = interactor.getAllDownloadModels()
+                        .filter { it.id in xBlockIds }
+                        .associateBy { it.id }
+
+                    val outdatedBlockIds = xBlocks
+                        .filter { block ->
+                            val savedBlock = savedDownloadModelsMap[block.id]
+                            savedBlock != null && block.offlineDownload?.lastModified != savedBlock.lastModified
+                        }
+                        .map { it.id }
+
+                    outdatedBlockIds.forEach { blockId ->
+                        interactor.removeDownloadModel(blockId)
+                    }
+                    saveDownloadModels(fileUtil.getExternalAppDir().path, outdatedBlockIds)
+                }
+                isOfflineBlocksUpToDate = true
             }
         }
     }

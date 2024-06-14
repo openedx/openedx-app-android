@@ -1,6 +1,10 @@
 package org.openedx.core.module.db
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -16,7 +20,10 @@ interface DownloadDao {
     suspend fun updateDownloadModel(downloadModelEntity: DownloadModelEntity)
 
     @Query("SELECT * FROM download_model")
-    fun readAllData() : Flow<List<DownloadModelEntity>>
+    fun getAllDataFlow(): Flow<List<DownloadModelEntity>>
+
+    @Query("SELECT * FROM download_model")
+    suspend fun readAllData(): List<DownloadModelEntity>
 
     @Query("SELECT * FROM download_model WHERE id in (:ids)")
     fun readAllDataByIds(ids: List<String>) : Flow<List<DownloadModelEntity>>

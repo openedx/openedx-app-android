@@ -41,7 +41,7 @@ abstract class BaseDownloadViewModel(
 
     init {
         viewModelScope.launch {
-            downloadDao.readAllData().map { list -> list.map { it.mapToDomain() } }
+            downloadDao.getAllDataFlow().map { list -> list.map { it.mapToDomain() } }
                 .collect { downloadModels ->
                     updateDownloadModelsStatus(downloadModels)
                     _downloadModelsStatusFlow.emit(downloadModelsStatus)
@@ -55,7 +55,7 @@ abstract class BaseDownloadViewModel(
     }
 
     private suspend fun getDownloadModelList(): List<DownloadModel> {
-        return downloadDao.readAllData().first().map { it.mapToDomain() }
+        return downloadDao.getAllDataFlow().first().map { it.mapToDomain() }
     }
 
     private suspend fun updateDownloadModelsStatus(models: List<DownloadModel>) {
@@ -120,7 +120,7 @@ abstract class BaseDownloadViewModel(
         }
     }
 
-    private suspend fun saveDownloadModels(folder: String, saveBlocksIds: List<String>) {
+    suspend fun saveDownloadModels(folder: String, saveBlocksIds: List<String>) {
         val downloadModels = mutableListOf<DownloadModel>()
         val downloadModelList = getDownloadModelList()
         for (blockId in saveBlocksIds) {

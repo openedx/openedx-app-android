@@ -43,8 +43,8 @@ class DownloadHelper(
                 )
             }
 
-            FileType.HTML -> {
-                val url = if (block.downloadableType == FileType.HTML) {
+            FileType.X_BLOCK -> {
+                val url = if (block.downloadableType == FileType.X_BLOCK) {
                     block.offlineDownload?.fileUrl ?: ""
                 } else {
                     ""
@@ -80,7 +80,7 @@ class DownloadHelper(
                 )
             }
 
-            FileType.HTML -> {
+            FileType.X_BLOCK -> {
                 val unzippedFolderPath = fileUtil.unzipFile(downloadModel.path)
                 downloadModel.copy(
                     downloadedState = DownloadedState.DOWNLOADED,

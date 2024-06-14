@@ -38,6 +38,7 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.ResourceManager
@@ -65,6 +66,7 @@ class CourseSectionViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val coreAnalytics = mockk<CoreAnalytics>()
+    private val downloadHelper = mockk<DownloadHelper>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -93,7 +95,8 @@ class CourseSectionViewModelTest {
             descendantsType = BlockType.HTML,
             completion = 0.0,
             assignmentProgress = assignmentProgress,
-            due = Date()
+            due = Date(),
+            offlineDownload = null,
         ),
         Block(
             id = "id1",
@@ -111,7 +114,8 @@ class CourseSectionViewModelTest {
             descendantsType = BlockType.HTML,
             completion = 0.0,
             assignmentProgress = assignmentProgress,
-            due = Date()
+            due = Date(),
+            offlineDownload = null,
         ),
         Block(
             id = "id2",
@@ -129,7 +133,8 @@ class CourseSectionViewModelTest {
             descendantsType = BlockType.HTML,
             completion = 0.0,
             assignmentProgress = assignmentProgress,
-            due = Date()
+            due = Date(),
+            offlineDownload = null,
         )
     )
 
@@ -161,6 +166,7 @@ class CourseSectionViewModelTest {
     private val downloadModel = DownloadModel(
         "id",
         "title",
+        "",
         0,
         "",
         "url",
@@ -184,7 +190,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `getBlocks no internet connection exception`() = runTest {
-        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -196,6 +202,7 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
@@ -214,7 +221,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `getBlocks unknown exception`() = runTest {
-        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -226,6 +233,7 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper,
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws Exception()
@@ -244,7 +252,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `getBlocks success`() = runTest {
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
         val viewModel = CourseSectionViewModel(
@@ -258,9 +266,10 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper,
         )
 
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
@@ -278,7 +287,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest {
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
         val viewModel = CourseSectionViewModel(
@@ -292,6 +301,7 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper,
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
@@ -306,7 +316,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest {
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(listOf(DownloadModelEntity.createFrom(downloadModel)))
         }
         val viewModel = CourseSectionViewModel(
@@ -320,6 +330,7 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper,
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
@@ -334,7 +345,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without connection`() = runTest {
-        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         val viewModel = CourseSectionViewModel(
             "",
             interactor,
@@ -346,6 +357,7 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper,
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns false
@@ -362,7 +374,7 @@ class CourseSectionViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
-        every { downloadDao.readAllData() } returns flow {
+        every { downloadDao.getAllDataFlow() } returns flow {
             repeat(5) {
                 delay(10000)
                 emit(emptyList())
@@ -379,6 +391,7 @@ class CourseSectionViewModelTest {
             coreAnalytics,
             workerController,
             downloadDao,
+            downloadHelper,
         )
 
         coEvery { notifier.notifier } returns flow { }

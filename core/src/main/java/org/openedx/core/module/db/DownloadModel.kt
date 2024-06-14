@@ -31,5 +31,5 @@ enum class DownloadedState {
 }
 
 enum class FileType {
-    VIDEO, HTML
+    VIDEO, X_BLOCK
 }

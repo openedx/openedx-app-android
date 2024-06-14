@@ -25,13 +25,11 @@ class CourseRepository(
         downloadDao.removeDownloadModel(id)
     }
 
-    fun getDownloadModels() = downloadDao.readAllData().map { list ->
+    fun getDownloadModels() = downloadDao.getAllDataFlow().map { list ->
         list.map { it.mapToDomain() }
     }
 
-    fun hasCourses(courseId: String): Boolean {
-        return courseStructure[courseId] != null
-    }
+    suspend fun getAllDownloadModels() = downloadDao.readAllData().map { it.mapToDomain() }
 
     suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
         val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
