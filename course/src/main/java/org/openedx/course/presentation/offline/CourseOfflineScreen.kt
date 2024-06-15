@@ -8,15 +8,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.rememberScaffoldState
@@ -28,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,7 +64,10 @@ fun CourseOfflineScreen(
         windowSize = windowSize,
         uiState = uiState,
         onDownloadAllClick = {
-
+            viewModel.downloadAllBlocks(fragmentManager)
+        },
+        onStopDownloadClick = {
+            viewModel.navigateToDownloadQueue(fragmentManager)
         }
     )
 }
@@ -66,7 +76,8 @@ fun CourseOfflineScreen(
 private fun CourseOfflineUI(
     windowSize: WindowSize,
     uiState: CourseOfflineUIState,
-    onDownloadAllClick: () -> Unit
+    onDownloadAllClick: () -> Unit,
+    onStopDownloadClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -110,30 +121,35 @@ private fun CourseOfflineUI(
                         .then(horizontalPadding)
                 ) {
                     if (uiState.isHaveDownloadableBlocks) {
-                        DownloadProgress(uiState = uiState)
+                        DownloadProgress(
+                            uiState = uiState,
+                            onStopDownloadClick = onStopDownloadClick,
+                        )
                     } else {
                         NoDownloadableBlocksProgress()
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    OpenEdXButton(
-                        text = stringResource(R.string.course_download_all),
-                        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-                        onClick = onDownloadAllClick,
-                        enabled = uiState.isHaveDownloadableBlocks,
-                        content = {
-                            val textColor = if (uiState.isHaveDownloadableBlocks) {
-                                MaterialTheme.appColors.primaryButtonText
-                            } else {
-                                MaterialTheme.appColors.textPrimaryVariant
+                    if (uiState.progressBarValue != 1f) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        OpenEdXButton(
+                            text = stringResource(R.string.course_download_all),
+                            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                            onClick = onDownloadAllClick,
+                            enabled = uiState.isHaveDownloadableBlocks,
+                            content = {
+                                val textColor = if (uiState.isHaveDownloadableBlocks) {
+                                    MaterialTheme.appColors.primaryButtonText
+                                } else {
+                                    MaterialTheme.appColors.textPrimaryVariant
+                                }
+                                IconText(
+                                    text = stringResource(R.string.course_download_all),
+                                    icon = Icons.Outlined.CloudDownload,
+                                    color = textColor,
+                                    textStyle = MaterialTheme.appTypography.labelLarge
+                                )
                             }
-                            IconText(
-                                text = stringResource(R.string.course_download_all),
-                                icon = Icons.Outlined.CloudDownload,
-                                color = textColor,
-                                textStyle = MaterialTheme.appTypography.labelLarge
-                            )
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -144,6 +160,7 @@ private fun CourseOfflineUI(
 private fun DownloadProgress(
     modifier: Modifier = Modifier,
     uiState: CourseOfflineUIState,
+    onStopDownloadClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -165,7 +182,9 @@ private fun DownloadProgress(
         }
         Spacer(modifier = Modifier.height(4.dp))
         Row(
-            modifier.fillMaxWidth(),
+            modifier
+                .fillMaxWidth()
+                .height(40.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconText(
@@ -174,15 +193,44 @@ private fun DownloadProgress(
                 color = MaterialTheme.appColors.successGreen,
                 textStyle = MaterialTheme.appTypography.labelLarge
             )
-            IconText(
-                text = stringResource(R.string.course_ready_to_download),
-                icon = Icons.Outlined.CloudDownload,
-                color = MaterialTheme.appColors.textDark,
-                textStyle = MaterialTheme.appTypography.labelLarge
-            )
+            if (!uiState.isDownloading) {
+                IconText(
+                    text = stringResource(R.string.course_ready_to_download),
+                    icon = Icons.Outlined.CloudDownload,
+                    color = MaterialTheme.appColors.textDark,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            } else {
+                Row {
+                    Box(
+                        modifier.offset(y = (-12).dp, x = 6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            backgroundColor = Color.LightGray,
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.appColors.primary
+                        )
+                        IconButton(
+                            onClick = onStopDownloadClick
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                                tint = MaterialTheme.appColors.error
+                            )
+                        }
+                    }
+                    Text(
+                        text = stringResource(R.string.course_downloading),
+                        color = MaterialTheme.appColors.textDark,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                }
+            }
         }
         if (uiState.progressBarValue != 0f) {
-            Spacer(modifier = Modifier.height(20.dp))
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -193,13 +241,13 @@ private fun DownloadProgress(
                 color = MaterialTheme.appColors.successGreen,
                 backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
             )
+        } else {
+            Text(
+                text = stringResource(R.string.course_you_can_download_course_content_offline),
+                style = MaterialTheme.appTypography.labelLarge,
+                color = MaterialTheme.appColors.textDark
+            )
         }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = stringResource(R.string.course_you_can_download_course_content_offline),
-            style = MaterialTheme.appTypography.labelLarge,
-            color = MaterialTheme.appColors.textDark
-        )
     }
 }
 
@@ -241,9 +289,11 @@ private fun CourseOfflineUIPreview() {
                 isHaveDownloadableBlocks = true,
                 readyToDownloadSize = "159MB",
                 downloadedSize = "0MB",
-                progressBarValue = 0f
+                progressBarValue = 0f,
+                isDownloading = true
             ),
-            onDownloadAllClick = {}
+            onDownloadAllClick = {},
+            onStopDownloadClick = {}
         )
     }
 }

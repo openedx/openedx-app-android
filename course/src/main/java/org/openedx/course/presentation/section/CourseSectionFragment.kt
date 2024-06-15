@@ -366,12 +366,18 @@ private fun CourseSubsectionItem(
                         } else {
                             stringResource(id = R.string.course_accessibility_download_course_section)
                         }
+                    val downloadIconTint =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            MaterialTheme.appColors.successGreen
+                        } else {
+                            MaterialTheme.appColors.textAccent
+                        }
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
                             imageVector = downloadIcon,
                             contentDescription = downloadIconDescription,
-                            tint = MaterialTheme.appColors.textPrimary
+                            tint = downloadIconTint
                         )
                     }
                 } else if (downloadedState != null) {
