@@ -39,56 +39,32 @@
 
 
     <plurals name="discussion_votes">
-        <item quantity="zero">%1$d votes</item>
         <item quantity="one">%1$d vote</item>
-        <item quantity="two">%1$d votes</item>
-        <item quantity="few">%1$d votes</item>
-        <item quantity="many">%1$d votes</item>
         <item quantity="other">%1$d votes</item>
     </plurals>
 
     <plurals name="discussion_comments">
-        <item quantity="zero">%1$d Comments</item>
         <item quantity="one">%1$d Comment</item>
-        <item quantity="two">%1$d Comments</item>
-        <item quantity="few">%1$d Comments</item>
-        <item quantity="many">%1$d Comments</item>
         <item quantity="other">%1$d Comments</item>
     </plurals>
 
     <plurals name="discussion_missed_posts">
-        <item quantity="zero">%1$d Missed posts</item>
         <item quantity="one">%1$d Missed post</item>
-        <item quantity="two">%1$d Missed posts</item>
-        <item quantity="few">%1$d Missed posts</item>
-        <item quantity="many">%1$d Missed posts</item>
         <item quantity="other">%1$d Missed posts</item>
     </plurals>
 
     <plurals name="discussion_responses">
-        <item quantity="zero">%1$d responses</item>
         <item quantity="one">%1$d response</item>
-        <item quantity="two">%1$d responses</item>
-        <item quantity="few">%1$d responses</item>
-        <item quantity="many">%1$d responses</item>
         <item quantity="other">%1$d responses</item>
     </plurals>
 
     <plurals name="discussion_responses_capitalized">
-        <item quantity="zero">%1$d Responses</item>
         <item quantity="one">%1$d Response</item>
-        <item quantity="two">%1$d Responses</item>
-        <item quantity="few">%1$d Responses</item>
-        <item quantity="many">%1$d Responses</item>
         <item quantity="other">%1$d Responses</item>
     </plurals>
 
     <plurals name="discussion_found_threads">
-        <item quantity="zero">Found %s posts</item>
         <item quantity="one">Found %s post</item>
-        <item quantity="two">Found %s posts</item>
-        <item quantity="few">Found %s posts</item>
-        <item quantity="many">Found %s posts</item>
         <item quantity="other">Found %s posts</item>
     </plurals>
 
