@@ -168,7 +168,7 @@ private fun DownloadConfirmDialogView(
             }
             Column {
                 uiState.downloadDialogItems.forEach {
-                    DownloadDialogItem(title = it.title, size = it.size.toFileSize(0, false))
+                    DownloadDialogItem(downloadDialogItem = it)
                 }
             }
             Text(

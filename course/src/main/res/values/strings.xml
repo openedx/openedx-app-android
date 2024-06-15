@@ -86,6 +86,7 @@
     <string name="course_ready_to_download">Ready to Download</string>
     <string name="course_you_can_download_course_content_offline">You can download course content offline to learn on the go, without requiring an active internet connection or using mobile data.</string>
     <string name="course_downloading">Downloading</string>
+    <string name="course_largest_downloads">Largest Downloads</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="zero">%1$s of %2$s  assignments complete</item>

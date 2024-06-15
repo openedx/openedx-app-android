@@ -10,20 +10,24 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
+import org.openedx.core.extension.toFileSize
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 
 @Composable
 fun DownloadDialogItem(
     modifier: Modifier = Modifier,
-    title: String,
-    size: String,
-    icon: Painter = painterResource(id = R.drawable.ic_core_chapter_icon)
+    downloadDialogItem: DownloadDialogItem,
 ) {
+    val icon = if (downloadDialogItem.icon != null) {
+        rememberVectorPainter(downloadDialogItem.icon)
+    } else {
+        painterResource(id = R.drawable.ic_core_chapter_icon)
+    }
     Row(
         modifier = modifier.padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -37,12 +41,12 @@ fun DownloadDialogItem(
         )
         Text(
             modifier = Modifier.weight(1f),
-            text = title,
+            text = downloadDialogItem.title,
             style = MaterialTheme.appTypography.titleSmall,
             color = MaterialTheme.appColors.textDark
         )
         Text(
-            text = size,
+            text = downloadDialogItem.size.toFileSize(0, false),
             style = MaterialTheme.appTypography.bodySmall,
             color = MaterialTheme.appColors.textFieldHint
         )

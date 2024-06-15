@@ -191,4 +191,5 @@
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="course_confirm_download">Confirm Download</string>
+    <string name="core_edit">Edit</string>
 </resources>

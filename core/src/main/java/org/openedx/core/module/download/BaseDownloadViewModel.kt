@@ -194,6 +194,12 @@ abstract class BaseDownloadViewModel(
         }
     }
 
+    fun removeBlockDownloadModel(blockId: String) {
+        viewModelScope.launch {
+            workerController.removeModel(blockId)
+        }
+    }
+
     protected fun addDownloadableChildrenForSequentialBlock(sequentialBlock: Block) {
         for (item in sequentialBlock.descendants) {
             allBlocks[item]?.let { blockDescendant ->

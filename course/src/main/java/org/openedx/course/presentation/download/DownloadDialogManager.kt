@@ -129,6 +129,26 @@ class DownloadDialogManager(
         )
     }
 
+    fun showRemoveDownloadModelPopup(
+        downloadDialogItem: DownloadDialogItem,
+        fragmentManager: FragmentManager,
+        removeDownloadModels: () -> Unit,
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            uiState.emit(
+                DownloadDialogUIState(
+                    downloadDialogItems = listOf(downloadDialogItem),
+                    isAllBlocksDownloaded = true,
+                    isDownloadFailed = false,
+                    sizeSum = downloadDialogItem.size,
+                    fragmentManager = fragmentManager,
+                    removeDownloadModels = removeDownloadModels,
+                    saveDownloadModels = {}
+                )
+            )
+        }
+    }
+
     fun showDownloadFailedPopup(
         downloadModel: List<DownloadModel>,
         fragmentManager: FragmentManager,

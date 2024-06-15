@@ -137,7 +137,7 @@ private fun DownloadStorageErrorDialogView(
             }
             Column {
                 uiState.downloadDialogItems.forEach {
-                    DownloadDialogItem(title = it.title, size = it.size.toFileSize(0, false))
+                    DownloadDialogItem(downloadDialogItem = it)
                 }
             }
             StorageBar(

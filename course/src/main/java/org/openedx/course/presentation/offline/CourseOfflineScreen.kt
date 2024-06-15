@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.offline
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
@@ -22,25 +25,35 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.extension.toFileSize
+import org.openedx.core.module.db.DownloadModel
+import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.WindowSize
@@ -51,6 +64,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
+import org.openedx.core.R as coreR
 
 @Composable
 fun CourseOfflineScreen(
@@ -68,6 +82,12 @@ fun CourseOfflineScreen(
         },
         onStopDownloadClick = {
             viewModel.navigateToDownloadQueue(fragmentManager)
+        },
+        onDeleteClick = { downloadModel ->
+            viewModel.removeDownloadModel(
+                downloadModel,
+                fragmentManager
+            )
         }
     )
 }
@@ -78,6 +98,7 @@ private fun CourseOfflineUI(
     uiState: CourseOfflineUIState,
     onDownloadAllClick: () -> Unit,
     onStopDownloadClick: () -> Unit,
+    onDeleteClick: (downloadModel: DownloadModel) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -150,9 +171,128 @@ private fun CourseOfflineUI(
                             }
                         )
                     }
+                    if (uiState.largestDownloads.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        LargestDownloads(
+                            largestDownloads = uiState.largestDownloads,
+                            onDeleteClick = onDeleteClick
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LargestDownloads(
+    largestDownloads: List<DownloadModel>,
+    onDeleteClick: (downloadModel: DownloadModel) -> Unit,
+) {
+    var isEditingEnabled by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val text = if (!isEditingEnabled) {
+        stringResource(coreR.string.core_edit)
+    } else {
+        stringResource(coreR.string.core_label_done)
+    }
+    Column {
+        Row {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.course_largest_downloads),
+                style = MaterialTheme.appTypography.titleMedium,
+                color = MaterialTheme.appColors.textDark
+            )
+            Text(
+                modifier = Modifier.clickable {
+                    isEditingEnabled = !isEditingEnabled
+                },
+                text = text,
+                style = MaterialTheme.appTypography.bodyMedium,
+                color = MaterialTheme.appColors.textAccent,
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        largestDownloads.forEach {
+            DownloadItem(
+                downloadModel = it,
+                isEditingEnabled = isEditingEnabled,
+                onDeleteClick = onDeleteClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun DownloadItem(
+    modifier: Modifier = Modifier,
+    downloadModel: DownloadModel,
+    isEditingEnabled: Boolean,
+    onDeleteClick: (downloadModel: DownloadModel) -> Unit
+) {
+    val fileIcon = if (downloadModel.type == FileType.VIDEO) {
+        Icons.Outlined.SmartDisplay
+    } else {
+        Icons.AutoMirrored.Outlined.InsertDriveFile
+    }
+    val downloadIcon: ImageVector
+    val downloadIconTint: Color
+    val downloadIconClick: Modifier
+    if (isEditingEnabled) {
+        downloadIcon = Icons.Rounded.Delete
+        downloadIconTint = MaterialTheme.appColors.error
+        downloadIconClick = Modifier.clickable {
+            onDeleteClick(downloadModel)
+        }
+    } else {
+        downloadIcon = Icons.Default.CloudDone
+        downloadIconTint = MaterialTheme.appColors.successGreen
+        downloadIconClick = Modifier
+    }
+
+    Column {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = fileIcon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = downloadModel.title,
+                    style = MaterialTheme.appTypography.labelLarge,
+                    color = MaterialTheme.appColors.textDark
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = downloadModel.size.toFileSize(0, false),
+                    style = MaterialTheme.appTypography.labelSmall,
+                    color = MaterialTheme.appColors.textDark
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .then(downloadIconClick),
+                imageVector = downloadIcon,
+                tint = downloadIconTint,
+                contentDescription = null
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Divider()
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -290,10 +430,24 @@ private fun CourseOfflineUIPreview() {
                 readyToDownloadSize = "159MB",
                 downloadedSize = "0MB",
                 progressBarValue = 0f,
-                isDownloading = true
+                isDownloading = true,
+                largestDownloads = listOf(
+                    DownloadModel(
+                        "",
+                        "",
+                        "",
+                        0,
+                        "",
+                        "",
+                        FileType.X_BLOCK,
+                        DownloadedState.DOWNLOADED,
+                        null
+                    )
+                ),
             ),
             onDownloadAllClick = {},
-            onStopDownloadClick = {}
+            onStopDownloadClick = {},
+            onDeleteClick = {}
         )
     }
 }

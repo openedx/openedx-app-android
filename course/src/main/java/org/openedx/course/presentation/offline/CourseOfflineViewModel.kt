@@ -1,5 +1,8 @@
 package org.openedx.course.presentation.offline
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
+import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +16,8 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
+import org.openedx.core.module.db.DownloadModel
+import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.module.download.DownloadHelper
@@ -20,6 +25,7 @@ import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.utils.FileUtil
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogItem
 import org.openedx.course.presentation.download.DownloadDialogManager
 
 class CourseOfflineViewModel(
@@ -45,6 +51,7 @@ class CourseOfflineViewModel(
     private val _uiState = MutableStateFlow(
         CourseOfflineUIState(
             isHaveDownloadableBlocks = false,
+            largestDownloads = emptyList(),
             isDownloading = false,
             readyToDownloadSize = "",
             downloadedSize = "",
@@ -104,6 +111,26 @@ class CourseOfflineViewModel(
         courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
     }
 
+    fun removeDownloadModel(downloadModel: DownloadModel, fragmentManager: FragmentManager) {
+        val icon = if (downloadModel.type == FileType.VIDEO) {
+            Icons.Outlined.SmartDisplay
+        } else {
+            Icons.AutoMirrored.Outlined.InsertDriveFile
+        }
+        val downloadDialogItem = DownloadDialogItem(
+            title = downloadModel.title,
+            size = downloadModel.size,
+            icon = icon
+        )
+        downloadDialogManager.showRemoveDownloadModelPopup(
+            downloadDialogItem = downloadDialogItem,
+            fragmentManager = fragmentManager,
+            removeDownloadModels = {
+                super.removeBlockDownloadModel(downloadModel.id)
+            },
+        )
+    }
+
     private fun getOfflineData() {
         viewModelScope.launch {
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
@@ -116,10 +143,15 @@ class CourseOfflineViewModel(
                     .map { it.id }
                 val downloadedBlocks = courseStructure.blockData.filter { it.id in downloadedModelsIds }
                 val downloadedFilesSize = getFilesSize(downloadedBlocks)
+                val largestDownloads = downloadModels
+                    .filter { it.downloadedState == DownloadedState.DOWNLOADED }
+                    .sortedByDescending { it.size }
+                    .take(5)
 
                 _uiState.update {
                     it.copy(
                         isHaveDownloadableBlocks = true,
+                        largestDownloads = largestDownloads,
                         readyToDownloadSize = (downloadableFilesSize - downloadedFilesSize).toFileSize(0, false),
                         downloadedSize = downloadedFilesSize.toFileSize(0, false),
                         progressBarValue = downloadedFilesSize.toFloat() / downloadableFilesSize.toFloat()

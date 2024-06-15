@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.extension.parcelable
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.system.PreviewFragmentManager
 import org.openedx.core.ui.OpenEdXButton
@@ -152,7 +151,7 @@ private fun DownloadErrorDialogView(
             }
             Column {
                 uiState.downloadDialogItems.forEach {
-                    DownloadDialogItem(title = it.title, size = it.size.toFileSize(0, false))
+                    DownloadDialogItem(downloadDialogItem = it)
                 }
             }
             Text(
