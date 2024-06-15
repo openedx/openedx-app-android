@@ -74,7 +74,10 @@ class DownloadConfirmDialogFragment : DialogFragment() {
 
                     DownloadConfirmDialogType.DOWNLOAD_ON_CELLULAR -> DownloadDialogResource(
                         title = stringResource(id = R.string.course_download_on_cellural),
-                        description = stringResource(id = R.string.course_download_on_cellural_dialog_description),
+                        description = stringResource(
+                            id = R.string.course_download_on_cellural_dialog_description,
+                            sizeSumString
+                        ),
                         icon = painterResource(id = org.openedx.core.R.drawable.core_ic_warning),
                     )
 

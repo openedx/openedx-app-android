@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -56,6 +57,7 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.rememberWindowSize
@@ -88,7 +90,10 @@ fun CourseOfflineScreen(
                 downloadModel,
                 fragmentManager
             )
-        }
+        },
+        onDeleteAllClick = {
+            viewModel.removeDownloadModel(fragmentManager)
+        },
     )
 }
 
@@ -99,6 +104,7 @@ private fun CourseOfflineUI(
     onDownloadAllClick: () -> Unit,
     onStopDownloadClick: () -> Unit,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
+    onDeleteAllClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -135,48 +141,51 @@ private fun CourseOfflineUI(
                 modifier = modifierScreenWidth,
                 color = MaterialTheme.appColors.background,
             ) {
-                Column(
+                LazyColumn(
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 20.dp)
+                        .padding(top = 20.dp, bottom = 24.dp)
                         .then(horizontalPadding)
                 ) {
-                    if (uiState.isHaveDownloadableBlocks) {
-                        DownloadProgress(
-                            uiState = uiState,
-                            onStopDownloadClick = onStopDownloadClick,
-                        )
-                    } else {
-                        NoDownloadableBlocksProgress()
-                    }
-                    if (uiState.progressBarValue != 1f) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        OpenEdXButton(
-                            text = stringResource(R.string.course_download_all),
-                            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-                            onClick = onDownloadAllClick,
-                            enabled = uiState.isHaveDownloadableBlocks,
-                            content = {
-                                val textColor = if (uiState.isHaveDownloadableBlocks) {
-                                    MaterialTheme.appColors.primaryButtonText
-                                } else {
-                                    MaterialTheme.appColors.textPrimaryVariant
+                    item {
+                        if (uiState.isHaveDownloadableBlocks) {
+                            DownloadProgress(
+                                uiState = uiState,
+                                onStopDownloadClick = onStopDownloadClick,
+                            )
+                        } else {
+                            NoDownloadableBlocksProgress()
+                        }
+                        if (uiState.progressBarValue != 1f) {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            OpenEdXButton(
+                                text = stringResource(R.string.course_download_all),
+                                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                                onClick = onDownloadAllClick,
+                                enabled = uiState.isHaveDownloadableBlocks,
+                                content = {
+                                    val textColor = if (uiState.isHaveDownloadableBlocks) {
+                                        MaterialTheme.appColors.primaryButtonText
+                                    } else {
+                                        MaterialTheme.appColors.textPrimaryVariant
+                                    }
+                                    IconText(
+                                        text = stringResource(R.string.course_download_all),
+                                        icon = Icons.Outlined.CloudDownload,
+                                        color = textColor,
+                                        textStyle = MaterialTheme.appTypography.labelLarge
+                                    )
                                 }
-                                IconText(
-                                    text = stringResource(R.string.course_download_all),
-                                    icon = Icons.Outlined.CloudDownload,
-                                    color = textColor,
-                                    textStyle = MaterialTheme.appTypography.labelLarge
-                                )
-                            }
-                        )
-                    }
-                    if (uiState.largestDownloads.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        LargestDownloads(
-                            largestDownloads = uiState.largestDownloads,
-                            onDeleteClick = onDeleteClick
-                        )
+                            )
+                        }
+                        if (uiState.largestDownloads.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            LargestDownloads(
+                                largestDownloads = uiState.largestDownloads,
+                                onDeleteClick = onDeleteClick,
+                                onDeleteAllClick = onDeleteAllClick
+                            )
+                        }
                     }
                 }
             }
@@ -188,6 +197,7 @@ private fun CourseOfflineUI(
 private fun LargestDownloads(
     largestDownloads: List<DownloadModel>,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
+    onDeleteAllClick: () -> Unit
 ) {
     var isEditingEnabled by rememberSaveable {
         mutableStateOf(false)
@@ -222,6 +232,22 @@ private fun LargestDownloads(
                 onDeleteClick = onDeleteClick
             )
         }
+        OpenEdXOutlinedButton(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.course_remove_all_downloads),
+            backgroundColor = MaterialTheme.appColors.background,
+            borderColor = MaterialTheme.appColors.error,
+            textColor = MaterialTheme.appColors.error,
+            onClick = onDeleteAllClick,
+            content = {
+                IconText(
+                    text = stringResource(R.string.course_remove_all_downloads),
+                    icon = Icons.Rounded.Delete,
+                    color = MaterialTheme.appColors.error,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
+            }
+        )
     }
 }
 
@@ -447,7 +473,8 @@ private fun CourseOfflineUIPreview() {
             ),
             onDownloadAllClick = {},
             onStopDownloadClick = {},
-            onDeleteClick = {}
+            onDeleteClick = {},
+            onDeleteAllClick = {}
         )
     }
 }

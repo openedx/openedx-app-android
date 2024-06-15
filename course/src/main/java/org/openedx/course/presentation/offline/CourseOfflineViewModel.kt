@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +18,6 @@ import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
-import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.module.download.DownloadHelper
@@ -69,18 +69,17 @@ class CourseOfflineViewModel(
             }
         }
 
-        getOfflineData()
+        viewModelScope.launch {
+            async { initDownloadFragment() }.await()
+            getOfflineData()
+        }
     }
 
     fun downloadAllBlocks(fragmentManager: FragmentManager) {
         viewModelScope.launch {
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
-            setBlocks(courseStructure.blockData)
             val downloadModels = courseInteractor.getAllDownloadModels()
             val subSectionsBlocks = allBlocks.values.filter { it.type == BlockType.SEQUENTIAL }
-            subSectionsBlocks.forEach {
-                addDownloadableChildrenForSequentialBlock(it)
-            }
             val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
                 val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
                 val notDownloadedBlocks = courseStructure.blockData.filter { block ->
@@ -131,20 +130,54 @@ class CourseOfflineViewModel(
         )
     }
 
+    fun removeDownloadModel(fragmentManager: FragmentManager) {
+        viewModelScope.launch {
+            val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
+            val downloadModels = courseInteractor.getAllDownloadModels()
+            val subSectionsBlocks = allBlocks.values.filter { it.type == BlockType.SEQUENTIAL }
+            val downloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val notDownloadedBlocks = courseStructure.blockData.filter { block ->
+                    block.id in verticalBlocks.flatMap { it.descendants } && block.isDownloadable && downloadModels.any { it.id == block.id }
+                }
+                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
+            }
+            downloadDialogManager.showPopup(
+                subSectionsBlocks = downloadedSubSectionBlocks,
+                courseId = courseId,
+                isAllBlocksDownloaded = true,
+                fragmentManager = fragmentManager,
+                removeDownloadModels = ::removeDownloadModels,
+                saveDownloadModels = { blockId ->
+                    super.removeDownloadModels(blockId)
+                }
+            )
+        }
+    }
+
+    private suspend fun initDownloadFragment() {
+        val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
+        setBlocks(courseStructure.blockData)
+        allBlocks.values
+            .filter { it.type == BlockType.SEQUENTIAL }
+            .forEach {
+                addDownloadableChildrenForSequentialBlock(it)
+            }
+
+    }
+
     private fun getOfflineData() {
         viewModelScope.launch {
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
-            val downloadableFilesSize = getFilesSize(courseStructure.blockData)
+            val downloadableFilesSize = getFilesSize(courseStructure.blockData) * 2
             if (downloadableFilesSize == 0L) return@launch
 
-            courseInteractor.getDownloadModels().collect { downloadModels ->
-                val downloadedModelsIds = downloadModels
-                    .filter { it.downloadedState.isDownloaded && it.courseId == courseId }
-                    .map { it.id }
+            courseInteractor.getDownloadModels().collect {
+                val downloadModels = it.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
+                val downloadedModelsIds = downloadModels.map { it.id }
                 val downloadedBlocks = courseStructure.blockData.filter { it.id in downloadedModelsIds }
-                val downloadedFilesSize = getFilesSize(downloadedBlocks)
+                val downloadedFilesSize = getFilesSize(downloadedBlocks) * 2
                 val largestDownloads = downloadModels
-                    .filter { it.downloadedState == DownloadedState.DOWNLOADED }
                     .sortedByDescending { it.size }
                     .take(5)
 

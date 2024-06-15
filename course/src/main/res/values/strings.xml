@@ -70,7 +70,7 @@
     <string name="course_download_failed_dialog_description">Unfortunately, this content failed to download. Please try again later or report this issue.</string>
     <string name="course_download_confirm_dialog_description">Downloading this %1$s of content will save available blocks offline.</string>
     <string name="course_download_on_cellural">Download on Cellular?</string>
-    <string name="course_download_on_cellural_dialog_description">Downloading this content will use 99MB of cellular data.</string>
+    <string name="course_download_on_cellural_dialog_description">Downloading this content will use %1$s of cellular data.</string>
     <string name="course_download_remove_offline_content">Remove Offline Content?</string>
     <string name="course_download_remove_dialog_description">Removing this content will free up %1$s.</string>
     <string name="course_download">Download</string>
@@ -87,6 +87,7 @@
     <string name="course_you_can_download_course_content_offline">You can download course content offline to learn on the go, without requiring an active internet connection or using mobile data.</string>
     <string name="course_downloading">Downloading</string>
     <string name="course_largest_downloads">Largest Downloads</string>
+    <string name="course_remove_all_downloads">Remove all downloads</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="zero">%1$s of %2$s  assignments complete</item>
