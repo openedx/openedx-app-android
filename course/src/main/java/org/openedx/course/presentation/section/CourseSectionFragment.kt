@@ -32,6 +32,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -353,10 +355,10 @@ private fun CourseSubsectionItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        painterResource(id = R.drawable.course_ic_remove_download)
+                    val downloadIcon = if (downloadedState == DownloadedState.DOWNLOADED) {
+                        Icons.Default.CloudDone
                     } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
+                        Icons.Outlined.CloudDownload
                     }
                     val downloadIconDescription =
                         if (downloadedState == DownloadedState.DOWNLOADED) {
@@ -367,7 +369,7 @@ private fun CourseSubsectionItem(
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
-                            painter = downloadIconPainter,
+                            imageVector = downloadIcon,
                             contentDescription = downloadIconDescription,
                             tint = MaterialTheme.appColors.textPrimary
                         )

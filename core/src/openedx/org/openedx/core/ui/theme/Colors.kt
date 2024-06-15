@@ -73,7 +73,7 @@ val light_course_home_header_shade = Color(0xFFBABABA)
 val light_course_home_back_btn_background = Color.White
 val light_settings_title_content = Color.White
 val light_progress_bar_color = light_primary
-val light_progress_bar_background_color = Color(0xFF97A5BB)
+val light_progress_bar_background_color = Color(0xFFCCD4E0)
 
 
 val dark_primary = Color(0xFF3F68F8)

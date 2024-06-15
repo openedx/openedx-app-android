@@ -272,6 +272,7 @@ class CourseContainerViewModel(
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
             CourseContainerTab.MORE -> moreTabClickedEvent()
+            CourseContainerTab.OFFLINE -> {}
         }
     }
 

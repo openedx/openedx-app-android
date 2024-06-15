@@ -19,12 +19,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -178,20 +178,20 @@ private fun DownloadConfirmDialogView(
             )
 
             val buttonText: String
-            val buttonIcon: Painter
+            val buttonIcon: ImageVector
             val buttonColor: ComposeColor
             val onClick: () -> Unit
             when (dialogType) {
                 DownloadConfirmDialogType.REMOVE -> {
                     buttonText = stringResource(id = R.string.course_remove)
-                    buttonIcon = rememberVectorPainter(Icons.Rounded.Delete)
+                    buttonIcon = Icons.Rounded.Delete
                     buttonColor = MaterialTheme.appColors.error
                     onClick = onRemoveClick
                 }
 
                 else -> {
                     buttonText = stringResource(id = R.string.course_download)
-                    buttonIcon = painterResource(id = R.drawable.course_ic_start_download)
+                    buttonIcon = Icons.Outlined.CloudDownload
                     buttonColor = MaterialTheme.appColors.secondaryButtonBackground
                     onClick = onConfirmClick
                 }
@@ -203,7 +203,7 @@ private fun DownloadConfirmDialogView(
                 content = {
                     IconText(
                         text = buttonText,
-                        painter = buttonIcon,
+                        icon = buttonIcon,
                         color = MaterialTheme.appColors.primaryButtonText,
                         textStyle = MaterialTheme.appTypography.labelLarge
                     )
