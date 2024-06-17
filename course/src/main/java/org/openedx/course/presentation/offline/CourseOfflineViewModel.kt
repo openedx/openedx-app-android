@@ -130,27 +130,22 @@ class CourseOfflineViewModel(
         )
     }
 
-    fun removeDownloadModel(fragmentManager: FragmentManager) {
+    fun deleteAll(fragmentManager: FragmentManager) {
         viewModelScope.launch {
-            val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
-            val downloadModels = courseInteractor.getAllDownloadModels()
-            val subSectionsBlocks = allBlocks.values.filter { it.type == BlockType.SEQUENTIAL }
-            val downloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
-                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
-                val notDownloadedBlocks = courseStructure.blockData.filter { block ->
-                    block.id in verticalBlocks.flatMap { it.descendants } && block.isDownloadable && downloadModels.any { it.id == block.id }
-                }
-                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
-            }
-            downloadDialogManager.showPopup(
-                subSectionsBlocks = downloadedSubSectionBlocks,
-                courseId = courseId,
-                isAllBlocksDownloaded = true,
+            val downloadModels = courseInteractor.getAllDownloadModels().filter { it.courseId == courseId }
+            val downloadDialogItem = DownloadDialogItem(
+                title = courseTitle,
+                size = downloadModels.sumOf { it.size },
+                icon = Icons.AutoMirrored.Outlined.InsertDriveFile
+            )
+            downloadDialogManager.showRemoveDownloadModelPopup(
+                downloadDialogItem = downloadDialogItem,
                 fragmentManager = fragmentManager,
-                removeDownloadModels = ::removeDownloadModels,
-                saveDownloadModels = { blockId ->
-                    super.removeDownloadModels(blockId)
-                }
+                removeDownloadModels = {
+                    downloadModels.forEach {
+                        super.removeBlockDownloadModel(it.id)
+                    }
+                },
             )
         }
     }
@@ -169,14 +164,14 @@ class CourseOfflineViewModel(
     private fun getOfflineData() {
         viewModelScope.launch {
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
-            val downloadableFilesSize = getFilesSize(courseStructure.blockData) * 2
+            val downloadableFilesSize = getFilesSize(courseStructure.blockData)
             if (downloadableFilesSize == 0L) return@launch
 
             courseInteractor.getDownloadModels().collect {
                 val downloadModels = it.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
                 val downloadedModelsIds = downloadModels.map { it.id }
                 val downloadedBlocks = courseStructure.blockData.filter { it.id in downloadedModelsIds }
-                val downloadedFilesSize = getFilesSize(downloadedBlocks) * 2
+                val downloadedFilesSize = getFilesSize(downloadedBlocks)
                 val largestDownloads = downloadModels
                     .sortedByDescending { it.size }
                     .take(5)
@@ -185,8 +180,8 @@ class CourseOfflineViewModel(
                     it.copy(
                         isHaveDownloadableBlocks = true,
                         largestDownloads = largestDownloads,
-                        readyToDownloadSize = (downloadableFilesSize - downloadedFilesSize).toFileSize(0, false),
-                        downloadedSize = downloadedFilesSize.toFileSize(0, false),
+                        readyToDownloadSize = (downloadableFilesSize - downloadedFilesSize).toFileSize(1, false),
+                        downloadedSize = downloadedFilesSize.toFileSize(1, false),
                         progressBarValue = downloadedFilesSize.toFloat() / downloadableFilesSize.toFloat()
                     )
                 }

@@ -62,7 +62,7 @@ class DownloadConfirmDialogFragment : DialogFragment() {
                 val dialogType =
                     requireArguments().parcelable<DownloadConfirmDialogType>(ARG_DIALOG_TYPE) ?: return@OpenEdXTheme
                 val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE) ?: return@OpenEdXTheme
-                val sizeSumString = uiState.sizeSum.toFileSize(0, false)
+                val sizeSumString = uiState.sizeSum.toFileSize(1, false)
                 val dialogData = when (dialogType) {
                     DownloadConfirmDialogType.CONFIRM -> DownloadDialogResource(
                         title = stringResource(id = coreR.string.course_confirm_download),

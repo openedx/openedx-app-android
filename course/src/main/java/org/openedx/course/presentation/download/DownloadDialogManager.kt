@@ -23,6 +23,7 @@ class DownloadDialogManager(
 
     companion object {
         const val MAX_CELLULAR_SIZE = 100000000 // 100MB
+        const val DOWNLOAD_SIZE_FACTOR = 2 // Multiplier to match required disk size
     }
 
     private val uiState = MutableSharedFlow<DownloadDialogUIState>()
@@ -64,7 +65,7 @@ class DownloadDialogManager(
                         )
                     }
 
-                    StorageManager.getFreeStorage() < uiState.sizeSum -> {
+                    StorageManager.getFreeStorage() < uiState.sizeSum * DOWNLOAD_SIZE_FACTOR -> {
                         val dialog = DownloadStorageErrorDialogFragment.newInstance(
                             uiState = uiState
                         )
@@ -176,7 +177,7 @@ class DownloadDialogManager(
                     val blocks = courseStructure.blockData.filter {
                         it.id in verticalBlocks.flatMap { it.descendants } && it.id in blockIds
                     }
-                    val size = blocks.sumOf { getFileSize(it) * 2 }
+                    val size = blocks.sumOf { getFileSize(it) }
                     if (blocks.isNotEmpty()) notDownloadedSubSections.add(subSectionsBlock)
                     if (size > 0) {
                         val downloadDialogItem = DownloadDialogItem(
@@ -218,7 +219,7 @@ class DownloadDialogManager(
             val downloadDialogItems = subSectionsBlocks.mapNotNull { subSectionsBlock ->
                 val verticalBlocks = courseStructure.blockData.filter { it.id in subSectionsBlock.descendants }
                 val blocks = courseStructure.blockData.filter { it.id in verticalBlocks.flatMap { it.descendants } }
-                val size = blocks.sumOf { getFileSize(it) * 2 }
+                val size = blocks.sumOf { getFileSize(it) }
                 if (size > 0) DownloadDialogItem(title = subSectionsBlock.displayName, size = size) else null
             }
 

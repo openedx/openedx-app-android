@@ -19,6 +19,7 @@ import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.download.AbstractDownloader.DownloadResult
 import org.openedx.core.module.download.CurrentProgress
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
@@ -130,15 +131,23 @@ class DownloadWorker(
                     )
                 )
             )
-            val isSuccess = fileDownloader.download(downloadTask.url, downloadTask.path)
-            if (isSuccess) {
-                val updatedModel = downloadHelper.updateDownloadStatus(downloadTask)
-                downloadDao.updateDownloadModel(
-                    DownloadModelEntity.createFrom(updatedModel)
-                )
-            } else {
-                downloadDao.removeDownloadModel(downloadTask.id)
-                downloadError.add(downloadTask)
+            val downloadResult = fileDownloader.download(downloadTask.url, downloadTask.path)
+            when (downloadResult) {
+                DownloadResult.SUCCESS -> {
+                    val updatedModel = downloadHelper.updateDownloadStatus(downloadTask)
+                    downloadDao.updateDownloadModel(
+                        DownloadModelEntity.createFrom(updatedModel)
+                    )
+                }
+
+                DownloadResult.CANCELED -> {
+                    downloadDao.removeDownloadModel(downloadTask.id)
+                }
+
+                DownloadResult.ERROR -> {
+                    downloadDao.removeDownloadModel(downloadTask.id)
+                    downloadError.add(downloadTask)
+                }
             }
             newDownload()
         } else {

@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.extension.toFileSize
@@ -43,10 +44,12 @@ fun DownloadDialogItem(
             modifier = Modifier.weight(1f),
             text = downloadDialogItem.title,
             style = MaterialTheme.appTypography.titleSmall,
-            color = MaterialTheme.appColors.textDark
+            color = MaterialTheme.appColors.textDark,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2
         )
         Text(
-            text = downloadDialogItem.size.toFileSize(0, false),
+            text = downloadDialogItem.size.toFileSize(1, false),
             style = MaterialTheme.appTypography.bodySmall,
             color = MaterialTheme.appColors.textFieldHint
         )

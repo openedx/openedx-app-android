@@ -92,7 +92,7 @@ fun CourseOfflineScreen(
             )
         },
         onDeleteAllClick = {
-            viewModel.removeDownloadModel(fragmentManager)
+            viewModel.deleteAll(fragmentManager)
         },
     )
 }
@@ -301,7 +301,7 @@ private fun DownloadItem(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = downloadModel.size.toFileSize(0, false),
+                    text = downloadModel.size.toFileSize(1, false),
                     style = MaterialTheme.appTypography.labelSmall,
                     color = MaterialTheme.appColors.textDark
                 )

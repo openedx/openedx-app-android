@@ -52,6 +52,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.domain.model.DownloadDialogResource
+import org.openedx.course.presentation.download.DownloadDialogManager.Companion.DOWNLOAD_SIZE_FACTOR
 
 class DownloadStorageErrorDialogFragment : DialogFragment() {
 
@@ -137,13 +138,13 @@ private fun DownloadStorageErrorDialogView(
             }
             Column {
                 uiState.downloadDialogItems.forEach {
-                    DownloadDialogItem(downloadDialogItem = it)
+                    DownloadDialogItem(downloadDialogItem = it.copy(size = it.size * DOWNLOAD_SIZE_FACTOR))
                 }
             }
             StorageBar(
                 freeSpace = StorageManager.getFreeStorage(),
                 totalSpace = StorageManager.getTotalStorage(),
-                requiredSpace = uiState.sizeSum
+                requiredSpace = uiState.sizeSum * DOWNLOAD_SIZE_FACTOR
             )
             Text(
                 text = downloadDialogResource.description,
@@ -173,8 +174,9 @@ private fun StorageBar(
     val cornerRadius = 2.dp
     val boxPadding = 1.dp
     val usedSpace = totalSpace - freeSpace
-    val usedPercentage = (totalSpace + requiredSpace - freeSpace) / totalSpace.toFloat()
-    val reqPercentage = (requiredSpace - freeSpace) / totalSpace.toFloat()
+    val minSize = 0.1f
+    val freePercentage = freeSpace / requiredSpace.toFloat() + minSize
+    val reqPercentage = (requiredSpace - freeSpace) / requiredSpace.toFloat() + minSize
 
     val animReqPercentage = remember { Animatable(Float.MIN_VALUE) }
     LaunchedEffect(Unit) {
@@ -206,7 +208,7 @@ private fun StorageBar(
         ) {
             Box(
                 modifier = Modifier
-                    .weight(usedPercentage)
+                    .weight(freePercentage)
                     .fillMaxHeight()
                     .padding(top = boxPadding, bottom = boxPadding, start = boxPadding, end = boxPadding / 2)
                     .clip(RoundedCornerShape(topStart = cornerRadius, bottomStart = cornerRadius))
@@ -228,15 +230,15 @@ private fun StorageBar(
             Text(
                 text = stringResource(
                     org.openedx.course.R.string.course_used_free_storage,
-                    usedSpace.toFileSize(0, false),
-                    freeSpace.toFileSize(0, false)
+                    usedSpace.toFileSize(1, false),
+                    freeSpace.toFileSize(1, false)
                 ),
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.textFieldHint,
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = requiredSpace.toFileSize(0, false),
+                text = requiredSpace.toFileSize(1, false),
                 style = MaterialTheme.appTypography.labelSmall,
                 color = MaterialTheme.appColors.error,
             )
