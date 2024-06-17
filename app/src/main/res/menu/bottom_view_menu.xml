@@ -2,22 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/fragmentHome"
-        android:title="@string/app_navigation_discovery"
-        android:enabled="true"
-        android:icon="@drawable/app_ic_home"/>
-
-    <item
         android:id="@+id/fragmentDashboard"
         android:title="@string/app_navigation_dashboard"
         android:enabled="true"
         android:icon="@drawable/app_ic_rows"/>
-
-    <item
-        android:id="@+id/fragmentPrograms"
-        android:title="@string/app_navigation_programs"
-        android:enabled="true"
-        android:icon="@drawable/app_ic_book"/>
 
     <item
         android:id="@+id/fragmentProfile"
