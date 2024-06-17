@@ -17,9 +17,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.dashboard.presentation.DashboardFragment
-import org.openedx.discovery.presentation.DiscoveryNavigator
 import org.openedx.discovery.presentation.DiscoveryRouter
-import org.openedx.discovery.presentation.program.ProgramFragment
 import org.openedx.profile.presentation.profile.ProfileFragment
 
 class MainFragment : Fragment(R.layout.fragment_main) {
@@ -47,24 +45,14 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         binding.bottomNavView.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.fragmentHome -> {
-                    viewModel.logDiscoveryTabClickedEvent()
-                    binding.viewPager.setCurrentItem(0, false)
-                }
-
                 R.id.fragmentDashboard -> {
                     viewModel.logMyCoursesTabClickedEvent()
-                    binding.viewPager.setCurrentItem(1, false)
-                }
-
-                R.id.fragmentPrograms -> {
-                    viewModel.logMyProgramsTabClickedEvent()
-                    binding.viewPager.setCurrentItem(2, false)
+                    binding.viewPager.setCurrentItem(0, false)
                 }
 
                 R.id.fragmentProfile -> {
                     viewModel.logProfileTabClickedEvent()
-                    binding.viewPager.setCurrentItem(3, false)
+                    binding.viewPager.setCurrentItem(1, false)
                 }
             }
             true
@@ -77,9 +65,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.navigateToDiscovery.collect { shouldNavigateToDiscovery ->
-                if (shouldNavigateToDiscovery) {
-                    binding.bottomNavView.selectedItemId = R.id.fragmentHome
+            viewModel.navigateToHome.collect { shouldNavigateToHome ->
+                if (shouldNavigateToHome) {
+                    binding.bottomNavView.selectedItemId = R.id.fragmentDashboard
                 }
             }
         }
@@ -105,18 +93,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4
 
-        val discoveryFragment = DiscoveryNavigator(viewModel.isDiscoveryTypeWebView)
-            .getDiscoveryFragment()
-        val programFragment = if (viewModel.isProgramTypeWebView) {
-            ProgramFragment(true)
-        } else {
-            InDevelopmentFragment()
-        }
-
         adapter = MainNavigationFragmentAdapter(this).apply {
-            addFragment(discoveryFragment)
             addFragment(DashboardFragment())
-            addFragment(programFragment)
             addFragment(ProfileFragment())
         }
         binding.viewPager.adapter = adapter

@@ -25,9 +25,9 @@ class MainViewModel(
     val isBottomBarEnabled: LiveData<Boolean>
         get() = _isBottomBarEnabled
 
-    private val _navigateToDiscovery = MutableSharedFlow<Boolean>()
-    val navigateToDiscovery: SharedFlow<Boolean>
-        get() = _navigateToDiscovery.asSharedFlow()
+    private val _navigateToHome = MutableSharedFlow<Boolean>()
+    val navigateToHome: SharedFlow<Boolean>
+        get() = _navigateToHome.asSharedFlow()
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 
@@ -37,7 +37,7 @@ class MainViewModel(
         super.onCreate(owner)
         notifier.notifier.onEach {
             if (it is NavigationToDiscovery) {
-                _navigateToDiscovery.emit(true)
+                _navigateToHome.emit(true)
             }
         }.distinctUntilChanged().launchIn(viewModelScope)
     }

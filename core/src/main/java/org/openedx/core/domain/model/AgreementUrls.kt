@@ -17,6 +17,7 @@ internal data class Agreement(
 
 data class AgreementUrls(
     val privacyPolicyUrl: String = "",
+    val contactSupportUrl: String = "",
     val cookiePolicyUrl: String = "",
     val dataSellConsentUrl: String = "",
     val tosUrl: String = "",

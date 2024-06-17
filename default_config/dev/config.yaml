@@ -1,17 +1,18 @@
-API_HOST_URL: 'http://localhost:8000'
+API_HOST_URL: 'https://lms.quince-sandbox.eshe.opencraft.hosting'
 APPLICATION_ID: 'org.openedx.app'
-ENVIRONMENT_DISPLAY_NAME: 'Localhost'
+ENVIRONMENT_DISPLAY_NAME: 'Eshe dev'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
-OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+OAUTH_CLIENT_ID: 'login-service-client-id'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: ''
+  PRIVACY_POLICY_URL: 'https://courses.ethernet.edu.et/terms'
   COOKIE_POLICY_URL: ''
   DATA_SELL_CONSENT_URL: ''
-  TOS_URL: ''
+  CONTACT_SUPPORT_URL: 'https://eshemoeasu.my.site.com/help/s/'
+  TOS_URL: 'https://courses.ethernet.edu.et/terms'
   EULA_URL: ''
   SUPPORTED_LANGUAGES: [ ] #en is default language
 

@@ -168,11 +168,11 @@ class SettingsViewModel(
         logProfileEvent(ProfileAnalyticsEvent.TERMS_OF_USE_CLICKED)
     }
 
-    fun emailSupportClicked(context: Context) {
-        EmailUtil.showFeedbackScreen(
-            context = context,
-            feedbackEmailAddress = config.getFeedbackEmailAddress(),
-            appVersion = appData.versionName
+    fun emailSupportClicked(fragmentManager: FragmentManager) {
+        router.navigateToWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(R.string.core_contact_support),
+            url = configuration.agreementUrls.contactSupportUrl,
         )
         logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
     }

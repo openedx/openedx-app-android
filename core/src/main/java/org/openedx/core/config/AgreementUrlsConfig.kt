@@ -14,6 +14,8 @@ internal data class AgreementUrlsConfig(
     private val dataSellConsentUrl: String = "",
     @SerializedName("TOS_URL")
     private val tosUrl: String = "",
+    @SerializedName("CONTACT_SUPPORT_URL")
+    private val contactSupportUrl: String = "",
     @SerializedName("EULA_URL")
     private val eulaUrl: String = "",
     @SerializedName("SUPPORTED_LANGUAGES")
@@ -25,6 +27,7 @@ internal data class AgreementUrlsConfig(
             cookiePolicyUrl = cookiePolicyUrl,
             dataSellConsentUrl = dataSellConsentUrl,
             tosUrl = tosUrl,
+            contactSupportUrl = contactSupportUrl,
             eulaUrl = eulaUrl,
             supportedLanguages = supportedLanguages,
         )
@@ -35,6 +38,7 @@ internal data class AgreementUrlsConfig(
                     cookiePolicyUrl = cookiePolicyUrl.appendLocale(it),
                     dataSellConsentUrl = dataSellConsentUrl.appendLocale(it),
                     tosUrl = tosUrl.appendLocale(it),
+                    contactSupportUrl = contactSupportUrl.appendLocale(it),
                     eulaUrl = eulaUrl.appendLocale(it),
                     supportedLanguages = supportedLanguages,
                 )

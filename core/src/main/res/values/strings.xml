@@ -12,6 +12,7 @@
     <string name="core_data_sell" translatable="false">Do not sell my personal information</string>
     <string name="core_faq" translatable="false">View FAQ</string>
     <string name="core_terms_of_use">Terms of Use</string>
+    <string name="core_contact_support">Contact Support</string>
     <string name="core_profile">Profile</string>
     <string name="core_cancel">Cancel</string>
     <string name="core_search">Search</string>
