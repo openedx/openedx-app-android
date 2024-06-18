@@ -88,6 +88,7 @@
     <string name="course_downloading">Downloading</string>
     <string name="course_largest_downloads">Largest Downloads</string>
     <string name="course_remove_all_downloads">Remove all downloads</string>
+    <string name="course_cancel_course_download">Cancel Course Download</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="zero">%1$s of %2$s  assignments complete</item>

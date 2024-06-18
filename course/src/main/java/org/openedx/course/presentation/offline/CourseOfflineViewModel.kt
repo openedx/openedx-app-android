@@ -24,7 +24,6 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.utils.FileUtil
 import org.openedx.course.domain.interactor.CourseInteractor
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.download.DownloadDialogItem
 import org.openedx.course.presentation.download.DownloadDialogManager
 
@@ -35,7 +34,6 @@ class CourseOfflineViewModel(
     private val preferencesManager: CorePreferences,
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
-    private val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -101,15 +99,6 @@ class CourseOfflineViewModel(
         }
     }
 
-    fun navigateToDownloadQueue(fragmentManager: FragmentManager) {
-        val downloadableChildren =
-            allBlocks.values
-                .filter { it.type == BlockType.SEQUENTIAL }
-                .mapNotNull { getDownloadableChildren(it.id) }
-                .flatten()
-        courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
-    }
-
     fun removeDownloadModel(downloadModel: DownloadModel, fragmentManager: FragmentManager) {
         val icon = if (downloadModel.type == FileType.VIDEO) {
             Icons.Outlined.SmartDisplay
@@ -147,6 +136,16 @@ class CourseOfflineViewModel(
                     }
                 },
             )
+        }
+    }
+
+    fun removeDownloadModel() {
+        viewModelScope.launch {
+            courseInteractor.getAllDownloadModels()
+                .filter { it.courseId == courseId && it.downloadedState.isWaitingOrDownloading }
+                .forEach {
+                    removeBlockDownloadModel(it.id)
+                }
         }
     }
 

@@ -9,17 +9,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -27,10 +24,10 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.SmartDisplay
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -82,8 +79,8 @@ fun CourseOfflineScreen(
         onDownloadAllClick = {
             viewModel.downloadAllBlocks(fragmentManager)
         },
-        onStopDownloadClick = {
-            viewModel.navigateToDownloadQueue(fragmentManager)
+        onCancelDownloadClick = {
+            viewModel.removeDownloadModel()
         },
         onDeleteClick = { downloadModel ->
             viewModel.removeDownloadModel(
@@ -102,7 +99,7 @@ private fun CourseOfflineUI(
     windowSize: WindowSize,
     uiState: CourseOfflineUIState,
     onDownloadAllClick: () -> Unit,
-    onStopDownloadClick: () -> Unit,
+    onCancelDownloadClick: () -> Unit,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
     onDeleteAllClick: () -> Unit
 ) {
@@ -151,12 +148,11 @@ private fun CourseOfflineUI(
                         if (uiState.isHaveDownloadableBlocks) {
                             DownloadProgress(
                                 uiState = uiState,
-                                onStopDownloadClick = onStopDownloadClick,
                             )
                         } else {
                             NoDownloadableBlocksProgress()
                         }
-                        if (uiState.progressBarValue != 1f) {
+                        if (uiState.progressBarValue != 1f && !uiState.isDownloading) {
                             Spacer(modifier = Modifier.height(20.dp))
                             OpenEdXButton(
                                 text = stringResource(R.string.course_download_all),
@@ -177,13 +173,32 @@ private fun CourseOfflineUI(
                                     )
                                 }
                             )
+                        } else if (uiState.isDownloading) {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            OpenEdXOutlinedButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.course_cancel_course_download),
+                                backgroundColor = MaterialTheme.appColors.background,
+                                borderColor = MaterialTheme.appColors.error,
+                                textColor = MaterialTheme.appColors.error,
+                                onClick = onCancelDownloadClick,
+                                content = {
+                                    IconText(
+                                        text = stringResource(R.string.course_cancel_course_download),
+                                        icon = Icons.Rounded.Close,
+                                        color = MaterialTheme.appColors.error,
+                                        textStyle = MaterialTheme.appTypography.labelLarge
+                                    )
+                                }
+                            )
                         }
                         if (uiState.largestDownloads.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(20.dp))
                             LargestDownloads(
                                 largestDownloads = uiState.largestDownloads,
+                                isDownloading = uiState.isDownloading,
                                 onDeleteClick = onDeleteClick,
-                                onDeleteAllClick = onDeleteAllClick
+                                onDeleteAllClick = onDeleteAllClick,
                             )
                         }
                     }
@@ -196,8 +211,9 @@ private fun CourseOfflineUI(
 @Composable
 private fun LargestDownloads(
     largestDownloads: List<DownloadModel>,
+    isDownloading: Boolean,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
-    onDeleteAllClick: () -> Unit
+    onDeleteAllClick: () -> Unit,
 ) {
     var isEditingEnabled by rememberSaveable {
         mutableStateOf(false)
@@ -232,22 +248,24 @@ private fun LargestDownloads(
                 onDeleteClick = onDeleteClick
             )
         }
-        OpenEdXOutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(R.string.course_remove_all_downloads),
-            backgroundColor = MaterialTheme.appColors.background,
-            borderColor = MaterialTheme.appColors.error,
-            textColor = MaterialTheme.appColors.error,
-            onClick = onDeleteAllClick,
-            content = {
-                IconText(
-                    text = stringResource(R.string.course_remove_all_downloads),
-                    icon = Icons.Rounded.Delete,
-                    color = MaterialTheme.appColors.error,
-                    textStyle = MaterialTheme.appTypography.labelLarge
-                )
-            }
-        )
+        if (!isDownloading) {
+            OpenEdXOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.course_remove_all_downloads),
+                backgroundColor = MaterialTheme.appColors.background,
+                borderColor = MaterialTheme.appColors.error,
+                textColor = MaterialTheme.appColors.error,
+                onClick = onDeleteAllClick,
+                content = {
+                    IconText(
+                        text = stringResource(R.string.course_remove_all_downloads),
+                        icon = Icons.Rounded.Delete,
+                        color = MaterialTheme.appColors.error,
+                        textStyle = MaterialTheme.appTypography.labelLarge
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -326,7 +344,6 @@ private fun DownloadItem(
 private fun DownloadProgress(
     modifier: Modifier = Modifier,
     uiState: CourseOfflineUIState,
-    onStopDownloadClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -367,33 +384,12 @@ private fun DownloadProgress(
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             } else {
-                Row {
-                    Box(
-                        modifier.offset(y = (-12).dp, x = 6.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(28.dp),
-                            backgroundColor = Color.LightGray,
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.appColors.primary
-                        )
-                        IconButton(
-                            onClick = onStopDownloadClick
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                                tint = MaterialTheme.appColors.error
-                            )
-                        }
-                    }
-                    Text(
-                        text = stringResource(R.string.course_downloading),
-                        color = MaterialTheme.appColors.textDark,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
-                }
+                IconText(
+                    text = stringResource(R.string.course_downloading),
+                    icon = Icons.Outlined.CloudDownload,
+                    color = MaterialTheme.appColors.textDark,
+                    textStyle = MaterialTheme.appTypography.labelLarge
+                )
             }
         }
         if (uiState.progressBarValue != 0f) {
@@ -472,7 +468,7 @@ private fun CourseOfflineUIPreview() {
                 ),
             ),
             onDownloadAllClick = {},
-            onStopDownloadClick = {},
+            onCancelDownloadClick = {},
             onDeleteClick = {},
             onDeleteAllClick = {}
         )
