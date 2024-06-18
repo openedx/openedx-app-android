@@ -9,8 +9,7 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONException
 import org.json.JSONObject
-import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.system.notifier.LogoutEvent
+import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.auth.data.api.AuthApi
 import org.openedx.auth.domain.model.AuthResponse
 import org.openedx.core.ApiConstants
@@ -18,6 +17,7 @@ import org.openedx.core.ApiConstants.TOKEN_TYPE_JWT
 import org.openedx.core.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.utils.TimeUtils
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -119,7 +119,7 @@ class OauthRefreshTokenAuthenticator(
                     }
 
                     runBlocking {
-                        appNotifier.send(LogoutEvent())
+                        appNotifier.send(LogoutEvent(true))
                     }
                 }
 
@@ -128,7 +128,7 @@ class OauthRefreshTokenAuthenticator(
                 JWT_USER_EMAIL_MISMATCH,
                 -> {
                     runBlocking {
-                        appNotifier.send(LogoutEvent())
+                        appNotifier.send(LogoutEvent(true))
                     }
                 }
             }

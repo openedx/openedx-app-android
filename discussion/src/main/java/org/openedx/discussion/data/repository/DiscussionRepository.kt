@@ -12,6 +12,7 @@ import org.openedx.discussion.data.model.request.ReportBody
 import org.openedx.discussion.data.model.request.ThreadBody
 import org.openedx.discussion.data.model.request.VoteBody
 import org.openedx.discussion.domain.model.CommentsData
+import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.ThreadsData
 import org.openedx.discussion.domain.model.Topic
 
@@ -81,10 +82,10 @@ class DiscussionRepository(
         return api.getThreadComments(threadId, page).mapToDomain()
     }
 
-    suspend fun getThreadComment(
-        commentId: String
-    ): CommentsData {
-        return api.getThreadComment(commentId).mapToDomain()
+    suspend fun getResponse(
+        responseId: String
+    ): DiscussionComment {
+        return api.getResponse(responseId).mapToDomain()
     }
 
     suspend fun getThreadQuestionComments(

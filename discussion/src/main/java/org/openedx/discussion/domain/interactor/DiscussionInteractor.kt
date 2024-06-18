@@ -2,6 +2,7 @@ package org.openedx.discussion.domain.interactor
 
 import org.openedx.discussion.data.repository.DiscussionRepository
 import org.openedx.discussion.domain.model.CommentsData
+import org.openedx.discussion.domain.model.DiscussionComment
 
 class DiscussionInteractor(
     private val repository: DiscussionRepository
@@ -41,8 +42,8 @@ class DiscussionInteractor(
     suspend fun getThreadComments(threadId: String, page: Int) =
         repository.getThreadComments(threadId, page)
 
-    suspend fun getThreadComment(commentId: String): CommentsData =
-        repository.getThreadComment(commentId)
+    suspend fun getResponse(responseId: String): DiscussionComment =
+        repository.getResponse(responseId)
 
     suspend fun getThreadQuestionComments(threadId: String, endorsed: Boolean, page: Int) =
         repository.getThreadQuestionComments(threadId, endorsed, page)

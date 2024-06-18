@@ -53,7 +53,7 @@ import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.presentation.global.AppData
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
