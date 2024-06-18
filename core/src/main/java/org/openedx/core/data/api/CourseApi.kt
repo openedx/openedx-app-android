@@ -5,6 +5,7 @@ import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.CourseComponentStatus
 import org.openedx.core.data.model.CourseDates
 import org.openedx.core.data.model.CourseDatesBannerInfo
+import org.openedx.core.data.model.CourseEnrollmentDetails
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.HandoutsModel
@@ -76,4 +77,9 @@ interface CourseApi {
         @Query("status") status: String? = null,
         @Query("requested_fields") fields: List<String> = emptyList()
     ): CourseEnrollments
+
+    @GET("/api/mobile/v1/course_info/{course_id}/enrollment_details")
+    suspend fun getEnrollmentDetails(
+        @Path("course_id") courseId: String,
+    ): CourseEnrollmentDetails
 }

@@ -69,4 +69,13 @@
         <item quantity="other">%1$s of %2$s  assignments complete</item>
     </plurals>
 
+    <string name="course_error_back">Back</string>
+    <string name="course_error_expired_not_upgradeable_title" formatted="false">Your free audit access to this course expired on %s.</string>
+    <string name="course_error_expired_upgradeable_title" formatted="false">Your free audit access to this course expired on %s. Please upgrade to continue learning and receive a verified certificate.</string>
+    <string name="course_error_expired_upgradeable_option_1">Earn a verified certificate of completion to showcase on your resumé</string>
+    <string name="course_error_expired_upgradeable_option_2">Unlock access to all course activities, including graded assignments</string>
+    <string name="course_error_expired_upgradeable_option_3">Full access to course content and material, even after the course ends</string>
+    <string name="course_error_expired_upgradeable_find_new_course_button">Find a new course</string>
+    <string name="course_error_expired_upgradeable_upgrade_now_button">Upgrade now for %s</string>
+    <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
 </resources>

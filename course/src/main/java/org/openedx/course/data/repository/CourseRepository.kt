@@ -6,6 +6,7 @@ import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseComponentStatus
+import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.module.db.DownloadDao
@@ -56,6 +57,10 @@ class CourseRepository(
         }
 
         return courseStructure[courseId]!!
+    }
+
+    suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
+        return api.getEnrollmentDetails(courseId = courseId).mapToDomain()
     }
 
     suspend fun getCourseStatus(courseId: String): CourseComponentStatus {
