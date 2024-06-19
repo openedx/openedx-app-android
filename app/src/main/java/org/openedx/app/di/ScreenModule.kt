@@ -146,7 +146,7 @@ val screenModule = module {
         )
     }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { LearnViewModel(get(), get()) }
+    viewModel { LearnViewModel(get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
