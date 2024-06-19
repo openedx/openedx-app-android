@@ -77,7 +77,7 @@ class WebViewDiscoveryViewModel(
         event: DiscoveryAnalyticsEvent,
         courseId: String,
     ) {
-        analytics.logEvent(
+        analytics.logScreenEvent(
             event.eventName,
             buildMap {
                 put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
