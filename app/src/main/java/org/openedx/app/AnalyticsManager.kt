@@ -51,6 +51,12 @@ class AnalyticsManager(
         }
     }
 
+    override fun logScreenEvent(screenName: String, params: Map<String, Any?>) {
+        services.forEach { analytics ->
+            analytics.logScreenEvent(screenName, params)
+        }
+    }
+
     override fun logEvent(event: String, params: Map<String, Any?>) {
         services.forEach { analytics ->
             analytics.logEvent(event, params)

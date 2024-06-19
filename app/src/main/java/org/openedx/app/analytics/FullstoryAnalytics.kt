@@ -26,6 +26,7 @@ class FullstoryAnalytics : Analytics {
     }
 
     override fun logUserId(userId: Long) {
+        logger.d { "Identify: $userId" }
         FS.identify(
             userId.toString(), mapOf(
                 DISPLAY_NAME to userId
