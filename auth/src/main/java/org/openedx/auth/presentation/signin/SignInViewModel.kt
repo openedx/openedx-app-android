@@ -77,6 +77,7 @@ class SignInViewModel(
 
     init {
         collectAppUpgradeEvent()
+        logScreenEvent(AuthAnalyticsEvent.SIGN_IN)
     }
 
     fun login(username: String, password: String) {
@@ -234,6 +235,19 @@ class SignInViewModel(
     ) {
         analytics.logEvent(
             event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
+    }
+
+    private fun logScreenEvent(
+        event: AuthAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
             params = buildMap {
                 put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)

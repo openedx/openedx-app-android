@@ -3,6 +3,7 @@ package org.openedx.auth.presentation
 interface AuthAnalytics {
     fun setUserIdForSession(userId: Long)
     fun logEvent(event: String, params: Map<String, Any?>)
+    fun logScreenEvent(screenName: String, params: Map<String, Any?>)
 }
 
 enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
@@ -13,6 +14,14 @@ enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
     EXPLORE_ALL_COURSES(
         "Logistration:Explore All Courses",
         "edx.bi.app.logistration.explore.all.courses"
+    ),
+    SIGN_IN(
+        "Logistration:Sign In",
+        "edx.bi.app.logistration.signin"
+    ),
+    REGISTER(
+        "Logistration:Register",
+        "edx.bi.app.logistration.register"
     ),
     REGISTER_CLICKED(
         "Logistration:Register Clicked",
