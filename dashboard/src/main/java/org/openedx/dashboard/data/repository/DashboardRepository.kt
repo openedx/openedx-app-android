@@ -35,9 +35,10 @@ class DashboardRepository(
         return list.map { it.mapToDomain() }
     }
 
-    suspend fun getMainUserCourses(): CourseEnrollments {
+    suspend fun getMainUserCourses(pageSize: Int): CourseEnrollments {
         val result = api.getUserCourses(
             username = preferencesManager.user?.username ?: "",
+            pageSize = pageSize
         )
         preferencesManager.appConfig = result.configs.mapToDomain()
 
