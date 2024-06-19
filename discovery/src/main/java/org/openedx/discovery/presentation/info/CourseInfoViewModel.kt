@@ -146,11 +146,11 @@ class CourseInfoViewModel(
     }
 
     fun courseInfoClickedEvent(courseId: String) {
-        logEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
+        logScreenEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
     }
 
     fun programInfoClickedEvent(courseId: String) {
-        logEvent(DiscoveryAnalyticsEvent.PROGRAM_INFO, courseId)
+        logScreenEvent(DiscoveryAnalyticsEvent.PROGRAM_INFO, courseId)
     }
 
     fun courseEnrollClickedEvent(courseId: String) {
@@ -165,15 +165,26 @@ class CourseInfoViewModel(
         event: DiscoveryAnalyticsEvent,
         courseId: String,
     ) {
-        analytics.logEvent(
-            event.eventName,
-            buildMap {
-                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
-                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
-                put(DiscoveryAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
-                put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
-            }
-        )
+        analytics.logEvent(event.eventName, buildEventDataMap(event, courseId))
+    }
+
+    private fun logScreenEvent(
+        event: DiscoveryAnalyticsEvent,
+        courseId: String,
+    ) {
+        analytics.logScreenEvent(event.eventName, buildEventDataMap(event, courseId))
+    }
+
+    private fun buildEventDataMap(
+        event: DiscoveryAnalyticsEvent,
+        courseId: String,
+    ): Map<String, String> {
+        return buildMap {
+            put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+            put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+            put(DiscoveryAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
+            put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
+        }
     }
 
     companion object {
