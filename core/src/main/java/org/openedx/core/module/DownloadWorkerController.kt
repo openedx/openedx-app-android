@@ -83,6 +83,7 @@ class DownloadWorkerController(
 
         if (hasDownloading) fileDownloader.cancelDownloading()
         downloadDao.removeAllDownloadModels(removeIds)
+        downloadDao.removeOfflineXBlockProgress(removeIds)
 
         updateList()
 

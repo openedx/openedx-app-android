@@ -10,17 +10,18 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.openedx.app.worker.OfflineProgressSyncScheduler
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
-import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryNavigator
 
 class MainViewModel(
     private val config: Config,
     private val notifier: DiscoveryNotifier,
     private val analytics: AppAnalytics,
+    private val offlineProgressSyncScheduler: OfflineProgressSyncScheduler,
 ) : BaseViewModel() {
 
     private val _isBottomBarEnabled = MutableLiveData(true)
@@ -36,6 +37,7 @@ class MainViewModel(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        offlineProgressSyncScheduler.scheduleHourlySync()
         notifier.notifier
             .onEach {
                 if (it is NavigationToDiscovery) {

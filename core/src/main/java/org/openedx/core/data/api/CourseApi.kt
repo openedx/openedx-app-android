@@ -10,6 +10,8 @@ import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.ResetCourseDates
 import retrofit2.http.Body
+import retrofit2.http.FieldMap
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -76,4 +78,12 @@ interface CourseApi {
         @Query("status") status: String? = null,
         @Query("requested_fields") fields: List<String> = emptyList()
     ): CourseEnrollments
+
+    @FormUrlEncoded
+    @POST("/courses/{course_id}/xblock/{block_id}/handler/xmodule_handler/problem_check")
+    suspend fun submitOfflineXBlockProgress(
+        @Path("course_id") courseId: String,
+        @Path("block_id") blockId: String,
+        @FieldMap(encoded = false) progress: Map<String, String>
+    )
 }

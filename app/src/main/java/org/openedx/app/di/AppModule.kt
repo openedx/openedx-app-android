@@ -19,6 +19,7 @@ import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.app.worker.OfflineProgressSyncScheduler
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
@@ -190,4 +191,6 @@ val appModule = module {
 
     factory { FileUtil(get()) }
     single { DownloadHelper(get(), get()) }
+
+    factory { OfflineProgressSyncScheduler(get()) }
 }

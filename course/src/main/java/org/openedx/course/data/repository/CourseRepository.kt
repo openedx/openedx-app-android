@@ -4,6 +4,8 @@ import kotlinx.coroutines.flow.map
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
+import org.openedx.core.data.model.room.OfflineXBlockProgress
+import org.openedx.core.data.model.room.XBlockProgressData
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseStructure
@@ -93,4 +95,37 @@ class CourseRepository(
 
     suspend fun getAnnouncements(courseId: String) =
         api.getAnnouncements(courseId).map { it.mapToDomain() }
+
+    suspend fun saveOfflineXBlockProgress(blockId: String, courseId: String, jsonProgress: String) {
+        val offlineXBlockProgress = OfflineXBlockProgress(
+            blockId = blockId,
+            courseId = courseId,
+            jsonProgress = XBlockProgressData.parseJson(jsonProgress)
+        )
+        downloadDao.insertOfflineXBlockProgress(offlineXBlockProgress)
+    }
+
+    suspend fun getXBlockProgress(blockId: String) = downloadDao.getOfflineXBlockProgress(blockId)
+    suspend fun submitAllOfflineXBlockProgress() {
+        val allOfflineXBlockProgress = downloadDao.getAllOfflineXBlockProgress()
+        allOfflineXBlockProgress.forEach {
+            submitOfflineXBlockProgress(it.blockId, it.courseId, it.jsonProgress.data)
+        }
+    }
+
+    suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) {
+        val jsonProgressData = getXBlockProgress(blockId)?.jsonProgress?.data
+        submitOfflineXBlockProgress(blockId, courseId, jsonProgressData)
+    }
+
+    private suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String, jsonProgressData: String?) {
+        if (!jsonProgressData.isNullOrEmpty()) {
+            val progressMap = jsonProgressData
+                .split("&")
+                .map { it.split("=") }
+                .associate { it[0] to it[1] }
+            api.submitOfflineXBlockProgress(courseId, blockId, progressMap)
+            downloadDao.removeOfflineXBlockProgress(listOf(blockId))
+        }
+    }
 }

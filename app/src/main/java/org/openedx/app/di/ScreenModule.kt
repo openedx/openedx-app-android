@@ -82,7 +82,7 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { MainViewModel(get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -416,7 +416,17 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
+    viewModel { (blockId: String, courseId: String) ->
+        HtmlUnitViewModel(
+            blockId,
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
 

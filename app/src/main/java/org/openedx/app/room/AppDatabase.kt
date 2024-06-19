@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import org.openedx.core.data.model.room.CourseStructureEntity
+import org.openedx.core.data.model.room.OfflineXBlockProgress
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModelEntity
@@ -22,7 +23,8 @@ const val DATABASE_NAME = "OpenEdX_db"
         CourseEntity::class,
         EnrolledCourseEntity::class,
         CourseStructureEntity::class,
-        DownloadModelEntity::class
+        DownloadModelEntity::class,
+        OfflineXBlockProgress::class,
     ],
     version = DATABASE_VERSION,
     exportSchema = false

@@ -92,7 +92,7 @@ class CourseUnitContainerAdapter(
                 HtmlUnitFragment.newInstance(
                     block.id,
                     block.studentViewUrl,
-                    block.displayName,
+                    viewModel.courseId,
                     offlineUrl,
                     lastModified
                 )

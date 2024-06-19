@@ -3,7 +3,9 @@ package org.openedx.course.presentation.unit.html
 import android.content.res.AssetManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
@@ -12,13 +14,21 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
+import org.openedx.course.domain.interactor.CourseInteractor
 
 class HtmlUnitViewModel(
+    private val blockId: String,
+    private val courseId: String,
     private val config: Config,
     private val edxCookieManager: AppCookieManager,
     private val networkConnection: NetworkConnection,
-    private val notifier: CourseNotifier
+    private val notifier: CourseNotifier,
+    private val courseInteractor: CourseInteractor,
 ) : BaseViewModel() {
+
+    private val _uiState = MutableStateFlow(HtmlUnitUIState(null, false))
+    val uiState: StateFlow<HtmlUnitUIState>
+        get() = _uiState.asStateFlow()
 
     private val _injectJSList = MutableStateFlow<List<String>>(listOf())
     val injectJSList = _injectJSList.asStateFlow()
@@ -27,6 +37,11 @@ class HtmlUnitViewModel(
     val isCourseUnitProgressEnabled get() = config.getCourseUIConfig().isCourseUnitProgressEnabled
     val apiHostURL get() = config.getApiHostURL()
     val cookieManager get() = edxCookieManager
+
+    init {
+        tryToSyncProgress()
+        getXBlockProgress(blockId)
+    }
 
     fun setWebPageLoaded(assets: AssetManager) {
         if (_injectJSList.value.isNotEmpty()) return
@@ -44,6 +59,34 @@ class HtmlUnitViewModel(
     fun notifyCompletionSet() {
         viewModelScope.launch {
             notifier.send(CourseCompletionSet())
+        }
+    }
+
+    fun saveXBlockProgress(jsonProgress: String) {
+        viewModelScope.launch {
+            courseInteractor.saveXBlockProgress(blockId, courseId, jsonProgress)
+        }
+    }
+
+    private fun tryToSyncProgress() {
+        viewModelScope.launch {
+            try {
+                if (isOnline) {
+                    courseInteractor.submitOfflineXBlockProgress(blockId, courseId)
+                }
+            } catch (e: Exception) {
+            } finally {
+                _uiState.update { it.copy(isLoadingEnabled = true) }
+            }
+        }
+    }
+
+    private fun getXBlockProgress(blockId: String) {
+        viewModelScope.launch {
+            if (!isOnline) {
+                val xBlockProgress = courseInteractor.getXBlockProgress(blockId)
+                _uiState.update { it.copy(jsonProgress = xBlockProgress?.jsonProgress?.toJson()) }
+            }
         }
     }
 }

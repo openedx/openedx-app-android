@@ -77,4 +77,15 @@ class CourseInteractor(
     fun getDownloadModels() = repository.getDownloadModels()
 
     suspend fun getAllDownloadModels() = repository.getAllDownloadModels()
+
+    suspend fun saveXBlockProgress(blockId: String, courseId: String, jsonProgress: String) {
+        repository.saveOfflineXBlockProgress(blockId, courseId, jsonProgress)
+    }
+
+    suspend fun getXBlockProgress(blockId: String) = repository.getXBlockProgress(blockId)
+
+    suspend fun submitAllOfflineXBlockProgress() = repository.submitAllOfflineXBlockProgress()
+
+    suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) =
+        repository.submitOfflineXBlockProgress(blockId, courseId)
 }
