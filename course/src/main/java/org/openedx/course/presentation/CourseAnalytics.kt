@@ -38,6 +38,7 @@ interface CourseAnalytics {
 
     fun finishVerticalBackClickedEvent(courseId: String, courseName: String)
     fun logEvent(event: String, params: Map<String, Any?>)
+    fun logScreenEvent(screenName: String, params: Map<String, Any?>)
 }
 
 enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
