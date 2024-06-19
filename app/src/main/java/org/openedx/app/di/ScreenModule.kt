@@ -14,6 +14,7 @@ import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
 import org.openedx.core.presentation.settings.video.VideoQualityViewModel
+import org.openedx.core.ui.WindowSize
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
@@ -67,7 +68,18 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
 
-    viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get(), get(), get()) }
+    viewModel {
+        AppViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(named("IODispatcher")),
+            get(),
+            get(),
+            get()
+        )
+    }
     viewModel { MainViewModel(get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
@@ -121,7 +133,18 @@ val screenModule = module {
     factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
     viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { DashboardGalleryViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { (windowSize: WindowSize) ->
+        DashboardGalleryViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            windowSize
+        )
+    }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { LearnViewModel(get(), get()) }
 
