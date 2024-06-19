@@ -93,6 +93,17 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         }
         binding.viewPager.adapter = adapter
         binding.viewPager.setUserInputEnabled(false)
+
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                if (LearnType.COURSES.ordinal == position) {
+                    viewModel.logMyCoursesTabClickedEvent()
+                } else {
+                    viewModel.logMyProgramsTabClickedEvent()
+                }
+            }
+        })
     }
 
     companion object {

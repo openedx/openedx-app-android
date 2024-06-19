@@ -77,8 +77,8 @@ class AppViewModel(
     }
 
     fun logAppLaunchEvent() {
-        analytics.logEvent(
-            event = AppAnalyticsEvent.LAUNCH.eventName,
+        analytics.logScreenEvent(
+            screenName = AppAnalyticsEvent.LAUNCH.eventName,
             params = buildMap {
                 put(AppAnalyticsKey.NAME.key, AppAnalyticsEvent.LAUNCH.biValue)
             }
