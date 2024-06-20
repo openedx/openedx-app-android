@@ -195,14 +195,8 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
-            networkConnection,
-            preferencesManager,
             notifier,
             analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
@@ -226,14 +220,8 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
-            networkConnection,
-            preferencesManager,
             notifier,
             analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper,
         )
 
         coEvery { interactor.getCourseStructure(any()) } throws Exception()
@@ -259,14 +247,8 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
-            networkConnection,
-            preferencesManager,
             notifier,
             analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper,
         )
 
         coEvery { downloadDao.getAllDataFlow() } returns flow {
@@ -294,21 +276,14 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
-            networkConnection,
-            preferencesManager,
             notifier,
             analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper,
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
-        viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
 
         assert(viewModel.uiMessage.value == null)
@@ -323,54 +298,18 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
-            networkConnection,
-            preferencesManager,
             notifier,
             analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper,
         )
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
-        viewModel.saveDownloadModels("", "")
         advanceUntilIdle()
 
         assert(viewModel.uiMessage.value == null)
     }
-
-    @Test
-    fun `saveDownloadModels only wifi download, without connection`() = runTest {
-        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
-        val viewModel = CourseSectionViewModel(
-            "",
-            interactor,
-            resourceManager,
-            networkConnection,
-            preferencesManager,
-            notifier,
-            analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper,
-        )
-        every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
-        every { networkConnection.isWifiConnected() } returns false
-        every { networkConnection.isOnline() } returns false
-        coEvery { workerController.saveModels(any()) } returns Unit
-
-        viewModel.saveDownloadModels("", "")
-
-        advanceUntilIdle()
-
-        assert(viewModel.uiMessage.value != null)
-    }
-
 
     @Test
     fun `updateVideos success`() = runTest {
@@ -384,14 +323,8 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
-            networkConnection,
-            preferencesManager,
             notifier,
             analytics,
-            coreAnalytics,
-            workerController,
-            downloadDao,
-            downloadHelper,
         )
 
         coEvery { notifier.notifier } returns flow { }
@@ -407,7 +340,6 @@ class CourseSectionViewModelTest {
         advanceUntilIdle()
 
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
-
     }
 
 }

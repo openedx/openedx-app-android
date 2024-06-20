@@ -14,7 +14,7 @@ class DashboardInteractor(
 
     suspend fun getEnrolledCoursesFromCache() = repository.getEnrolledCoursesFromCache()
 
-    suspend fun getMainUserCourses() = repository.getMainUserCourses()
+    suspend fun getMainUserCourses(pageSize: Int) = repository.getMainUserCourses(pageSize)
 
     suspend fun getAllUserCourses(
         page: Int = 1,

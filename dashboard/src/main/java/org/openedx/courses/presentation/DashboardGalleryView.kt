@@ -66,6 +66,7 @@ import androidx.fragment.app.FragmentManager
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.Lock
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AppConfig
@@ -100,7 +101,8 @@ import org.openedx.core.R as CoreR
 fun DashboardGalleryView(
     fragmentManager: FragmentManager,
 ) {
-    val viewModel: DashboardGalleryViewModel = koinViewModel()
+    val windowSize = rememberWindowSize()
+    val viewModel: DashboardGalleryViewModel = koinViewModel { parametersOf(windowSize) }
     val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val uiState by viewModel.uiState.collectAsState(DashboardGalleryUIState.Loading)
@@ -293,6 +295,7 @@ private fun UserCourses(
         if (userCourses.enrollments.courses.isNotEmpty()) {
             SecondaryCourses(
                 courses = userCourses.enrollments.courses,
+                hasNextPage = userCourses.enrollments.pagination.next.isNotEmpty(),
                 apiHostUrl = apiHostUrl,
                 onCourseClick = openCourse,
                 onViewAllClick = onViewAllClick
@@ -304,6 +307,7 @@ private fun UserCourses(
 @Composable
 private fun SecondaryCourses(
     courses: List<EnrolledCourse>,
+    hasNextPage: Boolean,
     apiHostUrl: String,
     onCourseClick: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit
@@ -342,10 +346,12 @@ private fun SecondaryCourses(
                         onCourseClick = onCourseClick
                     )
                 }
-                item {
-                    ViewAllItem(
-                        onViewAllClick = onViewAllClick
-                    )
+                if (hasNextPage) {
+                    item {
+                        ViewAllItem(
+                            onViewAllClick = onViewAllClick
+                        )
+                    }
                 }
             }
         )

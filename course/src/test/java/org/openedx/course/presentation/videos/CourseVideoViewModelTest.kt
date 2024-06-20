@@ -52,10 +52,12 @@ import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogManager
 import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -78,6 +80,8 @@ class CourseVideoViewModelTest {
     private val workerController = mockk<DownloadWorkerController>()
     private val courseRouter = mockk<CourseRouter>()
     private val downloadHelper = mockk<DownloadHelper>()
+    private val downloadDialogManager = mockk<DownloadDialogManager>()
+    private val fileUtil = mockk<FileUtil>()
 
     private val cantDownload = "You can download content only from Wi-fi"
 
@@ -194,6 +198,7 @@ class CourseVideoViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { config.getApiHostURL() } returns "http://localhost:8000"
         every { courseNotifier.notifier } returns flowOf(CourseLoading(false))
+        every { downloadDialogManager.showPopup(any(), any(), any(), any(), any(), any()) } returns Unit
     }
 
     @After
@@ -219,6 +224,8 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            downloadDialogManager,
+            fileUtil,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -252,6 +259,8 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            downloadDialogManager,
+            fileUtil,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -293,6 +302,8 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            downloadDialogManager,
+            fileUtil,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -336,6 +347,8 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            downloadDialogManager,
+            fileUtil,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -374,6 +387,8 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            downloadDialogManager,
+            fileUtil,
             courseRouter,
             coreAnalytics,
             downloadDao,
@@ -416,6 +431,8 @@ class CourseVideoViewModelTest {
             courseNotifier,
             videoNotifier,
             analytics,
+            downloadDialogManager,
+            fileUtil,
             courseRouter,
             coreAnalytics,
             downloadDao,
