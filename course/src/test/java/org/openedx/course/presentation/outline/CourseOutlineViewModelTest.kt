@@ -248,7 +248,7 @@ class CourseOutlineViewModelTest {
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
-        every { downloadDialogManager.showPopup(any(), any(), any(), any(), any(), any()) } returns Unit
+        every { downloadDialogManager.showPopup(any(), any(), any(), any(), any(), any(), any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } throws UnknownHostException()
 
         val viewModel = CourseOutlineViewModel(

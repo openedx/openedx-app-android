@@ -135,9 +135,14 @@ class DownloadWorker(
             when (downloadResult) {
                 DownloadResult.SUCCESS -> {
                     val updatedModel = downloadHelper.updateDownloadStatus(downloadTask)
-                    downloadDao.updateDownloadModel(
-                        DownloadModelEntity.createFrom(updatedModel)
-                    )
+                    if (updatedModel == null) {
+                        downloadDao.removeDownloadModel(downloadTask.id)
+                        downloadError.add(downloadTask)
+                    } else {
+                        downloadDao.updateDownloadModel(
+                            DownloadModelEntity.createFrom(updatedModel)
+                        )
+                    }
                 }
 
                 DownloadResult.CANCELED -> {

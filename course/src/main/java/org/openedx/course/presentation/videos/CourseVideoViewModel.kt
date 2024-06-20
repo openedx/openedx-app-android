@@ -252,14 +252,17 @@ class CourseVideoViewModel(
                     courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
                 } else {
                     downloadableChildren.forEach {
-                        removeBlockDownloadModel(it)
+                        if (!isBlockDownloaded(it)) {
+                            removeBlockDownloadModel(it)
+                        }
                     }
                 }
             } else {
                 downloadDialogManager.showPopup(
                     subSectionsBlocks = requiredSubSections,
                     courseId = courseId,
-                    isAllBlocksDownloaded = isAllBlocksDownloaded,
+                    isBlocksDownloaded = isAllBlocksDownloaded,
+                    onlyVideoBlocks = true,
                     fragmentManager = fragmentManager,
                     removeDownloadModels = ::removeDownloadModels,
                     saveDownloadModels = { blockId ->

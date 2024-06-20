@@ -1,4 +1,4 @@
-package org.openedx.app.worker
+package org.openedx.course.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,7 +15,6 @@ import com.google.firebase.ktx.Firebase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.openedx.core.R
-import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.domain.interactor.CourseInteractor
 
 class OfflineProgressSyncWorker(
@@ -24,7 +23,6 @@ class OfflineProgressSyncWorker(
 ) : CoroutineWorker(context, workerParams), KoinComponent {
 
     private val courseInteractor: CourseInteractor by inject()
-    private val networkConnection: NetworkConnection by inject()
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANEL_ID)
@@ -71,11 +69,8 @@ class OfflineProgressSyncWorker(
     }
 
     private suspend fun tryToSyncProgress() {
-        if (networkConnection.isOnline()) {
-            courseInteractor.submitAllOfflineXBlockProgress()
-        }
+        courseInteractor.submitAllOfflineXBlockProgress()
     }
-
 
     companion object {
         const val WORKER_TAG = "progress_sync_worker_tag"

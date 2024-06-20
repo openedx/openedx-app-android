@@ -121,6 +121,10 @@ private fun DownloadErrorDialogView(
     onCancelClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
+    val dismissButtonText = when (dialogType) {
+        DownloadErrorDialogType.DOWNLOAD_FAILED -> stringResource(id = coreR.string.core_cancel)
+        else -> stringResource(id = coreR.string.core_close)
+    }
     DefaultDialogBox(
         modifier = modifier,
         onDismissClick = onCancelClick
@@ -170,7 +174,7 @@ private fun DownloadErrorDialogView(
             }
             OpenEdXOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = org.openedx.core.R.string.core_cancel),
+                text = dismissButtonText,
                 backgroundColor = MaterialTheme.appColors.background,
                 borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 textColor = MaterialTheme.appColors.primaryButtonBackground,

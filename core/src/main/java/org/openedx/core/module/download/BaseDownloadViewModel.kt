@@ -217,17 +217,6 @@ abstract class BaseDownloadViewModel(
         }
     }
 
-    protected fun addDownloadableChildrenForVerticalBlock(verticalBlock: Block) {
-        for (unitBlockId in verticalBlock.descendants) {
-            val block = allBlocks[unitBlockId]
-            if (block?.isDownloadable == true) {
-                val id = verticalBlock.id
-                val children = downloadableChildrenMap[id] ?: listOf()
-                downloadableChildrenMap[id] = children + block.id
-            }
-        }
-    }
-
     fun logBulkDownloadToggleEvent(toggle: Boolean) {
         logEvent(
             CoreAnalyticsEvent.VIDEO_BULK_DOWNLOAD_TOGGLE,

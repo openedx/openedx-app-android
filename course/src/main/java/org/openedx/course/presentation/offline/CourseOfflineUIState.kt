@@ -8,5 +8,5 @@ data class CourseOfflineUIState(
     val isDownloading: Boolean,
     val readyToDownloadSize: String,
     val downloadedSize: String,
-    val progressBarValue: Float
+    val progressBarValue: Float,
 )

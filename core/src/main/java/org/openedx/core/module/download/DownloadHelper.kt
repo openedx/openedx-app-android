@@ -71,7 +71,7 @@ class DownloadHelper(
         }
     }
 
-    suspend fun updateDownloadStatus(downloadModel: DownloadModel): DownloadModel {
+    suspend fun updateDownloadStatus(downloadModel: DownloadModel): DownloadModel? {
         return when (downloadModel.type) {
             FileType.VIDEO -> {
                 downloadModel.copy(
@@ -81,13 +81,33 @@ class DownloadHelper(
             }
 
             FileType.X_BLOCK -> {
-                val unzippedFolderPath = fileUtil.unzipFile(downloadModel.path)
+                val unzippedFolderPath = fileUtil.unzipFile(downloadModel.path) ?: return null
                 downloadModel.copy(
                     downloadedState = DownloadedState.DOWNLOADED,
-                    size = File(unzippedFolderPath ?: "").length(),
-                    path = unzippedFolderPath ?: ""
+                    size = calculateDirectorySize(File(unzippedFolderPath)),
+                    path = unzippedFolderPath
                 )
             }
         }
+    }
+
+    private fun calculateDirectorySize(directory: File): Long {
+        var size: Long = 0
+
+        if (directory.exists()) {
+            val files = directory.listFiles()
+
+            if (files != null) {
+                for (file in files) {
+                    size += if (file.isDirectory) {
+                        calculateDirectorySize(file)
+                    } else {
+                        file.length()
+                    }
+                }
+            }
+        }
+
+        return size
     }
 }

@@ -73,7 +73,6 @@ abstract class AbstractDownloader : KoinComponent {
         }
     }
 
-
     suspend fun cancelDownloading() {
         isCanceled = true
         withContext(Dispatchers.IO) {
@@ -95,5 +94,4 @@ abstract class AbstractDownloader : KoinComponent {
     enum class DownloadResult {
         SUCCESS, CANCELED, ERROR
     }
-
 }

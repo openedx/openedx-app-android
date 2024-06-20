@@ -31,7 +31,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.utils.FileUtil
-import org.openedx.course.presentation.download.DownloadDialogManager
 
 @ExperimentalCoroutinesApi
 class AppViewModelTest {
@@ -48,7 +47,6 @@ class AppViewModelTest {
     private val analytics = mockk<AppAnalytics>()
     private val fileUtil = mockk<FileUtil>()
     private val deepLinkRouter = mockk<DeepLinkRouter>()
-    private val downloadDialogManager = mockk<DownloadDialogManager>()
     private val downloadNotifier = mockk<DownloadNotifier>()
 
     private val user = User(0, "", "", "")
@@ -56,7 +54,6 @@ class AppViewModelTest {
     @Before
     fun before() {
         Dispatchers.setMain(dispatcher)
-        every { downloadDialogManager.showDownloadFailedPopup(any(), any()) } returns Unit
         every { downloadNotifier.notifier } returns flow { }
     }
 
@@ -82,7 +79,6 @@ class AppViewModelTest {
                 deepLinkRouter,
                 fileUtil,
                 downloadNotifier,
-                downloadDialogManager,
             )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -116,7 +112,6 @@ class AppViewModelTest {
                 deepLinkRouter,
                 fileUtil,
                 downloadNotifier,
-                downloadDialogManager,
             )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -152,7 +147,6 @@ class AppViewModelTest {
                 deepLinkRouter,
                 fileUtil,
                 downloadNotifier,
-                downloadDialogManager,
             )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

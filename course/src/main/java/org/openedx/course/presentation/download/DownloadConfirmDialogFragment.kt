@@ -37,6 +37,7 @@ import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.system.PreviewFragmentManager
+import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -78,7 +79,7 @@ class DownloadConfirmDialogFragment : DialogFragment() {
                             id = R.string.course_download_on_cellural_dialog_description,
                             sizeSumString
                         ),
-                        icon = painterResource(id = org.openedx.core.R.drawable.core_ic_warning),
+                        icon = painterResource(id = coreR.drawable.core_ic_warning),
                     )
 
                     DownloadConfirmDialogType.REMOVE -> DownloadDialogResource(
@@ -163,10 +164,11 @@ private fun DownloadConfirmDialogView(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
-                Text(
+                AutoSizeText(
                     text = downloadDialogResource.title,
                     style = MaterialTheme.appTypography.titleLarge,
-                    color = MaterialTheme.appColors.textDark
+                    color = MaterialTheme.appColors.textDark,
+                    minSize = MaterialTheme.appTypography.titleLarge.fontSize.value - 1
                 )
             }
             Column {
@@ -214,7 +216,7 @@ private fun DownloadConfirmDialogView(
             )
             OpenEdXOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = org.openedx.core.R.string.core_cancel),
+                text = stringResource(id = coreR.string.core_cancel),
                 backgroundColor = MaterialTheme.appColors.background,
                 borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 textColor = MaterialTheme.appColors.primaryButtonBackground,

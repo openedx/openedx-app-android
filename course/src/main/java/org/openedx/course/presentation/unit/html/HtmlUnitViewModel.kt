@@ -15,6 +15,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
+import org.openedx.course.worker.OfflineProgressSyncScheduler
 
 class HtmlUnitViewModel(
     private val blockId: String,
@@ -24,6 +25,7 @@ class HtmlUnitViewModel(
     private val networkConnection: NetworkConnection,
     private val notifier: CourseNotifier,
     private val courseInteractor: CourseInteractor,
+    private val offlineProgressSyncScheduler: OfflineProgressSyncScheduler
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(HtmlUnitUIState(null, false))
@@ -65,6 +67,7 @@ class HtmlUnitViewModel(
     fun saveXBlockProgress(jsonProgress: String) {
         viewModelScope.launch {
             courseInteractor.saveXBlockProgress(blockId, courseId, jsonProgress)
+            offlineProgressSyncScheduler.scheduleSync()
         }
     }
 

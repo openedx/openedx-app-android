@@ -22,7 +22,7 @@ class DownloadDialogManager(
 ) {
 
     companion object {
-        const val MAX_CELLULAR_SIZE = 100000000 // 100MB
+        const val MAX_CELLULAR_SIZE = 104857600 // 100MB
         const val DOWNLOAD_SIZE_FACTOR = 2 // Multiplier to match required disk size
     }
 
@@ -86,7 +86,7 @@ class DownloadDialogManager(
                         )
                     }
 
-                    !corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() && uiState.sizeSum >= MAX_CELLULAR_SIZE -> {
+                    !corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> {
                         val dialog = DownloadConfirmDialogFragment.newInstance(
                             dialogType = DownloadConfirmDialogType.DOWNLOAD_ON_CELLULAR,
                             uiState = uiState
@@ -119,7 +119,8 @@ class DownloadDialogManager(
     fun showPopup(
         subSectionsBlocks: List<Block>,
         courseId: String,
-        isAllBlocksDownloaded: Boolean,
+        isBlocksDownloaded: Boolean,
+        onlyVideoBlocks: Boolean = false,
         fragmentManager: FragmentManager,
         removeDownloadModels: (blockId: String) -> Unit,
         saveDownloadModels: (blockId: String) -> Unit,
@@ -128,7 +129,8 @@ class DownloadDialogManager(
             subSectionsBlocks = subSectionsBlocks,
             courseId = courseId,
             fragmentManager = fragmentManager,
-            isAllBlocksDownloaded = isAllBlocksDownloaded,
+            isBlocksDownloaded = isBlocksDownloaded,
+            onlyVideoBlocks = onlyVideoBlocks,
             removeDownloadModels = removeDownloadModels,
             saveDownloadModels = saveDownloadModels
         )
@@ -214,15 +216,24 @@ class DownloadDialogManager(
         subSectionsBlocks: List<Block>,
         courseId: String,
         fragmentManager: FragmentManager,
-        isAllBlocksDownloaded: Boolean,
+        isBlocksDownloaded: Boolean,
+        onlyVideoBlocks: Boolean,
         removeDownloadModels: (blockId: String) -> Unit,
         saveDownloadModels: (blockId: String) -> Unit,
     ) {
         CoroutineScope(Dispatchers.IO).launch {
             val courseStructure = interactor.getCourseStructure(courseId, false)
+            val downloadModelIds = interactor.getAllDownloadModels().map { it.id }
+
             val downloadDialogItems = subSectionsBlocks.mapNotNull { subSectionsBlock ->
                 val verticalBlocks = courseStructure.blockData.filter { it.id in subSectionsBlock.descendants }
-                val blocks = courseStructure.blockData.filter { it.id in verticalBlocks.flatMap { it.descendants } }
+                val blocks = verticalBlocks.flatMap { verticalBlock ->
+                    courseStructure.blockData.filter {
+                        it.id in verticalBlock.descendants &&
+                                (isBlocksDownloaded == (it.id in downloadModelIds)) &&
+                                (!onlyVideoBlocks || it.type == BlockType.VIDEO)
+                    }
+                }
                 val size = blocks.sumOf { getFileSize(it) }
                 if (size > 0) DownloadDialogItem(title = subSectionsBlock.displayName, size = size) else null
             }
@@ -230,16 +241,12 @@ class DownloadDialogManager(
             uiState.emit(
                 DownloadDialogUIState(
                     downloadDialogItems = downloadDialogItems,
-                    isAllBlocksDownloaded = isAllBlocksDownloaded,
+                    isAllBlocksDownloaded = isBlocksDownloaded,
                     isDownloadFailed = false,
                     sizeSum = downloadDialogItems.sumOf { it.size },
                     fragmentManager = fragmentManager,
-                    removeDownloadModels = {
-                        subSectionsBlocks.forEach { removeDownloadModels(it.id) }
-                    },
-                    saveDownloadModels = {
-                        subSectionsBlocks.forEach { saveDownloadModels(it.id) }
-                    }
+                    removeDownloadModels = { subSectionsBlocks.forEach { removeDownloadModels(it.id) } },
+                    saveDownloadModels = { subSectionsBlocks.forEach { saveDownloadModels(it.id) } }
                 )
             )
         }
@@ -247,9 +254,9 @@ class DownloadDialogManager(
 
 
     private fun getFileSize(block: Block): Long {
-        return when (block.type) {
-            BlockType.VIDEO -> block.downloadModel?.size ?: 0
-            BlockType.HTML -> block.offlineDownload?.fileSize ?: 0
+        return when {
+            block.type == BlockType.VIDEO -> block.downloadModel?.size ?: 0
+            block.isxBlock -> block.offlineDownload?.fileSize ?: 0
             else -> 0
         }
     }

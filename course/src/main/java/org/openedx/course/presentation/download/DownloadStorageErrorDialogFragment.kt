@@ -41,18 +41,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import org.openedx.core.R
 import org.openedx.core.extension.parcelable
 import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.system.PreviewFragmentManager
 import org.openedx.core.system.StorageManager
+import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.course.R
 import org.openedx.course.domain.model.DownloadDialogResource
 import org.openedx.course.presentation.download.DownloadDialogManager.Companion.DOWNLOAD_SIZE_FACTOR
+import org.openedx.core.R as coreR
 
 class DownloadStorageErrorDialogFragment : DialogFragment() {
 
@@ -67,9 +69,9 @@ class DownloadStorageErrorDialogFragment : DialogFragment() {
             OpenEdXTheme {
                 val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE) ?: return@OpenEdXTheme
                 val downloadDialogResource = DownloadDialogResource(
-                    title = stringResource(id = org.openedx.course.R.string.course_device_storage_full),
-                    description = stringResource(id = org.openedx.course.R.string.course_download_device_storage_full_dialog_description),
-                    icon = painterResource(id = org.openedx.course.R.drawable.course_ic_error),
+                    title = stringResource(id = R.string.course_device_storage_full),
+                    description = stringResource(id = R.string.course_download_device_storage_full_dialog_description),
+                    icon = painterResource(id = R.drawable.course_ic_error),
                 )
 
                 DownloadStorageErrorDialogView(
@@ -130,10 +132,11 @@ private fun DownloadStorageErrorDialogView(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
-                Text(
+                AutoSizeText(
                     text = downloadDialogResource.title,
                     style = MaterialTheme.appTypography.titleLarge,
-                    color = MaterialTheme.appColors.textDark
+                    color = MaterialTheme.appColors.textDark,
+                    minSize = MaterialTheme.appTypography.titleLarge.fontSize.value - 1
                 )
             }
             Column {
@@ -153,7 +156,7 @@ private fun DownloadStorageErrorDialogView(
             )
             OpenEdXOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.core_cancel),
+                text = stringResource(id = coreR.string.core_cancel),
                 backgroundColor = MaterialTheme.appColors.background,
                 borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 textColor = MaterialTheme.appColors.primaryButtonBackground,
@@ -229,7 +232,7 @@ private fun StorageBar(
         ) {
             Text(
                 text = stringResource(
-                    org.openedx.course.R.string.course_used_free_storage,
+                    R.string.course_used_free_storage,
                     usedSpace.toFileSize(1, false),
                     freeSpace.toFileSize(1, false)
                 ),
@@ -254,7 +257,7 @@ private fun DownloadStorageErrorDialogViewPreview() {
             downloadDialogResource = DownloadDialogResource(
                 title = "Title",
                 description = "Description Description Description Description Description Description Description ",
-                icon = painterResource(id = org.openedx.course.R.drawable.course_ic_error)
+                icon = painterResource(id = R.drawable.course_ic_error)
             ),
             uiState = DownloadDialogUIState(
                 downloadDialogItems = listOf(

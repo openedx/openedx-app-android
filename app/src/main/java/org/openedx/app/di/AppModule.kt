@@ -19,7 +19,6 @@ import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
 import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.worker.OfflineProgressSyncScheduler
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
@@ -56,6 +55,7 @@ import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics

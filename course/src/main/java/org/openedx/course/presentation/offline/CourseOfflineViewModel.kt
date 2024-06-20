@@ -22,6 +22,7 @@ import org.openedx.core.module.db.FileType
 import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.FileUtil
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.download.DownloadDialogItem
@@ -34,6 +35,7 @@ class CourseOfflineViewModel(
     private val preferencesManager: CorePreferences,
     private val downloadDialogManager: DownloadDialogManager,
     private val fileUtil: FileUtil,
+    private val networkConnection: NetworkConnection,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
@@ -53,11 +55,14 @@ class CourseOfflineViewModel(
             isDownloading = false,
             readyToDownloadSize = "",
             downloadedSize = "",
-            progressBarValue = 0f
+            progressBarValue = 0f,
         )
     )
     val uiState: StateFlow<CourseOfflineUIState>
         get() = _uiState.asStateFlow()
+
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
 
     init {
         viewModelScope.launch {
@@ -89,7 +94,7 @@ class CourseOfflineViewModel(
             downloadDialogManager.showPopup(
                 subSectionsBlocks = notDownloadedSubSectionBlocks,
                 courseId = courseId,
-                isAllBlocksDownloaded = false,
+                isBlocksDownloaded = false,
                 fragmentManager = fragmentManager,
                 removeDownloadModels = ::removeDownloadModels,
                 saveDownloadModels = { blockId ->
@@ -171,6 +176,7 @@ class CourseOfflineViewModel(
                 val downloadedModelsIds = downloadModels.map { it.id }
                 val downloadedBlocks = courseStructure.blockData.filter { it.id in downloadedModelsIds }
                 val downloadedFilesSize = getFilesSize(downloadedBlocks)
+                val realDownloadedFilesSize = downloadModels.sumOf { it.size }
                 val largestDownloads = downloadModels
                     .sortedByDescending { it.size }
                     .take(5)
@@ -180,7 +186,7 @@ class CourseOfflineViewModel(
                         isHaveDownloadableBlocks = true,
                         largestDownloads = largestDownloads,
                         readyToDownloadSize = (downloadableFilesSize - downloadedFilesSize).toFileSize(1, false),
-                        downloadedSize = downloadedFilesSize.toFileSize(1, false),
+                        downloadedSize = realDownloadedFilesSize.toFileSize(1, false),
                         progressBarValue = downloadedFilesSize.toFloat() / downloadableFilesSize.toFloat()
                     )
                 }

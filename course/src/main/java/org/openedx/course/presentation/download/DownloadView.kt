@@ -35,10 +35,12 @@ fun DownloadDialogItem(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
+            modifier = Modifier
+                .size(24.dp)
+                .align(Alignment.Top),
             painter = icon,
             tint = MaterialTheme.appColors.textDark,
             contentDescription = null,
-            modifier = Modifier.size(24.dp)
         )
         Text(
             modifier = Modifier.weight(1f),

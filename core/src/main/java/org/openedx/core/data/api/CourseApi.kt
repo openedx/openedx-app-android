@@ -84,6 +84,6 @@ interface CourseApi {
     suspend fun submitOfflineXBlockProgress(
         @Path("course_id") courseId: String,
         @Path("block_id") blockId: String,
-        @FieldMap(encoded = false) progress: Map<String, String>
+        @FieldMap progress: Map<String, String>
     )
 }

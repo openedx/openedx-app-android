@@ -6,6 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.app.deeplink.DeepLink
@@ -19,7 +22,6 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.utils.FileUtil
-import org.openedx.course.presentation.download.DownloadDialogManager
 
 class AppViewModel(
     private val config: Config,
@@ -31,12 +33,16 @@ class AppViewModel(
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
     private val downloadNotifier: DownloadNotifier,
-    private val downloadDialogManager: DownloadDialogManager,
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
     val logoutUser: LiveData<Unit>
         get() = _logoutUser
+
+    private val _downloadFailedDialog = MutableSharedFlow<DownloadFailed>()
+    val downloadFailedDialog: SharedFlow<DownloadFailed>
+        get() = _downloadFailedDialog.asSharedFlow()
+
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
@@ -44,8 +50,6 @@ class AppViewModel(
 
     val isBranchEnabled get() = config.getBranchConfig().enabled
     private val canResetAppDirectory get() = preferencesManager.canResetAppDirectory
-
-    var fragmentManager: FragmentManager? = null
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
@@ -69,12 +73,7 @@ class AppViewModel(
         viewModelScope.launch {
             downloadNotifier.notifier.collect { event ->
                 if (event is DownloadFailed) {
-                    fragmentManager?.let {
-                        downloadDialogManager.showDownloadFailedPopup(
-                            downloadModel = event.downloadModel,
-                            fragmentManager = it,
-                        )
-                    }
+                    _downloadFailedDialog.emit(event)
                 }
             }
         }

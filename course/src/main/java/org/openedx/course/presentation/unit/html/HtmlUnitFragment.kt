@@ -149,50 +149,50 @@ class HtmlUnitFragment : Fragment() {
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (uiState.isLoadingEnabled) {
-                        if (hasInternetConnection || fromDownloadedContent) {
-                            HTMLContentView(
-                                uiState = uiState,
-                                windowSize = windowSize,
-                                url = url,
-                                cookieManager = viewModel.cookieManager,
-                                apiHostURL = viewModel.apiHostURL,
-                                isLoading = isLoading,
-                                injectJSList = injectJSList,
-                                onCompletionSet = {
-                                    viewModel.notifyCompletionSet()
-                                },
-                                onWebPageLoading = {
-                                    isLoading = true
-                                },
-                                onWebPageLoaded = {
-                                    isLoading = false
-                                    if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
-                                },
-                                saveXBlockProgress = { jsonProgress ->
-                                    viewModel.saveXBlockProgress(jsonProgress)
+                            if (hasInternetConnection || fromDownloadedContent) {
+                                HTMLContentView(
+                                    uiState = uiState,
+                                    windowSize = windowSize,
+                                    url = url,
+                                    cookieManager = viewModel.cookieManager,
+                                    apiHostURL = viewModel.apiHostURL,
+                                    isLoading = isLoading,
+                                    injectJSList = injectJSList,
+                                    onCompletionSet = {
+                                        viewModel.notifyCompletionSet()
+                                    },
+                                    onWebPageLoading = {
+                                        isLoading = true
+                                    },
+                                    onWebPageLoaded = {
+                                        isLoading = false
+                                        if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
+                                    },
+                                    saveXBlockProgress = { jsonProgress ->
+                                        viewModel.saveXBlockProgress(jsonProgress)
+                                    }
+                                )
+                            } else {
+                                ConnectionErrorView(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight()
+                                        .background(MaterialTheme.appColors.background)
+                                ) {
+                                    hasInternetConnection = viewModel.isOnline
                                 }
-                            )
-                        } else {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background)
-                            ) {
-                                hasInternetConnection = viewModel.isOnline
+                            }
+                            if (isLoading && hasInternetConnection) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .zIndex(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                }
                             }
                         }
-                        if (isLoading && hasInternetConnection) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .zIndex(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-                    }
                     }
                 }
             }

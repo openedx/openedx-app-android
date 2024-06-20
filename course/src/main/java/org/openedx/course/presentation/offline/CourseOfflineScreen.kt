@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,7 @@ fun CourseOfflineScreen(
     CourseOfflineUI(
         windowSize = windowSize,
         uiState = uiState,
+        hasInternetConnection = viewModel.hasInternetConnection,
         onDownloadAllClick = {
             viewModel.downloadAllBlocks(fragmentManager)
         },
@@ -98,6 +100,7 @@ fun CourseOfflineScreen(
 private fun CourseOfflineUI(
     windowSize: WindowSize,
     uiState: CourseOfflineUIState,
+    hasInternetConnection: Boolean,
     onDownloadAllClick: () -> Unit,
     onCancelDownloadClick: () -> Unit,
     onDeleteClick: (downloadModel: DownloadModel) -> Unit,
@@ -152,7 +155,7 @@ private fun CourseOfflineUI(
                         } else {
                             NoDownloadableBlocksProgress()
                         }
-                        if (uiState.progressBarValue != 1f && !uiState.isDownloading) {
+                        if (uiState.progressBarValue != 1f && !uiState.isDownloading && hasInternetConnection) {
                             Spacer(modifier = Modifier.height(20.dp))
                             OpenEdXButton(
                                 text = stringResource(R.string.course_download_all),
@@ -223,6 +226,13 @@ private fun LargestDownloads(
     } else {
         stringResource(coreR.string.core_label_done)
     }
+
+    LaunchedEffect(isDownloading) {
+        if (isDownloading) {
+            isEditingEnabled = false
+        }
+    }
+
     Column {
         Row {
             Text(
@@ -231,14 +241,16 @@ private fun LargestDownloads(
                 style = MaterialTheme.appTypography.titleMedium,
                 color = MaterialTheme.appColors.textDark
             )
-            Text(
-                modifier = Modifier.clickable {
-                    isEditingEnabled = !isEditingEnabled
-                },
-                text = text,
-                style = MaterialTheme.appTypography.bodyMedium,
-                color = MaterialTheme.appColors.textAccent,
-            )
+            if (!isDownloading) {
+                Text(
+                    modifier = Modifier.clickable {
+                        isEditingEnabled = !isEditingEnabled
+                    },
+                    text = text,
+                    style = MaterialTheme.appTypography.bodyMedium,
+                    color = MaterialTheme.appColors.textAccent,
+                )
+            }
         }
         Spacer(modifier = Modifier.height(20.dp))
         largestDownloads.forEach {
@@ -447,6 +459,7 @@ private fun CourseOfflineUIPreview() {
     OpenEdXTheme {
         CourseOfflineUI(
             windowSize = rememberWindowSize(),
+            hasInternetConnection = true,
             uiState = CourseOfflineUIState(
                 isHaveDownloadableBlocks = true,
                 readyToDownloadSize = "159MB",

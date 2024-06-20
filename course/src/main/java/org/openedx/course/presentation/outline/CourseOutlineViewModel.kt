@@ -402,7 +402,11 @@ class CourseOutlineViewModel(
                 val notDownloadedBlocks = allBlocks.values.filter {
                     it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(it.id)
                 }
-                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
+                if (notDownloadedBlocks.isNotEmpty()) {
+                    subSectionsBlock
+                } else {
+                    null
+                }
             }
 
             val requiredSubSections = notDownloadedSubSectionBlocks.ifEmpty {
@@ -415,14 +419,16 @@ class CourseOutlineViewModel(
                     courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
                 } else {
                     downloadableChildren.forEach {
-                        removeBlockDownloadModel(it)
+                        if (!isBlockDownloaded(it)) {
+                            removeBlockDownloadModel(it)
+                        }
                     }
                 }
             } else {
                 downloadDialogManager.showPopup(
                     subSectionsBlocks = requiredSubSections,
                     courseId = courseId,
-                    isAllBlocksDownloaded = isAllBlocksDownloaded,
+                    isBlocksDownloaded = isAllBlocksDownloaded,
                     fragmentManager = fragmentManager,
                     removeDownloadModels = ::removeDownloadModels,
                     saveDownloadModels = { blockId ->

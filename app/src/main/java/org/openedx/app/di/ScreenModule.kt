@@ -80,10 +80,9 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get(),
         )
     }
-    viewModel { MainViewModel(get(), get(), get(), get()) }
+    viewModel { MainViewModel(get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
     factory { AuthInteractor(get()) }
@@ -438,7 +437,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
 
@@ -448,6 +448,7 @@ val screenModule = module {
         CourseOfflineViewModel(
             courseId,
             courseTitle,
+            get(),
             get(),
             get(),
             get(),
