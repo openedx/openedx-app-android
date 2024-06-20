@@ -71,7 +71,7 @@ class CourseOutlineViewModel(
     coreAnalytics,
     downloadHelper
 ) {
-    val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
+    val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
     private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: StateFlow<CourseOutlineUIState>
@@ -411,7 +411,13 @@ class CourseOutlineViewModel(
 
             if (downloadingBlocks.isNotEmpty()) {
                 val downloadableChildren = downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
-                courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
+                if (config.getCourseUIConfig().isCourseDownloadQueueEnabled) {
+                    courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
+                } else {
+                    downloadableChildren.forEach {
+                        removeBlockDownloadModel(it)
+                    }
+                }
             } else {
                 downloadDialogManager.showPopup(
                     subSectionsBlocks = requiredSubSections,

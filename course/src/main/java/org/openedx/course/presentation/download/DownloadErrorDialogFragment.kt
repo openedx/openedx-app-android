@@ -32,6 +32,7 @@ import androidx.fragment.app.DialogFragment
 import org.openedx.core.extension.parcelable
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.system.PreviewFragmentManager
+import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -143,10 +144,11 @@ private fun DownloadErrorDialogView(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
-                Text(
+                AutoSizeText(
                     text = downloadDialogResource.title,
                     style = MaterialTheme.appTypography.titleLarge,
-                    color = MaterialTheme.appColors.textDark
+                    color = MaterialTheme.appColors.textDark,
+                    minSize = MaterialTheme.appTypography.titleLarge.fontSize.value - 1
                 )
             }
             Column {

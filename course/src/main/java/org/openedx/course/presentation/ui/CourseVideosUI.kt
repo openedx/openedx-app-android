@@ -103,16 +103,25 @@ fun CourseVideosScreen(
             viewModel.switchCourseSections(block.id)
         },
         onSubSectionClick = { subSectionBlock ->
-            viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+            if (viewModel.isCourseDropdownNavigationEnabled) {
+                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    viewModel.courseRouter.navigateToCourseContainer(
+                        fragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = unit.id,
+                        mode = CourseViewMode.FULL
+                    )
+                }
+            } else {
                 viewModel.sequentialClickedEvent(
-                    unit.blockId,
-                    unit.displayName
+                    subSectionBlock.blockId,
+                    subSectionBlock.displayName
                 )
-                viewModel.courseRouter.navigateToCourseContainer(
+                viewModel.courseRouter.navigateToCourseSubsections(
                     fm = fragmentManager,
                     courseId = viewModel.courseId,
-                    unitId = unit.id,
-                    mode = CourseViewMode.VIDEOS
+                    subSectionId = subSectionBlock.id,
+                    mode = CourseViewMode.FULL
                 )
             }
         },
@@ -120,7 +129,6 @@ fun CourseVideosScreen(
             viewModel.downloadBlocks(
                 blocksIds = blocksIds,
                 fragmentManager = fragmentManager,
-                context = context
             )
         },
         onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->

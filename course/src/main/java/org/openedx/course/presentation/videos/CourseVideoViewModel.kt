@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.videos
 
-import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,6 +32,7 @@ import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogManager
 
 class CourseVideoViewModel(
     val courseId: String,
@@ -45,6 +45,8 @@ class CourseVideoViewModel(
     private val courseNotifier: CourseNotifier,
     private val videoNotifier: VideoNotifier,
     private val analytics: CourseAnalytics,
+    private val downloadDialogManager: DownloadDialogManager,
+    private val fileUtil: FileUtil,
     val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
@@ -59,7 +61,7 @@ class CourseVideoViewModel(
     downloadHelper,
 ) {
 
-    val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
+    val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
     private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
     val uiState: StateFlow<CourseVideosUIState>
@@ -217,18 +219,52 @@ class CourseVideoViewModel(
         return resultBlocks.toList()
     }
 
-    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
-        blocksIds.forEach { blockId ->
-            if (isBlockDownloading(blockId)) {
-                courseRouter.navigateToDownloadQueue(
-                    fm = fragmentManager,
-                    getDownloadableChildren(blockId) ?: arrayListOf()
-                )
-            } else if (isBlockDownloaded(blockId)) {
-                removeDownloadModels(blockId)
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
+        viewModelScope.launch {
+            val courseData = _uiState.value as? CourseVideosUIState.CourseData ?: return@launch
+
+            val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+
+            val blocks = subSectionsBlocks.flatMap { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                allBlocks.values.filter { it.id in verticalBlocks.flatMap { it.descendants } }
+            }
+
+            val downloadableBlocks = blocks.filter { it.isDownloadable }
+            val downloadingBlocks = blocksIds.filter { isBlockDownloading(it) }
+            val isAllBlocksDownloaded = downloadableBlocks.all { isBlockDownloaded(it.id) }
+
+            val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val notDownloadedBlocks = allBlocks.values.filter {
+                    it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(it.id)
+                }
+                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
+            }
+
+            val requiredSubSections = notDownloadedSubSectionBlocks.ifEmpty {
+                subSectionsBlocks
+            }
+
+            if (downloadingBlocks.isNotEmpty()) {
+                val downloadableChildren = downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
+                if (config.getCourseUIConfig().isCourseDownloadQueueEnabled) {
+                    courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
+                } else {
+                    downloadableChildren.forEach {
+                        removeBlockDownloadModel(it)
+                    }
+                }
             } else {
-                saveDownloadModels(
-                    FileUtil(context).getExternalAppDir().path, blockId
+                downloadDialogManager.showPopup(
+                    subSectionsBlocks = requiredSubSections,
+                    courseId = courseId,
+                    isAllBlocksDownloaded = isAllBlocksDownloaded,
+                    fragmentManager = fragmentManager,
+                    removeDownloadModels = ::removeDownloadModels,
+                    saveDownloadModels = { blockId ->
+                        saveDownloadModels(fileUtil.getExternalAppDir().path, blockId)
+                    }
                 )
             }
         }

@@ -97,7 +97,7 @@ class DownloadDialogManager(
                         )
                     }
 
-                    else -> {
+                    uiState.sizeSum >= MAX_CELLULAR_SIZE -> {
                         val dialog = DownloadConfirmDialogFragment.newInstance(
                             dialogType = DownloadConfirmDialogType.CONFIRM,
                             uiState = uiState
@@ -106,6 +106,10 @@ class DownloadDialogManager(
                             uiState.fragmentManager,
                             DownloadConfirmDialogFragment.DIALOG_TAG
                         )
+                    }
+
+                    else -> {
+                        uiState.saveDownloadModels()
                     }
                 }
             }

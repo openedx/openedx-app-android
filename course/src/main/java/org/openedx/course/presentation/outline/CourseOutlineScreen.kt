@@ -105,7 +105,7 @@ fun CourseOutlineScreen(
             }
         },
         onSubSectionClick = { subSectionBlock ->
-            if (viewModel.isCourseNestedListEnabled) {
+            if (viewModel.isCourseDropdownNavigationEnabled) {
                 viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
                     viewModel.logUnitDetailViewedEvent(
                         unit.blockId,
