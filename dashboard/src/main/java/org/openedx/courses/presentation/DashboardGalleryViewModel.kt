@@ -21,6 +21,7 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
+import org.openedx.core.ui.WindowSize
 import org.openedx.core.utils.FileUtil
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardRouter
@@ -33,6 +34,7 @@ class DashboardGalleryViewModel(
     private val networkConnection: NetworkConnection,
     private val fileUtil: FileUtil,
     private val dashboardRouter: DashboardRouter,
+    private val windowSize: WindowSize
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -62,7 +64,12 @@ class DashboardGalleryViewModel(
         viewModelScope.launch {
             try {
                 if (networkConnection.isOnline()) {
-                    val response = interactor.getMainUserCourses()
+                    val pageSize = if (windowSize.isTablet) {
+                        PAGE_SIZE_TABLET
+                    } else {
+                        PAGE_SIZE_PHONE
+                    }
+                    val response = interactor.getMainUserCourses(pageSize)
                     if (response.primary == null && response.enrollments.courses.isEmpty()) {
                         _uiState.value = DashboardGalleryUIState.Empty
                     } else {
@@ -126,5 +133,10 @@ class DashboardGalleryViewModel(
                 }
             }
         }
+    }
+
+    companion object {
+        private const val PAGE_SIZE_TABLET = 7
+        private const val PAGE_SIZE_PHONE = 5
     }
 }

@@ -16,11 +16,7 @@
     <string name="discovery_programs" tools:ignore="MissingTranslation">Programs</string>
 
     <plurals name="discovery_found_courses">
-        <item quantity="zero">Found %s courses on your request</item>
         <item quantity="one">Found %s course on your request</item>
-        <item quantity="two">Found %s courses on your request</item>
-        <item quantity="few">Found %s courses on your request</item>
-        <item quantity="many">Found %s courses on your request</item>
         <item quantity="other">Found %s courses on your request</item>
     </plurals>
 
