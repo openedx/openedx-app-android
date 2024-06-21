@@ -65,11 +65,7 @@
     <string name="course_subsection_assignment_info" translatable="false">%1$s - %2$s - %3$d / %4$d</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
-        <item quantity="zero">%1$s of %2$s  assignments complete</item>
         <item quantity="one">%1$s of %2$s  assignment complete</item>
-        <item quantity="two">%1$s of %2$s  assignments complete</item>
-        <item quantity="few">%1$s of %2$s  assignments complete</item>
-        <item quantity="many">%1$s of %2$s  assignments complete</item>
         <item quantity="other">%1$s of %2$s  assignments complete</item>
     </plurals>
 
