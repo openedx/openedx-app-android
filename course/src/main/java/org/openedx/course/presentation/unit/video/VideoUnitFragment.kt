@@ -91,7 +91,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
         }
         viewModel.downloadSubtitles()
-        handler.removeCallbacks(videoTimeRunnable)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
