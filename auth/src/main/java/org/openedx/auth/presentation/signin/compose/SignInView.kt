@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -220,6 +221,7 @@ private fun AuthForm(
 ) {
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         LoginTextField(
@@ -239,6 +241,7 @@ private fun AuthForm(
                 password = it
             },
             onPressDone = {
+                keyboardController?.hide()
                 onEvent(AuthEvent.SignIn(login = login, password = password))
             }
         )
@@ -282,6 +285,7 @@ private fun AuthForm(
                 textColor = MaterialTheme.appColors.primaryButtonText,
                 backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                 onClick = {
+                    keyboardController?.hide()
                     onEvent(AuthEvent.SignIn(login = login, password = password))
                 }
             )
@@ -294,6 +298,7 @@ private fun AuthForm(
                 isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
                 isSignIn = true,
             ) {
+                keyboardController?.hide()
                 onEvent(AuthEvent.SocialSignIn(it))
             }
         }

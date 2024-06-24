@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -130,6 +131,7 @@ private fun RestorePasswordScreen(
     var email by rememberSaveable {
         mutableStateOf("")
     }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -272,6 +274,7 @@ private fun RestorePasswordScreen(
                                     },
                                     imeAction = ImeAction.Done,
                                     keyboardActions = {
+                                        keyboardController?.hide()
                                         it.clearFocus()
                                         onRestoreButtonClick(email)
                                     }
@@ -292,6 +295,7 @@ private fun RestorePasswordScreen(
                                         modifier = buttonWidth.testTag("btn_reset_password"),
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
+                                            keyboardController?.hide()
                                             onRestoreButtonClick(email)
                                         }
                                     )
