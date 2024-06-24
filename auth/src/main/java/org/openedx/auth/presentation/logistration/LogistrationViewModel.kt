@@ -18,6 +18,10 @@ class LogistrationViewModel(
 
     private val discoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
 
+    init {
+        logScreenEvent(AuthAnalyticsEvent.Logistration)
+    }
+
     fun navigateToSignIn(parentFragmentManager: FragmentManager) {
         router.navigateToSignIn(parentFragmentManager, courseId, null)
         logEvent(AuthAnalyticsEvent.SIGN_IN_CLICKED)
@@ -56,6 +60,19 @@ class LogistrationViewModel(
     ) {
         analytics.logEvent(
             event = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
+    }
+
+    private fun logScreenEvent(
+        event: AuthAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
             params = buildMap {
                 put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
