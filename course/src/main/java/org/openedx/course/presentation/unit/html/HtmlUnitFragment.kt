@@ -170,7 +170,7 @@ class HtmlUnitFragment : Fragment() {
                                     },
                                     saveXBlockProgress = { jsonProgress ->
                                         viewModel.saveXBlockProgress(jsonProgress)
-                                    }
+                                    },
                                 )
                             } else {
                                 ConnectionErrorView(

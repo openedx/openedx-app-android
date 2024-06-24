@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
@@ -33,6 +34,7 @@ class OfflineProgressSyncWorker(
             tryToSyncProgress()
             Result.success()
         } catch (e: Exception) {
+            Log.e(WORKER_TAG, "$e")
             Firebase.crashlytics.log("$e")
             Result.failure()
         }

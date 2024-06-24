@@ -1,6 +1,7 @@
 package org.openedx.course.data.repository
 
 import kotlinx.coroutines.flow.map
+import okhttp3.MultipartBody
 import org.openedx.core.ApiConstants
 import org.openedx.core.data.api.CourseApi
 import org.openedx.core.data.model.BlocksCompletionBody
@@ -13,6 +14,8 @@ import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.course.data.storage.CourseDao
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class CourseRepository(
     private val api: CourseApi,
@@ -120,11 +123,14 @@ class CourseRepository(
 
     private suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String, jsonProgressData: String?) {
         if (!jsonProgressData.isNullOrEmpty()) {
-            val progressMap = jsonProgressData
-                .split("&")
-                .map { it.split("=") }
-                .associate { it[0] to it[1] }
-            api.submitOfflineXBlockProgress(courseId, blockId, progressMap)
+            val parts = mutableListOf<MultipartBody.Part>()
+            val decodedQuery = URLDecoder.decode(jsonProgressData, StandardCharsets.UTF_8.name())
+            val keyValuePairs = decodedQuery.split("&")
+            for (pair in keyValuePairs) {
+                val (key, value) = pair.split("=")
+                parts.add(MultipartBody.Part.createFormData(key, value))
+            }
+            api.submitOfflineXBlockProgress(courseId, blockId, parts)
             downloadDao.removeOfflineXBlockProgress(listOf(blockId))
         }
     }

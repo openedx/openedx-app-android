@@ -2,6 +2,7 @@ package org.openedx.course.presentation.unit.html
 
 import android.content.res.AssetManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +43,6 @@ class HtmlUnitViewModel(
 
     init {
         tryToSyncProgress()
-        getXBlockProgress(blockId)
     }
 
     fun setWebPageLoaded(assets: AssetManager) {
@@ -56,6 +56,7 @@ class HtmlUnitViewModel(
         assets.readAsText("js_injection/survey_css.js")?.let { jsList.add(it) }
 
         _injectJSList.value = jsList
+        getXBlockProgress()
     }
 
     fun notifyCompletionSet() {
@@ -84,10 +85,11 @@ class HtmlUnitViewModel(
         }
     }
 
-    private fun getXBlockProgress(blockId: String) {
+    private fun getXBlockProgress() {
         viewModelScope.launch {
             if (!isOnline) {
                 val xBlockProgress = courseInteractor.getXBlockProgress(blockId)
+                delay(500)
                 _uiState.update { it.copy(jsonProgress = xBlockProgress?.jsonProgress?.toJson()) }
             }
         }

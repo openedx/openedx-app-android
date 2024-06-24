@@ -1,5 +1,6 @@
 package org.openedx.core.data.api
 
+import okhttp3.MultipartBody
 import org.openedx.core.data.model.AnnouncementModel
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.model.CourseComponentStatus
@@ -10,11 +11,11 @@ import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.ResetCourseDates
 import retrofit2.http.Body
-import retrofit2.http.FieldMap
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -79,11 +80,11 @@ interface CourseApi {
         @Query("requested_fields") fields: List<String> = emptyList()
     ): CourseEnrollments
 
-    @FormUrlEncoded
+    @Multipart
     @POST("/courses/{course_id}/xblock/{block_id}/handler/xmodule_handler/problem_check")
     suspend fun submitOfflineXBlockProgress(
         @Path("course_id") courseId: String,
         @Path("block_id") blockId: String,
-        @FieldMap progress: Map<String, String>
+        @Part progress: List<MultipartBody.Part>
     )
 }

@@ -28,26 +28,25 @@ class CourseUnitContainerAdapter(
         val offlineUrl = downloadedModel?.let { it.path + File.separator + "index.html" } ?: ""
         val noNetwork = !viewModel.hasNetworkConnection
 
-        if (noNetwork) {
-            if (block.isDownloadable && offlineUrl.isEmpty()) {
-                return createNotAvailableUnitFragment(block, NotAvailableUnitType.NOT_DOWNLOADED)
+        return when {
+            noNetwork && block.isDownloadable && offlineUrl.isEmpty() -> {
+                createNotAvailableUnitFragment(block, NotAvailableUnitType.NOT_DOWNLOADED)
             }
-            if (!block.isDownloadable) {
-                return createNotAvailableUnitFragment(block, NotAvailableUnitType.OFFLINE_UNSUPPORTED)
-            }
-        }
 
-        when {
+            noNetwork && !block.isDownloadable -> {
+                createNotAvailableUnitFragment(block, NotAvailableUnitType.OFFLINE_UNSUPPORTED)
+            }
+
             block.isVideoBlock && block.studentViewData?.encodedVideos?.run { hasVideoUrl || hasYoutubeUrl } == true -> {
-                return createVideoFragment(block)
+                createVideoFragment(block)
             }
 
             block.isDiscussionBlock && !block.studentViewData?.topicId.isNullOrEmpty() -> {
-                return createDiscussionFragment(block)
+                createDiscussionFragment(block)
             }
 
             !block.studentViewMultiDevice -> {
-                return createNotAvailableUnitFragment(block, NotAvailableUnitType.MOBILE_UNSUPPORTED)
+                createNotAvailableUnitFragment(block, NotAvailableUnitType.MOBILE_UNSUPPORTED)
             }
 
             block.isHTMLBlock || block.isProblemBlock || block.isOpenAssessmentBlock || block.isDragAndDropBlock ||
@@ -57,7 +56,7 @@ class CourseUnitContainerAdapter(
                 } else {
                     ""
                 }
-                return HtmlUnitFragment.newInstance(
+                HtmlUnitFragment.newInstance(
                     block.id,
                     block.studentViewUrl,
                     viewModel.courseId,
@@ -67,7 +66,7 @@ class CourseUnitContainerAdapter(
             }
 
             else -> {
-                return createNotAvailableUnitFragment(block, NotAvailableUnitType.MOBILE_UNSUPPORTED)
+                createNotAvailableUnitFragment(block, NotAvailableUnitType.MOBILE_UNSUPPORTED)
             }
         }
     }
