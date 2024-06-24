@@ -16,6 +16,7 @@ class FirebaseAnalytics(context: Context) : Analytics {
     }
 
     override fun logScreenEvent(screenName: String, params: Map<String, Any?>) {
+        tracker.logEvent(screenName, params.toBundle())
         logger.d { "Firebase Analytics log Screen Event: $screenName + $params" }
     }
 

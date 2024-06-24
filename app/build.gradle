@@ -3,11 +3,15 @@ def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
 def themeDirectory = config.getOrDefault("THEME_DIRECTORY", "openedx")
 def firebaseConfig = config.get('FIREBASE')
 def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
+def fullstoryConfig = config.get("FULLSTORY")
+def fullstoryEnabled = fullstoryConfig?.getOrDefault('ENABLED', false)
 
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'fullstory'
+
 if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
@@ -23,6 +27,18 @@ if (firebaseEnabled) {
     }
 
     preBuild.dependsOn(removeGoogleServicesJson)
+}
+
+if (fullstoryEnabled) {
+    def fullstoryOrgId = fullstoryConfig?.get("ORG_ID")
+
+    fullstory {
+        org fullstoryOrgId
+        composeEnabled true
+        composeSelectorVersion 4
+        enabledVariants 'debug|release'
+        logcatLevel 'error'
+    }
 }
 
 android {

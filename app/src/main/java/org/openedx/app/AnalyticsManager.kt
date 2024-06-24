@@ -3,6 +3,7 @@ package org.openedx.app
 import android.content.Context
 import org.openedx.app.analytics.Analytics
 import org.openedx.app.analytics.FirebaseAnalytics
+import org.openedx.app.analytics.FullstoryAnalytics
 import org.openedx.app.analytics.SegmentAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.core.config.Config
@@ -29,9 +30,14 @@ class AnalyticsManager(
         if (config.getFirebaseConfig().enabled) {
             addAnalyticsTracker(FirebaseAnalytics(context = context))
         }
+
         val segmentConfig = config.getSegmentConfig()
         if (segmentConfig.enabled && segmentConfig.segmentWriteKey.isNotBlank()) {
             addAnalyticsTracker(SegmentAnalytics(context = context, config = config))
+        }
+
+        if (config.getFullstoryConfig().isEnabled) {
+            addAnalyticsTracker(FullstoryAnalytics())
         }
     }
 
@@ -42,6 +48,12 @@ class AnalyticsManager(
     private fun logEvent(event: Event, params: Map<String, Any?> = mapOf()) {
         services.forEach { analytics ->
             analytics.logEvent(event.eventName, params)
+        }
+    }
+
+    override fun logScreenEvent(screenName: String, params: Map<String, Any?>) {
+        services.forEach { analytics ->
+            analytics.logScreenEvent(screenName, params)
         }
     }
 

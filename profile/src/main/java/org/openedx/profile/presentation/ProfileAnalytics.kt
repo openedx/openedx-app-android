@@ -2,9 +2,14 @@ package org.openedx.profile.presentation
 
 interface ProfileAnalytics {
     fun logEvent(event: String, params: Map<String, Any?>)
+    fun logScreenEvent(screenName: String, params: Map<String, Any?>)
 }
 
 enum class ProfileAnalyticsEvent(val eventName: String, val biValue: String) {
+    EDIT_PROFILE(
+        "Profile:Edit Profile",
+        "edx.bi.app.profile.edit"
+    ),
     EDIT_CLICKED(
         "Profile:Edit Clicked",
         "edx.bi.app.profile.edit.clicked"

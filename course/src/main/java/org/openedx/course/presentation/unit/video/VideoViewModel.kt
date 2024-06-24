@@ -40,7 +40,6 @@ class VideoViewModel(
     }
 
     fun markBlockCompleted(blockId: String, medium: String) {
-        logLoadedCompletedEvent(videoUrl, false, currentVideoTime, medium)
         if (!isBlockAlreadyCompleted) {
             viewModelScope.launch {
                 try {
@@ -49,6 +48,7 @@ class VideoViewModel(
                         courseId,
                         listOf(blockId)
                     )
+                    logLoadedCompletedEvent(videoUrl, false, currentVideoTime, medium)
                     notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
                     isBlockAlreadyCompleted = false

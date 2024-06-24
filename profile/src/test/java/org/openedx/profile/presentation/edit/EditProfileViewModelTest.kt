@@ -64,6 +64,7 @@ class EditProfileViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
+        every { analytics.logScreenEvent(any(), any()) } returns Unit
     }
 
     @After
@@ -172,6 +173,7 @@ class EditProfileViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.updateAccount(any()) }
         coVerify(exactly = 1) { interactor.setProfileImage(any(), any()) }
 

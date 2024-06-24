@@ -67,6 +67,9 @@ class EditProfileViewModel(
     val showLeaveDialog: LiveData<Boolean>
         get() = _showLeaveDialog
 
+    init {
+        logProfileScreenEvent(ProfileAnalyticsEvent.EDIT_PROFILE)
+    }
 
     fun updateAccount(fields: Map<String, Any?>) {
         _uiState.value = EditProfileUIState(account, true, isLimitedProfile)
@@ -149,6 +152,20 @@ class EditProfileViewModel(
     ) {
         analytics.logEvent(
             event = event.eventName,
+            params = buildMap {
+                put(ProfileAnalyticsKey.NAME.key, event.biValue)
+                put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
+                putAll(params)
+            }
+        )
+    }
+
+    private fun logProfileScreenEvent(
+        event: ProfileAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
             params = buildMap {
                 put(ProfileAnalyticsKey.NAME.key, event.biValue)
                 put(ProfileAnalyticsKey.CATEGORY.key, ProfileAnalyticsKey.PROFILE.key)
