@@ -7,6 +7,10 @@ interface AuthAnalytics {
 }
 
 enum class AuthAnalyticsEvent(val eventName: String, val biValue: String) {
+    Logistration(
+        "Logistration",
+        "edx.bi.app.logistration"
+    ),
     DISCOVERY_COURSES_SEARCH(
         "Logistration:Courses Search",
         "edx.bi.app.logistration.courses_search"
