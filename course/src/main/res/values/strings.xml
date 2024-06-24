@@ -27,8 +27,8 @@
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
-    <string name="course_this_interactive_component">This interactive component isn\'t available on mobile.</string>
-    <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
+    <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
+    <string name="course_explore_other_parts_on_web">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>
     <string name="course_continue_with">Continue with:</string>
@@ -89,6 +89,10 @@
     <string name="course_largest_downloads">Largest Downloads</string>
     <string name="course_remove_all_downloads">Remove all downloads</string>
     <string name="course_cancel_course_download">Cancel Course Download</string>
+    <string name="course_not_available_offline">This component is not yet available offline</string>
+    <string name="course_explore_other_parts_when_reconnect">Explore other parts of this course or view this when you reconnect.</string>
+    <string name="course_not_downloaded">This component is not downloaded</string>
+    <string name="course_explore_other_parts_when_reconnect_or_download">Explore other parts of this course or download this when you reconnect.</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
         <item quantity="zero">%1$s of %2$s  assignments complete</item>

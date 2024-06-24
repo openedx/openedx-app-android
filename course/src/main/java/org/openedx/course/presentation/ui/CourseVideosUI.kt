@@ -109,7 +109,7 @@ fun CourseVideosScreen(
                         fragmentManager,
                         courseId = viewModel.courseId,
                         unitId = unit.id,
-                        mode = CourseViewMode.FULL
+                        mode = CourseViewMode.VIDEOS
                     )
                 }
             } else {
@@ -121,7 +121,7 @@ fun CourseVideosScreen(
                     fm = fragmentManager,
                     courseId = viewModel.courseId,
                     subSectionId = subSectionBlock.id,
-                    mode = CourseViewMode.FULL
+                    mode = CourseViewMode.VIDEOS
                 )
             }
         },
