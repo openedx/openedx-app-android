@@ -32,8 +32,9 @@ import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
 import org.openedx.core.R as CoreRes
 
@@ -42,7 +43,7 @@ class SignInViewModel(
     private val resourceManager: ResourceManager,
     private val preferencesManager: CorePreferences,
     private val validator: Validator,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
     private val router: AuthRouter,
@@ -107,6 +108,7 @@ class SignInViewModel(
                         )
                     }
                 )
+                appNotifier.send(SignInEvent())
             } catch (e: Exception) {
                 if (e is EdxError.InvalidGrantException) {
                     _uiMessage.value =
@@ -125,8 +127,10 @@ class SignInViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _appUpgradeEvent.value = event
+                }
             }
         }
     }
@@ -170,6 +174,7 @@ class SignInViewModel(
             _uiState.update { it.copy(loginSuccess = true) }
             setUserId()
             _uiState.update { it.copy(showProgress = false) }
+            appNotifier.send(SignInEvent())
         }
     }
 

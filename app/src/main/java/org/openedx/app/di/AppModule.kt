@@ -18,7 +18,6 @@ import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
-import org.openedx.app.system.notifier.AppNotifier
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
@@ -44,11 +43,11 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.utils.FileUtil
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
@@ -96,7 +95,6 @@ val appModule = module {
     single { CourseNotifier() }
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
-    single { AppUpgradeNotifier() }
     single { DownloadNotifier() }
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
@@ -110,7 +108,7 @@ val appModule = module {
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
-    single { DeepLinkRouter(get(), get(), get(), get(), get()) }
+    single { DeepLinkRouter(get(), get(), get(), get(), get(), get()) }
 
     single { NetworkConnection(get()) }
 
