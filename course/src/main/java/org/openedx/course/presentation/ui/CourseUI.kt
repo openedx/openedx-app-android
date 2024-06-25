@@ -244,8 +244,7 @@ fun OfflineQueueCard(
                 maxLines = 1
             )
 
-            val progress = progressValue.toFloat() / progressSize
-
+            val progress = if (progressSize == 0L) 0f else progressValue.toFloat() / progressSize
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()

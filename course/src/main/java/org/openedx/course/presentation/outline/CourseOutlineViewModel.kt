@@ -388,14 +388,17 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager, context: Context) {
+    fun downloadBlocks(
+        blocksIds: List<String>,
+        fragmentManager: FragmentManager,
+        context: Context
+    ) {
+        if (blocksIds.find { isBlockDownloading(it) } != null) {
+            courseRouter.navigateToDownloadQueue(fm = fragmentManager)
+            return
+        }
         blocksIds.forEach { blockId ->
-            if (isBlockDownloading(blockId)) {
-                courseRouter.navigateToDownloadQueue(
-                    fm = fragmentManager,
-                    getDownloadableChildren(blockId) ?: arrayListOf()
-                )
-            } else if (isBlockDownloaded(blockId)) {
+            if (isBlockDownloaded(blockId)) {
                 removeDownloadModels(blockId)
             } else {
                 saveDownloadModels(
