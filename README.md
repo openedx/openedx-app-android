@@ -57,7 +57,8 @@ Additional arguments can be passed to `atlas pull`. Refer to the [atlas document
 	
 Translations are managed in the [open-edx/openedx-translations](https://app.transifex.com/open-edx/openedx-translations/dashboard/) Transifex project.
 
-To translate the app join the [Transifex project](https://app.transifex.com/open-edx/openedx-translations/dashboard/) and add your translations `openedx-app-android` resource: https://app.transifex.com/open-edx/openedx-translations/openedx-app-android/ (the link will start working after the [pull request #317](https://github.com/openedx/openedx-app-android/pull/317) is merged)
+To translate the app join the [Transifex project](https://app.transifex.com/open-edx/openedx-translations/dashboard/) and add your translations to the 
+[`openedx-app-android`](https://app.transifex.com/open-edx/openedx-translations/openedx-app-android/) resource.
 
 Once the resource is both 100% translated and reviewed the [Transifex integration](https://github.com/apps/transifex-integration) will automatically push it to the [openedx-translations](https://github.com/openedx/openedx-translations) repository and developers can use the translations in their app.
 
