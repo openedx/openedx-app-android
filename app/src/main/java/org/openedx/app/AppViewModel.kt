@@ -69,23 +69,8 @@ class AppViewModel(
             notifier.notifier.collect { event ->
                 if (event is SignInEvent && config.getFirebaseConfig().isCloudMessagingEnabled) {
                     SyncFirebaseTokenWorker.schedule(context)
-                } else if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
-                    if (event.isForced) {
-                        logoutHandledAt = System.currentTimeMillis()
-                        preferencesManager.clear()
-                        withContext(dispatcher) {
-                            room.clearAllTables()
-                        }
-                        analytics.logoutEvent(true)
-                        _logoutUser.value = Unit
-                    }
-                    if (config.getFirebaseConfig().isCloudMessagingEnabled) {
-                        RefreshFirebaseTokenWorker.schedule(context)
-                        val notificationManager = context.getSystemService(
-                            Context.NOTIFICATION_SERVICE
-                        ) as NotificationManager
-                        notificationManager.cancelAll()
-                    }
+                } else if (event is LogoutEvent) {
+                    handleLogoutEvent(event)
                 }
             }
         }
@@ -112,6 +97,27 @@ class AppViewModel(
     private fun setUserId(user: User?) {
         user?.let {
             analytics.setUserIdForSession(it.id)
+        }
+    }
+
+    private suspend fun handleLogoutEvent(event: LogoutEvent) {
+        if (System.currentTimeMillis() - logoutHandledAt > 5000) {
+            if (event.isForced) {
+                logoutHandledAt = System.currentTimeMillis()
+                preferencesManager.clear()
+                withContext(dispatcher) {
+                    room.clearAllTables()
+                }
+                analytics.logoutEvent(true)
+                _logoutUser.value = Unit
+            }
+
+            if (config.getFirebaseConfig().isCloudMessagingEnabled) {
+                RefreshFirebaseTokenWorker.schedule(context)
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancelAll()
+            }
         }
     }
 }

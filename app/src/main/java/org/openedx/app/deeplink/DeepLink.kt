@@ -2,8 +2,8 @@ package org.openedx.app.deeplink
 
 class DeepLink(params: Map<String, String>) {
 
-    val screenName = params[Keys.SCREEN_NAME.value]
-    val notificationType = params[Keys.NOTIFICATION_TYPE.value]
+    private val screenName = params[Keys.SCREEN_NAME.value]
+    private val notificationType = params[Keys.NOTIFICATION_TYPE.value]
     val courseId = params[Keys.COURSE_ID.value]
     val pathId = params[Keys.PATH_ID.value]
     val componentId = params[Keys.COMPONENT_ID.value]

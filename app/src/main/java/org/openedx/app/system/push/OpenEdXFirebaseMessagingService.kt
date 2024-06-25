@@ -92,5 +92,4 @@ class OpenEdXFirebaseMessagingService : FirebaseMessagingService() {
     private fun createId(): Int {
         return SystemClock.uptimeMillis().toInt()
     }
-
 }
