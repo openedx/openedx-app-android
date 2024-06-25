@@ -59,6 +59,20 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
 
+    private val branchCallback =
+        BranchUniversalReferralInitListener { branchUniversalObject, _, error ->
+            if (branchUniversalObject?.contentMetadata?.customMetadata != null) {
+                branchLogger.i { "Branch init complete." }
+                branchLogger.i { branchUniversalObject.contentMetadata.customMetadata.toString() }
+                viewModel.makeExternalRoute(
+                    fm = supportFragmentManager,
+                    deepLink = DeepLink(branchUniversalObject.contentMetadata.customMetadata)
+                )
+            } else if (error != null) {
+                branchLogger.e { "Branch init failed. Caused by -" + error.message }
+            }
+        }
+
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(TOP_INSET, topInset)
         outState.putInt(BOTTOM_INSET, bottomInset)
@@ -152,21 +166,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         super.onStart()
 
         if (viewModel.isBranchEnabled) {
-            val callback = BranchUniversalReferralInitListener { branchUniversalObject, _, error ->
-                if (branchUniversalObject?.contentMetadata?.customMetadata != null) {
-                    branchLogger.i { "Branch init complete." }
-                    branchLogger.i { branchUniversalObject.contentMetadata.customMetadata.toString() }
-                    viewModel.makeExternalRoute(
-                        fm = supportFragmentManager,
-                        deepLink = DeepLink(branchUniversalObject.contentMetadata.customMetadata)
-                    )
-                } else if (error != null) {
-                    branchLogger.e { "Branch init failed. Caused by -" + error.message }
-                }
-            }
-
             Branch.sessionBuilder(this)
-                .withCallback(callback)
+                .withCallback(branchCallback)
                 .withData(this.intent.data)
                 .init()
         }
@@ -183,13 +184,9 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
         if (viewModel.isBranchEnabled) {
             if (intent?.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false) == true) {
-                Branch.sessionBuilder(this).withCallback { referringParams, error ->
-                    if (error != null) {
-                        branchLogger.e { error.message }
-                    } else if (referringParams != null) {
-                        branchLogger.i { referringParams.toString() }
-                    }
-                }.reInit()
+                Branch.sessionBuilder(this)
+                    .withCallback(branchCallback)
+                    .reInit()
             }
         }
     }
