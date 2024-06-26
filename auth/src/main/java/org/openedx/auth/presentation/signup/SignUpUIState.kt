@@ -2,7 +2,7 @@ package org.openedx.auth.presentation.signup
 
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.core.domain.model.RegistrationField
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 
 data class SignUpUIState(
     val allFields: List<RegistrationField> = emptyList(),

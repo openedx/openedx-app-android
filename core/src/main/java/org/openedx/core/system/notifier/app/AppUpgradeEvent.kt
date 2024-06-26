@@ -1,6 +1,6 @@
-package org.openedx.core.system.notifier
+package org.openedx.core.system.notifier.app
 
-sealed class AppUpgradeEvent {
+sealed class AppUpgradeEvent: AppEvent {
     object UpgradeRequiredEvent : AppUpgradeEvent()
     class UpgradeRecommendedEvent(val newVersionName: String) : AppUpgradeEvent()
 }

@@ -1,5 +1,6 @@
 package org.openedx
 
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -25,10 +26,11 @@ import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppViewModel
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.room.AppDatabase
-import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.system.notifier.LogoutEvent
+import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.config.Config
+import org.openedx.core.config.FirebaseConfig
 import org.openedx.core.data.model.User
+import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.utils.FileUtil
 
 @ExperimentalCoroutinesApi
@@ -46,6 +48,7 @@ class AppViewModelTest {
     private val analytics = mockk<AppAnalytics>()
     private val fileUtil = mockk<FileUtil>()
     private val deepLinkRouter = mockk<DeepLinkRouter>()
+    private val context = mockk<Context>()
 
     private val user = User(0, "", "", "")
 
@@ -65,17 +68,19 @@ class AppViewModelTest {
         every { preferencesManager.user } returns user
         every { notifier.notifier } returns flow { }
         every { preferencesManager.canResetAppDirectory } returns false
-        val viewModel =
-            AppViewModel(
-                config,
-                notifier,
-                room,
-                preferencesManager,
-                dispatcher,
-                analytics,
-                deepLinkRouter,
-                fileUtil
-            )
+        every { preferencesManager.pushToken } returns ""
+
+        val viewModel = AppViewModel(
+            config,
+            notifier,
+            room,
+            preferencesManager,
+            dispatcher,
+            analytics,
+            deepLinkRouter,
+            fileUtil,
+            context
+        )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -89,7 +94,7 @@ class AppViewModelTest {
     @Test
     fun forceLogout() = runTest {
         every { notifier.notifier } returns flow {
-            emit(LogoutEvent())
+            emit(LogoutEvent(true))
         }
         every { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
@@ -97,17 +102,20 @@ class AppViewModelTest {
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
         every { preferencesManager.canResetAppDirectory } returns false
-        val viewModel =
-            AppViewModel(
-                config,
-                notifier,
-                room,
-                preferencesManager,
-                dispatcher,
-                analytics,
-                deepLinkRouter,
-                fileUtil
-            )
+        every { preferencesManager.pushToken } returns ""
+        every { config.getFirebaseConfig() } returns FirebaseConfig()
+
+        val viewModel = AppViewModel(
+            config,
+            notifier,
+            room,
+            preferencesManager,
+            dispatcher,
+            analytics,
+            deepLinkRouter,
+            fileUtil,
+            context
+        )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
@@ -122,8 +130,8 @@ class AppViewModelTest {
     @Test
     fun forceLogoutTwice() = runTest {
         every { notifier.notifier } returns flow {
-            emit(LogoutEvent())
-            emit(LogoutEvent())
+            emit(LogoutEvent(true))
+            emit(LogoutEvent(true))
         }
         every { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
@@ -131,17 +139,20 @@ class AppViewModelTest {
         every { room.clearAllTables() } returns Unit
         every { analytics.logoutEvent(true) } returns Unit
         every { preferencesManager.canResetAppDirectory } returns false
-        val viewModel =
-            AppViewModel(
-                config,
-                notifier,
-                room,
-                preferencesManager,
-                dispatcher,
-                analytics,
-                deepLinkRouter,
-                fileUtil
-            )
+        every { preferencesManager.pushToken } returns ""
+        every { config.getFirebaseConfig() } returns FirebaseConfig()
+
+        val viewModel = AppViewModel(
+            config,
+            notifier,
+            room,
+            preferencesManager,
+            dispatcher,
+            analytics,
+            deepLinkRouter,
+            fileUtil,
+            context
+        )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)

@@ -100,19 +100,11 @@
     <string name="core_date_format_assignment_due_tomorrow" tools:ignore="MissingTranslation">Due Tomorrow</string>
     <string name="core_date_format_assignment_due_yesterday" tools:ignore="MissingTranslation">Due Yesterday</string>
     <plurals name="core_date_format_assignment_due_days_ago" tools:ignore="MissingTranslation">
-        <item quantity="zero">Due %1$d days ago</item>
         <item quantity="one">Due %1$d day ago</item>
-        <item quantity="two">Due %1$d days ago</item>
-        <item quantity="few">Due %1$d days ago</item>
-        <item quantity="many">Due %1$d days ago</item>
         <item quantity="other">Due %1$d days ago</item>
     </plurals>
     <plurals name="core_date_format_assignment_due_in" tools:ignore="MissingTranslation">
-        <item quantity="zero">Due in %1$d days</item>
         <item quantity="one">Due in %1$d day</item>
-        <item quantity="two">Due in %1$d days</item>
-        <item quantity="few">Due in %1$d days</item>
-        <item quantity="many">Due in %1$d days</item>
         <item quantity="other">Due in %1$d days</item>
     </plurals>
     <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">

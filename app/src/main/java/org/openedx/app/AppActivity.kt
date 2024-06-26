@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.window.layout.WindowMetricsCalculator
+import com.braze.support.toStringMap
 import io.branch.referral.Branch
 import io.branch.referral.Branch.BranchUniversalReferralInitListener
 import org.koin.android.ext.android.inject
@@ -137,6 +138,11 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     addFragment(MainFragment.newInstance())
                 }
             }
+
+            val extras = intent.extras
+            if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
+                handlePushNotification(extras)
+            }
         }
 
         viewModel.logoutUser.observe(this) {
@@ -173,6 +179,11 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         this.intent = intent
+
+        val extras = intent?.extras
+        if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
+            handlePushNotification(extras)
+        }
 
         if (viewModel.isBranchEnabled) {
             if (intent?.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false) == true) {
@@ -220,6 +231,11 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
         }
+    }
+
+    private fun handlePushNotification(data: Bundle) {
+        val deepLink = DeepLink(data.toStringMap())
+        viewModel.makeExternalRoute(supportFragmentManager, deepLink)
     }
 
     companion object {

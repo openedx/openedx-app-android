@@ -15,8 +15,8 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 
@@ -26,7 +26,7 @@ class NativeDiscoveryViewModel(
     private val interactor: DiscoveryInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: DiscoveryAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier,
     private val corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
@@ -160,14 +160,13 @@ class NativeDiscoveryViewModel(
     @OptIn(FlowPreview::class)
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier
+            appNotifier.notifier
                 .debounce(100)
                 .collect { event ->
                     when (event) {
                         is AppUpgradeEvent.UpgradeRecommendedEvent -> {
                             _appUpgradeEvent.value = event
                         }
-
                         is AppUpgradeEvent.UpgradeRequiredEvent -> {
                             _appUpgradeEvent.value = AppUpgradeEvent.UpgradeRequiredEvent
                         }

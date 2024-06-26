@@ -14,6 +14,8 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.discovery.domain.interactor.DiscoveryInteractor
+import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.catalog.WebViewLink
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
@@ -23,6 +25,7 @@ class DeepLinkRouter(
     private val config: Config,
     private val appRouter: AppRouter,
     private val corePreferences: CorePreferences,
+    private val discoveryInteractor: DiscoveryInteractor,
     private val courseInteractor: CourseInteractor,
     private val discussionInteractor: DiscussionInteractor
 ) : CoroutineScope {
@@ -34,15 +37,14 @@ class DeepLinkRouter(
         get() = corePreferences.user != null
 
     fun makeRoute(fm: FragmentManager, deepLink: DeepLink) {
-        val screenName = deepLink.screenName ?: return
-        when (screenName) {
+        when (deepLink.type) {
             // Discovery
-            Screen.DISCOVERY.screenName -> {
+            DeepLinkType.DISCOVERY -> {
                 navigateToDiscoveryScreen(fm = fm)
                 return
             }
 
-            Screen.DISCOVERY_COURSE_DETAIL.screenName -> {
+            DeepLinkType.DISCOVERY_COURSE_DETAIL -> {
                 navigateToCourseDetail(
                     fm = fm,
                     deepLink = deepLink
@@ -50,12 +52,16 @@ class DeepLinkRouter(
                 return
             }
 
-            Screen.DISCOVERY_PROGRAM_DETAIL.screenName -> {
+            DeepLinkType.DISCOVERY_PROGRAM_DETAIL -> {
                 navigateToProgramDetail(
                     fm = fm,
                     deepLink = deepLink
                 )
                 return
+            }
+
+            else -> {
+                //ignore
             }
         }
 
@@ -64,125 +70,162 @@ class DeepLinkRouter(
             return
         }
 
-        when (screenName) {
-            // Course
-            Screen.COURSE_DASHBOARD.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDashboard(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.COURSE_VIDEOS.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseVideos(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.COURSE_DATES.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDates(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.COURSE_DISCUSSION.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDiscussion(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.COURSE_HANDOUT.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseMore(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                navigateToCourseHandout(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.COURSE_ANNOUNCEMENT.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseMore(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                navigateToCourseAnnouncement(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.COURSE_COMPONENT.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDashboard(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                navigateToCourseComponent(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
+        when (deepLink.type) {
             // Program
-            Screen.PROGRAM.screenName -> {
+            DeepLinkType.PROGRAM -> {
                 navigateToProgram(
                     fm = fm,
                     deepLink = deepLink
                 )
+                return
             }
-
-            // Discussions
-            Screen.DISCUSSION_TOPIC.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDiscussion(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                navigateToDiscussionTopic(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.DISCUSSION_POST.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDiscussion(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                navigateToDiscussionPost(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
-            Screen.DISCUSSION_COMMENT.screenName -> {
-                navigateToDashboard(fm = fm)
-                navigateToCourseDiscussion(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                navigateToDiscussionComment(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-            }
-
             // Profile
-            Screen.PROFILE.screenName,
-            Screen.USER_PROFILE.screenName -> {
+            DeepLinkType.PROFILE,
+            DeepLinkType.USER_PROFILE -> {
                 navigateToProfile(fm = fm)
+                return
+            }
+            else -> {
+                //ignore
+            }
+        }
+
+        launch(Dispatchers.Main) {
+            val courseId = deepLink.courseId ?: return@launch navigateToDashboard(fm = fm)
+            val course = getCourseDetails(courseId) ?: return@launch navigateToDashboard(fm = fm)
+            if (!course.isEnrolled) {
+                navigateToDashboard(fm = fm)
+                return@launch
+            }
+
+            when (deepLink.type) {
+                // Course
+                DeepLinkType.COURSE_DASHBOARD, DeepLinkType.ENROLL, DeepLinkType.ADD_BETA_TESTER -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDashboard(
+                        fm = fm,
+                        deepLink = deepLink,
+                        courseTitle = course.name
+                    )
+                }
+
+                DeepLinkType.UNENROLL, DeepLinkType.REMOVE_BETA_TESTER -> {
+                    navigateToDashboard(fm = fm)
+                }
+
+                DeepLinkType.COURSE_VIDEOS -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseVideos(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.COURSE_DATES -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDates(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.COURSE_DISCUSSION -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDiscussion(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.COURSE_HANDOUT -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseMore(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                    navigateToCourseHandout(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.COURSE_ANNOUNCEMENT -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseMore(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                    navigateToCourseAnnouncement(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.COURSE_COMPONENT -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDashboard(
+                        fm = fm,
+                        deepLink = deepLink,
+                        courseTitle = course.name
+                    )
+                    navigateToCourseComponent(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                // Discussions
+                DeepLinkType.DISCUSSION_TOPIC -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDiscussion(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                    navigateToDiscussionTopic(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.DISCUSSION_POST -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDiscussion(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                    navigateToDiscussionPost(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.DISCUSSION_COMMENT, DeepLinkType.FORUM_RESPONSE -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDiscussion(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                    navigateToDiscussionResponse(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                DeepLinkType.FORUM_COMMENT -> {
+                    navigateToDashboard(fm = fm)
+                    navigateToCourseDiscussion(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                    navigateToDiscussionComment(
+                        fm = fm,
+                        deepLink = deepLink
+                    )
+                }
+
+                else -> {
+                    //ignore
+                }
             }
         }
     }
@@ -247,12 +290,16 @@ class DeepLinkRouter(
         }
     }
 
-    private fun navigateToCourseDashboard(fm: FragmentManager, deepLink: DeepLink) {
+    private fun navigateToCourseDashboard(
+        fm: FragmentManager,
+        deepLink: DeepLink,
+        courseTitle: String
+    ) {
         deepLink.courseId?.let { courseId ->
             appRouter.navigateToCourseOutline(
                 fm = fm,
                 courseId = courseId,
-                courseTitle = "",
+                courseTitle = courseTitle,
                 enrollmentMode = ""
             )
         }
@@ -427,53 +474,99 @@ class DeepLinkRouter(
         }
     }
 
-    private fun navigateToDiscussionComment(fm: FragmentManager, deepLink: DeepLink) {
-        deepLink.courseId?.let { courseId ->
-            deepLink.topicId?.let { topicId ->
-                deepLink.threadId?.let { threadId ->
-                    deepLink.commentId?.let { commentId ->
-                        launch {
-                            try {
-                                discussionInteractor.getCourseTopics(courseId)
-                                    .find { it.id == topicId }?.let { topic ->
-                                        launch(Dispatchers.Main) {
-                                            appRouter.navigateToDiscussionThread(
-                                                fm = fm,
-                                                action = DiscussionTopicsViewModel.TOPIC,
-                                                courseId = courseId,
-                                                topicId = topicId,
-                                                title = topic.name,
-                                                viewType = FragmentViewType.FULL_CONTENT
-                                            )
-                                        }
-                                    }
-                                val thread = discussionInteractor.getThread(
-                                    threadId,
-                                    courseId,
-                                    topicId
-                                )
-                                launch(Dispatchers.Main) {
-                                    appRouter.navigateToDiscussionComments(
-                                        fm = fm,
-                                        thread = thread
-                                    )
-                                }
-                                val commentsData = discussionInteractor.getThreadComment(commentId)
-                                commentsData.results.firstOrNull()?.let { comment ->
-                                    launch(Dispatchers.Main) {
-                                        appRouter.navigateToDiscussionResponses(
-                                            fm = fm,
-                                            comment = comment,
-                                            isClosed = false
-                                        )
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
+    private fun navigateToDiscussionResponse(fm: FragmentManager, deepLink: DeepLink) {
+        val courseId = deepLink.courseId
+        val topicId = deepLink.topicId
+        val threadId = deepLink.threadId
+        val commentId = deepLink.commentId
+        if (courseId == null || topicId == null || threadId == null || commentId == null) {
+            return
+        }
+        launch {
+            try {
+                discussionInteractor.getCourseTopics(courseId)
+                    .find { it.id == topicId }?.let { topic ->
+                        launch(Dispatchers.Main) {
+                            appRouter.navigateToDiscussionThread(
+                                fm = fm,
+                                action = DiscussionTopicsViewModel.TOPIC,
+                                courseId = courseId,
+                                topicId = topicId,
+                                title = topic.name,
+                                viewType = FragmentViewType.FULL_CONTENT
+                            )
                         }
                     }
+                val thread = discussionInteractor.getThread(
+                    threadId,
+                    courseId,
+                    topicId
+                )
+                launch(Dispatchers.Main) {
+                    appRouter.navigateToDiscussionComments(
+                        fm = fm,
+                        thread = thread
+                    )
                 }
+                val response = discussionInteractor.getResponse(commentId)
+                launch(Dispatchers.Main) {
+                    appRouter.navigateToDiscussionResponses(
+                        fm = fm,
+                        comment = response,
+                        isClosed = false
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun navigateToDiscussionComment(fm: FragmentManager, deepLink: DeepLink) {
+        val courseId = deepLink.courseId
+        val topicId = deepLink.topicId
+        val threadId = deepLink.threadId
+        val commentId = deepLink.commentId
+        val parentId = deepLink.parentId
+        if (courseId == null || topicId == null || threadId == null || commentId == null || parentId == null) {
+            return
+        }
+        launch {
+            try {
+                discussionInteractor.getCourseTopics(courseId)
+                    .find { it.id == topicId }?.let { topic ->
+                        launch(Dispatchers.Main) {
+                            appRouter.navigateToDiscussionThread(
+                                fm = fm,
+                                action = DiscussionTopicsViewModel.TOPIC,
+                                courseId = courseId,
+                                topicId = topicId,
+                                title = topic.name,
+                                viewType = FragmentViewType.FULL_CONTENT
+                            )
+                        }
+                    }
+                val thread = discussionInteractor.getThread(
+                    threadId,
+                    courseId,
+                    topicId
+                )
+                launch(Dispatchers.Main) {
+                    appRouter.navigateToDiscussionComments(
+                        fm = fm,
+                        thread = thread
+                    )
+                }
+                val comment = discussionInteractor.getResponse(parentId)
+                launch(Dispatchers.Main) {
+                    appRouter.navigateToDiscussionResponses(
+                        fm = fm,
+                        comment = comment,
+                        isClosed = false
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -503,5 +596,14 @@ class DeepLinkRouter(
             infoType = null,
             openTab = "PROFILE"
         )
+    }
+
+    private suspend fun getCourseDetails(courseId: String): Course? {
+        return try {
+            discoveryInteractor.getCourseDetails(courseId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }

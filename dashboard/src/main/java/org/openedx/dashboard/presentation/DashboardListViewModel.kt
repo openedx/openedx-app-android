@@ -14,10 +14,10 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 
 class DashboardListViewModel(
@@ -27,7 +27,7 @@ class DashboardListViewModel(
     private val resourceManager: ResourceManager,
     private val discoveryNotifier: DiscoveryNotifier,
     private val analytics: DashboardAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier
 ) : BaseViewModel() {
 
     private val coursesList = mutableListOf<EnrolledCourse>()
@@ -82,6 +82,9 @@ class DashboardListViewModel(
     }
 
     fun updateCourses() {
+        if (isLoading) {
+            return
+        }
         viewModelScope.launch {
             try {
                 _updating.value = true
@@ -167,8 +170,10 @@ class DashboardListViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _appUpgradeEvent.value = event
+                }
             }
         }
     }

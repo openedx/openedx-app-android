@@ -130,6 +130,9 @@ dependencies {
 
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
+    api platform("com.google.firebase:firebase-bom:$firebase_version")
+    api "com.google.firebase:firebase-messaging"
+
     // Segment Library
     implementation "com.segment.analytics.kotlin:android:1.14.2"
     // Segment's Firebase integration
@@ -137,9 +140,6 @@ dependencies {
     // Braze SDK Integration
     implementation "com.braze:braze-segment-kotlin:1.4.2"
     implementation "com.braze:android-sdk-ui:30.2.0"
-
-    // Firebase Cloud Messaging Integration for Braze
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
