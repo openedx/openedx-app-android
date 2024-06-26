@@ -95,11 +95,7 @@
     <string name="course_explore_other_parts_when_reconnect_or_download">Explore other parts of this course or download this when you reconnect.</string>
 
     <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
-        <item quantity="zero">%1$s of %2$s  assignments complete</item>
         <item quantity="one">%1$s of %2$s  assignment complete</item>
-        <item quantity="two">%1$s of %2$s  assignments complete</item>
-        <item quantity="few">%1$s of %2$s  assignments complete</item>
-        <item quantity="many">%1$s of %2$s  assignments complete</item>
         <item quantity="other">%1$s of %2$s  assignments complete</item>
     </plurals>
 

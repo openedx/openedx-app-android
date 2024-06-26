@@ -1,5 +1,8 @@
 package org.openedx.app
 
+import android.annotation.SuppressLint
+import android.app.NotificationManager
+import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -13,16 +16,22 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.app.deeplink.DeepLink
 import org.openedx.app.deeplink.DeepLinkRouter
-import org.openedx.app.system.notifier.AppNotifier
-import org.openedx.app.system.notifier.LogoutEvent
+import org.openedx.app.system.push.RefreshFirebaseTokenWorker
+import org.openedx.app.system.push.SyncFirebaseTokenWorker
 import org.openedx.core.BaseViewModel
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.LogoutEvent
+import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.FileUtil
 
+
+@SuppressLint("StaticFieldLeak")
 class AppViewModel(
     private val config: Config,
     private val appNotifier: AppNotifier,
@@ -33,6 +42,7 @@ class AppViewModel(
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
     private val downloadNotifier: DownloadNotifier,
+    private val context: Context
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
@@ -53,20 +63,25 @@ class AppViewModel(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        setUserId()
+
+        val user = preferencesManager.user
+
+        setUserId(user)
+
+        if (user != null && preferencesManager.pushToken.isNotEmpty()) {
+            SyncFirebaseTokenWorker.schedule(context)
+        }
+
         if (canResetAppDirectory) {
             resetAppDirectory()
         }
+
         viewModelScope.launch {
             appNotifier.notifier.collect { event ->
-                if (event is LogoutEvent && System.currentTimeMillis() - logoutHandledAt > 5000) {
-                    logoutHandledAt = System.currentTimeMillis()
-                    preferencesManager.clear()
-                    withContext(dispatcher) {
-                        room.clearAllTables()
-                    }
-                    analytics.logoutEvent(true)
-                    _logoutUser.value = Unit
+                if (event is SignInEvent && config.getFirebaseConfig().isCloudMessagingEnabled) {
+                    SyncFirebaseTokenWorker.schedule(context)
+                } else if (event is LogoutEvent) {
+                    handleLogoutEvent(event)
                 }
             }
         }
@@ -97,9 +112,30 @@ class AppViewModel(
         deepLinkRouter.makeRoute(fm, deepLink)
     }
 
-    private fun setUserId() {
-        preferencesManager.user?.let {
+    private fun setUserId(user: User?) {
+        user?.let {
             analytics.setUserIdForSession(it.id)
+        }
+    }
+
+    private suspend fun handleLogoutEvent(event: LogoutEvent) {
+        if (System.currentTimeMillis() - logoutHandledAt > 5000) {
+            if (event.isForced) {
+                logoutHandledAt = System.currentTimeMillis()
+                preferencesManager.clear()
+                withContext(dispatcher) {
+                    room.clearAllTables()
+                }
+                analytics.logoutEvent(true)
+                _logoutUser.value = Unit
+            }
+
+            if (config.getFirebaseConfig().isCloudMessagingEnabled) {
+                RefreshFirebaseTokenWorker.schedule(context)
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancelAll()
+            }
         }
     }
 }

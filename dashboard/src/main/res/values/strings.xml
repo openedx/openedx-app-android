@@ -21,11 +21,7 @@
     <string name="dashboard_no_status_courses">No %1$s Courses</string>
 
     <plurals name="dashboard_past_due_assignment">
-        <item quantity="zero">%1$d Past Due Assignments</item>
         <item quantity="one">%1$d Past Due Assignment</item>
-        <item quantity="two">%1$d Past Due Assignments</item>
-        <item quantity="few">%1$d Past Due Assignments</item>
-        <item quantity="many">%1$d Past Due Assignments</item>
         <item quantity="other">%1$d Past Due Assignments</item>
     </plurals>
 </resources>

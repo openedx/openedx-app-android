@@ -1,4 +1,4 @@
-package org.openedx.app.system.notifier
+package org.openedx.core.system.notifier.app
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -10,6 +10,10 @@ class AppNotifier {
 
     val notifier: Flow<AppEvent> = channel.asSharedFlow()
 
+    suspend fun send(event: SignInEvent) = channel.emit(event)
+
     suspend fun send(event: LogoutEvent) = channel.emit(event)
+
+    suspend fun send(event: AppUpgradeEvent) = channel.emit(event)
 
 }

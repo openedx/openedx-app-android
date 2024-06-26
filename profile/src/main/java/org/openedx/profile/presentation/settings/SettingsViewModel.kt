@@ -23,8 +23,9 @@ import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.utils.EmailUtil
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
@@ -44,7 +45,7 @@ class SettingsViewModel(
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
     private val router: ProfileRouter,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier,
     private val profileNotifier: ProfileNotifier,
 ) : BaseViewModel() {
 
@@ -100,6 +101,7 @@ class SettingsViewModel(
                 }
             } finally {
                 cookieManager.clearWebViewCookie()
+                appNotifier.send(LogoutEvent(false))
                 _successLogout.emit(true)
             }
         }
@@ -107,8 +109,10 @@ class SettingsViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _appUpgradeEvent.value = event
+                }
             }
         }
     }

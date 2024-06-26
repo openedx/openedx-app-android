@@ -105,9 +105,9 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
-        <!-- Braze init -->
+        <!-- FirebaseMessaging init -->
         <service
-            android:name="com.braze.push.BrazeFirebaseMessagingService"
+            android:name=".system.push.OpenEdXFirebaseMessagingService"
             android:enabled="${fcmEnabled}"
             android:exported="false">
             <intent-filter>

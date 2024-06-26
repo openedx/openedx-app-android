@@ -1,5 +1,6 @@
 package org.openedx.discussion.data.api
 
+import org.json.JSONObject
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.discussion.data.model.request.*
 import org.openedx.discussion.data.model.response.CommentResult
@@ -50,11 +51,11 @@ interface DiscussionApi {
         @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
     ): CommentsResponse
 
-    @GET("/api/discussion/v1/comments/{comment_id}")
-    suspend fun getThreadComment(
-        @Path("comment_id") commentId: String,
-        @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
-    ): CommentsResponse
+    @Headers("Content-type: application/merge-patch+json")
+    @PATCH("/api/discussion/v1/comments/{response_id}/")
+    suspend fun getResponse(
+        @Path("response_id") responseId: String
+    ): CommentResult
 
     @GET("/api/discussion/v1/comments/")
     suspend fun getThreadQuestionComments(

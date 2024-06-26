@@ -55,6 +55,8 @@ class DashboardGalleryViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    private var isLoading = false
+
     init {
         collectDiscoveryNotifier()
         getCourses()
@@ -64,6 +66,7 @@ class DashboardGalleryViewModel(
         viewModelScope.launch {
             try {
                 if (networkConnection.isOnline()) {
+                    isLoading = true
                     val pageSize = if (windowSize.isTablet) {
                         PAGE_SIZE_TABLET
                     } else {
@@ -92,11 +95,15 @@ class DashboardGalleryViewModel(
                 }
             } finally {
                 _updating.value = false
+                isLoading = false
             }
         }
     }
 
     fun updateCourses() {
+        if (isLoading) {
+            return
+        }
         _updating.value = true
         getCourses()
     }

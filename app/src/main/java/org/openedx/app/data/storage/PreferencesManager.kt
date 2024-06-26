@@ -54,6 +54,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             remove(ACCESS_TOKEN)
             remove(REFRESH_TOKEN)
             remove(USER)
+            remove(ACCOUNT)
             remove(EXPIRES_IN)
         }.apply()
     }
@@ -69,6 +70,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             saveString(REFRESH_TOKEN, value)
         }
         get() = getString(REFRESH_TOKEN)
+
+    override var pushToken: String
+        set(value) {
+            saveString(PUSH_TOKEN, value)
+        }
+        get() = getString(PUSH_TOKEN)
 
     override var accessTokenExpiresAt: Long
         set(value) {
@@ -168,6 +175,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
     companion object {
         private const val ACCESS_TOKEN = "access_token"
         private const val REFRESH_TOKEN = "refresh_token"
+        private const val PUSH_TOKEN = "push_token"
         private const val EXPIRES_IN = "expires_in"
         private const val USER = "user"
         private const val ACCOUNT = "account"

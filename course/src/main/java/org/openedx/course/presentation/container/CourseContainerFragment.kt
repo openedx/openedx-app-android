@@ -1,6 +1,8 @@
 package org.openedx.course.presentation.container
 
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -98,6 +100,12 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
         }
     }
 
+    private val pushNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        Log.d(CourseContainerFragment::class.java.simpleName, "Permission granted: $granted")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.preloadCourseStructure()
@@ -131,6 +139,12 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     requireActivity().supportFragmentManager,
                     viewModel.courseName
                 )
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pushNotificationPermissionLauncher.launch(
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    )
+                }
             }
         }
         viewModel.errorMessage.observe(viewLifecycleOwner) {

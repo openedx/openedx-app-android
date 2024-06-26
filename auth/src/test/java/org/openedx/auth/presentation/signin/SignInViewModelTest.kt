@@ -38,7 +38,9 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppEvent
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.SignInEvent
 import java.net.UnknownHostException
 import org.openedx.core.R as CoreRes
 
@@ -56,7 +58,7 @@ class SignInViewModelTest {
     private val preferencesManager = mockk<CorePreferences>()
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
-    private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val appNotifier = mockk<AppNotifier>()
     private val agreementProvider = mockk<AgreementProvider>()
     private val oAuthHelper = mockk<OAuthHelper>()
     private val router = mockk<AuthRouter>()
@@ -78,7 +80,7 @@ class SignInViewModelTest {
         every { resourceManager.getString(CoreRes.string.core_error_unknown_error) } returns somethingWrong
         every { resourceManager.getString(R.string.auth_invalid_email_username) } returns invalidEmailOrUsername
         every { resourceManager.getString(R.string.auth_invalid_password) } returns invalidPassword
-        every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { appNotifier.notifier } returns emptyFlow()
         every { agreementProvider.getAgreement(true) } returns null
         every { config.isPreLoginExperienceEnabled() } returns false
         every { config.isSocialAuthEnabled() } returns false
@@ -104,7 +106,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -137,7 +139,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -171,7 +173,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -204,7 +206,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -233,13 +235,14 @@ class SignInViewModelTest {
         every { preferencesManager.user } returns user
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
+        coEvery { appNotifier.send(any<SignInEvent>()) } returns Unit
         val viewModel = SignInViewModel(
             interactor = interactor,
             resourceManager = resourceManager,
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -255,7 +258,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
         assert(uiState.loginSuccess)
@@ -275,7 +278,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -291,7 +294,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -313,7 +316,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -328,7 +331,7 @@ class SignInViewModelTest {
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
@@ -351,7 +354,7 @@ class SignInViewModelTest {
             preferencesManager = preferencesManager,
             validator = validator,
             analytics = analytics,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -366,7 +369,7 @@ class SignInViewModelTest {
 
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
