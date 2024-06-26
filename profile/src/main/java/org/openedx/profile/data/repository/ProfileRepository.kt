@@ -1,9 +1,9 @@
 package org.openedx.profile.data.repository
 
-import androidx.room.RoomDatabase
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.openedx.core.ApiConstants
+import org.openedx.core.DatabaseManager
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.profile.data.api.ProfileApi
@@ -14,9 +14,9 @@ import java.io.File
 class ProfileRepository(
     private val config: Config,
     private val api: ProfileApi,
-    private val room: RoomDatabase,
     private val profilePreferences: ProfilePreferences,
     private val corePreferences: CorePreferences,
+    private val databaseManager: DatabaseManager
 ) {
 
     suspend fun getAccount(): Account {
@@ -61,8 +61,8 @@ class ProfileRepository(
                 ApiConstants.TOKEN_TYPE_REFRESH
             )
         } finally {
-            corePreferences.clear()
-            room.clearAllTables()
+            corePreferences.clearCorePreferences()
+            databaseManager.clearTables()
         }
     }
 }

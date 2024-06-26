@@ -1,10 +1,8 @@
 package org.openedx.core.system
 
-import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
@@ -13,20 +11,17 @@ import androidx.core.content.ContextCompat
 import io.branch.indexing.BranchUniversalObject
 import io.branch.referral.util.ContentMetadata
 import io.branch.referral.util.LinkProperties
-import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CalendarData
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.utils.Logger
 import org.openedx.core.utils.toCalendar
-import java.util.Calendar
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
-import org.openedx.core.R as CoreR
 
 class CalendarManager(
     private val context: Context,
     private val corePreferences: CorePreferences,
-    private val resourceManager: ResourceManager,
 ) {
     private val logger = Logger(TAG)
 
@@ -35,7 +30,7 @@ class CalendarManager(
         android.Manifest.permission.READ_CALENDAR
     )
 
-    private val accountName: String
+    val accountName: String
         get() = getUserAccountForSync()
 
     /**
@@ -48,29 +43,40 @@ class CalendarManager(
     /**
      * Check if the calendar is already existed in mobile calendar app or not
      */
-    fun isCalendarExists(calendarTitle: String): Boolean {
-        if (hasPermissions()) {
-            return getCalendarId(calendarTitle) != CALENDAR_DOES_NOT_EXIST
-        }
-        return false
+    fun isCalendarExist(calendarId: Long): Boolean {
+        val projection = arrayOf(CalendarContract.Calendars._ID)
+        val selection = "${CalendarContract.Calendars._ID} = ?"
+        val selectionArgs = arrayOf(calendarId.toString())
+
+        val cursor = context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+
+        val exists = cursor != null && cursor.count > 0
+        cursor?.close()
+
+        return exists
     }
 
     /**
      * Create or update the calendar if it is already existed in mobile calendar app
      */
     fun createOrUpdateCalendar(
-        calendarTitle: String
+        calendarId: Long = CALENDAR_DOES_NOT_EXIST,
+        calendarTitle: String,
+        calendarColor: Long
     ): Long {
-        val calendarId = getCalendarId(
-            calendarTitle = calendarTitle
-        )
-
         if (calendarId != CALENDAR_DOES_NOT_EXIST) {
             deleteCalendar(calendarId = calendarId)
         }
 
         return createCalendar(
-            calendarTitle = calendarTitle
+            calendarTitle = calendarTitle,
+            calendarColor = calendarColor
         )
     }
 
@@ -78,7 +84,8 @@ class CalendarManager(
      * Method to create a separate calendar based on course name in mobile calendar app
      */
     private fun createCalendar(
-        calendarTitle: String
+        calendarTitle: String,
+        calendarColor: Long
     ): Long {
         val contentValues = ContentValues()
         contentValues.put(CalendarContract.Calendars.NAME, calendarTitle)
@@ -97,7 +104,7 @@ class CalendarManager(
         contentValues.put(CalendarContract.Calendars.VISIBLE, 1)
         contentValues.put(
             CalendarContract.Calendars.CALENDAR_COLOR,
-            ContextCompat.getColor(context, R.color.primary)
+            calendarColor.toInt()
         )
         val creationUri: Uri? = asSyncAdapter(
             Uri.parse(CalendarContract.Calendars.CONTENT_URI.toString()),
@@ -115,39 +122,6 @@ class CalendarManager(
     }
 
     /**
-     * Method to check if the calendar with the course name exist in the mobile calendar app or not
-     */
-    @SuppressLint("Range")
-    fun getCalendarId(calendarTitle: String): Long {
-        var calendarId = CALENDAR_DOES_NOT_EXIST
-        val projection = arrayOf(
-            CalendarContract.Calendars._ID,
-            CalendarContract.Calendars.ACCOUNT_NAME,
-            CalendarContract.Calendars.NAME
-        )
-        val calendarContentResolver = context.contentResolver
-        val cursor = calendarContentResolver.query(
-            CalendarContract.Calendars.CONTENT_URI, projection,
-            CalendarContract.Calendars.ACCOUNT_NAME + "=? and (" +
-                    CalendarContract.Calendars.NAME + "=? or " +
-                    CalendarContract.Calendars.CALENDAR_DISPLAY_NAME + "=?)", arrayOf(
-                accountName, calendarTitle,
-                calendarTitle
-            ), null
-        )
-        if (cursor?.moveToFirst() == true) {
-            if (cursor.getString(cursor.getColumnIndex(CalendarContract.Calendars.NAME))
-                    .equals(calendarTitle)
-            ) {
-                calendarId =
-                    cursor.getInt(cursor.getColumnIndex(CalendarContract.Calendars._ID)).toLong()
-            }
-        }
-        cursor?.close()
-        return calendarId
-    }
-
-    /**
      * Method to add important dates of course as calendar event into calendar of mobile app
      */
     fun addEventsIntoCalendar(
@@ -155,7 +129,7 @@ class CalendarManager(
         courseId: String,
         courseName: String,
         courseDateBlock: CourseDateBlock
-    ) {
+    ): Long {
         val date = courseDateBlock.date.toCalendar()
         // start time of the event, adjusted 1 hour earlier for a 1-hour duration
         val startMillis: Long = date.timeInMillis - TimeUnit.HOURS.toMillis(1)
@@ -167,7 +141,7 @@ class CalendarManager(
             put(CalendarContract.Events.DTEND, endMillis)
             put(
                 CalendarContract.Events.TITLE,
-                "${resourceManager.getString(R.string.core_assignment_due_tag)} : $courseName"
+                "${courseDateBlock.title} : $courseName"
             )
             put(
                 CalendarContract.Events.DESCRIPTION,
@@ -182,6 +156,8 @@ class CalendarManager(
         }
         val uri = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
         uri?.let { addReminderToEvent(uri = it) }
+        val eventId = uri?.lastPathSegment?.toLong() ?: EVENT_DOES_NOT_EXIST
+        return eventId
     }
 
     /**
@@ -194,7 +170,7 @@ class CalendarManager(
         courseDateBlock: CourseDateBlock,
         isDeeplinkEnabled: Boolean
     ): String {
-        var eventDescription = courseDateBlock.title
+        var eventDescription = courseDateBlock.description
 
         if (isDeeplinkEnabled && courseDateBlock.blockId.isNotEmpty()) {
             val metaData = ContentMetadata()
@@ -247,82 +223,6 @@ class CalendarManager(
     }
 
     /**
-     * Method to query the events for the given calendar id
-     *
-     * @param calendarId calendarId to query the events
-     *
-     * @return [Cursor]
-     *
-     * */
-    private fun getCalendarEvents(calendarId: Long): Cursor? {
-        val calendarContentResolver = context.contentResolver
-        val projection = arrayOf(
-            CalendarContract.Events._ID,
-            CalendarContract.Events.DTEND,
-            CalendarContract.Events.DESCRIPTION
-        )
-        val selection = CalendarContract.Events.CALENDAR_ID + "=?"
-        return calendarContentResolver.query(
-            CalendarContract.Events.CONTENT_URI,
-            projection,
-            selection,
-            arrayOf(calendarId.toString()),
-            null
-        )
-    }
-
-    /**
-     * Method to compare the calendar events with course dates
-     * @return  true if the events are the same as calendar dates otherwise false
-     */
-    @SuppressLint("Range")
-    private fun compareEvents(
-        calendarId: Long,
-        courseDateBlocks: List<CourseDateBlock>
-    ): Boolean {
-        val cursor = getCalendarEvents(calendarId) ?: return false
-
-        val datesList = ArrayList(courseDateBlocks)
-        val dueDateColumnIndex = cursor.getColumnIndex(CalendarContract.Events.DTEND)
-        val descriptionColumnIndex = cursor.getColumnIndex(CalendarContract.Events.DESCRIPTION)
-
-        while (cursor.moveToNext()) {
-            val dueDateInMillis = cursor.getLong(dueDateColumnIndex)
-
-            val description = cursor.getString(descriptionColumnIndex)
-            if (description != null) {
-                val matchedDate = datesList.find { unit ->
-                    description.contains(unit.title, ignoreCase = true)
-                }
-
-                matchedDate?.let { unit ->
-                    val dueDateCalendar = Calendar.getInstance().apply {
-                        timeInMillis = dueDateInMillis
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }
-
-                    val unitDateCalendar = unit.date.toCalendar().apply {
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }
-
-                    if (dueDateCalendar == unitDateCalendar) {
-                        datesList.remove(unit)
-                    } else {
-                        // If any single value isn't matched, return false
-                        cursor.close()
-                        return false
-                    }
-                }
-            }
-        }
-
-        cursor.close()
-        return datesList.isEmpty()
-    }
-
-    /**
      * Method to delete the course calendar from the mobile calendar app
      */
     fun deleteCalendar(calendarId: Long) {
@@ -352,37 +252,6 @@ class CalendarManager(
             ).build()
     }
 
-    fun openCalendarApp() {
-        val builder: Uri.Builder = CalendarContract.CONTENT_URI.buildUpon()
-            .appendPath("time")
-        ContentUris.appendId(builder, Calendar.getInstance().timeInMillis)
-        val intent = Intent(Intent.ACTION_VIEW).setData(builder.build())
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    }
-
-    /**
-     * Helper method used to check that the calendar if outdated for the course or not
-     *
-     * @param calendarTitle Title for the course Calendar
-     * @param courseDateBlocks Course dates events
-     *
-     * @return Calendar Id if Calendar is outdated otherwise -1 or CALENDAR_DOES_NOT_EXIST
-     *
-     */
-    fun isCalendarOutOfDate(
-        calendarTitle: String,
-        courseDateBlocks: List<CourseDateBlock>
-    ): Long {
-        if (isCalendarExists(calendarTitle)) {
-            val calendarId = getCalendarId(calendarTitle)
-            if (compareEvents(calendarId, courseDateBlocks).not()) {
-                return calendarId
-            }
-        }
-        return CALENDAR_DOES_NOT_EXIST
-    }
-
     /**
      * Method to get the current user account as the Calendar owner
      *
@@ -392,19 +261,49 @@ class CalendarManager(
         return corePreferences.user?.email ?: LOCAL_USER
     }
 
-    /**
-     * Method to create the Calendar title for the platform against the course
-     *
-     * @param courseName Name of the course for that creating the Calendar events.
-     *
-     * @return title of the Calendar against the course
-     */
-    fun getCourseCalendarTitle(courseName: String): String {
-        return "${resourceManager.getString(id = CoreR.string.platform_name)} - $courseName"
+    fun getCalendarData(calendarId: Long): CalendarData? {
+        val projection = arrayOf(
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.CALENDAR_COLOR
+        )
+        val selection = "${CalendarContract.Calendars._ID} = ?"
+        val selectionArgs = arrayOf(calendarId.toString())
+
+        val cursor: Cursor? = context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+
+        return cursor?.use {
+            if (it.moveToFirst()) {
+                val title = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME))
+                val color = it.getInt(it.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_COLOR))
+                CalendarData(
+                    title = title,
+                    color = color
+                )
+            } else {
+                null
+            }
+        }
+    }
+
+    fun deleteEvent(eventId: Long) {
+        val deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId)
+        val rows = context.contentResolver.delete(deleteUri, null, null)
+        if (rows > 0) {
+            logger.d { "Event deleted successfully" }
+        } else {
+            logger.d { "Event deletion failed" }
+        }
     }
 
     companion object {
         const val CALENDAR_DOES_NOT_EXIST = -1L
+        const val EVENT_DOES_NOT_EXIST = -1L
         private const val TAG = "CalendarManager"
         private const val LOCAL_USER = "local_user"
     }

@@ -3,8 +3,11 @@ package org.openedx.app.room
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import org.openedx.core.data.model.room.CourseCalendarEventEntity
+import org.openedx.core.data.model.room.CourseCalendarStateEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.discovery.EnrolledCourseEntity
+import org.openedx.core.module.db.CalendarDao
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.course.data.storage.CourseConverter
@@ -22,7 +25,9 @@ const val DATABASE_NAME = "OpenEdX_db"
         CourseEntity::class,
         EnrolledCourseEntity::class,
         CourseStructureEntity::class,
-        DownloadModelEntity::class
+        DownloadModelEntity::class,
+        CourseCalendarEventEntity::class,
+        CourseCalendarStateEntity::class
     ],
     version = DATABASE_VERSION,
     exportSchema = false
@@ -33,4 +38,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun courseDao(): CourseDao
     abstract fun dashboardDao(): DashboardDao
     abstract fun downloadDao(): DownloadDao
+    abstract fun calendarDao(): CalendarDao
 }

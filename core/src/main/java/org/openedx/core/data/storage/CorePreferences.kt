@@ -14,5 +14,5 @@ interface CorePreferences {
     var appConfig: AppConfig
     var canResetAppDirectory: Boolean
 
-    fun clear()
+    fun clearCorePreferences()
 }

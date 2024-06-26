@@ -12,12 +12,13 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
-import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
+import org.openedx.app.room.DatabaseManager
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
@@ -25,9 +26,11 @@ import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
+import org.openedx.core.CalendarRouter
 import org.openedx.core.ImageProcessor
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
@@ -48,7 +51,9 @@ import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
 import org.openedx.core.utils.FileUtil
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
@@ -62,11 +67,12 @@ import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
+import org.openedx.core.DatabaseManager as IDatabaseManager
 
 val appModule = module {
 
@@ -77,11 +83,14 @@ val appModule = module {
     single<WhatsNewPreferences> { get<PreferencesManager>() }
     single<InAppReviewPreferences> { get<PreferencesManager>() }
     single<CoursePreferences> { get<PreferencesManager>() }
+    single<CalendarPreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
-    single { CalendarManager(get(), get(), get()) }
+    single { CalendarManager(get(), get()) }
+    single { DatabaseManager(get(), get(), get(), get()) }
+    single<IDatabaseManager> { get<DatabaseManager>() }
 
     single { ImageProcessor(get()) }
 
@@ -98,6 +107,7 @@ val appModule = module {
     single { DownloadNotifier() }
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
+    single { CalendarNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }
@@ -109,6 +119,7 @@ val appModule = module {
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
     single { DeepLinkRouter(get(), get(), get(), get(), get(), get()) }
+    single<CalendarRouter> { get<AppRouter>() }
 
     single { NetworkConnection(get()) }
 
@@ -151,6 +162,11 @@ val appModule = module {
     }
 
     single {
+        val room = get<AppDatabase>()
+        room.calendarDao()
+    }
+
+    single {
         FileDownloader()
     }
 
@@ -184,4 +200,6 @@ val appModule = module {
     factory { OAuthHelper(get(), get(), get()) }
 
     factory { FileUtil(get()) }
+
+    single { CalendarSyncScheduler(get()) }
 }

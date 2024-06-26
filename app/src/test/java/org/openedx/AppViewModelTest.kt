@@ -96,7 +96,7 @@ class AppViewModelTest {
         every { notifier.notifier } returns flow {
             emit(LogoutEvent(true))
         }
-        every { preferencesManager.clear() } returns Unit
+        every { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
@@ -133,7 +133,7 @@ class AppViewModelTest {
             emit(LogoutEvent(true))
             emit(LogoutEvent(true))
         }
-        every { preferencesManager.clear() } returns Unit
+        every { preferencesManager.clearCorePreferences() } returns Unit
         every { analytics.setUserIdForSession(any()) } returns Unit
         every { preferencesManager.user } returns user
         every { room.clearAllTables() } returns Unit
@@ -161,7 +161,7 @@ class AppViewModelTest {
         advanceUntilIdle()
 
         verify(exactly = 1) { analytics.logoutEvent(true) }
-        verify(exactly = 1) { preferencesManager.clear() }
+        verify(exactly = 1) { preferencesManager.clearCorePreferences() }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { preferencesManager.user }
         verify(exactly = 1) { room.clearAllTables() }

@@ -7,6 +7,7 @@ import org.openedx.core.data.model.CourseDates
 import org.openedx.core.data.model.CourseDatesBannerInfo
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.model.CourseStructureModel
+import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.ResetCourseDates
 import retrofit2.http.Body
@@ -76,4 +77,9 @@ interface CourseApi {
         @Query("status") status: String? = null,
         @Query("requested_fields") fields: List<String> = emptyList()
     ): CourseEnrollments
+
+    @GET("/api/mobile/v1/users/{username}/enrollments_status/")
+    suspend fun getEnrollmentsStatus(
+        @Path("username") username: String
+    ): List<EnrollmentStatus>
 }

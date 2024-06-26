@@ -1,9 +1,10 @@
-package org.openedx.profile.system.notifier
+package org.openedx.profile.system.notifier.profile
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import org.openedx.core.system.notifier.VideoQualityChanged
+import org.openedx.profile.system.notifier.account.AccountDeactivated
+import org.openedx.profile.system.notifier.account.AccountUpdated
 
 class ProfileNotifier {
 

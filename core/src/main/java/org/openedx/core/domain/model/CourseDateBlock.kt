@@ -32,4 +32,24 @@ data class CourseDateBlock(
     fun isTimeDifferenceLessThan24Hours(): Boolean {
         return (date.isToday() && date.before(Date())) || date.isTimeLessThan24Hours()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CourseDateBlock
+
+        if (blockId != other.blockId) return false
+        if (date != other.date) return false
+        if (assignmentType != other.assignmentType) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = blockId.hashCode()
+        result = 31 * result + date.hashCode()
+        result = 31 * result + (assignmentType?.hashCode() ?: 0)
+        return result
+    }
 }

@@ -1,6 +1,10 @@
 package org.openedx.core.module.db
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,4 +27,7 @@ interface DownloadDao {
 
     @Query("DELETE FROM download_model WHERE id in (:ids)")
     suspend fun removeAllDownloadModels(ids: List<String>)
+
+    @Query("DELETE FROM download_model")
+    suspend fun clearCachedData()
 }

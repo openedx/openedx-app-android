@@ -15,6 +15,7 @@ import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
@@ -30,6 +31,7 @@ class CourseDetailsViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: DiscoveryNotifier,
     private val analytics: DiscoveryAnalytics,
+    private val calendarSyncScheduler: CalendarSyncScheduler,
 ) : BaseViewModel() {
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
@@ -92,6 +94,7 @@ class CourseDetailsViewModel(
                 if (courseData is CourseDetailsUIState.CourseData) {
                     _uiState.value = courseData.copy(course = course)
                     courseEnrollSuccessEvent(id, title)
+                    calendarSyncScheduler.requestImmediateSync(id)
                     notifier.send(CourseDashboardUpdate())
                 }
             } catch (e: Exception) {
