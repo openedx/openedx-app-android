@@ -56,8 +56,8 @@ class CourseDatesViewModel(
 
     var isSelfPaced = true
 
-    private val _uiState = MutableLiveData<DatesUIState>(DatesUIState.Loading)
-    val uiState: LiveData<DatesUIState>
+    private val _uiState = MutableLiveData<CourseDatesUIState>(CourseDatesUIState.Loading)
+    val uiState: LiveData<CourseDatesUIState>
         get() = _uiState
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
@@ -105,9 +105,9 @@ class CourseDatesViewModel(
                 isSelfPaced = courseStructure?.isSelfPaced ?: false
                 val datesResponse = interactor.getCourseDates(courseId = courseId)
                 if (datesResponse.datesSection.isEmpty()) {
-                    _uiState.value = DatesUIState.Empty
+                    _uiState.value = CourseDatesUIState.Empty
                 } else {
-                    _uiState.value = DatesUIState.Dates(datesResponse)
+                    _uiState.value = CourseDatesUIState.CourseDates(datesResponse)
                     courseBannerType = datesResponse.courseBanner.bannerType
                     checkIfCalendarOutOfDate()
                 }
@@ -180,7 +180,7 @@ class CourseDatesViewModel(
 
     private fun setCalendarSyncDialogType(dialog: CalendarSyncDialogType) {
         val value = _uiState.value
-        if (value is DatesUIState.Dates) {
+        if (value is CourseDatesUIState.CourseDates) {
             viewModelScope.launch {
                 courseNotifier.send(
                     CreateCalendarSyncEvent(
@@ -195,7 +195,7 @@ class CourseDatesViewModel(
 
     private fun checkIfCalendarOutOfDate() {
         val value = _uiState.value
-        if (value is DatesUIState.Dates) {
+        if (value is CourseDatesUIState.CourseDates) {
             viewModelScope.launch {
                 courseNotifier.send(
                     CreateCalendarSyncEvent(

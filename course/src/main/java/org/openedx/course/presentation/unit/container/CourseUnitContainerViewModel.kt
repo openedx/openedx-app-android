@@ -18,6 +18,7 @@ import org.openedx.core.extension.indexOfFirstFromIndex
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -33,6 +34,7 @@ class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
+    private val networkConnection: NetworkConnection,
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
@@ -81,6 +83,9 @@ class CourseUnitContainerViewModel(
 
     private val _descendantsBlocks = MutableStateFlow<List<Block>>(listOf())
     val descendantsBlocks = _descendantsBlocks.asStateFlow()
+
+    val hasNetworkConnection: Boolean
+        get() = networkConnection.isOnline()
 
     fun loadBlocks(mode: CourseViewMode, componentId: String = "") {
         currentMode = mode

@@ -1,8 +1,11 @@
 package org.openedx.core.utils
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.exception.ZipException
 import java.io.File
 import java.util.Collections
 
@@ -71,6 +74,48 @@ class FileUtil(val context: Context) {
         // Don't break the recursion upon encountering an error
         // noinspection ResultOfMethodCallIgnored
         fileOrDirectory.delete()
+    }
+
+    fun unzipFile(filepath: String): String? {
+        val archive = File(filepath)
+        val destinationFolder = File(
+            archive.parentFile.absolutePath + "/" + archive.name + "-unzipped"
+        )
+        try {
+            if (!destinationFolder.exists()) {
+                destinationFolder.mkdirs()
+            }
+            val zip = ZipFile(archive)
+            zip.extractAll(destinationFolder.absolutePath)
+            deleteFile(archive.absolutePath)
+            return destinationFolder.absolutePath
+        } catch (e: ZipException) {
+            e.printStackTrace()
+            deleteFile(destinationFolder.absolutePath)
+        }
+        return null
+    }
+
+    private fun deleteFile(filepath: String?): Boolean {
+        try {
+            if (filepath != null) {
+                val file = File(filepath)
+                if (file.exists()) {
+                    if (file.delete()) {
+                        Log.d(this.javaClass.name, "Deleted: " + file.path)
+                        return true
+                    } else {
+                        Log.d(this.javaClass.name, "Delete failed: " + file.path)
+                    }
+                } else {
+                    Log.d(this.javaClass.name, "Delete failed, file does NOT exist: " + file.path)
+                    return true
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return false
     }
 }
 

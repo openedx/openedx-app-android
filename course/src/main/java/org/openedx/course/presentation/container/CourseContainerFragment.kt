@@ -72,6 +72,7 @@ import org.openedx.course.databinding.FragmentCourseContainerBinding
 import org.openedx.course.presentation.dates.CourseDatesScreen
 import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
+import org.openedx.course.presentation.offline.CourseOfflineScreen
 import org.openedx.course.presentation.outline.CourseOutlineScreen
 import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
@@ -517,6 +518,21 @@ fun DashboardPager(
                     updateCourseStructure = {
                         viewModel.updateData()
                     }
+                )
+            }
+
+            CourseContainerTab.OFFLINE -> {
+                CourseOfflineScreen(
+                    windowSize = windowSize,
+                    viewModel = koinViewModel(
+                        parameters = {
+                            parametersOf(
+                                bundle.getString(CourseContainerFragment.ARG_COURSE_ID, ""),
+                                bundle.getString(CourseContainerFragment.ARG_TITLE, "")
+                            )
+                        }
+                    ),
+                    fragmentManager = fragmentManager,
                 )
             }
 

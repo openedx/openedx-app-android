@@ -22,14 +22,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.app.AppAnalytics
-import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.AppViewModel
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.config.Config
 import org.openedx.core.config.FirebaseConfig
 import org.openedx.core.data.model.User
+import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.utils.FileUtil
 
@@ -49,12 +50,14 @@ class AppViewModelTest {
     private val fileUtil = mockk<FileUtil>()
     private val deepLinkRouter = mockk<DeepLinkRouter>()
     private val context = mockk<Context>()
+    private val downloadNotifier = mockk<DownloadNotifier>()
 
     private val user = User(0, "", "", "")
 
     @Before
     fun before() {
         Dispatchers.setMain(dispatcher)
+        every { downloadNotifier.notifier } returns flow { }
     }
 
     @After
@@ -79,7 +82,8 @@ class AppViewModelTest {
             analytics,
             deepLinkRouter,
             fileUtil,
-            context
+            downloadNotifier,
+            context,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -114,7 +118,8 @@ class AppViewModelTest {
             analytics,
             deepLinkRouter,
             fileUtil,
-            context
+            downloadNotifier,
+            context,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()
@@ -151,7 +156,8 @@ class AppViewModelTest {
             analytics,
             deepLinkRouter,
             fileUtil,
-            context
+            downloadNotifier,
+            context,
         )
 
         val mockLifeCycleOwner: LifecycleOwner = mockk()

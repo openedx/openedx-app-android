@@ -65,7 +65,7 @@ class TranscriptManager(
                 downloadLink,
                 file.path
             )
-            if (result) {
+            if (result == AbstractDownloader.DownloadResult.SUCCESS) {
                 getInputStream(downloadLink)?.let {
                     val transcriptTimedTextObject =
                         convertIntoTimedTextObject(it)

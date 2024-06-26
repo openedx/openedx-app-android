@@ -229,6 +229,10 @@ class CourseContainerViewModel(
                 updateData()
             }
 
+            CourseContainerTab.OFFLINE -> {
+                updateData()
+            }
+
             CourseContainerTab.DATES -> {
                 viewModelScope.launch {
                     courseNotifier.send(RefreshDates)
@@ -272,6 +276,7 @@ class CourseContainerViewModel(
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
             CourseContainerTab.MORE -> moreTabClickedEvent()
+            CourseContainerTab.OFFLINE -> {}
         }
     }
 

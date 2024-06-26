@@ -32,7 +32,7 @@
     <string name="core_course_container_nav_more">Матеріали</string>
     <string name="course_can_download_only_with_wifi">Ви можете завантажувати контент тільки через Wi-Fi</string>
     <string name="course_this_interactive_component">Ця інтерактивна компонента ще не доступна</string>
-    <string name="course_explore_other_parts">Досліджуйте інші частини цього курсу або перегляньте це на веб-сайті.</string>
+    <string name="course_explore_other_parts_on_web">Досліджуйте інші частини цього курсу або перегляньте це на веб-сайті.</string>
     <string name="course_open_in_browser">Відкрити в браузері</string>
     <string name="course_subtitles">Субтитри</string>
     <string name="course_continue_with">Остання активність:</string>

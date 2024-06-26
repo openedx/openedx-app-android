@@ -9,6 +9,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.app.deeplink.DeepLink
@@ -20,6 +23,8 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.system.notifier.DownloadFailed
+import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.system.notifier.app.SignInEvent
@@ -29,19 +34,25 @@ import org.openedx.core.utils.FileUtil
 @SuppressLint("StaticFieldLeak")
 class AppViewModel(
     private val config: Config,
-    private val notifier: AppNotifier,
+    private val appNotifier: AppNotifier,
     private val room: RoomDatabase,
     private val preferencesManager: CorePreferences,
     private val dispatcher: CoroutineDispatcher,
     private val analytics: AppAnalytics,
     private val deepLinkRouter: DeepLinkRouter,
     private val fileUtil: FileUtil,
+    private val downloadNotifier: DownloadNotifier,
     private val context: Context
 ) : BaseViewModel() {
 
     private val _logoutUser = SingleEventLiveData<Unit>()
     val logoutUser: LiveData<Unit>
         get() = _logoutUser
+
+    private val _downloadFailedDialog = MutableSharedFlow<DownloadFailed>()
+    val downloadFailedDialog: SharedFlow<DownloadFailed>
+        get() = _downloadFailedDialog.asSharedFlow()
+
 
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
@@ -66,11 +77,18 @@ class AppViewModel(
         }
 
         viewModelScope.launch {
-            notifier.notifier.collect { event ->
+            appNotifier.notifier.collect { event ->
                 if (event is SignInEvent && config.getFirebaseConfig().isCloudMessagingEnabled) {
                     SyncFirebaseTokenWorker.schedule(context)
                 } else if (event is LogoutEvent) {
                     handleLogoutEvent(event)
+                }
+            }
+        }
+        viewModelScope.launch {
+            downloadNotifier.notifier.collect { event ->
+                if (event is DownloadFailed) {
+                    _downloadFailedDialog.emit(event)
                 }
             }
         }

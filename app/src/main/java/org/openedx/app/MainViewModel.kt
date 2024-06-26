@@ -14,7 +14,6 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
-import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryNavigator
 
 class MainViewModel(

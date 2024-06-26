@@ -7,4 +7,6 @@ data class UIConfig(
     val isCourseDropdownNavigationEnabled: Boolean = false,
     @SerializedName("COURSE_UNIT_PROGRESS_ENABLED")
     val isCourseUnitProgressEnabled: Boolean = false,
+    @SerializedName("COURSE_DOWNLOAD_QUEUE_SCREEN")
+    val isCourseDownloadQueueEnabled: Boolean = false,
 )

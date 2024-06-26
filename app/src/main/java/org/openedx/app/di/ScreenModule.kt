@@ -20,6 +20,7 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
+import org.openedx.course.presentation.offline.CourseOfflineViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
@@ -78,7 +79,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { MainViewModel(get(), get(), get()) }
@@ -257,6 +259,9 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
+            get(),
             get()
         )
     }
@@ -267,17 +272,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
         )
     }
     viewModel { (courseId: String, unitId: String) ->
         CourseUnitContainerViewModel(
             courseId,
             unitId,
+            get(),
             get(),
             get(),
             get(),
@@ -299,7 +300,10 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
@@ -423,10 +427,38 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
-    viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
+    viewModel { (blockId: String, courseId: String) ->
+        HtmlUnitViewModel(
+            blockId,
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
+
+    viewModel { (courseId: String, courseTitle: String) ->
+        CourseOfflineViewModel(
+            courseId,
+            courseTitle,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
 
 }

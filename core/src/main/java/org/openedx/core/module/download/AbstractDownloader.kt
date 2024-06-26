@@ -35,7 +35,7 @@ abstract class AbstractDownloader : KoinComponent {
     open suspend fun download(
         url: String,
         path: String
-    ): Boolean {
+    ): DownloadResult {
         isCanceled = false
         return try {
             val response = downloadApi.downloadFile(url).body()
@@ -56,19 +56,22 @@ abstract class AbstractDownloader : KoinComponent {
                     }
                     output?.flush()
                 }
-                true
+                DownloadResult.SUCCESS
             } else {
-                false
+                DownloadResult.ERROR
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            false
+            if (isCanceled) {
+                DownloadResult.CANCELED
+            } else {
+                DownloadResult.ERROR
+            }
         } finally {
             fos?.close()
             input?.close()
         }
     }
-
 
     suspend fun cancelDownloading() {
         isCanceled = true
@@ -88,4 +91,7 @@ abstract class AbstractDownloader : KoinComponent {
         }
     }
 
+    enum class DownloadResult {
+        SUCCESS, CANCELED, ERROR
+    }
 }
