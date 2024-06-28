@@ -149,8 +149,8 @@ internal fun ProfileView(
                                         onClick = {
                                             onAction(ProfileViewAction.EditAccountClick)
                                         },
-                                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                                        textColor = MaterialTheme.appColors.textAccent
+                                        borderColor = MaterialTheme.appColors.primaryButtonBorder,
+                                        textColor = MaterialTheme.appColors.primaryButtonBorderedText
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }

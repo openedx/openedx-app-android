@@ -116,7 +116,10 @@ fun CourseSectionCard(
 ) {
     val iconModifier = Modifier.size(24.dp)
 
-    Column(Modifier.clickable { onItemClick(block) }) {
+    Column(
+        Modifier
+            .clickable { onItemClick(block) }
+            .background(MaterialTheme.appColors.cardViewBackground)) {
         Row(
             Modifier
                 .fillMaxWidth()
@@ -329,15 +332,14 @@ fun NavigationUnitsButtons(
         } else {
             Modifier
                 .statusBarsPadding()
-                .padding(end = 32.dp)
-                .padding(top = 2.dp)
+                .padding(top = 2.dp,end = 32.dp)
         }
 
     Row(
         modifier = Modifier
             .navigationBarsPadding()
             .then(subModifier)
-            .padding(horizontal = 12.dp),
+            .background(MaterialTheme.appColors.background),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -377,7 +379,7 @@ fun NavigationUnitsButtons(
             modifier = Modifier
                 .height(42.dp),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground
             ),
             elevation = null,
             shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -389,7 +391,7 @@ fun NavigationUnitsButtons(
             ) {
                 Text(
                     text = nextButtonText,
-                    color = MaterialTheme.appColors.primaryButtonText,
+                    color = MaterialTheme.appColors.secondaryButtonText,
                     style = MaterialTheme.appTypography.labelLarge
                 )
                 Spacer(Modifier.width(8.dp))
@@ -397,7 +399,7 @@ fun NavigationUnitsButtons(
                     modifier = Modifier.rotate(if (isVerticalNavigation || !hasNextBlock) 0f else -90f),
                     painter = nextButtonIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.appColors.primaryButtonText
+                    tint = MaterialTheme.appColors.secondaryButtonText
                 )
             }
         }
@@ -631,6 +633,7 @@ fun CourseSection(
                     block = subSectionBlock,
                     onClick = onSubSectionClick
                 )
+                Divider()
             }
         }
     }
@@ -658,7 +661,8 @@ fun CourseExpandableChapterCard(
         if (block.isCompleted()) {
             val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
             val completedIconColor = MaterialTheme.appColors.successGreen
-            val completedIconDescription = stringResource(id = R.string.course_accessibility_section_completed)
+            val completedIconDescription =
+                stringResource(id = R.string.course_accessibility_section_completed)
 
             Icon(
                 painter = completedIconPainter,
@@ -669,7 +673,7 @@ fun CourseExpandableChapterCard(
         Text(
             modifier = Modifier.weight(1f),
             text = block.displayName,
-            style = MaterialTheme.appTypography.titleSmall,
+            style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -744,13 +748,16 @@ fun CourseSubSectionItem(
 ) {
     val context = LocalContext.current
     val icon =
-        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
+        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+            coreR.drawable.ic_core_chapter_icon
+        )
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
     val due by rememberSaveable {
         mutableStateOf(block.due?.let { TimeUtils.getAssignmentFormattedDate(context, it) })
     }
-    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
+    val isAssignmentEnable =
+        !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(
         modifier = modifier
             .fillMaxWidth()

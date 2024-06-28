@@ -475,7 +475,7 @@ private fun DiscussionThreadsScreen(
                                                                 Modifier
                                                                     .size(40.dp)
                                                                     .clip(CircleShape)
-                                                                    .background(MaterialTheme.appColors.secondaryButtonBackground)
+                                                                    .background(MaterialTheme.appColors.primaryButtonBackground)
                                                                     .clickable {
                                                                         onCreatePostClick()
                                                                     },

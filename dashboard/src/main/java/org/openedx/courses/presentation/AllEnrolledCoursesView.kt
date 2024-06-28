@@ -410,7 +410,7 @@ fun CourseItem(
             .clickable {
                 onClick(course)
             },
-        backgroundColor = MaterialTheme.appColors.background,
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
         shape = MaterialTheme.appShapes.courseImageShape,
         elevation = 4.dp
     ) {
@@ -438,8 +438,8 @@ fun CourseItem(
                         .fillMaxWidth()
                         .height(8.dp),
                     progress = progress,
-                    color = MaterialTheme.appColors.primary,
-                    backgroundColor = MaterialTheme.appColors.divider
+                    color = MaterialTheme.appColors.progressBarColor,
+                    backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
                 )
 
                 Text(

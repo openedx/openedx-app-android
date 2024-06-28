@@ -219,8 +219,8 @@ private fun ChapterEndDialogScreen(
                 Spacer(Modifier.height(16.dp))
             }
             OpenEdXOutlinedButton(
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
+                borderColor = MaterialTheme.appColors.primaryButtonBorder,
+                textColor = MaterialTheme.appColors.primaryButtonBorderedText,
                 text = stringResource(id = R.string.course_back_to_outline),
                 onClick = onBackButtonClick,
                 content = {
@@ -335,8 +335,8 @@ private fun ChapterEndDialogScreenLandscape(
                         Spacer(Modifier.height(16.dp))
                     }
                     OpenEdXOutlinedButton(
-                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                        textColor = MaterialTheme.appColors.primaryButtonBackground,
+                        borderColor = MaterialTheme.appColors.primaryButtonBorder,
+                        textColor = MaterialTheme.appColors.primaryButtonBorderedText,
                         text = stringResource(id = R.string.course_back_to_outline),
                         onClick = onBackButtonClick,
                         content = {

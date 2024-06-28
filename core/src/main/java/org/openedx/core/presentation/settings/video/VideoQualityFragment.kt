@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,7 +74,7 @@ class VideoQualityFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -125,7 +126,7 @@ private fun VideoQualityScreen(
     title: String,
     selectedVideoQuality: VideoQuality,
     onQualityChanged: (VideoQuality) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
     Scaffold(
@@ -136,6 +137,7 @@ private fun VideoQualityScreen(
                 testTagsAsResourceId = true
             },
         scaffoldState = scaffoldState,
+        backgroundColor = MaterialTheme.appColors.background
     ) { paddingValues ->
 
         val topBarWidth by remember(key1 = windowSize) {
@@ -160,7 +162,8 @@ private fun VideoQualityScreen(
         }
 
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
@@ -205,7 +208,7 @@ private fun QualityOption(
     title: String,
     description: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
         Modifier
