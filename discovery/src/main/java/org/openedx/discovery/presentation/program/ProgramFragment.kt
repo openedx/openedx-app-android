@@ -284,7 +284,8 @@ private fun ProgramInfoScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .then(statusBarPadding)
-                .displayCutoutForLandscape(),
+                .displayCutoutForLandscape()
+                .background(MaterialTheme.appColors.background),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (!isNestedFragment) {
@@ -301,7 +302,7 @@ private fun ProgramInfoScreen(
                 Box(
                     modifier = modifierScreenWidth
                         .fillMaxHeight()
-                        .background(Color.White),
+                        .background(MaterialTheme.appColors.background),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     if (hasInternetConnection) {

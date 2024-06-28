@@ -135,7 +135,8 @@ private fun LogistrationScreen(
                     style = MaterialTheme.appTypography.headlineSmall,
                     modifier = Modifier
                         .testTag("txt_screen_title")
-                        .padding(bottom = 40.dp)
+                        .padding(bottom = 40.dp),
+                    color = MaterialTheme.appColors.textPrimary,
                 )
                 val focusManager = LocalFocusManager.current
                 Column(Modifier.padding(bottom = 8.dp)) {
@@ -145,6 +146,7 @@ private fun LogistrationScreen(
                             .padding(bottom = 10.dp),
                         style = MaterialTheme.appTypography.titleMedium,
                         text = stringResource(id = R.string.pre_auth_search_title),
+                        color = MaterialTheme.appColors.textPrimary,
                     )
                     SearchBar(
                         modifier = Modifier
@@ -176,7 +178,7 @@ private fun LogistrationScreen(
                             onSearchClick("")
                         },
                     text = stringResource(id = R.string.pre_auth_explore_all_courses),
-                    color = MaterialTheme.appColors.primary,
+                    color = MaterialTheme.appColors.textHyperLink,
                     style = MaterialTheme.appTypography.labelLarge,
                     textDecoration = TextDecoration.Underline
                 )
