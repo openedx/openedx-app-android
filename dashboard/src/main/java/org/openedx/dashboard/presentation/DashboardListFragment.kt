@@ -407,7 +407,6 @@ private fun CourseItem(
                 Modifier
                     .fillMaxWidth()
                     .height(105.dp)
-                    .background(MaterialTheme.appColors.background)
             ) {
                 Text(
                     modifier = Modifier.testTag("txt_course_org"),
@@ -417,9 +416,7 @@ private fun CourseItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Column(
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.appColors.background),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
@@ -431,9 +428,7 @@ private fun CourseItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.appColors.background),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

@@ -193,7 +193,7 @@ private fun DiscussionCommentsScreen(
     val sendButtonColor = if (responseValue.isEmpty()) {
         MaterialTheme.appColors.textFieldBorder
     } else {
-        MaterialTheme.appColors.primary
+        MaterialTheme.appColors.primaryButtonBackground
     }
 
     val iconButtonColor = if (responseValue.isEmpty()) {

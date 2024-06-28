@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -170,6 +172,7 @@ private fun ActionDialog(
                     text = stringResource(R.string.core_cancel),
                     onClick = onPositiveClick
                 )
+                Spacer(modifier = Modifier.size(16.dp))
                 DefaultTextButton(
                     text = stringResource(R.string.core_continue),
                     onClick = onNegativeClick
@@ -183,10 +186,12 @@ private fun ActionDialog(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ActionDialogPreview() {
-    ActionDialog(
-        title = "Leaving the app",
-        message = "You are now leaving the app and opening a browser.",
-        onPositiveClick = {},
-        onNegativeClick = {},
-    )
+    OpenEdXTheme {
+        ActionDialog(
+            title = "Leaving the app",
+            message = "You are now leaving the app and opening a browser.",
+            onPositiveClick = {},
+            onNegativeClick = {},
+        )
+    }
 }

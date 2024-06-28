@@ -115,13 +115,13 @@ class HtmlUnitFragment : Fragment() {
                 Surface(
                     modifier = Modifier
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-                    color = Color.White
+                    color = MaterialTheme.appColors.background
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(bottom = bottomPadding)
-                            .background(Color.White)
+                            .background(MaterialTheme.appColors.background)
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {

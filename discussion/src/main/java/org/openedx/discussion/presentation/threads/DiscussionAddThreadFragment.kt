@@ -487,9 +487,9 @@ private fun Tabs(
         tabs.forEachIndexed { index, text ->
             val selected = currentPage == index
             val textColor = if (selected) {
-                Color.White
+                MaterialTheme.appColors.tabSelectedBtnContent
             } else {
-                MaterialTheme.appColors.textPrimaryVariant
+                MaterialTheme.appColors.tabUnselectedBtnContent
             }
             Tab(
                 modifier = if (selected) Modifier
@@ -533,7 +533,7 @@ private fun SelectableField(
             value = text,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
-                backgroundColor = MaterialTheme.appColors.surface,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 textColor = MaterialTheme.appColors.textFieldText,
                 unfocusedLabelColor = MaterialTheme.appColors.textFieldText,
                 disabledTextColor = MaterialTheme.appColors.textFieldText

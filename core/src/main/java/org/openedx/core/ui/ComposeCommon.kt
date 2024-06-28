@@ -1,5 +1,6 @@
 package org.openedx.core.ui
 
+import android.content.res.Configuration
 import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -202,7 +203,7 @@ fun Toolbar(
             ) {
                 Icon(
                     imageVector = Icons.Default.ManageAccounts,
-                    tint = MaterialTheme.appColors.textAccent,
+                    tint = MaterialTheme.appColors.primary,
                     contentDescription = stringResource(id = R.string.core_accessibility_settings)
                 )
             }
@@ -257,7 +258,7 @@ fun SearchBar(
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
@@ -269,7 +270,7 @@ fun SearchBar(
                     .testTag("txt_search_placeholder")
                     .fillMaxWidth(),
                 text = label,
-                color = MaterialTheme.appColors.textSecondary,
+                color = MaterialTheme.appColors.textFieldHint,
                 style = MaterialTheme.appTypography.bodyMedium
             )
         },
@@ -278,7 +279,7 @@ fun SearchBar(
                 modifier = Modifier.padding(start = 16.dp),
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = if (isFocused) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+                tint = if (isFocused) MaterialTheme.appColors.textPrimary else MaterialTheme.appColors.textFieldHint
             )
         },
         trailingIcon = {
@@ -1057,7 +1058,7 @@ fun OpenEdXButton(
     enabled: Boolean = true,
     textColor: Color = MaterialTheme.appColors.primaryButtonText,
     backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null
+    content: (@Composable RowScope.() -> Unit)? = null,
 ) {
     Button(
         modifier = Modifier
@@ -1192,7 +1193,7 @@ fun AuthButtonsPanel(
                 .weight(1f),
             text = stringResource(id = R.string.core_register),
             textColor = MaterialTheme.appColors.primaryButtonText,
-            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+            backgroundColor = MaterialTheme.appColors.primaryButtonBackground,
             onClick = { onRegisterClick() }
         )
 
@@ -1219,7 +1220,7 @@ fun RoundTabsBar(
     contentPadding: PaddingValues = PaddingValues(),
     withPager: Boolean = false,
     rowState: LazyListState = rememberLazyListState(),
-    onTabClicked: (Int) -> Unit = { }
+    onTabClicked: (Int) -> Unit = { },
 ) {
     // The pager state does not work without the pager and the tabs do not change.
     if (!withPager) {
@@ -1247,7 +1248,7 @@ fun RoundTabsBar(
 
             RoundTab(
                 modifier = Modifier
-                    .height(40.dp)
+                    .height(32.dp)
                     .clip(CircleShape)
                     .background(backgroundColor)
                     .then(border)
@@ -1270,7 +1271,7 @@ fun RoundTabsBar(
 private fun RoundTab(
     modifier: Modifier = Modifier,
     item: TabItem,
-    contentColor: Color
+    contentColor: Color,
 ) {
     Row(
         modifier = modifier,
@@ -1378,7 +1379,8 @@ val mockTab = object : TabItem {
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RoundTabsBarPreview() {
     OpenEdXTheme {

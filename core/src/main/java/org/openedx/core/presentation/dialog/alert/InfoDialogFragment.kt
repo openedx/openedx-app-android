@@ -1,5 +1,6 @@
 package org.openedx.core.presentation.dialog.alert
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -116,12 +117,15 @@ private fun InfoDialog(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SimpleDialogPreview() {
-    InfoDialog(
-        title = "Important Notice",
-        message = "This is an important announcement.",
-        onClick = {}
-    )
+    OpenEdXTheme {
+        InfoDialog(
+            title = "Important Notice",
+            message = "This is an important announcement.",
+            onClick = {}
+        )
+    }
 }

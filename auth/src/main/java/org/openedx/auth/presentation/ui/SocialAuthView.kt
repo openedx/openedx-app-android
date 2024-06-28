@@ -40,13 +40,12 @@ internal fun SocialAuthView(
             } else {
                 R.string.auth_continue_google
             }
-            OpenEdXOutlinedButton(
+            OpenEdXButton(
                 modifier = Modifier
                     .testTag("btn_google_auth")
                     .padding(top = 24.dp)
                     .fillMaxWidth(),
                 backgroundColor = MaterialTheme.appColors.authGoogleButtonBackground,
-                borderColor = MaterialTheme.appColors.primary,
                 textColor = Color.Unspecified,
                 onClick = {
                     onEvent(AuthType.GOOGLE)
@@ -63,7 +62,7 @@ internal fun SocialAuthView(
                             .testTag("txt_google_auth")
                             .padding(start = 10.dp),
                         text = stringResource(id = stringRes),
-                        color = MaterialTheme.appColors.primaryButtonBorderedText,
+                        color = MaterialTheme.appColors.textPrimaryLight,
                     )
                 }
             }

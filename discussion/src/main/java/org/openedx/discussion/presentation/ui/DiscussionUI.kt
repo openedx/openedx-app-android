@@ -246,7 +246,7 @@ fun CommentItem(
                 shape
             )
         ),
-        backgroundColor = MaterialTheme.appColors.surface,
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
         elevation = 0.dp
     ) {
         Column(
@@ -612,7 +612,7 @@ fun ThreadItemCategory(
                 .clip(MaterialTheme.appShapes.cardShape)
                 .clickable { onClick() }),
         shape = MaterialTheme.appShapes.cardShape,
-        backgroundColor = MaterialTheme.appColors.surface
+        backgroundColor = MaterialTheme.appColors.cardViewBackground
     ) {
         Column(
             modifier = Modifier

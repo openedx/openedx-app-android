@@ -412,7 +412,7 @@ private fun CourseListItem(
             .clickable {
                 onCourseClick(course)
             },
-        backgroundColor = MaterialTheme.appColors.background,
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
         shape = MaterialTheme.appShapes.courseImageShape,
         elevation = 4.dp
     ) {
@@ -514,7 +514,7 @@ private fun PrimaryCourseCard(
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .padding(2.dp),
-        backgroundColor = MaterialTheme.appColors.background,
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
         shape = MaterialTheme.appShapes.courseImageShape,
         elevation = 4.dp
     ) {
@@ -546,8 +546,8 @@ private fun PrimaryCourseCard(
                     .fillMaxWidth()
                     .height(8.dp),
                 progress = progress,
-                color = MaterialTheme.appColors.primary,
-                backgroundColor = MaterialTheme.appColors.divider
+                color = MaterialTheme.appColors.progressBarColor,
+                backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
             )
             PrimaryCourseTitle(
                 modifier = Modifier
@@ -625,7 +625,7 @@ private fun ResumeButton(
             .fillMaxWidth()
             .clickable { onClick() }
             .heightIn(min = 60.dp)
-            .background(MaterialTheme.appColors.primary)
+            .background(MaterialTheme.appColors.primaryButtonBackground)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
