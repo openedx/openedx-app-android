@@ -395,7 +395,7 @@ private fun DiscussionAddThreadScreen(
                                     ),
                                     isSingleLine = false,
                                     withRequiredMark = true,
-                                    imeAction = ImeAction.Done,
+                                    imeAction = ImeAction.Default,
                                     keyboardActions = { focusManager ->
                                         focusManager.clearFocus()
                                         keyboardController?.hide()
