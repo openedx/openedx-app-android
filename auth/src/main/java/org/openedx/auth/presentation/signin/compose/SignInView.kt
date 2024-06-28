@@ -222,6 +222,9 @@ private fun AuthForm(
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var isEmailError by rememberSaveable { mutableStateOf(false) }
+    var isPasswordError by rememberSaveable { mutableStateOf(false) }
+
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         LoginTextField(
@@ -231,7 +234,11 @@ private fun AuthForm(
             description = stringResource(id = R.string.auth_enter_email_username),
             onValueChanged = {
                 login = it
-            })
+                isEmailError = login.isEmpty()
+            },
+            isError = isEmailError,
+            errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
+        )
 
         Spacer(modifier = Modifier.height(18.dp))
         PasswordTextField(
@@ -239,11 +246,18 @@ private fun AuthForm(
                 .fillMaxWidth(),
             onValueChanged = {
                 password = it
+                isPasswordError = password.isEmpty()
             },
             onPressDone = {
                 keyboardController?.hide()
-                onEvent(AuthEvent.SignIn(login = login, password = password))
-            }
+                if (password.isNotEmpty()) {
+                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                } else {
+                    isEmailError = login.isEmpty()
+                    isPasswordError = password.isEmpty()
+                }
+            },
+            isError = isPasswordError,
         )
 
         Row(
@@ -286,7 +300,12 @@ private fun AuthForm(
                 backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                 onClick = {
                     keyboardController?.hide()
-                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                    if (login.isNotEmpty() && password.isNotEmpty()) {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    } else {
+                        isEmailError = login.isEmpty()
+                        isPasswordError = password.isEmpty()
+                    }
                 }
             )
         }
@@ -308,6 +327,7 @@ private fun AuthForm(
 @Composable
 private fun PasswordTextField(
     modifier: Modifier = Modifier,
+    isError: Boolean,
     onValueChanged: (String) -> Unit,
     onPressDone: () -> Unit,
 ) {
@@ -366,9 +386,21 @@ private fun PasswordTextField(
             focusManager.clearFocus()
             onPressDone()
         },
+        isError = isError,
         textStyle = MaterialTheme.appTypography.bodyMedium,
-        singleLine = true
+        singleLine = true,
     )
+    if (isError) {
+        Text(
+            modifier = Modifier
+                .testTag("txt_password_error")
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            text = stringResource(id = R.string.auth_error_empty_password),
+            style = MaterialTheme.appTypography.bodySmall,
+            color = MaterialTheme.appColors.error,
+        )
+    }
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_NO)

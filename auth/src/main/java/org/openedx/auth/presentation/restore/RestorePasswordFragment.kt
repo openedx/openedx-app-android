@@ -128,9 +128,8 @@ private fun RestorePasswordScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
-    var email by rememberSaveable {
-        mutableStateOf("")
-    }
+    var email by rememberSaveable { mutableStateOf("") }
+    var isEmailError by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
@@ -271,13 +270,20 @@ private fun RestorePasswordScreen(
                                     description = stringResource(id = authR.string.auth_example_email),
                                     onValueChanged = {
                                         email = it
+                                        isEmailError = email.isEmpty()
                                     },
                                     imeAction = ImeAction.Done,
                                     keyboardActions = {
                                         keyboardController?.hide()
-                                        it.clearFocus()
-                                        onRestoreButtonClick(email)
-                                    }
+                                        if (email.isNotEmpty()) {
+                                            it.clearFocus()
+                                            onRestoreButtonClick(email)
+                                        } else {
+                                            isEmailError = email.isEmpty()
+                                        }
+                                    },
+                                    isError = isEmailError,
+                                    errorMessages = stringResource(id = authR.string.auth_error_empty_email)
                                 )
                                 Spacer(Modifier.height(50.dp))
                                 if (uiState == RestorePasswordUIState.Loading) {
@@ -296,7 +302,11 @@ private fun RestorePasswordScreen(
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
                                             keyboardController?.hide()
-                                            onRestoreButtonClick(email)
+                                            if (email.isNotEmpty()) {
+                                                onRestoreButtonClick(email)
+                                            } else {
+                                                isEmailError = email.isEmpty()
+                                            }
                                         }
                                     )
                                 }
