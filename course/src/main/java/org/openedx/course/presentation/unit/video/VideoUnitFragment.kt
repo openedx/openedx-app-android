@@ -180,6 +180,11 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 appReviewManager.tryToOpenRateDialog()
             }
         }
+        viewModel.isCastReady.observe(viewLifecycleOwner) { isReady ->
+            if (isReady && !viewModel.isCastActive) {
+                setCastSessionListener()
+            }
+        }
     }
 
     @androidx.annotation.OptIn(UnstableApi::class)
@@ -204,33 +209,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying
                 viewModel.isPlayerSetUp = true
             }
-
-            viewModel.castPlayer?.setSessionAvailabilityListener(
-                object : SessionAvailabilityListener {
-                    override fun onCastSessionAvailable() {
-                        viewModel.logCastConnection(CourseAnalyticsEvent.CAST_CONNECTED)
-                        viewModel.isCastActive = true
-                        viewModel.exoPlayer?.pause()
-                        playerView.player = viewModel.castPlayer
-                        viewModel.castPlayer?.setMediaItem(
-                            mediaItem,
-                            viewModel.exoPlayer?.currentPosition ?: 0L
-                        )
-                        viewModel.castPlayer?.playWhenReady = false
-                        showVideoControllerIndefinitely(true)
-                    }
-
-                    override fun onCastSessionUnavailable() {
-                        viewModel.logCastConnection(CourseAnalyticsEvent.CAST_DISCONNECTED)
-                        viewModel.isCastActive = false
-                        playerView.player = viewModel.exoPlayer
-                        viewModel.exoPlayer?.seekTo(viewModel.castPlayer?.currentPosition ?: 0L)
-                        viewModel.castPlayer?.stop()
-                        viewModel.exoPlayer?.play()
-                        showVideoControllerIndefinitely(false)
-                    }
-                }
-            )
 
             playerView.setFullscreenButtonClickListener {
                 if (viewModel.isCastActive)
@@ -283,6 +261,44 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 viewModel.getCurrentVideoTime()
             )
         }
+    }
+
+    @androidx.annotation.OptIn(UnstableApi::class)
+    private fun setCastSessionListener() {
+        val movieMetadata = MediaMetadata.Builder()
+            .setMediaType(MediaMetadata.MEDIA_TYPE_MOVIE)
+            .build()
+        val mediaItem = MediaItem.Builder().setMediaMetadata(movieMetadata)
+            .setUri(viewModel.videoUrl)
+            .setMimeType("video/*")
+            .build()
+
+        viewModel.castPlayer?.setSessionAvailabilityListener(
+            object : SessionAvailabilityListener {
+                override fun onCastSessionAvailable() {
+                    viewModel.logCastConnection(CourseAnalyticsEvent.CAST_CONNECTED)
+                    viewModel.isCastActive = true
+                    viewModel.exoPlayer?.pause()
+                    binding.playerView.player = viewModel.castPlayer
+                    viewModel.castPlayer?.setMediaItem(
+                        mediaItem,
+                        viewModel.exoPlayer?.currentPosition ?: 0L
+                    )
+                    viewModel.castPlayer?.playWhenReady = false
+                    showVideoControllerIndefinitely(true)
+                }
+
+                override fun onCastSessionUnavailable() {
+                    viewModel.logCastConnection(CourseAnalyticsEvent.CAST_DISCONNECTED)
+                    viewModel.isCastActive = false
+                    binding.playerView.player = viewModel.exoPlayer
+                    viewModel.exoPlayer?.seekTo(viewModel.castPlayer?.currentPosition ?: 0L)
+                    viewModel.castPlayer?.stop()
+                    viewModel.exoPlayer?.play()
+                    showVideoControllerIndefinitely(false)
+                }
+            }
+        )
     }
 
     companion object {
