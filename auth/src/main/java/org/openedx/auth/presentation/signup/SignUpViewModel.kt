@@ -73,7 +73,7 @@ class SignUpViewModel(
 
     init {
         collectAppUpgradeEvent()
-        logScreenEvent(AuthAnalyticsEvent.REGISTER)
+        logRegisterScreenEvent()
     }
 
     fun getRegistrationFields() {
@@ -326,15 +326,12 @@ class SignUpViewModel(
         )
     }
 
-    private fun logScreenEvent(
-        event: AuthAnalyticsEvent,
-        params: Map<String, Any?> = emptyMap(),
-    ) {
+    private fun logRegisterScreenEvent() {
+        val event = AuthAnalyticsEvent.REGISTER
         analytics.logScreenEvent(
             screenName = event.eventName,
             params = buildMap {
                 put(AuthAnalyticsKey.NAME.key, event.biValue)
-                putAll(params)
             }
         )
     }

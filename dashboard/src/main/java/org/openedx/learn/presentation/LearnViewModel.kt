@@ -35,8 +35,9 @@ class LearnViewModel(
     }
 
     private fun logScreenEvent(event: DashboardAnalyticsEvent) {
-        analytics.logScreenEvent(event.eventName,
-            buildMap {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
                 put(DashboardAnalyticsKey.NAME.key, event.biValue)
             }
         )

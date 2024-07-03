@@ -58,8 +58,9 @@ class MainViewModel(
     }
 
     private fun logScreenEvent(event: AppAnalyticsEvent) {
-        analytics.logScreenEvent(event.eventName,
-            buildMap {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
                 put(AppAnalyticsKey.NAME.key, event.biValue)
             }
         )
