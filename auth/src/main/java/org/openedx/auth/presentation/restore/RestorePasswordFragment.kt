@@ -270,7 +270,7 @@ private fun RestorePasswordScreen(
                                     description = stringResource(id = authR.string.auth_example_email),
                                     onValueChanged = {
                                         email = it
-                                        isEmailError = email.isEmpty()
+                                        isEmailError = false
                                     },
                                     imeAction = ImeAction.Done,
                                     keyboardActions = {

@@ -225,7 +225,6 @@ private fun AuthForm(
     var isEmailError by rememberSaveable { mutableStateOf(false) }
     var isPasswordError by rememberSaveable { mutableStateOf(false) }
 
-
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         LoginTextField(
             modifier = Modifier
@@ -234,7 +233,7 @@ private fun AuthForm(
             description = stringResource(id = R.string.auth_enter_email_username),
             onValueChanged = {
                 login = it
-                isEmailError = login.isEmpty()
+                isEmailError = false
             },
             isError = isEmailError,
             errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
@@ -246,7 +245,7 @@ private fun AuthForm(
                 .fillMaxWidth(),
             onValueChanged = {
                 password = it
-                isPasswordError = password.isEmpty()
+                isPasswordError = false
             },
             onPressDone = {
                 keyboardController?.hide()
