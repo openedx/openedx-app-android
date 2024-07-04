@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -54,6 +55,7 @@ import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.SomethingWentWrongErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.roundBorderWithoutBottom
@@ -86,6 +88,10 @@ class HtmlUnitFragment : Fragment() {
 
                 var isLoading by remember {
                     mutableStateOf(true)
+                }
+
+                var isError by remember {
+                    mutableStateOf(false)
                 }
 
                 var hasInternetConnection by remember {
@@ -125,7 +131,7 @@ class HtmlUnitFragment : Fragment() {
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        if (hasInternetConnection) {
+                        if (hasInternetConnection && !isError) {
                             HTMLContentView(
                                 windowSize = windowSize,
                                 url = blockUrl,
@@ -138,20 +144,42 @@ class HtmlUnitFragment : Fragment() {
                                 },
                                 onWebPageLoading = {
                                     isLoading = true
+                                    isError = false
                                 },
                                 onWebPageLoaded = {
                                     isLoading = false
+                                    isError = false
                                     if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
+                                },
+                                onWebPageLoadError = {
+                                    isLoading = false
+                                    isError = true
                                 }
                             )
                         } else {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background)
-                            ) {
+                            isError = true
+                        }
+                        if (isError) {
+                            val onReloadClick = {
+                                isError = false
                                 hasInternetConnection = viewModel.isOnline
+                            }
+                            if (!hasInternetConnection) {
+                                ConnectionErrorView(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight()
+                                        .background(MaterialTheme.appColors.background),
+                                    onReloadClick = onReloadClick
+                                )
+                            } else {
+                                SomethingWentWrongErrorView(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight()
+                                        .background(MaterialTheme.appColors.background),
+                                    onReloadClick = onReloadClick
+                                )
                             }
                         }
                         if (isLoading && hasInternetConnection) {
@@ -200,6 +228,7 @@ private fun HTMLContentView(
     onCompletionSet: () -> Unit,
     onWebPageLoading: () -> Unit,
     onWebPageLoaded: () -> Unit,
+    onWebPageLoadError: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -281,6 +310,15 @@ private fun HTMLContentView(
                             }
                         }
                         super.onReceivedHttpError(view, request, errorResponse)
+                    }
+
+                    override fun onReceivedError(
+                        view: WebView?,
+                        request: WebResourceRequest?,
+                        error: WebResourceError?
+                    ) {
+                        onWebPageLoadError()
+                        super.onReceivedError(view, request, error)
                     }
                 }
                 with(settings) {

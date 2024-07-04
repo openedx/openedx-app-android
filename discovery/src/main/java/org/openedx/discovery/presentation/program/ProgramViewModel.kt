@@ -106,4 +106,10 @@ class ProgramViewModel(
     fun navigateToSettings(fragmentManager: FragmentManager) {
         router.navigateToSettings(fragmentManager)
     }
+
+    fun onPageLoadError() {
+        viewModelScope.launch {
+            _uiState.emit(ProgramUIState.Error)
+        }
+    }
 }

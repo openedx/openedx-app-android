@@ -1,6 +1,7 @@
 package org.openedx.discovery.presentation.catalog
 
 import android.annotation.SuppressLint
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,6 +21,7 @@ fun CatalogWebViewScreen(
     refreshSessionCookie: () -> Unit = {},
     onWebPageUpdated: (String) -> Unit = {},
     onUriClick: (String, linkAuthority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ): WebView {
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
@@ -80,6 +82,15 @@ fun CatalogWebViewScreen(
 
                         else -> false
                     }
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    onWebPageLoadError()
+                    super.onReceivedError(view, request, error)
                 }
             }
 

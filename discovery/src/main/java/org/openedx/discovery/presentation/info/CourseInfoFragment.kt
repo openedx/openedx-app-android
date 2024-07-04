@@ -48,6 +48,7 @@ import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.SomethingWentWrongErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -232,6 +233,7 @@ private fun CourseInfoScreen(
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
     var isLoading by remember { mutableStateOf(true) }
+    var isError by remember { mutableStateOf(false) }
 
     HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -291,21 +293,41 @@ private fun CourseInfoScreen(
                         .navigationBarsPadding(),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
+                    if (hasInternetConnection && !isError) {
                         CourseInfoWebView(
                             contentUrl = uiState.initialUrl,
                             uriScheme = uriScheme,
                             onWebPageLoaded = { isLoading = false },
                             onUriClick = onUriClick,
+                            onWebPageLoadError = {
+                                isLoading = false
+                                isError = true
+                            }
                         )
                     } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
+                        isError = true
+                    }
+                    if (isError) {
+                        val onReloadClick = {
+                            isError = false
                             checkInternetConnection()
+                        }
+                        if (!hasInternetConnection) {
+                            ConnectionErrorView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.appColors.background),
+                                onReloadClick = onReloadClick
+                            )
+                        } else {
+                            SomethingWentWrongErrorView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.appColors.background),
+                                onReloadClick = onReloadClick
+                            )
                         }
                     }
                     if (isLoading && hasInternetConnection) {
@@ -331,6 +353,7 @@ private fun CourseInfoWebView(
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
     onUriClick: (String, linkAuthority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ) {
 
     val webView = CatalogWebViewScreen(
@@ -339,6 +362,7 @@ private fun CourseInfoWebView(
         isAllLinksExternal = true,
         onWebPageLoaded = onWebPageLoaded,
         onUriClick = onUriClick,
+        onWebPageLoadError = onWebPageLoadError
     )
 
     AndroidView(

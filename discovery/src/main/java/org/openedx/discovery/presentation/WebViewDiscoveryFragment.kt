@@ -54,6 +54,7 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.SomethingWentWrongErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -185,6 +186,7 @@ private fun WebViewDiscoveryScreen(
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
     var isLoading by remember { mutableStateOf(true) }
+    var isError by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -248,22 +250,45 @@ private fun WebViewDiscoveryScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
+                    if (hasInternetConnection && !isError) {
                         DiscoveryWebView(
                             contentUrl = contentUrl,
                             uriScheme = uriScheme,
-                            onWebPageLoaded = { isLoading = false },
+                            onWebPageLoaded = {
+                                isLoading = false
+                                isError = false
+                            },
                             onWebPageUpdated = onWebPageUpdated,
                             onUriClick = onUriClick,
+                            onWebPageLoadError = {
+                                isLoading = false
+                                isError = true
+                            }
                         )
                     } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
+                        isError = true
+                    }
+                    if (isError) {
+                        val onReloadClick = {
+                            isError = false
                             checkInternetConnection()
+                        }
+                        if (!hasInternetConnection) {
+                            ConnectionErrorView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.appColors.background),
+                                onReloadClick = onReloadClick
+                            )
+                        } else {
+                            SomethingWentWrongErrorView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.appColors.background),
+                                onReloadClick = onReloadClick
+                            )
                         }
                     }
                     if (isLoading && hasInternetConnection) {
@@ -290,6 +315,7 @@ private fun DiscoveryWebView(
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ) {
     val webView = CatalogWebViewScreen(
         url = contentUrl,
@@ -297,6 +323,7 @@ private fun DiscoveryWebView(
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
         onUriClick = onUriClick,
+        onWebPageLoadError = onWebPageLoadError
     )
 
     AndroidView(

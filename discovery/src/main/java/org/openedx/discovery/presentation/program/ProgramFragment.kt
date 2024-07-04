@@ -53,6 +53,7 @@ import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.SomethingWentWrongErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -133,10 +134,25 @@ class ProgramFragment : Fragment() {
                     isNestedFragment = isNestedFragment,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    checkInternetConnection = {
-                        hasInternetConnection = viewModel.hasInternetConnection
+                    onProgramAction = { action ->
+                        when (action) {
+                            ProgramUIAction.CHECK_INTERNET_CONNECTION -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
+                            }
+
+                            ProgramUIAction.WEB_PAGE_LOADED -> {
+                                viewModel.showLoading(false)
+                            }
+
+                            ProgramUIAction.WEB_PAGE_ERROR -> {
+                                viewModel.onPageLoadError()
+                            }
+
+                            ProgramUIAction.ON_RELOAD -> {
+                                viewModel.showLoading(true)
+                            }
+                        }
                     },
-                    onWebPageLoaded = { viewModel.showLoading(false) },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
@@ -192,7 +208,7 @@ class ProgramFragment : Fragment() {
                     },
                     onSettingsClick = {
                         viewModel.navigateToSettings(requireActivity().supportFragmentManager)
-                    },
+                    }
                 )
             }
         }
@@ -234,8 +250,7 @@ private fun ProgramInfoScreen(
     canShowBackBtn: Boolean,
     isNestedFragment: Boolean,
     hasInternetConnection: Boolean,
-    checkInternetConnection: () -> Unit,
-    onWebPageLoaded: () -> Unit,
+    onProgramAction: (ProgramUIAction) -> Unit,
     onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
@@ -304,18 +319,19 @@ private fun ProgramInfoScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
+                    if (hasInternetConnection && uiState != ProgramUIState.Error) {
                         val webView = CatalogWebViewScreen(
                             url = contentUrl,
                             uriScheme = uriScheme,
                             isAllLinksExternal = true,
-                            onWebPageLoaded = onWebPageLoaded,
+                            onWebPageLoaded = { onProgramAction(ProgramUIAction.WEB_PAGE_LOADED) },
                             refreshSessionCookie = {
                                 coroutineScope.launch {
                                     cookieManager.tryToRefreshSessionCookie()
                                 }
                             },
                             onUriClick = onUriClick,
+                            onWebPageLoadError = { onProgramAction(ProgramUIAction.WEB_PAGE_ERROR) }
                         )
 
                         AndroidView(
@@ -329,15 +345,32 @@ private fun ProgramInfoScreen(
                             }
                         )
                     } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
-                            checkInternetConnection()
+                        onProgramAction(ProgramUIAction.WEB_PAGE_LOADED)
+                    }
+
+                    if (uiState == ProgramUIState.Error) {
+                        val onReloadClick = {
+                            onProgramAction(ProgramUIAction.ON_RELOAD)
+                        }
+                        if (!hasInternetConnection) {
+                            ConnectionErrorView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.appColors.background),
+                                onReloadClick = onReloadClick
+                            )
+                        } else {
+                            SomethingWentWrongErrorView(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .background(MaterialTheme.appColors.background),
+                                onReloadClick = onReloadClick
+                            )
                         }
                     }
+
                     if (isLoading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
@@ -368,9 +401,8 @@ fun MyProgramsPreview() {
             canShowBackBtn = false,
             isNestedFragment = false,
             hasInternetConnection = false,
-            checkInternetConnection = {},
+            onProgramAction = {},
             onBackClick = {},
-            onWebPageLoaded = {},
             onSettingsClick = {},
             onUriClick = { _, _ -> },
         )

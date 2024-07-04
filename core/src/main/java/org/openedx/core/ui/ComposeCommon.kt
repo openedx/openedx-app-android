@@ -1140,6 +1140,40 @@ fun ConnectionErrorView(
     modifier: Modifier,
     onReloadClick: () -> Unit,
 ) {
+    ErrorScreen(
+        modifier = modifier,
+        title = stringResource(id = R.string.core_no_internet_connection),
+        description = stringResource(id = R.string.core_no_internet_connection_description),
+        buttonText = stringResource(id = R.string.core_reload),
+        icon = painterResource(id = R.drawable.core_no_internet_connection),
+        onReloadClick = onReloadClick
+    )
+}
+
+@Composable
+fun SomethingWentWrongErrorView(
+    modifier: Modifier,
+    onReloadClick: () -> Unit,
+) {
+    ErrorScreen(
+        modifier = modifier,
+        title = stringResource(id = R.string.core_try_again),
+        description = stringResource(id = R.string.core_something_went_wrong_description),
+        buttonText = stringResource(id = R.string.core_reload),
+        icon = painterResource(id = R.drawable.core_unkown),
+        onReloadClick = onReloadClick
+    )
+}
+
+@Composable
+fun ErrorScreen(
+    modifier: Modifier,
+    title: String,
+    description: String,
+    buttonText: String,
+    icon: Painter,
+    onReloadClick: () -> Unit
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -1147,14 +1181,14 @@ fun ConnectionErrorView(
     ) {
         Icon(
             modifier = Modifier.size(100.dp),
-            painter = painterResource(id = R.drawable.core_no_internet_connection),
+            painter = icon,
             contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
         Spacer(Modifier.height(28.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_no_internet_connection),
+            text = title,
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleLarge,
             textAlign = TextAlign.Center
@@ -1162,7 +1196,7 @@ fun ConnectionErrorView(
         Spacer(Modifier.height(16.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_no_internet_connection_description),
+            text = description,
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
@@ -1171,7 +1205,7 @@ fun ConnectionErrorView(
         OpenEdXButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
-            text = stringResource(id = R.string.core_reload),
+            text = buttonText,
             textColor = MaterialTheme.appColors.primaryButtonText,
             backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = onReloadClick,
@@ -1365,6 +1399,18 @@ private fun IconTextPreview() {
 private fun ConnectionErrorViewPreview() {
     OpenEdXTheme(darkTheme = true) {
         ConnectionErrorView(
+            modifier = Modifier
+                .fillMaxSize(),
+            onReloadClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun SomethingWentWrongErrorViewPreview() {
+    OpenEdXTheme(darkTheme = true) {
+        SomethingWentWrongErrorView(
             modifier = Modifier
                 .fillMaxSize(),
             onReloadClick = {}
