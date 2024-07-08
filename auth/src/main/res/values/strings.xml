@@ -22,7 +22,10 @@
     <string name="auth_restore_password_success">We have sent a password recover instructions to your email %s</string>
     <string name="auth_example_email" translatable="false">username@domain.com</string>
     <string name="auth_enter_email_username" tools:ignore="MissingTranslation">Enter email or username</string>
+    <string name="auth_error_empty_username_email">Please enter your username or e-mail address and try again.</string>
+    <string name="auth_error_empty_email">Please enter your e-mail address and try again.</string>
     <string name="auth_enter_password">Enter password</string>
+    <string name="auth_error_empty_password">Please enter your password and try again.</string>
     <string name="auth_create_new_account">Create an account to start learning today!</string>
     <string name="auth_compete_registration" translatable="false">Complete your registration</string>
     <string name="auth_google" tools:ignore="ExtraTranslation">Sign in with Google</string>

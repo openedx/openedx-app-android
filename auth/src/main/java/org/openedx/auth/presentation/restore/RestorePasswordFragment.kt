@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -127,9 +128,9 @@ private fun RestorePasswordScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberScrollState()
-    var email by rememberSaveable {
-        mutableStateOf("")
-    }
+    var email by rememberSaveable { mutableStateOf("") }
+    var isEmailError by rememberSaveable { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -269,12 +270,20 @@ private fun RestorePasswordScreen(
                                     description = stringResource(id = authR.string.auth_example_email),
                                     onValueChanged = {
                                         email = it
+                                        isEmailError = false
                                     },
                                     imeAction = ImeAction.Done,
                                     keyboardActions = {
-                                        it.clearFocus()
-                                        onRestoreButtonClick(email)
-                                    }
+                                        keyboardController?.hide()
+                                        if (email.isNotEmpty()) {
+                                            it.clearFocus()
+                                            onRestoreButtonClick(email)
+                                        } else {
+                                            isEmailError = email.isEmpty()
+                                        }
+                                    },
+                                    isError = isEmailError,
+                                    errorMessages = stringResource(id = authR.string.auth_error_empty_email)
                                 )
                                 Spacer(Modifier.height(50.dp))
                                 if (uiState == RestorePasswordUIState.Loading) {
@@ -292,7 +301,12 @@ private fun RestorePasswordScreen(
                                         modifier = buttonWidth.testTag("btn_reset_password"),
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
-                                            onRestoreButtonClick(email)
+                                            keyboardController?.hide()
+                                            if (email.isNotEmpty()) {
+                                                onRestoreButtonClick(email)
+                                            } else {
+                                                isEmailError = email.isEmpty()
+                                            }
                                         }
                                     )
                                 }
