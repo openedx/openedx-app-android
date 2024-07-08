@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -562,6 +563,11 @@ fun VideoSubtitles(
                             } else {
                                 MaterialTheme.appColors.textFieldBorder
                             }
+                        val fontWeight = if (currentIndex == index) {
+                            FontWeight.SemiBold
+                        } else {
+                            FontWeight.Normal
+                        }
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -570,7 +576,8 @@ fun VideoSubtitles(
                                 },
                             text = Jsoup.parse(item.content).text(),
                             color = textColor,
-                            style = MaterialTheme.appTypography.bodyMedium
+                            style = MaterialTheme.appTypography.bodyMedium,
+                            fontWeight = fontWeight,
                         )
                         Spacer(Modifier.height(16.dp))
                     }
