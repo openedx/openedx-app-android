@@ -14,7 +14,6 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
-import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryNavigator
 
 class MainViewModel(
@@ -51,20 +50,17 @@ class MainViewModel(
     }
 
     fun logDiscoveryTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.DISCOVER)
-    }
-
-    fun logMyCoursesTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.MY_COURSES)
+        logScreenEvent(AppAnalyticsEvent.DISCOVER)
     }
 
     fun logProfileTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.PROFILE)
+        logScreenEvent(AppAnalyticsEvent.PROFILE)
     }
 
-    private fun logEvent(event: AppAnalyticsEvent) {
-        analytics.logEvent(event.eventName,
-            buildMap {
+    private fun logScreenEvent(event: AppAnalyticsEvent) {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
                 put(AppAnalyticsKey.NAME.key, event.biValue)
             }
         )

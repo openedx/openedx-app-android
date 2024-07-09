@@ -166,12 +166,12 @@ class CourseContainerViewModelTest {
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStructure(any(), any()) } throws UnknownHostException()
-        every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
+        every { analytics.logScreenEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseStructure(any(), any()) }
-        verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(noInternet, message)
@@ -199,12 +199,12 @@ class CourseContainerViewModelTest {
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStructure(any(), any()) } throws Exception()
-        every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
+        every { analytics.logScreenEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseStructure(any(), any()) }
-        verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         val message = viewModel.errorMessage.value
         assertEquals(somethingWrong, message)
@@ -232,12 +232,12 @@ class CourseContainerViewModelTest {
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
-        every { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
+        every { analytics.logScreenEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) } returns Unit
         viewModel.preloadCourseStructure()
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.getCourseStructure(any(), any()) }
-        verify(exactly = 1) { analytics.logEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(CourseAnalyticsEvent.DASHBOARD.eventName, any()) }
 
         assert(viewModel.errorMessage.value == null)
         assert(!viewModel.refreshing.value)
@@ -264,7 +264,7 @@ class CourseContainerViewModelTest {
         )
         every { networkConnection.isOnline() } returns false
         coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
-        every { analytics.logEvent(any(), any()) } returns Unit
+        every { analytics.logScreenEvent(any(), any()) } returns Unit
         coEvery {
             courseApi.getCourseStructure(any(), any(), any(), any())
         } returns courseStructureModel
@@ -272,7 +272,7 @@ class CourseContainerViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 0) { courseApi.getCourseStructure(any(), any(), any(), any()) }
-        verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
         assert(viewModel.errorMessage.value == null)
         assert(!viewModel.refreshing.value)

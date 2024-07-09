@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        maven { url "https://maven.fullstory.com" }
     }
     buildscript {
         repositories {
@@ -10,9 +11,11 @@ pluginManagement {
             maven {
                 url = uri("https://storage.googleapis.com/r8-releases/raw")
             }
+            maven { url "https://maven.fullstory.com" }
         }
         dependencies {
             classpath("com.android.tools:r8:8.2.26")
+            classpath 'com.fullstory:gradle-plugin-local:1.47.0'
         }
     }
 }
@@ -21,6 +24,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://maven.fullstory.com" }
         maven {
             url "http://appboy.github.io/appboy-android-sdk/sdk"
             allowInsecureProtocol = true

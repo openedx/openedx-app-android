@@ -69,6 +69,10 @@ BRANCH:
   HOST: ''
   ALTERNATE_HOST: ''
 
+FULLSTORY:
+  ENABLED: false
+  ORG_ID: ''
+
 #Platform names
 PLATFORM_NAME: "OpenEdX"
 PLATFORM_FULL_NAME: "OpenEdX"

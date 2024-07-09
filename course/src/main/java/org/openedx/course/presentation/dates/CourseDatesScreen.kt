@@ -41,6 +41,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -209,6 +210,17 @@ private fun CourseDatesUI(
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
+        val isPLSBannerAvailable = (uiState as? DatesUIState.Dates)
+            ?.courseDatesResult
+            ?.courseBanner
+            ?.isBannerAvailableForUserType(isSelfPaced)
+
+        LaunchedEffect(key1 = isPLSBannerAvailable) {
+            if (isPLSBannerAvailable == true) {
+                onPLSBannerViewed()
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -236,7 +248,6 @@ private fun CourseDatesUI(
 
                                 if (courseBanner.isBannerAvailableForUserType(isSelfPaced)) {
                                     item {
-                                        onPLSBannerViewed()
                                         if (windowSize.isTablet) {
                                             CourseDatesBannerTablet(
                                                 modifier = Modifier.padding(top = 16.dp),

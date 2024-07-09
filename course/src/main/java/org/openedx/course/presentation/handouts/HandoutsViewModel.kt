@@ -98,8 +98,8 @@ class HandoutsViewModel(
     }
 
     fun logEvent(event: CourseAnalyticsEvent) {
-        courseAnalytics.logEvent(
-            event = event.eventName,
+        courseAnalytics.logScreenEvent(
+            screenName = event.eventName,
             params = buildMap {
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)
