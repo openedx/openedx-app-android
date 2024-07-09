@@ -7,7 +7,7 @@ import com.braze.ui.BrazeDeeplinkHandler
 import com.braze.ui.actions.UriAction
 import org.openedx.app.AppActivity
 
-class BrazeBranchDeeplinkHandler : BrazeDeeplinkHandler() {
+internal class BranchBrazeDeeplinkHandler : BrazeDeeplinkHandler() {
     override fun gotoUri(context: Context, uriAction: UriAction) {
         val deeplink = uriAction.uri.toString()
 
