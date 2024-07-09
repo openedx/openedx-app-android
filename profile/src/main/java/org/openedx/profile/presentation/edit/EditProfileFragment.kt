@@ -1047,7 +1047,7 @@ private fun InputEditField(
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = keyboardType,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Default
             ),
             keyboardActions = KeyboardActions {
                 keyboardController?.hide()
