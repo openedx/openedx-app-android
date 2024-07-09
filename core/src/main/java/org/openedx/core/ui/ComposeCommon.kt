@@ -1253,9 +1253,9 @@ fun RoundTabsBar(
                     .then(border)
                     .clickable {
                         scope.launch {
+                            onTabClicked(index)
                             pagerState.scrollToPage(index)
                             rowState.animateScrollToItem(index)
-                            onTabClicked(index)
                         }
                     }
                     .padding(horizontal = 16.dp),

@@ -5,6 +5,7 @@ interface DiscoveryAnalytics {
     fun discoveryCourseSearchEvent(label: String, coursesCount: Int)
     fun discoveryCourseClickedEvent(courseId: String, courseName: String)
     fun logEvent(event: String, params: Map<String, Any?>)
+    fun logScreenEvent(screenName: String, params: Map<String, Any?>)
 }
 
 enum class DiscoveryAnalyticsEvent(val eventName: String, val biValue: String) {

@@ -119,6 +119,7 @@ class SignUpViewModelTest {
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { analytics.logScreenEvent(any(), any()) } returns Unit
     }
 
     @After
@@ -159,6 +160,7 @@ class SignUpViewModelTest {
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
@@ -206,6 +208,7 @@ class SignUpViewModelTest {
         viewModel.register()
         advanceUntilIdle()
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
@@ -245,6 +248,7 @@ class SignUpViewModelTest {
         advanceUntilIdle()
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -298,6 +302,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.register(any()) }
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.validationError)
