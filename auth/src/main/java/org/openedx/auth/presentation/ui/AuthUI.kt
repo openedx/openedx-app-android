@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -69,14 +70,15 @@ fun RequiredFields(
     showErrorMap: MutableMap<String, Boolean?>,
     selectableNamesMap: MutableMap<String, String?>,
     onFieldUpdated: (String, String) -> Unit,
-    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit
+    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit,
 ) {
     fields.forEach { field ->
         when (field.type) {
             RegistrationFieldType.TEXT,
             RegistrationFieldType.EMAIL,
             RegistrationFieldType.CONFIRM_EMAIL,
-            RegistrationFieldType.PASSWORD -> {
+            RegistrationFieldType.PASSWORD,
+            -> {
                 InputRegistrationField(
                     modifier = Modifier.fillMaxWidth(),
                     isErrorShown = showErrorMap[field.name] ?: true,
@@ -232,9 +234,11 @@ fun LoginTextField(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
+    isError: Boolean = false,
+    errorMessages: String = "",
     onValueChanged: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
-    keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) }
+    keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) },
 ) {
     var loginTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
@@ -281,8 +285,20 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier.testTag("tf_email")
+        modifier = modifier.testTag("tf_email"),
+        isError = isError
     )
+    if (isError) {
+        Text(
+            modifier = Modifier
+                .testTag("txt_email_error")
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            text = errorMessages,
+            style = MaterialTheme.appTypography.bodySmall,
+            color = MaterialTheme.appColors.error,
+        )
+    }
 }
 
 @Composable
@@ -290,7 +306,7 @@ fun InputRegistrationField(
     modifier: Modifier,
     isErrorShown: Boolean,
     registrationField: RegistrationField,
-    onValueChanged: (String, String, Boolean) -> Unit
+    onValueChanged: (String, String, Boolean) -> Unit,
 ) {
     var inputRegistrationFieldValue by rememberSaveable {
         mutableStateOf(registrationField.placeholder)
@@ -401,7 +417,7 @@ fun SelectableRegisterField(
     registrationField: RegistrationField,
     isErrorShown: Boolean,
     initialValue: String,
-    onClick: (String, List<RegistrationField.Option>) -> Unit
+    onClick: (String, List<RegistrationField.Option>) -> Unit,
 ) {
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
         MaterialTheme.appColors.textSecondary
@@ -489,7 +505,7 @@ fun SelectableRegisterField(
 fun ExpandableText(
     modifier: Modifier = Modifier,
     isExpanded: Boolean,
-    onClick: (Boolean) -> Unit
+    onClick: (Boolean) -> Unit,
 ) {
     val transitionState = remember {
         MutableTransitionState(isExpanded).apply {
@@ -537,7 +553,7 @@ fun ExpandableText(
 @Composable
 internal fun PasswordVisibilityIcon(
     isPasswordVisible: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val (image, description) = if (isPasswordVisible) {
         Icons.Filled.VisibilityOff to stringResource(R.string.auth_accessibility_hide_password)

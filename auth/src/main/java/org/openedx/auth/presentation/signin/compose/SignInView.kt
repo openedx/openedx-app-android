@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -220,6 +221,9 @@ private fun AuthForm(
 ) {
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var isEmailError by rememberSaveable { mutableStateOf(false) }
+    var isPasswordError by rememberSaveable { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         LoginTextField(
@@ -229,7 +233,11 @@ private fun AuthForm(
             description = stringResource(id = R.string.auth_enter_email_username),
             onValueChanged = {
                 login = it
-            })
+                isEmailError = false
+            },
+            isError = isEmailError,
+            errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
+        )
 
         Spacer(modifier = Modifier.height(18.dp))
         PasswordTextField(
@@ -237,10 +245,18 @@ private fun AuthForm(
                 .fillMaxWidth(),
             onValueChanged = {
                 password = it
+                isPasswordError = false
             },
             onPressDone = {
-                onEvent(AuthEvent.SignIn(login = login, password = password))
-            }
+                keyboardController?.hide()
+                if (password.isNotEmpty()) {
+                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                } else {
+                    isEmailError = login.isEmpty()
+                    isPasswordError = password.isEmpty()
+                }
+            },
+            isError = isPasswordError,
         )
 
         Row(
@@ -282,7 +298,13 @@ private fun AuthForm(
                 textColor = MaterialTheme.appColors.primaryButtonText,
                 backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                 onClick = {
-                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                    keyboardController?.hide()
+                    if (login.isNotEmpty() && password.isNotEmpty()) {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    } else {
+                        isEmailError = login.isEmpty()
+                        isPasswordError = password.isEmpty()
+                    }
                 }
             )
         }
@@ -294,6 +316,7 @@ private fun AuthForm(
                 isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
                 isSignIn = true,
             ) {
+                keyboardController?.hide()
                 onEvent(AuthEvent.SocialSignIn(it))
             }
         }
@@ -303,6 +326,7 @@ private fun AuthForm(
 @Composable
 private fun PasswordTextField(
     modifier: Modifier = Modifier,
+    isError: Boolean,
     onValueChanged: (String) -> Unit,
     onPressDone: () -> Unit,
 ) {
@@ -361,9 +385,21 @@ private fun PasswordTextField(
             focusManager.clearFocus()
             onPressDone()
         },
+        isError = isError,
         textStyle = MaterialTheme.appTypography.bodyMedium,
-        singleLine = true
+        singleLine = true,
     )
+    if (isError) {
+        Text(
+            modifier = Modifier
+                .testTag("txt_password_error")
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            text = stringResource(id = R.string.auth_error_empty_password),
+            style = MaterialTheme.appTypography.bodySmall,
+            color = MaterialTheme.appColors.error,
+        )
+    }
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_NO)

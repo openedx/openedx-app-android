@@ -442,6 +442,7 @@ internal fun SignUpView(
                                         textColor = MaterialTheme.appColors.primaryButtonText,
                                         backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                                         onClick = {
+                                            keyboardController?.hide()
                                             showErrorMap.clear()
                                             onRegisterClick(AuthType.PASSWORD)
                                         }
@@ -455,6 +456,7 @@ internal fun SignUpView(
                                         isMicrosoftAuthEnabled = uiState.isMicrosoftAuthEnabled,
                                         isSignIn = false,
                                     ) {
+                                        keyboardController?.hide()
                                         onRegisterClick(it)
                                     }
                                 }
@@ -478,7 +480,10 @@ private fun RegistrationScreenPreview() {
         SignUpView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = SignUpUIState(
-                allFields = listOf(field, field, field.copy(required = false)),
+                allFields = listOf(field),
+                requiredFields = listOf(field, field),
+                optionalFields = listOf(field, field),
+                agreementFields = listOf(field),
             ),
             uiMessage = null,
             onBackClick = {},
