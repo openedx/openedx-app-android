@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -51,9 +52,8 @@ import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.ErrorScreen
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.SomethingWentWrongErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -136,10 +136,6 @@ class ProgramFragment : Fragment() {
                     hasInternetConnection = hasInternetConnection,
                     onProgramAction = { action ->
                         when (action) {
-                            ProgramUIAction.CHECK_INTERNET_CONNECTION -> {
-                                hasInternetConnection = viewModel.hasInternetConnection
-                            }
-
                             ProgramUIAction.WEB_PAGE_LOADED -> {
                                 viewModel.showLoading(false)
                             }
@@ -148,7 +144,8 @@ class ProgramFragment : Fragment() {
                                 viewModel.onPageLoadError()
                             }
 
-                            ProgramUIAction.ON_RELOAD -> {
+                            ProgramUIAction.RELOAD_WEB_PAGE -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
                                 viewModel.showLoading(true)
                             }
                         }
@@ -258,7 +255,6 @@ private fun ProgramInfoScreen(
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
-    val isLoading = uiState is ProgramUIState.Loading
 
     when (uiState) {
         is ProgramUIState.UiMessage -> {
@@ -319,7 +315,7 @@ private fun ProgramInfoScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection && uiState != ProgramUIState.Error) {
+                    if (hasInternetConnection && (uiState is ProgramUIState.Error).not()) {
                         val webView = CatalogWebViewScreen(
                             url = contentUrl,
                             uriScheme = uriScheme,
@@ -345,33 +341,22 @@ private fun ProgramInfoScreen(
                             }
                         )
                     } else {
-                        onProgramAction(ProgramUIAction.WEB_PAGE_LOADED)
+                        onProgramAction(ProgramUIAction.WEB_PAGE_ERROR)
                     }
 
-                    if (uiState == ProgramUIState.Error) {
-                        val onReloadClick = {
-                            onProgramAction(ProgramUIAction.ON_RELOAD)
-                        }
-                        if (!hasInternetConnection) {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background),
-                                onReloadClick = onReloadClick
-                            )
-                        } else {
-                            SomethingWentWrongErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background),
-                                onReloadClick = onReloadClick
-                            )
-                        }
+                    if (uiState is ProgramUIState.Error) {
+                        ErrorScreen(
+                            title = stringResource(id = uiState.errorType.titleResId),
+                            description = stringResource(id = uiState.errorType.descriptionResId),
+                            buttonText = stringResource(id = uiState.errorType.actionResId),
+                            icon = painterResource(id = uiState.errorType.iconResId),
+                            onReloadClick = {
+                                onProgramAction(ProgramUIAction.RELOAD_WEB_PAGE)
+                            }
+                        )
                     }
 
-                    if (isLoading && hasInternetConnection) {
+                    if (uiState == ProgramUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()

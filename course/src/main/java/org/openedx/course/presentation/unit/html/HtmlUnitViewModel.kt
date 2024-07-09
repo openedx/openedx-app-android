@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.extension.readAsText
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
@@ -20,6 +21,9 @@ class HtmlUnitViewModel(
     private val notifier: CourseNotifier
 ) : BaseViewModel() {
 
+    private val _uiState = MutableStateFlow<HtmlUnitUIState>(HtmlUnitUIState.Loading)
+    val uiState = _uiState.asStateFlow()
+
     private val _injectJSList = MutableStateFlow<List<String>>(listOf())
     val injectJSList = _injectJSList.asStateFlow()
 
@@ -27,6 +31,19 @@ class HtmlUnitViewModel(
     val isCourseUnitProgressEnabled get() = config.getCourseUIConfig().isCourseUnitProgressEnabled
     val apiHostURL get() = config.getApiHostURL()
     val cookieManager get() = edxCookieManager
+
+    fun onWebPageLoading() {
+        _uiState.value = HtmlUnitUIState.Loading
+    }
+
+    fun onWebPageLoaded() {
+        _uiState.value = HtmlUnitUIState.Loaded
+    }
+
+    fun onWebPageLoadError() {
+        _uiState.value =
+            HtmlUnitUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+    }
 
     fun setWebPageLoaded(assets: AssetManager) {
         if (_injectJSList.value.isNotEmpty()) return

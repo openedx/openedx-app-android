@@ -1,9 +1,13 @@
 package org.openedx.discovery.presentation
 
 import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.UrlUtils
 
@@ -16,6 +20,8 @@ class WebViewDiscoveryViewModel(
     private val analytics: DiscoveryAnalytics,
 ) : BaseViewModel() {
 
+    private val _uiState = MutableStateFlow<DiscoveryUIState>(DiscoveryUIState.Loading)
+    val uiState: StateFlow<DiscoveryUIState> = _uiState.asStateFlow()
     val uriScheme: String get() = config.getUriScheme()
 
     private val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
@@ -36,6 +42,18 @@ class WebViewDiscoveryViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    fun onWebPageLoading() {
+        _uiState.value = DiscoveryUIState.Loaded
+    }
+    fun onWebPageLoaded() {
+        _uiState.value = DiscoveryUIState.Loaded
+    }
+
+    fun onWebPageLoadError() {
+        _uiState.value =
+            DiscoveryUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+    }
 
     fun updateDiscoveryUrl(url: String) {
         if (url.isNotEmpty()) {

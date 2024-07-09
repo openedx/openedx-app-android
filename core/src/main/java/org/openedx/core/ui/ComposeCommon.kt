@@ -1136,12 +1136,8 @@ fun BackBtn(
 }
 
 @Composable
-fun ConnectionErrorView(
-    modifier: Modifier,
-    onReloadClick: () -> Unit,
-) {
+fun ConnectionErrorView(onReloadClick: () -> Unit) {
     ErrorScreen(
-        modifier = modifier,
         title = stringResource(id = R.string.core_no_internet_connection),
         description = stringResource(id = R.string.core_no_internet_connection_description),
         buttonText = stringResource(id = R.string.core_reload),
@@ -1151,23 +1147,7 @@ fun ConnectionErrorView(
 }
 
 @Composable
-fun SomethingWentWrongErrorView(
-    modifier: Modifier,
-    onReloadClick: () -> Unit,
-) {
-    ErrorScreen(
-        modifier = modifier,
-        title = stringResource(id = R.string.core_try_again),
-        description = stringResource(id = R.string.core_something_went_wrong_description),
-        buttonText = stringResource(id = R.string.core_reload),
-        icon = painterResource(id = R.drawable.core_unkown),
-        onReloadClick = onReloadClick
-    )
-}
-
-@Composable
 fun ErrorScreen(
-    modifier: Modifier,
     title: String,
     description: String,
     buttonText: String,
@@ -1175,7 +1155,9 @@ fun ErrorScreen(
     onReloadClick: () -> Unit
 ) {
     Column(
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.appColors.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -1398,23 +1380,7 @@ private fun IconTextPreview() {
 @Composable
 private fun ConnectionErrorViewPreview() {
     OpenEdXTheme(darkTheme = true) {
-        ConnectionErrorView(
-            modifier = Modifier
-                .fillMaxSize(),
-            onReloadClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SomethingWentWrongErrorViewPreview() {
-    OpenEdXTheme(darkTheme = true) {
-        SomethingWentWrongErrorView(
-            modifier = Modifier
-                .fillMaxSize(),
-            onReloadClick = {}
-        )
+        ConnectionErrorView(onReloadClick = {})
     }
 }
 

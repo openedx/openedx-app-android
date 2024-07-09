@@ -85,12 +85,14 @@ fun CatalogWebViewScreen(
                 }
 
                 override fun onReceivedError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
+                    view: WebView,
+                    request: WebResourceRequest,
+                    error: WebResourceError
                 ) {
-                    onWebPageLoadError()
                     super.onReceivedError(view, request, error)
+                    if (view.url?.equals(request.url) == true) {
+                        onWebPageLoadError()
+                    }
                 }
             }
 

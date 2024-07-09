@@ -24,6 +24,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -52,9 +54,9 @@ import androidx.lifecycle.LifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.ui.AuthButtonsPanel
-import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.SomethingWentWrongErrorView
+import org.openedx.core.ui.ErrorScreen
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -84,17 +86,32 @@ class WebViewDiscoveryFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
+                val uiState by viewModel.uiState.collectAsState()
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
                 WebViewDiscoveryScreen(
                     windowSize = windowSize,
+                    uiState = uiState,
                     isPreLogin = viewModel.isPreLogin,
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    checkInternetConnection = {
-                        hasInternetConnection = viewModel.hasInternetConnection
+                    onDiscoveryUIAction = { action ->
+                        when (action) {
+                            DiscoveryUIAction.WEB_PAGE_LOADED -> {
+                                viewModel.onWebPageLoaded()
+                            }
+
+                            DiscoveryUIAction.WEB_PAGE_ERROR -> {
+                                viewModel.onWebPageLoadError()
+                            }
+
+                            DiscoveryUIAction.RELOAD_WEB_PAGE -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
+                                viewModel.onWebPageLoading()
+                            }
+                        }
                     },
                     onWebPageUpdated = { url ->
                         viewModel.updateDiscoveryUrl(url)
@@ -171,11 +188,12 @@ class WebViewDiscoveryFragment : Fragment() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
+    uiState: DiscoveryUIState,
     isPreLogin: Boolean,
     contentUrl: String,
     uriScheme: String,
     hasInternetConnection: Boolean,
-    checkInternetConnection: () -> Unit,
+    onDiscoveryUIAction: (DiscoveryUIAction) -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
     onRegisterClick: () -> Unit,
@@ -185,8 +203,6 @@ private fun WebViewDiscoveryScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(true) }
-    var isError by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -250,48 +266,37 @@ private fun WebViewDiscoveryScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection && !isError) {
-                        DiscoveryWebView(
-                            contentUrl = contentUrl,
-                            uriScheme = uriScheme,
-                            onWebPageLoaded = {
-                                isLoading = false
-                                isError = false
-                            },
-                            onWebPageUpdated = onWebPageUpdated,
-                            onUriClick = onUriClick,
-                            onWebPageLoadError = {
-                                isLoading = false
-                                isError = true
-                            }
-                        )
+                    if (hasInternetConnection) {
+                        if ((uiState is DiscoveryUIState.Error).not()) {
+                            DiscoveryWebView(
+                                contentUrl = contentUrl,
+                                uriScheme = uriScheme,
+                                onWebPageLoaded = {
+                                    if ((uiState is DiscoveryUIState.Error).not()) {
+                                        onDiscoveryUIAction(DiscoveryUIAction.WEB_PAGE_LOADED)
+                                    }
+                                },
+                                onWebPageUpdated = onWebPageUpdated,
+                                onUriClick = onUriClick,
+                                onWebPageLoadError = {
+                                    onDiscoveryUIAction(DiscoveryUIAction.WEB_PAGE_ERROR)
+                                }
+                            )
+                        }
                     } else {
-                        isError = true
+                        onDiscoveryUIAction(DiscoveryUIAction.WEB_PAGE_ERROR)
                     }
-                    if (isError) {
-                        val onReloadClick = {
-                            isError = false
-                            checkInternetConnection()
-                        }
-                        if (!hasInternetConnection) {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background),
-                                onReloadClick = onReloadClick
-                            )
-                        } else {
-                            SomethingWentWrongErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background),
-                                onReloadClick = onReloadClick
-                            )
+                    if (uiState is DiscoveryUIState.Error) {
+                        ErrorScreen(
+                            title = stringResource(id = uiState.errorType.titleResId),
+                            description = stringResource(id = uiState.errorType.descriptionResId),
+                            buttonText = stringResource(id = uiState.errorType.actionResId),
+                            icon = painterResource(id = uiState.errorType.iconResId)
+                        ) {
+                            onDiscoveryUIAction(DiscoveryUIAction.RELOAD_WEB_PAGE)
                         }
                     }
-                    if (isLoading && hasInternetConnection) {
+                    if (uiState is DiscoveryUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -387,17 +392,18 @@ private fun WebViewDiscoveryScreenPreview() {
     OpenEdXTheme {
         WebViewDiscoveryScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            contentUrl = "https://www.example.com/",
+            uiState = DiscoveryUIState.Error(ErrorType.CONNECTION_ERROR),
             isPreLogin = false,
+            contentUrl = "https://www.example.com/",
             uriScheme = "",
             hasInternetConnection = false,
-            checkInternetConnection = {},
+            onDiscoveryUIAction = {},
             onWebPageUpdated = {},
             onUriClick = { _, _ -> },
             onRegisterClick = {},
             onSignInClick = {},
             onSettingsClick = {},
-            onBackClick = {}
+            onBackClick = {},
         )
     }
 }

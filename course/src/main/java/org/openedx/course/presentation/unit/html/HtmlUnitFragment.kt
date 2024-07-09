@@ -18,7 +18,6 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,6 +41,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -54,8 +55,7 @@ import org.openedx.core.extension.applyDarkModeIfEnabled
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.SomethingWentWrongErrorView
+import org.openedx.core.ui.ErrorScreen
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.roundBorderWithoutBottom
@@ -85,14 +85,7 @@ class HtmlUnitFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-
-                var isLoading by remember {
-                    mutableStateOf(true)
-                }
-
-                var isError by remember {
-                    mutableStateOf(false)
-                }
+                val uiState by viewModel.uiState.collectAsState()
 
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.isOnline)
@@ -131,58 +124,46 @@ class HtmlUnitFragment : Fragment() {
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        if (hasInternetConnection && !isError) {
-                            HTMLContentView(
-                                windowSize = windowSize,
-                                url = blockUrl,
-                                cookieManager = viewModel.cookieManager,
-                                apiHostURL = viewModel.apiHostURL,
-                                isLoading = isLoading,
-                                injectJSList = injectJSList,
-                                onCompletionSet = {
-                                    viewModel.notifyCompletionSet()
-                                },
-                                onWebPageLoading = {
-                                    isLoading = true
-                                    isError = false
-                                },
-                                onWebPageLoaded = {
-                                    isLoading = false
-                                    isError = false
-                                    if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
-                                },
-                                onWebPageLoadError = {
-                                    isLoading = false
-                                    isError = true
-                                }
-                            )
+                        if (hasInternetConnection) {
+                            if ((uiState is HtmlUnitUIState.Error).not()) {
+                                HTMLContentView(
+                                    windowSize = windowSize,
+                                    url = blockUrl,
+                                    cookieManager = viewModel.cookieManager,
+                                    apiHostURL = viewModel.apiHostURL,
+                                    isLoading = uiState is HtmlUnitUIState.Loading,
+                                    injectJSList = injectJSList,
+                                    onCompletionSet = {
+                                        viewModel.notifyCompletionSet()
+                                    },
+                                    onWebPageLoading = {
+                                        viewModel.onWebPageLoading()
+                                    },
+                                    onWebPageLoaded = {
+                                        viewModel.onWebPageLoaded()
+                                        if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
+                                    },
+                                    onWebPageLoadError = {
+                                        viewModel.onWebPageLoadError()
+                                    }
+                                )
+                            }
                         } else {
-                            isError = true
+                            viewModel.onWebPageLoadError()
                         }
-                        if (isError) {
-                            val onReloadClick = {
-                                isError = false
+                        if (uiState is HtmlUnitUIState.Error) {
+                            val errorType = (uiState as HtmlUnitUIState.Error).errorType
+                            ErrorScreen(
+                                title = stringResource(id = errorType.titleResId),
+                                description = stringResource(id = errorType.descriptionResId),
+                                buttonText = stringResource(id = errorType.actionResId),
+                                icon = painterResource(id = errorType.iconResId)
+                            ) {
                                 hasInternetConnection = viewModel.isOnline
-                            }
-                            if (!hasInternetConnection) {
-                                ConnectionErrorView(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .fillMaxHeight()
-                                        .background(MaterialTheme.appColors.background),
-                                    onReloadClick = onReloadClick
-                                )
-                            } else {
-                                SomethingWentWrongErrorView(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .fillMaxHeight()
-                                        .background(MaterialTheme.appColors.background),
-                                    onReloadClick = onReloadClick
-                                )
+                                viewModel.onWebPageLoading()
                             }
                         }
-                        if (isLoading && hasInternetConnection) {
+                        if (uiState is HtmlUnitUIState.Loading && hasInternetConnection) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -317,7 +298,9 @@ private fun HTMLContentView(
                         request: WebResourceRequest?,
                         error: WebResourceError?
                     ) {
-                        onWebPageLoadError()
+                        if (view?.url?.equals(request?.url) == true) {
+                            onWebPageLoadError()
+                        }
                         super.onReceivedError(view, request, error)
                     }
                 }
