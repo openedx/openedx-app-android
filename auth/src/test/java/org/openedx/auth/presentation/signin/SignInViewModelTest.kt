@@ -87,6 +87,7 @@ class SignInViewModelTest {
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { analytics.logScreenEvent(any(), any()) } returns Unit
     }
 
     @After
@@ -119,6 +120,7 @@ class SignInViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -220,6 +222,7 @@ class SignInViewModelTest {
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -258,6 +261,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 1) { analytics.setUserIdForSession(any()) }
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
         val uiState = viewModel.uiState.value
         assertFalse(uiState.showProgress)
@@ -294,6 +298,7 @@ class SignInViewModelTest {
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 1) { appNotifier.notifier }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -333,6 +338,7 @@ class SignInViewModelTest {
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appNotifier.notifier }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value
@@ -371,6 +377,7 @@ class SignInViewModelTest {
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { appNotifier.notifier }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
 
         val message = viewModel.uiMessage.value as UIMessage.SnackBarMessage
         val uiState = viewModel.uiState.value

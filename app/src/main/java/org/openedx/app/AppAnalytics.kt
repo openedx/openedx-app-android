@@ -4,6 +4,7 @@ interface AppAnalytics {
     fun logoutEvent(force: Boolean)
     fun setUserIdForSession(userId: Long)
     fun logEvent(event: String, params: Map<String, Any?>)
+    fun logScreenEvent(screenName: String, params: Map<String, Any?>)
 }
 
 enum class AppAnalyticsEvent(val eventName: String, val biValue: String) {
@@ -14,14 +15,6 @@ enum class AppAnalyticsEvent(val eventName: String, val biValue: String) {
     DISCOVER(
         "MainDashboard:Discover",
         "edx.bi.app.main_dashboard.discover"
-    ),
-    MY_COURSES(
-        "MainDashboard:My Courses",
-        "edx.bi.app.main_dashboard.my_course"
-    ),
-    MY_PROGRAMS(
-        "MainDashboard:My Programs",
-        "edx.bi.app.main_dashboard.my_program"
     ),
     PROFILE(
         "MainDashboard:Profile",
