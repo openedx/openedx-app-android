@@ -2,6 +2,7 @@ package org.openedx.core.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.openedx.core.domain.model.iap.ProductInfo
 import java.util.Date
 
 @Parcelize
@@ -14,5 +15,16 @@ data class EnrolledCourse(
     val certificate: Certificate?,
     val progress: Progress,
     val courseStatus: CourseStatus?,
-    val courseAssignments: CourseAssignments?
-) : Parcelable
+    val courseAssignments: CourseAssignments?,
+    val productInfo: ProductInfo?,
+) : Parcelable {
+
+    private val isAuditMode: Boolean
+        get() = EnrollmentMode.AUDIT.toString().equals(mode, ignoreCase = true)
+
+    val isUpgradeable: Boolean
+        get() = isAuditMode &&
+                course.isStarted &&
+                course.isUpgradeDeadlinePassed.not() &&
+                productInfo != null
+}

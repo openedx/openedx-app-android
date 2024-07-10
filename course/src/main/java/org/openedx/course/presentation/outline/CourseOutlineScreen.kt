@@ -49,9 +49,11 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
@@ -80,9 +82,9 @@ fun CourseOutlineScreen(
     fragmentManager: FragmentManager,
     onResetDatesClick: () -> Unit
 ) {
+    val resumeBlockId by viewModel.resumeBlockId.collectAsState("")
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
-    val resumeBlockId by viewModel.resumeBlockId.collectAsState("")
     val context = LocalContext.current
 
     LaunchedEffect(resumeBlockId) {
@@ -168,7 +170,7 @@ private fun CourseOutlineUI(
     onResumeClick: (String) -> Unit,
     onDownloadClick: (blockIds: List<String>) -> Unit,
     onResetDatesClick: () -> Unit,
-    onCertificateClick: (String) -> Unit,
+    onCertificateClick: (String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
 
@@ -512,7 +514,7 @@ private fun CourseOutlineScreenPreview() {
             onResumeClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
-            onCertificateClick = {},
+            onCertificateClick = {}
         )
     }
 }
@@ -545,7 +547,7 @@ private fun CourseOutlineScreenTabletPreview() {
             onResumeClick = {},
             onDownloadClick = {},
             onResetDatesClick = {},
-            onCertificateClick = {},
+            onCertificateClick = {}
         )
     }
 }
@@ -603,6 +605,21 @@ private val mockSequentialBlock = Block(
     due = Date()
 )
 
+private val mockEnrollmentDetails =
+    EnrollmentDetails(created = Date(), mode = "audit", isActive = false, upgradeDeadline = Date())
+
+private val mockCourseAccessDetails = CourseAccessDetails(
+    Date(),
+    coursewareAccess = CoursewareAccess(
+        true,
+        "",
+        "",
+        "",
+        "",
+        ""
+    )
+)
+
 private val mockCourseStructure = CourseStructure(
     root = "",
     blockData = listOf(mockSequentialBlock, mockSequentialBlock),
@@ -614,16 +631,11 @@ private val mockCourseStructure = CourseStructure(
     startDisplay = "",
     startType = "",
     end = Date(),
-    coursewareAccess = CoursewareAccess(
-        true,
-        "",
-        "",
-        "",
-        "",
-        ""
-    ),
     media = null,
     certificate = null,
     isSelfPaced = false,
-    progress = Progress(1, 3)
+    progress = Progress(1, 3),
+    productInfo = null,
+    enrollmentDetails = mockEnrollmentDetails,
+    courseAccessDetails = mockCourseAccessDetails
 )

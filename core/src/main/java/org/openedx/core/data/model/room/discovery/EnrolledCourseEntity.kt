@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseAssignments
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseSharingUtmParameters
@@ -14,6 +15,7 @@ import org.openedx.core.domain.model.CourseStatus
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.utils.TimeUtils
 import java.util.Date
@@ -53,7 +55,8 @@ data class EnrolledCourseEntity(
             certificate?.mapToDomain(),
             progress.mapToDomain(),
             courseStatus?.mapToDomain(),
-            courseAssignments?.mapToDomain()
+            courseAssignments?.mapToDomain(),
+            null
         )
     }
 }
@@ -75,8 +78,8 @@ data class EnrolledCourseDataDb(
     val startType: String,
     @ColumnInfo("end")
     val end: String,
-    @ColumnInfo("dynamicUpgradeDeadline")
-    val dynamicUpgradeDeadline: String,
+    @ColumnInfo("upgradeDeadline")
+    val upgradeDeadline: String,
     @ColumnInfo("subscriptionId")
     val subscriptionId: String,
     @Embedded
@@ -110,7 +113,7 @@ data class EnrolledCourseDataDb(
             startDisplay,
             startType,
             TimeUtils.iso8601ToDate(end),
-            dynamicUpgradeDeadline,
+            upgradeDeadline,
             subscriptionId,
             coursewareAccess?.mapToDomain(),
             media?.mapToDomain(),
@@ -243,4 +246,36 @@ data class CourseDateBlockDb(
         dateType = dateType,
         assignmentType = assignmentType
     )
+}
+
+data class EnrollmentDetailsDB(
+    @ColumnInfo("created")
+    var created: String?,
+    @ColumnInfo("mode")
+    var mode: String?,
+    @ColumnInfo("isActive")
+    var isActive: Boolean,
+    @ColumnInfo("upgradeDeadline")
+    var upgradeDeadline: String?,
+) {
+    fun mapToDomain() = EnrollmentDetails(
+        TimeUtils.iso8601ToDate(created ?: ""),
+        mode,
+        isActive,
+        TimeUtils.iso8601ToDate(upgradeDeadline ?: "")
+    )
+}
+
+data class CourseAccessDetailsDb(
+    @ColumnInfo("auditAccessExpires")
+    var auditAccessExpires: String?,
+    @Embedded
+    val coursewareAccess: CoursewareAccessDb?,
+) {
+    fun mapToDomain(): CourseAccessDetails {
+        return CourseAccessDetails(
+            TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
+            coursewareAccess?.mapToDomain()
+        )
+    }
 }

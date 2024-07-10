@@ -58,6 +58,8 @@ ext {
 
     webkit_version = "1.11.0"
 
+    billing_version = "6.2.1"
+
     configHelper = new ConfigHelper(projectDir, getCurrentFlavor())
 
     //testing

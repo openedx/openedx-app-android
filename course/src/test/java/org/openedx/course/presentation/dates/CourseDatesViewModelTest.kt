@@ -30,6 +30,7 @@ import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AppConfig
+import org.openedx.core.domain.model.CourseAccessDetails
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesCalendarSync
@@ -37,6 +38,7 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
+import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
@@ -125,18 +127,25 @@ class CourseDatesViewModelTest {
         startDisplay = "",
         startType = "",
         end = null,
-        coursewareAccess = CoursewareAccess(
+        media = null,
+        courseAccessDetails = CourseAccessDetails(Date(), CoursewareAccess(
             true,
             "",
             "",
             "",
             "",
             ""
-        ),
-        media = null,
+        )),
         certificate = null,
         isSelfPaced = true,
-        progress = null
+        progress = null,
+        enrollmentDetails = EnrollmentDetails(
+            created = Date(),
+            mode = "audit",
+            isActive = false,
+            upgradeDeadline = Date()
+        ),
+        productInfo = null
     )
 
     @Before

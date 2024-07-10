@@ -152,7 +152,11 @@ fun AllEnrolledCoursesView(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalComposeUiApi::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 private fun AllEnrolledCoursesView(
     apiHostUrl: String,
@@ -271,7 +275,9 @@ private fun AllEnrolledCoursesView(
                             Header(
                                 modifier = Modifier
                                     .padding(
-                                        start = contentPaddings.calculateStartPadding(layoutDirection),
+                                        start = contentPaddings.calculateStartPadding(
+                                            layoutDirection
+                                        ),
                                         end = contentPaddings.calculateEndPadding(layoutDirection)
                                     ),
                                 onSearchClick = {
@@ -324,7 +330,11 @@ private fun AllEnrolledCoursesView(
                                                             course = course,
                                                             apiHostUrl = apiHostUrl,
                                                             onClick = {
-                                                                onAction(AllEnrolledCoursesAction.OpenCourse(it))
+                                                                onAction(
+                                                                    AllEnrolledCoursesAction.OpenCourse(
+                                                                        it
+                                                                    )
+                                                                )
                                                             }
                                                         )
                                                     }
@@ -616,7 +626,7 @@ private val mockCourseEnrolled = EnrolledCourse(
         startDisplay = "",
         startType = "",
         end = Date(),
-        dynamicUpgradeDeadline = "",
+        upgradeDeadline = "",
         subscriptionId = "",
         coursewareAccess = CoursewareAccess(
             false,
@@ -635,5 +645,6 @@ private val mockCourseEnrolled = EnrolledCourse(
         discussionUrl = "",
         videoOutline = "",
         isSelfPaced = false
-    )
+    ),
+    productInfo = null
 )

@@ -34,4 +34,8 @@ object ApiConstants {
         const val HONOR_CODE = "honor_code"
         const val MARKETING_EMAILS = "marketing_emails_opt_in"
     }
+
+    object IAPFields {
+        const val PAYMENT_PROCESSOR = "android-iap"
+    }
 }

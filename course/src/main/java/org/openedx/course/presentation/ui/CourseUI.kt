@@ -664,7 +664,8 @@ fun CourseExpandableChapterCard(
         if (block.isCompleted()) {
             val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
             val completedIconColor = MaterialTheme.appColors.successGreen
-            val completedIconDescription = stringResource(id = R.string.course_accessibility_section_completed)
+            val completedIconDescription =
+                stringResource(id = R.string.course_accessibility_section_completed)
 
             Icon(
                 painter = completedIconPainter,
@@ -750,13 +751,16 @@ fun CourseSubSectionItem(
 ) {
     val context = LocalContext.current
     val icon =
-        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
+        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
+            coreR.drawable.ic_core_chapter_icon
+        )
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
     val due by rememberSaveable {
         mutableStateOf(block.due?.let { TimeUtils.getAssignmentFormattedDate(context, it) })
     }
-    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
+    val isAssignmentEnable =
+        !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(
         modifier = modifier
             .fillMaxWidth()

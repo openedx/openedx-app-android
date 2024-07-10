@@ -35,6 +35,12 @@ data class CourseEnrollments(
             val appConfig = deserializeAppConfig(json)
             val primaryCourse = deserializePrimaryCourse(json)
 
+            if (appConfig.iapConfig.productPrefix.isNotEmpty()) {
+                enrollments.results.forEach { courseData ->
+                    courseData.setStoreSku(appConfig.iapConfig.productPrefix)
+                }
+            }
+
             return CourseEnrollments(enrollments, appConfig, primaryCourse)
         }
 

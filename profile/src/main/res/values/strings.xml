@@ -34,7 +34,6 @@
     <string name="profile_changes_you_made">Changes you have made will be discarded.</string>
     <string name="profile_logout">Log Out</string>
     <string name="profile_logout_dialog_body">Are you sure you want to log out?</string>
-    <string name="profile_contact_support">Contact Support</string>
     <string name="profile_support_info">Support</string>
     <string name="profile_video">Video</string>
     <string name="profile_dates_and_calendar">Dates &amp; Calendar</string>
@@ -60,5 +59,7 @@
     <string name="calendar_color_accent">Accent</string>
     <string name="profile_course_dates">Course Dates</string>
     <string name="profile_color">Color</string>
+    <string name="profile_purchases">Purchases</string>
+    <string name="profile_restore_purchaes">Restore Purchases</string>
 
 </resources>

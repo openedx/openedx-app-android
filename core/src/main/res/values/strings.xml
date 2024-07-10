@@ -46,6 +46,7 @@
     <string name="core_android_os_version" translatable="false">OS version: </string>
     <string name="core_android_device_model" translatable="false">Device model: </string>
     <string name="core_email_subject" translatable="false">Feedback</string>
+    <string name="core_error_upgrading_course_in_app" translatable="false">Error upgrading course in app</string>
     <string name="core_date_format_MMM_dd_yyyy">MMM dd, yyyy</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
     <string name="core_app_upgrade_title">App Update</string>
@@ -174,6 +175,7 @@
     <string name="core_snackbar_course_calendar_removed" tools:ignore="MissingTranslation">Your course calendar has been removed.</string>
     <string name="core_snackbar_course_calendar_updated" tools:ignore="MissingTranslation">Your course calendar has been updated.</string>
     <string name="core_snackbar_course_calendar_error" tools:ignore="MissingTranslation">Error Adding Calendar, Please try later</string>
+    <string name="core_contact_support">Contact Support</string>
 
     <!-- endregion -->
 
@@ -182,4 +184,35 @@
     <string name="core_course_container_nav_discussions">Discussions</string>
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
+
+    <!-- IAP -->
+    <string name="iap_upgrade_access_course">Upgrade to access more features</string>
+    <string name="iap_upgrade_course">Upgrade %s</string>
+    <string name="iap_upgrade_price">Upgrade now for %s</string>
+    <string name="iap_unloacking_text">Unlocking</string>
+    <string name="iap_full_access_text">full access</string>
+    <string name="iap_your_course_text">to your course</string>
+    <string name="iap_get_help">Get help</string>
+    <string name="iap_earn_certificate">Earn a verified certificate of completion to showcase on your resume</string>
+    <string name="iap_unlock_access">Unlock access to all course activities, including graded assignments</string>
+    <string name="iap_full_access_course">Full access to course content and course material even after the course ends</string>
+    <string name="iap_error_title">An Error occurred</string>
+    <string name="iap_refresh_to_retry">Refresh to retry</string>
+    <string name="iap_general_upgrade_error_message">It looks like something went wrong when upgrading your course. If this error continues, please contact Support.</string>
+    <string name="iap_email_subject_upgrade_error">Error upgrading course in app</string>
+    <string name="iap_success_message">Thank you for your purchase. Enjoy full access to your course!</string>
+    <string name="iap_silent_course_upgrade_success_title">New experience available</string>
+    <string name="iap_silent_course_upgrade_success_message">An update is available to unlock a purchased course. To update, we need to quickly refresh your app. If you choose not to update now, we’ll try again later.</string>
+    <string name="iap_label_refresh_now">Refresh now</string>
+    <string name="iap_label_continue_without_update">Continue without update</string>
+    <string name="iap_checking_purchases">Checking purchases\.\.\.</string>
+    <string name="iap_title_purchases_restored">Purchases have been successfully restored</string>
+    <string name="iap_message_purchases_restored">All purchases are up to date. If you’re not seeing your purchases restored, please try restarting your app to refresh the experience.</string>
+    <string name="iap_error_price_not_fetched">Your request could not be completed at this time. If this error continues, please reach out to Support.</string>
+    <string name="iap_unauthenticated_account_message">Your account could not be authenticated. Try signing out and signing back into the app. If this error continues, please contact Support.</string>
+    <string name="iap_course_not_available_message">The course you are looking to upgrade could not be found. Please try your upgrade again. If this error continues, contact Support.</string>
+    <string name="iap_course_already_paid_for_message">The course you are looking to upgrade has already been paid for. For additional help, reach out to Support.</string>
+    <string name="iap_course_not_fullfilled">Something happened when we tried to update your course experience. If this error continues, reach out to Support for help.</string>
+    <string name="iap_payment_could_not_be_processed">Your payment could not be processed at this time. Please try again. For additional help, reach out to Support.</string>
+
 </resources>

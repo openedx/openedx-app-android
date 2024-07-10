@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
@@ -23,8 +26,10 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.CalendarManager
@@ -33,13 +38,16 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseDataUpdated
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.system.notifier.IAPNotifier
 import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.core.system.notifier.RefreshDiscussions
+import org.openedx.core.system.notifier.UpdateCourseData
 import org.openedx.core.utils.TimeUtils
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.data.storage.CoursePreferences
@@ -59,11 +67,13 @@ class CourseContainerViewModel(
     var courseName: String,
     private var resumeBlockId: String,
     private val enrollmentMode: String,
+    private val appData: AppData,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
     private val courseNotifier: CourseNotifier,
+    private val iapNotifier: IAPNotifier,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
     private val coursePreferences: CoursePreferences,
@@ -96,20 +106,30 @@ class CourseContainerViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private var _isSelfPaced: Boolean = true
-    val isSelfPaced: Boolean
-        get() = _isSelfPaced
+    private val isValuePropEnabled: Boolean
+        get() = corePreferences.appConfig.isValuePropEnabled
 
-    private var _organization: String = ""
-    val organization: String
-        get() = _organization
+    private val iapConfig
+        get() = corePreferences.appConfig.iapConfig
+
+    private val isIAPEnabled
+        get() = iapConfig.isEnabled &&
+                iapConfig.disableVersions.contains(appData.versionName).not()
+
+    private var _canShowUpgradeButton = MutableStateFlow(false)
+    val canShowUpgradeButton: StateFlow<Boolean>
+        get() = _canShowUpgradeButton.asStateFlow()
+
+    private var _courseStructure: CourseStructure? = null
+    val courseStructure: CourseStructure?
+        get() = _courseStructure
 
     val calendarPermissions: Array<String>
         get() = calendarManager.permissions
 
     private val _calendarSyncUIState = MutableStateFlow(
         CalendarSyncUIState(
-            isCalendarSyncEnabled = isCalendarSyncEnabled(),
+            isCalendarSyncEnabled = false,
             calendarTitle = calendarManager.getCourseCalendarTitle(courseName),
             courseDates = emptyList(),
             dialogType = CalendarSyncDialogType.NONE,
@@ -162,6 +182,14 @@ class CourseContainerViewModel(
                 }
             }
         }
+
+        iapNotifier.notifier.onEach { event ->
+            when (event) {
+                is UpdateCourseData -> {
+                    updateData(true)
+                }
+            }
+        }.distinctUntilChanged().launchIn(viewModelScope)
     }
 
     fun preloadCourseStructure() {
@@ -169,21 +197,26 @@ class CourseContainerViewModel(
         if (_dataReady.value != null) {
             return
         }
-
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                val courseStructure = interactor.getCourseStructure(courseId, true)
-                courseName = courseStructure.name
-                _organization = courseStructure.org
-                _isSelfPaced = courseStructure.isSelfPaced
-                loadCourseImage(courseStructure.media?.image?.large)
-                _dataReady.value = courseStructure.start?.let { start ->
-                    val isReady = start < Date()
-                    if (isReady) {
-                        _isNavigationEnabled.value = true
+                _courseStructure = interactor.getCourseStructure(courseId, true)
+                _courseStructure?.let {
+                    courseName = it.name
+                    loadCourseImage(courseStructure?.media?.image?.large)
+                    _calendarSyncUIState.update { state ->
+                        state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
                     }
-                    isReady
+                    _dataReady.value = courseStructure?.start?.let { start ->
+                        val isReady = start < Date()
+                        if (isReady) {
+                            _isNavigationEnabled.value = true
+                        }
+                        isReady
+                    }
+                    _canShowUpgradeButton.value = isIAPEnabled &&
+                            isValuePropEnabled &&
+                            courseStructure?.isUpgradeable == true
                 }
                 if (_dataReady.value == true && resumeBlockId.isNotEmpty()) {
                     delay(500L)
@@ -247,10 +280,14 @@ class CourseContainerViewModel(
         }
     }
 
-    fun updateData() {
+    fun updateData(isIAPFlow: Boolean = false) {
         viewModelScope.launch {
             try {
-                interactor.getCourseStructure(courseId, isNeedRefresh = true)
+                _courseStructure = interactor.getCourseStructure(courseId, isNeedRefresh = true)
+                _canShowUpgradeButton.value = isIAPEnabled &&
+                        isValuePropEnabled &&
+                        courseStructure?.productInfo != null &&
+                        courseStructure?.isUpgradeable == true
             } catch (e: Exception) {
                 if (e.isInternetError()) {
                     _errorMessage.value =
@@ -262,6 +299,9 @@ class CourseContainerViewModel(
             }
             _refreshing.value = false
             courseNotifier.send(CourseStructureUpdated(courseId))
+            if (isIAPFlow) {
+                iapNotifier.send(CourseDataUpdated())
+            }
         }
     }
 
@@ -391,8 +431,8 @@ class CourseContainerViewModel(
 
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
-                (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
+        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && _courseStructure?.isSelfPaced == true) ||
+                (calendarSync.isInstructorPacedEnabled && _courseStructure?.isSelfPaced == false))
     }
 
     private fun courseDashboardViewed() {
@@ -484,7 +524,7 @@ class CourseContainerViewModel(
                 put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
+                    if (_courseStructure?.isSelfPaced == true) CourseAnalyticsKey.SELF_PACED.key
                     else CourseAnalyticsKey.INSTRUCTOR_PACED.key
                 )
                 putAll(param)

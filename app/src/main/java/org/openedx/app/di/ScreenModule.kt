@@ -12,7 +12,12 @@ import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
+import org.openedx.core.data.repository.iap.IAPRepository
+import org.openedx.core.domain.interactor.IAPInteractor
+import org.openedx.core.domain.model.iap.PurchaseFlowData
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
+import org.openedx.core.presentation.iap.IAPFlow
+import org.openedx.core.presentation.iap.IAPViewModel
 import org.openedx.core.presentation.settings.video.VideoQualityViewModel
 import org.openedx.core.ui.WindowSize
 import org.openedx.course.data.repository.CourseRepository
@@ -133,7 +138,23 @@ val screenModule = module {
 
     factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        DashboardListViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
+
     viewModel { (windowSize: WindowSize) ->
         DashboardGalleryViewModel(
             get(),
@@ -190,6 +211,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
+            get(),
             get()
         )
     }
@@ -230,6 +253,8 @@ val screenModule = module {
             courseTitle,
             resumeBlockId,
             enrollmentMode,
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -412,6 +437,22 @@ val screenModule = module {
             get(),
             get(),
             get(),
+        )
+    }
+
+    single { IAPRepository(get()) }
+    factory { IAPInteractor(get(), get()) }
+    viewModel { (iapFlow: IAPFlow, purchaseFlowData: PurchaseFlowData) ->
+        IAPViewModel(
+            iapFlow = iapFlow,
+            purchaseFlowData = purchaseFlowData,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get()
         )
     }
 

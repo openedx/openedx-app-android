@@ -117,7 +117,7 @@ class CourseOutlineViewModel(
                         courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        datesBannerInfo = state.datesBannerInfo,
+                        datesBannerInfo = state.datesBannerInfo
                     )
                 }
             }
@@ -164,7 +164,7 @@ class CourseOutlineViewModel(
                 courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
                 subSectionsDownloadsCount = subSectionsDownloadsCount,
-                datesBannerInfo = state.datesBannerInfo,
+                datesBannerInfo = state.datesBannerInfo
             )
 
             courseSectionsState[blockId] ?: false
@@ -220,7 +220,7 @@ class CourseOutlineViewModel(
                     courseSubSections = courseSubSections,
                     courseSectionsState = courseSectionsState,
                     subSectionsDownloadsCount = subSectionsDownloadsCount,
-                    datesBannerInfo = datesBannerInfo,
+                    datesBannerInfo = datesBannerInfo
                 )
                 courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {

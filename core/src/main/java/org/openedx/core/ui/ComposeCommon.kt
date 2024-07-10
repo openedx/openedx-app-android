@@ -400,6 +400,7 @@ fun SearchBarStateless(
 fun HandleUIMessage(
     uiMessage: UIMessage?,
     scaffoldState: ScaffoldState,
+    onDisplayed: () -> Unit = {}
 ) {
     val context = LocalContext.current
     LaunchedEffect(uiMessage) {
@@ -417,6 +418,7 @@ fun HandleUIMessage(
 
             else -> {}
         }
+        onDisplayed()
     }
 }
 

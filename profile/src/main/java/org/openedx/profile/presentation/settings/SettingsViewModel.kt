@@ -5,6 +5,7 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,9 +19,20 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.interactor.IAPInteractor
+import org.openedx.core.exception.iap.IAPException
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
+import org.openedx.core.presentation.IAPAnalyticsEvent
+import org.openedx.core.presentation.IAPAnalyticsKeys
+import org.openedx.core.presentation.IAPAnalyticsScreen
 import org.openedx.core.presentation.global.AppData
+import org.openedx.core.presentation.iap.IAPAction
+import org.openedx.core.presentation.iap.IAPFlow
+import org.openedx.core.presentation.iap.IAPLoaderType
+import org.openedx.core.presentation.iap.IAPRequestType
+import org.openedx.core.presentation.iap.IAPUIState
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.app.AppNotifier
@@ -40,7 +52,9 @@ class SettingsViewModel(
     private val appData: AppData,
     private val config: Config,
     private val resourceManager: ResourceManager,
+    private val corePreferences: CorePreferences,
     private val interactor: ProfileInteractor,
+    private val iapInteractor: IAPInteractor,
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
@@ -49,8 +63,13 @@ class SettingsViewModel(
     private val profileNotifier: ProfileNotifier,
 ) : BaseViewModel() {
 
-    private val _uiState: MutableStateFlow<SettingsUIState> = MutableStateFlow(SettingsUIState.Data(configuration))
+    private val _uiState: MutableStateFlow<SettingsUIState> =
+        MutableStateFlow(SettingsUIState.Data(configuration))
     internal val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
+
+    private val _iapUiState: MutableStateFlow<IAPUIState?> = MutableStateFlow(null)
+    val iapUiState: StateFlow<IAPUIState?>
+        get() = _iapUiState.asStateFlow()
 
     private val _successLogout = MutableSharedFlow<Boolean>()
     val successLogout: SharedFlow<Boolean>
@@ -176,6 +195,7 @@ class SettingsViewModel(
         EmailUtil.showFeedbackScreen(
             context = context,
             feedbackEmailAddress = config.getFeedbackEmailAddress(),
+            subject = context.getString(R.string.core_error_upgrading_course_in_app),
             appVersion = appData.versionName
         )
         logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)
@@ -212,5 +232,84 @@ class SettingsViewModel(
                 putAll(params)
             }
         )
+    }
+
+    fun restorePurchase() {
+        logIAPEvent(IAPAnalyticsEvent.IAP_RESTORE_PURCHASE_CLICKED)
+        viewModelScope.launch(Dispatchers.IO) {
+            val userId = corePreferences.user?.id ?: return@launch
+
+            _iapUiState.emit(IAPUIState.Loading(IAPLoaderType.RESTORE_PURCHASES))
+            // delay to show loading state
+            delay(2000)
+
+            runCatching {
+                iapInteractor.processUnfulfilledPurchase(userId)
+            }.onSuccess {
+                if (it) {
+                    logIAPEvent(IAPAnalyticsEvent.IAP_UNFULFILLED_PURCHASE_INITIATED, buildMap {
+                        put(
+                            IAPAnalyticsKeys.SCREEN_NAME.key,
+                            IAPAnalyticsScreen.PROFILE.screenName
+                        )
+                        put(IAPAnalyticsKeys.IAP_FLOW_TYPE.key, IAPFlow.RESTORE.value)
+                    }.toMutableMap())
+                    _iapUiState.emit(IAPUIState.PurchasesFulfillmentCompleted)
+                } else {
+                    _iapUiState.emit(IAPUIState.FakePurchasesFulfillmentCompleted)
+                }
+            }.onFailure {
+                if (it is IAPException) {
+                    _iapUiState.emit(
+                        IAPUIState.Error(
+                            IAPException(
+                                IAPRequestType.RESTORE_CODE,
+                                it.httpErrorCode,
+                                it.errorMessage
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun logIAPCancelEvent() {
+        logIAPEvent(IAPAnalyticsEvent.IAP_ERROR_ALERT_ACTION, buildMap {
+            put(IAPAnalyticsKeys.ERROR_ALERT_TYPE.key, IAPAction.ACTION_RESTORE.action)
+            put(IAPAnalyticsKeys.ERROR_ACTION.key, IAPAction.ACTION_CLOSE.action)
+        }.toMutableMap())
+    }
+
+    fun showFeedbackScreen(context: Context, message: String) {
+        EmailUtil.showFeedbackScreen(
+            context = context,
+            feedbackEmailAddress = config.getFeedbackEmailAddress(),
+            subject = context.getString(R.string.core_error_upgrading_course_in_app),
+            feedback = message,
+            appVersion = appData.versionName
+        )
+        logIAPEvent(IAPAnalyticsEvent.IAP_ERROR_ALERT_ACTION, buildMap {
+            put(IAPAnalyticsKeys.ERROR_ALERT_TYPE.key, IAPAction.ACTION_UNFULFILLED.action)
+            put(IAPAnalyticsKeys.ERROR_ACTION.key, IAPAction.ACTION_GET_HELP.action)
+        }.toMutableMap())
+    }
+
+    fun logIAPEvent(
+        event: IAPAnalyticsEvent,
+        params: MutableMap<String, Any?> = mutableMapOf()
+    ) {
+        analytics.logEvent(event.eventName, params.apply {
+            put(IAPAnalyticsKeys.NAME.key, event.biValue)
+            put(IAPAnalyticsKeys.SCREEN_NAME.key, IAPAnalyticsScreen.PROFILE.screenName)
+            put(IAPAnalyticsKeys.IAP_FLOW_TYPE.key, IAPFlow.RESTORE.value)
+            put(IAPAnalyticsKeys.CATEGORY.key, IAPAnalyticsKeys.IN_APP_PURCHASES.key)
+        })
+    }
+
+    fun clearIAPState() {
+        viewModelScope.launch {
+            _iapUiState.emit(null)
+        }
     }
 }

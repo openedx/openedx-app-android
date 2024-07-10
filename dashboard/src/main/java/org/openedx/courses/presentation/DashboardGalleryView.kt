@@ -223,7 +223,12 @@ private fun DashboardGalleryView(
                                     onAction(DashboardGalleryScreenAction.NavigateToDates(it))
                                 },
                                 resumeBlockId = { course, blockId ->
-                                    onAction(DashboardGalleryScreenAction.OpenBlock(course, blockId))
+                                    onAction(
+                                        DashboardGalleryScreenAction.OpenBlock(
+                                            course,
+                                            blockId
+                                        )
+                                    )
                                 }
                             )
                         }
@@ -606,7 +611,10 @@ private fun PrimaryCourseCard(
                     if (primaryCourse.courseStatus == null) {
                         openCourse(primaryCourse)
                     } else {
-                        resumeBlockId(primaryCourse, primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
+                        resumeBlockId(
+                            primaryCourse,
+                            primaryCourse.courseStatus?.lastVisitedBlockId ?: ""
+                        )
                     }
                 }
             )
@@ -803,7 +811,7 @@ private val mockCourse = EnrolledCourse(
         startDisplay = "",
         startType = "",
         end = Date(),
-        dynamicUpgradeDeadline = "",
+        upgradeDeadline = "",
         subscriptionId = "",
         coursewareAccess = CoursewareAccess(
             true,
@@ -822,8 +830,10 @@ private val mockCourse = EnrolledCourse(
         discussionUrl = "",
         videoOutline = "",
         isSelfPaced = false
-    )
+    ),
+    productInfo = null
 )
+
 private val mockPagination = Pagination(10, "", 4, "1")
 private val mockDashboardCourseList = DashboardCourseList(
     pagination = mockPagination,

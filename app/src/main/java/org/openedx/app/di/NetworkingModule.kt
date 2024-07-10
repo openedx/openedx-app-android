@@ -2,6 +2,7 @@ package org.openedx.app.di
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.openedx.app.data.api.NotificationsApi
 import org.openedx.app.data.networking.AppUpgradeInterceptor
@@ -13,6 +14,7 @@ import org.openedx.core.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.data.api.CookiesApi
 import org.openedx.core.data.api.CourseApi
+import org.openedx.core.data.api.iap.InAppPurchasesApi
 import org.openedx.discovery.data.api.DiscoveryApi
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.profile.data.api.ProfileApi
@@ -48,6 +50,15 @@ val networkingModule = module {
             .build()
     }
 
+    single<Retrofit>(named("IAPApiInstance")) {
+        val config = this.get<Config>()
+        Retrofit.Builder()
+            .baseUrl(config.getEcommerceURL())
+            .client(get())
+            .addConverterFactory(GsonConverterFactory.create(get()))
+            .build()
+    }
+
     single { provideApi<AuthApi>(get()) }
     single { provideApi<CookiesApi>(get()) }
     single { provideApi<CourseApi>(get()) }
@@ -55,8 +66,8 @@ val networkingModule = module {
     single { provideApi<DiscussionApi>(get()) }
     single { provideApi<DiscoveryApi>(get()) }
     single { provideApi<NotificationsApi>(get()) }
+    single { provideApi<InAppPurchasesApi>(get(named("IAPApiInstance"))) }
 }
-
 
 inline fun <reified T> provideApi(retrofit: Retrofit): T {
     return retrofit.create(T::class.java)

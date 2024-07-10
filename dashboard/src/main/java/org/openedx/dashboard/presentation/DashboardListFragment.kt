@@ -40,6 +40,8 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -81,10 +83,20 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.domain.model.iap.ProductInfo
+import org.openedx.core.exception.iap.IAPException
+import org.openedx.core.presentation.IAPAnalyticsScreen
+import org.openedx.core.presentation.dialog.IAPDialogFragment
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.presentation.iap.IAPAction
+import org.openedx.core.presentation.iap.IAPFlow
+import org.openedx.core.presentation.iap.IAPUIState
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.PurchasesFulfillmentCompletedDialog
+import org.openedx.core.ui.UpgradeErrorDialog
+import org.openedx.core.ui.UpgradeToAccessView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -124,12 +136,14 @@ class DashboardListFragment : Fragment() {
                 val refreshing by viewModel.updating.observeAsState(false)
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState()
+                val iapUiState by viewModel.iapUiState.collectAsState(null)
 
                 DashboardListView(
                     windowSize = windowSize,
                     viewModel.apiHostUrl,
-                    uiState!!,
-                    uiMessage,
+                    state = uiState!!,
+                    uiMessage = uiMessage,
+                    iapUiState = iapUiState,
                     canLoadMore = canLoadMore,
                     refreshing = refreshing,
                     hasInternetConnection = viewModel.hasInternetConnection,
@@ -157,6 +171,57 @@ class DashboardListFragment : Fragment() {
                             AppUpdateState.openPlayMarket(requireContext())
                         },
                     ),
+                    onIAPAction = { action, course, iapException ->
+                        when (action) {
+                            IAPAction.ACTION_USER_INITIATED -> {
+                                if (course != null) {
+                                    IAPDialogFragment.newInstance(
+                                        iapFlow = IAPFlow.USER_INITIATED,
+                                        screenName = IAPAnalyticsScreen.COURSE_ENROLLMENT.screenName,
+                                        courseId = course.course.id,
+                                        courseName = course.course.name,
+                                        isSelfPaced = course.course.isSelfPaced,
+                                        productInfo = course.productInfo!!
+                                    ).show(
+                                        requireActivity().supportFragmentManager,
+                                        IAPDialogFragment.TAG
+                                    )
+                                }
+                            }
+
+                            IAPAction.ACTION_COMPLETION -> {
+                                IAPDialogFragment.newInstance(
+                                    IAPFlow.SILENT,
+                                    IAPAnalyticsScreen.COURSE_ENROLLMENT.screenName
+                                ).show(
+                                    requireActivity().supportFragmentManager,
+                                    IAPDialogFragment.TAG
+                                )
+                                viewModel.clearIAPState()
+                            }
+
+                            IAPAction.ACTION_UNFULFILLED -> {
+                                viewModel.detectUnfulfilledPurchase()
+                            }
+
+                            IAPAction.ACTION_CLOSE -> {
+                                viewModel.clearIAPState()
+                            }
+
+                            IAPAction.ACTION_ERROR_CLOSE -> {
+                                viewModel.logIAPCancelEvent()
+                            }
+
+                            IAPAction.ACTION_GET_HELP -> {
+                                iapException?.getFormattedErrorMessage()
+                                    ?.let { viewModel.showFeedbackScreen(requireActivity(), it) }
+                            }
+
+                            else -> {
+
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -170,6 +235,7 @@ internal fun DashboardListView(
     apiHostUrl: String,
     state: DashboardUIState,
     uiMessage: UIMessage?,
+    iapUiState: IAPUIState?,
     canLoadMore: Boolean,
     refreshing: Boolean,
     hasInternetConnection: Boolean,
@@ -177,6 +243,7 @@ internal fun DashboardListView(
     onSwipeRefresh: () -> Unit,
     paginationCallback: () -> Unit,
     onItemClick: (EnrolledCourse) -> Unit,
+    onIAPAction: (IAPAction, EnrolledCourse?, IAPException?) -> Unit,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -280,6 +347,19 @@ internal fun DashboardListView(
                                                 course,
                                                 windowSize,
                                                 onClick = { onItemClick(it) })
+                                            if (course.isUpgradeable && state.isValuePropEnabled) {
+                                                UpgradeToAccessView(
+                                                    modifier = Modifier.padding(
+                                                        bottom = 16.dp
+                                                    )
+                                                ) {
+                                                    onIAPAction(
+                                                        IAPAction.ACTION_USER_INITIATED,
+                                                        course,
+                                                        null
+                                                    )
+                                                }
+                                            }
                                             Divider()
                                         }
                                         item {
@@ -297,6 +377,12 @@ internal fun DashboardListView(
                                     })
                                 if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
                                     paginationCallback()
+                                }
+                            }
+
+                            LaunchedEffect(state.courses) {
+                                if (state.courses.isNotEmpty()) {
+                                    onIAPAction(IAPAction.ACTION_UNFULFILLED, null, null)
                                 }
                             }
                         }
@@ -351,6 +437,41 @@ internal fun DashboardListView(
                                 }
                             )
                         }
+                    }
+
+                    when (iapUiState) {
+                        is IAPUIState.PurchasesFulfillmentCompleted -> {
+                            PurchasesFulfillmentCompletedDialog(onConfirm = {
+                                onIAPAction(IAPAction.ACTION_COMPLETION, null, null)
+                            }, onDismiss = {
+                                onIAPAction(IAPAction.ACTION_CLOSE, null, null)
+                            })
+                        }
+
+                        is IAPUIState.Error -> {
+                            UpgradeErrorDialog(
+                                title = stringResource(id = CoreR.string.iap_error_title),
+                                description = stringResource(id = CoreR.string.iap_course_not_fullfilled),
+                                confirmText = stringResource(id = CoreR.string.core_cancel),
+                                onConfirm = {
+                                    onIAPAction(
+                                        IAPAction.ACTION_ERROR_CLOSE,
+                                        null,
+                                        null
+                                    )
+                                },
+                                dismissText = stringResource(id = CoreR.string.iap_get_help),
+                                onDismiss = {
+                                    onIAPAction(
+                                        IAPAction.ACTION_GET_HELP,
+                                        null,
+                                        iapUiState.iapException
+                                    )
+                                }
+                            )
+                        }
+
+                        else -> {}
                     }
                 }
             }
@@ -524,23 +645,25 @@ private fun DashboardListViewPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
-                listOf(
+                courses = listOf(
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled
-                )
+                ), isValuePropEnabled = false
             ),
             uiMessage = null,
-            onSwipeRefresh = {},
-            onItemClick = {},
-            onReloadClick = {},
-            hasInternetConnection = true,
-            refreshing = false,
+            iapUiState = null,
             canLoadMore = false,
+            refreshing = false,
+            hasInternetConnection = true,
+            onReloadClick = {},
+            onSwipeRefresh = {},
             paginationCallback = {},
+            onItemClick = {},
+            onIAPAction = { _, _, _ -> },
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -555,23 +678,25 @@ private fun DashboardListViewTabletPreview() {
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             apiHostUrl = "http://localhost:8000",
             state = DashboardUIState.Courses(
-                listOf(
+                courses = listOf(
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled,
                     mockCourseEnrolled
-                )
+                ), isValuePropEnabled = false
             ),
             uiMessage = null,
-            onSwipeRefresh = {},
-            onItemClick = {},
-            onReloadClick = {},
-            hasInternetConnection = true,
-            refreshing = false,
+            iapUiState = null,
             canLoadMore = false,
+            refreshing = false,
+            hasInternetConnection = true,
+            onReloadClick = {},
+            onSwipeRefresh = {},
             paginationCallback = {},
+            onItemClick = {},
+            onIAPAction = { _, _, _ -> },
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters()
         )
     }
@@ -596,7 +721,7 @@ private val mockCourseEnrolled = EnrolledCourse(
         startDisplay = "",
         startType = "",
         end = Date(),
-        dynamicUpgradeDeadline = "",
+        upgradeDeadline = "",
         subscriptionId = "",
         coursewareAccess = CoursewareAccess(
             true,
@@ -615,5 +740,6 @@ private val mockCourseEnrolled = EnrolledCourse(
         discussionUrl = "",
         videoOutline = "",
         isSelfPaced = false
-    )
+    ),
+    productInfo = ProductInfo(courseSku = "example_sku", storeSku = "mobile.android.example_100")
 )
