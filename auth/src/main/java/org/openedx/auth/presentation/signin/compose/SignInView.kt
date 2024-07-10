@@ -259,8 +259,8 @@ private fun AuthForm(
                     color = MaterialTheme.appColors.textHyperLink,
                     style = MaterialTheme.appTypography.labelLarge
                 )
-                Spacer(modifier = Modifier.weight(1f))
             }
+            Spacer(modifier = Modifier.weight(1f))
             Text(
                 modifier = Modifier
                     .testTag("txt_forgot_password")

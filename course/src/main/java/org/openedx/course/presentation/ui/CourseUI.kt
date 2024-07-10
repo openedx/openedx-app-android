@@ -332,7 +332,7 @@ fun NavigationUnitsButtons(
         } else {
             Modifier
                 .statusBarsPadding()
-                .padding(top = 2.dp,end = 32.dp)
+                .padding(top = 2.dp, end = 32.dp)
         }
 
     Row(
@@ -633,7 +633,6 @@ fun CourseSection(
                     block = subSectionBlock,
                     onClick = onSubSectionClick
                 )
-                Divider()
             }
         }
     }
