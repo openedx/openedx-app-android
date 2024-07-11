@@ -4,4 +4,6 @@
     <!--  Primary 500 | Dark 500 | Elm  -->
     <color name="primary">#00262B</color>
     <color name="splash">#FFFFFF</color>
+    <color name="checked_tab_item">#00262B</color>
+    <color name="unchecked_tab_item">#454545</color>
 </resources>

@@ -35,7 +35,8 @@ import org.openedx.core.ui.theme.appTypography
 fun ValuePropUpgradeFeatures(modifier: Modifier = Modifier, courseName: String) {
     Column(
         modifier = modifier
-            .padding(all = 16.dp)
+            .background(color = MaterialTheme.appColors.background)
+            .padding(all = 16.dp),
     ) {
         Text(
             modifier = Modifier.padding(vertical = 32.dp),
@@ -66,7 +67,7 @@ fun CheckmarkView(text: String) {
             modifier = Modifier.padding(end = 16.dp),
             imageVector = Icons.Filled.Check,
             contentDescription = null,
-            tint = MaterialTheme.appColors.certificateForeground
+            tint = MaterialTheme.appColors.successGreen
         )
         Text(
             modifier = Modifier.weight(1f),

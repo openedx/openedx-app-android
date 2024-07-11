@@ -1321,6 +1321,32 @@ private fun CourseMessagePreview() {
     }
 }
 
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseExpendableCardPreview(){
+    OpenEdXTheme {
+        CourseExpandableChapterCard(
+            block = mockChapterBlock,
+            arrowDegrees = 0f,
+            downloadedState = DownloadedState.DOWNLOADED,
+            onDownloadClick = {}
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CourseSubSectionItemPreview(){
+    OpenEdXTheme {
+        CourseSubSectionItem(
+            block = mockChapterBlock,
+            onClick = {}
+        )
+    }
+}
+
 private val mockChapterBlock = Block(
     id = "id",
     blockId = "blockId",
@@ -1335,7 +1361,7 @@ private val mockChapterBlock = Block(
     blockCounts = BlockCounts(1),
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
-    completion = 0.0,
+    completion = 1.0,
     containsGatedContent = false,
     assignmentProgress = AssignmentProgress("", 1f, 2f),
     due = Date()
