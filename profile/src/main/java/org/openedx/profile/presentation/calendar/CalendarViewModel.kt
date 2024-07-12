@@ -128,7 +128,11 @@ class CalendarViewModel(
     }
 
     private fun isCalendarExist(): Boolean {
-        return calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST &&
-                calendarManager.isCalendarExist(calendarPreferences.calendarId)
+        return try {
+            calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST &&
+                    calendarManager.isCalendarExist(calendarPreferences.calendarId)
+        } catch (e: SecurityException) {
+            false
+        }
     }
 }
