@@ -57,7 +57,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,6 +75,7 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -306,18 +306,10 @@ private fun CourseDatesUI(
                         }
 
                         DatesUIState.Empty -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = stringResource(id = R.string.course_dates_unavailable_message),
-                                    color = MaterialTheme.appColors.textPrimary,
-                                    style = MaterialTheme.appTypography.titleMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            NoContentScreen(
+                                message = stringResource(id = R.string.course_dates_unavailable_message),
+                                icon = painterResource(id = R.drawable.course_ic_no_content)
+                            )
                         }
 
                         DatesUIState.Loading -> {}
@@ -640,6 +632,26 @@ private fun CourseDateItem(
                 style = MaterialTheme.appTypography.labelMedium,
             )
         }
+    }
+}
+
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun EmptyCourseDatesScreenPreview() {
+    OpenEdXTheme {
+        CourseDatesUI(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = DatesUIState.Empty,
+            uiMessage = null,
+            isSelfPaced = true,
+            calendarSyncUIState = mockCalendarSyncUIState,
+            onItemClick = {},
+            onPLSBannerViewed = {},
+            onSyncDates = {},
+            onCalendarSyncSwitch = {},
+        )
     }
 }
 

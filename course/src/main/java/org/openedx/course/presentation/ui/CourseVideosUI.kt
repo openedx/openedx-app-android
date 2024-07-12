@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -47,8 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -69,6 +67,7 @@ import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -233,20 +232,10 @@ private fun CourseVideosUI(
                     ) {
                         when (uiState) {
                             is CourseVideosUIState.Empty -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState()),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.course_does_not_include_videos),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.headlineSmall,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(horizontal = 40.dp)
-                                    )
-                                }
+                                NoContentScreen(
+                                    stringResource(id = R.string.course_no_videos),
+                                    painterResource(id = R.drawable.course_ic_no_videos)
+                                )
                             }
 
                             is CourseVideosUIState.CourseData -> {
@@ -646,9 +635,7 @@ private fun CourseVideosScreenEmptyPreview() {
         CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
-            uiState = CourseVideosUIState.Empty(
-                "This course does not include any videos."
-            ),
+            uiState = CourseVideosUIState.Empty,
             courseTitle = "",
             onExpandClick = { },
             onSubSectionClick = { },

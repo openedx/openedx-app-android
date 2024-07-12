@@ -148,9 +148,7 @@ class CourseVideoViewModel(
             var courseStructure = interactor.getCourseStructureForVideos(courseId)
             val blocks = courseStructure.blockData
             if (blocks.isEmpty()) {
-                _uiState.value = CourseVideosUIState.Empty(
-                    message = resourceManager.getString(R.string.course_does_not_include_videos)
-                )
+                _uiState.value = CourseVideosUIState.Empty
             } else {
                 setBlocks(courseStructure.blockData)
                 courseSubSections.clear()

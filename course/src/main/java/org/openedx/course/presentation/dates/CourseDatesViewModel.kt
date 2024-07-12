@@ -117,6 +117,7 @@ class CourseDatesViewModel(
                 } else {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
+                _uiState.value = DatesUIState.Empty
             } finally {
                 courseNotifier.send(CourseLoading(false))
             }

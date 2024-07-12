@@ -31,10 +31,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
@@ -49,6 +51,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -1180,6 +1183,33 @@ fun ConnectionErrorView(
 }
 
 @Composable
+fun NoContentScreen(message: String, icon: Painter) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            modifier = Modifier.size(80.dp),
+            painter = icon,
+            contentDescription = null,
+            tint = MaterialTheme.appColors.progressBarBackgroundColor,
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(0.8f),
+            text = message,
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
 fun AuthButtonsPanel(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
@@ -1387,6 +1417,17 @@ private fun RoundTabsBarPreview() {
             rowState = rememberLazyListState(),
             pagerState = rememberPagerState(pageCount = { 3 }),
             onTabClicked = { }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewNoContentScreen() {
+    OpenEdXTheme(darkTheme = true) {
+        NoContentScreen(
+            "No Content available",
+            rememberVectorPainter(image = Icons.Filled.Info)
         )
     }
 }

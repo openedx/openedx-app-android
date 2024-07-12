@@ -56,6 +56,7 @@ import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.WindowSize
@@ -222,6 +223,13 @@ private fun CourseOutlineUI(
                 Box {
                     when (uiState) {
                         is CourseOutlineUIState.CourseData -> {
+                            if (uiState.courseStructure.blockData.isEmpty()) {
+                                NoContentScreen(
+                                    stringResource(id = R.string.course_no_course_content),
+                                    painterResource(id = R.drawable.course_ic_no_content)
+                                )
+                                return@Surface
+                            }
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = listBottomPadding
