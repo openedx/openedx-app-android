@@ -11,13 +11,7 @@
     <string name="core_cancel">Скасувати</string>
     <string name="core_search">Пошук</string>
     <string name="core_select_value">Виберіть значення</string>
-    <string name="core_label_starting">Починається %1$s</string>
-    <string name="core_label_ended">Закінчився %1$s</string>
     <string name="core_label_ends">Закінчується %1$s</string>
-    <string name="core_label_expires">Термін дії курсу закінчується %1$s</string>
-    <string name="core_label_expires_on">Термін дії курсу закінчується %1$s</string>
-    <string name="core_label_expired">Термін дії курсу минув %1$s</string>
-    <string name="core_label_expired_on">Термін дії курсу минув %1$s</string>
     <string name="core_password">Пароль</string>
     <string name="core_assessment_soon">незабаром</string>
     <string name="core_video_quality_auto">Авто</string>

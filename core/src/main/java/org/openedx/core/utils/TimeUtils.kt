@@ -116,12 +116,12 @@ object TimeUtils {
                             DateUtils.SECOND_IN_MILLIS,
                             DateUtils.FORMAT_ABBREV_RELATIVE
                         ).toString()
-                        resourceManager.getString(R.string.core_label_expired, timeSpan)
+                        resourceManager.getString(R.string.core_label_access_expired, timeSpan)
                     }
                 } else {
                     formattedDate = if (dayDifferenceInMillis > SEVEN_DAYS_IN_MILLIS) {
                         resourceManager.getString(
-                            R.string.core_label_expires_on,
+                            R.string.core_label_expires,
                             dateToCourseDate(resourceManager, expiry)
                         )
                     } else {

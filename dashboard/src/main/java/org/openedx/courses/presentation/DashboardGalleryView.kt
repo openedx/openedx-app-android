@@ -442,9 +442,9 @@ private fun CourseListItem(
                     minLines = 2
                 )
             }
-            if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
-                Lock()
-            }
+//            if (!course.course.coursewareAccess?.errorCode.isNullOrEmpty()) {
+//                Lock()
+//            }
         }
     }
 }
@@ -700,17 +700,14 @@ private fun PrimaryCourseTitle(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.appTypography.labelMedium,
             color = MaterialTheme.appColors.textFieldHint,
-            text = stringResource(
-                R.string.dashboard_course_date,
-                TimeUtils.getCourseFormattedDate(
-                    LocalContext.current,
-                    Date(),
-                    primaryCourse.auditAccessExpires,
-                    primaryCourse.course.start,
-                    primaryCourse.course.end,
-                    primaryCourse.course.startType,
-                    primaryCourse.course.startDisplay
-                )
+            text = TimeUtils.getCourseFormattedDate(
+                LocalContext.current,
+                Date(),
+                primaryCourse.auditAccessExpires,
+                primaryCourse.course.start,
+                primaryCourse.course.end,
+                primaryCourse.course.startType,
+                primaryCourse.course.startDisplay
             )
         )
     }
