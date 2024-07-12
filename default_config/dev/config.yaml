@@ -4,11 +4,11 @@ ENVIRONMENT_DISPLAY_NAME: 'Eshe dev'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
-OAUTH_CLIENT_ID: 'login-service-client-id'
+OAUTH_CLIENT_ID: 'android-app-client-id'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: 'https://courses.ethernet.edu.et/terms'
+  PRIVACY_POLICY_URL: ''
   COOKIE_POLICY_URL: ''
   DATA_SELL_CONSENT_URL: ''
   CONTACT_SUPPORT_URL: 'https://eshemoeasu.my.site.com/help/s/'
