@@ -305,7 +305,7 @@ private fun CourseDatesUI(
                             }
                         }
 
-                        DatesUIState.Empty -> {
+                        DatesUIState.Error -> {
                             NoContentScreen(
                                 message = stringResource(id = R.string.course_dates_unavailable_message),
                                 icon = painterResource(id = R.drawable.course_ic_no_content)
@@ -643,7 +643,7 @@ private fun EmptyCourseDatesScreenPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DatesUIState.Empty,
+            uiState = DatesUIState.Error,
             uiMessage = null,
             isSelfPaced = true,
             calendarSyncUIState = mockCalendarSyncUIState,

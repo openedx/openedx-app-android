@@ -105,7 +105,7 @@ class CourseDatesViewModel(
                 isSelfPaced = courseStructure?.isSelfPaced ?: false
                 val datesResponse = interactor.getCourseDates(courseId = courseId)
                 if (datesResponse.datesSection.isEmpty()) {
-                    _uiState.value = DatesUIState.Empty
+                    _uiState.value = DatesUIState.Error
                 } else {
                     _uiState.value = DatesUIState.Dates(datesResponse)
                     courseBannerType = datesResponse.courseBanner.bannerType
@@ -117,7 +117,7 @@ class CourseDatesViewModel(
                 } else {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
-                _uiState.value = DatesUIState.Empty
+                _uiState.value = DatesUIState.Error
             } finally {
                 courseNotifier.send(CourseLoading(false))
             }
