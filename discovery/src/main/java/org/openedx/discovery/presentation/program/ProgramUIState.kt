@@ -12,9 +12,3 @@ sealed class ProgramUIState {
 
     class UiMessage(val uiMessage: UIMessage) : ProgramUIState()
 }
-
-enum class ProgramUIAction {
-    WEB_PAGE_LOADED,
-    WEB_PAGE_ERROR,
-    RELOAD_WEB_PAGE
-}

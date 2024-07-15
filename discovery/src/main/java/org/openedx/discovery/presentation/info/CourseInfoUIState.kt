@@ -9,9 +9,3 @@ sealed class CourseInfoUIState {
         val enrollmentSuccess: AtomicReference<String> = AtomicReference("")
     ) : CourseInfoUIState()
 }
-
-enum class CourseInfoUIAction {
-    WEB_PAGE_LOADED,
-    WEB_PAGE_ERROR,
-    RELOAD_WEB_PAGE
-}

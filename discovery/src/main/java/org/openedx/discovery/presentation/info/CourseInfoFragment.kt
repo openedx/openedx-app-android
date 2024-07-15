@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -46,9 +45,10 @@ import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
-import org.openedx.core.presentation.global.webview.WebViewState
+import org.openedx.core.presentation.global.webview.WebViewUIAction
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.ui.AuthButtonsPanel
-import org.openedx.core.ui.ErrorScreen
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
@@ -124,21 +124,21 @@ class CourseInfoFragment : Fragment() {
                 CourseInfoScreen(
                     windowSize = windowSize,
                     uiState = uiState,
-                    webViewState = webViewState,
+                    webViewUIState = webViewState,
                     uiMessage = uiMessage,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    onCourseInfoUIAction = { action ->
+                    onWebViewUIAction = { action ->
                         when (action) {
-                            CourseInfoUIAction.WEB_PAGE_LOADED -> {
+                            WebViewUIAction.WEB_PAGE_LOADED -> {
                                 viewModel.onWebPageLoaded()
                             }
 
-                            CourseInfoUIAction.WEB_PAGE_ERROR -> {
+                            WebViewUIAction.WEB_PAGE_ERROR -> {
                                 viewModel.onWebPageError()
                             }
 
-                            CourseInfoUIAction.RELOAD_WEB_PAGE -> {
+                            WebViewUIAction.RELOAD_WEB_PAGE -> {
                                 hasInternetConnection = viewModel.hasInternetConnection
                                 viewModel.onWebPageLoading()
                             }
@@ -239,11 +239,11 @@ class CourseInfoFragment : Fragment() {
 private fun CourseInfoScreen(
     windowSize: WindowSize,
     uiState: CourseInfoUIState,
-    webViewState: WebViewState,
+    webViewUIState: WebViewUIState,
     uiMessage: UIMessage?,
     uriScheme: String,
     hasInternetConnection: Boolean,
-    onCourseInfoUIAction: (CourseInfoUIAction) -> Unit,
+    onWebViewUIAction: (WebViewUIAction) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -310,32 +310,27 @@ private fun CourseInfoScreen(
                         .navigationBarsPadding(),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
-                        if ((webViewState is WebViewState.Error).not()) {
+                    if ((webViewUIState is WebViewUIState.Error).not()) {
+                        if (hasInternetConnection) {
                             CourseInfoWebView(
                                 contentUrl = (uiState as CourseInfoUIState.CourseInfo).initialUrl,
                                 uriScheme = uriScheme,
-                                onWebPageLoaded = { onCourseInfoUIAction(CourseInfoUIAction.WEB_PAGE_LOADED) },
+                                onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
                                 onUriClick = onUriClick,
                                 onWebPageLoadError = {
-                                    onCourseInfoUIAction(CourseInfoUIAction.WEB_PAGE_ERROR)
+                                    onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                                 }
                             )
-                        }
-                    } else {
-                        onCourseInfoUIAction(CourseInfoUIAction.WEB_PAGE_ERROR)
-                    }
-                    if (webViewState is WebViewState.Error) {
-                        ErrorScreen(
-                            title = stringResource(id = webViewState.errorType.titleResId),
-                            description = stringResource(id = webViewState.errorType.descriptionResId),
-                            buttonText = stringResource(id = webViewState.errorType.actionResId),
-                            icon = painterResource(id = webViewState.errorType.iconResId)
-                        ) {
-                            onCourseInfoUIAction(CourseInfoUIAction.RELOAD_WEB_PAGE)
+                        } else {
+                            onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                         }
                     }
-                    if (webViewState is WebViewState.Loading && hasInternetConnection) {
+                    if (webViewUIState is WebViewUIState.Error) {
+                        FullScreenErrorView(errorType = webViewUIState.errorType) {
+                            onWebViewUIAction(WebViewUIAction.RELOAD_WEB_PAGE)
+                        }
+                    }
+                    if (webViewUIState is WebViewUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -397,12 +392,12 @@ fun CourseInfoScreenPreview() {
             uiMessage = null,
             uriScheme = "",
             hasInternetConnection = false,
-            onCourseInfoUIAction = {},
+            onWebViewUIAction = {},
             onRegisterClick = {},
             onSignInClick = {},
             onBackClick = {},
             onUriClick = { _, _ -> },
-            webViewState = WebViewState.Loading,
+            webViewUIState = WebViewUIState.Loading,
         )
     }
 }

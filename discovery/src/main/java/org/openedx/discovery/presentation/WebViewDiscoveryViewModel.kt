@@ -8,6 +8,7 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.UrlUtils
 
@@ -20,8 +21,8 @@ class WebViewDiscoveryViewModel(
     private val analytics: DiscoveryAnalytics,
 ) : BaseViewModel() {
 
-    private val _uiState = MutableStateFlow<DiscoveryUIState>(DiscoveryUIState.Loading)
-    val uiState: StateFlow<DiscoveryUIState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
+    val uiState: StateFlow<WebViewUIState> = _uiState.asStateFlow()
     val uriScheme: String get() = config.getUriScheme()
 
     private val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
@@ -44,15 +45,16 @@ class WebViewDiscoveryViewModel(
         get() = networkConnection.isOnline()
 
     fun onWebPageLoading() {
-        _uiState.value = DiscoveryUIState.Loaded
+        _uiState.value = WebViewUIState.Loaded
     }
+
     fun onWebPageLoaded() {
-        _uiState.value = DiscoveryUIState.Loaded
+        _uiState.value = WebViewUIState.Loaded
     }
 
     fun onWebPageLoadError() {
         _uiState.value =
-            DiscoveryUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
     }
 
     fun updateDiscoveryUrl(url: String) {

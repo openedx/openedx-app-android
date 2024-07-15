@@ -19,7 +19,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.core.presentation.global.ErrorType
-import org.openedx.core.presentation.global.webview.WebViewState
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -56,9 +56,9 @@ class CourseInfoViewModel(
         )
     internal val uiState: StateFlow<CourseInfoUIState> = _uiState
 
-    private val _webViewState = MutableStateFlow<WebViewState>(WebViewState.Loading)
+    private val _webViewUIState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
     val webViewState
-        get() = _webViewState.asStateFlow()
+        get() = _webViewUIState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
@@ -195,16 +195,16 @@ class CourseInfoViewModel(
     }
 
     fun onWebPageLoaded() {
-        _webViewState.value = WebViewState.Loaded
+        _webViewUIState.value = WebViewUIState.Loaded
     }
 
     fun onWebPageError() {
-        _webViewState.value =
-            WebViewState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+        _webViewUIState.value =
+            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
     }
 
     fun onWebPageLoading() {
-        _webViewState.value = WebViewState.Loading
+        _webViewUIState.value = WebViewUIState.Loading
     }
 
     companion object {

@@ -37,7 +37,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -55,8 +54,10 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIAction
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.ui.AuthButtonsPanel
-import org.openedx.core.ui.ErrorScreen
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -97,17 +98,17 @@ class WebViewDiscoveryFragment : Fragment() {
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    onDiscoveryUIAction = { action ->
+                    onWebViewUIAction = { action ->
                         when (action) {
-                            DiscoveryUIAction.WEB_PAGE_LOADED -> {
+                            WebViewUIAction.WEB_PAGE_LOADED -> {
                                 viewModel.onWebPageLoaded()
                             }
 
-                            DiscoveryUIAction.WEB_PAGE_ERROR -> {
+                            WebViewUIAction.WEB_PAGE_ERROR -> {
                                 viewModel.onWebPageLoadError()
                             }
 
-                            DiscoveryUIAction.RELOAD_WEB_PAGE -> {
+                            WebViewUIAction.RELOAD_WEB_PAGE -> {
                                 hasInternetConnection = viewModel.hasInternetConnection
                                 viewModel.onWebPageLoading()
                             }
@@ -188,12 +189,12 @@ class WebViewDiscoveryFragment : Fragment() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
-    uiState: DiscoveryUIState,
+    uiState: WebViewUIState,
     isPreLogin: Boolean,
     contentUrl: String,
     uriScheme: String,
     hasInternetConnection: Boolean,
-    onDiscoveryUIAction: (DiscoveryUIAction) -> Unit,
+    onWebViewUIAction: (WebViewUIAction) -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
     onRegisterClick: () -> Unit,
@@ -266,37 +267,32 @@ private fun WebViewDiscoveryScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
-                        if ((uiState is DiscoveryUIState.Error).not()) {
+                    if ((uiState is WebViewUIState.Error).not()) {
+                        if (hasInternetConnection) {
                             DiscoveryWebView(
                                 contentUrl = contentUrl,
                                 uriScheme = uriScheme,
                                 onWebPageLoaded = {
-                                    if ((uiState is DiscoveryUIState.Error).not()) {
-                                        onDiscoveryUIAction(DiscoveryUIAction.WEB_PAGE_LOADED)
+                                    if ((uiState is WebViewUIState.Error).not()) {
+                                        onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED)
                                     }
                                 },
                                 onWebPageUpdated = onWebPageUpdated,
                                 onUriClick = onUriClick,
                                 onWebPageLoadError = {
-                                    onDiscoveryUIAction(DiscoveryUIAction.WEB_PAGE_ERROR)
+                                    onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                                 }
                             )
-                        }
-                    } else {
-                        onDiscoveryUIAction(DiscoveryUIAction.WEB_PAGE_ERROR)
-                    }
-                    if (uiState is DiscoveryUIState.Error) {
-                        ErrorScreen(
-                            title = stringResource(id = uiState.errorType.titleResId),
-                            description = stringResource(id = uiState.errorType.descriptionResId),
-                            buttonText = stringResource(id = uiState.errorType.actionResId),
-                            icon = painterResource(id = uiState.errorType.iconResId)
-                        ) {
-                            onDiscoveryUIAction(DiscoveryUIAction.RELOAD_WEB_PAGE)
+                        } else {
+                            onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                         }
                     }
-                    if (uiState is DiscoveryUIState.Loading && hasInternetConnection) {
+                    if (uiState is WebViewUIState.Error) {
+                        FullScreenErrorView(errorType = uiState.errorType) {
+                            onWebViewUIAction(WebViewUIAction.RELOAD_WEB_PAGE)
+                        }
+                    }
+                    if (uiState is WebViewUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -392,12 +388,12 @@ private fun WebViewDiscoveryScreenPreview() {
     OpenEdXTheme {
         WebViewDiscoveryScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DiscoveryUIState.Error(ErrorType.CONNECTION_ERROR),
+            uiState = WebViewUIState.Error(ErrorType.CONNECTION_ERROR),
             isPreLogin = false,
             contentUrl = "https://www.example.com/",
             uriScheme = "",
             hasInternetConnection = false,
-            onDiscoveryUIAction = {},
+            onWebViewUIAction = {},
             onWebPageUpdated = {},
             onUriClick = { _, _ -> },
             onRegisterClick = {},

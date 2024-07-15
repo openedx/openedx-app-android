@@ -109,6 +109,7 @@ import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
 import org.openedx.core.extension.tagId
 import org.openedx.core.extension.toastMessage
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -1137,21 +1138,12 @@ fun BackBtn(
 
 @Composable
 fun ConnectionErrorView(onReloadClick: () -> Unit) {
-    ErrorScreen(
-        title = stringResource(id = R.string.core_no_internet_connection),
-        description = stringResource(id = R.string.core_no_internet_connection_description),
-        buttonText = stringResource(id = R.string.core_reload),
-        icon = painterResource(id = R.drawable.core_no_internet_connection),
-        onReloadClick = onReloadClick
-    )
+    FullScreenErrorView(errorType = ErrorType.CONNECTION_ERROR, onReloadClick = onReloadClick)
 }
 
 @Composable
-fun ErrorScreen(
-    title: String,
-    description: String,
-    buttonText: String,
-    icon: Painter,
+fun FullScreenErrorView(
+    errorType: ErrorType,
     onReloadClick: () -> Unit
 ) {
     Column(
@@ -1163,14 +1155,14 @@ fun ErrorScreen(
     ) {
         Icon(
             modifier = Modifier.size(100.dp),
-            painter = icon,
+            painter = painterResource(id = errorType.iconResId),
             contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
         Spacer(Modifier.height(28.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = title,
+            text = stringResource(id = errorType.titleResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleLarge,
             textAlign = TextAlign.Center
@@ -1178,7 +1170,7 @@ fun ErrorScreen(
         Spacer(Modifier.height(16.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = description,
+            text = stringResource(id = errorType.descriptionResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
@@ -1187,7 +1179,7 @@ fun ErrorScreen(
         OpenEdXButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
-            text = buttonText,
+            text = stringResource(id = errorType.actionResId),
             textColor = MaterialTheme.appColors.primaryButtonText,
             backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = onReloadClick,

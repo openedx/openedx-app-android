@@ -41,8 +41,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -52,10 +50,11 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.applyDarkModeIfEnabled
+import org.openedx.core.extension.equalsHost
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.ErrorScreen
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.roundBorderWithoutBottom
@@ -124,8 +123,8 @@ class HtmlUnitFragment : Fragment() {
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        if (hasInternetConnection) {
-                            if ((uiState is HtmlUnitUIState.Error).not()) {
+                        if ((uiState is HtmlUnitUIState.Error).not()) {
+                            if (hasInternetConnection) {
                                 HTMLContentView(
                                     windowSize = windowSize,
                                     url = blockUrl,
@@ -140,25 +139,22 @@ class HtmlUnitFragment : Fragment() {
                                         viewModel.onWebPageLoading()
                                     },
                                     onWebPageLoaded = {
-                                        viewModel.onWebPageLoaded()
+                                        if ((uiState is HtmlUnitUIState.Error).not()) {
+                                            viewModel.onWebPageLoaded()
+                                        }
                                         if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
                                     },
                                     onWebPageLoadError = {
                                         viewModel.onWebPageLoadError()
                                     }
                                 )
+                            } else {
+                                viewModel.onWebPageLoadError()
                             }
-                        } else {
-                            viewModel.onWebPageLoadError()
                         }
                         if (uiState is HtmlUnitUIState.Error) {
                             val errorType = (uiState as HtmlUnitUIState.Error).errorType
-                            ErrorScreen(
-                                title = stringResource(id = errorType.titleResId),
-                                description = stringResource(id = errorType.descriptionResId),
-                                buttonText = stringResource(id = errorType.actionResId),
-                                icon = painterResource(id = errorType.iconResId)
-                            ) {
+                            FullScreenErrorView(errorType = errorType) {
                                 hasInternetConnection = viewModel.isOnline
                                 viewModel.onWebPageLoading()
                             }
@@ -294,11 +290,11 @@ private fun HTMLContentView(
                     }
 
                     override fun onReceivedError(
-                        view: WebView?,
-                        request: WebResourceRequest?,
-                        error: WebResourceError?
+                        view: WebView,
+                        request: WebResourceRequest,
+                        error: WebResourceError
                     ) {
-                        if (view?.url?.equals(request?.url) == true) {
+                        if (view.url.equalsHost(request.url.host)) {
                             onWebPageLoadError()
                         }
                         super.onReceivedError(view, request, error)

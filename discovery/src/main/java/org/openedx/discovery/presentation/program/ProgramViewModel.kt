@@ -93,6 +93,9 @@ class ProgramViewModel(
                 enrollmentMode = ""
             )
         }
+        viewModelScope.launch {
+            _uiState.emit(ProgramUIState.Loaded)
+        }
     }
 
     fun navigateToDiscovery() {

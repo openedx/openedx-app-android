@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.openedx.core.extension.applyDarkModeIfEnabled
+import org.openedx.core.extension.equalsHost
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
@@ -89,10 +90,10 @@ fun CatalogWebViewScreen(
                     request: WebResourceRequest,
                     error: WebResourceError
                 ) {
-                    super.onReceivedError(view, request, error)
-                    if (view.url?.equals(request.url) == true) {
+                    if (view.url.equalsHost(request.url.host)) {
                         onWebPageLoadError()
                     }
+                    super.onReceivedError(view, request, error)
                 }
             }
 
