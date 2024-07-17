@@ -2,6 +2,8 @@
 <resources>
     <!--  Primary 500 | Dark 500-->
     <color name="background">#FF00262b</color>
-    <color name="primary">#FFFBFAF9</color>
+    <color name="primary">#FFFFFF</color>
     <color name="splash">#00262B</color>
+    <color name="checked_tab_item">#F2F0EF</color>
+    <color name="unchecked_tab_item">#707070</color>
 </resources>

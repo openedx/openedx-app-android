@@ -313,7 +313,7 @@ private fun CourseSubsectionItem(
             CoreR.drawable.ic_core_chapter_icon
         )
     val completedIconColor =
-        if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+        if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
     val completedIconDescription = if (block.isCompleted()) {
         stringResource(id = R.string.course_accessibility_section_completed)
     } else {

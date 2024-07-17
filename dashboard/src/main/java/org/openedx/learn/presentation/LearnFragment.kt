@@ -190,7 +190,7 @@ private fun Title(
         ) {
             Icon(
                 imageVector = Icons.Default.ManageAccounts,
-                tint = MaterialTheme.appColors.textAccent,
+                tint = MaterialTheme.appColors.primary,
                 contentDescription = stringResource(id = CoreR.string.core_accessibility_settings)
             )
         }
@@ -254,19 +254,17 @@ private fun LearnDropdownMenu(
             DropdownMenu(
                 modifier = Modifier
                     .crop(vertical = 8.dp)
-                    .widthIn(min = 182.dp),
+                    .widthIn(min = 182.dp)
+                    .background(MaterialTheme.appColors.surface),
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
                 for (learnType in LearnType.entries) {
                     val background: Color
-                    val textColor: Color
                     if (currentValue == learnType) {
-                        background = MaterialTheme.appColors.primary
-                        textColor = MaterialTheme.appColors.primaryButtonText
+                        background = MaterialTheme.appColors.surface
                     } else {
-                        background = Color.Transparent
-                        textColor = MaterialTheme.appColors.textDark
+                        background = MaterialTheme.appColors.background
                     }
                     DropdownMenuItem(
                         modifier = Modifier
@@ -279,7 +277,7 @@ private fun LearnDropdownMenu(
                         Text(
                             text = stringResource(id = learnType.title),
                             style = MaterialTheme.appTypography.titleSmall,
-                            color = textColor
+                            color = MaterialTheme.appColors.textPrimary
                         )
                     }
                 }

@@ -3,7 +3,6 @@
 package org.openedx.profile.presentation.edit
 
 import android.content.res.Configuration
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.graphics.Matrix
@@ -747,7 +746,7 @@ private fun EditProfileScreen(
 @Composable
 private fun LimitedProfileDialog(
     modifier: Modifier,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
 ) {
     val tint = MaterialTheme.appColors.textWarning
     Column(
@@ -806,14 +805,15 @@ private fun ChangeImageDialog(
         dialogWindowProvider.window.setGravity(Gravity.BOTTOM)
         Box(
             Modifier
-                .padding(bottom = 24.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp)
                 .semantics { testTagsAsResourceId = true }
         ) {
             Column(
                 Modifier
                     .fillMaxWidth()
                     .background(
-                        MaterialTheme.appColors.cardViewBackground,
+                        MaterialTheme.appColors.background,
                         MaterialTheme.appShapes.cardShape
                     )
                     .padding(horizontal = 20.dp),
@@ -869,8 +869,8 @@ private fun ChangeImageDialog(
                 )
                 Spacer(Modifier.height(40.dp))
                 OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textPrimaryVariant,
-                    textColor = MaterialTheme.appColors.textPrimary,
+                    borderColor = MaterialTheme.appColors.primaryButtonBorder,
+                    textColor = MaterialTheme.appColors.primaryButtonBorderedText,
                     text = stringResource(id = coreR.string.core_cancel),
                     onClick = onCancelClick
                 )
@@ -887,7 +887,7 @@ private fun ProfileFields(
     mapFields: MutableMap<String, Any?>,
     onFieldClick: (String, String) -> Unit,
     onValueChanged: (String) -> Unit,
-    onDoneClick: () -> Unit
+    onDoneClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val languageProficiency = (mapFields[LANGUAGE] as List<LanguageProficiency>)
@@ -1008,7 +1008,7 @@ private fun InputEditField(
     initialValue: String,
     disabled: Boolean = false,
     onValueChanged: (String) -> Unit,
-    onDoneClick: () -> Unit
+    onDoneClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -1084,8 +1084,7 @@ private fun LeaveProfile(
                         MaterialTheme.appColors.cardViewBorder,
                         MaterialTheme.appShapes.cardShape
                     )
-                    .padding(horizontal = 40.dp)
-                    .padding(top = 48.dp, bottom = 36.dp)
+                    .padding(top = 48.dp, bottom = 36.dp, start = 40.dp, end = 40.dp)
                     .semantics {
                         testTagsAsResourceId = true
                     },
@@ -1095,7 +1094,7 @@ private fun LeaveProfile(
                     modifier = Modifier
                         .size(60.dp),
                     painter = painterResource(R.drawable.profile_ic_save),
-                    tint = MaterialTheme.appColors.textPrimary,
+                    tint = MaterialTheme.appColors.primary,
                     contentDescription = null
                 )
                 Spacer(Modifier.size(48.dp))
@@ -1120,7 +1119,7 @@ private fun LeaveProfile(
                 OpenEdXButton(
                     text = stringResource(id = R.string.profile_leave),
                     onClick = onLeaveClick,
-                    backgroundColor = MaterialTheme.appColors.primary,
+                    backgroundColor = MaterialTheme.appColors.primaryButtonBackground,
                     content = {
                         Text(
                             modifier = Modifier
@@ -1135,8 +1134,8 @@ private fun LeaveProfile(
                 )
                 Spacer(Modifier.height(24.dp))
                 OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textFieldBorder,
-                    textColor = MaterialTheme.appColors.textPrimary,
+                    borderColor = MaterialTheme.appColors.primaryButtonBorder,
+                    textColor = MaterialTheme.appColors.primaryButtonBorderedText,
                     text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
                 )
@@ -1212,7 +1211,7 @@ private fun LeaveProfileLandscape(
                     ) {
                         OpenEdXButton(
                             text = stringResource(id = R.string.profile_leave),
-                            backgroundColor = MaterialTheme.appColors.primary,
+                            backgroundColor = MaterialTheme.appColors.primaryButtonBackground,
                             content = {
                                 AutoSizeText(
                                     modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),
@@ -1225,8 +1224,8 @@ private fun LeaveProfileLandscape(
                         )
                         Spacer(Modifier.height(16.dp))
                         OpenEdXOutlinedButton(
-                            borderColor = MaterialTheme.appColors.textFieldBorder,
-                            textColor = MaterialTheme.appColors.textPrimary,
+                            borderColor = MaterialTheme.appColors.primaryButtonBorder,
+                            textColor = MaterialTheme.appColors.primaryButtonBorderedText,
                             text = stringResource(id = R.string.profile_keep_editing),
                             onClick = onDismissRequest,
                             content = {
@@ -1235,7 +1234,7 @@ private fun LeaveProfileLandscape(
                                         .testTag("btn_leave_profile_dialog_keep_editing"),
                                     text = stringResource(id = R.string.profile_keep_editing),
                                     style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.textPrimary
+                                    color = MaterialTheme.appColors.primaryButtonBorderedText
                                 )
                             }
                         )
@@ -1245,32 +1244,41 @@ private fun LeaveProfileLandscape(
         })
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun LeaveProfilePreview() {
-    LeaveProfile(
-        onDismissRequest = {},
-        onLeaveClick = {}
-    )
+    OpenEdXTheme {
+        LeaveProfile(
+            onDismissRequest = {},
+            onLeaveClick = {}
+        )
+    }
 }
 
-@Preview
+@Preview(device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun LeaveProfileLandscapePreview() {
-    LeaveProfileLandscape(
-        onDismissRequest = {},
-        onLeaveClick = {}
-    )
+    OpenEdXTheme {
+        LeaveProfileLandscape(
+            onDismissRequest = {},
+            onLeaveClick = {}
+        )
+    }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ChangeProfileImagePreview() {
-    ChangeImageDialog(
-        onSelectFromGalleryClick = {},
-        onRemoveImageClick = {},
-        onCancelClick = {}
-    )
+    OpenEdXTheme {
+        ChangeImageDialog(
+            onSelectFromGalleryClick = {},
+            onRemoveImageClick = {},
+            onCancelClick = {}
+        )
+    }
 }
 
 @Preview
@@ -1283,9 +1291,9 @@ fun LimitedProfilePreview() {
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EditProfileScreenPreview() {
     OpenEdXTheme {
@@ -1308,7 +1316,7 @@ private fun EditProfileScreenPreview() {
 }
 
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EditProfileScreenTabletPreview() {
     OpenEdXTheme {

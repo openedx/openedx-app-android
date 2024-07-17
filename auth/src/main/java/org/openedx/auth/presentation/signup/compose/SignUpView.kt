@@ -440,7 +440,7 @@ internal fun SignUpView(
                                         modifier = buttonWidth.testTag("btn_create_account"),
                                         text = stringResource(id = R.string.auth_create_account),
                                         textColor = MaterialTheme.appColors.primaryButtonText,
-                                        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                                        backgroundColor = MaterialTheme.appColors.primaryButtonBackground,
                                         onClick = {
                                             keyboardController?.hide()
                                             showErrorMap.clear()

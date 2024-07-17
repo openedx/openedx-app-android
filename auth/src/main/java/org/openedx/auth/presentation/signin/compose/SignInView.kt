@@ -272,7 +272,7 @@ private fun AuthForm(
                             onEvent(AuthEvent.RegisterClick)
                         },
                     text = stringResource(id = coreR.string.core_register),
-                    color = MaterialTheme.appColors.primary,
+                    color = MaterialTheme.appColors.textHyperLink,
                     style = MaterialTheme.appTypography.labelLarge
                 )
             }
@@ -284,7 +284,7 @@ private fun AuthForm(
                         onEvent(AuthEvent.ForgotPasswordClick)
                     },
                 text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.info_variant,
+                color = MaterialTheme.appColors.textHyperLink,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
@@ -296,7 +296,7 @@ private fun AuthForm(
                 modifier = buttonWidth.testTag("btn_sign_in"),
                 text = stringResource(id = coreR.string.core_sign_in),
                 textColor = MaterialTheme.appColors.primaryButtonText,
-                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                backgroundColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     keyboardController?.hide()
                     if (login.isNotEmpty() && password.isNotEmpty()) {
