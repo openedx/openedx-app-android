@@ -30,7 +30,7 @@ enum class CalendarSyncState(
         Icons.Rounded.FreeCancellation
     ),
     SYNCED(
-        R.string.core_synced,
+        R.string.core_to_sync,
         R.string.core_synced_to_calendar,
         Icons.Rounded.EventRepeat
     ),

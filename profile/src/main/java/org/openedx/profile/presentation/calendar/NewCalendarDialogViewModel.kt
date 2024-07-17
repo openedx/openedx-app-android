@@ -40,6 +40,7 @@ class NewCalendarDialogViewModel(
             if (networkConnection.isOnline()) {
                 calendarInteractor.resetChecksums()
                 val calendarId = calendarManager.createOrUpdateCalendar(
+                    calendarId = calendarPreferences.calendarId,
                     calendarTitle = calendarTitle,
                     calendarColor = calendarColor.color
                 )

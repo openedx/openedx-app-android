@@ -7,6 +7,6 @@ enum class SyncCourseTab(
     @StringRes
     val title: Int
 ) {
-    SYNCED(R.string.core_synced),
+    SYNCED(R.string.core_to_sync),
     NOT_SYNCED(R.string.core_not_synced)
 }

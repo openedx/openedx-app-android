@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -43,10 +45,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -69,6 +73,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.theme.fontFamily
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.profile.R
+import org.openedx.core.R as coreR
 
 class CoursesToSyncFragment : Fragment() {
 
@@ -274,55 +279,109 @@ private fun CourseCheckboxList(
                 .map { it.courseId }
             val filteredEnrollments = uiState.enrollmentsStatus
                 .filter { it.courseId in courseIds }
-            items(filteredEnrollments) { course ->
-                val isCourseSyncEnabled =
-                    uiState.coursesCalendarState.find { it.courseId == course.courseId }?.isCourseSyncEnabled ?: false
-                val annotatedString = buildAnnotatedString {
-                    append(course.courseName)
-                    if (!course.isActive) {
-                        append(" ")
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Normal,
-                                letterSpacing = 0.sp,
-                                fontFamily = fontFamily,
-                                color = MaterialTheme.appColors.textFieldHint,
-                            )
-                        ) {
-                            append(stringResource(R.string.profile_inactive))
-                        }
+                .let { enrollments ->
+                    if (uiState.isHideInactiveCourses) {
+                        enrollments.filter { it.isActive }
+                    } else {
+                        enrollments
                     }
                 }
-
-                if (uiState.isHideInactiveCourses && !course.isActive) return@items
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        modifier = Modifier.size(24.dp),
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.appColors.primary,
-                            uncheckedColor = MaterialTheme.appColors.textFieldText
-                        ),
-                        checked = isCourseSyncEnabled,
-                        enabled = course.isActive,
-                        onCheckedChange = { isEnabled ->
-                            onCourseSyncCheckChange(isEnabled, course.courseId)
+            if (filteredEnrollments.isEmpty()) {
+                item {
+                    EmptyListState(
+                        selectedTab = selectedTab
+                    )
+                }
+            } else {
+                items(filteredEnrollments) { course ->
+                    val isCourseSyncEnabled =
+                        uiState.coursesCalendarState.find { it.courseId == course.courseId }?.isCourseSyncEnabled
+                            ?: false
+                    val annotatedString = buildAnnotatedString {
+                        append(course.courseName)
+                        if (!course.isActive) {
+                            append(" ")
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    letterSpacing = 0.sp,
+                                    fontFamily = fontFamily,
+                                    color = MaterialTheme.appColors.textFieldHint,
+                                )
+                            ) {
+                                append(stringResource(R.string.profile_inactive))
+                            }
                         }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = annotatedString,
-                        style = MaterialTheme.appTypography.labelLarge,
-                        color = MaterialTheme.appColors.textDark
-                    )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            modifier = Modifier.size(24.dp),
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.appColors.primary,
+                                uncheckedColor = MaterialTheme.appColors.textFieldText
+                            ),
+                            checked = isCourseSyncEnabled,
+                            enabled = course.isActive,
+                            onCheckedChange = { isEnabled ->
+                                onCourseSyncCheckChange(isEnabled, course.courseId)
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = annotatedString,
+                            style = MaterialTheme.appTypography.labelLarge,
+                            color = MaterialTheme.appColors.textDark
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyListState(
+    modifier: Modifier = Modifier,
+    selectedTab: SyncCourseTab,
+) {
+    val description = if (selectedTab == SyncCourseTab.SYNCED) {
+        stringResource(id = R.string.profile_no_sync_courses)
+    } else {
+        stringResource(id = R.string.profile_no_courses_with_current_filter)
+    }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 40.dp, vertical = 60.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(96.dp),
+            painter = painterResource(id = coreR.drawable.core_ic_book),
+            tint = MaterialTheme.appColors.divider,
+            contentDescription = null
+        )
+        Text(
+            text = stringResource(
+                id = R.string.profile_no_courses,
+                stringResource(id = selectedTab.title)
+            ),
+            style = MaterialTheme.appTypography.titleMedium,
+            color = MaterialTheme.appColors.textDark
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.appTypography.labelMedium,
+            color = MaterialTheme.appColors.textDark,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

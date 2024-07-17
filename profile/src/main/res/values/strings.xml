@@ -75,5 +75,8 @@
     <string name="profile_disable_calendar_dialog_title">Disable Calendar Sync</string>
     <string name="profile_disable_calendar_dialog_description">Disabling calendar sync will delete the calendar “%1$s.” You can turn calendar sync back on at any time.</string>
     <string name="profile_disable_syncing">Disable Syncing</string>
+    <string name="profile_no_courses">No %1$s Courses</string>
+    <string name="profile_no_sync_courses">No courses are currently being synced to your calendar.</string>
+    <string name="profile_no_courses_with_current_filter">No courses match the current filter.</string>
 
 </resources>

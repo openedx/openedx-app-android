@@ -69,6 +69,7 @@ class CalendarViewModel(
 
                     CalendarSyncFailed -> {
                         _uiState.update { it.copy(calendarSyncState = CalendarSyncState.SYNC_FAILED) }
+                        updateSyncedCoursesCount()
                     }
 
                     CalendarSyncOffline -> {

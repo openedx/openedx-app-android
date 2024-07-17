@@ -42,6 +42,8 @@ class CalendarSyncWorker(
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANEL_ID)
 
+    private val failedCoursesSync = mutableSetOf<String>()
+
     override suspend fun doWork(): Result {
         return try {
             setForeground(createForegroundInfo())
@@ -98,7 +100,11 @@ class CalendarSyncWorker(
                 syncCalendar(enrollmentsStatus, courseId)
             }
             removeUnenrolledCourseEvents(enrollmentsStatus)
-            calendarNotifier.send(CalendarSynced)
+            if (failedCoursesSync.isEmpty()) {
+                calendarNotifier.send(CalendarSynced)
+            } else {
+                calendarNotifier.send(CalendarSyncFailed)
+            }
         }
     }
 
@@ -127,17 +133,22 @@ class CalendarSyncWorker(
     }
 
     private suspend fun syncCourseEvents(enrollmentStatus: EnrollmentStatus) {
-        createCalendarState(enrollmentStatus)
         val courseId = enrollmentStatus.courseId
-        if (enrollmentStatus.isActive && isCourseSyncEnabled(courseId)) {
-            val courseDates = calendarInteractor.getCourseDates(courseId)
-            val isCourseCalendarUpToDate = isCourseCalendarUpToDate(courseId, courseDates)
-            if (!isCourseCalendarUpToDate) {
+        try {
+            createCalendarState(enrollmentStatus)
+            if (enrollmentStatus.isActive && isCourseSyncEnabled(courseId)) {
+                val courseDates = calendarInteractor.getCourseDates(courseId)
+                val isCourseCalendarUpToDate = isCourseCalendarUpToDate(courseId, courseDates)
+                if (!isCourseCalendarUpToDate) {
+                    removeCalendarEvents(courseId)
+                    updateCourseEvents(courseDates, enrollmentStatus)
+                }
+            } else {
                 removeCalendarEvents(courseId)
-                updateCourseEvents(courseDates, enrollmentStatus)
             }
-        } else {
-            removeCalendarEvents(courseId)
+        } catch (e: Exception) {
+            failedCoursesSync.add(courseId)
+            e.printStackTrace()
         }
     }
 
