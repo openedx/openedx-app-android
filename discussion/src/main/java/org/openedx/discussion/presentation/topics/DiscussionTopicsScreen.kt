@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.FragmentViewType
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
@@ -55,7 +56,6 @@ import org.openedx.discussion.R
 import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
-import org.openedx.core.R as CoreR
 
 @Composable
 fun DiscussionTopicsScreen(
@@ -257,10 +257,7 @@ private fun DiscussionTopicsUI(
 
                                 DiscussionTopicsUIState.Loading -> {}
                                 else -> {
-                                    NoContentScreen(
-                                        message = stringResource(id = R.string.discussion_unable_to_load),
-                                        icon = painterResource(id = CoreR.drawable.core_ic_no_content)
-                                    )
+                                    NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_DISCUSSIONS)
                                 }
                             }
                         }

@@ -24,15 +24,15 @@ class HandoutsViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
 
-    private val _uiState = MutableStateFlow<HandoutsUIState>(HandoutsUIState.HTMLContent(""))
+    private val _uiState = MutableStateFlow<HandoutsUIState>(HandoutsUIState.Loading)
     val uiState: StateFlow<HandoutsUIState>
         get() = _uiState.asStateFlow()
 
     init {
-        getEnrolledCourse()
+        getCourseHandouts()
     }
 
-    private fun getEnrolledCourse() {
+    private fun getCourseHandouts() {
         viewModelScope.launch {
             var emptyState = false
             try {

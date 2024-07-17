@@ -63,6 +63,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.UIMessage
 import org.openedx.core.data.model.DateType
 import org.openedx.core.domain.model.CourseDateBlock
@@ -74,6 +75,7 @@ import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
+import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.WindowSize
@@ -306,13 +308,12 @@ private fun CourseDatesUI(
                         }
 
                         DatesUIState.Error -> {
-                            NoContentScreen(
-                                message = stringResource(id = R.string.course_dates_unavailable_message),
-                                icon = painterResource(id = R.drawable.course_ic_no_content)
-                            )
+                            NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_DATES)
                         }
 
-                        DatesUIState.Loading -> {}
+                        DatesUIState.Loading -> {
+                            CircularProgress()
+                        }
                     }
                 }
             }

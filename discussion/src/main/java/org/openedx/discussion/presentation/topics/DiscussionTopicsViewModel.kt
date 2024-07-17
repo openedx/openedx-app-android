@@ -53,12 +53,10 @@ class DiscussionTopicsViewModel(
                     _uiState.value = DiscussionTopicsUIState.Error
                 }
             } catch (e: Exception) {
+                _uiState.value = DiscussionTopicsUIState.Error
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
-                } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
-                _uiState.value = DiscussionTopicsUIState.Error
             } finally {
                 courseNotifier.send(CourseLoading(false))
             }

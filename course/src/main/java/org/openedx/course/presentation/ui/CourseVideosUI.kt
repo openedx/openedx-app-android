@@ -45,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.AppDataConstants
 import org.openedx.core.BlockType
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
@@ -66,6 +66,7 @@ import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.video.VideoQualityType
+import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.WindowSize
@@ -232,10 +233,7 @@ private fun CourseVideosUI(
                     ) {
                         when (uiState) {
                             is CourseVideosUIState.Empty -> {
-                                NoContentScreen(
-                                    stringResource(id = R.string.course_no_videos),
-                                    painterResource(id = R.drawable.course_ic_no_videos)
-                                )
+                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_VIDEOS)
                             }
 
                             is CourseVideosUIState.CourseData -> {
@@ -289,7 +287,9 @@ private fun CourseVideosUI(
                                 }
                             }
 
-                            CourseVideosUIState.Loading -> {}
+                            CourseVideosUIState.Loading -> {
+                                CircularProgress()
+                            }
                         }
                     }
                 }

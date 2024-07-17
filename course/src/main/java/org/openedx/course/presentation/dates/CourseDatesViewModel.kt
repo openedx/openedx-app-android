@@ -112,12 +112,10 @@ class CourseDatesViewModel(
                     checkIfCalendarOutOfDate()
                 }
             } catch (e: Exception) {
+                _uiState.value = DatesUIState.Error
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
-                } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_unknown_error)))
                 }
-                _uiState.value = DatesUIState.Error
             } finally {
                 courseNotifier.send(CourseLoading(false))
             }

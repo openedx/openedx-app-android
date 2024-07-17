@@ -36,7 +36,7 @@
     <string name="discussion_no_yet">No discussions yet</string>
     <string name="discussion_click_button_create_discussion">Click the button below to create your first discussion.</string>
     <string name="discussion_unnamed_subcategory">Unnamed subcategory</string>
-    <string name="discussion_unable_to_load">Unable to load discussions.\n Please try again later.</string>
+
 
 
     <plurals name="discussion_votes">

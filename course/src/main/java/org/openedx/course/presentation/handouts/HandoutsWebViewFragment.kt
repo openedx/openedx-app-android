@@ -24,8 +24,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Devices
@@ -37,6 +35,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.openedx.core.NoContentScreenType
+import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WebContentScreen
@@ -128,6 +128,10 @@ fun HandoutsScreens(
 ) {
     val windowSize = rememberWindowSize()
     when (uiState) {
+        is HandoutsUIState.Loading -> {
+            CircularProgress()
+        }
+
         is HandoutsUIState.HTMLContent -> {
             WebContentScreen(
                 windowSize = windowSize,
@@ -157,10 +161,9 @@ fun HandoutsEmptyScreen(
     title: String,
     onBackClick: () -> Unit
 ) {
-    val messageResId =
-        if (handoutType == HandoutsType.Handouts) R.string.course_no_handouts else R.string.course_no_announcements
-    val iconRedId =
-        if (handoutType == HandoutsType.Handouts) R.drawable.course_ic_no_handouts else R.drawable.course_ic_no_announcements
+    val handoutScreenType =
+        if (handoutType == HandoutsType.Handouts) NoContentScreenType.COURSE_HANDOUTS
+        else NoContentScreenType.COURSE_ANNOUNCEMENTS
 
     val scaffoldState = rememberScaffoldState()
     Scaffold(
@@ -208,10 +211,7 @@ fun HandoutsEmptyScreen(
                     Modifier.fillMaxSize(),
                     color = MaterialTheme.appColors.background
                 ) {
-                    NoContentScreen(
-                        message = stringResource(id = messageResId),
-                        icon = painterResource(id = iconRedId)
-                    )
+                    NoContentScreen(noContentScreenType = handoutScreenType)
                 }
             }
         }

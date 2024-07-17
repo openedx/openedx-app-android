@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.BlockType
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
@@ -55,6 +56,7 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.OpenEdXButton
@@ -224,10 +226,7 @@ private fun CourseOutlineUI(
                     when (uiState) {
                         is CourseOutlineUIState.CourseData -> {
                             if (uiState.courseStructure.blockData.isEmpty()) {
-                                NoContentScreen(
-                                    stringResource(id = R.string.course_no_course_content),
-                                    painterResource(id = R.drawable.course_ic_no_content)
-                                )
+                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_OUTLINE)
                                 return@Surface
                             }
                             LazyColumn(
@@ -334,7 +333,9 @@ private fun CourseOutlineUI(
                             }
                         }
 
-                        CourseOutlineUIState.Loading -> {}
+                        CourseOutlineUIState.Loading -> {
+                            CircularProgress()
+                        }
                     }
                 }
             }
