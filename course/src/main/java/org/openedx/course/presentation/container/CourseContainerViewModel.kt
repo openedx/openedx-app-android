@@ -25,6 +25,7 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.extension.toImageLink
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.CalendarManager
@@ -203,7 +204,7 @@ class CourseContainerViewModel(
 
     private fun loadCourseImage(imageUrl: String?) {
         imageProcessor.loadImage(
-            imageUrl = config.getApiHostURL() + imageUrl,
+            imageUrl = imageUrl?.toImageLink(config.getApiHostURL()) ?: "",
             defaultImage = CoreR.drawable.core_no_image_course,
             onComplete = { drawable ->
                 val bitmap = (drawable as BitmapDrawable).bitmap.apply {

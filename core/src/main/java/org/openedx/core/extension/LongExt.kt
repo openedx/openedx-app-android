@@ -5,7 +5,7 @@ import kotlin.math.pow
 
 fun Long.toFileSize(round: Int = 2, space: Boolean = true): String {
     try {
-        if (this <= 0) return "0"
+        if (this <= 0) return "0MB"
         val units = arrayOf("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         val digitGroups = (log10(this.toDouble()) / log10(1024.0)).toInt()
         val size = this / 1024.0.pow(digitGroups.toDouble())
