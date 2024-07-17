@@ -417,8 +417,6 @@ internal fun DiscoveryScreen(
                                 }
                             }
                         }
-
-                        else -> {}
                     }
                     PullRefreshIndicator(
                         refreshing,
