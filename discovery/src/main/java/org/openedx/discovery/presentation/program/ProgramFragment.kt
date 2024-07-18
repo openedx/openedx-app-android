@@ -50,8 +50,9 @@ import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
+import org.openedx.core.presentation.global.webview.WebViewUIAction
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
@@ -133,10 +134,22 @@ class ProgramFragment : Fragment() {
                     isNestedFragment = isNestedFragment,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    checkInternetConnection = {
-                        hasInternetConnection = viewModel.hasInternetConnection
+                    onWebViewUIAction = { action ->
+                        when (action) {
+                            WebViewUIAction.WEB_PAGE_LOADED -> {
+                                viewModel.showLoading(false)
+                            }
+
+                            WebViewUIAction.WEB_PAGE_ERROR -> {
+                                viewModel.onPageLoadError()
+                            }
+
+                            WebViewUIAction.RELOAD_WEB_PAGE -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
+                                viewModel.showLoading(true)
+                            }
+                        }
                     },
-                    onWebPageLoaded = { viewModel.showLoading(false) },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
@@ -192,7 +205,7 @@ class ProgramFragment : Fragment() {
                     },
                     onSettingsClick = {
                         viewModel.navigateToSettings(requireActivity().supportFragmentManager)
-                    },
+                    }
                 )
             }
         }
@@ -234,8 +247,7 @@ private fun ProgramInfoScreen(
     canShowBackBtn: Boolean,
     isNestedFragment: Boolean,
     hasInternetConnection: Boolean,
-    checkInternetConnection: () -> Unit,
-    onWebPageLoaded: () -> Unit,
+    onWebViewUIAction: (WebViewUIAction) -> Unit,
     onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
@@ -243,7 +255,6 @@ private fun ProgramInfoScreen(
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
-    val isLoading = uiState is ProgramUIState.Loading
 
     when (uiState) {
         is ProgramUIState.UiMessage -> {
@@ -304,41 +315,44 @@ private fun ProgramInfoScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
-                        val webView = CatalogWebViewScreen(
-                            url = contentUrl,
-                            uriScheme = uriScheme,
-                            isAllLinksExternal = true,
-                            onWebPageLoaded = onWebPageLoaded,
-                            refreshSessionCookie = {
-                                coroutineScope.launch {
-                                    cookieManager.tryToRefreshSessionCookie()
-                                }
-                            },
-                            onUriClick = onUriClick,
-                        )
+                    if ((uiState is ProgramUIState.Error).not()) {
+                        if (hasInternetConnection) {
+                            val webView = CatalogWebViewScreen(
+                                url = contentUrl,
+                                uriScheme = uriScheme,
+                                isAllLinksExternal = true,
+                                onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
+                                refreshSessionCookie = {
+                                    coroutineScope.launch {
+                                        cookieManager.tryToRefreshSessionCookie()
+                                    }
+                                },
+                                onUriClick = onUriClick,
+                                onWebPageLoadError = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR) }
+                            )
 
-                        AndroidView(
-                            modifier = Modifier
-                                .background(MaterialTheme.appColors.background),
-                            factory = {
-                                webView
-                            },
-                            update = {
-                                webView.loadUrl(contentUrl, coroutineScope, cookieManager)
-                            }
-                        )
-                    } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
-                            checkInternetConnection()
+                            AndroidView(
+                                modifier = Modifier
+                                    .background(MaterialTheme.appColors.background),
+                                factory = {
+                                    webView
+                                },
+                                update = {
+                                    webView.loadUrl(contentUrl, coroutineScope, cookieManager)
+                                }
+                            )
+                        } else {
+                            onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                         }
                     }
-                    if (isLoading && hasInternetConnection) {
+
+                    if (uiState is ProgramUIState.Error) {
+                        FullScreenErrorView(errorType = uiState.errorType) {
+                            onWebViewUIAction(WebViewUIAction.RELOAD_WEB_PAGE)
+                        }
+                    }
+
+                    if (uiState == ProgramUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -368,9 +382,8 @@ fun MyProgramsPreview() {
             canShowBackBtn = false,
             isNestedFragment = false,
             hasInternetConnection = false,
-            checkInternetConnection = {},
+            onWebViewUIAction = {},
             onBackClick = {},
-            onWebPageLoaded = {},
             onSettingsClick = {},
             onUriClick = { _, _ -> },
         )

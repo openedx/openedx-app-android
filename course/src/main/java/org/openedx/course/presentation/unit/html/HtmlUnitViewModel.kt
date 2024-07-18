@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.extension.readAsText
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
@@ -29,9 +30,8 @@ class HtmlUnitViewModel(
     private val offlineProgressSyncScheduler: OfflineProgressSyncScheduler
 ) : BaseViewModel() {
 
-    private val _uiState = MutableStateFlow(HtmlUnitUIState(null, false))
-    val uiState: StateFlow<HtmlUnitUIState>
-        get() = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<HtmlUnitUIState>(HtmlUnitUIState.Initialization)
+    val uiState = _uiState.asStateFlow()
 
     private val _injectJSList = MutableStateFlow<List<String>>(listOf())
     val injectJSList = _injectJSList.asStateFlow()
@@ -43,6 +43,19 @@ class HtmlUnitViewModel(
 
     init {
         tryToSyncProgress()
+    }
+
+    fun onWebPageLoading() {
+        _uiState.value = HtmlUnitUIState.Loading
+    }
+
+    fun onWebPageLoaded() {
+        _uiState.value = HtmlUnitUIState.Loaded()
+    }
+
+    fun onWebPageLoadError() {
+        _uiState.value =
+            HtmlUnitUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
     }
 
     fun setWebPageLoaded(assets: AssetManager) {
@@ -80,7 +93,7 @@ class HtmlUnitViewModel(
                 }
             } catch (e: Exception) {
             } finally {
-                _uiState.update { it.copy(isLoadingEnabled = true) }
+                _uiState.value = HtmlUnitUIState.Loading
             }
         }
     }
@@ -90,7 +103,7 @@ class HtmlUnitViewModel(
             if (!isOnline) {
                 val xBlockProgress = courseInteractor.getXBlockProgress(blockId)
                 delay(500)
-                _uiState.update { it.copy(jsonProgress = xBlockProgress?.jsonProgress?.toJson()) }
+                _uiState.value = HtmlUnitUIState.Loaded(jsonProgress = xBlockProgress?.jsonProgress?.toJson())
             }
         }
     }

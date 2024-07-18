@@ -109,6 +109,7 @@ import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
 import org.openedx.core.extension.tagId
 import org.openedx.core.extension.toastMessage
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -1136,25 +1137,33 @@ fun BackBtn(
 }
 
 @Composable
-fun ConnectionErrorView(
-    modifier: Modifier,
-    onReloadClick: () -> Unit,
+fun ConnectionErrorView(onReloadClick: () -> Unit) {
+    FullScreenErrorView(errorType = ErrorType.CONNECTION_ERROR, onReloadClick = onReloadClick)
+}
+
+@Composable
+fun FullScreenErrorView(
+    modifier: Modifier = Modifier,
+    errorType: ErrorType,
+    onReloadClick: () -> Unit
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.appColors.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             modifier = Modifier.size(100.dp),
-            painter = painterResource(id = R.drawable.core_no_internet_connection),
+            painter = painterResource(id = errorType.iconResId),
             contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
         Spacer(Modifier.height(28.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_no_internet_connection),
+            text = stringResource(id = errorType.titleResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleLarge,
             textAlign = TextAlign.Center
@@ -1162,7 +1171,7 @@ fun ConnectionErrorView(
         Spacer(Modifier.height(16.dp))
         Text(
             modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_no_internet_connection_description),
+            text = stringResource(id = errorType.descriptionResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
@@ -1171,7 +1180,7 @@ fun ConnectionErrorView(
         OpenEdXButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
-            text = stringResource(id = R.string.core_reload),
+            text = stringResource(id = errorType.actionResId),
             textColor = MaterialTheme.appColors.primaryButtonText,
             backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = onReloadClick,
@@ -1364,11 +1373,7 @@ private fun IconTextPreview() {
 @Composable
 private fun ConnectionErrorViewPreview() {
     OpenEdXTheme(darkTheme = true) {
-        ConnectionErrorView(
-            modifier = Modifier
-                .fillMaxSize(),
-            onReloadClick = {}
-        )
+        ConnectionErrorView(onReloadClick = {})
     }
 }
 

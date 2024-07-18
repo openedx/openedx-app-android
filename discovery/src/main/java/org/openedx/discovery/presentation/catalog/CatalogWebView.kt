@@ -1,6 +1,7 @@
 package org.openedx.discovery.presentation.catalog
 
 import android.annotation.SuppressLint
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.openedx.core.extension.applyDarkModeIfEnabled
+import org.openedx.core.extension.equalsHost
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
@@ -20,6 +22,7 @@ fun CatalogWebViewScreen(
     refreshSessionCookie: () -> Unit = {},
     onWebPageUpdated: (String) -> Unit = {},
     onUriClick: (String, linkAuthority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ): WebView {
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
@@ -80,6 +83,17 @@ fun CatalogWebViewScreen(
 
                         else -> false
                     }
+                }
+
+                override fun onReceivedError(
+                    view: WebView,
+                    request: WebResourceRequest,
+                    error: WebResourceError
+                ) {
+                    if (view.url.equalsHost(request.url.host)) {
+                        onWebPageLoadError()
+                    }
+                    super.onReceivedError(view, request, error)
                 }
             }
 
