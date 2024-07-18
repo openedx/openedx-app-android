@@ -75,26 +75,28 @@ class SignUpViewModelTest {
     private val listOfFields = listOf(
         RegistrationField(
             ApiConstants.EMAIL,
-            "",
-            RegistrationFieldType.TEXT,
-            "",
-            "",
-            true,
-            true,
-            RegistrationField.Restrictions(),
-            emptyList()
+            label = "",
+            type = RegistrationFieldType.TEXT,
+            placeholder = "",
+            instructions = "",
+            exposed = true,
+            required = true,
+            defaultValue = false,
+            restrictions = RegistrationField.Restrictions(),
+            options = emptyList()
         ),
 
         RegistrationField(
             ApiConstants.PASSWORD,
-            "",
-            RegistrationFieldType.TEXT,
-            "",
-            "",
-            true,
-            false,
-            RegistrationField.Restrictions(),
-            emptyList()
+            label = "",
+            type = RegistrationFieldType.TEXT,
+            placeholder = "",
+            instructions = "",
+            exposed = true,
+            required = true,
+            defaultValue = false,
+            restrictions = RegistrationField.Restrictions(),
+            options = emptyList()
         )
     )
 

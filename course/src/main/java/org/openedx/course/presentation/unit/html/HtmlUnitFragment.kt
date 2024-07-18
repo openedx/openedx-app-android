@@ -36,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -130,6 +129,7 @@ class HtmlUnitFragment : Fragment() {
                                     url = blockUrl,
                                     cookieManager = viewModel.cookieManager,
                                     apiHostURL = viewModel.apiHostURL,
+                                    userAgent = viewModel.appUserAgent,
                                     isLoading = uiState is HtmlUnitUIState.Loading,
                                     injectJSList = injectJSList,
                                     onCompletionSet = {
@@ -200,6 +200,7 @@ private fun HTMLContentView(
     url: String,
     cookieManager: AppCookieManager,
     apiHostURL: String,
+    userAgent: String,
     isLoading: Boolean,
     injectJSList: List<String>,
     onCompletionSet: () -> Unit,
@@ -307,7 +308,7 @@ private fun HTMLContentView(
                     setSupportZoom(true)
                     loadsImagesAutomatically = true
                     domStorageEnabled = true
-
+                    userAgentString = "$userAgentString $userAgent"
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false

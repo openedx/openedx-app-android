@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.extension.readAsText
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -16,6 +17,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 
 class HtmlUnitViewModel(
     private val config: Config,
+    private val appData: AppData,
     private val edxCookieManager: AppCookieManager,
     private val networkConnection: NetworkConnection,
     private val notifier: CourseNotifier
@@ -31,6 +33,7 @@ class HtmlUnitViewModel(
     val isCourseUnitProgressEnabled get() = config.getCourseUIConfig().isCourseUnitProgressEnabled
     val apiHostURL get() = config.getApiHostURL()
     val cookieManager get() = edxCookieManager
+    val appUserAgent get() = appData.appUserAgent
 
     fun onWebPageLoading() {
         _uiState.value = HtmlUnitUIState.Loading

@@ -140,9 +140,11 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     requireActivity().supportFragmentManager,
                     viewModel.courseName
                 )
-            } else if (viewModel.calendarSyncUIState.value.isCalendarSyncEnabled) {
-                setUpCourseCalendar()
             } else {
+                if (viewModel.calendarSyncUIState.value.isCalendarSyncEnabled) {
+                    setUpCourseCalendar()
+                }
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     pushNotificationPermissionLauncher.launch(
                         android.Manifest.permission.POST_NOTIFICATIONS

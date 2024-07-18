@@ -8,9 +8,15 @@ import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -266,6 +272,7 @@ private fun CourseInfoScreen(
                             horizontal = 16.dp,
                             vertical = 32.dp,
                         )
+                        .navigationBarsPadding()
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
@@ -315,6 +322,7 @@ private fun CourseInfoScreen(
                             CourseInfoWebView(
                                 contentUrl = (uiState as CourseInfoUIState.CourseInfo).initialUrl,
                                 uriScheme = uriScheme,
+                                isPreLogin = uiState.isPreLogin,
                                 onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
                                 onUriClick = onUriClick,
                                 onWebPageLoadError = {
@@ -351,6 +359,7 @@ private fun CourseInfoScreen(
 private fun CourseInfoWebView(
     contentUrl: String,
     uriScheme: String,
+    isPreLogin: Boolean,
     onWebPageLoaded: () -> Unit,
     onUriClick: (String, linkAuthority) -> Unit,
     onWebPageLoadError: () -> Unit
@@ -365,8 +374,18 @@ private fun CourseInfoWebView(
         onWebPageLoadError = onWebPageLoadError
     )
 
+    val consumeWindowInsets = if (isPreLogin) {
+        WindowInsets.navigationBars
+            .add(WindowInsets(bottom = 112.dp)) // The size of AuthButtonPanel
+            .asPaddingValues()
+    } else {
+        WindowInsets(0.dp).asPaddingValues()
+    }
+
     AndroidView(
         modifier = Modifier
+            .consumeWindowInsets(consumeWindowInsets)
+            .imePadding()
             .background(MaterialTheme.appColors.background),
         factory = {
             webView

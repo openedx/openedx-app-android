@@ -288,11 +288,11 @@ private fun SettingsSection(
                     text = stringResource(id = profileR.string.profile_video),
                     onClick = onVideoSettingsClick
                 )
-                SettingsDivider()
-                SettingsItem(
-                    text = stringResource(id = profileR.string.profile_dates_and_calendar),
-                    onClick = onCalendarSettingsClick
-                )
+//                SettingsDivider()
+//                SettingsItem(
+//                    text = stringResource(id = profileR.string.profile_dates_and_calendar),
+//                    onClick = onCalendarSettingsClick
+//                )
             }
         }
     }
@@ -706,7 +706,9 @@ fun AppVersionItemUpgradeRequired(
 }
 
 private val mockAppData = AppData(
+    appName = "openedx",
     versionName = "1.0.0",
+    applicationId = "org.example.com"
 )
 
 private val mockConfiguration = Configuration(

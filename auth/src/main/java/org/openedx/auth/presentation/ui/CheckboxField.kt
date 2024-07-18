@@ -14,6 +14,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import org.openedx.core.domain.model.RegistrationField
+import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -21,11 +23,17 @@ import org.openedx.core.ui.theme.appTypography
 
 @Composable
 internal fun CheckboxField(
-    text: String,
-    defaultValue: Boolean,
+    field: RegistrationField,
     onValueChanged: (Boolean) -> Unit
 ) {
-    var checkedState by remember { mutableStateOf(defaultValue) }
+    // Initialize checkedState with user-inputted placeholder value,
+    // fallback to defaultValue if not provided
+    var checkedState by remember {
+        mutableStateOf(
+            field.placeholder.takeIf { it.isNotEmpty() }?.toBoolean() ?: field.defaultValue
+        )
+    }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
             checked = checkedState,
@@ -43,7 +51,7 @@ internal fun CheckboxField(
                 checkedState = !checkedState
                 onValueChanged(checkedState)
             },
-            text = text,
+            text = field.label,
             style = MaterialTheme.appTypography.bodySmall,
         )
     }
@@ -55,8 +63,19 @@ internal fun CheckboxField(
 private fun CheckboxFieldPreview() {
     OpenEdXTheme {
         CheckboxField(
-            text = "Test",
-            defaultValue = true,
+            field = RegistrationField(
+                "",
+                "Checkbox label",
+                RegistrationFieldType.CHECKBOX,
+                "",
+                instructions = "",
+                exposed = true,
+                required = false,
+                defaultValue = true,
+                restrictions = RegistrationField.Restrictions(),
+                options = listOf(),
+                errorInstructions = ""
+            )
         ) {}
     }
 }

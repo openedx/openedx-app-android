@@ -11,9 +11,15 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -272,6 +278,7 @@ private fun WebViewDiscoveryScreen(
                             DiscoveryWebView(
                                 contentUrl = contentUrl,
                                 uriScheme = uriScheme,
+                                isPreLogin = isPreLogin,
                                 onWebPageLoaded = {
                                     if ((uiState is WebViewUIState.Error).not()) {
                                         onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED)
@@ -313,6 +320,7 @@ private fun WebViewDiscoveryScreen(
 private fun DiscoveryWebView(
     contentUrl: String,
     uriScheme: String,
+    isPreLogin: Boolean,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
@@ -327,8 +335,20 @@ private fun DiscoveryWebView(
         onWebPageLoadError = onWebPageLoadError
     )
 
+    val consumeWindowInsets = if (isPreLogin) {
+        WindowInsets.navigationBars
+            .add(WindowInsets(bottom = 112.dp)) // The size of AuthButtonPanel
+            .asPaddingValues()
+    } else {
+        WindowInsets.navigationBars
+            .add(WindowInsets(bottom = 56.dp)) // The size of BottomNavigationView
+            .asPaddingValues()
+    }
+
     AndroidView(
         modifier = Modifier
+            .consumeWindowInsets(consumeWindowInsets)
+            .imePadding()
             .background(MaterialTheme.appColors.background),
         factory = {
             webView

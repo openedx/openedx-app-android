@@ -11,11 +11,12 @@ data class Progress(
 ) : Parcelable {
 
     @IgnoredOnParcel
-    val value: Float = try {
-        assignmentsCompleted.toFloat() / totalAssignmentsCount.toFloat()
-    } catch (_: ArithmeticException) {
-        0f
-    }
+    val value: Float
+        get() = if (totalAssignmentsCount != 0) {
+            assignmentsCompleted.toFloat() / totalAssignmentsCount.toFloat()
+        } else {
+            0f
+        }
 
     companion object {
         val DEFAULT_PROGRESS = Progress(0, 0)

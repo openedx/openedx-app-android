@@ -461,7 +461,7 @@ private fun PreviewCourseAlreadyPurchasedExecuteErrorDialog() {
     CourseAlreadyPurchasedExecuteErrorDialog(
         description = stringResource(id = R.string.iap_course_not_fullfilled),
         positiveText = stringResource(id = R.string.iap_label_refresh_now),
-        negativeText = stringResource(id = R.string.core_contact_support),
+        negativeText = stringResource(id = R.string.iap_get_help),
         neutralText = stringResource(id = R.string.core_cancel),
         onPositiveClick = {}, onNegativeClick = {}, onNeutralClick = {})
 }

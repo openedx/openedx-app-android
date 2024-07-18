@@ -158,12 +158,6 @@ class AllEnrolledCoursesViewModel(
         }
     }
 
-    fun navigateToCourseSearch(fragmentManager: FragmentManager) {
-        dashboardRouter.navigateToCourseSearch(
-            fragmentManager, ""
-        )
-    }
-
     fun navigateToCourseOutline(
         fragmentManager: FragmentManager,
         courseId: String,

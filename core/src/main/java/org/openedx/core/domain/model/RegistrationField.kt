@@ -15,7 +15,7 @@ data class RegistrationField(
     val restrictions: Restrictions,
     val options: List<Option>,
     val errorInstructions: String = "",
-    val defaultValue: Boolean = false,
+    val defaultValue: Boolean,
 ) {
 
     data class Restrictions(
@@ -39,6 +39,7 @@ fun String.createHonorCodeField() = RegistrationField(
     instructions = "",
     exposed = false,
     required = false,
+    defaultValue = true,
     restrictions = RegistrationField.Restrictions(),
     options = emptyList(),
     errorInstructions = ""

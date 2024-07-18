@@ -24,6 +24,8 @@ data class RegistrationFields(
         val exposed: Boolean?,
         @SerializedName("required")
         val required: Boolean?,
+        @SerializedName("defaultValue")
+        val defaultValue: Boolean?,
         @SerializedName("restrictions")
         val restrictions: Restrictions?,
         @SerializedName("options")
@@ -38,6 +40,7 @@ data class RegistrationFields(
                 instructions = instructions ?: "",
                 exposed = exposed ?: false,
                 required = required ?: false,
+                defaultValue = defaultValue ?: true,
                 restrictions = restrictions?.mapToDomain() ?: RegistrationField.Restrictions(),
                 options = options?.map { it.mapToDomain() } ?: emptyList()
             )

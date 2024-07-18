@@ -33,15 +33,15 @@ class SyncFirebaseTokenWorker(context: Context, params: WorkerParameters) :
         private const val WORKER_TAG = "SyncFirebaseTokenWorker"
 
         fun schedule(context: Context) {
-            val work = OneTimeWorkRequest
-                .Builder(SyncFirebaseTokenWorker::class.java)
-                .addTag(WORKER_TAG)
-                .build()
-            WorkManager.getInstance(context).beginUniqueWork(
-                WORKER_TAG,
-                ExistingWorkPolicy.REPLACE,
-                work
-            ).enqueue()
+//            val work = OneTimeWorkRequest
+//                .Builder(SyncFirebaseTokenWorker::class.java)
+//                .addTag(WORKER_TAG)
+//                .build()
+//            WorkManager.getInstance(context).beginUniqueWork(
+//                WORKER_TAG,
+//                ExistingWorkPolicy.REPLACE,
+//                work
+//            ).enqueue()
         }
     }
 }

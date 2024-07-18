@@ -71,6 +71,7 @@ import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
+import org.openedx.core.R as CoreR
 
 val appModule = module {
 
@@ -167,7 +168,14 @@ val appModule = module {
         DownloadWorkerController(get(), get(), get())
     }
 
-    single { AppData(versionName = BuildConfig.VERSION_NAME) }
+    single {
+        val resourceManager = get<ResourceManager>()
+        AppData(
+            appName = resourceManager.getString(CoreR.string.app_name),
+            versionName = BuildConfig.VERSION_NAME,
+            applicationId = BuildConfig.APPLICATION_ID,
+        )
+    }
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get()) }

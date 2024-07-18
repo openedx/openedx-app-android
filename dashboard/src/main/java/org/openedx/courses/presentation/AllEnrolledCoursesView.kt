@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -29,14 +28,11 @@ import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -127,10 +123,6 @@ fun AllEnrolledCoursesView(
 
                 AllEnrolledCoursesAction.Back -> {
                     fragmentManager.popBackStack()
-                }
-
-                AllEnrolledCoursesAction.Search -> {
-                    viewModel.navigateToCourseSearch(fragmentManager)
                 }
 
                 is AllEnrolledCoursesAction.OpenCourse -> {
@@ -279,10 +271,7 @@ private fun AllEnrolledCoursesView(
                                             layoutDirection
                                         ),
                                         end = contentPaddings.calculateEndPadding(layoutDirection)
-                                    ),
-                                onSearchClick = {
-                                    onAction(AllEnrolledCoursesAction.Search)
-                                }
+                                    )
                             )
                             RoundTabsBar(
                                 modifier = Modifier.align(Alignment.Start),
@@ -438,16 +427,11 @@ fun CourseItem(
                         .fillMaxWidth()
                         .height(90.dp)
                 )
-                val progress: Float = try {
-                    course.progress.assignmentsCompleted.toFloat() / course.progress.totalAssignmentsCount.toFloat()
-                } catch (_: ArithmeticException) {
-                    0f
-                }
                 LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    progress = progress,
+                    progress = course.progress.value,
                     color = MaterialTheme.appColors.progressBarColor,
                     backgroundColor = MaterialTheme.appColors.progressBarBackgroundColor
                 )
@@ -493,7 +477,6 @@ fun CourseItem(
 @Composable
 fun Header(
     modifier: Modifier = Modifier,
-    onSearchClick: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxWidth()
@@ -504,20 +487,6 @@ fun Header(
             color = MaterialTheme.appColors.textDark,
             style = MaterialTheme.appTypography.headlineBold
         )
-        IconButton(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .offset(x = 12.dp),
-            onClick = {
-                onSearchClick()
-            }
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                tint = MaterialTheme.appColors.textDark
-            )
-        }
     }
 }
 

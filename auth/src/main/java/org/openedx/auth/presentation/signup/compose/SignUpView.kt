@@ -526,6 +526,7 @@ private val field = RegistrationField(
     instructions = "Enter your fullname",
     exposed = false,
     required = true,
+    defaultValue = true,
     restrictions = RegistrationField.Restrictions(),
     options = listOf(option, option),
     errorInstructions = ""

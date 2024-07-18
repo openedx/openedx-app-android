@@ -10,8 +10,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.CircularProgressIndicator
@@ -142,6 +146,9 @@ private fun WebViewContent(
     val context = LocalContext.current
     val isDarkTheme = isSystemInDarkTheme()
     AndroidView(
+        modifier = Modifier
+            .consumeWindowInsets(WindowInsets.navigationBars)
+            .imePadding(),
         factory = {
             WebView(context).apply {
                 webViewClient = object : WebViewClient() {

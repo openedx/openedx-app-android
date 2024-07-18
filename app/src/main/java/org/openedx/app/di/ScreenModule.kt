@@ -466,7 +466,7 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
+    viewModel { HtmlUnitViewModel(get(), get(), get(), get(), get()) }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
 

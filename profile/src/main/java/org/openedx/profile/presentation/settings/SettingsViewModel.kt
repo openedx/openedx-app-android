@@ -195,7 +195,6 @@ class SettingsViewModel(
         EmailUtil.showFeedbackScreen(
             context = context,
             feedbackEmailAddress = config.getFeedbackEmailAddress(),
-            subject = context.getString(R.string.core_error_upgrading_course_in_app),
             appVersion = appData.versionName
         )
         logProfileEvent(ProfileAnalyticsEvent.CONTACT_SUPPORT_CLICKED)

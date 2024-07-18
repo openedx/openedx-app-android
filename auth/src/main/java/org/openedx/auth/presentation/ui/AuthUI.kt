@@ -104,7 +104,9 @@ fun RequiredFields(
             }
 
             RegistrationFieldType.CHECKBOX -> {
-                CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                CheckboxField(
+                    field = field
+                ) {
                     onFieldUpdated(field.name, it.toString())
                 }
             }
@@ -188,7 +190,9 @@ fun OptionalFields(
                 }
 
                 RegistrationFieldType.CHECKBOX -> {
-                    CheckboxField(text = field.label, defaultValue = field.defaultValue) {
+                    CheckboxField(
+                        field = field
+                    ) {
                         onFieldUpdated(field.name, it.toString())
                     }
                 }
@@ -668,6 +672,7 @@ private val field = RegistrationField(
     instructions = "Enter your fullname",
     exposed = false,
     required = true,
+    defaultValue = true,
     restrictions = RegistrationField.Restrictions(),
     options = listOf(option, option),
     errorInstructions = ""

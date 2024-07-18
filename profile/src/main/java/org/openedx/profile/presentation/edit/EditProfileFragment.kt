@@ -973,6 +973,7 @@ private fun SelectableField(
             enabled = false,
             value = initialValue ?: "",
             colors = colors,
+            singleLine = true,
             shape = MaterialTheme.appShapes.textFieldShape,
             textStyle = MaterialTheme.appTypography.bodyMedium,
             onValueChange = { },
