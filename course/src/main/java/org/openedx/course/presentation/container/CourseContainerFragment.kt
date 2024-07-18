@@ -57,8 +57,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialog
-import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.RoundTabsBar
@@ -89,15 +87,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
             requireArguments().getString(ARG_ENROLLMENT_MODE, ""),
             requireArguments().getString(ARG_RESUME_BLOCK, "")
         )
-    }
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { isGranted ->
-        viewModel.logCalendarPermissionAccess(!isGranted.containsValue(false))
-        if (!isGranted.containsValue(false)) {
-            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.SYNC_DIALOG)
-        }
     }
 
     private val pushNotificationPermissionLauncher = registerForActivityResult(
@@ -189,84 +178,12 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                 OpenEdXTheme {
                     val syncState by viewModel.calendarSyncUIState.collectAsState()
 
-                    LaunchedEffect(key1 = syncState.checkForOutOfSync) {
-                        if (syncState.isCalendarSyncEnabled && syncState.checkForOutOfSync.get()) {
-                            viewModel.checkIfCalendarOutOfDate()
-                        }
-                    }
-
                     LaunchedEffect(syncState.uiMessage.get()) {
                         syncState.uiMessage.get().takeIfNotEmpty()?.let {
                             Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
                             syncState.uiMessage.set("")
                         }
                     }
-
-                    CalendarSyncDialog(
-                        syncDialogType = syncState.dialogType,
-                        calendarTitle = syncState.calendarTitle,
-                        syncDialogPosAction = { dialog ->
-                            when (dialog) {
-                                CalendarSyncDialogType.SYNC_DIALOG -> {
-                                    viewModel.logCalendarAddDates(true)
-                                    viewModel.addOrUpdateEventsInCalendar(
-                                        updatedEvent = false,
-                                    )
-                                }
-
-                                CalendarSyncDialogType.UN_SYNC_DIALOG -> {
-                                    viewModel.logCalendarRemoveDates(true)
-                                    viewModel.deleteCourseCalendar()
-                                }
-
-                                CalendarSyncDialogType.PERMISSION_DIALOG -> {
-                                    permissionLauncher.launch(viewModel.calendarPermissions)
-                                }
-
-                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
-                                    viewModel.logCalendarSyncUpdate(true)
-                                    viewModel.addOrUpdateEventsInCalendar(
-                                        updatedEvent = true,
-                                    )
-                                }
-
-                                CalendarSyncDialogType.EVENTS_DIALOG -> {
-                                    viewModel.logCalendarSyncedConfirmation(true)
-                                    viewModel.openCalendarApp()
-                                }
-
-                                else -> {}
-                            }
-                        },
-                        syncDialogNegAction = { dialog ->
-                            when (dialog) {
-                                CalendarSyncDialogType.SYNC_DIALOG ->
-                                    viewModel.logCalendarAddDates(false)
-
-                                CalendarSyncDialogType.UN_SYNC_DIALOG ->
-                                    viewModel.logCalendarRemoveDates(false)
-
-                                CalendarSyncDialogType.OUT_OF_SYNC_DIALOG -> {
-                                    viewModel.logCalendarSyncUpdate(false)
-                                    viewModel.deleteCourseCalendar()
-                                }
-
-                                CalendarSyncDialogType.EVENTS_DIALOG ->
-                                    viewModel.logCalendarSyncedConfirmation(false)
-
-                                CalendarSyncDialogType.LOADING_DIALOG,
-                                CalendarSyncDialogType.PERMISSION_DIALOG,
-                                CalendarSyncDialogType.NONE,
-                                -> {
-                                }
-                            }
-
-                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
-                        },
-                        dismissSyncDialog = {
-                            viewModel.setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
-                        }
-                    )
                 }
             }
         }

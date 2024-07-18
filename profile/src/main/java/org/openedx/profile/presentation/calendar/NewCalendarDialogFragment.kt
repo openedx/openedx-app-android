@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -36,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +61,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import org.koin.androidx.compose.koinViewModel
+import org.openedx.core.extension.parcelable
+import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -82,12 +89,32 @@ class NewCalendarDialogFragment : DialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
+                val viewModel: NewCalendarDialogViewModel = koinViewModel()
+
+                LaunchedEffect(Unit) {
+                    viewModel.uiMessage.collect { message ->
+                        if (message.isNotEmpty()) {
+                            context.toastMessage(message)
+                        }
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    viewModel.isSuccess.collect { isSuccess ->
+                        if (isSuccess) {
+                            dismiss()
+                        }
+                    }
+                }
+
                 NewCalendarDialog(
+                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(ARG_DIALOG_TYPE)
+                        ?: NewCalendarDialogType.CREATE_NEW,
                     onCancelClick = {
                         dismiss()
                     },
-                    onBeginSyncingClick = { calendarName, calendarColor ->
-                        //TODO Create calendar and sync events
+                    onBeginSyncingClick = { calendarTitle, calendarColor ->
+                        viewModel.createCalendar(calendarTitle, calendarColor)
                     }
                 )
             }
@@ -96,12 +123,19 @@ class NewCalendarDialogFragment : DialogFragment() {
 
     companion object {
         const val DIALOG_TAG = "NewCalendarDialogFragment"
+        const val ARG_DIALOG_TYPE = "ARG_DIALOG_TYPE"
 
-        fun newInstance(): NewCalendarDialogFragment {
-            return NewCalendarDialogFragment()
+        fun newInstance(
+            newCalendarDialogType: NewCalendarDialogType
+        ): NewCalendarDialogFragment {
+            val fragment = NewCalendarDialogFragment()
+            fragment.arguments = bundleOf(
+                ARG_DIALOG_TYPE to newCalendarDialogType
+            )
+            return fragment
         }
 
-        fun getDefaultCalendarName(context: Context): String {
+        fun getDefaultCalendarTitle(context: Context): String {
             return "${context.getString(CoreR.string.app_name)} ${context.getString(R.string.profile_course_dates)}"
         }
     }
@@ -110,11 +144,17 @@ class NewCalendarDialogFragment : DialogFragment() {
 @Composable
 private fun NewCalendarDialog(
     modifier: Modifier = Modifier,
+    newCalendarDialogType: NewCalendarDialogType,
     onCancelClick: () -> Unit,
-    onBeginSyncingClick: (calendarName: String, calendarColor: CalendarColor) -> Unit
+    onBeginSyncingClick: (calendarTitle: String, calendarColor: CalendarColor) -> Unit
 ) {
     val context = LocalContext.current
-    var calendarName by rememberSaveable {
+    val scrollState = rememberScrollState()
+    val title = when (newCalendarDialogType) {
+        NewCalendarDialogType.CREATE_NEW -> stringResource(id = R.string.profile_new_calendar)
+        NewCalendarDialogType.UPDATE -> stringResource(id = R.string.profile_change_sync_options)
+    }
+    var calendarTitle by rememberSaveable {
         mutableStateOf("")
     }
     var calendarColor by rememberSaveable {
@@ -127,6 +167,7 @@ private fun NewCalendarDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(scrollState)
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -136,7 +177,7 @@ private fun NewCalendarDialog(
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
-                    text = stringResource(id = R.string.profile_new_calendar),
+                    text = title,
                     color = MaterialTheme.appColors.textDark,
                     style = MaterialTheme.appTypography.titleLarge
                 )
@@ -151,9 +192,9 @@ private fun NewCalendarDialog(
                     tint = MaterialTheme.appColors.primary
                 )
             }
-            CalendarNameTextField(
+            CalendarTitleTextField(
                 onValueChanged = {
-                    calendarName = it
+                    calendarTitle = it
                 }
             )
             ColorDropdown(
@@ -183,7 +224,7 @@ private fun NewCalendarDialog(
                 text = stringResource(id = R.string.profile_begin_syncing),
                 onClick = {
                     onBeginSyncingClick(
-                        calendarName.ifEmpty { NewCalendarDialogFragment.getDefaultCalendarName(context) },
+                        calendarTitle.ifEmpty { NewCalendarDialogFragment.getDefaultCalendarTitle(context) },
                         calendarColor
                     )
                 }
@@ -193,11 +234,12 @@ private fun NewCalendarDialog(
 }
 
 @Composable
-private fun CalendarNameTextField(
+private fun CalendarTitleTextField(
     modifier: Modifier = Modifier,
     onValueChanged: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val maxChar = 40
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
             TextFieldValue("")
@@ -218,7 +260,7 @@ private fun CalendarNameTextField(
                 .height(48.dp),
             value = textFieldValue,
             onValueChange = {
-                textFieldValue = it
+                if (it.text.length <= maxChar) textFieldValue = it
                 onValueChanged(it.text.trim())
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -227,7 +269,7 @@ private fun CalendarNameTextField(
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
                 Text(
-                    text = NewCalendarDialogFragment.getDefaultCalendarName(LocalContext.current),
+                    text = NewCalendarDialogFragment.getDefaultCalendarTitle(LocalContext.current),
                     color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.bodyMedium
                 )
@@ -383,6 +425,7 @@ private fun ColorCircle(
 private fun NewCalendarDialogPreview() {
     OpenEdXTheme {
         NewCalendarDialog(
+            newCalendarDialogType = NewCalendarDialogType.CREATE_NEW,
             onCancelClick = { },
             onBeginSyncingClick = { _, _ -> }
         )

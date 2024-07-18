@@ -20,8 +20,8 @@ import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.notifier.AccountUpdated
-import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.account.AccountUpdated
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 
 class ManageAccountViewModel(
     private val interactor: ProfileInteractor,

@@ -186,4 +186,11 @@
     <string name="core_edit">Edit</string>
     <string name="core_offline_progress_sync">Offline Progress Sync</string>
     <string name="core_close">Close</string>
+
+    <string name="core_calendar_sync_failed">Calendar Sync Failed</string>
+    <string name="core_synced_to_calendar">Synced to Calendar</string>
+    <string name="core_syncing_failed">Sync Failed</string>
+    <string name="core_to_sync">To Sync</string>
+    <string name="core_not_synced">Not Synced</string>
+    <string name="core_syncing_to_calendar">Syncing to calendar…</string>
 </resources>

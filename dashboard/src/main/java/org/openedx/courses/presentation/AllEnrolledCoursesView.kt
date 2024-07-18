@@ -528,7 +528,7 @@ fun EmptyState(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = org.openedx.dashboard.R.drawable.dashboard_ic_book),
+                painter = painterResource(id = R.drawable.core_ic_book),
                 tint = MaterialTheme.appColors.textFieldBorder,
                 contentDescription = null
             )

@@ -122,7 +122,7 @@ class AppViewModel(
         if (System.currentTimeMillis() - logoutHandledAt > 5000) {
             if (event.isForced) {
                 logoutHandledAt = System.currentTimeMillis()
-                preferencesManager.clear()
+                preferencesManager.clearCorePreferences()
                 withContext(dispatcher) {
                     room.clearAllTables()
                 }

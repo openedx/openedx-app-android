@@ -31,6 +31,7 @@ import org.openedx.core.presentation.global.WindowSizeHolder
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.utils.Logger
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.presentation.download.DownloadDialogManager
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewManager
@@ -54,6 +55,7 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
     private val downloadDialogManager by inject<DownloadDialogManager>()
+    private val calendarSyncScheduler by inject<CalendarSyncScheduler>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -173,6 +175,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                 )
             }
         }
+
+        calendarSyncScheduler.scheduleDailySync()
     }
 
     override fun onStart() {

@@ -60,5 +60,23 @@
     <string name="calendar_color_accent">Accent</string>
     <string name="profile_course_dates">Course Dates</string>
     <string name="profile_color">Color</string>
+    <string name="profile_course_calendar_sync">Course Calendar Sync</string>
+    <string name="profile_currently_syncing_events">Currently syncing events to your calendar</string>
+    <string name="profile_change_sync_options">Change Sync Options</string>
+    <string name="profile_courses_to_sync">Courses to Sync</string>
+    <string name="profile_syncing_courses">Syncing %1$s Courses</string>
+    <string name="profile_options">Options</string>
+    <string name="profile_use_relative_dates">Use relative dates</string>
+    <string name="profile_show_relative_dates">Show relative dates like “Tomorrow” and “Yesterday”</string>
+    <string name="profile_courses_to_sync_title">Disabling sync for a course will remove all events connected to the course from your synced calendar.</string>
+    <string name="profile_automatically_remove_events">Automatically remove events from courses you haven’t viewed in the last month</string>
+    <string name="profile_inactive">Inactive</string>
+    <string name="profile_hide_inactive_courses">Hide Inactive Courses</string>
+    <string name="profile_disable_calendar_dialog_title">Disable Calendar Sync</string>
+    <string name="profile_disable_calendar_dialog_description">Disabling calendar sync will delete the calendar “%1$s.” You can turn calendar sync back on at any time.</string>
+    <string name="profile_disable_syncing">Disable Syncing</string>
+    <string name="profile_no_courses">No %1$s Courses</string>
+    <string name="profile_no_sync_courses">No courses are currently being synced to your calendar.</string>
+    <string name="profile_no_courses_with_current_filter">No courses match the current filter.</string>
 
 </resources>

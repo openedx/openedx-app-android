@@ -12,8 +12,10 @@ import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
+import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
 import org.openedx.core.presentation.settings.video.VideoQualityViewModel
+import org.openedx.core.repository.CalendarRepository
 import org.openedx.core.ui.WindowSize
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -59,6 +61,9 @@ import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
 import org.openedx.profile.presentation.calendar.CalendarViewModel
+import org.openedx.profile.presentation.calendar.CoursesToSyncViewModel
+import org.openedx.profile.presentation.calendar.DisableCalendarSyncDialogViewModel
+import org.openedx.profile.presentation.calendar.NewCalendarDialogViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.manageaccount.ManageAccountViewModel
@@ -100,6 +105,8 @@ val screenModule = module {
 
     viewModel { (courseId: String?, infoType: String?) ->
         SignInViewModel(
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -192,14 +199,21 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
-    viewModel { CalendarViewModel(get()) }
+    viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { CoursesToSyncViewModel(get(), get(), get(), get()) }
+    viewModel { NewCalendarDialogViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { DisableCalendarSyncDialogViewModel(get(), get(), get(), get()) }
+    factory { CalendarRepository(get(), get(), get()) }
+    factory { CalendarInteractor(get()) }
 
     single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
+
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
             pathId,
@@ -223,7 +237,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String, courseTitle: String, enrollmentMode: String, resumeBlockId: String) ->
@@ -232,7 +247,6 @@ val screenModule = module {
             courseTitle,
             resumeBlockId,
             enrollmentMode,
-            get(),
             get(),
             get(),
             get(),
@@ -331,10 +345,9 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
+    viewModel { (courseId: String, enrollmentMode: String) ->
         CourseDatesViewModel(
             courseId,
-            courseTitle,
             enrollmentMode,
             get(),
             get(),
@@ -343,7 +356,8 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
     viewModel { (courseId: String, handoutsType: String) ->

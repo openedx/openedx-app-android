@@ -385,7 +385,7 @@ private fun ViewAllItem(
         ) {
             Icon(
                 modifier = Modifier.size(48.dp),
-                painter = painterResource(id = R.drawable.dashboard_ic_book),
+                painter = painterResource(id = CoreR.drawable.core_ic_book),
                 tint = MaterialTheme.appColors.textFieldBorder,
                 contentDescription = null
             )
@@ -750,7 +750,7 @@ private fun NoCoursesInfo(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.dashboard_ic_book),
+                painter = painterResource(id = CoreR.drawable.core_ic_book),
                 tint = MaterialTheme.appColors.textFieldBorder,
                 contentDescription = null
             )

@@ -8,6 +8,7 @@ import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
+import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
@@ -46,6 +47,7 @@ import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileFragment
 import org.openedx.profile.presentation.calendar.CalendarFragment
+import org.openedx.profile.presentation.calendar.CoursesToSyncFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
@@ -56,7 +58,7 @@ import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
+    ProfileRouter, AppUpgradeRouter, WhatsNewRouter, CalendarRouter {
 
     //region AuthRouter
     override fun navigateToMain(
@@ -410,6 +412,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToCalendarSettings(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, CalendarFragment())
+    }
+
+    override fun navigateToCoursesToSync(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, CoursesToSyncFragment())
     }
     //endregion
 
