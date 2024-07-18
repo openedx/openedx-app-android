@@ -10,7 +10,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'fullstory'
+
+if (fullstoryEnabled) {
+    apply plugin: 'fullstory'
+}
 
 if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
