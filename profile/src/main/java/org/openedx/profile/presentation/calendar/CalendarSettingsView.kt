@@ -67,6 +67,7 @@ fun CalendarSettingsView(
     windowSize: WindowSize,
     uiState: CalendarUIState,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
+    onRelativeDateSwitchClick: (Boolean) -> Unit,
     onChangeSyncOptionClick: () -> Unit,
     onCourseToSyncClick: () -> Unit,
     onBackClick: () -> Unit
@@ -155,6 +156,11 @@ fun CalendarSettingsView(
                                 onCourseToSyncClick = onCourseToSyncClick
                             )
                         }
+                        Spacer(modifier = Modifier.height(32.dp))
+                        OptionsSection(
+                            isRelativeDatesEnabled = uiState.isRelativeDateEnabled,
+                            onRelativeDateSwitchClick = onRelativeDateSwitchClick
+                        )
                     }
                 }
             }
@@ -312,10 +318,12 @@ private fun CalendarSettingsViewPreview() {
                 calendarData = CalendarData("calendar", Color.Red.toArgb()),
                 calendarSyncState = CalendarSyncState.SYNCED,
                 isCalendarSyncEnabled = false,
+                isRelativeDateEnabled = true,
                 coursesSynced = 5
             ),
             onBackClick = {},
             onCalendarSyncSwitchClick = {},
+            onRelativeDateSwitchClick = {},
             onChangeSyncOptionClick = {},
             onCourseToSyncClick = {}
         )

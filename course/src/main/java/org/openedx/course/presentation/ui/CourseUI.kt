@@ -65,7 +65,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -591,6 +590,7 @@ fun VideoSubtitles(
 fun CourseSection(
     modifier: Modifier = Modifier,
     block: Block,
+    useRelativeDates: Boolean,
     onItemClick: (Block) -> Unit,
     courseSectionsState: Boolean?,
     courseSubSections: List<Block>?,
@@ -635,7 +635,8 @@ fun CourseSection(
             ) {
                 CourseSubSectionItem(
                     block = subSectionBlock,
-                    onClick = onSubSectionClick
+                    onClick = onSubSectionClick,
+                    useRelativeDates = useRelativeDates
                 )
             }
         }
@@ -746,15 +747,15 @@ fun CourseExpandableChapterCard(
 fun CourseSubSectionItem(
     modifier: Modifier = Modifier,
     block: Block,
+    useRelativeDates: Boolean,
     onClick: (Block) -> Unit,
 ) {
-    val context = LocalContext.current
     val icon =
         if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.getAssignmentFormattedDate(context, it) })
+        mutableStateOf(block.due?.let { TimeUtils.formatToString(it, useRelativeDates) } ?: "")
     }
     val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(
@@ -796,7 +797,7 @@ fun CourseSubSectionItem(
                 stringResource(
                     R.string.course_subsection_assignment_info,
                     block.assignmentProgress?.assignmentType ?: "",
-                    due ?: "",
+                    stringResource(id = coreR.string.core_date_format_assignment_due, due),
                     block.assignmentProgress?.numPointsEarned?.toInt() ?: 0,
                     block.assignmentProgress?.numPointsPossible?.toInt() ?: 0
                 )

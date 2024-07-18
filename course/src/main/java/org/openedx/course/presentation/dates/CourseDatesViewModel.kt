@@ -14,6 +14,7 @@ import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseBannerType
@@ -48,11 +49,13 @@ class CourseDatesViewModel(
     private val config: Config,
     private val calendarInteractor: CalendarInteractor,
     private val calendarNotifier: CalendarNotifier,
+    private val corePreferences: CorePreferences,
     val courseRouter: CourseRouter,
     val calendarRouter: CalendarRouter
 ) : BaseViewModel() {
 
     var isSelfPaced = true
+    var useRelativeDates = corePreferences.isRelativeDatesEnabled
 
     private val _uiState = MutableStateFlow<DatesUIState>(DatesUIState.Loading)
     val uiState: StateFlow<DatesUIState>

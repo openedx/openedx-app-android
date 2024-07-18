@@ -150,6 +150,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
             windowSize
         )
     }
@@ -202,7 +203,7 @@ val screenModule = module {
         )
     }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
-    viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { CoursesToSyncViewModel(get(), get(), get(), get()) }
     viewModel { NewCalendarDialogViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { DisableCalendarSyncDialogViewModel(get(), get(), get(), get()) }
@@ -271,7 +272,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
         )
     }
     viewModel { (courseId: String) ->
@@ -313,7 +314,6 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
         )
     }
     viewModel { (courseId: String) -> BaseVideoViewModel(courseId, get()) }
@@ -345,6 +345,7 @@ val screenModule = module {
         CourseDatesViewModel(
             courseId,
             enrollmentMode,
+            get(),
             get(),
             get(),
             get(),

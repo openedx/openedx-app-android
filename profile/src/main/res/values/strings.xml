@@ -78,5 +78,6 @@
     <string name="profile_no_courses">No %1$s Courses</string>
     <string name="profile_no_sync_courses">No courses are currently being synced to your calendar.</string>
     <string name="profile_no_courses_with_current_filter">No courses match the current filter.</string>
+    <string name="profile_show_full_dates">Show full dates like “%1$s”</string>
 
 </resources>

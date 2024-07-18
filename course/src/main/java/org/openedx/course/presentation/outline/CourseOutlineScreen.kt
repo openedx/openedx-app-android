@@ -315,6 +315,7 @@ private fun CourseOutlineUI(
                                             modifier = listPadding.padding(vertical = 4.dp),
                                             block = section,
                                             onItemClick = onExpandClick,
+                                            useRelativeDates = uiState.useRelativeDates,
                                             courseSectionsState = courseSectionsState,
                                             courseSubSections = courseSubSections,
                                             downloadedStateMap = uiState.downloadedState,
@@ -504,7 +505,8 @@ private fun CourseOutlineScreenPreview() {
                     verifiedUpgradeLink = "",
                     contentTypeGatingEnabled = false,
                     hasEnded = false
-                )
+                ),
+                true
             ),
             uiMessage = null,
             onExpandClick = {},
@@ -537,7 +539,8 @@ private fun CourseOutlineScreenTabletPreview() {
                     verifiedUpgradeLink = "",
                     contentTypeGatingEnabled = false,
                     hasEnded = false
-                )
+                ),
+                true
             ),
             uiMessage = null,
             onExpandClick = {},

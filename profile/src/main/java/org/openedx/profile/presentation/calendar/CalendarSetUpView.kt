@@ -55,7 +55,9 @@ import org.openedx.profile.R
 @Composable
 fun CalendarSetUpView(
     windowSize: WindowSize,
+    useRelativeDates: Boolean,
     setUpCalendarSync: () -> Unit,
+    onRelativeDateSwitchClick: (Boolean) -> Unit,
     onBackClick: () -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -192,6 +194,11 @@ fun CalendarSetUpView(
                                 Spacer(modifier = Modifier.height(24.dp))
                             }
                         }
+                        Spacer(modifier = Modifier.height(28.dp))
+                        OptionsSection(
+                            isRelativeDatesEnabled = useRelativeDates,
+                            onRelativeDateSwitchClick = onRelativeDateSwitchClick
+                        )
                     }
                 }
             }
@@ -206,7 +213,9 @@ private fun CalendarScreenPreview() {
     OpenEdXTheme {
         CalendarSetUpView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            useRelativeDates = true,
             setUpCalendarSync = {},
+            onRelativeDateSwitchClick = { _ -> },
             onBackClick = {}
         )
     }

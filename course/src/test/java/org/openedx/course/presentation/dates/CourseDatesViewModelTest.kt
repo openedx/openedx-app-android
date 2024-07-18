@@ -28,6 +28,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.DateType
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.CourseCalendarState
 import org.openedx.core.domain.model.CourseDateBlock
@@ -65,6 +66,7 @@ class CourseDatesViewModelTest {
     private val calendarRouter = mockk<CalendarRouter>()
     private val calendarNotifier = mockk<CalendarNotifier>()
     private val calendarInteractor = mockk<CalendarInteractor>()
+    private val preferencesManager = mockk<CorePreferences>()
 
     private val openEdx = "OpenEdx"
     private val noInternet = "Slow or no internet connection"
@@ -138,6 +140,7 @@ class CourseDatesViewModelTest {
         coEvery { notifier.send(any<CourseLoading>()) } returns Unit
         every { calendarNotifier.notifier } returns flowOf(CalendarSynced)
         coEvery { calendarNotifier.send(any<CalendarEvent>()) } returns Unit
+        every { preferencesManager.isRelativeDatesEnabled } returns true
         coEvery { calendarInteractor.getCourseCalendarStateByIdFromCache(any()) } returns CourseCalendarState(
             0,
             "",
@@ -162,6 +165,7 @@ class CourseDatesViewModelTest {
             config,
             calendarInteractor,
             calendarNotifier,
+            preferencesManager,
             courseRouter,
             calendarRouter,
         )
@@ -191,6 +195,7 @@ class CourseDatesViewModelTest {
             config,
             calendarInteractor,
             calendarNotifier,
+            preferencesManager,
             courseRouter,
             calendarRouter,
         )
@@ -220,6 +225,7 @@ class CourseDatesViewModelTest {
             config,
             calendarInteractor,
             calendarNotifier,
+            preferencesManager,
             courseRouter,
             calendarRouter,
         )
@@ -249,6 +255,7 @@ class CourseDatesViewModelTest {
             config,
             calendarInteractor,
             calendarNotifier,
+            preferencesManager,
             courseRouter,
             calendarRouter,
         )

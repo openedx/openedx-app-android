@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.VideoSettings
@@ -36,7 +35,6 @@ import org.openedx.course.presentation.CourseRouter
 class CourseVideoViewModel(
     val courseId: String,
     val courseTitle: String,
-    private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
     private val networkConnection: NetworkConnection,
@@ -55,9 +53,6 @@ class CourseVideoViewModel(
     workerController,
     coreAnalytics
 ) {
-
-    val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
-
     private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
     val uiState: StateFlow<CourseVideosUIState>
         get() = _uiState.asStateFlow()
@@ -163,8 +158,13 @@ class CourseVideoViewModel(
 
                 _uiState.value =
                     CourseVideosUIState.CourseData(
-                        courseStructure, getDownloadModelsStatus(), courseSubSections,
-                        courseSectionsState, subSectionsDownloadsCount, getDownloadModelsSize()
+                        courseStructure = courseStructure,
+                        downloadedState = getDownloadModelsStatus(),
+                        courseSubSections = courseSubSections,
+                        courseSectionsState = courseSectionsState,
+                        subSectionsDownloadsCount = subSectionsDownloadsCount,
+                        downloadModelsSize = getDownloadModelsSize(),
+                        useRelativeDates = preferencesManager.isRelativeDatesEnabled
                     )
             }
             courseNotifier.send(CourseLoading(false))

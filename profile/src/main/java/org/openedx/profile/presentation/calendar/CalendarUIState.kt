@@ -8,5 +8,6 @@ data class CalendarUIState(
     val calendarData: CalendarData? = null,
     val calendarSyncState: CalendarSyncState,
     val isCalendarSyncEnabled: Boolean,
-    val coursesSynced: Int?
+    val coursesSynced: Int?,
+    val isRelativeDateEnabled: Boolean,
 )

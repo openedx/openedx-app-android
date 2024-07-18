@@ -30,7 +30,6 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.BlockType
 import org.openedx.core.UIMessage
-import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
@@ -64,7 +63,6 @@ class CourseVideoViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
-    private val config = mockk<Config>()
     private val resourceManager = mockk<ResourceManager>()
     private val interactor = mockk<CourseInteractor>()
     private val courseNotifier = spyk<CourseNotifier>()
@@ -186,8 +184,8 @@ class CourseVideoViewModelTest {
         every { resourceManager.getString(R.string.course_does_not_include_videos) } returns ""
         every { resourceManager.getString(R.string.course_can_download_only_with_wifi) } returns cantDownload
         Dispatchers.setMain(dispatcher)
-        every { config.getApiHostURL() } returns "http://localhost:8000"
         every { courseNotifier.notifier } returns flowOf(CourseLoading(false))
+        every { preferencesManager.isRelativeDatesEnabled } returns true
     }
 
     @After
@@ -197,7 +195,6 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos empty list`() = runTest {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns
                 courseStructure.copy(blockData = emptyList())
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
@@ -205,7 +202,6 @@ class CourseVideoViewModelTest {
         val viewModel = CourseVideoViewModel(
             "",
             "",
-            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -229,7 +225,6 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `getVideos success`() = runTest {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
         every { preferencesManager.videoSettings } returns VideoSettings.default
@@ -237,7 +232,6 @@ class CourseVideoViewModelTest {
         val viewModel = CourseVideoViewModel(
             "",
             "",
-            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -262,7 +256,6 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `updateVideos success`() = runTest {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { courseNotifier.notifier } returns flow {
             emit(CourseStructureUpdated(""))
@@ -277,7 +270,6 @@ class CourseVideoViewModelTest {
         val viewModel = CourseVideoViewModel(
             "",
             "",
-            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -305,7 +297,6 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `setIsUpdating success`() = runTest {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         coEvery { interactor.getCourseStructureForVideos(any()) } returns courseStructure
         coEvery { downloadDao.readAllData() } returns flow { emit(listOf(downloadModelEntity)) }
@@ -314,12 +305,10 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels test`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
             "",
-            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -351,12 +340,10 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
             "",
-            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -392,12 +379,10 @@ class CourseVideoViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, without connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
             "",
             "",
-            config,
             interactor,
             resourceManager,
             networkConnection,
@@ -428,6 +413,4 @@ class CourseVideoViewModelTest {
 
         assert(message.await()?.message.isNullOrEmpty())
     }
-
-
 }

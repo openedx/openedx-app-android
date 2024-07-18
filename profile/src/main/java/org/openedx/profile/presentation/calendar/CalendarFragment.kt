@@ -59,6 +59,9 @@ class CalendarFragment : Fragment() {
                     onCalendarSyncSwitchClick = {
                         viewModel.setCalendarSyncEnabled(it, requireActivity().supportFragmentManager)
                     },
+                    onRelativeDateSwitchClick = {
+                        viewModel.setRelativeDateEnabled(it)
+                    },
                     onChangeSyncOptionClick = {
                         val dialog = NewCalendarDialogFragment.newInstance(NewCalendarDialogType.UPDATE)
                         dialog.show(
@@ -84,11 +87,14 @@ private fun CalendarView(
     onChangeSyncOptionClick: () -> Unit,
     onCourseToSyncClick: () -> Unit,
     onCalendarSyncSwitchClick: (Boolean) -> Unit,
+    onRelativeDateSwitchClick: (Boolean) -> Unit
 ) {
     if (!uiState.isCalendarExist) {
         CalendarSetUpView(
             windowSize = windowSize,
+            useRelativeDates = uiState.isRelativeDateEnabled,
             setUpCalendarSync = setUpCalendarSync,
+            onRelativeDateSwitchClick = onRelativeDateSwitchClick,
             onBackClick = onBackClick
         )
     } else {
@@ -97,6 +103,7 @@ private fun CalendarView(
             uiState = uiState,
             onBackClick = onBackClick,
             onCalendarSyncSwitchClick = onCalendarSyncSwitchClick,
+            onRelativeDateSwitchClick = onRelativeDateSwitchClick,
             onChangeSyncOptionClick = onChangeSyncOptionClick,
             onCourseToSyncClick = onCourseToSyncClick
         )

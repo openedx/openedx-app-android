@@ -223,6 +223,7 @@ class CourseOutlineViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
         every { config.getApiHostURL() } returns "http://localhost:8000"
+        every { preferencesManager.isRelativeDatesEnabled } returns true
 
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
     }
