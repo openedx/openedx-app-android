@@ -32,9 +32,6 @@ interface DownloadDao {
     @Query("DELETE FROM download_model WHERE id in (:ids)")
     suspend fun removeAllDownloadModels(ids: List<String>)
 
-    @Query("DELETE FROM download_model")
-    suspend fun clearCachedData()
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOfflineXBlockProgress(offlineXBlockProgress: OfflineXBlockProgress)
 
@@ -46,4 +43,7 @@ interface DownloadDao {
 
     @Query("DELETE FROM offline_x_block_progress_table WHERE id in (:ids)")
     suspend fun removeOfflineXBlockProgress(ids: List<String>)
+
+    @Query("DELETE FROM offline_x_block_progress_table")
+    suspend fun clearOfflineProgress()
 }

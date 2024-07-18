@@ -19,7 +19,7 @@ class DatabaseManager(
         CoroutineScope(Dispatchers.Main).launch {
             courseDao.clearCachedData()
             dashboardDao.clearCachedData()
-            downloadDao.clearCachedData()
+            downloadDao.clearOfflineProgress()
             discoveryDao.clearCachedData()
         }
     }
