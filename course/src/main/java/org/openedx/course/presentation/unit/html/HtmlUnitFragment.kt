@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -17,7 +18,6 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -50,10 +50,11 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.extension.applyDarkModeIfEnabled
+import org.openedx.core.extension.equalsHost
 import org.openedx.core.extension.isEmailValid
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.roundBorderWithoutBottom
@@ -83,10 +84,7 @@ class HtmlUnitFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-
-                var isLoading by remember {
-                    mutableStateOf(true)
-                }
+                val uiState by viewModel.uiState.collectAsState()
 
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.isOnline)
@@ -125,36 +123,43 @@ class HtmlUnitFragment : Fragment() {
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        if (hasInternetConnection) {
-                            HTMLContentView(
-                                windowSize = windowSize,
-                                url = blockUrl,
-                                cookieManager = viewModel.cookieManager,
-                                apiHostURL = viewModel.apiHostURL,
-                                isLoading = isLoading,
-                                injectJSList = injectJSList,
-                                onCompletionSet = {
-                                    viewModel.notifyCompletionSet()
-                                },
-                                onWebPageLoading = {
-                                    isLoading = true
-                                },
-                                onWebPageLoaded = {
-                                    isLoading = false
-                                    if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
-                                }
-                            )
-                        } else {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background)
-                            ) {
-                                hasInternetConnection = viewModel.isOnline
+                        if ((uiState is HtmlUnitUIState.Error).not()) {
+                            if (hasInternetConnection) {
+                                HTMLContentView(
+                                    windowSize = windowSize,
+                                    url = blockUrl,
+                                    cookieManager = viewModel.cookieManager,
+                                    apiHostURL = viewModel.apiHostURL,
+                                    isLoading = uiState is HtmlUnitUIState.Loading,
+                                    injectJSList = injectJSList,
+                                    onCompletionSet = {
+                                        viewModel.notifyCompletionSet()
+                                    },
+                                    onWebPageLoading = {
+                                        viewModel.onWebPageLoading()
+                                    },
+                                    onWebPageLoaded = {
+                                        if ((uiState is HtmlUnitUIState.Error).not()) {
+                                            viewModel.onWebPageLoaded()
+                                        }
+                                        if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
+                                    },
+                                    onWebPageLoadError = {
+                                        viewModel.onWebPageLoadError()
+                                    }
+                                )
+                            } else {
+                                viewModel.onWebPageLoadError()
                             }
                         }
-                        if (isLoading && hasInternetConnection) {
+                        if (uiState is HtmlUnitUIState.Error) {
+                            val errorType = (uiState as HtmlUnitUIState.Error).errorType
+                            FullScreenErrorView(errorType = errorType) {
+                                hasInternetConnection = viewModel.isOnline
+                                viewModel.onWebPageLoading()
+                            }
+                        }
+                        if (uiState is HtmlUnitUIState.Loading && hasInternetConnection) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -200,6 +205,7 @@ private fun HTMLContentView(
     onCompletionSet: () -> Unit,
     onWebPageLoading: () -> Unit,
     onWebPageLoaded: () -> Unit,
+    onWebPageLoadError: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -281,6 +287,17 @@ private fun HTMLContentView(
                             }
                         }
                         super.onReceivedHttpError(view, request, errorResponse)
+                    }
+
+                    override fun onReceivedError(
+                        view: WebView,
+                        request: WebResourceRequest,
+                        error: WebResourceError
+                    ) {
+                        if (view.url.equalsHost(request.url.host)) {
+                            onWebPageLoadError()
+                        }
+                        super.onReceivedError(view, request, error)
                     }
                 }
                 with(settings) {

@@ -1,6 +1,7 @@
 package org.openedx.core.extension
 
 import android.util.Patterns
+import java.net.URL
 import java.util.Locale
 import java.util.regex.Pattern
 
@@ -36,4 +37,12 @@ fun String.tagId(): String = this.replaceSpace("_").lowercase(Locale.getDefault(
 
 fun String.takeIfNotEmpty(): String? {
     return if (this.isEmpty().not()) this else null
+}
+
+fun String?.equalsHost(host: String?): Boolean {
+    return try {
+        host?.startsWith(URL(this).host, ignoreCase = true) == true
+    } catch (e: Exception) {
+        false
+    }
 }
