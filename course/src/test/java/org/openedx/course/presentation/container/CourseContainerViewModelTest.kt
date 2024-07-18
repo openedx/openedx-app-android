@@ -33,12 +33,11 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.course.data.storage.CoursePreferences
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -57,19 +56,17 @@ class CourseContainerViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val config = mockk<Config>()
     private val interactor = mockk<CourseInteractor>()
-    private val calendarManager = mockk<CalendarManager>()
     private val networkConnection = mockk<NetworkConnection>()
     private val notifier = spyk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val corePreferences = mockk<CorePreferences>()
-    private val coursePreferences = mockk<CoursePreferences>()
     private val mockBitmap = mockk<Bitmap>()
     private val imageProcessor = mockk<ImageProcessor>()
     private val courseRouter = mockk<CourseRouter>()
     private val courseApi = mockk<CourseApi>()
+    private val calendarSyncScheduler = mockk<CalendarSyncScheduler>()
 
     private val openEdx = "OpenEdx"
-    private val calendarTitle = "OpenEdx - Abc"
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
@@ -139,7 +136,6 @@ class CourseContainerViewModelTest {
         every { corePreferences.user } returns user
         every { corePreferences.appConfig } returns appConfig
         every { notifier.notifier } returns emptyFlow()
-        every { calendarManager.getCourseCalendarTitle(any()) } returns calendarTitle
         every { config.getApiHostURL() } returns "baseUrl"
         every { imageProcessor.loadImage(any(), any(), any()) } returns Unit
         every { imageProcessor.applyBlur(any(), any()) } returns mockBitmap
@@ -159,15 +155,14 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
-            courseRouter
+            calendarSyncScheduler,
+            courseRouter,
         )
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStructure(any(), any()) } throws UnknownHostException()
@@ -193,14 +188,13 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
+            calendarSyncScheduler,
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
@@ -227,14 +221,13 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
+            calendarSyncScheduler,
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
@@ -260,14 +253,13 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
+            calendarSyncScheduler,
             courseRouter
         )
         every { networkConnection.isOnline() } returns false
@@ -296,14 +288,13 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
+            calendarSyncScheduler,
             courseRouter
         )
         coEvery { interactor.getCourseStructure(any(), true) } throws UnknownHostException()
@@ -327,14 +318,13 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
+            calendarSyncScheduler,
             courseRouter
         )
         coEvery { interactor.getCourseStructure(any(), true) } throws Exception()
@@ -358,14 +348,13 @@ class CourseContainerViewModelTest {
             "",
             config,
             interactor,
-            calendarManager,
             resourceManager,
             notifier,
             networkConnection,
             corePreferences,
-            coursePreferences,
             analytics,
             imageProcessor,
+            calendarSyncScheduler,
             courseRouter
         )
         coEvery { interactor.getCourseStructure(any(), true) } returns courseStructure

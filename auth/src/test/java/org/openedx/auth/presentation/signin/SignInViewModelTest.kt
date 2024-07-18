@@ -34,7 +34,9 @@ import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
 import org.openedx.core.config.MicrosoftConfig
 import org.openedx.core.data.model.User
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
@@ -63,6 +65,8 @@ class SignInViewModelTest {
     private val oAuthHelper = mockk<OAuthHelper>()
     private val router = mockk<AuthRouter>()
     private val whatsNewGlobalManager = mockk<WhatsNewGlobalManager>()
+    private val calendarInteractor = mockk<CalendarInteractor>()
+    private val calendarPreferences = mockk<CalendarPreferences>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -87,6 +91,9 @@ class SignInViewModelTest {
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { calendarPreferences.calendarUser } returns ""
+        every { calendarPreferences.clearCalendarPreferences() } returns Unit
+        coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
     }
 
@@ -115,6 +122,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         viewModel.login("", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -149,6 +158,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         viewModel.login("acc@test.o", "")
         coVerify(exactly = 0) { interactor.login(any(), any()) }
@@ -183,6 +194,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         viewModel.login("acc@test.org", "")
 
@@ -216,6 +229,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         viewModel.login("acc@test.org", "ed")
 
@@ -253,6 +268,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         coEvery { interactor.login("acc@test.org", "edx") } returns Unit
         viewModel.login("acc@test.org", "edx")
@@ -290,6 +307,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws UnknownHostException()
         viewModel.login("acc@test.org", "edx")
@@ -329,6 +348,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws EdxError.InvalidGrantException()
         viewModel.login("acc@test.org", "edx")
@@ -368,6 +389,8 @@ class SignInViewModelTest {
             whatsNewGlobalManager = whatsNewGlobalManager,
             courseId = "",
             infoType = "",
+            calendarInteractor = calendarInteractor,
+            calendarPreferences = calendarPreferences
         )
         coEvery { interactor.login("acc@test.org", "edx") } throws IllegalStateException()
         viewModel.login("acc@test.org", "edx")
