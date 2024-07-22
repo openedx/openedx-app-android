@@ -12,7 +12,6 @@
     <string name="course_navigation_next">Next</string>
     <string name="course_navigation_next_unit">Next Unit</string>
     <string name="course_navigation_finish">Finish</string>
-    <string name="course_does_not_include_videos">This course does not include any videos.</string>
     <string name="course_resume_unit_title">Last unit:</string>
     <string name="course_resume_unit_btn">Resume</string>
     <string name="course_discussion">Discussion</string>

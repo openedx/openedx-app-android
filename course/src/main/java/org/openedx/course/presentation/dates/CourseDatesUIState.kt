@@ -9,6 +9,6 @@ sealed interface CourseDatesUIState {
         val calendarSyncState: CalendarSyncState,
     ) : CourseDatesUIState
 
-    data object Empty : CourseDatesUIState
+    data object Error : CourseDatesUIState
     data object Loading : CourseDatesUIState
 }
