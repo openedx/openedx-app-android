@@ -20,18 +20,59 @@ object TimeUtils {
     private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "yyyy-MM-dd'T'HH:mm:ssXXX"
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
 
-    fun formatToString(date: Date, useRelativeDates: Boolean): String {
-        return if (useRelativeDates) {
-            DateUtils.getRelativeTimeSpanString(
+    fun formatToString(context: Context, date: Date, useRelativeDates: Boolean): String {
+        if (!useRelativeDates) {
+            val locale = Locale(Locale.getDefault().language)
+            val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
+            return dateFormat.format(date)
+        }
+
+        val now = Calendar.getInstance()
+        val inputDate = Calendar.getInstance().apply { time = date }
+        val daysDiff = ((now.timeInMillis - inputDate.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+        return when {
+            daysDiff in -5..-1 -> DateUtils.formatDateTime(
+                context,
                 date.time,
-                getCurrentTime(),
+                DateUtils.FORMAT_SHOW_WEEKDAY
+            ).toString()
+
+            daysDiff == -6 -> context.getString(R.string.core_next) + " " + DateUtils.formatDateTime(
+                context,
+                date.time,
+                DateUtils.FORMAT_SHOW_WEEKDAY
+            ).toString()
+
+            daysDiff in -1..1 -> DateUtils.getRelativeTimeSpanString(
+                date.time,
+                now.timeInMillis,
                 DateUtils.DAY_IN_MILLIS,
                 DateUtils.FORMAT_ABBREV_TIME
             ).toString()
-        } else {
-            val locale = Locale(Locale.getDefault().language)
-            val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
-            dateFormat.format(date)
+
+            daysDiff in 2..6 -> DateUtils.getRelativeTimeSpanString(
+                date.time,
+                now.timeInMillis,
+                DateUtils.DAY_IN_MILLIS
+            ).toString()
+
+            inputDate.get(Calendar.YEAR) == now.get(Calendar.YEAR) -> {
+                DateUtils.getRelativeTimeSpanString(
+                    date.time,
+                    now.timeInMillis,
+                    DateUtils.DAY_IN_MILLIS,
+                    DateUtils.FORMAT_SHOW_DATE
+                ).toString()
+            }
+
+            else -> {
+                DateUtils.getRelativeTimeSpanString(
+                    date.time,
+                    now.timeInMillis,
+                    DateUtils.DAY_IN_MILLIS,
+                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
+                ).toString()
+            }
         }
     }
 

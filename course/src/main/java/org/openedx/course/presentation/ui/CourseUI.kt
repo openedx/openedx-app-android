@@ -65,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -750,12 +751,13 @@ fun CourseSubSectionItem(
     useRelativeDates: Boolean,
     onClick: (Block) -> Unit,
 ) {
+    val context = LocalContext.current
     val icon =
         if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.formatToString(it, useRelativeDates) } ?: "")
+        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
     }
     val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(

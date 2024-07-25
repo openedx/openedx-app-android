@@ -175,4 +175,5 @@
     <string name="core_to_sync">To Sync</string>
     <string name="core_not_synced">Not Synced</string>
     <string name="core_syncing_to_calendar">Syncing to calendar…</string>
+    <string name="core_next">Next</string>
 </resources>

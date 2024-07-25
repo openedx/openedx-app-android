@@ -601,6 +601,7 @@ private fun CourseDateItem(
     useRelativeDates: Boolean,
     onItemClick: (CourseDateBlock) -> Unit,
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .wrapContentHeight()
@@ -610,7 +611,7 @@ private fun CourseDateItem(
             Spacer(modifier = Modifier.height(20.dp))
         }
         if (canShowDate) {
-            val timeTitle = formatToString(dateBlock.date, useRelativeDates)
+            val timeTitle = formatToString(context, dateBlock.date, useRelativeDates)
             Text(
                 text = timeTitle,
                 style = MaterialTheme.appTypography.labelMedium,

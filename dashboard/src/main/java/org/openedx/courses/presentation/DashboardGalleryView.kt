@@ -603,7 +603,7 @@ private fun PrimaryCourseCard(
                         nearestAssignment.assignmentType ?: "",
                         stringResource(
                             id = CoreR.string.core_date_format_assignment_due,
-                            TimeUtils.formatToString(nearestAssignment.date, useRelativeDates)
+                            TimeUtils.formatToString(context, nearestAssignment.date, useRelativeDates)
                         )
                     )
                 )
