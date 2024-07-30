@@ -14,7 +14,7 @@ pluginManagement {
             maven { url "https://maven.fullstory.com" }
         }
         dependencies {
-            classpath("com.android.tools:r8:8.2.26")
+            classpath("com.android.tools:r8:8.3.37")
             classpath 'com.fullstory:gradle-plugin-local:1.47.0'
         }
     }

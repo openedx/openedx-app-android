@@ -109,6 +109,7 @@ class CourseRepository(
     }
 
     suspend fun getXBlockProgress(blockId: String) = downloadDao.getOfflineXBlockProgress(blockId)
+
     suspend fun submitAllOfflineXBlockProgress() {
         val allOfflineXBlockProgress = downloadDao.getAllOfflineXBlockProgress()
         allOfflineXBlockProgress.forEach {
