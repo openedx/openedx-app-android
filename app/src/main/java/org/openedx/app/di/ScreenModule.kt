@@ -170,6 +170,7 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
 
@@ -219,6 +220,7 @@ val screenModule = module {
         CourseInfoViewModel(
             pathId,
             infoType,
+            get(),
             get(),
             get(),
             get(),
@@ -458,7 +460,7 @@ val screenModule = module {
         )
     }
 
-    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
     viewModel { (courseId: String, courseTitle: String) ->
         CourseOfflineViewModel(

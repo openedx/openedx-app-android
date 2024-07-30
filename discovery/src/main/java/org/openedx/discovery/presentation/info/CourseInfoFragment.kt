@@ -127,8 +127,9 @@ class CourseInfoFragment : Fragment() {
                     webViewUIState = webViewState,
                     uiMessage = uiMessage,
                     uriScheme = viewModel.uriScheme,
-                    hasInternetConnection = hasInternetConnection,
                     isRegistrationEnabled = viewModel.isRegistrationEnabled,
+                    userAgent = viewModel.appUserAgent,
+                    hasInternetConnection = hasInternetConnection,
                     onWebViewUIAction = { action ->
                         when (action) {
                             WebViewUIAction.WEB_PAGE_LOADED -> {
@@ -244,6 +245,7 @@ private fun CourseInfoScreen(
     uiMessage: UIMessage?,
     uriScheme: String,
     isRegistrationEnabled: Boolean,
+    userAgent: String,
     hasInternetConnection: Boolean,
     onWebViewUIAction: (WebViewUIAction) -> Unit,
     onRegisterClick: () -> Unit,
@@ -318,6 +320,8 @@ private fun CourseInfoScreen(
                             CourseInfoWebView(
                                 contentUrl = (uiState as CourseInfoUIState.CourseInfo).initialUrl,
                                 uriScheme = uriScheme,
+                                userAgent = userAgent,
+                                isPreLogin = uiState.isPreLogin,
                                 onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
                                 onUriClick = onUriClick,
                                 onWebPageLoadError = {
@@ -354,6 +358,8 @@ private fun CourseInfoScreen(
 private fun CourseInfoWebView(
     contentUrl: String,
     uriScheme: String,
+    userAgent: String,
+    isPreLogin: Boolean,
     onWebPageLoaded: () -> Unit,
     onUriClick: (String, linkAuthority) -> Unit,
     onWebPageLoadError: () -> Unit
@@ -362,6 +368,7 @@ private fun CourseInfoWebView(
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,
+        userAgent = userAgent,
         isAllLinksExternal = true,
         onWebPageLoaded = onWebPageLoaded,
         onUriClick = onUriClick,
@@ -392,6 +399,7 @@ fun CourseInfoScreenPreview() {
             uiMessage = null,
             uriScheme = "",
             isRegistrationEnabled = true,
+            userAgent = "",
             hasInternetConnection = false,
             onWebViewUIAction = {},
             onRegisterClick = {},

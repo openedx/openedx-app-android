@@ -625,7 +625,9 @@ fun AppVersionItemUpgradeRequired(
 }
 
 private val mockAppData = AppData(
+    appName = "openedx",
     versionName = "1.0.0",
+    applicationId = "org.example.com"
 )
 
 private val mockConfiguration = Configuration(

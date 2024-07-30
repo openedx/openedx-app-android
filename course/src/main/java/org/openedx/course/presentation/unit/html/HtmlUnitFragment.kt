@@ -52,7 +52,6 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.equalsHost
 import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.FullScreenErrorView
@@ -342,7 +341,7 @@ private fun HTMLContentView(
                         request: WebResourceRequest,
                         error: WebResourceError
                     ) {
-                        if (view.url.equalsHost(request.url.host)) {
+                        if (request.url.toString() == view.url) {
                             onWebPageLoadError()
                         }
                         super.onReceivedError(view, request, error)

@@ -133,6 +133,7 @@ class ProgramFragment : Fragment() {
                         ?.isNotEmpty() == true,
                     isNestedFragment = isNestedFragment,
                     uriScheme = viewModel.uriScheme,
+                    userAgent = viewModel.appUserAgent,
                     hasInternetConnection = hasInternetConnection,
                     onWebViewUIAction = { action ->
                         when (action) {
@@ -244,6 +245,7 @@ private fun ProgramInfoScreen(
     contentUrl: String,
     cookieManager: AppCookieManager,
     uriScheme: String,
+    userAgent: String,
     canShowBackBtn: Boolean,
     isNestedFragment: Boolean,
     hasInternetConnection: Boolean,
@@ -320,6 +322,7 @@ private fun ProgramInfoScreen(
                             val webView = CatalogWebViewScreen(
                                 url = contentUrl,
                                 uriScheme = uriScheme,
+                                userAgent = userAgent,
                                 isAllLinksExternal = true,
                                 onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
                                 refreshSessionCookie = {
@@ -379,6 +382,7 @@ fun MyProgramsPreview() {
             contentUrl = "https://www.example.com/",
             cookieManager = koinViewModel<ProgramViewModel>().cookieManager,
             uriScheme = "",
+            userAgent = "",
             canShowBackBtn = false,
             isNestedFragment = false,
             hasInternetConnection = false,

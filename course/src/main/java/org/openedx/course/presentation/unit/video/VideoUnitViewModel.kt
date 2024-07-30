@@ -30,7 +30,7 @@ open class VideoUnitViewModel(
 
     var videoUrl = ""
     var transcripts = emptyMap<String, String>()
-    var isPlaying = false
+    var isPlaying = true
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
 
