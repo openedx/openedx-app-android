@@ -17,8 +17,11 @@ internal data class SignInUIState(
     val isGoogleAuthEnabled: Boolean = false,
     val isMicrosoftAuthEnabled: Boolean = false,
     val isSocialAuthEnabled: Boolean = false,
+    val isBrowserLoginEnabled: Boolean = false,
+    val isBrowserRegistrationEnabled: Boolean = false,
     val isLogistrationEnabled: Boolean = false,
     val showProgress: Boolean = false,
     val loginSuccess: Boolean = false,
     val agreement: RegistrationField? = null,
+    val loginFailure: Boolean = false,
 )

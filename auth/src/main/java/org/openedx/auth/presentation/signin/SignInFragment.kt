@@ -43,6 +43,11 @@ class SignInFragment : Fragment() {
                 val appUpgradeEvent by viewModel.appUpgradeEvent.observeAsState(null)
 
                 if (appUpgradeEvent == null) {
+                    val authCode = arguments?.getString("auth_code")
+                    if (authCode is String && !state.loginFailure && !state.loginSuccess) {
+                        arguments?.remove("auth_code")
+                        viewModel.signInAuthCode(authCode)
+                    }
                     LoginScreen(
                         windowSize = windowSize,
                         state = state,
@@ -57,6 +62,10 @@ class SignInFragment : Fragment() {
 
                                 AuthEvent.ForgotPasswordClick -> {
                                     viewModel.navigateToForgotPassword(parentFragmentManager)
+                                }
+
+                                AuthEvent.SignInBrowser -> {
+                                    viewModel.signInBrowser(requireActivity())
                                 }
 
                                 AuthEvent.RegisterClick -> {
@@ -107,6 +116,7 @@ internal sealed interface AuthEvent {
     data class SignIn(val login: String, val password: String) : AuthEvent
     data class SocialSignIn(val authType: AuthType) : AuthEvent
     data class OpenLink(val links: Map<String, String>, val link: String) : AuthEvent
+    object SignInBrowser : AuthEvent
     object RegisterClick : AuthEvent
     object ForgotPasswordClick : AuthEvent
     object BackClick : AuthEvent

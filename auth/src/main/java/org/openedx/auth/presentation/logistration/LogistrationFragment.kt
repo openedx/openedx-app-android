@@ -49,6 +49,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.theme.compose.LogistrationLogoView
+import org.openedx.core.utils.UrlUtils
 
 class LogistrationFragment : Fragment() {
 
@@ -66,10 +67,23 @@ class LogistrationFragment : Fragment() {
             OpenEdXTheme {
                 LogistrationScreen(
                     onSignInClick = {
-                        viewModel.navigateToSignIn(parentFragmentManager)
+                        if(viewModel.isBrowserLoginEnabled) {
+                            viewModel.signInBrowser(requireActivity())
+                        } else {
+                            viewModel.navigateToSignIn(parentFragmentManager)
+                        }
+
                     },
                     onRegisterClick = {
-                        viewModel.navigateToSignUp(parentFragmentManager)
+                        if (viewModel.isBrowserRegistrationEnabled) {
+                            UrlUtils.openInBrowser(
+                                activity = context,
+                                apiHostUrl = viewModel.apiHostUrl,
+                                url = "/register",
+                            )
+                        } else {
+                            viewModel.navigateToSignUp(parentFragmentManager)
+                        }
                     },
                     onSearchClick = { querySearch ->
                         viewModel.navigateToDiscovery(parentFragmentManager, querySearch)

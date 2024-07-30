@@ -34,6 +34,15 @@ interface AuthApi {
 
     @FormUrlEncoded
     @POST(ApiConstants.URL_ACCESS_TOKEN)
+    suspend fun getAccessTokenFromCode(
+        @Field("grant_type") grantType: String,
+        @Field("client_id") clientId: String,
+        @Field("code") code: String,
+        @Field("redirect_uri") redirectUri: String
+    ): AuthResponse
+
+    @FormUrlEncoded
+    @POST(ApiConstants.URL_ACCESS_TOKEN)
     fun refreshAccessToken(
         @Field("grant_type") grantType: String,
         @Field("client_id") clientId: String,

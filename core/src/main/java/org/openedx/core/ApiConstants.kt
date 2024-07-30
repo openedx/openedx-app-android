@@ -12,6 +12,7 @@ object ApiConstants {
     const val URL_PASSWORD_RESET = "/password_reset/"
 
     const val GRANT_TYPE_PASSWORD = "password"
+    const val GRANT_TYPE_CODE = "authorization_code"
 
     const val TOKEN_TYPE_BEARER = "Bearer"
     const val TOKEN_TYPE_JWT = "jwt"
@@ -27,6 +28,7 @@ object ApiConstants {
     const val AUTH_TYPE_GOOGLE = "google-oauth2"
     const val AUTH_TYPE_FB = "facebook"
     const val AUTH_TYPE_MICROSOFT = "azuread-oauth2"
+    const val AUTH_TYPE_BROWSER = "browser"
 
     const val COURSE_KEY = "course_key"
 

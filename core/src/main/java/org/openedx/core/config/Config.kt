@@ -31,6 +31,10 @@ class Config(context: Context) {
         return getString(URI_SCHEME, "")
     }
 
+    fun getApplicationID(): String {
+        return getString(APPLICATION_ID, "")
+    }
+
     fun getOAuthClientId(): String {
         return getString(OAUTH_CLIENT_ID, "")
     }
@@ -111,6 +115,14 @@ class Config(context: Context) {
         return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
     }
 
+    fun isBrowserLoginEnabled(): Boolean {
+        return getBoolean(BROWSER_LOGIN, false)
+    }
+
+    fun isBrowserRegistrationEnabled(): Boolean {
+        return getBoolean(BROWSER_REGISTRATION, false)
+    }
+
     private fun getString(key: String, defaultValue: String): String {
         val element = getObject(key)
         return if (element != null) {
@@ -148,6 +160,7 @@ class Config(context: Context) {
     companion object {
         private const val API_HOST_URL = "API_HOST_URL"
         private const val URI_SCHEME = "URI_SCHEME"
+        private const val APPLICATION_ID = "APPLICATION_ID"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
         private const val FAQ_URL = "FAQ_URL"
@@ -162,6 +175,8 @@ class Config(context: Context) {
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
+        private const val BROWSER_LOGIN = "BROWSER_LOGIN"
+        private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
         private const val BRANCH = "BRANCH"

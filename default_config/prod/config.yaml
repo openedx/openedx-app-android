@@ -75,6 +75,10 @@ TOKEN_TYPE: "JWT"
 WHATS_NEW_ENABLED: false
 #feature flag enable Social Login buttons
 SOCIAL_AUTH_ENABLED: false
+#feature flag to do the authentication flow in the browser to log in
+BROWSER_LOGIN: false
+#feature flag to do the registration for in the browser
+BROWSER_REGISTRATION: false
 #Course navigation feature flags
 COURSE_NESTED_LIST_ENABLED: false
 COURSE_UNIT_PROGRESS_ENABLED: false

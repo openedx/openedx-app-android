@@ -25,6 +25,7 @@ import org.openedx.auth.R
 import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.UIMessage
@@ -61,6 +62,7 @@ class SignInViewModelTest {
     private val oAuthHelper = mockk<OAuthHelper>()
     private val router = mockk<AuthRouter>()
     private val whatsNewGlobalManager = mockk<WhatsNewGlobalManager>()
+    private val browserAuthHelper = mockk<BrowserAuthHelper>()
 
     private val invalidCredential = "Invalid credentials"
     private val noInternet = "Slow or no internet connection"
@@ -85,6 +87,8 @@ class SignInViewModelTest {
         every { config.getFacebookConfig() } returns FacebookConfig()
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { config.isBrowserLoginEnabled() } returns false
+        every { config.isBrowserRegistrationEnabled() } returns false
     }
 
     @After
@@ -110,6 +114,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -143,6 +148,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -177,6 +183,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -210,6 +217,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -245,6 +253,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -281,6 +290,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -319,6 +329,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
@@ -357,6 +368,7 @@ class SignInViewModelTest {
             config = config,
             router = router,
             whatsNewGlobalManager = whatsNewGlobalManager,
+            browserAuthHelper = browserAuthHelper,
             courseId = "",
             infoType = "",
         )
