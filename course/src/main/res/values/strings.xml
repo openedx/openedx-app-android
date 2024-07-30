@@ -46,6 +46,7 @@
     <string name="course_container_nav_discussions">Discussions</string>
     <string name="course_container_nav_more">More</string>
     <string name="course_container_nav_dates">Dates</string>
+    <string name="course_container_nav_downloads">Downloads</string>
 
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>

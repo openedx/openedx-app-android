@@ -11,7 +11,6 @@ import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.openedx.core.ui.TabItem
 import org.openedx.course.R
-import org.openedx.core.R as coreR
 
 enum class CourseContainerTab(
     @StringRes
@@ -21,7 +20,7 @@ enum class CourseContainerTab(
     HOME(R.string.course_container_nav_home, Icons.Default.Home),
     VIDEOS(R.string.course_container_nav_videos, Icons.Rounded.PlayCircleFilled),
     DATES(R.string.course_container_nav_dates, Icons.Outlined.CalendarMonth),
-    OFFLINE(coreR.string.core_offline, Icons.Outlined.CloudDownload),
+    OFFLINE(R.string.course_container_nav_downloads, Icons.Outlined.CloudDownload),
     DISCUSSIONS(R.string.course_container_nav_discussions, Icons.AutoMirrored.Filled.Chat),
     MORE(R.string.course_container_nav_more, Icons.AutoMirrored.Filled.TextSnippet)
 }
