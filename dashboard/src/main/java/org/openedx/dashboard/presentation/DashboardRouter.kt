@@ -9,7 +9,6 @@ interface DashboardRouter {
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        enrollmentMode: String,
         openTab: String = "",
         resumeBlockId: String = ""
     )

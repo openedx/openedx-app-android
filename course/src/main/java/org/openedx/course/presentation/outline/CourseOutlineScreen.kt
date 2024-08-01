@@ -143,7 +143,7 @@ fun CourseOutlineScreen(
         onDownloadClick = { blocksIds ->
             viewModel.downloadBlocks(
                 blocksIds = blocksIds,
-                fragmentManager = fragmentManager
+                fragmentManager = fragmentManager,
             )
         },
         onResetDatesClick = {
@@ -630,7 +630,7 @@ private val mockSequentialBlock = Block(
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
     due = Date(),
-    offlineDownload = OfflineDownload("fileUrl", "", 1)
+    offlineDownload = OfflineDownload("fileUrl", "", 1),
 )
 
 private val mockCourseStructure = CourseStructure(
@@ -655,5 +655,5 @@ private val mockCourseStructure = CourseStructure(
     media = null,
     certificate = null,
     isSelfPaced = false,
-    progress = Progress(1, 3)
+    progress = Progress(1, 3),
 )

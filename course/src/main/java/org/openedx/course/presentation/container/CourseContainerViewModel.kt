@@ -21,8 +21,12 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CourseAccessError
+import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.exception.NoCachedDataException
+import org.openedx.core.extension.isFalse
 import org.openedx.core.extension.isInternetError
+import org.openedx.core.extension.isTrue
 import org.openedx.core.extension.toImageLink
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
@@ -45,7 +49,6 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
-import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 
@@ -53,7 +56,6 @@ class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
     private var resumeBlockId: String,
-    private val enrollmentMode: String,
     private val config: Config,
     private val interactor: CourseInteractor,
     private val resourceManager: ResourceManager,
@@ -69,6 +71,10 @@ class CourseContainerViewModel(
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>
         get() = _dataReady
+
+    private val _courseAccessStatus = MutableLiveData<CourseAccessError>()
+    val courseAccessStatus: LiveData<CourseAccessError>
+        get() = _courseAccessStatus
 
     private val _errorMessage = SingleEventLiveData<String>()
     val errorMessage: LiveData<String>
@@ -90,13 +96,9 @@ class CourseContainerViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private var _isSelfPaced: Boolean = true
-    val isSelfPaced: Boolean
-        get() = _isSelfPaced
-
-    private var _organization: String = ""
-    val organization: String
-        get() = _organization
+    private var _courseDetails: CourseEnrollmentDetails? = null
+    val courseDetails: CourseEnrollmentDetails?
+        get() = _courseDetails
 
     private val _calendarSyncUIState = MutableStateFlow(
         CalendarSyncUIState(
@@ -155,7 +157,7 @@ class CourseContainerViewModel(
         }
     }
 
-    fun preloadCourseStructure() {
+    fun fetchCourseDetails() {
         courseDashboardViewed()
         if (_dataReady.value != null) {
             return
@@ -164,30 +166,45 @@ class CourseContainerViewModel(
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                val courseStructure = interactor.getCourseStructure(courseId, true)
-                courseName = courseStructure.name
-                _organization = courseStructure.org
-                _isSelfPaced = courseStructure.isSelfPaced
-                loadCourseImage(courseStructure.media?.image?.large)
-                _dataReady.value = courseStructure.start?.let { start ->
-                    val isReady = start < Date()
-                    if (isReady) {
+                interactor.getCourseStructure(courseId, isNeedRefresh = true)
+                _courseDetails = interactor.getEnrollmentDetails(courseId)
+                _showProgress.value = false
+                _courseDetails?.let { courseDetails ->
+                    courseName = courseDetails.courseInfoOverview.name
+                    loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
+                    if (courseDetails.hasAccess.isFalse()) {
+                        _dataReady.value = false
+                        if (courseDetails.isAuditAccessExpired) {
+                            _courseAccessStatus.value =
+                                CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
+                        } else if (courseDetails.courseInfoOverview.isStarted.not()) {
+                            _courseAccessStatus.value = CourseAccessError.NOT_YET_STARTED
+                        } else {
+                            _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                        }
+                    } else {
+                        _courseAccessStatus.value = CourseAccessError.NONE
                         _isNavigationEnabled.value = true
+                        _calendarSyncUIState.update { state ->
+                            state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+                        }
+                        if (resumeBlockId.isNotEmpty()) {
+                            delay(500L)
+                            courseNotifier.send(CourseOpenBlock(resumeBlockId))
+                        }
                     }
-                    isReady
-                }
-                if (_dataReady.value == true && resumeBlockId.isNotEmpty()) {
-                    delay(500L)
-                    courseNotifier.send(CourseOpenBlock(resumeBlockId))
+                } ?: run {
+                    _courseAccessStatus.value = CourseAccessError.UNKNOWN
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 if (e.isInternetError() || e is NoCachedDataException) {
                     _errorMessage.value =
                         resourceManager.getString(CoreR.string.core_error_no_connection)
                 } else {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_unknown_error)
+                    _courseAccessStatus.value = CourseAccessError.UNKNOWN
                 }
+                _showProgress.value = false
             }
         }
     }
@@ -280,8 +297,8 @@ class CourseContainerViewModel(
 
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
-                (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
+        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) ||
+                (calendarSync.isInstructorPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isFalse()))
     }
 
     private fun courseDashboardViewed() {
@@ -335,10 +352,13 @@ class CourseContainerViewModel(
             params = buildMap {
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(
+                    CourseAnalyticsKey.ENROLLMENT_MODE.key,
+                    _courseDetails?.enrollmentDetails?.mode ?: ""
+                )
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
+                    if (_courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) CourseAnalyticsKey.SELF_PACED.key
                     else CourseAnalyticsKey.INSTRUCTOR_PACED.key
                 )
                 putAll(param)

@@ -762,5 +762,5 @@ private val mockCourseStructure = CourseStructure(
     media = null,
     certificate = null,
     isSelfPaced = false,
-    progress = Progress(1, 3)
+    progress = Progress(1, 3),
 )

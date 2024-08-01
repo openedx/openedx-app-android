@@ -99,4 +99,9 @@
         <item quantity="other">%1$s of %2$s  assignments complete</item>
     </plurals>
 
+    <string name="course_label_back">Back</string>
+    <string name="course_error_expired_not_upgradeable_title" formatted="false">Your free audit access to this course expired on %s.</string>
+    <string name="course_find_new_course_button">Find a new course</string>
+    <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
+    <string name="course_an_error_occurred">An error occurred while loading your course</string>
 </resources>

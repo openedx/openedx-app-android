@@ -44,6 +44,7 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.R as courseR
 import org.openedx.course.presentation.download.DownloadDialogManager
 
 class CourseOutlineViewModel(
@@ -102,7 +103,7 @@ class CourseOutlineViewModel(
                 when (event) {
                     is CourseStructureUpdated -> {
                         if (event.courseId == courseId) {
-                            updateCourseData()
+                            getCourseData()
                         }
                     }
 
@@ -135,14 +136,21 @@ class CourseOutlineViewModel(
         getCourseData()
     }
 
-    fun updateCourseData() {
-        getCourseDataInternal()
+    override fun saveDownloadModels(folder: String, id: String) {
+        if (preferencesManager.videoSettings.wifiDownloadOnly) {
+            if (networkConnection.isWifiConnected()) {
+                super.saveDownloadModels(folder, id)
+            } else {
+                viewModelScope.launch {
+                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi)))
+                }
+            }
+        } else {
+            super.saveDownloadModels(folder, id)
+        }
     }
 
     fun getCourseData() {
-        viewModelScope.launch {
-            courseNotifier.send(CourseLoading(true))
-        }
         getCourseDataInternal()
     }
 
@@ -222,7 +230,6 @@ class CourseOutlineViewModel(
                     datesBannerInfo = datesBannerInfo,
                     useRelativeDates = preferencesManager.isRelativeDatesEnabled
                 )
-                courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {
                 _uiState.value = CourseOutlineUIState.Error
                 if (e.isInternetError()) {
@@ -272,7 +279,7 @@ class CourseOutlineViewModel(
         viewModelScope.launch {
             try {
                 interactor.resetCourseDates(courseId = courseId)
-                updateCourseData()
+                getCourseData()
                 courseNotifier.send(CourseDatesShifted)
                 onResetDates(true)
             } catch (e: Exception) {

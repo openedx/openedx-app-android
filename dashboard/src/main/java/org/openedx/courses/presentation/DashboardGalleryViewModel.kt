@@ -134,7 +134,6 @@ class DashboardGalleryViewModel(
             fm = fragmentManager,
             courseId = enrolledCourse.course.id,
             courseTitle = enrolledCourse.course.name,
-            enrollmentMode = enrolledCourse.mode,
             openTab = if (openDates) CourseTab.DATES.name else CourseTab.HOME.name,
             resumeBlockId = resumeBlockId
         )

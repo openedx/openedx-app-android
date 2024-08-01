@@ -53,3 +53,7 @@ fun String.toImageLink(apiHostURL: String): String =
     } else {
         (apiHostURL + this).replace(Regex("(?<!:)//"), "/")
     }
+
+fun String?.isNotNullOrEmpty(): Boolean {
+    return this.isNullOrEmpty().not()
+}

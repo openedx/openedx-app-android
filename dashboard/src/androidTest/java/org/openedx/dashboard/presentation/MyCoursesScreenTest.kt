@@ -17,6 +17,7 @@ import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import java.util.Date
@@ -61,7 +62,10 @@ class MyCoursesScreenTest {
             discussionUrl = "",
             videoOutline = "",
             isSelfPaced = false
-        )
+        ),
+        progress = Progress(0, 0),
+        courseStatus = null,
+        courseAssignments = null,
     )
     //endregion
 
@@ -81,7 +85,6 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
             )
         }
 
@@ -114,7 +117,6 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
             )
         }
 
@@ -140,7 +142,6 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
             )
         }
 
@@ -162,5 +163,4 @@ class MyCoursesScreenTest {
             )
         }
     }
-
 }

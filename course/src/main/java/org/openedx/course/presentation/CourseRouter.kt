@@ -62,4 +62,6 @@ interface CourseRouter {
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
+
+    fun navigateToDiscover(fm: FragmentManager)
 }

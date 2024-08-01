@@ -79,6 +79,7 @@ internal fun CollapsingLayout(
     modifier: Modifier = Modifier,
     courseImage: Bitmap,
     imageHeight: Int,
+    isEnabled: Boolean,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
@@ -166,10 +167,15 @@ internal fun CollapsingLayout(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
+    val collapsingModifier = if (isEnabled) {
+        modifier
             .nestedScroll(nestedScrollConnection)
+    } else {
+        modifier
+    }
+    Box(
+        modifier = collapsingModifier
+            .fillMaxSize()
             .pointerInput(Unit) {
                 var yStart = 0f
                 coroutineScope {
@@ -221,6 +227,7 @@ internal fun CollapsingLayout(
                 backBtnStartPadding = backBtnStartPadding,
                 courseImage = courseImage,
                 imageHeight = imageHeight,
+                isEnabled = isEnabled,
                 onBackClick = onBackClick,
                 expandedTop = expandedTop,
                 navigation = navigation,
@@ -244,6 +251,7 @@ internal fun CollapsingLayout(
                 courseImage = courseImage,
                 imageHeight = imageHeight,
                 toolbarBackgroundOffset = toolbarBackgroundOffset,
+                isEnabled = isEnabled,
                 onBackClick = onBackClick,
                 expandedTop = expandedTop,
                 collapsedTop = collapsedTop,
@@ -265,6 +273,7 @@ private fun CollapsingLayoutTablet(
     backBtnStartPadding: Dp,
     courseImage: Bitmap,
     imageHeight: Int,
+    isEnabled: Boolean,
     onBackClick: () -> Unit,
     expandedTop: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
@@ -408,15 +417,22 @@ private fun CollapsingLayoutTablet(
         content = navigation,
     )
 
-    Box(
-        modifier = Modifier
+    val bodyPadding = expandedTopHeight.value + backgroundImageHeight.value + navigationHeight.value
+    val bodyModifier = if (isEnabled) {
+        Modifier
             .offset {
                 IntOffset(
                     x = 0,
-                    y = (expandedTopHeight.value + backgroundImageHeight.value + navigationHeight.value).roundToInt()
+                    y = bodyPadding.roundToInt()
                 )
             }
-            .padding(bottom = with(localDensity) { (expandedTopHeight.value + navigationHeight.value + backgroundImageHeight.value).toDp() }),
+            .padding(bottom = with(localDensity) { bodyPadding.toDp() })
+    } else {
+        Modifier
+            .padding(top = with(localDensity) { if (bodyPadding < 0) 0.toDp() else bodyPadding.toDp() })
+    }
+    Box(
+        modifier = bodyModifier,
         content = bodyContent,
     )
 }
@@ -439,6 +455,7 @@ private fun CollapsingLayoutMobile(
     courseImage: Bitmap,
     imageHeight: Int,
     toolbarBackgroundOffset: Int,
+    isEnabled: Boolean,
     onBackClick: () -> Unit,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
@@ -712,15 +729,23 @@ private fun CollapsingLayoutMobile(
             content = navigation,
         )
 
-        Box(
-            modifier = Modifier
+        val bodyPadding =
+            expandedTopHeight.value + offset.value + backgroundImageHeight.value + navigationHeight.value - blurImagePaddingPx * factor
+        val bodyModifier = if (isEnabled) {
+            Modifier
                 .offset {
                     IntOffset(
                         x = 0,
-                        y = (expandedTopHeight.value + offset.value + backgroundImageHeight.value + navigationHeight.value - blurImagePaddingPx * factor).roundToInt()
+                        y = bodyPadding.roundToInt()
                     )
                 }
-                .padding(bottom = with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() }),
+                .padding(bottom = with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() })
+        } else {
+            Modifier
+                .padding(top = with(localDensity) { if (bodyPadding < 0) 0.toDp() else bodyPadding.toDp() })
+        }
+        Box(
+            modifier = bodyModifier,
             content = bodyContent,
         )
     }
@@ -764,6 +789,7 @@ private fun CollapsingLayoutPreview() {
                     pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
                 )
             },
+            isEnabled = true,
             onBackClick = {},
             bodyContent = {}
         )

@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 object TimeUtils {
 
@@ -223,6 +224,14 @@ object TimeUtils {
             }
         }
         return formattedDate
+    }
+
+    /**
+     * Returns a formatted date string for the given date using context.
+     */
+    fun getCourseAccessFormattedDate(context: Context, date: Date): String {
+        val resourceManager = ResourceManager(context)
+        return dateToCourseDate(resourceManager, date)
     }
 }
 

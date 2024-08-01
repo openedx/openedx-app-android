@@ -28,15 +28,19 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.DateType
+import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
+import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.CourseCalendarState
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
+import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.DatesSection
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseLoading
@@ -60,6 +64,7 @@ class CourseDatesViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val notifier = mockk<CourseNotifier>()
     private val interactor = mockk<CourseInteractor>()
+    private val corePreferences = mockk<CorePreferences>()
     private val analytics = mockk<CourseAnalytics>()
     private val config = mockk<Config>()
     private val courseRouter = mockk<CourseRouter>()
@@ -72,6 +77,20 @@ class CourseDatesViewModelTest {
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
 
+    private val user = User(
+        id = 0,
+        username = "",
+        email = "",
+        name = "",
+    )
+    private val appConfig = AppConfig(
+        CourseDatesCalendarSync(
+            isEnabled = true,
+            isSelfPacedEnabled = true,
+            isInstructorPacedEnabled = true,
+            isDeepLinkEnabled = false,
+        )
+    )
     private val dateBlock = CourseDateBlock(
         complete = false,
         date = Date(),
@@ -135,6 +154,8 @@ class CourseDatesViewModelTest {
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         coEvery { interactor.getCourseStructure(any()) } returns courseStructure
+        every { corePreferences.user } returns user
+        every { corePreferences.appConfig } returns appConfig
         every { notifier.notifier } returns flowOf(CourseLoading(false))
         coEvery { notifier.send(any<CreateCalendarSyncEvent>()) } returns Unit
         coEvery { notifier.send(any<CourseLoading>()) } returns Unit
