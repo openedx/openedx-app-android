@@ -204,6 +204,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying && isResumed
                 viewModel.isPlayerSetUp = true
             }
+            viewModel.getActivePlayer()?.seekTo(viewModel.getCurrentVideoTime())
 
             viewModel.castPlayer?.setSessionAvailabilityListener(
                 object : SessionAvailabilityListener {
