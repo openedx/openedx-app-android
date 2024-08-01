@@ -347,9 +347,6 @@ private fun CourseInfoWebView(
         factory = {
             webView
         },
-        update = {
-            webView.loadUrl(contentUrl)
-        }
     )
 }
 
