@@ -141,6 +141,9 @@ class CourseUnitContainerViewModel(
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(unitId))
 
+                    if(_descendantsBlocks.value.isEmpty()){
+                        _descendantsBlocks.value = listOf(block)
+                    }
                 } else {
                     setNextVerticalIndex()
                 }
