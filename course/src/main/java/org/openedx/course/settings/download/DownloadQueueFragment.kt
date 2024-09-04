@@ -23,7 +23,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.module.db.DownloadModel
@@ -80,7 +80,7 @@ class DownloadQueueFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                val uiState by viewModel.uiState.collectAsState(DownloadQueueUIState.Loading)
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle(DownloadQueueUIState.Loading)
 
                 DownloadQueueScreen(
                     windowSize = windowSize,
