@@ -81,6 +81,7 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Progress
+import org.openedx.core.extension.toImageLink
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
@@ -373,7 +374,6 @@ private fun CourseItem(
             )
         )
     }
-    val imageUrl = apiHostUrl + enrolledCourse.course.courseImage
     val context = LocalContext.current
     Surface(
         modifier = Modifier
@@ -392,7 +392,7 @@ private fun CourseItem(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageUrl)
+                    .data(enrolledCourse.course.courseImage.toImageLink(apiHostUrl) ?: "")
                     .error(CoreR.drawable.core_no_image_course)
                     .placeholder(CoreR.drawable.core_no_image_course)
                     .build(),

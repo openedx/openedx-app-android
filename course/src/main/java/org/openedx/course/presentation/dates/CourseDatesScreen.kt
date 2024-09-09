@@ -100,7 +100,7 @@ fun CourseDatesScreen(
     isFragmentResumed: Boolean,
     updateCourseStructure: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState(DatesUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(CourseDatesUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val context = LocalContext.current
 
@@ -175,7 +175,7 @@ fun CourseDatesScreen(
 @Composable
 private fun CourseDatesUI(
     windowSize: WindowSize,
-    uiState: DatesUIState,
+    uiState: CourseDatesUIState,
     uiMessage: UIMessage?,
     isSelfPaced: Boolean,
     onItemClick: (CourseDateBlock) -> Unit,
@@ -210,7 +210,7 @@ private fun CourseDatesUI(
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-        val isPLSBannerAvailable = (uiState as? DatesUIState.Dates)
+        val isPLSBannerAvailable = (uiState as? CourseDatesUIState.CourseDates)
             ?.courseDatesResult
             ?.courseBanner
             ?.isBannerAvailableForUserType(isSelfPaced)
@@ -236,7 +236,7 @@ private fun CourseDatesUI(
                         .fillMaxWidth()
                 ) {
                     when (uiState) {
-                        is DatesUIState.Dates -> {
+                        is CourseDatesUIState.CourseDates -> {
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -332,7 +332,7 @@ private fun CourseDatesUI(
                             }
                         }
 
-                        DatesUIState.Empty -> {
+                        CourseDatesUIState.Empty -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -347,7 +347,7 @@ private fun CourseDatesUI(
                             }
                         }
 
-                        DatesUIState.Loading -> {}
+                        CourseDatesUIState.Loading -> {}
                     }
                 }
             }
@@ -677,7 +677,7 @@ private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DatesUIState.Dates(
+            uiState = CourseDatesUIState.CourseDates(
                 CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
                 CalendarSyncState.SYNCED
             ),
@@ -698,7 +698,7 @@ private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DatesUIState.Dates(
+            uiState = CourseDatesUIState.CourseDates(
                 CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
                 CalendarSyncState.SYNCED
             ),

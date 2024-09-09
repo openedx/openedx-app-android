@@ -3,10 +3,25 @@ package org.openedx.course.presentation.unit
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.openedx.core.extension.parcelable
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -31,7 +47,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R as courseR
 
-class NotSupportedUnitFragment : Fragment() {
+class NotAvailableUnitFragment : Fragment() {
 
     private var blockId: String? = null
 
@@ -49,9 +65,40 @@ class NotSupportedUnitFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                NotSupportedUnitScreen(
+                val uriHandler = LocalUriHandler.current
+                val uri = requireArguments().getString(ARG_BLOCK_URL, "")
+                val title: String
+                val description: String
+                var buttonAction: (() -> Unit)? = null
+                when (requireArguments().parcelable<NotAvailableUnitType>(ARG_UNIT_TYPE)) {
+                    NotAvailableUnitType.MOBILE_UNSUPPORTED -> {
+                        title = stringResource(id = courseR.string.course_this_interactive_component)
+                        description = stringResource(id = courseR.string.course_explore_other_parts_on_web)
+                        buttonAction = {
+                            uriHandler.openUri(uri)
+                        }
+                    }
+
+                    NotAvailableUnitType.OFFLINE_UNSUPPORTED -> {
+                        title = stringResource(id = courseR.string.course_not_available_offline)
+                        description = stringResource(id = courseR.string.course_explore_other_parts_when_reconnect)
+                    }
+
+                    NotAvailableUnitType.NOT_DOWNLOADED -> {
+                        title = stringResource(id = courseR.string.course_not_downloaded)
+                        description =
+                            stringResource(id = courseR.string.course_explore_other_parts_when_reconnect_or_download)
+                    }
+
+                    else -> {
+                        return@OpenEdXTheme
+                    }
+                }
+                NotAvailableUnitScreen(
                     windowSize = windowSize,
-                    uri = requireArguments().getString(ARG_BLOCK_URL, "")
+                    title = title,
+                    description = description,
+                    buttonAction = buttonAction
                 )
             }
         }
@@ -60,14 +107,17 @@ class NotSupportedUnitFragment : Fragment() {
     companion object {
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_BLOCK_URL = "blockUrl"
+        private const val ARG_UNIT_TYPE = "notAvailableUnitType"
         fun newInstance(
             blockId: String,
-            blockUrl: String
-        ): NotSupportedUnitFragment {
-            val fragment = NotSupportedUnitFragment()
+            blockUrl: String,
+            unitType: NotAvailableUnitType,
+        ): NotAvailableUnitFragment {
+            val fragment = NotAvailableUnitFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_ID to blockId,
-                ARG_BLOCK_URL to blockUrl
+                ARG_BLOCK_URL to blockUrl,
+                ARG_UNIT_TYPE to unitType
             )
             return fragment
         }
@@ -76,12 +126,13 @@ class NotSupportedUnitFragment : Fragment() {
 }
 
 @Composable
-private fun NotSupportedUnitScreen(
+private fun NotAvailableUnitScreen(
     windowSize: WindowSize,
-    uri: String
+    title: String,
+    description: String,
+    buttonAction: (() -> Unit)? = null,
 ) {
     val scaffoldState = rememberScaffoldState()
-    val uriHandler = LocalUriHandler.current
     val scrollState = rememberScrollState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -120,7 +171,7 @@ private fun NotSupportedUnitScreen(
                 Spacer(Modifier.height(36.dp))
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = courseR.string.course_this_interactive_component),
+                    text = title,
                     style = MaterialTheme.appTypography.titleLarge,
                     color = MaterialTheme.appColors.textPrimary,
                     textAlign = TextAlign.Center
@@ -128,29 +179,31 @@ private fun NotSupportedUnitScreen(
                 Spacer(Modifier.height(12.dp))
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = courseR.string.course_explore_other_parts),
+                    text = description,
                     style = MaterialTheme.appTypography.bodyLarge,
                     color = MaterialTheme.appColors.textPrimary,
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.height(40.dp))
-                Button(modifier = Modifier
-                    .width(216.dp)
-                    .height(42.dp),
-                    shape = MaterialTheme.appShapes.buttonShape,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.appColors.primaryButtonBackground
-                    ),
-                    onClick = {
-                        uriHandler.openUri(uri)
-                    }) {
-                    Text(
-                        text = stringResource(id = courseR.string.course_open_in_browser),
-                        color = MaterialTheme.appColors.primaryButtonText,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
+                if (buttonAction != null) {
+                    Button(
+                        modifier = Modifier
+                            .width(216.dp)
+                            .height(42.dp),
+                        shape = MaterialTheme.appShapes.buttonShape,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.appColors.primaryButtonBackground
+                        ),
+                        onClick = buttonAction
+                    ) {
+                        Text(
+                            text = stringResource(id = courseR.string.course_open_in_browser),
+                            color = MaterialTheme.appColors.primaryButtonText,
+                            style = MaterialTheme.appTypography.labelLarge
+                        )
+                    }
+                    Spacer(Modifier.height(20.dp))
                 }
-                Spacer(Modifier.height(20.dp))
             }
         }
     }

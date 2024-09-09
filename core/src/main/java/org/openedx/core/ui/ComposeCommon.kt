@@ -833,6 +833,7 @@ fun AutoSizeText(
     style: TextStyle,
     color: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
+    minSize: Float = 0f
 ) {
     var scaledTextStyle by remember { mutableStateOf(style) }
     var readyToDraw by remember { mutableStateOf(false) }
@@ -849,9 +850,8 @@ fun AutoSizeText(
         softWrap = false,
         maxLines = maxLines,
         onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowWidth) {
-                scaledTextStyle =
-                    scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
+            if (textLayoutResult.didOverflowWidth && scaledTextStyle.fontSize.value > minSize) {
+                scaledTextStyle = scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
             } else {
                 readyToDraw = true
             }

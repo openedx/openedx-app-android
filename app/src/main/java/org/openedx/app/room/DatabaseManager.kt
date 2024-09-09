@@ -16,10 +16,10 @@ class DatabaseManager(
     private val discoveryDao: DiscoveryDao
 ) : DatabaseManager {
     override fun clearTables() {
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             courseDao.clearCachedData()
             dashboardDao.clearCachedData()
-            downloadDao.clearCachedData()
+            downloadDao.clearOfflineProgress()
             discoveryDao.clearCachedData()
         }
     }

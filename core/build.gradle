@@ -80,6 +80,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
+        freeCompilerArgs = List.of("-Xstring-concat=inline")
     }
 
     buildFeatures {
@@ -164,6 +165,9 @@ dependencies {
     api "io.branch.sdk.android:library:5.9.0"
     api "com.google.android.gms:play-services-ads-identifier:18.0.1"
     api "com.android.installreferrer:installreferrer:2.2"
+
+    // Zip
+    api "net.lingala.zip4j:zip4j:$zip_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
