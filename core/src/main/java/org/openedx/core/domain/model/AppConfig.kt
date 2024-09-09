@@ -3,12 +3,12 @@ package org.openedx.core.domain.model
 import java.io.Serializable
 
 data class AppConfig(
-    val courseDatesCalendarSync: CourseDatesCalendarSync,
+    val courseDatesCalendarSync: CourseDatesCalendarSync = CourseDatesCalendarSync(),
 ) : Serializable
 
 data class CourseDatesCalendarSync(
-    val isEnabled: Boolean,
-    val isSelfPacedEnabled: Boolean,
-    val isInstructorPacedEnabled: Boolean,
-    val isDeepLinkEnabled: Boolean,
+    val isEnabled: Boolean = false,
+    val isSelfPacedEnabled: Boolean = false,
+    val isInstructorPacedEnabled: Boolean = false,
+    val isDeepLinkEnabled: Boolean = false,
 ) : Serializable
