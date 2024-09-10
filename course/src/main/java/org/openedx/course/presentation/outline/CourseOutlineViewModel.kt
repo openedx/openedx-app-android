@@ -1,6 +1,5 @@
 package org.openedx.course.presentation.outline
 
-import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,12 +19,14 @@ import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
 import org.openedx.core.domain.model.CourseDatesResult
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
@@ -43,7 +44,7 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.R as courseR
+import org.openedx.course.presentation.download.DownloadDialogManager
 
 class CourseOutlineViewModel(
     val courseId: String,
@@ -55,18 +56,22 @@ class CourseOutlineViewModel(
     private val networkConnection: NetworkConnection,
     private val preferencesManager: CorePreferences,
     private val analytics: CourseAnalytics,
+    private val downloadDialogManager: DownloadDialogManager,
+    private val fileUtil: FileUtil,
     val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
     workerController: DownloadWorkerController,
+    downloadHelper: DownloadHelper,
 ) : BaseDownloadViewModel(
     courseId,
     downloadDao,
     preferencesManager,
     workerController,
-    coreAnalytics
+    coreAnalytics,
+    downloadHelper
 ) {
-    val isCourseNestedListEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
+    val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
     private val _uiState = MutableStateFlow<CourseOutlineUIState>(CourseOutlineUIState.Loading)
     val uiState: StateFlow<CourseOutlineUIState>
@@ -88,6 +93,8 @@ class CourseOutlineViewModel(
     private val courseSubSections = mutableMapOf<String, MutableList<Block>>()
     private val subSectionsDownloadsCount = mutableMapOf<String, Int>()
     val courseSubSectionUnit = mutableMapOf<String, Block?>()
+
+    private var isOfflineBlocksUpToDate = false
 
     init {
         viewModelScope.launch {
@@ -125,20 +132,6 @@ class CourseOutlineViewModel(
         }
 
         getCourseData()
-    }
-
-    override fun saveDownloadModels(folder: String, id: String) {
-        if (preferencesManager.videoSettings.wifiDownloadOnly) {
-            if (networkConnection.isWifiConnected()) {
-                super.saveDownloadModels(folder, id)
-            } else {
-                viewModelScope.launch {
-                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi)))
-                }
-            }
-        } else {
-            super.saveDownloadModels(folder, id)
-        }
     }
 
     fun updateCourseData() {
@@ -205,6 +198,7 @@ class CourseOutlineViewModel(
                 val datesBannerInfo = courseDatesResult.courseBanner
 
                 checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
+                updateOutdatedOfflineXBlocks(courseStructure)
 
                 setBlocks(blocks)
                 courseSubSections.clear()
@@ -391,22 +385,86 @@ class CourseOutlineViewModel(
         }
     }
 
-    fun downloadBlocks(
-        blocksIds: List<String>,
-        fragmentManager: FragmentManager,
-        context: Context
-    ) {
-        if (blocksIds.find { isBlockDownloading(it) } != null) {
-            courseRouter.navigateToDownloadQueue(fm = fragmentManager)
-            return
-        }
-        blocksIds.forEach { blockId ->
-            if (isBlockDownloaded(blockId)) {
-                removeDownloadModels(blockId)
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
+        viewModelScope.launch {
+            val courseData = _uiState.value as? CourseOutlineUIState.CourseData ?: return@launch
+
+            val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+
+            val blocks = subSectionsBlocks.flatMap { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                allBlocks.values.filter { it.id in verticalBlocks.flatMap { it.descendants } }
+            }
+
+            val downloadableBlocks = blocks.filter { it.isDownloadable }
+            val downloadingBlocks = blocksIds.filter { isBlockDownloading(it) }
+            val isAllBlocksDownloaded = downloadableBlocks.all { isBlockDownloaded(it.id) }
+
+            val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val notDownloadedBlocks = allBlocks.values.filter {
+                    it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(it.id)
+                }
+                if (notDownloadedBlocks.isNotEmpty()) {
+                    subSectionsBlock
+                } else {
+                    null
+                }
+            }
+
+            val requiredSubSections = notDownloadedSubSectionBlocks.ifEmpty {
+                subSectionsBlocks
+            }
+
+            if (downloadingBlocks.isNotEmpty()) {
+                val downloadableChildren = downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
+                if (config.getCourseUIConfig().isCourseDownloadQueueEnabled) {
+                    courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
+                } else {
+                    downloadableChildren.forEach {
+                        if (!isBlockDownloaded(it)) {
+                            removeBlockDownloadModel(it)
+                        }
+                    }
+                }
             } else {
-                saveDownloadModels(
-                    FileUtil(context).getExternalAppDir().path, blockId
+                downloadDialogManager.showPopup(
+                    subSectionsBlocks = requiredSubSections,
+                    courseId = courseId,
+                    isBlocksDownloaded = isAllBlocksDownloaded,
+                    fragmentManager = fragmentManager,
+                    removeDownloadModels = ::removeDownloadModels,
+                    saveDownloadModels = { blockId ->
+                        saveDownloadModels(fileUtil.getExternalAppDir().path, blockId)
+                    }
                 )
+            }
+        }
+    }
+
+    private fun updateOutdatedOfflineXBlocks(courseStructure: CourseStructure) {
+        viewModelScope.launch {
+            if (!isOfflineBlocksUpToDate) {
+                val xBlocks = courseStructure.blockData.filter { it.isxBlock }
+                if (xBlocks.isNotEmpty()) {
+                    val xBlockIds = xBlocks.map { it.id }.toSet()
+                    val savedDownloadModelsMap = interactor.getAllDownloadModels()
+                        .filter { it.id in xBlockIds }
+                        .associateBy { it.id }
+
+                    val outdatedBlockIds = xBlocks
+                        .filter { block ->
+                            val savedBlock = savedDownloadModelsMap[block.id]
+                            savedBlock != null && block.offlineDownload?.lastModified != savedBlock.lastModified
+                        }
+                        .map { it.id }
+
+                    outdatedBlockIds.forEach { blockId ->
+                        interactor.removeDownloadModel(blockId)
+                    }
+                    saveDownloadModels(fileUtil.getExternalAppDir().path, outdatedBlockIds)
+                }
+                isOfflineBlocksUpToDate = true
             }
         }
     }

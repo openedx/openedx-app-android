@@ -180,7 +180,7 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         Assert.assertEquals(noInternet, message.await()?.message)
-        assert(viewModel.uiState.value is DatesUIState.Loading)
+        assert(viewModel.uiState.value is CourseDatesUIState.Loading)
     }
 
     @Test
@@ -210,7 +210,7 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         Assert.assertEquals(somethingWrong, message.await()?.message)
-        assert(viewModel.uiState.value is DatesUIState.Loading)
+        assert(viewModel.uiState.value is CourseDatesUIState.Loading)
     }
 
     @Test
@@ -240,7 +240,7 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
-        assert(viewModel.uiState.value is DatesUIState.Dates)
+        assert(viewModel.uiState.value is CourseDatesUIState.CourseDates)
     }
 
     @Test
@@ -273,6 +273,6 @@ class CourseDatesViewModelTest {
         coVerify(exactly = 1) { interactor.getCourseDates(any()) }
 
         assert(message.await()?.message.isNullOrEmpty())
-        assert(viewModel.uiState.value is DatesUIState.Empty)
+        assert(viewModel.uiState.value is CourseDatesUIState.Empty)
     }
 }

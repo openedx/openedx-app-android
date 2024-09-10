@@ -42,6 +42,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
+        freeCompilerArgs = List.of("-Xstring-concat=inline")
     }
     buildFeatures {
         viewBinding true

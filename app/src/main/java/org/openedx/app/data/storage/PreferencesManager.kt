@@ -145,9 +145,11 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             saveString(APP_CONFIG, appConfigJson)
         }
         get() {
-            val appConfigString = getString(APP_CONFIG)
+            val appConfigString = getString(APP_CONFIG, getDefaultAppConfig())
             return Gson().fromJson(appConfigString, AppConfig::class.java)
         }
+
+    private fun getDefaultAppConfig() = Gson().toJson(AppConfig())
 
     override var lastWhatsNewVersion: String
         set(value) {
