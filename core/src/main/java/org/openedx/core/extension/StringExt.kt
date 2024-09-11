@@ -42,5 +42,5 @@ fun String.toImageLink(apiHostURL: String): String =
     if (this.isLinkValid()) {
         this
     } else {
-        apiHostURL + this.removePrefix("/")
+        (apiHostURL + this).replace(Regex("(?<!:)//"), "/")
     }

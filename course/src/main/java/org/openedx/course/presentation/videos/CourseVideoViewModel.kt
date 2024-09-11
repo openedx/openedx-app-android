@@ -168,8 +168,13 @@ class CourseVideoViewModel(
 
                 _uiState.value =
                     CourseVideosUIState.CourseData(
-                        courseStructure, getDownloadModelsStatus(), courseSubSections,
-                        courseSectionsState, subSectionsDownloadsCount, getDownloadModelsSize()
+                        courseStructure = courseStructure,
+                        downloadedState = getDownloadModelsStatus(),
+                        courseSubSections = courseSubSections,
+                        courseSectionsState = courseSectionsState,
+                        subSectionsDownloadsCount = subSectionsDownloadsCount,
+                        downloadModelsSize = getDownloadModelsSize(),
+                        useRelativeDates = preferencesManager.isRelativeDatesEnabled
                     )
             }
             courseNotifier.send(CourseLoading(false))

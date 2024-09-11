@@ -68,15 +68,10 @@ fun ImageHeader(
         } else {
             ContentScale.Crop
         }
-    val imageUrl = if (courseImage?.isLinkValid() == true) {
-        courseImage
-    } else {
-        apiHostUrl + courseImage
-    }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
+                .data(courseImage?.toImageLink(apiHostUrl))
                 .error(CoreR.drawable.core_no_image_course)
                 .placeholder(CoreR.drawable.core_no_image_course)
                 .build(),

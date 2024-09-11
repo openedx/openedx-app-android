@@ -13,6 +13,7 @@ interface CorePreferences {
     var videoSettings: VideoSettings
     var appConfig: AppConfig
     var canResetAppDirectory: Boolean
+    var isRelativeDatesEnabled: Boolean
 
     fun clearCorePreferences()
 }

@@ -198,6 +198,7 @@ class CourseVideoViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { config.getApiHostURL() } returns "http://localhost:8000"
         every { courseNotifier.notifier } returns flowOf(CourseLoading(false))
+        every { preferencesManager.isRelativeDatesEnabled } returns true
         every { downloadDialogManager.showPopup(any(), any(), any(), any(), any(), any(), any()) } returns Unit
     }
 

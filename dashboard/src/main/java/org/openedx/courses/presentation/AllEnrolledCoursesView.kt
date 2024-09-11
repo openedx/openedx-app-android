@@ -419,7 +419,7 @@ fun CourseItem(
             Column {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(course.course.courseImage.toImageLink(apiHostUrl) ?: "")
+                        .data(course.course.courseImage.toImageLink(apiHostUrl))
                         .error(R.drawable.core_no_image_course)
                         .placeholder(R.drawable.core_no_image_course)
                         .build(),

@@ -14,6 +14,7 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
@@ -34,7 +35,8 @@ class DashboardGalleryViewModel(
     private val networkConnection: NetworkConnection,
     private val fileUtil: FileUtil,
     private val dashboardRouter: DashboardRouter,
-    private val windowSize: WindowSize
+    private val corePreferences: CorePreferences,
+    private val windowSize: WindowSize,
 ) : BaseViewModel() {
 
     val apiHostUrl get() = config.getApiHostURL()
@@ -76,7 +78,10 @@ class DashboardGalleryViewModel(
                     if (response.primary == null && response.enrollments.courses.isEmpty()) {
                         _uiState.value = DashboardGalleryUIState.Empty
                     } else {
-                        _uiState.value = DashboardGalleryUIState.Courses(response)
+                        _uiState.value = DashboardGalleryUIState.Courses(
+                            response,
+                            corePreferences.isRelativeDatesEnabled
+                        )
                     }
                 } else {
                     val courseEnrollments = fileUtil.getObjectFromFile<CourseEnrollments>()
@@ -84,7 +89,10 @@ class DashboardGalleryViewModel(
                         _uiState.value = DashboardGalleryUIState.Empty
                     } else {
                         _uiState.value =
-                            DashboardGalleryUIState.Courses(courseEnrollments.mapToDomain())
+                            DashboardGalleryUIState.Courses(
+                                courseEnrollments.mapToDomain(),
+                                corePreferences.isRelativeDatesEnabled
+                            )
                     }
                 }
             } catch (e: Exception) {

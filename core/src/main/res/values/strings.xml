@@ -92,21 +92,7 @@
     <string name="core_date_type_next_week" tools:ignore="MissingTranslation">Next Week</string>
     <string name="core_date_type_upcoming" tools:ignore="MissingTranslation">Upcoming</string>
     <string name="core_date_type_none" tools:ignore="MissingTranslation">None</string>
-    <string name="core_date_format_today" tools:ignore="MissingTranslation">Today</string>
-    <string name="core_date_format_tomorrow" tools:ignore="MissingTranslation">Tomorrow</string>
-    <string name="core_date_format_yesterday" tools:ignore="MissingTranslation">Yesterday</string>
-    <string name="core_date_format_days_ago" tools:ignore="MissingTranslation">%1$s days ago</string>
-    <string name="core_date_format_assignment_due_today" tools:ignore="MissingTranslation">Due Today</string>
-    <string name="core_date_format_assignment_due_tomorrow" tools:ignore="MissingTranslation">Due Tomorrow</string>
-    <string name="core_date_format_assignment_due_yesterday" tools:ignore="MissingTranslation">Due Yesterday</string>
-    <plurals name="core_date_format_assignment_due_days_ago" tools:ignore="MissingTranslation">
-        <item quantity="one">Due %1$d day ago</item>
-        <item quantity="other">Due %1$d days ago</item>
-    </plurals>
-    <plurals name="core_date_format_assignment_due_in" tools:ignore="MissingTranslation">
-        <item quantity="one">Due in %1$d day</item>
-        <item quantity="other">Due in %1$d days</item>
-    </plurals>
+    <string name="core_date_format_assignment_due" tools:ignore="MissingTranslation">Due %1$s</string>
     <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">
         <item quantity="one">%d Item Hidden</item>
         <item quantity="other">%d Items Hidden</item>
@@ -193,4 +179,5 @@
     <string name="core_to_sync">To Sync</string>
     <string name="core_not_synced">Not Synced</string>
     <string name="core_syncing_to_calendar">Syncing to calendar…</string>
+    <string name="core_next">Next</string>
 </resources>

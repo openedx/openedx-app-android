@@ -300,6 +300,7 @@ private fun CourseVideosUI(
                                                 courseSectionsState = courseSectionsState,
                                                 courseSubSections = courseSubSections,
                                                 downloadedStateMap = uiState.downloadedState,
+                                                useRelativeDates = uiState.useRelativeDates,
                                                 onSubSectionClick = onSubSectionClick,
                                                 onDownloadClick = onDownloadClick
                                             )
@@ -632,7 +633,8 @@ private fun CourseVideosScreenPreview() {
                     remainingSize = 0,
                     allCount = 1,
                     allSize = 0
-                )
+                ),
+                useRelativeDates = true
             ),
             courseTitle = "",
             onExpandClick = { },
@@ -689,7 +691,7 @@ private fun CourseVideosScreenTabletPreview() {
                     remainingSize = 0,
                     allCount = 0,
                     allSize = 0
-                )
+                ), useRelativeDates = true
             ),
             courseTitle = "",
             onExpandClick = { },

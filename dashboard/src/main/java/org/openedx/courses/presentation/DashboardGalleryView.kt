@@ -213,6 +213,7 @@ private fun DashboardGalleryView(
                             UserCourses(
                                 modifier = Modifier.fillMaxSize(),
                                 userCourses = uiState.userCourses,
+                                useRelativeDates = uiState.useRelativeDates,
                                 apiHostUrl = apiHostUrl,
                                 openCourse = {
                                     onAction(DashboardGalleryScreenAction.OpenCourse(it))
@@ -274,6 +275,7 @@ private fun UserCourses(
     modifier: Modifier = Modifier,
     userCourses: CourseEnrollments,
     apiHostUrl: String,
+    useRelativeDates: Boolean,
     openCourse: (EnrolledCourse) -> Unit,
     navigateToDates: (EnrolledCourse) -> Unit,
     onViewAllClick: () -> Unit,
@@ -290,7 +292,8 @@ private fun UserCourses(
                 apiHostUrl = apiHostUrl,
                 navigateToDates = navigateToDates,
                 resumeBlockId = resumeBlockId,
-                openCourse = openCourse
+                openCourse = openCourse,
+                useRelativeDates = useRelativeDates
             )
         }
         if (userCourses.enrollments.courses.isNotEmpty()) {
@@ -505,6 +508,7 @@ private fun AssignmentItem(
 private fun PrimaryCourseCard(
     primaryCourse: EnrolledCourse,
     apiHostUrl: String,
+    useRelativeDates: Boolean,
     navigateToDates: (EnrolledCourse) -> Unit,
     resumeBlockId: (enrolledCourse: EnrolledCourse, blockId: String) -> Unit,
     openCourse: (EnrolledCourse) -> Unit,
@@ -527,7 +531,7 @@ private fun PrimaryCourseCard(
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
-                    .data(apiHostUrl + primaryCourse.course.courseImage)
+                    .data(primaryCourse.course.courseImage.toImageLink(apiHostUrl))
                     .error(CoreR.drawable.core_no_image_course)
                     .placeholder(CoreR.drawable.core_no_image_course)
                     .build(),
@@ -597,7 +601,10 @@ private fun PrimaryCourseCard(
                     info = stringResource(
                         R.string.dashboard_assignment_due,
                         nearestAssignment.assignmentType ?: "",
-                        TimeUtils.getAssignmentFormattedDate(context, nearestAssignment.date)
+                        stringResource(
+                            id = CoreR.string.core_date_format_assignment_due,
+                            TimeUtils.formatToString(context, nearestAssignment.date, useRelativeDates)
+                        )
                     )
                 )
             }
@@ -856,7 +863,7 @@ private fun ViewAllItemPreview() {
 private fun DashboardGalleryViewPreview() {
     OpenEdXTheme {
         DashboardGalleryView(
-            uiState = DashboardGalleryUIState.Courses(mockUserCourses),
+            uiState = DashboardGalleryUIState.Courses(mockUserCourses, true),
             apiHostUrl = "",
             uiMessage = null,
             updating = false,

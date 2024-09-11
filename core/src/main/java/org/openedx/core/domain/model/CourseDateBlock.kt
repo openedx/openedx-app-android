@@ -3,8 +3,6 @@ package org.openedx.core.domain.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import org.openedx.core.data.model.DateType
-import org.openedx.core.utils.isTimeLessThan24Hours
-import org.openedx.core.utils.isToday
 import java.util.Date
 
 @Parcelize
@@ -27,10 +25,6 @@ data class CourseDateBlock(
             DateType.VERIFIED_UPGRADE_DEADLINE,
             DateType.VERIFICATION_DEADLINE_DATE,
         ) && date.before(Date()))
-    }
-
-    fun isTimeDifferenceLessThan24Hours(): Boolean {
-        return (date.isToday() && date.before(Date())) || date.isTimeLessThan24Hours()
     }
 
     override fun equals(other: Any?): Boolean {
