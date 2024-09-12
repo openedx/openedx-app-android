@@ -49,6 +49,10 @@ class MainViewModel(
         _isBottomBarEnabled.value = enable
     }
 
+    fun logLearnTabClickedEvent() {
+        logScreenEvent(AppAnalyticsEvent.LEARN)
+    }
+    
     fun logDiscoveryTabClickedEvent() {
         logScreenEvent(AppAnalyticsEvent.DISCOVER)
     }

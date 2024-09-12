@@ -7,12 +7,12 @@ interface DashboardAnalytics {
 
 enum class DashboardAnalyticsEvent(val eventName: String, val biValue: String) {
     MY_COURSES(
-        "MainDashboard:My Courses",
-        "edx.bi.app.main_dashboard.my_course"
+        "Learn:My Courses",
+        "edx.bi.app.main_dashboard.learn.my_course"
     ),
     MY_PROGRAMS(
-        "MainDashboard:My Programs",
-        "edx.bi.app.main_dashboard.my_program"
+        "Learn:My Programs",
+        "edx.bi.app.main_dashboard.learn.my_programs"
     ),
 }
 

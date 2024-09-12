@@ -12,6 +12,10 @@ enum class AppAnalyticsEvent(val eventName: String, val biValue: String) {
         "Launch",
         "edx.bi.app.launch"
     ),
+    LEARN(
+        "MainDashboard:Learn",
+        "edx.bi.app.main_dashboard.learn"
+    ),
     DISCOVER(
         "MainDashboard:Discover",
         "edx.bi.app.main_dashboard.discover"
