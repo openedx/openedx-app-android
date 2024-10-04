@@ -17,5 +17,6 @@ sealed class CourseOutlineUIState {
         val useRelativeDates: Boolean,
     ) : CourseOutlineUIState()
 
+    data object Error : CourseOutlineUIState()
     data object Loading : CourseOutlineUIState()
 }

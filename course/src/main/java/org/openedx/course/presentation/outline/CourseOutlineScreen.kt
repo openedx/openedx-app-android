@@ -327,6 +327,8 @@ private fun CourseOutlineUI(
                             }
                         }
 
+                        CourseOutlineUIState.Error -> {}
+
                         CourseOutlineUIState.Loading -> {}
                     }
                 }
