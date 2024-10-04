@@ -103,15 +103,24 @@ fun CourseVideosScreen(
             viewModel.switchCourseSections(block.id)
         },
         onSubSectionClick = { subSectionBlock ->
-            viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+            if (viewModel.isCourseDropdownNavigationEnabled) {
+                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    viewModel.courseRouter.navigateToCourseContainer(
+                        fragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = unit.id,
+                        mode = CourseViewMode.VIDEOS
+                    )
+                }
+            } else {
                 viewModel.sequentialClickedEvent(
-                    unit.blockId,
-                    unit.displayName
+                    subSectionBlock.blockId,
+                    subSectionBlock.displayName
                 )
-                viewModel.courseRouter.navigateToCourseContainer(
+                viewModel.courseRouter.navigateToCourseSubsections(
                     fm = fragmentManager,
                     courseId = viewModel.courseId,
-                    unitId = unit.id,
+                    subSectionId = subSectionBlock.id,
                     mode = CourseViewMode.VIDEOS
                 )
             }
@@ -120,7 +129,6 @@ fun CourseVideosScreen(
             viewModel.downloadBlocks(
                 blocksIds = blocksIds,
                 fragmentManager = fragmentManager,
-                context = context
             )
         },
         onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
@@ -292,6 +300,7 @@ private fun CourseVideosUI(
                                                 courseSectionsState = courseSectionsState,
                                                 courseSubSections = courseSubSections,
                                                 downloadedStateMap = uiState.downloadedState,
+                                                useRelativeDates = uiState.useRelativeDates,
                                                 onSubSectionClick = onSubSectionClick,
                                                 onDownloadClick = onDownloadClick
                                             )
@@ -624,7 +633,8 @@ private fun CourseVideosScreenPreview() {
                     remainingSize = 0,
                     allCount = 1,
                     allSize = 0
-                )
+                ),
+                useRelativeDates = true
             ),
             courseTitle = "",
             onExpandClick = { },
@@ -681,7 +691,7 @@ private fun CourseVideosScreenTabletPreview() {
                     remainingSize = 0,
                     allCount = 0,
                     allSize = 0
-                )
+                ), useRelativeDates = true
             ),
             courseTitle = "",
             onExpandClick = { },
@@ -718,7 +728,8 @@ private val mockChapterBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )
 
 private val mockSequentialBlock = Block(
@@ -738,7 +749,8 @@ private val mockSequentialBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = mockAssignmentProgress,
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )
 
 private val mockCourseStructure = CourseStructure(

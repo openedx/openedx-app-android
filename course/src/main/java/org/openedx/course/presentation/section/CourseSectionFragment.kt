@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,13 +24,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -65,7 +60,6 @@ import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.extension.serializable
-import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -79,12 +73,9 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.ui.windowSizeValue
-import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
-import java.io.File
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -133,15 +124,6 @@ class CourseSectionFragment : Fragment() {
                             )
                         }
                     },
-                    onDownloadClick = {
-                        if (viewModel.isBlockDownloading(it.id) || viewModel.isBlockDownloaded(it.id)) {
-                            viewModel.removeDownloadModels(it.id)
-                        } else {
-                            viewModel.saveDownloadModels(
-                                FileUtil(context).getExternalAppDir().path, it.id
-                            )
-                        }
-                    }
                 )
 
                 LaunchedEffect(rememberSaveable { true }) {
@@ -194,7 +176,6 @@ private fun CourseSectionScreen(
     uiMessage: UIMessage?,
     onBackClick: () -> Unit,
     onItemClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val title = when (uiState) {
@@ -283,11 +264,9 @@ private fun CourseSectionScreen(
                                     items(uiState.blocks) { block ->
                                         CourseSubsectionItem(
                                             block = block,
-                                            downloadedState = uiState.downloadedState[block.id],
                                             onClick = {
                                                 onItemClick(it)
                                             },
-                                            onDownloadClick = onDownloadClick
                                         )
                                         Divider()
                                     }
@@ -304,9 +283,7 @@ private fun CourseSectionScreen(
 @Composable
 private fun CourseSubsectionItem(
     block: Block,
-    downloadedState: DownloadedState?,
     onClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit
 ) {
     val completedIconPainter =
         if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
@@ -319,8 +296,6 @@ private fun CourseSubsectionItem(
     } else {
         stringResource(id = R.string.course_accessibility_section_uncompleted)
     }
-
-    val iconModifier = Modifier.size(24.dp)
 
     Column(Modifier.clickable { onClick(block) }) {
         Row(
@@ -354,47 +329,6 @@ private fun CourseSubsectionItem(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        painterResource(id = R.drawable.course_ic_remove_download)
-                    } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
-                    }
-                    val downloadIconDescription =
-                        if (downloadedState == DownloadedState.DOWNLOADED) {
-                            stringResource(id = R.string.course_accessibility_remove_course_section)
-                        } else {
-                            stringResource(id = R.string.course_accessibility_download_course_section)
-                        }
-                    IconButton(modifier = iconModifier,
-                        onClick = { onDownloadClick(block) }) {
-                        Icon(
-                            painter = downloadIconPainter,
-                            contentDescription = downloadIconDescription,
-                            tint = MaterialTheme.appColors.textPrimary
-                        )
-                    }
-                } else if (downloadedState != null) {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(34.dp),
-                                backgroundColor = Color.LightGray,
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.appColors.primary
-                            )
-                        }
-                        IconButton(
-                            modifier = iconModifier.padding(top = 2.dp),
-                            onClick = { onDownloadClick(block) }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
-                                tint = MaterialTheme.appColors.error
-                            )
-                        }
-                    }
-                }
                 CardArrow(
                     degrees = 0f
                 )
@@ -427,14 +361,12 @@ private fun CourseSectionScreenPreview() {
                     mockBlock,
                     mockBlock
                 ),
-                mapOf(),
                 "",
                 "Course default"
             ),
             uiMessage = null,
             onBackClick = {},
             onItemClick = {},
-            onDownloadClick = {}
         )
     }
 }
@@ -453,14 +385,12 @@ private fun CourseSectionScreenTabletPreview() {
                     mockBlock,
                     mockBlock
                 ),
-                mapOf(),
                 "",
                 "Course default",
             ),
             uiMessage = null,
             onBackClick = {},
             onItemClick = {},
-            onDownloadClick = {}
         )
     }
 }
@@ -482,5 +412,6 @@ private val mockBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = AssignmentProgress("", 1f, 2f),
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )

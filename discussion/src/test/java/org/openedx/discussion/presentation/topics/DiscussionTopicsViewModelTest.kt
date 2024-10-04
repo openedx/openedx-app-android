@@ -29,8 +29,6 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
@@ -80,7 +78,8 @@ class DiscussionTopicsViewModelTest {
             descendantsType = BlockType.HTML,
             completion = 0.0,
             assignmentProgress = assignmentProgress,
-            due = Date()
+            due = Date(),
+            offlineDownload = null,
         ),
         Block(
             id = "id1",
@@ -98,7 +97,8 @@ class DiscussionTopicsViewModelTest {
             descendantsType = BlockType.HTML,
             completion = 0.0,
             assignmentProgress = assignmentProgress,
-            due = Date()
+            due = Date(),
+            offlineDownload = null,
         ),
         Block(
             id = "id2",
@@ -116,32 +116,9 @@ class DiscussionTopicsViewModelTest {
             descendantsType = BlockType.HTML,
             completion = 0.0,
             assignmentProgress = assignmentProgress,
-            due = Date()
+            due = Date(),
+            offlineDownload = null,
         )
-    )
-    private val courseStructure = CourseStructure(
-        root = "",
-        blockData = blocks,
-        id = "id",
-        name = "Course name",
-        number = "",
-        org = "Org",
-        start = Date(),
-        startDisplay = "",
-        startType = "",
-        end = Date(),
-        coursewareAccess = CoursewareAccess(
-            true,
-            "",
-            "",
-            "",
-            "",
-            ""
-        ),
-        media = null,
-        certificate = null,
-        isSelfPaced = false,
-        progress = null
     )
 
     @Before

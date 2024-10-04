@@ -145,9 +145,11 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             saveString(APP_CONFIG, appConfigJson)
         }
         get() {
-            val appConfigString = getString(APP_CONFIG)
+            val appConfigString = getString(APP_CONFIG, getDefaultAppConfig())
             return Gson().fromJson(appConfigString, AppConfig::class.java)
         }
+
+    private fun getDefaultAppConfig() = Gson().toJson(AppConfig())
 
     override var lastWhatsNewVersion: String
         set(value) {
@@ -193,6 +195,12 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getString(CALENDAR_USER)
 
+    override var isRelativeDatesEnabled: Boolean
+        set(value) {
+            saveBoolean(IS_RELATIVE_DATES_ENABLED, value)
+        }
+        get() = getBoolean(IS_RELATIVE_DATES_ENABLED, true)
+
     override var isHideInactiveCourses: Boolean
         set(value) {
             saveBoolean(HIDE_INACTIVE_COURSES, value)
@@ -223,6 +231,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val CALENDAR_ID = "CALENDAR_ID"
         private const val RESET_APP_DIRECTORY = "reset_app_directory"
         private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
+        private const val IS_RELATIVE_DATES_ENABLED = "IS_RELATIVE_DATES_ENABLED"
         private const val HIDE_INACTIVE_COURSES = "HIDE_INACTIVE_COURSES"
         private const val CALENDAR_USER = "CALENDAR_USER"
     }

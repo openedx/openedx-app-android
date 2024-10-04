@@ -41,7 +41,9 @@ data class Block(
     @SerializedName("assignment_progress")
     val assignmentProgress: AssignmentProgress?,
     @SerializedName("due")
-    val due: String?
+    val due: String?,
+    @SerializedName("offline_download")
+    val offlineDownload: OfflineDownload?,
 ) {
     fun mapToDomain(blockData: Map<String, Block>): DomainBlock {
         val blockType = BlockType.getBlockType(type ?: "")
@@ -73,6 +75,7 @@ data class Block(
             containsGatedContent = containsGatedContent ?: false,
             assignmentProgress = assignmentProgress?.mapToDomain(),
             due = TimeUtils.iso8601ToDate(due ?: ""),
+            offlineDownload = offlineDownload?.mapToDomain()
         )
     }
 }
@@ -133,7 +136,7 @@ data class VideoInfo(
     @SerializedName("url")
     var url: String?,
     @SerializedName("file_size")
-    var fileSize: Int?
+    var fileSize: Long?
 ) {
     fun mapToDomain(): DomainVideoInfo {
         return DomainVideoInfo(

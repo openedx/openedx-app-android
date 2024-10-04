@@ -37,10 +37,10 @@ ext {
 
     firebase_version = "33.0.0"
 
-    retrofit_version = '2.9.0'
+    retrofit_version = '2.11.0'
     logginginterceptor_version = '4.9.1'
 
-    koin_version = '3.2.0'
+    koin_version = '3.5.6'
 
     coil_version = '2.3.0'
 
@@ -60,6 +60,7 @@ ext {
 
     configHelper = new ConfigHelper(projectDir, getCurrentFlavor())
 
+    zip_version = '2.6.3'
     //testing
     mockk_version = '1.13.3'
     android_arch_version = '2.2.0'

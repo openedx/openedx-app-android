@@ -47,6 +47,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +64,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -161,10 +161,10 @@ fun CourseSectionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                    val downloadIconPainter = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        painterResource(id = R.drawable.course_ic_remove_download)
+                    val downloadIcon = if (downloadedState == DownloadedState.DOWNLOADED) {
+                        Icons.Default.CloudDone
                     } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
+                        Icons.Outlined.CloudDownload
                     }
                     val downloadIconDescription =
                         if (downloadedState == DownloadedState.DOWNLOADED) {
@@ -175,7 +175,7 @@ fun CourseSectionCard(
                     IconButton(modifier = iconModifier,
                         onClick = { onDownloadClick(block) }) {
                         Icon(
-                            painter = downloadIconPainter,
+                            imageVector = downloadIcon,
                             contentDescription = downloadIconDescription,
                             tint = MaterialTheme.appColors.textPrimary
                         )
@@ -591,6 +591,7 @@ fun VideoSubtitles(
 fun CourseSection(
     modifier: Modifier = Modifier,
     block: Block,
+    useRelativeDates: Boolean,
     onItemClick: (Block) -> Unit,
     courseSectionsState: Boolean?,
     courseSubSections: List<Block>?,
@@ -609,7 +610,6 @@ fun CourseSection(
         filteredStatuses.any { it.isWaitingOrDownloading } -> DownloadedState.DOWNLOADING
         else -> DownloadedState.NOT_DOWNLOADED
     }
-    val downloadBlockIds = downloadedStateMap.keys.filter { it in block.descendants }
 
     Column(modifier = modifier
         .clip(MaterialTheme.appShapes.cardShape)
@@ -626,7 +626,7 @@ fun CourseSection(
             arrowDegrees = arrowRotation,
             downloadedState = downloadedState,
             onDownloadClick = {
-                onDownloadClick(downloadBlockIds)
+                onDownloadClick(block.descendants)
             }
         )
         courseSubSections?.forEach { subSectionBlock ->
@@ -635,7 +635,8 @@ fun CourseSection(
             ) {
                 CourseSubSectionItem(
                     block = subSectionBlock,
-                    onClick = onSubSectionClick
+                    onClick = onSubSectionClick,
+                    useRelativeDates = useRelativeDates
                 )
             }
         }
@@ -685,11 +686,11 @@ fun CourseExpandableChapterCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                val downloadIconPainter =
+                val downloadIcon =
                     if (downloadedState == DownloadedState.DOWNLOADED) {
-                        rememberVectorPainter(Icons.Default.CloudDone)
+                        Icons.Default.CloudDone
                     } else {
-                        painterResource(id = R.drawable.course_ic_start_download)
+                        Icons.Outlined.CloudDownload
                     }
                 val downloadIconDescription =
                     if (downloadedState == DownloadedState.DOWNLOADED) {
@@ -706,7 +707,7 @@ fun CourseExpandableChapterCard(
                 IconButton(modifier = iconModifier,
                     onClick = { onDownloadClick() }) {
                     Icon(
-                        painter = downloadIconPainter,
+                        imageVector = downloadIcon,
                         contentDescription = downloadIconDescription,
                         tint = downloadIconTint
                     )
@@ -746,6 +747,7 @@ fun CourseExpandableChapterCard(
 fun CourseSubSectionItem(
     modifier: Modifier = Modifier,
     block: Block,
+    useRelativeDates: Boolean,
     onClick: (Block) -> Unit,
 ) {
     val context = LocalContext.current
@@ -754,7 +756,7 @@ fun CourseSubSectionItem(
     val iconColor =
         if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.getAssignmentFormattedDate(context, it) })
+        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
     }
     val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
     Column(
@@ -796,7 +798,7 @@ fun CourseSubSectionItem(
                 stringResource(
                     R.string.course_subsection_assignment_info,
                     block.assignmentProgress?.assignmentType ?: "",
-                    due ?: "",
+                    stringResource(id = coreR.string.core_date_format_assignment_due, due),
                     block.assignmentProgress?.numPointsEarned?.toInt() ?: 0,
                     block.assignmentProgress?.numPointsPossible?.toInt() ?: 0
                 )
@@ -1277,6 +1279,7 @@ private fun OfflineQueueCardPreview() {
         Surface(color = MaterialTheme.appColors.background) {
             OfflineQueueCard(
                 downloadModel = DownloadModel(
+                    courseId = "",
                     id = "",
                     title = "Problems of society",
                     size = 4000,
@@ -1284,7 +1287,6 @@ private fun OfflineQueueCardPreview() {
                     url = "",
                     type = FileType.VIDEO,
                     downloadedState = DownloadedState.DOWNLOADING,
-                    progress = 0f
                 ),
                 progressValue = 10,
                 progressSize = 30,
@@ -1332,5 +1334,6 @@ private val mockChapterBlock = Block(
     completion = 0.0,
     containsGatedContent = false,
     assignmentProgress = AssignmentProgress("", 1f, 2f),
-    due = Date()
+    due = Date(),
+    offlineDownload = null
 )

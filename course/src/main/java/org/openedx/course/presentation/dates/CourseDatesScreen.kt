@@ -74,7 +74,6 @@ import org.openedx.core.presentation.CoreAnalyticsScreen
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
-import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -85,11 +84,12 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
+import org.openedx.core.utils.TimeUtils.formatToString
 import org.openedx.core.utils.clearTime
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
-import java.util.concurrent.atomic.AtomicReference
+import java.util.Date
 import org.openedx.core.R as CoreR
 
 @Composable
@@ -100,7 +100,7 @@ fun CourseDatesScreen(
     isFragmentResumed: Boolean,
     updateCourseStructure: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState(DatesUIState.Loading)
+    val uiState by viewModel.uiState.collectAsState(CourseDatesUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val context = LocalContext.current
 
@@ -109,6 +109,7 @@ fun CourseDatesScreen(
         uiState = uiState,
         uiMessage = uiMessage,
         isSelfPaced = viewModel.isSelfPaced,
+        useRelativeDates = viewModel.useRelativeDates,
         onItemClick = { block ->
             if (block.blockId.isNotEmpty()) {
                 viewModel.getVerticalBlock(block.blockId)
@@ -175,9 +176,10 @@ fun CourseDatesScreen(
 @Composable
 private fun CourseDatesUI(
     windowSize: WindowSize,
-    uiState: DatesUIState,
+    uiState: CourseDatesUIState,
     uiMessage: UIMessage?,
     isSelfPaced: Boolean,
+    useRelativeDates: Boolean,
     onItemClick: (CourseDateBlock) -> Unit,
     onPLSBannerViewed: () -> Unit,
     onSyncDates: () -> Unit,
@@ -210,7 +212,7 @@ private fun CourseDatesUI(
 
         HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
-        val isPLSBannerAvailable = (uiState as? DatesUIState.Dates)
+        val isPLSBannerAvailable = (uiState as? CourseDatesUIState.CourseDates)
             ?.courseDatesResult
             ?.courseBanner
             ?.isBannerAvailableForUserType(isSelfPaced)
@@ -236,7 +238,7 @@ private fun CourseDatesUI(
                         .fillMaxWidth()
                 ) {
                     when (uiState) {
-                        is DatesUIState.Dates -> {
+                        is CourseDatesUIState.CourseDates -> {
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -311,6 +313,7 @@ private fun CourseDatesUI(
                                             sectionKey = DatesSection.COMPLETED,
                                             sectionDates = section,
                                             onItemClick = onItemClick,
+                                            useRelativeDates = useRelativeDates
                                         )
                                     }
                                 }
@@ -325,6 +328,7 @@ private fun CourseDatesUI(
                                                 sectionKey = sectionKey,
                                                 sectionDates = section,
                                                 onItemClick = onItemClick,
+                                                useRelativeDates = useRelativeDates
                                             )
                                         }
                                     }
@@ -332,7 +336,7 @@ private fun CourseDatesUI(
                             }
                         }
 
-                        DatesUIState.Empty -> {
+                        CourseDatesUIState.Empty -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -347,7 +351,7 @@ private fun CourseDatesUI(
                             }
                         }
 
-                        DatesUIState.Loading -> {}
+                        CourseDatesUIState.Loading -> {}
                     }
                 }
             }
@@ -420,6 +424,7 @@ fun CalendarSyncCard(
 @Composable
 fun ExpandableView(
     sectionKey: DatesSection = DatesSection.NONE,
+    useRelativeDates: Boolean,
     sectionDates: List<CourseDateBlock>,
     onItemClick: (CourseDateBlock) -> Unit,
 ) {
@@ -503,6 +508,7 @@ fun ExpandableView(
                 sectionKey = sectionKey,
                 sectionDates = sectionDates,
                 onItemClick = onItemClick,
+                useRelativeDates = useRelativeDates
             )
         }
     }
@@ -511,6 +517,7 @@ fun ExpandableView(
 @Composable
 private fun CourseDateBlockSection(
     sectionKey: DatesSection = DatesSection.NONE,
+    useRelativeDates: Boolean,
     sectionDates: List<CourseDateBlock>,
     onItemClick: (CourseDateBlock) -> Unit,
 ) {
@@ -533,7 +540,7 @@ private fun CourseDateBlockSection(
             if (sectionKey != DatesSection.COMPLETED) {
                 DateBullet(section = sectionKey)
             }
-            DateBlock(dateBlocks = sectionDates, onItemClick = onItemClick)
+            DateBlock(dateBlocks = sectionDates, onItemClick = onItemClick, useRelativeDates = useRelativeDates)
         }
     }
 }
@@ -565,6 +572,7 @@ private fun DateBullet(
 @Composable
 private fun DateBlock(
     dateBlocks: List<CourseDateBlock>,
+    useRelativeDates: Boolean,
     onItemClick: (CourseDateBlock) -> Unit,
 ) {
     Column(
@@ -579,7 +587,7 @@ private fun DateBlock(
             if (index != 0) {
                 canShowDate = (lastAssignmentDate != dateBlock.date)
             }
-            CourseDateItem(dateBlock, canShowDate, index != 0, onItemClick)
+            CourseDateItem(dateBlock, canShowDate, index != 0, useRelativeDates, onItemClick)
             lastAssignmentDate = dateBlock.date
         }
     }
@@ -590,8 +598,10 @@ private fun CourseDateItem(
     dateBlock: CourseDateBlock,
     canShowDate: Boolean,
     isMiddleChild: Boolean,
+    useRelativeDates: Boolean,
     onItemClick: (CourseDateBlock) -> Unit,
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .wrapContentHeight()
@@ -601,11 +611,7 @@ private fun CourseDateItem(
             Spacer(modifier = Modifier.height(20.dp))
         }
         if (canShowDate) {
-            val timeTitle = if (dateBlock.isTimeDifferenceLessThan24Hours()) {
-                TimeUtils.getFormattedTime(dateBlock.date)
-            } else {
-                TimeUtils.getCourseFormattedDate(LocalContext.current, dateBlock.date)
-            }
+            val timeTitle = formatToString(context, dateBlock.date, useRelativeDates)
             Text(
                 text = timeTitle,
                 style = MaterialTheme.appTypography.labelMedium,
@@ -677,12 +683,13 @@ private fun CourseDatesScreenPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = DatesUIState.Dates(
+            uiState = CourseDatesUIState.CourseDates(
                 CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
                 CalendarSyncState.SYNCED
             ),
             uiMessage = null,
             isSelfPaced = true,
+            useRelativeDates = true,
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
@@ -698,12 +705,13 @@ private fun CourseDatesScreenTabletPreview() {
     OpenEdXTheme {
         CourseDatesUI(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            uiState = DatesUIState.Dates(
+            uiState = CourseDatesUIState.CourseDates(
                 CourseDatesResult(mockedResponse, mockedCourseBannerInfo),
                 CalendarSyncState.SYNCED
             ),
             uiMessage = null,
             isSelfPaced = true,
+            useRelativeDates = true,
             onItemClick = {},
             onPLSBannerViewed = {},
             onSyncDates = {},
@@ -743,7 +751,7 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
-                    date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
+                    date = Date(),
                     dateType = DateType.ASSIGNMENT_DUE_DATE,
                 )
             )
@@ -793,9 +801,3 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
             )
         )
     )
-
-val mockCalendarSyncUIState = CalendarSyncUIState(
-    isCalendarSyncEnabled = true,
-    isSynced = true,
-    checkForOutOfSync = AtomicReference()
-)

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncState
 import org.openedx.core.system.CalendarManager
@@ -30,6 +31,7 @@ class CalendarViewModel(
     private val calendarPreferences: CalendarPreferences,
     private val calendarNotifier: CalendarNotifier,
     private val calendarInteractor: CalendarInteractor,
+    private val corePreferences: CorePreferences,
     private val profileRouter: ProfileRouter,
     private val networkConnection: NetworkConnection,
 ) : BaseViewModel() {
@@ -40,7 +42,8 @@ class CalendarViewModel(
             calendarData = null,
             calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCED else CalendarSyncState.OFFLINE,
             isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
-            coursesSynced = null
+            coursesSynced = null,
+            isRelativeDateEnabled = corePreferences.isRelativeDatesEnabled,
         )
 
     private val _uiState = MutableStateFlow(calendarInitState)
@@ -105,6 +108,11 @@ class CalendarViewModel(
             _uiState.update { it.copy(isCalendarSyncEnabled = true) }
             calendarSyncScheduler.requestImmediateSync()
         }
+    }
+
+    fun setRelativeDateEnabled(isEnabled: Boolean) {
+        corePreferences.isRelativeDatesEnabled = isEnabled
+        _uiState.update { it.copy(isRelativeDateEnabled = isEnabled) }
     }
 
     fun navigateToCoursesToSync(fragmentManager: FragmentManager) {

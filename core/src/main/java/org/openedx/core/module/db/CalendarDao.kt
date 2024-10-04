@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
 
@@ -55,4 +56,10 @@ interface CalendarDao {
         checksum: Int? = null,
         isCourseSyncEnabled: Boolean? = null
     )
+
+    @Transaction
+    suspend fun clearCachedData() {
+        clearCourseCalendarStateCachedData()
+        clearCourseCalendarEventsCachedData()
+    }
 }

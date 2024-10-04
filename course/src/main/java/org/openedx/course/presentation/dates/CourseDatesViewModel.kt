@@ -14,6 +14,7 @@ import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseBannerType
@@ -48,14 +49,16 @@ class CourseDatesViewModel(
     private val config: Config,
     private val calendarInteractor: CalendarInteractor,
     private val calendarNotifier: CalendarNotifier,
+    private val corePreferences: CorePreferences,
     val courseRouter: CourseRouter,
     val calendarRouter: CalendarRouter
 ) : BaseViewModel() {
 
     var isSelfPaced = true
+    var useRelativeDates = corePreferences.isRelativeDatesEnabled
 
-    private val _uiState = MutableStateFlow<DatesUIState>(DatesUIState.Loading)
-    val uiState: StateFlow<DatesUIState>
+    private val _uiState = MutableStateFlow<CourseDatesUIState>(CourseDatesUIState.Loading)
+    val uiState: StateFlow<CourseDatesUIState>
         get() = _uiState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
@@ -82,7 +85,7 @@ class CourseDatesViewModel(
                 (_uiState.value as? DatesUIState.Dates)?.let { currentUiState ->
                     val courseDates = currentUiState.courseDatesResult.datesSection.values.flatten()
                     _uiState.update {
-                        (it as DatesUIState.Dates).copy(calendarSyncState = getCalendarState(courseDates))
+                        (it as CourseDatesUIState.CourseDates).copy(calendarSyncState = getCalendarState(courseDates))
                     }
                 }
             }
@@ -98,11 +101,11 @@ class CourseDatesViewModel(
                 isSelfPaced = courseStructure?.isSelfPaced ?: false
                 val datesResponse = interactor.getCourseDates(courseId = courseId)
                 if (datesResponse.datesSection.isEmpty()) {
-                    _uiState.value = DatesUIState.Empty
+                    _uiState.value = CourseDatesUIState.Empty
                 } else {
                     val courseDates = datesResponse.datesSection.values.flatten()
                     val calendarState = getCalendarState(courseDates)
-                    _uiState.value = DatesUIState.Dates(datesResponse, calendarState)
+                    _uiState.value = CourseDatesUIState.CourseDates(datesResponse, calendarState)
                     courseBannerType = datesResponse.courseBanner.bannerType
                     checkIfCalendarOutOfDate()
                 }
@@ -156,7 +159,7 @@ class CourseDatesViewModel(
 
     private fun checkIfCalendarOutOfDate() {
         val value = _uiState.value
-        if (value is DatesUIState.Dates) {
+        if (value is CourseDatesUIState.CourseDates) {
             viewModelScope.launch {
                 courseNotifier.send(
                     CreateCalendarSyncEvent(

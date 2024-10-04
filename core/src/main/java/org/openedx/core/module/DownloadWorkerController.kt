@@ -28,7 +28,7 @@ class DownloadWorkerController(
 
     init {
         GlobalScope.launch {
-            downloadDao.readAllData().collect { list ->
+            downloadDao.getAllDataFlow().collect { list ->
                 val domainList = list.map { it.mapToDomain() }
                 downloadTaskList = domainList.filter {
                     it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
@@ -47,7 +47,7 @@ class DownloadWorkerController(
 
     private suspend fun updateList() {
         downloadTaskList =
-            downloadDao.readAllData().first().map { it.mapToDomain() }.filter {
+            downloadDao.getAllDataFlow().first().map { it.mapToDomain() }.filter {
                 it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
             }
     }
@@ -83,6 +83,7 @@ class DownloadWorkerController(
 
         if (hasDownloading) fileDownloader.cancelDownloading()
         downloadDao.removeAllDownloadModels(removeIds)
+        downloadDao.removeOfflineXBlockProgress(removeIds)
 
         updateList()
 
