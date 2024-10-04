@@ -22,7 +22,7 @@ class FullstoryAnalytics : Analytics {
 
     override fun logEvent(eventName: String, params: Map<String, Any?>) {
         logger.d { "Event: $eventName $params" }
-        FS.page(eventName, params).start()
+        FS.event(eventName, params)
     }
 
     override fun logUserId(userId: Long) {
