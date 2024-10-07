@@ -11,6 +11,10 @@ apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 
+if (fullstoryEnabled) {
+    apply plugin: 'fullstory'
+}
+
 if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
@@ -29,7 +33,6 @@ if (firebaseEnabled) {
 }
 
 if (fullstoryEnabled) {
-    apply plugin: 'fullstory'
     def fullstoryOrgId = fullstoryConfig?.get("ORG_ID")
 
     fullstory {
