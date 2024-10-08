@@ -53,6 +53,10 @@ class EncodedVideoUnitViewModel(
     val isVideoEnded: LiveData<Boolean>
         get() = _isVideoEnded
 
+    private val _isCastReady = MutableLiveData(false)
+    val isCastReady: LiveData<Boolean>
+        get() = _isCastReady
+
     var exoPlayer: ExoPlayer? = null
         private set
 
@@ -107,13 +111,16 @@ class EncodedVideoUnitViewModel(
         CastContext.getSharedInstance(context, executor).addOnCompleteListener {
             it.result?.let { castContext ->
                 castPlayer = CastPlayer(castContext)
+                _isCastReady.value = true
             }
         }
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         exoPlayer?.addListener(exoPlayerListener)
+        castPlayer?.addListener(exoPlayerListener)
         getActivePlayer()?.playWhenReady = isPlaying
     }
 
