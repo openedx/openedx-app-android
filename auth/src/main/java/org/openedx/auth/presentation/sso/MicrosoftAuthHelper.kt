@@ -12,8 +12,8 @@ import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
-import org.openedx.core.extension.safeResume
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.extension.safeResume
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 

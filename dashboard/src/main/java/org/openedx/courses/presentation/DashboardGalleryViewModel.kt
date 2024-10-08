@@ -16,7 +16,6 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -26,6 +25,7 @@ import org.openedx.core.ui.WindowSize
 import org.openedx.core.utils.FileUtil
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.foundation.extension.isInternetError
 
 class DashboardGalleryViewModel(
     private val config: Config,

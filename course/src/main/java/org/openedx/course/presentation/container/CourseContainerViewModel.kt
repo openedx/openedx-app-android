@@ -22,8 +22,6 @@ import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.exception.NoCachedDataException
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.extension.toImageLink
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.ResourceManager
@@ -45,6 +43,8 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.extension.toImageLink
 import java.util.Date
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR

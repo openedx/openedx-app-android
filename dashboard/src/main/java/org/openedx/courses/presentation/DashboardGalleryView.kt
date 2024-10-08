@@ -83,7 +83,6 @@ import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.extension.toImageLink
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
@@ -95,6 +94,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
+import org.openedx.foundation.extension.toImageLink
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -424,7 +424,7 @@ private fun CourseListItem(
             Column {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(course.course.courseImage.toImageLink(apiHostUrl) ?: "")
+                        .data(course.course.courseImage.toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .build(),

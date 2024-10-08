@@ -49,8 +49,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.R
 import org.openedx.core.domain.model.VideoQuality
-import org.openedx.core.extension.nonZero
-import org.openedx.core.extension.tagId
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
@@ -61,6 +59,8 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.extension.nonZero
+import org.openedx.foundation.extension.tagId
 
 class VideoQualityFragment : Fragment() {
 
@@ -183,7 +183,7 @@ private fun VideoQualityScreen(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    VideoQuality.values().forEach { videoQuality ->
+                    VideoQuality.entries.forEach { videoQuality ->
                         QualityOption(
                             title = stringResource(id = videoQuality.titleResId),
                             description = videoQuality.desResId.nonZero()

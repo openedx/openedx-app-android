@@ -2,8 +2,8 @@ package org.openedx.app.analytics
 
 import android.content.Context
 import com.google.firebase.analytics.FirebaseAnalytics
-import org.openedx.core.extension.toBundle
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.extension.toBundle
 
 class FirebaseAnalytics(context: Context) : Analytics {
 

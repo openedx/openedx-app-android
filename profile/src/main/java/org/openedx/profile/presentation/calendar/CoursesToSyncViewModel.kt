@@ -14,9 +14,9 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.worker.CalendarSyncScheduler
+import org.openedx.foundation.extension.isInternetError
 
 class CoursesToSyncViewModel(
     private val calendarInteractor: CalendarInteractor,

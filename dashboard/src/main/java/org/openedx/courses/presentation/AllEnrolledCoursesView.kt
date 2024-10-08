@@ -81,7 +81,6 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.extension.toImageLink
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -97,6 +96,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.domain.CourseStatusFilter
+import org.openedx.foundation.extension.toImageLink
 import java.util.Date
 
 @Composable

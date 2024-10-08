@@ -15,7 +15,6 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.CoreAnalyticsKey
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -28,6 +27,7 @@ import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import org.openedx.discovery.presentation.DiscoveryAnalyticsKey
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.catalog.WebViewLink
+import org.openedx.foundation.extension.isInternetError
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 

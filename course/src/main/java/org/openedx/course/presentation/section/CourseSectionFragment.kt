@@ -59,7 +59,6 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
-import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -76,6 +75,7 @@ import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.CardArrow
+import org.openedx.foundation.extension.serializable
 import java.util.Date
 import org.openedx.core.R as CoreR
 
@@ -336,16 +336,6 @@ private fun CourseSubsectionItem(
         }
     }
 }
-
-private fun getUnitBlockIcon(block: Block): Int {
-    return when (block.descendantsType) {
-        BlockType.VIDEO -> R.drawable.ic_course_video
-        BlockType.PROBLEM -> R.drawable.ic_course_pen
-        BlockType.DISCUSSION -> R.drawable.ic_course_discussion
-        else -> R.drawable.ic_course_block
-    }
-}
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

@@ -110,44 +110,12 @@ dependencies {
     api "androidx.window:window:$window_version"
     api "androidx.work:work-runtime-ktx:$work_version"
 
-    //Android Jetpack
-    api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-    api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-
     // Fullstory
     api 'com.fullstory:instrumentation-full:1.47.0@aar'
     api 'com.fullstory:compose:1.47.0@aar'
 
     // Room
-    api "androidx.room:room-runtime:$room_version"
-    api "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
-
-    //Compose
-    api "androidx.compose.runtime:runtime:$compose_version"
-    api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api "androidx.compose.ui:ui:$compose_version"
-    api "androidx.compose.material:material:$compose_version"
-    api "androidx.compose.foundation:foundation:$compose_version"
-    debugApi "androidx.compose.ui:ui-tooling:$compose_version"
-    api "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    api "androidx.compose.material:material-icons-extended:$compose_version"
-    debugApi "androidx.customview:customview:1.2.0-alpha02"
-    debugApi "androidx.customview:customview-poolingcontainer:1.0.0"
-
-    //Networking
-    api "com.squareup.retrofit2:retrofit:$retrofit_version"
-    api "com.squareup.retrofit2:converter-gson:$retrofit_version"
-    api "com.squareup.okhttp3:logging-interceptor:$logginginterceptor_version"
-
-    // Koin DI
-    api "io.insert-koin:koin-core:$koin_version"
-    api "io.insert-koin:koin-android:$koin_version"
-    api "io.insert-koin:koin-androidx-compose:$koin_version"
-
-    api "io.coil-kt:coil-compose:$coil_version"
-    api "io.coil-kt:coil-gif:$coil_version"
 
     api "org.jsoup:jsoup:$jsoup_version"
 
@@ -159,8 +127,6 @@ dependencies {
     //Play In-App Review
     api "com.google.android.play:review-ktx:$in_app_review"
 
-    api "androidx.webkit:webkit:$webkit_version"
-
     // Branch SDK Integration
     api "io.branch.sdk.android:library:5.9.0"
     api "com.google.android.gms:play-services-ads-identifier:18.0.1"
@@ -168,6 +134,9 @@ dependencies {
 
     // Zip
     api "net.lingala.zip4j:zip4j:$zip_version"
+
+    //  OpenEdx libs
+    api("org.openedx:foundation:0.1")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

@@ -54,7 +54,6 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.OfflineDownload
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
@@ -71,6 +70,7 @@ import org.openedx.course.presentation.ui.CourseDatesBanner
 import org.openedx.course.presentation.ui.CourseDatesBannerTablet
 import org.openedx.course.presentation.ui.CourseMessage
 import org.openedx.course.presentation.ui.CourseSection
+import org.openedx.foundation.extension.takeIfNotEmpty
 import java.util.Date
 import org.openedx.core.R as CoreR
 

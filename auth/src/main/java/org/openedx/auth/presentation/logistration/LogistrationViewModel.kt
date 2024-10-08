@@ -7,7 +7,7 @@ import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
-import org.openedx.core.extension.takeIfNotEmpty
+import org.openedx.foundation.extension.takeIfNotEmpty
 
 class LogistrationViewModel(
     private val courseId: String,

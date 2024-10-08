@@ -3,8 +3,8 @@ package org.openedx.core.presentation.dialog.appreview
 import androidx.fragment.app.DialogFragment
 import org.koin.android.ext.android.inject
 import org.openedx.core.data.storage.InAppReviewPreferences
-import org.openedx.core.extension.nonZero
 import org.openedx.core.presentation.global.AppData
+import org.openedx.foundation.extension.nonZero
 
 open class BaseAppReviewDialogFragment : DialogFragment() {
 

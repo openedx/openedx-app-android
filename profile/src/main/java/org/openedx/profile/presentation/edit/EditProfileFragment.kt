@@ -112,9 +112,6 @@ import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
-import org.openedx.core.extension.getFileName
-import org.openedx.core.extension.parcelable
-import org.openedx.core.extension.tagId
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -136,6 +133,9 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
+import org.openedx.foundation.extension.getFileName
+import org.openedx.foundation.extension.parcelable
+import org.openedx.foundation.extension.tagId
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
 import java.io.ByteArrayOutputStream

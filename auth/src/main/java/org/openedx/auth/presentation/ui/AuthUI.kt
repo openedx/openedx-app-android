@@ -55,7 +55,6 @@ import org.openedx.auth.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.extension.tagId
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.noRippleClickable
@@ -63,6 +62,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.tagId
 
 @Composable
 fun RequiredFields(

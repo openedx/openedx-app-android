@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
-import org.openedx.core.extension.readAsText
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
+import org.openedx.foundation.extension.readAsText
 
 class HtmlUnitViewModel(
     private val blockId: String,
@@ -79,6 +79,7 @@ class HtmlUnitViewModel(
                     courseInteractor.submitOfflineXBlockProgress(blockId, courseId)
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
             } finally {
                 _uiState.update { it.copy(isLoadingEnabled = true) }
             }

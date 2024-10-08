@@ -14,11 +14,11 @@ import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
+import org.openedx.foundation.extension.isInternetError
 
 class CourseSearchViewModel(
     private val config: Config,

@@ -19,7 +19,6 @@ import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
@@ -28,6 +27,7 @@ import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.utils.EmailUtil
+import org.openedx.foundation.extension.isInternetError
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
 import org.openedx.profile.presentation.ProfileAnalytics

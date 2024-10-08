@@ -22,7 +22,6 @@ import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
@@ -45,6 +44,7 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.foundation.extension.isInternetError
 
 class CourseOutlineViewModel(
     val courseId: String,

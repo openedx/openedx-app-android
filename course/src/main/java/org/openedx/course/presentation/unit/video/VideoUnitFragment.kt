@@ -28,9 +28,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.extension.computeWindowSizeClasses
-import org.openedx.core.extension.dpToPixel
-import org.openedx.core.extension.objectToString
-import org.openedx.core.extension.stringToObject
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.presentation.global.viewBinding
@@ -46,6 +43,9 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
+import org.openedx.foundation.extension.dpToPixel
+import org.openedx.foundation.extension.objectToString
+import org.openedx.foundation.extension.stringToObject
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {

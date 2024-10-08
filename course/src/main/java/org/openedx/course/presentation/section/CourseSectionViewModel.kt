@@ -11,7 +11,6 @@ import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Block
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CourseNotifier
@@ -20,6 +19,7 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.extension.isInternetError
 
 class CourseSectionViewModel(
     val courseId: String,

@@ -12,12 +12,12 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.extension.isEmailValid
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.foundation.extension.isEmailValid
+import org.openedx.foundation.extension.isInternetError
 
 class RestorePasswordViewModel(
     private val interactor: AuthInteractor,

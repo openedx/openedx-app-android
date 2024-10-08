@@ -16,7 +16,6 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -25,6 +24,7 @@ import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.foundation.extension.isInternetError
 
 class AllEnrolledCoursesViewModel(
     private val config: Config,

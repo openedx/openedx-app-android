@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
-import org.openedx.core.extension.applyDarkModeIfEnabled
-import org.openedx.core.extension.isEmailValid
-import org.openedx.core.extension.replaceLinkTags
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.EmailUtil
+import org.openedx.foundation.extension.applyDarkModeIfEnabled
+import org.openedx.foundation.extension.isEmailValid
+import org.openedx.foundation.extension.replaceLinkTags
 import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalComposeUiApi::class)

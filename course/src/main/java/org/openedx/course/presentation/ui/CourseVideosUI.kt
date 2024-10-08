@@ -64,7 +64,6 @@ import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.video.VideoQualityType
@@ -80,6 +79,7 @@ import org.openedx.core.utils.FileUtil
 import org.openedx.course.R
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.presentation.videos.CourseVideosUIState
+import org.openedx.foundation.extension.toFileSize
 import java.util.Date
 
 @Composable

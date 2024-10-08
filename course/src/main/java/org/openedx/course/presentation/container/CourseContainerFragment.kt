@@ -55,7 +55,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -75,6 +74,7 @@ import org.openedx.course.presentation.outline.CourseOutlineScreen
 import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
+import org.openedx.foundation.extension.takeIfNotEmpty
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 

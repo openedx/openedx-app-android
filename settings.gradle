@@ -24,6 +24,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
         maven { url "https://maven.fullstory.com" }
         maven {
             url "http://appboy.github.io/appboy-android-sdk/sdk"

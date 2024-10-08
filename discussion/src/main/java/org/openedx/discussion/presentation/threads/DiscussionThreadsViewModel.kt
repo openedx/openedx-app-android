@@ -9,13 +9,13 @@ import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.SingleEventLiveData
 import org.openedx.core.UIMessage
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
+import org.openedx.foundation.extension.isInternetError
 
 class DiscussionThreadsViewModel(
     private val interactor: DiscussionInteractor,

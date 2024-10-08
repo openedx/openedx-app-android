@@ -107,12 +107,12 @@ import org.openedx.core.R
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
-import org.openedx.core.extension.tagId
-import org.openedx.core.extension.toastMessage
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.tagId
+import org.openedx.foundation.extension.toastMessage
 
 @Composable
 fun StaticSearchBar(

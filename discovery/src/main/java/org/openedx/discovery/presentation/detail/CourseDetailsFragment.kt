@@ -81,8 +81,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Media
-import org.openedx.core.extension.applyDarkModeIfEnabled
-import org.openedx.core.extension.isEmailValid
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -104,6 +102,8 @@ import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.ui.ImageHeader
 import org.openedx.discovery.presentation.ui.WarningLabel
+import org.openedx.foundation.extension.applyDarkModeIfEnabled
+import org.openedx.foundation.extension.isEmailValid
 import java.nio.charset.StandardCharsets
 import java.util.Date
 import org.openedx.core.R as CoreR

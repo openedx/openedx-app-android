@@ -7,8 +7,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import org.openedx.core.extension.isEmailValid
 import org.openedx.core.utils.EmailUtil
+import org.openedx.foundation.extension.isEmailValid
 
 open class DefaultWebViewClient(
     val context: Context,

@@ -158,10 +158,11 @@ dependencies {
     implementation "com.braze:braze-segment-kotlin:1.4.2"
     implementation "com.braze:android-sdk-ui:30.2.0"
 
+    // Plugins
+    implementation("org.openedx:foundation:0.1")
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
     testImplementation "junit:junit:$junit_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "io.mockk:mockk-android:$mockk_version"
