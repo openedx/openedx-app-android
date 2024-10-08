@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
@@ -23,10 +22,11 @@ import org.openedx.core.module.download.BaseDownloadViewModel
 import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.utils.FileUtil
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.download.DownloadDialogItem
 import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.foundation.extension.toFileSize
+import org.openedx.foundation.utils.FileUtil
 
 class CourseOfflineViewModel(
     val courseId: String,

@@ -1,6 +1,6 @@
 package org.openedx.discovery.presentation.program
 
-import org.openedx.core.UIMessage
+import org.openedx.foundation.presentation.UIMessage
 
 sealed class ProgramUIState {
     data object Loading : ProgramUIState()

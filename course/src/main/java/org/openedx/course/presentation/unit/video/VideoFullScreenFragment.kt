@@ -27,12 +27,12 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.domain.model.VideoQuality
-import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.extension.requestApplyInsetsWhenAttached
 
 class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 

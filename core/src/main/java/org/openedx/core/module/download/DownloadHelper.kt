@@ -5,8 +5,9 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
-import org.openedx.core.utils.FileUtil
 import org.openedx.core.utils.Sha1Util
+import org.openedx.core.utils.unzipFile
+import org.openedx.foundation.utils.FileUtil
 import java.io.File
 
 class DownloadHelper(

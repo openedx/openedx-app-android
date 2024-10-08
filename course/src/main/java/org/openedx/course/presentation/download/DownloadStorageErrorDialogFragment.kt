@@ -41,10 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import org.openedx.core.extension.parcelable
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.presentation.dialog.DefaultDialogBox
-import org.openedx.core.system.PreviewFragmentManager
 import org.openedx.core.system.StorageManager
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -54,6 +51,9 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.domain.model.DownloadDialogResource
 import org.openedx.course.presentation.download.DownloadDialogManager.Companion.DOWNLOAD_SIZE_FACTOR
+import org.openedx.foundation.extension.parcelable
+import org.openedx.foundation.extension.toFileSize
+import org.openedx.foundation.system.PreviewFragmentManager
 import org.openedx.core.R as coreR
 
 class DownloadStorageErrorDialogFragment : DialogFragment() {

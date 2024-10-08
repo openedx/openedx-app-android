@@ -84,8 +84,6 @@ import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.extension.nonZero
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
@@ -103,6 +101,8 @@ import org.openedx.core.utils.TimeUtils
 import org.openedx.course.R
 import org.openedx.course.presentation.dates.mockedCourseBannerInfo
 import org.openedx.course.presentation.outline.getUnitBlockIcon
+import org.openedx.foundation.extension.nonZero
+import org.openedx.foundation.extension.toFileSize
 import subtitleFile.Caption
 import subtitleFile.TimedTextObject
 import java.util.Date
@@ -238,7 +238,7 @@ fun OfflineQueueCard(
                 maxLines = 1
             )
             Text(
-                text = downloadModel.size.toLong().toFileSize(),
+                text = downloadModel.size.toFileSize(),
                 style = MaterialTheme.appTypography.titleSmall,
                 color = MaterialTheme.appColors.textSecondary,
                 overflow = TextOverflow.Ellipsis,
@@ -758,7 +758,7 @@ fun CourseSubSectionItem(
     val due by rememberSaveable {
         mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
     }
-    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && !due.isNullOrEmpty()
+    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
     Column(
         modifier = modifier
             .fillMaxWidth()

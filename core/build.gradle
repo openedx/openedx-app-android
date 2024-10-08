@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.yaml:snakeyaml:1.33'
+        classpath 'org.yaml:snakeyaml:2.0'
     }
 }
 
@@ -12,7 +12,8 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
-    id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
+    id "org.jetbrains.kotlin.plugin.compose"
 }
 
 def currentFlavour = getCurrentFlavor()
@@ -88,90 +89,39 @@ android {
         compose true
         buildConfig true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "$compose_compiler_version"
-    }
 }
 
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-
-    //AndroidX
-    api "androidx.core:core-ktx:$core_version"
-    api "androidx.appcompat:appcompat:$appcompat_version"
-    api "com.google.android.material:material:$material_version"
-    api "androidx.fragment:fragment-ktx:$fragment_version"
-    api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
-    api "androidx.viewpager2:viewpager2:$viewpager2_version"
-    api "androidx.window:window:$window_version"
-    api "androidx.work:work-runtime-ktx:$work_version"
-
-    //Android Jetpack
-    api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-    api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-
-    // Fullstory
-    api 'com.fullstory:instrumentation-full:1.47.0@aar'
-    api 'com.fullstory:compose:1.47.0@aar'
-
     // Room
-    api "androidx.room:room-runtime:$room_version"
-    api "androidx.room:room-ktx:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
-    //Compose
-    api "androidx.compose.runtime:runtime:$compose_version"
-    api "androidx.compose.runtime:runtime-livedata:$compose_version"
-    api "androidx.compose.ui:ui:$compose_version"
-    api "androidx.compose.material:material:$compose_version"
-    api "androidx.compose.foundation:foundation:$compose_version"
-    debugApi "androidx.compose.ui:ui-tooling:$compose_version"
-    api "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    api "androidx.compose.material:material-icons-extended:$compose_version"
-    debugApi "androidx.customview:customview:1.2.0-alpha02"
-    debugApi "androidx.customview:customview-poolingcontainer:1.0.0"
-
-    //Networking
-    api "com.squareup.retrofit2:retrofit:$retrofit_version"
-    api "com.squareup.retrofit2:converter-gson:$retrofit_version"
-    api "com.squareup.okhttp3:logging-interceptor:$logginginterceptor_version"
-
-    // Koin DI
-    api "io.insert-koin:koin-core:$koin_version"
-    api "io.insert-koin:koin-android:$koin_version"
-    api "io.insert-koin:koin-androidx-compose:$koin_version"
-
-    api "io.coil-kt:coil-compose:$coil_version"
-    api "io.coil-kt:coil-gif:$coil_version"
-
+    // jsoup
     api "org.jsoup:jsoup:$jsoup_version"
 
+    // Firebase
     api platform("com.google.firebase:firebase-bom:$firebase_version")
     api 'com.google.firebase:firebase-common-ktx'
     api "com.google.firebase:firebase-crashlytics-ktx"
-    api "com.google.firebase:firebase-analytics-ktx"
 
     //Play In-App Review
     api "com.google.android.play:review-ktx:$in_app_review"
 
-    api "androidx.webkit:webkit:$webkit_version"
-
     // Branch SDK Integration
     api "io.branch.sdk.android:library:5.9.0"
-    api "com.google.android.gms:play-services-ads-identifier:18.0.1"
+    api "com.google.android.gms:play-services-ads-identifier:18.1.0"
     api "com.android.installreferrer:installreferrer:2.2"
 
     // Zip
     api "net.lingala.zip4j:zip4j:$zip_version"
 
+    //  OpenEdx libs
+    api("com.github.openedx:openedx-app-foundation-android:1.0.0")
+
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 def insertBuildConfigFields(currentFlavour, buildType) {

@@ -3,7 +3,7 @@ package org.openedx.auth.presentation
 import androidx.compose.ui.text.intl.Locale
 import org.openedx.auth.R
 import org.openedx.core.config.Config
-import org.openedx.core.system.ResourceManager
+import org.openedx.foundation.system.ResourceManager
 
 class AgreementProvider(
     private val config: Config,
