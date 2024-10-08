@@ -1,7 +1,6 @@
 package org.openedx.app
 
 import android.content.Context
-import org.openedx.app.analytics.Analytics
 import org.openedx.app.analytics.FirebaseAnalytics
 import org.openedx.app.analytics.FullstoryAnalytics
 import org.openedx.app.analytics.SegmentAnalytics
@@ -13,6 +12,7 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
+import org.openedx.foundation.interfaces.Analytics
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 

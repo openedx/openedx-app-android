@@ -3,6 +3,7 @@ package org.openedx.app.analytics
 import com.fullstory.FS
 import com.fullstory.FSSessionData
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.interfaces.Analytics
 
 class FullstoryAnalytics : Analytics {
 

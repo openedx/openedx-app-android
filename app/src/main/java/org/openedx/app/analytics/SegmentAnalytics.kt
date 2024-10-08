@@ -6,6 +6,7 @@ import com.segment.analytics.kotlin.destinations.firebase.FirebaseDestination
 import org.openedx.app.BuildConfig
 import org.openedx.core.config.Config
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.interfaces.Analytics
 import com.segment.analytics.kotlin.android.Analytics as SegmentAnalyticsBuilder
 import com.segment.analytics.kotlin.core.Analytics as SegmentTracker
 

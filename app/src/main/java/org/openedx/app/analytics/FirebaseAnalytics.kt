@@ -4,14 +4,14 @@ import android.content.Context
 import com.google.firebase.analytics.FirebaseAnalytics
 import org.openedx.core.utils.Logger
 import org.openedx.foundation.extension.toBundle
+import org.openedx.foundation.interfaces.Analytics
 
 class FirebaseAnalytics(context: Context) : Analytics {
 
     private val logger = Logger(TAG)
-    private var tracker: FirebaseAnalytics
+    private var tracker: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
     init {
-        tracker = FirebaseAnalytics.getInstance(context)
         logger.d { "Firebase Analytics Builder Initialised" }
     }
 
