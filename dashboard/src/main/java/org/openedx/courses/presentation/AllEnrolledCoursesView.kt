@@ -454,17 +454,14 @@ fun CourseItem(
                     overflow = TextOverflow.Ellipsis,
                     minLines = 1,
                     maxLines = 2,
-                    text = stringResource(
-                        org.openedx.dashboard.R.string.dashboard_course_date,
-                        TimeUtils.getCourseFormattedDate(
-                            LocalContext.current,
-                            Date(),
-                            course.auditAccessExpires,
-                            course.course.start,
-                            course.course.end,
-                            course.course.startType,
-                            course.course.startDisplay
-                        )
+                    text = TimeUtils.getCourseFormattedDate(
+                        LocalContext.current,
+                        Date(),
+                        course.auditAccessExpires,
+                        course.course.start,
+                        course.course.end,
+                        course.course.startType,
+                        course.course.startDisplay
                     )
                 )
                 Text(
