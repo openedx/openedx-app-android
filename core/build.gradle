@@ -12,7 +12,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
-    id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
 }
 
 def currentFlavour = getCurrentFlavor()
@@ -96,10 +96,6 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-
     //AndroidX
     api "androidx.core:core-ktx:$core_version"
     api "androidx.appcompat:appcompat:$appcompat_version"
@@ -115,7 +111,7 @@ dependencies {
     api 'com.fullstory:compose:1.47.0@aar'
 
     // Room
-    kapt "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
     api "org.jsoup:jsoup:$jsoup_version"
 
@@ -129,7 +125,7 @@ dependencies {
 
     // Branch SDK Integration
     api "io.branch.sdk.android:library:5.9.0"
-    api "com.google.android.gms:play-services-ads-identifier:18.0.1"
+    api "com.google.android.gms:play-services-ads-identifier:18.1.0"
     api "com.android.installreferrer:installreferrer:2.2"
 
     // Zip
@@ -139,8 +135,8 @@ dependencies {
     api("org.openedx:foundation:0.1")
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 def insertBuildConfigFields(currentFlavour, buildType) {

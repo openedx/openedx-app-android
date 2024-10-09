@@ -9,7 +9,7 @@ def fullstoryEnabled = fullstoryConfig?.getOrDefault('ENABLED', false)
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 
 if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
@@ -143,7 +143,7 @@ dependencies {
     implementation project(path: ':discussion')
     implementation project(path: ':whatsnew')
 
-    kapt "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
@@ -161,12 +161,11 @@ dependencies {
     // Plugins
     implementation("org.openedx:foundation:0.1")
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     testImplementation "junit:junit:$junit_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "io.mockk:mockk-android:$mockk_version"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"
 }
 
