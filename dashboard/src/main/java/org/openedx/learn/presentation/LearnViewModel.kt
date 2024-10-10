@@ -2,12 +2,12 @@ package org.openedx.learn.presentation
 
 import androidx.fragment.app.FragmentManager
 import org.openedx.DashboardNavigator
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalyticsEvent
 import org.openedx.dashboard.presentation.DashboardAnalyticsKey
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.foundation.presentation.BaseViewModel
 
 class LearnViewModel(
     private val config: Config,

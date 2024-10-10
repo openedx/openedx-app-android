@@ -59,8 +59,6 @@ import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.RoundTabsBar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.course.DatesShiftedSnackBar
@@ -75,6 +73,8 @@ import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
 import org.openedx.foundation.extension.takeIfNotEmpty
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.rememberWindowSize
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
 
@@ -368,7 +368,6 @@ fun CourseDashboard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DashboardPager(
     windowSize: WindowSize,

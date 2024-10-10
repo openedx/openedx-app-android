@@ -46,14 +46,14 @@ import org.openedx.core.adapter.NavigationFragmentAdapter
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.dashboard.R
 import org.openedx.dashboard.databinding.FragmentLearnBinding
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.learn.LearnType
 import org.openedx.core.R as CoreR
 

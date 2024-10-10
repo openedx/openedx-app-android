@@ -5,15 +5,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.R
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.system.CalendarManager
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.calendar.CalendarCreated
 import org.openedx.core.system.notifier.calendar.CalendarNotifier
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.system.ResourceManager
 
 class NewCalendarDialogViewModel(
     private val calendarManager: CalendarManager,

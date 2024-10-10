@@ -68,10 +68,10 @@ import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.foundation.presentation.rememberWindowSize
 import kotlin.math.roundToInt
 
 @Composable

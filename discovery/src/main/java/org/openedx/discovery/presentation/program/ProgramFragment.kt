@@ -52,20 +52,20 @@ import org.openedx.core.system.AppCookieManager
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
 import org.openedx.discovery.presentation.DiscoveryAnalyticsScreen
 import org.openedx.discovery.presentation.catalog.CatalogWebViewScreen
 import org.openedx.discovery.presentation.catalog.WebViewLink
 import org.openedx.foundation.extension.takeIfNotEmpty
 import org.openedx.foundation.extension.toastMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 

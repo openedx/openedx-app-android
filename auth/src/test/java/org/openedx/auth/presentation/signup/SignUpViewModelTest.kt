@@ -33,7 +33,6 @@ import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
@@ -43,8 +42,9 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @ExperimentalCoroutinesApi

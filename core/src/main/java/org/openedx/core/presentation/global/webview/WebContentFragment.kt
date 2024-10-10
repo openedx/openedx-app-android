@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.openedx.core.config.Config
 import org.openedx.core.ui.WebContentScreen
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.foundation.presentation.rememberWindowSize
 
 class WebContentFragment : Fragment() {
 

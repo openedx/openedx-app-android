@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
@@ -29,7 +28,6 @@ import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
@@ -37,7 +35,6 @@ import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.utils.FileUtil
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -45,6 +42,9 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.download.DownloadDialogManager
 import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
+import org.openedx.foundation.utils.FileUtil
 
 class CourseOutlineViewModel(
     val courseId: String,

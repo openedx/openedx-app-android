@@ -1,11 +1,11 @@
 package org.openedx.discovery.presentation
 
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.utils.UrlUtils
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.utils.UrlUtils
 
 class WebViewDiscoveryViewModel(
     private val querySearch: String,

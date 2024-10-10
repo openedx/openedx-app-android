@@ -9,8 +9,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.profile.presentation.manageaccount.compose.ManageAccountView
 import org.openedx.profile.presentation.manageaccount.compose.ManageAccountViewAction
 

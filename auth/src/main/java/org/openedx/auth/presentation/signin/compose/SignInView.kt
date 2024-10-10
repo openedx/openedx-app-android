@@ -62,14 +62,11 @@ import org.openedx.auth.presentation.signin.SignInUIState
 import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.auth.presentation.ui.PasswordVisibilityIcon
 import org.openedx.auth.presentation.ui.SocialAuthView
-import org.openedx.core.UIMessage
 import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -77,7 +74,10 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.ui.theme.compose.SignInLogoView
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 
 @OptIn(ExperimentalComposeUiApi::class)

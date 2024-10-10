@@ -26,13 +26,13 @@ import org.openedx.app.AppViewModel
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
-import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.config.Config
 import org.openedx.core.config.FirebaseConfig
 import org.openedx.core.data.model.User
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
-import org.openedx.core.utils.FileUtil
+import org.openedx.core.system.notifier.app.LogoutEvent
+import org.openedx.foundation.utils.FileUtil
 
 @ExperimentalCoroutinesApi
 class AppViewModelTest {

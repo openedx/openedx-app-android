@@ -72,7 +72,6 @@ import coil.request.ImageRequest
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Certificate
 import org.openedx.core.domain.model.CourseAssignments
 import org.openedx.core.domain.model.CourseSharingUtmParameters
@@ -85,19 +84,20 @@ import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
 import org.openedx.foundation.extension.toImageLink
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import java.util.Date
 import org.openedx.core.R as CoreR
 

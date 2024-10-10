@@ -22,7 +22,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import org.openedx.core.ImageProcessor
 import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.api.CourseApi
@@ -33,7 +32,6 @@ import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -42,6 +40,8 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.utils.ImageProcessor
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 import java.util.Date
 

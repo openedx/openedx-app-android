@@ -10,6 +10,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
@@ -113,9 +114,6 @@ android {
         viewBinding true
         compose true
         buildConfig true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "$compose_compiler_version"
     }
     bundle {
         language {

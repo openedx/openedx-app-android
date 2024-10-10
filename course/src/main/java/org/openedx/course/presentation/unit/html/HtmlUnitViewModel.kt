@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -17,6 +16,7 @@ import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.foundation.extension.readAsText
+import org.openedx.foundation.presentation.BaseViewModel
 
 class HtmlUnitViewModel(
     private val blockId: String,

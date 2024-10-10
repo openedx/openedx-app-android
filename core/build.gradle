@@ -13,6 +13,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
     id 'com.google.devtools.ksp'
+    id "org.jetbrains.kotlin.plugin.compose"
 }
 
 def currentFlavour = getCurrentFlavor()
@@ -88,23 +89,10 @@ android {
         compose true
         buildConfig true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "$compose_compiler_version"
-    }
 }
 
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
-
-    //AndroidX
-    api "androidx.core:core-ktx:$core_version"
-    api "androidx.appcompat:appcompat:$appcompat_version"
-    api "com.google.android.material:material:$material_version"
-    api "androidx.fragment:fragment-ktx:$fragment_version"
-    api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
-    api "androidx.viewpager2:viewpager2:$viewpager2_version"
-    api "androidx.window:window:$window_version"
-    api "androidx.work:work-runtime-ktx:$work_version"
 
     // Fullstory
     api 'com.fullstory:instrumentation-full:1.47.0@aar'

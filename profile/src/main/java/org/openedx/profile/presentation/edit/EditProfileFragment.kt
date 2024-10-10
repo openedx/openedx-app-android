@@ -42,7 +42,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
@@ -108,7 +107,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
@@ -119,23 +117,24 @@ import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberSaveableMap
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.foundation.extension.getFileName
 import org.openedx.foundation.extension.parcelable
 import org.openedx.foundation.extension.tagId
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
 import java.io.ByteArrayOutputStream
@@ -304,10 +303,7 @@ class EditProfileFragment : Fragment() {
 
 }
 
-@OptIn(
-    ExperimentalMaterialApi::class,
-    ExperimentalComposeUiApi::class
-)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun EditProfileScreen(
     windowSize: WindowSize,
