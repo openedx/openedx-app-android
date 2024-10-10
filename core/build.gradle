@@ -101,8 +101,10 @@ dependencies {
     // Room
     ksp "androidx.room:room-compiler:$room_version"
 
+    // jsoup
     api "org.jsoup:jsoup:$jsoup_version"
 
+    // Firebase
     api platform("com.google.firebase:firebase-bom:$firebase_version")
     api 'com.google.firebase:firebase-common-ktx'
     api "com.google.firebase:firebase-crashlytics-ktx"
