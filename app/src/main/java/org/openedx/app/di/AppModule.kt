@@ -14,6 +14,7 @@ import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
 import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
+import org.openedx.app.PluginManager
 import org.openedx.app.data.storage.PreferencesManager
 import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
@@ -186,7 +187,6 @@ val appModule = module {
     single { WhatsNewManager(get(), get(), get(), get()) }
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
-    single { AnalyticsManager(get(), get()) }
     single<AppAnalytics> { get<AnalyticsManager>() }
     single<AuthAnalytics> { get<AnalyticsManager>() }
     single<AppReviewAnalytics> { get<AnalyticsManager>() }
@@ -210,4 +210,11 @@ val appModule = module {
     factory { OfflineProgressSyncScheduler(get()) }
 
     single { CalendarSyncScheduler(get()) }
+
+    single { AnalyticsManager() }
+    single {
+        PluginManager(
+            analyticsManager = get()
+        )
+    }
 }
