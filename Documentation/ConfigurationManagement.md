@@ -49,7 +49,6 @@ TOKEN_TYPE: "JWT"
 
 FIREBASE:
   ENABLED: false
-  ANALYTICS_SOURCE: ''
   CLOUD_MESSAGING_ENABLED: false
   PROJECT_NUMBER: ''
   PROJECT_ID: ''
@@ -82,7 +81,6 @@ android:
 - **Facebook:** Sign in and Sign up via Facebook
 - **Branch:** Deeplinks
 - **Braze:** Cloud Messaging
-- **SegmentIO:** Analytics
 
 ## Available Feature Flags
 - **PRE_LOGIN_EXPERIENCE_ENABLED:** Enables the pre login courses discovery experience.

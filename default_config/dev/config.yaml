@@ -1,10 +1,10 @@
-API_HOST_URL: 'https://axim-mobile.raccoongang.net'
+API_HOST_URL: 'http://localhost:8000'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
-OAUTH_CLIENT_ID: 'zP3vPz00c8fTRpYjNbVSlA1fxt9LnCxTM4JK1KQ0'
+OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
 
 # Keep empty to hide setting
 AGREEMENT_URLS:
@@ -33,16 +33,11 @@ DASHBOARD:
 
 FIREBASE:
   ENABLED: false
-  ANALYTICS_SOURCE: '' # segment | none
   CLOUD_MESSAGING_ENABLED: false
   PROJECT_NUMBER: ''
   PROJECT_ID: ''
   APPLICATION_ID: '' #App ID field from the Firebase console or mobilesdk_app_id from the google-services.json file.
   API_KEY: ''
-
-SEGMENT_IO:
-  ENABLED: false
-  SEGMENT_IO_WRITE_KEY: ''
 
 BRAZE:
   ENABLED: false
@@ -68,10 +63,6 @@ BRANCH:
   URI_SCHEME: ''
   HOST: ''
   ALTERNATE_HOST: ''
-
-FULLSTORY:
-  ENABLED: false
-  ORG_ID: ''
 
 #Platform names
 PLATFORM_NAME: "OpenEdX"

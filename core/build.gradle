@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.yaml:snakeyaml:1.33'
+        classpath 'org.yaml:snakeyaml:2.0'
     }
 }
 
@@ -94,10 +94,6 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
-    // Fullstory
-    api 'com.fullstory:instrumentation-full:1.47.0@aar'
-    api 'com.fullstory:compose:1.47.0@aar'
-
     // Room
     ksp "androidx.room:room-compiler:$room_version"
 
@@ -121,7 +117,7 @@ dependencies {
     api "net.lingala.zip4j:zip4j:$zip_version"
 
     //  OpenEdx libs
-    api("org.openedx:foundation:0.1")
+    api("org.openedx:foundation:1.0")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
