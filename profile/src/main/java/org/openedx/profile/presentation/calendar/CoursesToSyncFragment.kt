@@ -281,7 +281,7 @@ private fun CourseCheckboxList(
                 .filter { it.courseId in courseIds }
                 .let { enrollments ->
                     if (uiState.isHideInactiveCourses) {
-                        enrollments.filter { it.isActive }
+                        enrollments.filter { it.recentlyActive }
                     } else {
                         enrollments
                     }
@@ -299,7 +299,7 @@ private fun CourseCheckboxList(
                             ?: false
                     val annotatedString = buildAnnotatedString {
                         append(course.courseName)
-                        if (!course.isActive) {
+                        if (!course.recentlyActive) {
                             append(" ")
                             withStyle(
                                 style = SpanStyle(
@@ -327,7 +327,7 @@ private fun CourseCheckboxList(
                                 uncheckedColor = MaterialTheme.appColors.textFieldText
                             ),
                             checked = isCourseSyncEnabled,
-                            enabled = course.isActive,
+                            enabled = course.recentlyActive,
                             onCheckedChange = { isEnabled ->
                                 onCourseSyncCheckChange(isEnabled, course.courseId)
                             }
