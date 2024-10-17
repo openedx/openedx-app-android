@@ -83,12 +83,14 @@ class CourseOfflineViewModel(
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
             val downloadModels = courseInteractor.getAllDownloadModels()
             val subSectionsBlocks = allBlocks.values.filter { it.type == BlockType.SEQUENTIAL }
-            val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
-                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+            val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSection ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSection.descendants }
                 val notDownloadedBlocks = courseStructure.blockData.filter { block ->
-                    block.id in verticalBlocks.flatMap { it.descendants } && block.isDownloadable && !downloadModels.any { it.id == block.id }
+                    block.id in verticalBlocks.flatMap { it.descendants } &&
+                            block.isDownloadable &&
+                            downloadModels.none { it.id == block.id }
                 }
-                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
+                if (notDownloadedBlocks.isNotEmpty()) subSection else null
             }
 
             downloadDialogManager.showPopup(
@@ -105,10 +107,9 @@ class CourseOfflineViewModel(
     }
 
     fun removeDownloadModel(downloadModel: DownloadModel, fragmentManager: FragmentManager) {
-        val icon = if (downloadModel.type == FileType.VIDEO) {
-            Icons.Outlined.SmartDisplay
-        } else {
-            Icons.AutoMirrored.Outlined.InsertDriveFile
+        val icon = when (downloadModel.type) {
+            FileType.VIDEO -> Icons.Outlined.SmartDisplay
+            else -> Icons.AutoMirrored.Outlined.InsertDriveFile
         }
         val downloadDialogItem = DownloadDialogItem(
             title = downloadModel.title,
@@ -120,26 +121,25 @@ class CourseOfflineViewModel(
             fragmentManager = fragmentManager,
             removeDownloadModels = {
                 super.removeBlockDownloadModel(downloadModel.id)
-            },
+            }
         )
     }
 
     fun deleteAll(fragmentManager: FragmentManager) {
         viewModelScope.launch {
             val downloadModels = courseInteractor.getAllDownloadModels().filter { it.courseId == courseId }
+            val totalSize = downloadModels.sumOf { it.size }
             val downloadDialogItem = DownloadDialogItem(
                 title = courseTitle,
-                size = downloadModels.sumOf { it.size },
+                size = totalSize,
                 icon = Icons.AutoMirrored.Outlined.InsertDriveFile
             )
             downloadDialogManager.showRemoveDownloadModelPopup(
                 downloadDialogItem = downloadDialogItem,
                 fragmentManager = fragmentManager,
                 removeDownloadModels = {
-                    downloadModels.forEach {
-                        super.removeBlockDownloadModel(it.id)
-                    }
-                },
+                    downloadModels.forEach { super.removeBlockDownloadModel(it.id) }
+                }
             )
         }
     }
@@ -148,9 +148,7 @@ class CourseOfflineViewModel(
         viewModelScope.launch {
             courseInteractor.getAllDownloadModels()
                 .filter { it.courseId == courseId && it.downloadedState.isWaitingOrDownloading }
-                .forEach {
-                    removeBlockDownloadModel(it.id)
-                }
+                .forEach { removeBlockDownloadModel(it.id) }
         }
     }
 
@@ -159,57 +157,64 @@ class CourseOfflineViewModel(
         setBlocks(courseStructure.blockData)
         allBlocks.values
             .filter { it.type == BlockType.SEQUENTIAL }
-            .forEach {
-                addDownloadableChildrenForSequentialBlock(it)
-            }
-
+            .forEach { addDownloadableChildrenForSequentialBlock(it) }
     }
 
     private fun getOfflineData() {
         viewModelScope.launch {
             val courseStructure = courseInteractor.getCourseStructureFromCache(courseId)
-            val downloadableFilesSize = getFilesSize(courseStructure.blockData)
-            if (downloadableFilesSize == 0L) return@launch
+            val totalDownloadableSize = getFilesSize(courseStructure.blockData)
 
-            courseInteractor.getDownloadModels().collect {
-                val downloadModels = it.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
-                val downloadedModelsIds = downloadModels.map { it.id }
-                val downloadedBlocks = courseStructure.blockData.filter { it.id in downloadedModelsIds }
-                val downloadedFilesSize = getFilesSize(downloadedBlocks)
-                val realDownloadedFilesSize = downloadModels.sumOf { it.size }
-                val largestDownloads = downloadModels
-                    .sortedByDescending { it.size }
-                    .take(5)
+            if (totalDownloadableSize == 0L) return@launch
 
-                _uiState.update {
-                    it.copy(
-                        isHaveDownloadableBlocks = true,
-                        largestDownloads = largestDownloads,
-                        readyToDownloadSize = (downloadableFilesSize - downloadedFilesSize).toFileSize(1, false),
-                        downloadedSize = realDownloadedFilesSize.toFileSize(1, false),
-                        progressBarValue = downloadedFilesSize.toFloat() / downloadableFilesSize.toFloat()
-                    )
-                }
+            courseInteractor.getDownloadModels().collect { downloadModels ->
+                val completedDownloads =
+                    downloadModels.filter { it.downloadedState.isDownloaded && it.courseId == courseId }
+                val completedDownloadIds = completedDownloads.map { it.id }
+                val downloadedBlocks = courseStructure.blockData.filter { it.id in completedDownloadIds }
+
+                updateUIState(
+                    totalDownloadableSize,
+                    completedDownloads,
+                    downloadedBlocks
+                )
             }
         }
     }
 
-    private fun getFilesSize(block: List<Block>): Long {
-        return block.filter { it.isDownloadable }.sumOf {
+    private fun updateUIState(
+        totalDownloadableSize: Long,
+        completedDownloads: List<DownloadModel>,
+        downloadedBlocks: List<Block>
+    ) {
+        val downloadedSize = getFilesSize(downloadedBlocks)
+        val realDownloadedSize = completedDownloads.sumOf { it.size }
+        val largestDownloads = completedDownloads
+            .sortedByDescending { it.size }
+            .take(5)
+
+        _uiState.update {
+            it.copy(
+                isHaveDownloadableBlocks = true,
+                largestDownloads = largestDownloads,
+                readyToDownloadSize = (totalDownloadableSize - downloadedSize).toFileSize(1, false),
+                downloadedSize = realDownloadedSize.toFileSize(1, false),
+                progressBarValue = downloadedSize.toFloat() / totalDownloadableSize.toFloat()
+            )
+        }
+    }
+
+    private fun getFilesSize(blocks: List<Block>): Long {
+        return blocks.filter { it.isDownloadable }.sumOf {
             when (it.downloadableType) {
                 FileType.VIDEO -> {
-                    val videoInfo =
-                        it.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                            preferencesManager.videoSettings.videoDownloadQuality
-                        )
-                    videoInfo?.fileSize ?: 0
+                    it.studentViewData?.encodedVideos
+                        ?.getPreferredVideoInfoForDownloading(preferencesManager.videoSettings.videoDownloadQuality)
+                        ?.fileSize ?: 0
                 }
 
-                FileType.X_BLOCK -> {
-                    it.offlineDownload?.fileSize ?: 0
-                }
-
-                null -> 0
+                FileType.X_BLOCK -> it.offlineDownload?.fileSize ?: 0
+                else -> 0
             }
         }
     }
