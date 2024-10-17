@@ -139,4 +139,6 @@ class CourseRepository(
             downloadDao.removeOfflineXBlockProgress(listOf(blockId))
         }
     }
+
+    suspend fun getSequence(sequenceId: String) = api.getSequence(sequenceId).mapToDomain()
 }

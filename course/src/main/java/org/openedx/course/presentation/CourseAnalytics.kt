@@ -78,6 +78,10 @@ enum class CourseAnalyticsEvent(val eventName: String, val biValue: String) {
         "Course:Unit Detail",
         "edx.bi.app.course.unit_detail"
     ),
+    PREREQUISITE(
+        "Course:Prerequisite",
+        "edx.bi.app.course.prerequisite"
+    ),
     VIEW_CERTIFICATE(
         "Course:View Certificate Clicked",
         "edx.bi.app.course.view_certificate.clicked"

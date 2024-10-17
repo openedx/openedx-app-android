@@ -12,6 +12,7 @@ import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.ResetCourseDates
+import org.openedx.core.data.model.SequenceModel
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -100,4 +101,7 @@ interface CourseApi {
     suspend fun getEnrollmentDetails(
         @Path("course_id") courseId: String,
     ): CourseEnrollmentDetails
+
+    @GET("api/courseware/sequence/{sequence_id}/")
+    suspend fun getSequence(@Path("sequence_id") sequenceId: String): SequenceModel
 }
