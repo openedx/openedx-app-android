@@ -136,7 +136,7 @@ class CalendarSyncWorker(
         val courseId = enrollmentStatus.courseId
         try {
             createCalendarState(enrollmentStatus)
-            if (enrollmentStatus.isActive && isCourseSyncEnabled(courseId)) {
+            if (enrollmentStatus.recentlyActive && isCourseSyncEnabled(courseId)) {
                 val courseDates = calendarInteractor.getCourseDates(courseId)
                 val isCourseCalendarUpToDate = isCourseCalendarUpToDate(courseId, courseDates)
                 if (!isCourseCalendarUpToDate) {
@@ -191,7 +191,7 @@ class CalendarSyncWorker(
         if (courseCalendarStateChecksum == null) {
             val courseCalendarStateEntity = CourseCalendarStateEntity(
                 courseId = enrollmentStatus.courseId,
-                isCourseSyncEnabled = enrollmentStatus.isActive
+                isCourseSyncEnabled = enrollmentStatus.recentlyActive
             )
             calendarInteractor.insertCourseCalendarStateEntityToCache(courseCalendarStateEntity)
         }
