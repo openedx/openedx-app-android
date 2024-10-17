@@ -3,8 +3,8 @@ package org.openedx.auth.presentation.ui
 import android.content.res.Configuration
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -512,7 +512,7 @@ fun ExpandableText(
             targetState = !isExpanded
         }
     }
-    val transition = updateTransition(transitionState, label = "")
+    val transition = rememberTransition(transitionState, label = "")
     val arrowRotationDegree by transition.animateFloat({
         tween(durationMillis = 300)
     }, label = "") {
@@ -534,7 +534,6 @@ fun ExpandableText(
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        //TODO: textStyle
         Text(
             modifier = Modifier,
             text = text,
