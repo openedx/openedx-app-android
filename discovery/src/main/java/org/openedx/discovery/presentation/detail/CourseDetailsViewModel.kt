@@ -35,6 +35,7 @@ class CourseDetailsViewModel(
 ) : BaseViewModel() {
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     private val _uiState = MutableLiveData<CourseDetailsUIState>(CourseDetailsUIState.Loading)
     val uiState: LiveData<CourseDetailsUIState>

@@ -89,7 +89,8 @@ android:
 - **WHATS_NEW_ENABLED:** Enables the "What's New" feature to present the latest changes to the user.
 - **SOCIAL_AUTH_ENABLED:** Enables SSO buttons on the SignIn and SignUp screens.
 - **COURSE_DROPDOWN_NAVIGATION_ENABLED:** Enables an alternative navigation through units.
-- **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware. 
+- **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware.
+- **REGISTRATION_ENABLED:** Enables user registration from the app.
 
 ## Future Support
 - To add config related to some other service, create a class, e.g. `ServiceNameConfig.kt`, to be able to populate related fields.

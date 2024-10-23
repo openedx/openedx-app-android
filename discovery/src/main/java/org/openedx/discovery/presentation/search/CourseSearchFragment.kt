@@ -118,6 +118,7 @@ class CourseSearchFragment : Fragment() {
                     refreshing = refreshing,
                     querySearch = querySearch,
                     isUserLoggedIn = viewModel.isUserLoggedIn,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
@@ -171,6 +172,7 @@ private fun CourseSearchScreen(
     refreshing: Boolean,
     querySearch: String,
     isUserLoggedIn: Boolean,
+    isRegistrationEnabled: Boolean,
     onBackClick: () -> Unit,
     onSearchTextChanged: (String) -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -222,7 +224,8 @@ private fun CourseSearchScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -433,6 +436,7 @@ fun CourseSearchScreenPreview() {
             refreshing = false,
             querySearch = "",
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
@@ -458,6 +462,7 @@ fun CourseSearchScreenTabletPreview() {
             refreshing = false,
             querySearch = "",
             isUserLoggedIn = false,
+            isRegistrationEnabled = true,
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
