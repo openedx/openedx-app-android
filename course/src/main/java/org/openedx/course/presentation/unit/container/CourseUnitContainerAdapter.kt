@@ -45,10 +45,6 @@ class CourseUnitContainerAdapter(
                 createDiscussionFragment(block)
             }
 
-            !block.studentViewMultiDevice -> {
-                createNotAvailableUnitFragment(block, NotAvailableUnitType.MOBILE_UNSUPPORTED)
-            }
-
             block.isHTMLBlock || block.isProblemBlock || block.isOpenAssessmentBlock || block.isDragAndDropBlock ||
                     block.isWordCloudBlock || block.isLTIConsumerBlock || block.isSurveyBlock -> {
                 val lastModified = if (downloadedModel != null && noNetwork) {
