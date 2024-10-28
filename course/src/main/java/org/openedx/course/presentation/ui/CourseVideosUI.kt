@@ -543,7 +543,12 @@ private fun AllVideosDownloadItem(
         )
     }
     if (isDownloadingAllVideos) {
-        val progress = 1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+        val progress =
+            if (downloadModelsSize.allSize == 0L) {
+                0f
+            } else {
+                1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+            }
 
         val animatedProgress by animateFloatAsState(
             targetValue = progress,
