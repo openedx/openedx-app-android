@@ -117,7 +117,7 @@ dependencies {
     api "net.lingala.zip4j:zip4j:$zip_version"
 
     //  OpenEdx libs
-    api("org.openedx:foundation:1.0")
+    api("com.github.openedx:openedx-app-foundation-android:1.0.0")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
