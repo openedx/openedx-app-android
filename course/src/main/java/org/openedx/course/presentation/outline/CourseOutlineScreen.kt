@@ -79,7 +79,7 @@ fun CourseOutlineScreen(
     windowSize: WindowSize,
     viewModel: CourseOutlineViewModel,
     fragmentManager: FragmentManager,
-    onResetDatesClick: () -> Unit
+    onResetDatesClick: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val uiMessage by viewModel.uiMessage.collectAsState(null)
@@ -288,12 +288,14 @@ private fun CourseOutlineUI(
                                                 ResumeCourseTablet(
                                                     modifier = Modifier.padding(vertical = 16.dp),
                                                     block = uiState.resumeComponent,
+                                                    displayName = uiState.resumeUnitTitle,
                                                     onResumeClick = onResumeClick
                                                 )
                                             } else {
                                                 ResumeCourse(
                                                     modifier = Modifier.padding(vertical = 16.dp),
                                                     block = uiState.resumeComponent,
+                                                    displayName = uiState.resumeUnitTitle,
                                                     onResumeClick = onResumeClick
                                                 )
                                             }
@@ -341,6 +343,7 @@ private fun CourseOutlineUI(
 private fun ResumeCourse(
     modifier: Modifier = Modifier,
     block: Block,
+    displayName: String,
     onResumeClick: (String) -> Unit,
 ) {
     Column(
@@ -363,7 +366,7 @@ private fun ResumeCourse(
                 tint = MaterialTheme.appColors.textPrimary
             )
             Text(
-                text = block.displayName,
+                text = displayName,
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.titleMedium,
                 maxLines = 1,
@@ -393,6 +396,7 @@ private fun ResumeCourse(
 private fun ResumeCourseTablet(
     modifier: Modifier = Modifier,
     block: Block,
+    displayName: String,
     onResumeClick: (String) -> Unit,
 ) {
     Row(
@@ -421,7 +425,7 @@ private fun ResumeCourseTablet(
                     tint = MaterialTheme.appColors.textPrimary
                 )
                 Text(
-                    text = block.displayName,
+                    text = displayName,
                     color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.titleMedium,
                     overflow = TextOverflow.Ellipsis,
@@ -450,7 +454,7 @@ private fun ResumeCourseTablet(
 @Composable
 private fun CourseProgress(
     modifier: Modifier = Modifier,
-    progress: Progress
+    progress: Progress,
 ) {
     Column(
         modifier = modifier,
@@ -498,6 +502,7 @@ private fun CourseOutlineScreenPreview() {
                 mockCourseStructure,
                 mapOf(),
                 mockChapterBlock,
+                "Resumed Unit",
                 mapOf(),
                 mapOf(),
                 mapOf(),
@@ -532,6 +537,7 @@ private fun CourseOutlineScreenTabletPreview() {
                 mockCourseStructure,
                 mapOf(),
                 mockChapterBlock,
+                "Resumed Unit",
                 mapOf(),
                 mapOf(),
                 mapOf(),
@@ -560,7 +566,7 @@ private fun CourseOutlineScreenTabletPreview() {
 @Composable
 private fun ResumeCoursePreview() {
     OpenEdXTheme {
-        ResumeCourse(block = mockChapterBlock) {}
+        ResumeCourse(block = mockChapterBlock, displayName = "Resumed Unit") {}
     }
 }
 

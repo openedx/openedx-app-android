@@ -66,23 +66,11 @@ fun WebView.loadUrl(url: String, scope: CoroutineScope, cookieManager: AppCookie
 }
 
 fun WebView.applyDarkModeIfEnabled(isDarkTheme: Boolean) {
-    if (isDarkTheme && WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            settings.setAlgorithmicDarkeningAllowed(true)
-        } else {
-            // Switch WebView to dark mode; uses default dark theme
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-                WebSettingsCompat.setForceDark(
-                    settings,
-                    WebSettingsCompat.FORCE_DARK_ON
-                )
-            }
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
-                WebSettingsCompat.setForceDarkStrategy(
-                    settings,
-                    WebSettingsCompat.DARK_STRATEGY_PREFER_WEB_THEME_OVER_USER_AGENT_DARKENING
-                )
-            }
+    if (isDarkTheme && WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+        try {
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, true)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
