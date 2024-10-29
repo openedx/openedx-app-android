@@ -108,11 +108,11 @@ class DashboardGalleryViewModel(
         }
     }
 
-    fun updateCourses() {
+    fun updateCourses(isUpdating: Boolean = true) {
         if (isLoading) {
             return
         }
-        _updating.value = true
+        _updating.value = isUpdating
         getCourses()
     }
 
