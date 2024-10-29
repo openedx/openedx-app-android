@@ -19,6 +19,7 @@
     <string name="dashboard_all_courses_empty_description">You are not currently enrolled in any courses, would you like to explore the course catalog?</string>
     <string name="dashboard_find_a_course">Find a Course</string>
     <string name="dashboard_no_status_courses">No %1$s Courses</string>
+    <string name="dashboard_pull_to_refresh">Swipe down to refresh</string>
 
     <plurals name="dashboard_past_due_assignment">
         <item quantity="one">%1$d Past Due Assignment</item>
