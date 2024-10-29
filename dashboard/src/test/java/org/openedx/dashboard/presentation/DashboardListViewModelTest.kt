@@ -38,7 +38,7 @@ import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DashboardViewModelTest {
+class DashboardListViewModelTest {
 
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()

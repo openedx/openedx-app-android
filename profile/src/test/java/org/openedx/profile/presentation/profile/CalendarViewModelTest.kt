@@ -42,10 +42,10 @@ class CalendarViewModelTest {
     private val calendarNotifier = mockk<CalendarNotifier>(relaxed = true)
     private val calendarInteractor = mockk<CalendarInteractor>(relaxed = true)
     private val corePreferences = mockk<CorePreferences>(relaxed = true)
-    private val profileRouter = mockk<ProfileRouter>(relaxed = true)
-    private val networkConnection = mockk<NetworkConnection>(relaxed = true)
-    private val permissionLauncher = mockk<ActivityResultLauncher<Array<String>>>(relaxed = true)
-    private val fragmentManager = mockk<FragmentManager>(relaxed = true)
+    private val profileRouter = mockk<ProfileRouter>()
+    private val networkConnection = mockk<NetworkConnection>()
+    private val permissionLauncher = mockk<ActivityResultLauncher<Array<String>>>()
+    private val fragmentManager = mockk<FragmentManager>()
 
     @Before
     fun setup() {
@@ -76,6 +76,7 @@ class CalendarViewModelTest {
 
     @Test
     fun `setUpCalendarSync launches permission request`() = runTest(dispatcher) {
+        every { permissionLauncher.launch(calendarManager.permissions) } returns Unit
         viewModel.setUpCalendarSync(permissionLauncher)
         coVerify { permissionLauncher.launch(calendarManager.permissions) }
     }
