@@ -21,6 +21,7 @@ class WebViewDiscoveryViewModel(
     private val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
 
     val isPreLogin get() = config.isPreLoginExperienceEnabled() && corePreferences.user == null
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     private var _discoveryUrl = webViewConfig.baseUrl
     val discoveryUrl: String

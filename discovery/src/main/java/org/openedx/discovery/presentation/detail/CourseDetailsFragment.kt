@@ -142,6 +142,7 @@ class CourseDetailsFragment : Fragment() {
                     ),
                     hasInternetConnection = viewModel.hasInternetConnection,
                     isUserLoggedIn = viewModel.isUserLoggedIn,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onReloadClick = {
                         viewModel.getCourseDetail()
                     },
@@ -211,6 +212,7 @@ internal fun CourseDetailsScreen(
     htmlBody: String,
     hasInternetConnection: Boolean,
     isUserLoggedIn: Boolean,
+    isRegistrationEnabled: Boolean,
     onReloadClick: () -> Unit,
     onBackClick: () -> Unit,
     onButtonClick: () -> Unit,
@@ -238,7 +240,8 @@ internal fun CourseDetailsScreen(
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -694,6 +697,7 @@ private fun CourseDetailNativeContentPreview() {
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
             onBackClick = {},
@@ -716,6 +720,7 @@ private fun CourseDetailNativeContentTabletPreview() {
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
             onBackClick = {},
