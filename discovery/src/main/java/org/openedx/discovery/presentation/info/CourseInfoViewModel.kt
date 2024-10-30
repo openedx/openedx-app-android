@@ -64,6 +64,8 @@ class CourseInfoViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
+
     val uriScheme: String get() = config.getUriScheme()
 
     private val webViewConfig get() = config.getDiscoveryConfig().webViewConfig

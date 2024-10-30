@@ -30,6 +30,7 @@ class CourseSearchViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     private val _uiState =
         MutableLiveData<CourseSearchUIState>(CourseSearchUIState.Courses(emptyList(), 0))

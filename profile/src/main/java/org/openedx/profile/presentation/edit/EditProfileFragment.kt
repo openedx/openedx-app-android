@@ -671,25 +671,29 @@ private fun EditProfileScreen(
                                             openWarningMessageDialog = true
                                         }
                                     },
-                                text = stringResource(if (uiState.isLimited) R.string.profile_switch_to_full else R.string.profile_switch_to_limited),
+                                text = stringResource(
+                                    if (uiState.isLimited) {
+                                        R.string.profile_switch_to_full
+                                    } else {
+                                        R.string.profile_switch_to_limited
+                                    }
+                                ),
                                 color = MaterialTheme.appColors.textAccent,
                                 style = MaterialTheme.appTypography.labelLarge
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             ProfileFields(
                                 disabled = uiState.isLimited,
-                                onFieldClick = { it, title ->
-                                    when (it) {
+                                onFieldClick = { field, title ->
+                                    when (field) {
                                         YEAR_OF_BIRTH -> {
                                             serverFieldName.value = YEAR_OF_BIRTH
-                                            expandedList =
-                                                LocaleUtils.getBirthYearsRange()
+                                            expandedList = LocaleUtils.getBirthYearsRange()
                                         }
 
                                         COUNTRY -> {
                                             serverFieldName.value = COUNTRY
-                                            expandedList =
-                                                LocaleUtils.getCountries()
+                                            expandedList = LocaleUtils.getCountries()
                                         }
 
                                         LANGUAGE -> {
@@ -702,9 +706,8 @@ private fun EditProfileScreen(
                                     coroutine.launch {
                                         val index = expandedList.indexOfFirst { option ->
                                             if (serverFieldName.value == LANGUAGE) {
-                                                option.value == (mapFields[serverFieldName.value] as List<LanguageProficiency>).getOrNull(
-                                                    0
-                                                )?.code
+                                                option.value == (mapFields[serverFieldName.value] as List<LanguageProficiency>)
+                                                    .getOrNull(0)?.code
                                             } else {
                                                 option.value == mapFields[serverFieldName.value]
                                             }

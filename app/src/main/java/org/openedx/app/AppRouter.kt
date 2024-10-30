@@ -67,10 +67,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         infoType: String?,
         openTab: String
     ) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance(courseId, infoType, openTab))
-            .commit()
+        try {
+            fm.popBackStack()
+            fm.beginTransaction()
+                .replace(R.id.container, MainFragment.newInstance(courseId, infoType, openTab))
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?) {
@@ -102,18 +106,26 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?, infoType: String?) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, WhatsNewFragment.newInstance(courseId, infoType))
-            .commit()
+        try {
+            fm.popBackStack()
+            fm.beginTransaction()
+                .replace(R.id.container, WhatsNewFragment.newInstance(courseId, infoType))
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun clearBackStack(fm: FragmentManager) {
         fm.apply {
-            for (fragment in fragments) {
-                beginTransaction().remove(fragment).commit()
+            try {
+                for (fragment in fragments) {
+                    beginTransaction().remove(fragment).commit()
+                }
+                popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
     //endregion
@@ -424,10 +436,14 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     private fun replaceFragmentWithBackStack(fm: FragmentManager, fragment: Fragment) {
-        fm.beginTransaction()
-            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
-            .addToBackStack(fragment.javaClass.simpleName)
-            .commit()
+        try {
+            fm.beginTransaction()
+                .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+                .addToBackStack(fragment.javaClass.simpleName)
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun replaceFragment(
@@ -435,18 +451,26 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fragment: Fragment,
         transaction: Int = FragmentTransaction.TRANSIT_NONE,
     ) {
-        fm.beginTransaction()
-            .setTransition(transaction)
-            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
-            .commit()
+        try {
+            fm.beginTransaction()
+                .setTransition(transaction)
+                .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     //App upgrade
     override fun navigateToUserProfile(fm: FragmentManager) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, ProfileFragment())
-            .commit()
+        try {
+            fm.popBackStack()
+            fm.beginTransaction()
+                .replace(R.id.container, ProfileFragment())
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
     //endregion
 }

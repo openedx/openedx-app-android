@@ -8,12 +8,12 @@ data class EnrollmentStatus(
     val courseId: String?,
     @SerializedName("course_name")
     val courseName: String?,
-    @SerializedName("is_active")
-    val isActive: Boolean?
+    @SerializedName("recently_active")
+    val recentlyActive: Boolean?
 ) {
     fun mapToDomain() = EnrollmentStatus(
         courseId = courseId ?: "",
         courseName = courseName ?: "",
-        isActive = isActive ?: false
+        recentlyActive = recentlyActive ?: false
     )
 }

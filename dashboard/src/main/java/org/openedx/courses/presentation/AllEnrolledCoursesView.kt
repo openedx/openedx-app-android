@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -185,6 +186,7 @@ private fun AllEnrolledCoursesView(
         scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .semantics {
                 testTagsAsResourceId = true
             },
@@ -261,7 +263,6 @@ private fun AllEnrolledCoursesView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .navigationBarsPadding()
                             .pullRefresh(pullRefreshState),
                     ) {
                         Column(
@@ -329,7 +330,7 @@ private fun AllEnrolledCoursesView(
                                                             }
                                                         )
                                                     }
-                                                    item {
+                                                    item(span = { GridItemSpan(columns) }) {
                                                         if (state.canLoadMore) {
                                                             Box(
                                                                 modifier = Modifier
@@ -453,17 +454,14 @@ fun CourseItem(
                     overflow = TextOverflow.Ellipsis,
                     minLines = 1,
                     maxLines = 2,
-                    text = stringResource(
-                        org.openedx.dashboard.R.string.dashboard_course_date,
-                        TimeUtils.getCourseFormattedDate(
-                            LocalContext.current,
-                            Date(),
-                            course.auditAccessExpires,
-                            course.course.start,
-                            course.course.end,
-                            course.course.startType,
-                            course.course.startDisplay
-                        )
+                    text = TimeUtils.getCourseFormattedDate(
+                        LocalContext.current,
+                        Date(),
+                        course.auditAccessExpires,
+                        course.course.start,
+                        course.course.end,
+                        course.course.startType,
+                        course.course.startDisplay
                     )
                 )
                 Text(

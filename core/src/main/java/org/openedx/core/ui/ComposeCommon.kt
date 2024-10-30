@@ -62,7 +62,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -212,7 +211,6 @@ fun Toolbar(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     modifier: Modifier,
@@ -312,7 +310,6 @@ fun SearchBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarStateless(
     modifier: Modifier,
@@ -1187,24 +1184,32 @@ fun ConnectionErrorView(
 fun AuthButtonsPanel(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
+    showRegisterButton: Boolean,
 ) {
     Row {
-        OpenEdXButton(
-            modifier = Modifier
-                .testTag("btn_register")
-                .width(0.dp)
-                .weight(1f),
-            text = stringResource(id = R.string.core_register),
-            textColor = MaterialTheme.appColors.primaryButtonText,
-            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-            onClick = { onRegisterClick() }
-        )
+        if (showRegisterButton) {
+            OpenEdXButton(
+                modifier = Modifier
+                    .testTag("btn_register")
+                    .width(0.dp)
+                    .weight(1f),
+                text = stringResource(id = R.string.core_register),
+                textColor = MaterialTheme.appColors.primaryButtonText,
+                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                onClick = { onRegisterClick() }
+            )
+        }
 
         OpenEdXOutlinedButton(
             modifier = Modifier
                 .testTag("btn_sign_in")
-                .width(100.dp)
-                .padding(start = 16.dp),
+                .then(
+                    if (showRegisterButton) {
+                        Modifier.width(100.dp).padding(start = 16.dp)
+                    } else {
+                        Modifier.weight(1f)
+                    }
+                ),
             text = stringResource(id = R.string.core_sign_in),
             onClick = { onSignInClick() },
             textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
@@ -1337,7 +1342,7 @@ private fun ToolbarPreview() {
 @Preview
 @Composable
 private fun AuthButtonsPanelPreview() {
-    AuthButtonsPanel(onRegisterClick = {}, onSignInClick = {})
+    AuthButtonsPanel(onRegisterClick = {}, onSignInClick = {}, showRegisterButton = true)
 }
 
 @Preview
