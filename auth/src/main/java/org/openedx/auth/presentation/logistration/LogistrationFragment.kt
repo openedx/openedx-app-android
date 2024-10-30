@@ -74,7 +74,8 @@ class LogistrationFragment : Fragment() {
                     },
                     onSearchClick = { querySearch ->
                         viewModel.navigateToDiscovery(parentFragmentManager, querySearch)
-                    }
+                    },
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled
                 )
             }
         }
@@ -98,6 +99,7 @@ private fun LogistrationScreen(
     onSearchClick: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
+    isRegistrationEnabled: Boolean,
 ) {
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -183,7 +185,11 @@ private fun LogistrationScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                AuthButtonsPanel(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
+                AuthButtonsPanel(
+                    onRegisterClick = onRegisterClick,
+                    onSignInClick = onSignInClick,
+                    showRegisterButton = isRegistrationEnabled
+                )
             }
         }
     }
@@ -199,7 +205,24 @@ private fun LogistrationPreview() {
         LogistrationScreen(
             onSearchClick = {},
             onSignInClick = {},
-            onRegisterClick = {}
+            onRegisterClick = {},
+            isRegistrationEnabled = true,
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun LogistrationRegistrationDisabledPreview() {
+    OpenEdXTheme {
+        LogistrationScreen(
+            onSearchClick = {},
+            onSignInClick = {},
+            onRegisterClick = {},
+            isRegistrationEnabled = false,
         )
     }
 }

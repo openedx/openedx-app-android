@@ -97,6 +97,7 @@ class WebViewDiscoveryFragment : Fragment() {
                     isPreLogin = viewModel.isPreLogin,
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     hasInternetConnection = hasInternetConnection,
                     onWebViewUIAction = { action ->
                         when (action) {
@@ -193,6 +194,7 @@ private fun WebViewDiscoveryScreen(
     isPreLogin: Boolean,
     contentUrl: String,
     uriScheme: String,
+    isRegistrationEnabled: Boolean,
     hasInternetConnection: Boolean,
     onWebViewUIAction: (WebViewUIAction) -> Unit,
     onWebPageUpdated: (String) -> Unit,
@@ -225,7 +227,8 @@ private fun WebViewDiscoveryScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -392,6 +395,7 @@ private fun WebViewDiscoveryScreenPreview() {
             isPreLogin = false,
             contentUrl = "https://www.example.com/",
             uriScheme = "",
+            isRegistrationEnabled = true,
             hasInternetConnection = false,
             onWebViewUIAction = {},
             onWebPageUpdated = {},

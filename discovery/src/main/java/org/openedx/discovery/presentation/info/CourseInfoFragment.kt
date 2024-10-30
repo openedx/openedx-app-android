@@ -128,6 +128,7 @@ class CourseInfoFragment : Fragment() {
                     uiMessage = uiMessage,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onWebViewUIAction = { action ->
                         when (action) {
                             WebViewUIAction.WEB_PAGE_LOADED -> {
@@ -242,6 +243,7 @@ private fun CourseInfoScreen(
     webViewUIState: WebViewUIState,
     uiMessage: UIMessage?,
     uriScheme: String,
+    isRegistrationEnabled: Boolean,
     hasInternetConnection: Boolean,
     onWebViewUIAction: (WebViewUIAction) -> Unit,
     onRegisterClick: () -> Unit,
@@ -269,7 +271,8 @@ private fun CourseInfoScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -388,6 +391,7 @@ fun CourseInfoScreenPreview() {
             ),
             uiMessage = null,
             uriScheme = "",
+            isRegistrationEnabled = true,
             hasInternetConnection = false,
             onWebViewUIAction = {},
             onRegisterClick = {},

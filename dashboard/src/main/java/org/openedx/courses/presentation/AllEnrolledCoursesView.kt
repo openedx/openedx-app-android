@@ -186,6 +186,7 @@ private fun AllEnrolledCoursesView(
         scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .semantics {
                 testTagsAsResourceId = true
             },
@@ -262,7 +263,6 @@ private fun AllEnrolledCoursesView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .navigationBarsPadding()
                             .pullRefresh(pullRefreshState),
                     ) {
                         Column(
