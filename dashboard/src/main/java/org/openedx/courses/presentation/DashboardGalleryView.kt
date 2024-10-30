@@ -434,7 +434,7 @@ private fun CourseListItem(
             Column {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(course.course.courseImage.toImageLink(apiHostUrl) ?: "")
+                        .data(course.course.courseImage.toImageLink(apiHostUrl))
                         .error(CoreR.drawable.core_no_image_course)
                         .placeholder(CoreR.drawable.core_no_image_course)
                         .build(),
