@@ -4,14 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -32,7 +28,6 @@ import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDial
 import org.openedx.core.ui.ConnectionErrorView
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoUnitBinding
@@ -102,11 +97,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
         binding.connectionError.setContent {
             OpenEdXTheme {
-                ConnectionErrorView(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.appColors.background)
-                ) {
+                ConnectionErrorView {
                     binding.connectionError.isVisible = !viewModel.hasInternetConnection
                 }
             }

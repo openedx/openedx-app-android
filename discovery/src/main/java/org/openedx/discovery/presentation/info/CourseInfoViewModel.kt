@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,6 +18,8 @@ import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.CoreAnalyticsKey
+import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
@@ -46,12 +49,16 @@ class CourseInfoViewModel(
 
     private val _uiState =
         MutableStateFlow(
-            CourseInfoUIState(
+            CourseInfoUIState.CourseInfo(
                 initialUrl = getInitialUrl(),
                 isPreLogin = config.isPreLoginExperienceEnabled() && corePreferences.user == null
             )
         )
     internal val uiState: StateFlow<CourseInfoUIState> = _uiState
+
+    private val _webViewUIState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
+    val webViewState
+        get() = _webViewUIState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
@@ -187,6 +194,19 @@ class CourseInfoViewModel(
             put(DiscoveryAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
             put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
         }
+    }
+
+    fun onWebPageLoaded() {
+        _webViewUIState.value = WebViewUIState.Loaded
+    }
+
+    fun onWebPageError() {
+        _webViewUIState.value =
+            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+    }
+
+    fun onWebPageLoading() {
+        _webViewUIState.value = WebViewUIState.Loading
     }
 
     companion object {
