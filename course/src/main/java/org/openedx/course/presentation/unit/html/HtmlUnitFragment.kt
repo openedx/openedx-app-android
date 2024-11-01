@@ -169,7 +169,7 @@ class HtmlUnitFragment : Fragment() {
                                         if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
                                     },
                                     onWebPageLoadError = {
-                                        viewModel.onWebPageLoadError()
+                                        if (!fromDownloadedContent) viewModel.onWebPageLoadError()
                                     },
                                     saveXBlockProgress = { jsonProgress ->
                                         viewModel.saveXBlockProgress(jsonProgress)
