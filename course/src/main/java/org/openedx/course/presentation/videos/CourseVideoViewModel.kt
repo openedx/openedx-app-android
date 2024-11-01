@@ -150,34 +150,36 @@ class CourseVideoViewModel(
 
     fun getVideos() {
         viewModelScope.launch {
-            var courseStructure = interactor.getCourseStructureForVideos(courseId)
-            val blocks = courseStructure.blockData
-            if (blocks.isEmpty()) {
-                _uiState.value = CourseVideosUIState.Empty(
-                    message = resourceManager.getString(R.string.course_does_not_include_videos)
-                )
-            } else {
-                setBlocks(courseStructure.blockData)
-                courseSubSections.clear()
-                courseSubSectionUnit.clear()
-                courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
-                initDownloadModelsStatus()
+            try {
+                var courseStructure = interactor.getCourseStructureForVideos(courseId)
+                val blocks = courseStructure.blockData
+                if (blocks.isEmpty()) {
+                    _uiState.value = CourseVideosUIState.Empty
+                } else {
+                    setBlocks(courseStructure.blockData)
+                    courseSubSections.clear()
+                    courseSubSectionUnit.clear()
+                    courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
+                    initDownloadModelsStatus()
 
-                val courseSectionsState =
-                    (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
+                    val courseSectionsState =
+                        (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
 
-                _uiState.value =
-                    CourseVideosUIState.CourseData(
-                        courseStructure = courseStructure,
-                        downloadedState = getDownloadModelsStatus(),
-                        courseSubSections = courseSubSections,
-                        courseSectionsState = courseSectionsState,
-                        subSectionsDownloadsCount = subSectionsDownloadsCount,
-                        downloadModelsSize = getDownloadModelsSize(),
-                        useRelativeDates = preferencesManager.isRelativeDatesEnabled
-                    )
+                    _uiState.value =
+                        CourseVideosUIState.CourseData(
+                            courseStructure = courseStructure,
+                            downloadedState = getDownloadModelsStatus(),
+                            courseSubSections = courseSubSections,
+                            courseSectionsState = courseSectionsState,
+                            subSectionsDownloadsCount = subSectionsDownloadsCount,
+                            downloadModelsSize = getDownloadModelsSize(),
+                            useRelativeDates = preferencesManager.isRelativeDatesEnabled
+                        )
+                }
+                courseNotifier.send(CourseLoading(false))
+            } catch (e: Exception) {
+                _uiState.value = CourseVideosUIState.Empty
             }
-            courseNotifier.send(CourseLoading(false))
         }
     }
 

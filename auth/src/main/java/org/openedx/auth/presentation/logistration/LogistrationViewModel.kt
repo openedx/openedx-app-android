@@ -17,6 +17,7 @@ class LogistrationViewModel(
 ) : BaseViewModel() {
 
     private val discoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
+    val isRegistrationEnabled get() = config.isRegistrationEnabled()
 
     init {
         logLogistrationScreenEvent()

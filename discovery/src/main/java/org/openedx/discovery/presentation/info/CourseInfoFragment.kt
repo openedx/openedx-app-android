@@ -44,8 +44,10 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
+import org.openedx.core.presentation.global.webview.WebViewUIAction
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.ui.AuthButtonsPanel
-import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -85,6 +87,7 @@ class CourseInfoFragment : Fragment() {
                 val uiMessage by viewModel.uiMessage.collectAsState(initial = null)
                 val showAlert by viewModel.showAlert.collectAsState(initial = false)
                 val uiState by viewModel.uiState.collectAsState()
+                val webViewState by viewModel.webViewState.collectAsState()
                 val windowSize = rememberWindowSize()
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
@@ -105,25 +108,42 @@ class CourseInfoFragment : Fragment() {
                     }
                 }
 
-                LaunchedEffect(uiState.enrollmentSuccess.get()) {
-                    if (uiState.enrollmentSuccess.get().isNotEmpty()) {
+                LaunchedEffect((uiState as CourseInfoUIState.CourseInfo).enrollmentSuccess.get()) {
+                    if ((uiState as CourseInfoUIState.CourseInfo).enrollmentSuccess.get()
+                            .isNotEmpty()
+                    ) {
                         viewModel.onSuccessfulCourseEnrollment(
                             fragmentManager = requireActivity().supportFragmentManager,
-                            courseId = uiState.enrollmentSuccess.get(),
+                            courseId = (uiState as CourseInfoUIState.CourseInfo).enrollmentSuccess.get(),
                         )
                         // Clear after navigation
-                        uiState.enrollmentSuccess.set("")
+                        (uiState as CourseInfoUIState.CourseInfo).enrollmentSuccess.set("")
                     }
                 }
 
                 CourseInfoScreen(
                     windowSize = windowSize,
                     uiState = uiState,
+                    webViewUIState = webViewState,
                     uiMessage = uiMessage,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    checkInternetConnection = {
-                        hasInternetConnection = viewModel.hasInternetConnection
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
+                    onWebViewUIAction = { action ->
+                        when (action) {
+                            WebViewUIAction.WEB_PAGE_LOADED -> {
+                                viewModel.onWebPageLoaded()
+                            }
+
+                            WebViewUIAction.WEB_PAGE_ERROR -> {
+                                viewModel.onWebPageError()
+                            }
+
+                            WebViewUIAction.RELOAD_WEB_PAGE -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
+                                viewModel.onWebPageLoading()
+                            }
+                        }
                     },
                     onRegisterClick = {
                         viewModel.navigateToSignUp(
@@ -179,7 +199,7 @@ class CourseInfoFragment : Fragment() {
 
                             linkAuthority.ENROLL -> {
                                 viewModel.courseEnrollClickedEvent(param)
-                                if (uiState.isPreLogin) {
+                                if ((uiState as CourseInfoUIState.CourseInfo).isPreLogin) {
                                     viewModel.navigateToSignUp(
                                         fragmentManager = requireActivity().supportFragmentManager,
                                         courseId = viewModel.pathId,
@@ -220,10 +240,12 @@ class CourseInfoFragment : Fragment() {
 private fun CourseInfoScreen(
     windowSize: WindowSize,
     uiState: CourseInfoUIState,
+    webViewUIState: WebViewUIState,
     uiMessage: UIMessage?,
     uriScheme: String,
+    isRegistrationEnabled: Boolean,
     hasInternetConnection: Boolean,
-    checkInternetConnection: () -> Unit,
+    onWebViewUIAction: (WebViewUIAction) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -231,7 +253,6 @@ private fun CourseInfoScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(true) }
 
     HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
@@ -240,7 +261,7 @@ private fun CourseInfoScreen(
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background,
         bottomBar = {
-            if (uiState.isPreLogin) {
+            if ((uiState as CourseInfoUIState.CourseInfo).isPreLogin) {
                 Box(
                     modifier = Modifier
                         .padding(
@@ -250,7 +271,8 @@ private fun CourseInfoScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -291,24 +313,27 @@ private fun CourseInfoScreen(
                         .navigationBarsPadding(),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
-                        CourseInfoWebView(
-                            contentUrl = uiState.initialUrl,
-                            uriScheme = uriScheme,
-                            onWebPageLoaded = { isLoading = false },
-                            onUriClick = onUriClick,
-                        )
-                    } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
-                            checkInternetConnection()
+                    if ((webViewUIState is WebViewUIState.Error).not()) {
+                        if (hasInternetConnection) {
+                            CourseInfoWebView(
+                                contentUrl = (uiState as CourseInfoUIState.CourseInfo).initialUrl,
+                                uriScheme = uriScheme,
+                                onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
+                                onUriClick = onUriClick,
+                                onWebPageLoadError = {
+                                    onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
+                                }
+                            )
+                        } else {
+                            onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                         }
                     }
-                    if (isLoading && hasInternetConnection) {
+                    if (webViewUIState is WebViewUIState.Error) {
+                        FullScreenErrorView(errorType = webViewUIState.errorType) {
+                            onWebViewUIAction(WebViewUIAction.RELOAD_WEB_PAGE)
+                        }
+                    }
+                    if (webViewUIState is WebViewUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -331,6 +356,7 @@ private fun CourseInfoWebView(
     uriScheme: String,
     onWebPageLoaded: () -> Unit,
     onUriClick: (String, linkAuthority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ) {
 
     val webView = CatalogWebViewScreen(
@@ -339,6 +365,7 @@ private fun CourseInfoWebView(
         isAllLinksExternal = true,
         onWebPageLoaded = onWebPageLoaded,
         onUriClick = onUriClick,
+        onWebPageLoadError = onWebPageLoadError
     )
 
     AndroidView(
@@ -347,9 +374,6 @@ private fun CourseInfoWebView(
         factory = {
             webView
         },
-        update = {
-            webView.loadUrl(contentUrl)
-        }
     )
 }
 
@@ -360,19 +384,21 @@ fun CourseInfoScreenPreview() {
     OpenEdXTheme {
         CourseInfoScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            uiState = CourseInfoUIState(
+            uiState = CourseInfoUIState.CourseInfo(
                 initialUrl = "https://www.example.com/",
                 isPreLogin = false,
                 enrollmentSuccess = AtomicReference("")
             ),
             uiMessage = null,
             uriScheme = "",
+            isRegistrationEnabled = true,
             hasInternetConnection = false,
-            checkInternetConnection = {},
+            onWebViewUIAction = {},
             onRegisterClick = {},
             onSignInClick = {},
             onBackClick = {},
             onUriClick = { _, _ -> },
+            webViewUIState = WebViewUIState.Loading,
         )
     }
 }

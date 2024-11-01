@@ -121,6 +121,7 @@ class CourseOutlineViewModel(
                         courseStructure = state.courseStructure,
                         downloadedState = it.toMap(),
                         resumeComponent = state.resumeComponent,
+                        resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
                         courseSubSections = courseSubSections,
                         courseSectionsState = state.courseSectionsState,
                         subSectionsDownloadsCount = subSectionsDownloadsCount,
@@ -155,6 +156,7 @@ class CourseOutlineViewModel(
                 courseStructure = state.courseStructure,
                 downloadedState = state.downloadedState,
                 resumeComponent = state.resumeComponent,
+                resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
                 courseSubSections = courseSubSections,
                 courseSectionsState = courseSectionsState,
                 subSectionsDownloadsCount = subSectionsDownloadsCount,
@@ -213,6 +215,7 @@ class CourseOutlineViewModel(
                     courseStructure = courseStructure,
                     downloadedState = getDownloadModelsStatus(),
                     resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
+                    resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
                     courseSubSections = courseSubSections,
                     courseSectionsState = courseSectionsState,
                     subSectionsDownloadsCount = subSectionsDownloadsCount,
@@ -221,6 +224,7 @@ class CourseOutlineViewModel(
                 )
                 courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {
+                _uiState.value = CourseOutlineUIState.Error
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
                 } else {

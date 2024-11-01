@@ -42,6 +42,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -63,6 +65,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
@@ -107,6 +110,13 @@ fun DashboardGalleryView(
     val updating by viewModel.updating.collectAsState(false)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val uiState by viewModel.uiState.collectAsState(DashboardGalleryUIState.Loading)
+
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+    LaunchedEffect(lifecycleState) {
+        if (lifecycleState == Lifecycle.State.RESUMED) {
+            viewModel.updateCourses(isUpdating = false)
+        }
+    }
 
     DashboardGalleryView(
         uiMessage = uiMessage,
@@ -708,17 +718,14 @@ private fun PrimaryCourseTitle(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.appTypography.labelMedium,
             color = MaterialTheme.appColors.textFieldHint,
-            text = stringResource(
-                R.string.dashboard_course_date,
-                TimeUtils.getCourseFormattedDate(
-                    LocalContext.current,
-                    Date(),
-                    primaryCourse.auditAccessExpires,
-                    primaryCourse.course.start,
-                    primaryCourse.course.end,
-                    primaryCourse.course.startType,
-                    primaryCourse.course.startDisplay
-                )
+            text = TimeUtils.getCourseFormattedDate(
+                LocalContext.current,
+                Date(),
+                primaryCourse.auditAccessExpires,
+                primaryCourse.course.start,
+                primaryCourse.course.end,
+                primaryCourse.course.startType,
+                primaryCourse.course.startDisplay
             )
         )
     }

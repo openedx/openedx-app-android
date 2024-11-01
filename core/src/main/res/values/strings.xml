@@ -16,13 +16,12 @@
     <string name="core_cancel">Cancel</string>
     <string name="core_search">Search</string>
     <string name="core_select_value">Select value</string>
-    <string name="core_label_starting">Starting %1$s</string>
-    <string name="core_label_ended">Ended %1$s</string>
+    <string name="core_label_starting">Starts %1$s</string>
+    <string name="core_label_ended">Ended on %1$s</string>
     <string name="core_label_ends">Ends %1$s</string>
-    <string name="core_label_expires">Course access expires %1$s</string>
-    <string name="core_label_expires_on">Course access expires on %1$s</string>
-    <string name="core_label_expired">Course access expired %1$s</string>
-    <string name="core_label_expired_on">Course access expired on %1$s</string>
+    <string name="core_label_expires">Access expires %1$s</string>
+    <string name="core_label_access_expired">Access expired %1$s</string>
+    <string name="core_label_expired_on">Expired on %1$s</string>
     <string name="core_password">Password</string>
     <string name="core_assessment_soon">Soon</string>
     <string name="core_offline">Offline</string>
@@ -76,6 +75,8 @@
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
     <string name="core_no_internet_connection">No internet connection</string>
     <string name="core_no_internet_connection_description">Please connect to the internet to view this content.</string>
+    <string name="core_try_again">Try Again</string>
+    <string name="core_something_went_wrong_description">Something went wrong</string>
     <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
     <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
     <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
@@ -168,6 +169,12 @@
     <string name="core_course_container_nav_discussions">Discussions</string>
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
+    <string name="core_no_course_content">No course content is currently available.</string>
+    <string name="core_no_videos">There are currently no videos for this course.</string>
+    <string name="core_no_dates">Course dates are currently not available.</string>
+    <string name="core_no_discussion">Unable to load discussions.\n Please try again later.</string>
+    <string name="core_no_handouts">There are currently no handouts for this course.</string>
+    <string name="core_no_announcements">There are currently no announcements for this course.</string>
     <string name="course_confirm_download">Confirm Download</string>
     <string name="core_edit">Edit</string>
     <string name="core_offline_progress_sync">Offline Progress Sync</string>

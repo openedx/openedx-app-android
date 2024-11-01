@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -48,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -57,6 +54,7 @@ import androidx.fragment.app.FragmentManager
 import org.koin.compose.koinInject
 import org.openedx.core.AppDataConstants
 import org.openedx.core.BlockType
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
@@ -67,7 +65,9 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.settings.video.VideoQualityType
+import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -243,20 +243,7 @@ private fun CourseVideosUI(
                     ) {
                         when (uiState) {
                             is CourseVideosUIState.Empty -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState()),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.course_does_not_include_videos),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.headlineSmall,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(horizontal = 40.dp)
-                                    )
-                                }
+                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_VIDEOS)
                             }
 
                             is CourseVideosUIState.CourseData -> {
@@ -311,7 +298,9 @@ private fun CourseVideosUI(
                                 }
                             }
 
-                            CourseVideosUIState.Loading -> {}
+                            CourseVideosUIState.Loading -> {
+                                CircularProgress()
+                            }
                         }
                     }
                 }
@@ -658,9 +647,7 @@ private fun CourseVideosScreenEmptyPreview() {
         CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
-            uiState = CourseVideosUIState.Empty(
-                "This course does not include any videos."
-            ),
+            uiState = CourseVideosUIState.Empty,
             courseTitle = "",
             onExpandClick = { },
             onSubSectionClick = { },

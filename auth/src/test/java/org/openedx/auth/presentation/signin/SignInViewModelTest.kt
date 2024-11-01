@@ -94,6 +94,7 @@ class SignInViewModelTest {
         every { calendarPreferences.clearCalendarPreferences() } returns Unit
         coEvery { calendarInteractor.clearCalendarCachedData() } returns Unit
         every { analytics.logScreenEvent(any(), any()) } returns Unit
+        every { config.isRegistrationEnabled() } returns true
     }
 
     @After

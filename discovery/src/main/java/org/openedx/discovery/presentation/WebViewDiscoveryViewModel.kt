@@ -1,8 +1,13 @@
 package org.openedx.discovery.presentation
 
 import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.utils.UrlUtils
@@ -16,11 +21,14 @@ class WebViewDiscoveryViewModel(
     private val analytics: DiscoveryAnalytics,
 ) : BaseViewModel() {
 
+    private val _uiState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
+    val uiState: StateFlow<WebViewUIState> = _uiState.asStateFlow()
     val uriScheme: String get() = config.getUriScheme()
 
     private val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
 
     val isPreLogin get() = config.isPreLoginExperienceEnabled() && corePreferences.user == null
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     private var _discoveryUrl = webViewConfig.baseUrl
     val discoveryUrl: String
@@ -36,6 +44,19 @@ class WebViewDiscoveryViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    fun onWebPageLoading() {
+        _uiState.value = WebViewUIState.Loading
+    }
+
+    fun onWebPageLoaded() {
+        _uiState.value = WebViewUIState.Loaded
+    }
+
+    fun onWebPageLoadError() {
+        _uiState.value =
+            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+    }
 
     fun updateDiscoveryUrl(url: String) {
         if (url.isNotEmpty()) {

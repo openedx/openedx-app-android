@@ -46,8 +46,8 @@ class FacebookAuthHelper {
                                 continuation.safeResume(
                                     SocialAuthResponse(
                                         accessToken = result.accessToken.token,
-                                        name = obj?.getString(ApiConstants.NAME) ?: "",
-                                        email = obj?.getString(ApiConstants.EMAIL) ?: "",
+                                        name = obj?.optString(ApiConstants.NAME).orEmpty(),
+                                        email = obj?.optString(ApiConstants.EMAIL).orEmpty(),
                                         authType = AuthType.FACEBOOK,
                                     )
                                 ) {

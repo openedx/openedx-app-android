@@ -47,12 +47,15 @@ class DiscussionTopicsViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.getCourseTopics(courseId)
-                _uiState.value = DiscussionTopicsUIState.Topics(response)
+                if (response.isEmpty().not()) {
+                    _uiState.value = DiscussionTopicsUIState.Topics(response)
+                } else {
+                    _uiState.value = DiscussionTopicsUIState.Error
+                }
             } catch (e: Exception) {
+                _uiState.value = DiscussionTopicsUIState.Error
                 if (e.isInternetError()) {
                     _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
-                } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
                 }
             } finally {
                 courseNotifier.send(CourseLoading(false))

@@ -281,7 +281,7 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assertEquals(noInternet, message.await()?.message)
-        assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
+        assert(viewModel.uiState.value is CourseOutlineUIState.Error)
     }
 
     @Test
@@ -319,7 +319,7 @@ class CourseOutlineViewModelTest {
         coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assertEquals(somethingWrong, message.await()?.message)
-        assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
+        assert(viewModel.uiState.value is CourseOutlineUIState.Error)
     }
 
     @Test

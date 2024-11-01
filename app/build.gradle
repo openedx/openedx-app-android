@@ -137,7 +137,7 @@ dependencies {
     implementation "com.braze:android-sdk-ui:30.2.0"
 
     // Plugins
-    implementation("org.openedx:firebase-analytics:1.0.0")
+    implementation("com.github.openedx:openedx-app-firebase-analytics-android:1.0.0")
 
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

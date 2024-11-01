@@ -16,6 +16,6 @@ sealed class CourseVideosUIState {
         val useRelativeDates: Boolean
     ) : CourseVideosUIState()
 
-    data class Empty(val message: String) : CourseVideosUIState()
-    object Loading : CourseVideosUIState()
+    data object Empty : CourseVideosUIState()
+    data object Loading : CourseVideosUIState()
 }
