@@ -193,7 +193,6 @@ class CourseVideoViewModelTest {
 
     @Before
     fun setUp() {
-        every { resourceManager.getString(R.string.course_does_not_include_videos) } returns ""
         every { resourceManager.getString(R.string.course_can_download_only_with_wifi) } returns cantDownload
         Dispatchers.setMain(dispatcher)
         every { config.getApiHostURL() } returns "http://localhost:8000"
