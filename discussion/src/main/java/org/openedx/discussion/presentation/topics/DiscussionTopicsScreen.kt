@@ -110,7 +110,6 @@ private fun DiscussionTopicsUI(
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -203,7 +202,9 @@ private fun DiscussionTopicsUI(
                                             ) {
                                                 ThreadItemCategory(
                                                     name = stringResource(id = R.string.discussion_all_posts),
-                                                    painterResource = painterResource(id = R.drawable.discussion_all_posts),
+                                                    painterResource = painterResource(
+                                                        id = R.drawable.discussion_all_posts
+                                                    ),
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .height(categoriesHeight),
@@ -213,7 +214,8 @@ private fun DiscussionTopicsUI(
                                                             "",
                                                             context.getString(R.string.discussion_all_posts)
                                                         )
-                                                    })
+                                                    }
+                                                )
                                                 ThreadItemCategory(
                                                     name = stringResource(id = R.string.discussion_posts_following),
                                                     painterResource = painterResource(id = R.drawable.discussion_star),
@@ -226,7 +228,8 @@ private fun DiscussionTopicsUI(
                                                             "",
                                                             context.getString(R.string.discussion_posts_following)
                                                         )
-                                                    })
+                                                    }
+                                                )
                                             }
                                         }
                                         itemsIndexed(uiState.data) { index, topic ->

@@ -42,7 +42,7 @@ data class AppColors(
     val bottomSheetToggle: Color,
     val warning: Color,
     val info: Color,
-    val info_variant: Color,
+    val infoVariant: Color,
     val onWarning: Color,
     val onInfo: Color,
 

@@ -1,7 +1,6 @@
 package org.openedx.courses.presentation
 
 import android.content.res.Configuration
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,6 +92,9 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.courses.presentation.AllEnrolledCoursesFragment.Companion.LOAD_MORE_THRESHOLD
+import org.openedx.courses.presentation.AllEnrolledCoursesFragment.Companion.MOBILE_GRID_COLUMNS
+import org.openedx.courses.presentation.AllEnrolledCoursesFragment.Companion.TABLET_GRID_COLUMNS
 import org.openedx.dashboard.domain.CourseStatusFilter
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
@@ -153,7 +155,8 @@ fun AllEnrolledCoursesView(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@Suppress("MaximumLineLength")
+@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun AllEnrolledCoursesView(
     apiHostUrl: String,
@@ -166,7 +169,7 @@ private fun AllEnrolledCoursesView(
     val layoutDirection = LocalLayoutDirection.current
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberLazyGridState()
-    val columns = if (windowSize.isTablet) 3 else 2
+    val columns = if (windowSize.isTablet) TABLET_GRID_COLUMNS else MOBILE_GRID_COLUMNS
     val pullRefreshState = rememberPullRefreshState(
         refreshing = state.refreshing,
         onRefresh = { onAction(AllEnrolledCoursesAction.SwipeRefresh) }
@@ -211,7 +214,6 @@ private fun AllEnrolledCoursesView(
                 )
             )
         }
-
 
         val emptyStatePaddings by remember(key1 = windowSize) {
             mutableStateOf(
@@ -346,7 +348,7 @@ private fun AllEnrolledCoursesView(
                                                 }
                                             )
                                         }
-                                        if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                        if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                             onAction(AllEnrolledCoursesAction.EndOfPage)
                                         }
                                     }

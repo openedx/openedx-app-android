@@ -46,7 +46,8 @@ class EditProfileViewModelTest {
 
     private val account = Account(
         username = "thom84",
-        bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
+        bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper " +
+                "questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
         requiresParentalConsent = true,
         name = "Thomas",
         country = "Ukraine",
@@ -198,5 +199,4 @@ class EditProfileViewModelTest {
 
         assert(viewModel.selectedImageUri.value != null)
     }
-
 }

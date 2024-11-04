@@ -101,7 +101,6 @@ private fun LogistrationScreen(
     onSignInClick: () -> Unit,
     isRegistrationEnabled: Boolean,
 ) {
-
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }

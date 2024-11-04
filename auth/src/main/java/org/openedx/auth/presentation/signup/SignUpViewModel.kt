@@ -166,8 +166,7 @@ class SignUpViewModel(
                         params = buildMap {
                             put(
                                 AuthAnalyticsKey.METHOD.key,
-                                (socialAuth?.authType?.methodName
-                                    ?: AuthType.PASSWORD.methodName).lowercase()
+                                (socialAuth?.authType?.methodName ?: AuthType.PASSWORD.methodName).lowercase()
                             )
                         }
                     )

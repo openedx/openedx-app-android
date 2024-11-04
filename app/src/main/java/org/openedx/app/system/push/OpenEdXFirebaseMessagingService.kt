@@ -68,7 +68,8 @@ class OpenEdXFirebaseMessagingService : FirebaseMessagingService() {
             .setContentTitle(notification.title)
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                .bigText(notification.body))
+                    .bigText(notification.body)
+            )
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)

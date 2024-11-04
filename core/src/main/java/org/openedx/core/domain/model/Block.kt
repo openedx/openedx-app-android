@@ -120,11 +120,11 @@ data class EncodedVideos(
                 isPreferredVideoInfo(mobileLow)
 
     val hasNonYoutubeVideo: Boolean
-        get() = mobileHigh?.url != null
-                || mobileLow?.url != null
-                || desktopMp4?.url != null
-                || hls?.url != null
-                || fallback?.url != null
+        get() = mobileHigh?.url != null ||
+                mobileLow?.url != null ||
+                desktopMp4?.url != null ||
+                hls?.url != null ||
+                fallback?.url != null
 
     val videoUrl: String
         get() = fallback?.url
@@ -158,29 +158,33 @@ data class EncodedVideos(
     }
 
     private fun getDefaultVideoInfoForDownloading(): VideoInfo? {
+        var result: VideoInfo? = null
+
         if (isPreferredVideoInfo(mobileLow)) {
-            return mobileLow
-        }
-        if (isPreferredVideoInfo(mobileHigh)) {
-            return mobileHigh
-        }
-        if (isPreferredVideoInfo(desktopMp4)) {
-            return desktopMp4
-        }
-        fallback?.let {
-            if (isPreferredVideoInfo(it) &&
-                !VideoUtil.videoHasFormat(it.url, AppDataConstants.VIDEO_FORMAT_M3U8)
-            ) {
-                return fallback
+            result = mobileLow
+        } else if (isPreferredVideoInfo(mobileHigh)) {
+            result = mobileHigh
+        } else if (isPreferredVideoInfo(desktopMp4)) {
+            result = desktopMp4
+        } else {
+            fallback?.let {
+                if (isPreferredVideoInfo(it) &&
+                    !VideoUtil.videoHasFormat(it.url, AppDataConstants.VIDEO_FORMAT_M3U8)
+                ) {
+                    result = fallback
+                }
+            }
+
+            if (result == null) {
+                hls?.let {
+                    if (isPreferredVideoInfo(it)) {
+                        result = hls
+                    }
+                }
             }
         }
-        hls?.let {
-            if (isPreferredVideoInfo(it)
-            ) {
-                return hls
-            }
-        }
-        return null
+
+        return result
     }
 
     private fun isPreferredVideoInfo(videoInfo: VideoInfo?): Boolean {
@@ -188,7 +192,6 @@ data class EncodedVideos(
                 URLUtil.isNetworkUrl(videoInfo.url) &&
                 VideoUtil.isValidVideoUrl(videoInfo.url)
     }
-
 }
 
 @Parcelize

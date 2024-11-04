@@ -59,7 +59,6 @@ class CourseInteractor(
                         }
                     }
                 }
-
             }
         }
         return courseStructure.copy(blockData = resultBlocks.toList())

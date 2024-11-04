@@ -91,6 +91,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.presentation.DiscussionRouter
+import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discussion.presentation.ui.ThreadItem
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -185,6 +186,7 @@ class DiscussionThreadsFragment : Fragment() {
         private const val ARG_TOPIC_ID = "topicId"
         private const val ARG_TITLE = "title"
         private const val ARG_FRAGMENT_VIEW_TYPE = "fragmentViewType"
+        const val LOAD_MORE_THRESHOLD = 4
 
         fun newInstance(
             threadType: String,
@@ -208,6 +210,7 @@ class DiscussionThreadsFragment : Fragment() {
     }
 }
 
+@Suppress("MaximumLineLength")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DiscussionThreadsScreen(
@@ -226,7 +229,6 @@ private fun DiscussionThreadsScreen(
     paginationCallback: () -> Unit,
     onBackClick: () -> Unit
 ) {
-
     val scaffoldState = rememberScaffoldState()
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -299,7 +301,6 @@ private fun DiscussionThreadsScreen(
         modifier = scaffoldModifier,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -413,7 +414,13 @@ private fun DiscussionThreadsScreen(
                         }
                     }
                     Surface(
-                        modifier = Modifier.padding(top = if (viewType == FragmentViewType.FULL_CONTENT) 6.dp else 0.dp),
+                        modifier = Modifier.padding(
+                            top = if (viewType == FragmentViewType.FULL_CONTENT) {
+                                6.dp
+                            } else {
+                                0.dp
+                            }
+                        ),
                         color = MaterialTheme.appColors.background
                     ) {
                         Box(Modifier.pullRefresh(pullRefreshState)) {
@@ -437,7 +444,9 @@ private fun DiscussionThreadsScreen(
                                             ) {
                                                 IconText(
                                                     text = filterType.first,
-                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_filter),
+                                                    painter = painterResource(
+                                                        id = discussionR.drawable.discussion_ic_filter
+                                                    ),
                                                     textStyle = MaterialTheme.appTypography.labelMedium,
                                                     color = MaterialTheme.appColors.textPrimary,
                                                     onClick = {
@@ -467,7 +476,9 @@ private fun DiscussionThreadsScreen(
                                                 )
                                                 IconText(
                                                     text = sortType.first,
-                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_sort),
+                                                    painter = painterResource(
+                                                        id = discussionR.drawable.discussion_ic_sort
+                                                    ),
                                                     textStyle = MaterialTheme.appTypography.labelMedium,
                                                     color = MaterialTheme.appColors.textPrimary,
                                                     onClick = {
@@ -521,7 +532,9 @@ private fun DiscussionThreadsScreen(
                                                                 Modifier
                                                                     .size(40.dp)
                                                                     .clip(CircleShape)
-                                                                    .background(MaterialTheme.appColors.secondaryButtonBackground)
+                                                                    .background(
+                                                                        MaterialTheme.appColors.secondaryButtonBackground
+                                                                    )
                                                                     .clickable {
                                                                         onCreatePostClick()
                                                                     },
@@ -529,8 +542,12 @@ private fun DiscussionThreadsScreen(
                                                             ) {
                                                                 Icon(
                                                                     modifier = Modifier.size(16.dp),
-                                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
-                                                                    contentDescription = stringResource(id = discussionR.string.discussion_add_comment),
+                                                                    painter = painterResource(
+                                                                        discussionR.drawable.discussion_ic_add_comment
+                                                                    ),
+                                                                    contentDescription = stringResource(
+                                                                        discussionR.string.discussion_add_comment
+                                                                    ),
                                                                     tint = MaterialTheme.appColors.primaryButtonText
                                                                 )
                                                             }
@@ -550,13 +567,15 @@ private fun DiscussionThreadsScreen(
                                                                     .padding(vertical = 16.dp),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                                                CircularProgressIndicator(
+                                                                    color = MaterialTheme.appColors.primary
+                                                                )
                                                             }
                                                         }
                                                     }
                                                     if (scrollState.shouldLoadMore(
                                                             firstVisibleIndex,
-                                                            4
+                                                            LOAD_MORE_THRESHOLD
                                                         )
                                                     ) {
                                                         paginationCallback()
@@ -582,7 +601,9 @@ private fun DiscussionThreadsScreen(
                                                     Spacer(modifier = Modifier.height(20.dp))
                                                     Icon(
                                                         modifier = Modifier.size(100.dp),
-                                                        painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
+                                                        painter = painterResource(
+                                                            id = discussionR.drawable.discussion_ic_empty
+                                                        ),
                                                         contentDescription = null,
                                                         tint = MaterialTheme.appColors.textPrimary
                                                     )
@@ -597,7 +618,9 @@ private fun DiscussionThreadsScreen(
                                                     Spacer(Modifier.height(12.dp))
                                                     Text(
                                                         modifier = Modifier.fillMaxWidth(),
-                                                        text = stringResource(discussionR.string.discussion_click_button_create_discussion),
+                                                        text = stringResource(
+                                                            discussionR.string.discussion_click_button_create_discussion
+                                                        ),
                                                         style = MaterialTheme.appTypography.bodyLarge,
                                                         color = MaterialTheme.appColors.textPrimary,
                                                         textAlign = TextAlign.Center
@@ -606,19 +629,25 @@ private fun DiscussionThreadsScreen(
                                                     OpenEdXOutlinedButton(
                                                         modifier = Modifier
                                                             .widthIn(184.dp, Dp.Unspecified),
-                                                        text = stringResource(id = discussionR.string.discussion_create_post),
+                                                        text = stringResource(
+                                                            id = discussionR.string.discussion_create_post
+                                                        ),
                                                         onClick = {
                                                             onCreatePostClick()
                                                         },
                                                         content = {
                                                             Icon(
-                                                                painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
+                                                                painter = painterResource(
+                                                                    id = discussionR.drawable.discussion_ic_add_comment
+                                                                ),
                                                                 contentDescription = null,
                                                                 tint = MaterialTheme.appColors.primary
                                                             )
                                                             Spacer(modifier = Modifier.width(6.dp))
                                                             Text(
-                                                                text = stringResource(id = discussionR.string.discussion_create_post),
+                                                                text = stringResource(
+                                                                    id = discussionR.string.discussion_create_post
+                                                                ),
                                                                 color = MaterialTheme.appColors.primary,
                                                                 style = MaterialTheme.appTypography.labelLarge
                                                             )
@@ -635,7 +664,8 @@ private fun DiscussionThreadsScreen(
                                 is DiscussionThreadsUIState.Loading -> {
                                     Box(
                                         Modifier
-                                            .fillMaxSize(), contentAlignment = Alignment.Center
+                                            .fillMaxSize(),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }

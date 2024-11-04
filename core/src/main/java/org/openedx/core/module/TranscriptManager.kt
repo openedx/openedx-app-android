@@ -26,14 +26,14 @@ class TranscriptManager(
             get() = OkHttpClient.Builder().build()
     }
 
-    var transcriptObject: TimedTextObject? = null
+    private var transcriptObject: TimedTextObject? = null
 
-    fun has(url: String): Boolean {
+    private fun has(url: String): Boolean {
         val transcriptDir = getTranscriptDir() ?: return false
         val hash = Sha1Util.SHA1(url)
         val file = File(transcriptDir, hash)
         return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(
-            5
+            FILE_VALIDITY_DURATION_HOURS
         )
     }
 
@@ -56,7 +56,9 @@ class TranscriptManager(
         return if (!file.exists()) {
             // not in cache
             null
-        } else FileInputStream(file)
+        } else {
+            FileInputStream(file)
+        }
     }
 
     private suspend fun startTranscriptDownload(downloadLink: String) {
@@ -102,7 +104,7 @@ class TranscriptManager(
         return timedTextObject
     }
 
-    fun fetchTranscriptResponse(url: String?): InputStream? {
+    private fun fetchTranscriptResponse(url: String?): InputStream? {
         if (url == null) {
             return null
         }
@@ -127,5 +129,9 @@ class TranscriptManager(
             return transcriptDir
         }
         return null
+    }
+
+    companion object {
+        private const val FILE_VALIDITY_DURATION_HOURS = 5L
     }
 }

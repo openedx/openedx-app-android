@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.global.app_upgrade
+package org.openedx.core.presentation.global.appupgrade
 
 import androidx.fragment.app.FragmentManager
 

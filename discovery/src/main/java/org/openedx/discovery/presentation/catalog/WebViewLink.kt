@@ -32,20 +32,20 @@ class WebViewLink(
             if (uriStr.isNullOrEmpty()) {
                 return null
             }
+
             val sanitizedUriStr = uriStr.replace("+", "%2B")
             val uri = Uri.parse(sanitizedUriStr)
 
-            // Validate the URI scheme
-            if (uriScheme != uri.scheme) {
+            // Validate URI scheme and authority
+            val isSchemeValid = (uriScheme == uri.scheme)
+            val uriAuthority = Authority.entries.find { it.key == uri.authority }
+
+            if (!isSchemeValid || uriAuthority == null) {
                 return null
             }
 
-            // Validate the Uri authority
-            val uriAuthority = Authority.entries.find { it.key == uri.authority } ?: return null
-
             // Parse the Uri params
             val params = uri.getQueryParams()
-
             return WebViewLink(uriAuthority, params)
         }
     }

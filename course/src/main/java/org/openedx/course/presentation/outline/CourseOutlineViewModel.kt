@@ -31,7 +31,6 @@ import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogTyp
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseDatesShifted
-import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -40,12 +39,12 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.R as courseR
 import org.openedx.course.presentation.download.DownloadDialogManager
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import org.openedx.foundation.utils.FileUtil
+import org.openedx.course.R as courseR
 
 class CourseOutlineViewModel(
     val courseId: String,
@@ -142,7 +141,11 @@ class CourseOutlineViewModel(
                 super.saveDownloadModels(folder, id)
             } else {
                 viewModelScope.launch {
-                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(courseR.string.course_can_download_only_with_wifi)))
+                    _uiMessage.emit(
+                        UIMessage.ToastMessage(
+                            resourceManager.getString(courseR.string.course_can_download_only_with_wifi)
+                        )
+                    )
                 }
             }
         } else {
@@ -173,7 +176,6 @@ class CourseOutlineViewModel(
             )
 
             courseSectionsState[blockId] ?: false
-
         } else {
             false
         }
@@ -233,9 +235,15 @@ class CourseOutlineViewModel(
             } catch (e: Exception) {
                 _uiState.value = CourseOutlineUIState.Error
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    )
                 }
             }
         }
@@ -284,9 +292,17 @@ class CourseOutlineViewModel(
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
+                        )
+                    )
                 }
                 onResetDates(false)
             }

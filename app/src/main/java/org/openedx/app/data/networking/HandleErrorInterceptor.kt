@@ -2,11 +2,11 @@ package org.openedx.app.data.networking
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
-import org.openedx.core.data.model.ErrorResponse
-import org.openedx.core.system.EdxError
 import okhttp3.Interceptor
 import okhttp3.Response
 import okio.IOException
+import org.openedx.core.data.model.ErrorResponse
+import org.openedx.core.system.EdxError
 
 class HandleErrorInterceptor(
     private val gson: Gson
@@ -25,9 +25,11 @@ class HandleErrorInterceptor(
                         ERROR_INVALID_GRANT -> {
                             throw EdxError.InvalidGrantException()
                         }
+
                         ERROR_USER_NOT_ACTIVE -> {
                             throw EdxError.UserNotActiveException()
                         }
+
                         else -> {
                             return response
                         }

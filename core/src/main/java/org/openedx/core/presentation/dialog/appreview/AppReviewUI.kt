@@ -333,7 +333,7 @@ fun RatingBar(
             }
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
-                    rating.intValue = round(offset.x / maxXValue * stars + 0.8f).toInt()
+                    rating.intValue = round(x = offset.x / maxXValue * stars + 0.8f).toInt()
                 }
             },
         horizontalArrangement = Arrangement.Center

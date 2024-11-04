@@ -195,7 +195,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         super.onDestroyView()
     }
 
-
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onDestroy() {
         releasePlayer()

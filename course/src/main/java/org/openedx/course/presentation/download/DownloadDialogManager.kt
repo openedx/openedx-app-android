@@ -34,31 +34,43 @@ class DownloadDialogManager(
             uiState.collect { state ->
                 val dialog = when {
                     state.isDownloadFailed -> DownloadErrorDialogFragment.newInstance(
-                        dialogType = DownloadErrorDialogType.DOWNLOAD_FAILED, uiState = state
-                    )
-
-                    state.isAllBlocksDownloaded -> DownloadConfirmDialogFragment.newInstance(
-                        dialogType = DownloadConfirmDialogType.REMOVE, uiState = state
-                    )
-
-                    !networkConnection.isOnline() -> DownloadErrorDialogFragment.newInstance(
-                        dialogType = DownloadErrorDialogType.NO_CONNECTION, uiState = state
-                    )
-
-                    StorageManager.getFreeStorage() < state.sizeSum * DOWNLOAD_SIZE_FACTOR -> DownloadStorageErrorDialogFragment.newInstance(
+                        dialogType = DownloadErrorDialogType.DOWNLOAD_FAILED,
                         uiState = state
                     )
 
-                    corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> DownloadErrorDialogFragment.newInstance(
-                        dialogType = DownloadErrorDialogType.WIFI_REQUIRED, uiState = state
+                    state.isAllBlocksDownloaded -> DownloadConfirmDialogFragment.newInstance(
+                        dialogType = DownloadConfirmDialogType.REMOVE,
+                        uiState = state
                     )
 
-                    !corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> DownloadConfirmDialogFragment.newInstance(
-                        dialogType = DownloadConfirmDialogType.DOWNLOAD_ON_CELLULAR, uiState = state
+                    !networkConnection.isOnline() -> DownloadErrorDialogFragment.newInstance(
+                        dialogType = DownloadErrorDialogType.NO_CONNECTION,
+                        uiState = state
                     )
+
+                    StorageManager.getFreeStorage() < state.sizeSum * DOWNLOAD_SIZE_FACTOR -> {
+                        DownloadStorageErrorDialogFragment.newInstance(
+                            uiState = state
+                        )
+                    }
+
+                    corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> {
+                        DownloadErrorDialogFragment.newInstance(
+                            dialogType = DownloadErrorDialogType.WIFI_REQUIRED,
+                            uiState = state
+                        )
+                    }
+
+                    !corePreferences.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected() -> {
+                        DownloadConfirmDialogFragment.newInstance(
+                            dialogType = DownloadConfirmDialogType.DOWNLOAD_ON_CELLULAR,
+                            uiState = state
+                        )
+                    }
 
                     state.sizeSum >= MAX_CELLULAR_SIZE -> DownloadConfirmDialogFragment.newInstance(
-                        dialogType = DownloadConfirmDialogType.CONFIRM, uiState = state
+                        dialogType = DownloadConfirmDialogType.CONFIRM,
+                        uiState = state
                     )
 
                     else -> null

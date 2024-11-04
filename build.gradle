@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.edx.builder.ConfigHelper
 
 import java.util.regex.Matcher
@@ -8,7 +9,7 @@ buildscript {
         //Depends on versions in OEXFoundation
         kotlin_version = '2.0.0'
         room_version = '2.6.1'
-        detekt_version = '1.23.3'
+        detekt_version = '1.23.7'
     }
 }
 
@@ -71,6 +72,7 @@ tasks.register('generateMockedRawFile') {
 
 def projectSource = file(projectDir)
 def configFile = files("$rootDir/config/detekt.yml")
+def basePathFile = rootProject.projectDir.absolutePath
 def kotlinFiles = "**/*.kt"
 def resourceFiles = "**/resources/**"
 def buildFiles = "**/build/**"
@@ -88,11 +90,13 @@ tasks.register("detektAll", Detekt) {
     setSource(projectSource)
     config.setFrom(configFile)
     include(kotlinFiles)
+    basePath(basePathFile)
     exclude(resourceFiles, buildFiles)
     reports {
-        html.enabled = true
-        xml.enabled = true
-        txt.enabled = false
+        html.enabled(true)
+        xml.enabled(true)
+        txt.enabled(false)
+        sarif.enabled(true)
     }
 }
 

@@ -46,6 +46,8 @@ import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.presentation.global.InsetHolder
 
+const val KEYBOARD_VISIBILITY_THRESHOLD = 0.15f
+
 inline val isPreview: Boolean
     @ReadOnlyComposable
     @Composable
@@ -107,7 +109,8 @@ fun Modifier.displayCutoutForLandscape(): Modifier = composed {
 inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier = composed {
     this then Modifier.clickable(
         indication = null,
-        interactionSource = remember { MutableInteractionSource() }) {
+        interactionSource = remember { MutableInteractionSource() }
+    ) {
         onClick()
     }
 }
@@ -167,7 +170,7 @@ fun isImeVisibleState(): State<Boolean> {
             view.getWindowVisibleDisplayFrame(rect)
             val screenHeight = view.rootView.height
             val keypadHeight = screenHeight - rect.bottom
-            keyboardState.value = keypadHeight > screenHeight * 0.15
+            keyboardState.value = keypadHeight > screenHeight * KEYBOARD_VISIBILITY_THRESHOLD
         }
         view.viewTreeObserver.addOnGlobalLayoutListener(onGlobalListener)
 

@@ -137,6 +137,7 @@ import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
+import org.openedx.profile.presentation.edit.EditProfileFragment.Companion.LEAVE_PROFILE_WIDTH_FACTOR
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -248,31 +249,39 @@ class EditProfileFragment : Fragment() {
             MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
         }
         val rotatedBitmap = Bitmap.createBitmap(
-            originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true
+            originalBitmap,
+            0,
+            0,
+            originalBitmap.width,
+            originalBitmap.height,
+            matrix,
+            true
         )
         val newFile = File.createTempFile(
-            "Image_${System.currentTimeMillis()}", ".jpg",
+            "Image_${System.currentTimeMillis()}",
+            ".jpg",
             requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         )
 
-        val ratio: Float = rotatedBitmap.width.toFloat() / 500
+        val ratio: Float = rotatedBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
         val newBitmap = Bitmap.createScaledBitmap(
             rotatedBitmap,
-            500,
+            TARGET_IMAGE_WIDTH,
             (rotatedBitmap.height.toFloat() / ratio).toInt(),
             false
         )
         val bos = ByteArrayOutputStream()
-        newBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bos)
+        newBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bos)
         val bitmapData = bos.toByteArray()
 
         val fos = FileOutputStream(newFile)
         fos.write(bitmapData)
         fos.flush()
         fos.close()
-        //TODO: get applicationId instead of packageName
+        // TODO: get applicationId instead of packageName
         return FileProvider.getUriForFile(
-            requireContext(), requireContext().packageName + ".fileprovider",
+            requireContext(),
+            requireContext().packageName + ".fileprovider",
             newFile
         )!!
     }
@@ -280,27 +289,34 @@ class EditProfileFragment : Fragment() {
     private fun getImageOrientation(uri: Uri): Int {
         var rotation = 0
         val exif = ExifInterface(requireActivity().contentResolver.openInputStream(uri)!!)
-        when (exif.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_NORMAL
-        )) {
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotation = 270
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotation = 180
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotation = 90
+        when (
+            exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+        ) {
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotation = ORIENTATION_ROTATE_270
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotation = ORIENTATION_ROTATE_180
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotation = ORIENTATION_ROTATE_90
         }
         return rotation
     }
 
-
     companion object {
         private const val ARG_ACCOUNT = "argAccount"
+        const val LEAVE_PROFILE_WIDTH_FACTOR = 0.7f
+        private const val ORIENTATION_ROTATE_270 = 270
+        private const val ORIENTATION_ROTATE_180 = 180
+        private const val ORIENTATION_ROTATE_90 = 90
+        private const val IMAGE_QUALITY = 90
+        private const val TARGET_IMAGE_WIDTH = 500
+
         fun newInstance(account: Account): EditProfileFragment {
             val fragment = EditProfileFragment()
             fragment.arguments = bundleOf(ARG_ACCOUNT to account)
             return fragment
         }
     }
-
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -358,13 +374,15 @@ private fun EditProfileScreen(
         )
     }
 
-    val saveButtonEnabled = !(uiState.account.yearOfBirth.toString() == mapFields[YEAR_OF_BIRTH]
-            && uiState.account.languageProficiencies == mapFields[LANGUAGE]
-            && uiState.account.country == mapFields[COUNTRY]
-            && uiState.account.bio == mapFields[BIO]
-            && selectedImageUri == null
-            && !isImageDeleted
-            && uiState.isLimited == uiState.account.isLimited())
+    val saveButtonEnabled = !(
+            uiState.account.yearOfBirth.toString() == mapFields[YEAR_OF_BIRTH] &&
+                    uiState.account.languageProficiencies == mapFields[LANGUAGE] &&
+                    uiState.account.country == mapFields[COUNTRY] &&
+                    uiState.account.bio == mapFields[BIO] &&
+                    selectedImageUri == null &&
+                    !isImageDeleted &&
+                    uiState.isLimited == uiState.account.isLimited()
+            )
     onDataChanged(saveButtonEnabled)
 
     val serverFieldName = rememberSaveable {
@@ -485,8 +503,8 @@ private fun EditProfileScreen(
                         searchValue = TextFieldValue(it)
                     }
                 )
-            }) {
-
+            }
+        ) {
             HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
             if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
@@ -572,7 +590,6 @@ private fun EditProfileScreen(
                                     onSaveClick(mapFields.toMap())
                                 }
                             )
-
                         }
                     }
                 }
@@ -595,7 +612,13 @@ private fun EditProfileScreen(
                         ) {
                             Text(
                                 modifier = Modifier.testTag("txt_edit_profile_type_label"),
-                                text = stringResource(if (uiState.isLimited) R.string.profile_limited_profile else R.string.profile_full_profile),
+                                text = stringResource(
+                                    if (uiState.isLimited) {
+                                        R.string.profile_limited_profile
+                                    } else {
+                                        R.string.profile_full_profile
+                                    }
+                                ),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.titleSmall
                             )
@@ -622,7 +645,6 @@ private fun EditProfileScreen(
                                         .padding(2.dp)
                                         .size(100.dp)
                                         .clip(CircleShape)
-
                                         .noRippleClickable {
                                             isOpenChangeImageDialogState = true
                                             if (!uiState.account.isOlderThanMinAge()) {
@@ -706,8 +728,9 @@ private fun EditProfileScreen(
                                     coroutine.launch {
                                         val index = expandedList.indexOfFirst { option ->
                                             if (serverFieldName.value == LANGUAGE) {
-                                                option.value == (mapFields[serverFieldName.value] as List<LanguageProficiency>)
-                                                    .getOrNull(0)?.code
+                                                option.value ==
+                                                        (mapFields[serverFieldName.value] as List<LanguageProficiency>)
+                                                            .getOrNull(0)?.code
                                             } else {
                                                 option.value == mapFields[serverFieldName.value]
                                             }
@@ -737,7 +760,6 @@ private fun EditProfileScreen(
                         }
                     }
                 }
-
             }
         }
     }
@@ -876,7 +898,6 @@ private fun ChangeImageDialog(
                 Spacer(Modifier.height(20.dp))
             }
         }
-
     }
 }
 
@@ -892,8 +913,12 @@ private fun ProfileFields(
     val languageProficiency = (mapFields[LANGUAGE] as List<LanguageProficiency>)
     val lang = if (languageProficiency.isNotEmpty()) {
         LocaleUtils.getLanguageByLanguageCode(languageProficiency[0].code)
-    } else ""
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    } else {
+        ""
+    }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
         SelectableField(
             name = stringResource(id = R.string.profile_year),
             initialValue = mapFields[YEAR_OF_BIRTH].toString(),
@@ -1140,7 +1165,8 @@ private fun LeaveProfile(
                     onClick = onDismissRequest
                 )
             }
-        })
+        }
+    )
 }
 
 @Composable
@@ -1160,7 +1186,7 @@ private fun LeaveProfileLandscape(
         content = {
             Card(
                 modifier = Modifier
-                    .width(screenWidth * 0.7f)
+                    .width(screenWidth * LEAVE_PROFILE_WIDTH_FACTOR)
                     .clip(MaterialTheme.appShapes.courseImageShape)
                     .semantics { testTagsAsResourceId = true },
                 backgroundColor = MaterialTheme.appColors.background,
@@ -1241,7 +1267,8 @@ private fun LeaveProfileLandscape(
                     }
                 }
             }
-        })
+        }
+    )
 }
 
 @Preview
@@ -1328,7 +1355,6 @@ private fun EditProfileScreenTabletPreview() {
         )
     }
 }
-
 
 private val mockAccount = Account(
     username = "thom84",

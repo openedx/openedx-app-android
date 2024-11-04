@@ -25,8 +25,10 @@ class DashboardRepository(
         preferencesManager.appConfig = result.configs.mapToDomain()
 
         if (page == 1) dao.clearCachedData()
-        dao.insertEnrolledCourseEntity(*result.enrollments.results.map { it.mapToRoomEntity() }
-            .toTypedArray())
+        dao.insertEnrolledCourseEntity(
+            *result.enrollments.results.map { it.mapToRoomEntity() }
+                .toTypedArray()
+        )
         return result.enrollments.mapToDomain()
     }
 
@@ -57,8 +59,11 @@ class DashboardRepository(
         preferencesManager.appConfig = result.configs.mapToDomain()
 
         dao.clearCachedData()
-        dao.insertEnrolledCourseEntity(*result.enrollments.results.map { it.mapToRoomEntity() }
-            .toTypedArray())
+        dao.insertEnrolledCourseEntity(
+            *result.enrollments.results
+                .map { it.mapToRoomEntity() }
+                .toTypedArray()
+        )
         return result.enrollments.mapToDomain()
     }
 }

@@ -124,11 +124,11 @@ class DiscussionCommentsViewModelTest {
         mapOf()
     )
 
-    //endregion
-
+    // endregion
 
     private val comments = listOf(
-        mockComment.copy(id = "0"), mockComment.copy(id = "1")
+        mockComment.copy(id = "0"),
+        mockComment.copy(id = "1")
     )
 
     @Before
@@ -136,7 +136,9 @@ class DiscussionCommentsViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added) } returns commentAddedSuccessfully
+        every {
+            resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+        } returns commentAddedSuccessfully
     }
 
     @After
@@ -283,7 +285,6 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.setThreadRead(any()) }
 
-
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
@@ -305,7 +306,6 @@ class DiscussionCommentsViewModelTest {
             notifier,
             mockThread
         )
-
 
         coEvery { interactor.getThreadQuestionComments(any(), any(), any()) } returns CommentsData(
             comments,
@@ -373,7 +373,6 @@ class DiscussionCommentsViewModelTest {
             notifier,
             mockThread
         )
-
 
         coEvery { interactor.setThreadVoted(any(), any()) } throws UnknownHostException()
 
@@ -461,7 +460,6 @@ class DiscussionCommentsViewModelTest {
                 mockThread
             )
 
-
         coEvery { interactor.setCommentFlagged(any(), any()) } throws UnknownHostException()
 
         viewModel.setCommentReported("", true)
@@ -490,7 +488,6 @@ class DiscussionCommentsViewModelTest {
                 notifier,
                 mockThread
             )
-
 
         coEvery { interactor.setCommentFlagged(any(), any()) } throws Exception()
 
@@ -530,7 +527,6 @@ class DiscussionCommentsViewModelTest {
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
-
 
     @Test
     fun `setCommentUpvoted no internet connection exception`() = runTest {
@@ -698,7 +694,6 @@ class DiscussionCommentsViewModelTest {
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
-
     @Test
     fun `setThreadFollowed no internet connection exception`() = runTest {
         coEvery { interactor.getThreadComments(any(), any()) } returns CommentsData(
@@ -742,7 +737,6 @@ class DiscussionCommentsViewModelTest {
             notifier,
             mockThread
         )
-
 
         coEvery { interactor.setThreadFollowed(any(), any()) } throws Exception()
 
@@ -814,9 +808,7 @@ class DiscussionCommentsViewModelTest {
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
-        assert(viewModel.scrollToBottom.value == true)
     }
-
 
     @Test
     fun `DiscussionCommentAdded notifier test all comments not loaded`() = runTest {
@@ -850,7 +842,6 @@ class DiscussionCommentsViewModelTest {
         val message = viewModel.uiMessage.value as? UIMessage.ToastMessage
         assert(commentAddedSuccessfully == message?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
-        assert(viewModel.scrollToBottom.value == null)
     }
 
     @Test
@@ -910,7 +901,6 @@ class DiscussionCommentsViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(noInternet, message?.message)
-
     }
 
     @Test
@@ -937,7 +927,6 @@ class DiscussionCommentsViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(somethingWrong, message?.message)
-
     }
 
     @Test
@@ -987,7 +976,6 @@ class DiscussionCommentsViewModelTest {
 
         viewModel.createComment("")
         advanceUntilIdle()
-
     }
 
     @Test
@@ -1037,5 +1025,4 @@ class DiscussionCommentsViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
-
 }

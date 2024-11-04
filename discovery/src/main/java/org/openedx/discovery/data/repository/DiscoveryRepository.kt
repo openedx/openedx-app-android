@@ -9,7 +9,6 @@ import org.openedx.discovery.data.storage.DiscoveryDao
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.domain.model.CourseList
 
-
 class DiscoveryRepository(
     private val api: DiscoveryApi,
     private val dao: DiscoveryDao,

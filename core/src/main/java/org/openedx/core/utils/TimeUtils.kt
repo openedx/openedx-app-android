@@ -13,8 +13,9 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
+import kotlin.math.absoluteValue
 
+@Suppress("MagicNumber")
 object TimeUtils {
 
     private const val FORMAT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'"
@@ -101,9 +102,13 @@ object TimeUtils {
 
     fun iso8601ToDateWithTime(context: Context, text: String): String {
         return try {
-            val courseDateFormat = SimpleDateFormat(FORMAT_ISO_8601, Locale.getDefault())
+            val courseDateFormat = SimpleDateFormat(
+                FORMAT_ISO_8601,
+                Locale.getDefault()
+            )
             val applicationDateFormat = SimpleDateFormat(
-                context.getString(R.string.core_full_date_with_time), Locale.getDefault()
+                context.getString(R.string.core_full_date_with_time),
+                Locale.getDefault()
             )
             applicationDateFormat.format(courseDateFormat.parse(text)!!)
         } catch (e: Exception) {
@@ -114,7 +119,8 @@ object TimeUtils {
 
     private fun dateToCourseDate(resourceManager: ResourceManager, date: Date?): String {
         return formatDate(
-            format = resourceManager.getString(R.string.core_date_format_MMM_dd_yyyy), date = date
+            format = resourceManager.getString(R.string.core_date_format_MMM_dd_yyyy),
+            date = date
         )
     }
 
@@ -147,83 +153,146 @@ object TimeUtils {
         startType: String,
         startDisplay: String
     ): String {
-        val formattedDate: String
         val resourceManager = ResourceManager(context)
 
-        if (isDatePassed(today, start)) {
-            if (expiry != null) {
-                val dayDifferenceInMillis = if (today.after(expiry)) {
-                    today.time - expiry.time
-                } else {
-                    expiry.time - today.time
-                }
+        return when {
+            isDatePassed(today, start) -> handleDatePassedToday(
+                resourceManager,
+                today,
+                expiry,
+                start,
+                end,
+                startType,
+                startDisplay
+            )
 
-                if (isDatePassed(today, expiry)) {
-                    formattedDate = if (dayDifferenceInMillis > SEVEN_DAYS_IN_MILLIS) {
-                        resourceManager.getString(
-                            R.string.core_label_expired_on,
-                            dateToCourseDate(resourceManager, expiry)
-                        )
-                    } else {
-                        val timeSpan = DateUtils.getRelativeTimeSpanString(
-                            expiry.time,
-                            today.time,
-                            DateUtils.SECOND_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_RELATIVE
-                        ).toString()
-                        resourceManager.getString(R.string.core_label_access_expired, timeSpan)
-                    }
-                } else {
-                    formattedDate = if (dayDifferenceInMillis > SEVEN_DAYS_IN_MILLIS) {
-                        resourceManager.getString(
-                            R.string.core_label_expires,
-                            dateToCourseDate(resourceManager, expiry)
-                        )
-                    } else {
-                        val timeSpan = DateUtils.getRelativeTimeSpanString(
-                            expiry.time,
-                            today.time,
-                            DateUtils.SECOND_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_RELATIVE
-                        ).toString()
-                        resourceManager.getString(R.string.core_label_expires, timeSpan)
-                    }
-                }
-            } else {
-                formattedDate = if (end == null) {
-                    if (startType == StartType.TIMESTAMP.type && start != null) {
-                        resourceManager.getString(
-                            R.string.core_label_starting, dateToCourseDate(resourceManager, start)
-                        )
-                    } else if (startType == StartType.STRING.type && start != null) {
-                        resourceManager.getString(R.string.core_label_starting, startDisplay)
-                    } else {
-                        val soon = resourceManager.getString(R.string.core_assessment_soon)
-                        resourceManager.getString(R.string.core_label_starting, soon)
-                    }
-                } else if (isDatePassed(today, end)) {
+            else -> handleDateNotPassedToday(resourceManager, start, startType, startDisplay)
+        }
+    }
+
+    private fun handleDatePassedToday(
+        resourceManager: ResourceManager,
+        today: Date,
+        expiry: Date?,
+        start: Date?,
+        end: Date?,
+        startType: String,
+        startDisplay: String
+    ): String {
+        return when {
+            expiry != null -> handleExpiry(resourceManager, today, expiry)
+            else -> handleNoExpiry(resourceManager, today, start, end, startType, startDisplay)
+        }
+    }
+
+    private fun handleExpiry(resourceManager: ResourceManager, today: Date, expiry: Date): String {
+        val dayDifferenceInMillis = (today.time - expiry.time).absoluteValue
+
+        return when {
+            isDatePassed(today, expiry) -> {
+                if (dayDifferenceInMillis > SEVEN_DAYS_IN_MILLIS) {
                     resourceManager.getString(
-                        R.string.core_label_ended, dateToCourseDate(resourceManager, end)
+                        R.string.core_label_expired_on,
+                        dateToCourseDate(resourceManager, expiry)
                     )
                 } else {
-                    resourceManager.getString(
-                        R.string.core_label_ends, dateToCourseDate(resourceManager, end)
-                    )
+                    val timeSpan = DateUtils.getRelativeTimeSpanString(
+                        expiry.time,
+                        today.time,
+                        DateUtils.SECOND_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE
+                    ).toString()
+                    resourceManager.getString(R.string.core_label_access_expired, timeSpan)
                 }
             }
-        } else {
-            formattedDate = if (startType == StartType.TIMESTAMP.type && start != null) {
-                resourceManager.getString(
-                    R.string.core_label_starting, dateToCourseDate(resourceManager, start)
-                )
-            } else if (startType == StartType.STRING.type && start != null) {
-                resourceManager.getString(R.string.core_label_starting, startDisplay)
-            } else {
+
+            else -> {
+                if (dayDifferenceInMillis > SEVEN_DAYS_IN_MILLIS) {
+                    resourceManager.getString(
+                        R.string.core_label_expires,
+                        dateToCourseDate(resourceManager, expiry)
+                    )
+                } else {
+                    val timeSpan = DateUtils.getRelativeTimeSpanString(
+                        expiry.time,
+                        today.time,
+                        DateUtils.SECOND_IN_MILLIS,
+                        DateUtils.FORMAT_ABBREV_RELATIVE
+                    ).toString()
+                    resourceManager.getString(R.string.core_label_expires, timeSpan)
+                }
+            }
+        }
+    }
+
+    private fun handleNoExpiry(
+        resourceManager: ResourceManager,
+        today: Date,
+        start: Date?,
+        end: Date?,
+        startType: String,
+        startDisplay: String
+    ): String {
+        return when {
+            end == null -> handleNoEndDate(resourceManager, start, startType, startDisplay)
+            isDatePassed(today, end) -> resourceManager.getString(
+                R.string.core_label_ended,
+                dateToCourseDate(resourceManager, end)
+            )
+
+            else -> resourceManager.getString(
+                R.string.core_label_ends,
+                dateToCourseDate(resourceManager, end)
+            )
+        }
+    }
+
+    private fun handleDateNotPassedToday(
+        resourceManager: ResourceManager,
+        start: Date?,
+        startType: String,
+        startDisplay: String
+    ): String {
+        return when {
+            startType == StartType.TIMESTAMP.type && start != null -> resourceManager.getString(
+                R.string.core_label_starting,
+                dateToCourseDate(resourceManager, start)
+            )
+
+            startType == StartType.STRING.type && start != null -> resourceManager.getString(
+                R.string.core_label_starting,
+                startDisplay
+            )
+
+            else -> {
                 val soon = resourceManager.getString(R.string.core_assessment_soon)
                 resourceManager.getString(R.string.core_label_starting, soon)
             }
         }
-        return formattedDate
+    }
+
+    private fun handleNoEndDate(
+        resourceManager: ResourceManager,
+        start: Date?,
+        startType: String,
+        startDisplay: String
+    ): String {
+        return when {
+            startType == StartType.TIMESTAMP.type && start != null -> resourceManager.getString(
+                R.string.core_label_starting,
+                dateToCourseDate(resourceManager, start)
+            )
+
+            startType == StartType.STRING.type && start != null -> resourceManager.getString(
+                R.string.core_label_starting,
+                startDisplay
+            )
+
+            else -> {
+                val soon = resourceManager.getString(R.string.core_assessment_soon)
+                resourceManager.getString(R.string.core_label_starting, soon)
+            }
+        }
     }
 
     /**

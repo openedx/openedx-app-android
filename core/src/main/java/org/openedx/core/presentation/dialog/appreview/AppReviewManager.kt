@@ -18,9 +18,11 @@ class AppReviewManager(
             val currentVersionName = reviewPreferences.formatVersionName(appData.versionName)
             // Check is app wasn't positive rated AND 2 minor OR 1 major app versions passed since the last review
             if (
-                !reviewPreferences.wasPositiveRated
-                && (currentVersionName.minorVersion - 2 >= reviewPreferences.lastReviewVersion.minorVersion
-                || currentVersionName.majorVersion - 1 >= reviewPreferences.lastReviewVersion.majorVersion)
+                !reviewPreferences.wasPositiveRated &&
+                (
+                        currentVersionName.minorVersion - 2 >= reviewPreferences.lastReviewVersion.minorVersion ||
+                                currentVersionName.majorVersion - 1 >= reviewPreferences.lastReviewVersion.majorVersion
+                        )
             ) {
                 val dialog = RateDialogFragment.newInstance()
                 dialog.show(

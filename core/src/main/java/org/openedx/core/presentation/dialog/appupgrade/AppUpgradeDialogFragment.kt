@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.DialogFragment
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendDialog
-import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.AppUpdateState
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendDialog
+import org.openedx.core.ui.theme.OpenEdXTheme
 
 class AppUpgradeDialogFragment : DialogFragment() {
 
@@ -48,5 +48,4 @@ class AppUpgradeDialogFragment : DialogFragment() {
             return AppUpgradeDialogFragment()
         }
     }
-
 }

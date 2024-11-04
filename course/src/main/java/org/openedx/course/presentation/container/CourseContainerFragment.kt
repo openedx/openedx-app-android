@@ -169,7 +169,6 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
                     viewModel.fetchCourseDetails()
                 }
             snackBar?.show()
-
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.showProgress.collect {
@@ -512,7 +511,8 @@ private fun DashboardPager(
                             viewModel.courseId,
                             HandoutsType.Announcements
                         )
-                    })
+                    }
+                )
             }
         }
     }
@@ -552,7 +552,6 @@ private fun CourseAccessErrorView(
 
         else -> {}
     }
-
 
     Box(
         modifier = Modifier

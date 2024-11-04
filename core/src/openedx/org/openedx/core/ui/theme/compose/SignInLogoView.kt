@@ -19,7 +19,7 @@ fun SignInLogoView() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.2f),
+            .fillMaxHeight(fraction = 0.2f),
         contentAlignment = Alignment.Center
     ) {
         Image(

@@ -90,7 +90,6 @@ class VideoViewModelTest {
                 any()
             )
         }
-
     }
 
     @Test

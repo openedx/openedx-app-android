@@ -94,113 +94,15 @@ class HtmlUnitFragment : Fragment() {
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            OpenEdXTheme {
-                val windowSize = rememberWindowSize()
-
-                var hasInternetConnection by remember {
-                    mutableStateOf(viewModel.isOnline)
-                }
-
-                val url by rememberSaveable {
-                    mutableStateOf(
-                        if (!hasInternetConnection && offlineUrl.isNotEmpty()) {
-                            offlineUrl
-                        } else {
-                            blockUrl
-                        }
-                    )
-                }
-
-                val injectJSList by viewModel.injectJSList.collectAsState()
-                val uiState by viewModel.uiState.collectAsState()
-
-                val configuration = LocalConfiguration.current
-
-                val bottomPadding =
-                    if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        72.dp
-                    } else {
-                        0.dp
-                    }
-
-                val border = if (!isSystemInDarkTheme() && !viewModel.isCourseUnitProgressEnabled) {
-                    Modifier.roundBorderWithoutBottom(
-                        borderWidth = 2.dp,
-                        cornerRadius = 30.dp
-                    )
-                } else {
-                    Modifier
-                }
-
-                Surface(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-                    color = Color.White
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = bottomPadding)
-                            .background(Color.White)
-                            .then(border),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        if (uiState is HtmlUnitUIState.Initialization) return@Box
-                        if ((uiState is HtmlUnitUIState.Error).not()) {
-                            if (hasInternetConnection || fromDownloadedContent) {
-                                HTMLContentView(
-                                    uiState = uiState,
-                                    windowSize = windowSize,
-                                    url = url,
-                                    cookieManager = viewModel.cookieManager,
-                                    apiHostURL = viewModel.apiHostURL,
-                                    isLoading = uiState is HtmlUnitUIState.Loading,
-                                    injectJSList = injectJSList,
-                                    onCompletionSet = {
-                                        viewModel.notifyCompletionSet()
-                                    },
-                                    onWebPageLoading = {
-                                        viewModel.onWebPageLoading()
-                                    },
-                                    onWebPageLoaded = {
-                                        if ((uiState is HtmlUnitUIState.Error).not()) {
-                                            viewModel.onWebPageLoaded()
-                                        }
-                                        if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
-                                    },
-                                    onWebPageLoadError = {
-                                        if (!fromDownloadedContent) viewModel.onWebPageLoadError()
-                                    },
-                                    saveXBlockProgress = { jsonProgress ->
-                                        viewModel.saveXBlockProgress(jsonProgress)
-                                    },
-                                )
-                            } else {
-                                viewModel.onWebPageLoadError()
-                            }
-                        } else {
-                            val errorType = (uiState as HtmlUnitUIState.Error).errorType
-                            FullScreenErrorView(errorType = errorType) {
-                                hasInternetConnection = viewModel.isOnline
-                                viewModel.onWebPageLoading()
-                            }
-                        }
-                        if (uiState is HtmlUnitUIState.Loading && hasInternetConnection) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .zIndex(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                            }
-                        }
-                    }
-                }
-            }
+            HtmlUnitView(
+                viewModel = viewModel,
+                blockUrl = blockUrl,
+                offlineUrl = offlineUrl,
+                fromDownloadedContent = fromDownloadedContent,
+                isFragmentAdded = isAdded
+            )
         }
     }
-
 
     companion object {
         private const val ARG_BLOCK_ID = "blockId"
@@ -224,6 +126,121 @@ class HtmlUnitFragment : Fragment() {
                 ARG_COURSE_ID to courseId
             )
             return fragment
+        }
+    }
+}
+
+@Composable
+fun HtmlUnitView(
+    viewModel: HtmlUnitViewModel,
+    blockUrl: String,
+    offlineUrl: String,
+    fromDownloadedContent: Boolean,
+    isFragmentAdded: Boolean,
+) {
+    OpenEdXTheme {
+        val context = LocalContext.current
+        val windowSize = rememberWindowSize()
+
+        var hasInternetConnection by remember {
+            mutableStateOf(viewModel.isOnline)
+        }
+
+        val url by rememberSaveable {
+            mutableStateOf(
+                if (!hasInternetConnection && offlineUrl.isNotEmpty()) {
+                    offlineUrl
+                } else {
+                    blockUrl
+                }
+            )
+        }
+
+        val injectJSList by viewModel.injectJSList.collectAsState()
+        val uiState by viewModel.uiState.collectAsState()
+
+        val configuration = LocalConfiguration.current
+
+        val bottomPadding =
+            if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                72.dp
+            } else {
+                0.dp
+            }
+
+        val border = if (!isSystemInDarkTheme() && !viewModel.isCourseUnitProgressEnabled) {
+            Modifier.roundBorderWithoutBottom(
+                borderWidth = 2.dp,
+                cornerRadius = 30.dp
+            )
+        } else {
+            Modifier
+        }
+
+        Surface(
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+            color = Color.White
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = bottomPadding)
+                    .background(Color.White)
+                    .then(border),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                if (uiState is HtmlUnitUIState.Initialization) return@Box
+                if ((uiState is HtmlUnitUIState.Error).not()) {
+                    if (hasInternetConnection || fromDownloadedContent) {
+                        HTMLContentView(
+                            uiState = uiState,
+                            windowSize = windowSize,
+                            url = url,
+                            cookieManager = viewModel.cookieManager,
+                            apiHostURL = viewModel.apiHostURL,
+                            isLoading = uiState is HtmlUnitUIState.Loading,
+                            injectJSList = injectJSList,
+                            onCompletionSet = {
+                                viewModel.notifyCompletionSet()
+                            },
+                            onWebPageLoading = {
+                                viewModel.onWebPageLoading()
+                            },
+                            onWebPageLoaded = {
+                                if ((uiState is HtmlUnitUIState.Error).not()) {
+                                    viewModel.onWebPageLoaded()
+                                }
+                                if (isFragmentAdded) viewModel.setWebPageLoaded(context.assets)
+                            },
+                            onWebPageLoadError = {
+                                if (!fromDownloadedContent) viewModel.onWebPageLoadError()
+                            },
+                            saveXBlockProgress = { jsonProgress ->
+                                viewModel.saveXBlockProgress(jsonProgress)
+                            },
+                        )
+                    } else {
+                        viewModel.onWebPageLoadError()
+                    }
+                } else {
+                    val errorType = (uiState as HtmlUnitUIState.Error).errorType
+                    FullScreenErrorView(errorType = errorType) {
+                        hasInternetConnection = viewModel.isOnline
+                        viewModel.onWebPageLoading()
+                    }
+                }
+                if (uiState is HtmlUnitUIState.Loading && hasInternetConnection) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zIndex(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                    }
+                }
+            }
         }
     }
 }
@@ -264,13 +281,16 @@ private fun HTMLContentView(
             .background(MaterialTheme.appColors.background),
         factory = {
             WebView(context).apply {
-                addJavascriptInterface(object {
-                    @Suppress("unused")
-                    @JavascriptInterface
-                    fun completionSet() {
-                        onCompletionSet()
-                    }
-                }, "callback")
+                addJavascriptInterface(
+                    object {
+                        @Suppress("unused")
+                        @JavascriptInterface
+                        fun completionSet() {
+                            onCompletionSet()
+                        }
+                    },
+                    "callback"
+                )
                 addJavascriptInterface(
                     JSBridge(
                         postMessageCallback = {
@@ -301,8 +321,10 @@ private fun HTMLContentView(
                     ): Boolean {
                         val clickUrl = request?.url?.toString() ?: ""
                         return if (clickUrl.isNotEmpty() &&
-                            (clickUrl.startsWith("http://") ||
-                                    clickUrl.startsWith("https://"))
+                            (
+                                    clickUrl.startsWith("http://") ||
+                                            clickUrl.startsWith("https://")
+                                    )
                         ) {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                             true

@@ -232,7 +232,8 @@ abstract class BaseDownloadViewModel(
             buildMap {
                 put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
                 put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
-            })
+            }
+        )
     }
 
     private fun logSubsectionDeleteEvent(subsectionId: String, numberOfVideos: Int) {
@@ -241,7 +242,8 @@ abstract class BaseDownloadViewModel(
             buildMap {
                 put(CoreAnalyticsKey.BLOCK_ID.key, subsectionId)
                 put(CoreAnalyticsKey.NUMBER_OF_VIDEOS.key, numberOfVideos)
-            })
+            }
+        )
     }
 
     private fun logEvent(event: CoreAnalyticsEvent, param: Map<String, Any?> = emptyMap()) {

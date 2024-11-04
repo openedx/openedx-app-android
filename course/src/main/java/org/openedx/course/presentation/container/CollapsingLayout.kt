@@ -74,6 +74,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.presentation.rememberWindowSize
 import kotlin.math.roundToInt
 
+@Suppress("MagicNumber")
 @Composable
 internal fun CollapsingLayout(
     modifier: Modifier = Modifier,
@@ -187,8 +188,8 @@ internal fun CollapsingLayout(
                             val yEnd = change.position.y
                             val yDelta = yEnd - yStart
                             val scrollDown = yDelta > 0
-                            val collapsedOffset =
-                                -expandedTopHeight.floatValue - backgroundImageHeight.floatValue + collapsedTopHeight.floatValue
+                            val collapsedOffset = -expandedTopHeight.floatValue - backgroundImageHeight.floatValue +
+                                    collapsedTopHeight.floatValue
                             val expandedOffset = 0f
 
                             launch {
@@ -262,6 +263,7 @@ internal fun CollapsingLayout(
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun CollapsingLayoutTablet(
     localDensity: Density,
@@ -306,7 +308,11 @@ private fun CollapsingLayoutTablet(
                 modifier = Modifier
                     .background(MaterialTheme.appColors.surface)
                     .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight.value + navigationHeight.value).toDp() } + blurImagePadding)
+                    .height(
+                        with(localDensity) {
+                            (expandedTopHeight.value + navigationHeight.value).toDp() + blurImagePadding
+                        }
+                    )
                     .align(Alignment.Center)
             )
             Image(
@@ -362,7 +368,11 @@ private fun CollapsingLayoutTablet(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(with(localDensity) { (expandedTopHeight.value + navigationHeight.value).toDp() } + blurImagePadding)
+                .height(
+                    with(localDensity) {
+                        (expandedTopHeight.value + navigationHeight.value).toDp() + blurImagePadding
+                    }
+                )
                 .offset {
                     IntOffset(
                         x = 0,
@@ -402,7 +412,6 @@ private fun CollapsingLayoutTablet(
         contentDescription = null
     )
 
-
     Box(
         modifier = Modifier
             .offset {
@@ -437,6 +446,7 @@ private fun CollapsingLayoutTablet(
     )
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun CollapsingLayoutMobile(
     configuration: Configuration,
@@ -473,7 +483,11 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.surface)
                         .fillMaxWidth()
-                        .height(with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() } + blurImagePadding)
+                        .height(
+                            with(localDensity) {
+                                (collapsedTopHeight.value + navigationHeight.value).toDp() + blurImagePadding
+                            }
+                        )
                         .align(Alignment.Center)
                 )
                 Image(
@@ -490,7 +504,9 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
-                        .height(with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() } * 0.1f)
+                        .height(
+                            with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() } * 0.1f
+                        )
                         .align(Alignment.BottomCenter)
                 )
             }
@@ -549,7 +565,6 @@ private fun CollapsingLayoutMobile(
             )
         }
 
-
         Box(
             modifier = Modifier
                 .displayCutoutForLandscape()
@@ -595,7 +610,11 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.surface)
                         .fillMaxWidth()
-                        .height(with(localDensity) { (expandedTopHeight.value + navigationHeight.value + adaptiveBlurImagePadding).toDp() })
+                        .height(
+                            with(localDensity) {
+                                (expandedTopHeight.value + navigationHeight.value + adaptiveBlurImagePadding).toDp()
+                            }
+                        )
                         .align(Alignment.Center)
                 )
                 Image(
@@ -652,7 +671,11 @@ private fun CollapsingLayoutMobile(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight.value + navigationHeight.value).toDp() } + blurImagePadding)
+                    .height(
+                        with(localDensity) {
+                            (expandedTopHeight.value + navigationHeight.value).toDp() + blurImagePadding
+                        }
+                    )
                     .offset {
                         IntOffset(
                             x = 0,
@@ -720,7 +743,10 @@ private fun CollapsingLayoutMobile(
                 .offset {
                     IntOffset(
                         x = 0,
-                        y = (offset.value + backgroundImageHeight.value + expandedTopHeight.value - adaptiveImagePadding).roundToInt()
+                        y = (
+                                offset.value + backgroundImageHeight.value +
+                                        expandedTopHeight.value - adaptiveImagePadding
+                                ).roundToInt()
                     )
                 }
                 .onSizeChanged { size ->
@@ -729,8 +755,8 @@ private fun CollapsingLayoutMobile(
             content = navigation,
         )
 
-        val bodyPadding =
-            expandedTopHeight.value + offset.value + backgroundImageHeight.value + navigationHeight.value - blurImagePaddingPx * factor
+        val bodyPadding = expandedTopHeight.value + offset.value + backgroundImageHeight.value +
+                navigationHeight.value - blurImagePaddingPx * factor
         val bodyModifier = if (isEnabled) {
             Modifier
                 .offset {

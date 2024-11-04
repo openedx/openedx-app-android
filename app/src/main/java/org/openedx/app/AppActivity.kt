@@ -220,15 +220,15 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
 
         val widthDp = metrics.bounds.width() / resources.displayMetrics.density
         val widthWindowSize = when {
-            widthDp < 600f -> WindowType.Compact
-            widthDp < 840f -> WindowType.Medium
+            widthDp < COMPACT_MAX_WIDTH -> WindowType.Compact
+            widthDp < MEDIUM_MAX_WIDTH -> WindowType.Medium
             else -> WindowType.Expanded
         }
 
         val heightDp = metrics.bounds.height() / resources.displayMetrics.density
         val heightWindowSize = when {
-            heightDp < 480f -> WindowType.Compact
-            heightDp < 900f -> WindowType.Medium
+            heightDp < COMPACT_MAX_HEIGHT -> WindowType.Compact
+            heightDp < MEDIUM_MAX_HEIGHT -> WindowType.Medium
             else -> WindowType.Expanded
         }
         _windowSize = WindowSize(widthWindowSize, heightWindowSize)
@@ -254,5 +254,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         const val CUTOUT_INSET = "cutoutInset"
         const val BRANCH_TAG = "Branch"
         const val BRANCH_FORCE_NEW_SESSION = "branch_force_new_session"
+
+        internal const val COMPACT_MAX_WIDTH = 600
+        internal const val MEDIUM_MAX_WIDTH = 840
+        internal const val COMPACT_MAX_HEIGHT = 480
+        internal const val MEDIUM_MAX_HEIGHT = 900
     }
 }

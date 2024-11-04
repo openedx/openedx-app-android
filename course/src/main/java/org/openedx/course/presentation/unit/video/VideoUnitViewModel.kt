@@ -98,7 +98,6 @@ open class VideoUnitViewModel(
         return ""
     }
 
-
     open fun markBlockCompleted(blockId: String, medium: String) {
         if (!isBlockAlreadyCompleted) {
             logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
@@ -111,6 +110,7 @@ open class VideoUnitViewModel(
                     )
                     notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     isBlockAlreadyCompleted = false
                 }
             }

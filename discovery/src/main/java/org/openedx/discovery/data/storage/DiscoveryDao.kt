@@ -24,5 +24,4 @@ interface DiscoveryDao {
 
     @Query("SELECT * FROM course_discovery_table")
     suspend fun readAllData(): List<CourseEntity>
-
 }

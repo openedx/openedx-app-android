@@ -1,5 +1,5 @@
 build:
-  maxIssues: 3000
+  maxIssues: 100
   weights:
     complexity: 2
     LongParameterList: 1
@@ -28,6 +28,7 @@ naming:
     active: true
     functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
+    ignoreAnnotated: [ 'Composable' ]
 
 style:
   active: true
@@ -35,20 +36,71 @@ style:
     active: true
     ignorePropertyDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
-    ignoreNumbers:
-      - '-1'
-      - '0'
-      - '1'
-      - '2'
-      - '100'
+    ignoreNumbers: [ '-1', '0', '1', '2', '10', '100', '90', '-90', '180', '1000', '400', '402', '401', '403', '404', '426', '500' ]
+    ignoreNamedArgument: true
+    ignoreEnums: true
   UnusedPrivateMember:
     active: true
     ignoreAnnotated:
       - 'Preview'
+  MaxLineLength:
+    active: false
+  ForbiddenComment:
+    active: false
+  ReturnCount:
+    active: true
+    max: 3
+  SerialVersionUIDInSerializableClass:
+    active: false
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 80
+    ignoreAnnotated: [ 'Composable' ]
+    ignoreFunction: [ 'onCreateView' ]
+  LargeClass:
+    active: false
+  LongParameterList:
+    active: true
+    functionThreshold: 15
+    constructorThreshold: 20
+    ignoreDataClasses: true
+    ignoreAnnotated: [ 'Composable' ]
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 30
+    thresholdInFiles: 30
+    thresholdInInterfaces: 30
+    ignoreAnnotatedFunctions: [ 'Composable' ]
+    ignoreOverridden: true
+    ignorePrivate: true
+  NestedBlockDepth:
+    active: true
+    threshold: 6
+  CyclomaticComplexMethod:
+    active: true
+    ignoreAnnotated: [ 'Composable' ]
+  ComplexCondition:
+    active: true
+    threshold: 6
 
 exceptions:
   active: true
   TooGenericExceptionCaught:
     active: false
   PrintStackTrace:
+    active: false
+  InstanceOfCheckForException:
+    active: false
+
+performance:
+  active: true
+  SpreadOperator:
+    active: false
+
+formatting:
+  active: true
+  Indentation:
     active: false

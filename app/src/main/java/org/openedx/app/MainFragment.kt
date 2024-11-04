@@ -14,7 +14,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.FragmentMainBinding
 import org.openedx.app.deeplink.HomeTab
 import org.openedx.core.adapter.NavigationFragmentAdapter
-import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
+import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.learn.presentation.LearnFragment
@@ -107,6 +107,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+    @Suppress("MagicNumber")
     private fun initViewPager() {
         binding.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
         binding.viewPager.offscreenPageLimit = 4

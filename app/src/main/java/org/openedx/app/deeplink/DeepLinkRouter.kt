@@ -38,196 +38,101 @@ class DeepLinkRouter(
 
     fun makeRoute(fm: FragmentManager, deepLink: DeepLink) {
         when (deepLink.type) {
-            // Discovery
-            DeepLinkType.DISCOVERY -> {
-                navigateToDiscoveryScreen(fm = fm)
-                return
-            }
-
-            DeepLinkType.DISCOVERY_COURSE_DETAIL -> {
-                navigateToCourseDetail(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                return
-            }
-
-            DeepLinkType.DISCOVERY_PROGRAM_DETAIL -> {
-                navigateToProgramDetail(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                return
-            }
-
-            else -> {
-                //ignore
-            }
+            DeepLinkType.DISCOVERY -> navigateToDiscoveryScreen(fm)
+            DeepLinkType.DISCOVERY_COURSE_DETAIL -> navigateToCourseDetail(fm, deepLink)
+            DeepLinkType.DISCOVERY_PROGRAM_DETAIL -> navigateToProgramDetail(fm, deepLink)
+            else -> handleLoggedOutOrUserNavigation(fm, deepLink)
         }
+    }
 
+    private fun handleLoggedOutOrUserNavigation(fm: FragmentManager, deepLink: DeepLink) {
         if (!isUserLoggedIn) {
-            navigateToSignIn(fm = fm)
-            return
+            navigateToSignIn(fm)
+        } else {
+            handleProgramAndProfileNavigation(fm, deepLink)
         }
+    }
 
+    private fun handleProgramAndProfileNavigation(fm: FragmentManager, deepLink: DeepLink) {
         when (deepLink.type) {
-            // Program
-            DeepLinkType.PROGRAM -> {
-                navigateToProgram(
-                    fm = fm,
-                    deepLink = deepLink
-                )
-                return
-            }
-            // Profile
-            DeepLinkType.PROFILE,
-            DeepLinkType.USER_PROFILE -> {
-                navigateToProfile(fm = fm)
-                return
-            }
-            else -> {
-                //ignore
-            }
+            DeepLinkType.PROGRAM -> navigateToProgram(fm, deepLink)
+            DeepLinkType.PROFILE, DeepLinkType.USER_PROFILE -> navigateToProfile(fm)
+            else -> handleCourseRelatedNavigation(fm, deepLink)
         }
+    }
 
+    private fun handleCourseRelatedNavigation(fm: FragmentManager, deepLink: DeepLink) {
         launch(Dispatchers.Main) {
-            val courseId = deepLink.courseId ?: return@launch navigateToDashboard(fm = fm)
-            val course = getCourseDetails(courseId) ?: return@launch navigateToDashboard(fm = fm)
-            if (!course.isEnrolled) {
-                navigateToDashboard(fm = fm)
-                return@launch
+            val courseId = deepLink.courseId ?: return@launch navigateToDashboard(fm)
+            val course = getCourseDetails(courseId) ?: return@launch navigateToDashboard(fm)
+            if (!course.isEnrolled) return@launch navigateToDashboard(fm)
+
+            handleSpecificCourseNavigation(fm, deepLink, course.name)
+        }
+    }
+
+    private fun handleSpecificCourseNavigation(fm: FragmentManager, deepLink: DeepLink, courseTitle: String) {
+        navigateToDashboard(fm)
+        when (deepLink.type) {
+            DeepLinkType.COURSE_DASHBOARD, DeepLinkType.ENROLL, DeepLinkType.ADD_BETA_TESTER -> {
+                navigateToCourseDashboard(fm, deepLink, courseTitle)
             }
 
-            when (deepLink.type) {
-                // Course
-                DeepLinkType.COURSE_DASHBOARD, DeepLinkType.ENROLL, DeepLinkType.ADD_BETA_TESTER -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDashboard(
-                        fm = fm,
-                        deepLink = deepLink,
-                        courseTitle = course.name
-                    )
-                }
+            DeepLinkType.UNENROLL, DeepLinkType.REMOVE_BETA_TESTER -> { /* Just navigate to dashboard */
+            }
 
-                DeepLinkType.UNENROLL, DeepLinkType.REMOVE_BETA_TESTER -> {
-                    navigateToDashboard(fm = fm)
-                }
+            DeepLinkType.COURSE_VIDEOS -> navigateToCourseVideos(fm, deepLink)
+            DeepLinkType.COURSE_DATES -> navigateToCourseDates(fm, deepLink)
+            DeepLinkType.COURSE_DISCUSSION -> navigateToCourseDiscussion(fm, deepLink)
+            DeepLinkType.COURSE_HANDOUT -> navigateToCourseHandoutWithMore(fm, deepLink)
+            DeepLinkType.COURSE_ANNOUNCEMENT -> navigateToCourseAnnouncementWithMore(fm, deepLink)
+            DeepLinkType.COURSE_COMPONENT -> navigateToCourseComponentWithDashboard(fm, deepLink, courseTitle)
+            DeepLinkType.DISCUSSION_TOPIC -> navigateToDiscussionTopicWithDiscussion(fm, deepLink)
+            DeepLinkType.DISCUSSION_POST -> navigateToDiscussionPostWithDiscussion(fm, deepLink)
+            DeepLinkType.DISCUSSION_COMMENT, DeepLinkType.FORUM_RESPONSE -> {
+                navigateToDiscussionResponseWithDiscussion(fm, deepLink)
+            }
 
-                DeepLinkType.COURSE_VIDEOS -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseVideos(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.COURSE_DATES -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDates(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.COURSE_DISCUSSION -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDiscussion(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.COURSE_HANDOUT -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseMore(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                    navigateToCourseHandout(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.COURSE_ANNOUNCEMENT -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseMore(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                    navigateToCourseAnnouncement(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.COURSE_COMPONENT -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDashboard(
-                        fm = fm,
-                        deepLink = deepLink,
-                        courseTitle = course.name
-                    )
-                    navigateToCourseComponent(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                // Discussions
-                DeepLinkType.DISCUSSION_TOPIC -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDiscussion(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                    navigateToDiscussionTopic(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.DISCUSSION_POST -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDiscussion(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                    navigateToDiscussionPost(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.DISCUSSION_COMMENT, DeepLinkType.FORUM_RESPONSE -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDiscussion(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                    navigateToDiscussionResponse(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                DeepLinkType.FORUM_COMMENT -> {
-                    navigateToDashboard(fm = fm)
-                    navigateToCourseDiscussion(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                    navigateToDiscussionComment(
-                        fm = fm,
-                        deepLink = deepLink
-                    )
-                }
-
-                else -> {
-                    //ignore
-                }
+            DeepLinkType.FORUM_COMMENT -> navigateToDiscussionCommentWithDiscussion(fm, deepLink)
+            else -> { /* ignore */
             }
         }
+    }
+
+    // Additional helper methods to encapsulate grouped navigation
+    private fun navigateToCourseHandoutWithMore(fm: FragmentManager, deepLink: DeepLink) {
+        navigateToCourseMore(fm, deepLink)
+        navigateToCourseHandout(fm, deepLink)
+    }
+
+    private fun navigateToCourseAnnouncementWithMore(fm: FragmentManager, deepLink: DeepLink) {
+        navigateToCourseMore(fm, deepLink)
+        navigateToCourseAnnouncement(fm, deepLink)
+    }
+
+    private fun navigateToCourseComponentWithDashboard(fm: FragmentManager, deepLink: DeepLink, courseTitle: String) {
+        navigateToCourseDashboard(fm, deepLink, courseTitle)
+        navigateToCourseComponent(fm, deepLink)
+    }
+
+    private fun navigateToDiscussionTopicWithDiscussion(fm: FragmentManager, deepLink: DeepLink) {
+        navigateToCourseDiscussion(fm, deepLink)
+        navigateToDiscussionTopic(fm, deepLink)
+    }
+
+    private fun navigateToDiscussionPostWithDiscussion(fm: FragmentManager, deepLink: DeepLink) {
+        navigateToCourseDiscussion(fm, deepLink)
+        navigateToDiscussionPost(fm, deepLink)
+    }
+
+    private fun navigateToDiscussionResponseWithDiscussion(fm: FragmentManager, deepLink: DeepLink) {
+        navigateToCourseDiscussion(fm, deepLink)
+        navigateToDiscussionResponse(fm, deepLink)
+    }
+
+    private fun navigateToDiscussionCommentWithDiscussion(fm: FragmentManager, deepLink: DeepLink) {
+        navigateToCourseDiscussion(fm, deepLink)
+        navigateToDiscussionComment(fm, deepLink)
     }
 
     // Returns true if there was a successful redirect to the discovery screen

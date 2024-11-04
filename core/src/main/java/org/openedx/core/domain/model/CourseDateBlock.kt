@@ -18,13 +18,17 @@ data class CourseDateBlock(
     val assignmentType: String? = "",
 ) : Parcelable {
     fun isCompleted(): Boolean {
-        return complete || (dateType in setOf(
-            DateType.COURSE_START_DATE,
-            DateType.COURSE_END_DATE,
-            DateType.CERTIFICATE_AVAILABLE_DATE,
-            DateType.VERIFIED_UPGRADE_DEADLINE,
-            DateType.VERIFICATION_DEADLINE_DATE,
-        ) && date.before(Date()))
+        return complete || (
+                dateType in setOf(
+                    DateType.COURSE_START_DATE,
+                    DateType.COURSE_END_DATE,
+                    DateType.CERTIFICATE_AVAILABLE_DATE,
+                    DateType.VERIFIED_UPGRADE_DEADLINE,
+                    DateType.VERIFICATION_DEADLINE_DATE,
+                ) && date.before(
+                    Date()
+                )
+                )
     }
 
     override fun equals(other: Any?): Boolean {

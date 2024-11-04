@@ -56,8 +56,11 @@ class EditProfileViewModel(
                 buildMap {
                     put(
                         ProfileAnalyticsKey.ACTION.key,
-                        if (isLimitedProfile) ProfileAnalyticsKey.LIMITED_PROFILE.key
-                        else ProfileAnalyticsKey.FULL_PROFILE.key
+                        if (isLimitedProfile) {
+                            ProfileAnalyticsKey.LIMITED_PROFILE.key
+                        } else {
+                            ProfileAnalyticsKey.FULL_PROFILE.key
+                        }
                     )
                 }
             )

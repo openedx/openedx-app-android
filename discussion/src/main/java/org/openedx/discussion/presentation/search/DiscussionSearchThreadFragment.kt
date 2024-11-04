@@ -71,6 +71,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.presentation.DiscussionRouter
+import org.openedx.discussion.presentation.search.DiscussionSearchThreadFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discussion.presentation.ui.ThreadItem
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -104,7 +105,8 @@ class DiscussionSearchThreadFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(
                     DiscussionSearchThreadUIState.Threads(
-                        emptyList(), 0
+                        emptyList(),
+                        0
                     )
                 )
                 val uiMessage by viewModel.uiMessage.observeAsState()
@@ -134,9 +136,9 @@ class DiscussionSearchThreadFragment : Fragment() {
         }
     }
 
-
     companion object {
         private const val ARG_COURSE_ID = "courseId"
+        const val LOAD_MORE_THRESHOLD = 4
         fun newInstance(
             courseId: String
         ): DiscussionSearchThreadFragment {
@@ -147,7 +149,6 @@ class DiscussionSearchThreadFragment : Fragment() {
             return fragment
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -189,7 +190,6 @@ private fun DiscussionSearchThreadScreen(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -348,7 +348,7 @@ private fun DiscussionSearchThreadScreen(
                                             }
                                         }
                                     }
-                                    if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                    if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                         paginationCallback()
                                     }
                                 }
@@ -366,7 +366,6 @@ private fun DiscussionSearchThreadScreen(
     }
 }
 
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -382,9 +381,8 @@ fun DiscussionSearchThreadScreenPreview() {
             onSearchTextChanged = {},
             onSwipeRefresh = {},
             paginationCallback = {},
-            onBackClick = {
-
-            })
+            onBackClick = {}
+        )
     }
 }
 
@@ -403,9 +401,8 @@ fun DiscussionSearchThreadScreenTabletPreview() {
             onSearchTextChanged = {},
             onSwipeRefresh = {},
             paginationCallback = {},
-            onBackClick = {
-
-            })
+            onBackClick = {}
+        )
     }
 }
 

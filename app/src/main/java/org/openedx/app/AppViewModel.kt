@@ -53,7 +53,6 @@ class AppViewModel(
     val downloadFailedDialog: SharedFlow<DownloadFailed>
         get() = _downloadFailedDialog.asSharedFlow()
 
-
     val isLogistrationEnabled get() = config.isPreLoginExperienceEnabled()
 
     private var logoutHandledAt: Long = 0
@@ -119,7 +118,7 @@ class AppViewModel(
     }
 
     private suspend fun handleLogoutEvent(event: LogoutEvent) {
-        if (System.currentTimeMillis() - logoutHandledAt > 5000) {
+        if (System.currentTimeMillis() - logoutHandledAt > LOGOUT_EVENT_THRESHOLD) {
             if (event.isForced) {
                 logoutHandledAt = System.currentTimeMillis()
                 preferencesManager.clearCorePreferences()
@@ -137,5 +136,9 @@ class AppViewModel(
                 notificationManager.cancelAll()
             }
         }
+    }
+
+    companion object {
+        private const val LOGOUT_EVENT_THRESHOLD = 5000L
     }
 }

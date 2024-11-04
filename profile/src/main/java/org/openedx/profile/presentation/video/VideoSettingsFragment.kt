@@ -106,7 +106,6 @@ class VideoSettingsFragment : Fragment() {
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

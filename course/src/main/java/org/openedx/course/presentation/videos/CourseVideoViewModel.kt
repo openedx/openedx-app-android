@@ -129,7 +129,11 @@ class CourseVideoViewModel(
                 super.saveDownloadModels(folder, id)
             } else {
                 viewModelScope.launch {
-                    _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi)))
+                    _uiMessage.emit(
+                        UIMessage.ToastMessage(
+                            resourceManager.getString(R.string.course_can_download_only_with_wifi)
+                        )
+                    )
                 }
             }
         } else {
@@ -140,7 +144,9 @@ class CourseVideoViewModel(
     override fun saveAllDownloadModels(folder: String) {
         if (preferencesManager.videoSettings.wifiDownloadOnly && !networkConnection.isWifiConnected()) {
             viewModelScope.launch {
-                _uiMessage.emit(UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi)))
+                _uiMessage.emit(
+                    UIMessage.ToastMessage(resourceManager.getString(R.string.course_can_download_only_with_wifi))
+                )
             }
             return
         }
@@ -178,6 +184,7 @@ class CourseVideoViewModel(
                 }
                 courseNotifier.send(CourseLoading(false))
             } catch (e: Exception) {
+                e.printStackTrace()
                 _uiState.value = CourseVideosUIState.Empty
             }
         }
@@ -196,13 +203,22 @@ class CourseVideoViewModel(
     fun sequentialClickedEvent(blockId: String, blockName: String) {
         val currentState = uiState.value
         if (currentState is CourseVideosUIState.CourseData) {
-            analytics.sequentialClickedEvent(courseId, courseTitle, blockId, blockName)
+            analytics.sequentialClickedEvent(
+                courseId,
+                courseTitle,
+                blockId,
+                blockName
+            )
         }
     }
 
     fun onChangingVideoQualityWhileDownloading() {
         viewModelScope.launch {
-            _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.course_change_quality_when_downloading)))
+            _uiMessage.emit(
+                UIMessage.SnackBarMessage(
+                    resourceManager.getString(R.string.course_change_quality_when_downloading)
+                )
+            )
         }
     }
 

@@ -11,9 +11,17 @@ import org.openedx.foundation.interfaces.Analytics
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 
-class AnalyticsManager : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAnalytics,
-    CourseAnalytics, DashboardAnalytics, DiscoveryAnalytics, DiscussionAnalytics,
-    ProfileAnalytics, WhatsNewAnalytics {
+class AnalyticsManager :
+    AppAnalytics,
+    AppReviewAnalytics,
+    AuthAnalytics,
+    CoreAnalytics,
+    CourseAnalytics,
+    DashboardAnalytics,
+    DiscoveryAnalytics,
+    DiscussionAnalytics,
+    ProfileAnalytics,
+    WhatsNewAnalytics {
 
     private val analytics: MutableList<Analytics> = mutableListOf()
 
@@ -45,17 +53,26 @@ class AnalyticsManager : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAn
         }
     }
 
-    override fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
-        logEvent(Event.DASHBOARD_COURSE_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-        })
+    override fun dashboardCourseClickedEvent(
+        courseId: String,
+        courseName: String
+    ) {
+        logEvent(
+            Event.DASHBOARD_COURSE_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+            }
+        )
     }
 
     override fun logoutEvent(force: Boolean) {
-        logEvent(Event.USER_LOGOUT, buildMap {
-            put(Key.FORCE.keyName, force)
-        })
+        logEvent(
+            Event.USER_LOGOUT,
+            buildMap {
+                put(Key.FORCE.keyName, force)
+            }
+        )
     }
 
     override fun setUserIdForSession(userId: Long) {
@@ -67,104 +84,164 @@ class AnalyticsManager : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAn
     }
 
     override fun discoveryCourseSearchEvent(label: String, coursesCount: Int) {
-        logEvent(Event.DISCOVERY_COURSE_SEARCH, buildMap {
-            put(Key.LABEL.keyName, label)
-            put(Key.COURSE_COUNT.keyName, coursesCount)
-        })
+        logEvent(
+            Event.DISCOVERY_COURSE_SEARCH,
+            buildMap {
+                put(Key.LABEL.keyName, label)
+                put(Key.COURSE_COUNT.keyName, coursesCount)
+            }
+        )
     }
 
     override fun discoveryCourseClickedEvent(courseId: String, courseName: String) {
-        logEvent(Event.DISCOVERY_COURSE_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-        })
+        logEvent(
+            Event.DISCOVERY_COURSE_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+            }
+        )
     }
 
     override fun sequentialClickedEvent(
-        courseId: String, courseName: String, blockId: String, blockName: String,
+        courseId: String,
+        courseName: String,
+        blockId: String,
+        blockName: String,
     ) {
-        logEvent(Event.SEQUENTIAL_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-            put(Key.BLOCK_ID.keyName, blockId)
-            put(Key.BLOCK_NAME.keyName, blockName)
-        })
+        logEvent(
+            Event.SEQUENTIAL_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+                put(Key.BLOCK_ID.keyName, blockId)
+                put(Key.BLOCK_NAME.keyName, blockName)
+            }
+        )
     }
 
     override fun nextBlockClickedEvent(
-        courseId: String, courseName: String, blockId: String, blockName: String,
+        courseId: String,
+        courseName: String,
+        blockId: String,
+        blockName: String,
     ) {
-        logEvent(Event.NEXT_BLOCK_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-            put(Key.BLOCK_ID.keyName, blockId)
-            put(Key.BLOCK_NAME.keyName, blockName)
-        })
+        logEvent(
+            Event.NEXT_BLOCK_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+                put(Key.BLOCK_ID.keyName, blockId)
+                put(Key.BLOCK_NAME.keyName, blockName)
+            }
+        )
     }
 
     override fun prevBlockClickedEvent(
-        courseId: String, courseName: String, blockId: String, blockName: String,
+        courseId: String,
+        courseName: String,
+        blockId: String,
+        blockName: String,
     ) {
-        logEvent(Event.PREV_BLOCK_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-            put(Key.BLOCK_ID.keyName, blockId)
-            put(Key.BLOCK_NAME.keyName, blockName)
-        })
+        logEvent(
+            Event.PREV_BLOCK_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+                put(Key.BLOCK_ID.keyName, blockId)
+                put(Key.BLOCK_NAME.keyName, blockName)
+            }
+        )
     }
 
     override fun finishVerticalClickedEvent(
-        courseId: String, courseName: String, blockId: String, blockName: String,
+        courseId: String,
+        courseName: String,
+        blockId: String,
+        blockName: String,
     ) {
-        logEvent(Event.FINISH_VERTICAL_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-            put(Key.BLOCK_ID.keyName, blockId)
-            put(Key.BLOCK_NAME.keyName, blockName)
-        })
+        logEvent(
+            Event.FINISH_VERTICAL_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+                put(Key.BLOCK_ID.keyName, blockId)
+                put(Key.BLOCK_NAME.keyName, blockName)
+            }
+        )
     }
 
     override fun finishVerticalNextClickedEvent(
-        courseId: String, courseName: String, blockId: String, blockName: String,
+        courseId: String,
+        courseName: String,
+        blockId: String,
+        blockName: String,
     ) {
-        logEvent(Event.FINISH_VERTICAL_NEXT_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-            put(Key.BLOCK_ID.keyName, blockId)
-            put(Key.BLOCK_NAME.keyName, blockName)
-        })
+        logEvent(
+            Event.FINISH_VERTICAL_NEXT_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+                put(Key.BLOCK_ID.keyName, blockId)
+                put(Key.BLOCK_NAME.keyName, blockName)
+            }
+        )
     }
 
-    override fun finishVerticalBackClickedEvent(courseId: String, courseName: String) {
-        logEvent(Event.FINISH_VERTICAL_BACK_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-        })
+    override fun finishVerticalBackClickedEvent(
+        courseId: String,
+        courseName: String
+    ) {
+        logEvent(
+            Event.FINISH_VERTICAL_BACK_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+            }
+        )
     }
 
-    override fun discussionAllPostsClickedEvent(courseId: String, courseName: String) {
-        logEvent(Event.DISCUSSION_ALL_POSTS_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-        })
+    override fun discussionAllPostsClickedEvent(
+        courseId: String,
+        courseName: String
+    ) {
+        logEvent(
+            Event.DISCUSSION_ALL_POSTS_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+            }
+        )
     }
 
-    override fun discussionFollowingClickedEvent(courseId: String, courseName: String) {
-        logEvent(Event.DISCUSSION_FOLLOWING_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-        })
+    override fun discussionFollowingClickedEvent(
+        courseId: String,
+        courseName: String
+    ) {
+        logEvent(
+            Event.DISCUSSION_FOLLOWING_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+            }
+        )
     }
 
     override fun discussionTopicClickedEvent(
-        courseId: String, courseName: String, topicId: String, topicName: String,
+        courseId: String,
+        courseName: String,
+        topicId: String,
+        topicName: String,
     ) {
-        logEvent(Event.DISCUSSION_TOPIC_CLICKED, buildMap {
-            put(Key.COURSE_ID.keyName, courseId)
-            put(Key.COURSE_NAME.keyName, courseName)
-            put(Key.TOPIC_ID.keyName, topicId)
-            put(Key.TOPIC_NAME.keyName, topicName)
-        })
+        logEvent(
+            Event.DISCUSSION_TOPIC_CLICKED,
+            buildMap {
+                put(Key.COURSE_ID.keyName, courseId)
+                put(Key.COURSE_NAME.keyName, courseName)
+                put(Key.TOPIC_ID.keyName, topicId)
+                put(Key.TOPIC_NAME.keyName, topicName)
+            }
+        )
     }
 }
 

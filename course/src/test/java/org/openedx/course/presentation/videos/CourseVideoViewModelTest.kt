@@ -209,8 +209,9 @@ class CourseVideoViewModelTest {
     @Test
     fun `getVideos empty list`() = runTest {
         every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
-        coEvery { interactor.getCourseStructureForVideos(any()) } returns
-                courseStructure.copy(blockData = emptyList())
+        coEvery {
+            interactor.getCourseStructureForVideos(any())
+        } returns courseStructure.copy(blockData = emptyList())
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         every { preferencesManager.videoSettings } returns VideoSettings.default
         val viewModel = CourseVideoViewModel(
@@ -267,7 +268,6 @@ class CourseVideoViewModelTest {
             workerController,
             downloadHelper,
         )
-
 
         viewModel.getVideos()
         advanceUntilIdle()
@@ -457,6 +457,4 @@ class CourseVideoViewModelTest {
 
         assert(message.await()?.message.isNullOrEmpty())
     }
-
-
 }

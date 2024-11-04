@@ -49,7 +49,7 @@ abstract class AbstractDownloader : KoinComponent {
                 currentDownloadingFilePath = path
                 fos = FileOutputStream(file)
                 fos.use { output ->
-                    val buffer = ByteArray(4 * 1024)
+                    val buffer = ByteArray(BUFFER_SIZE)
                     var read: Int
                     while (input!!.read(buffer).also { read = it } != -1) {
                         output?.write(buffer, 0, read)
@@ -93,5 +93,9 @@ abstract class AbstractDownloader : KoinComponent {
 
     enum class DownloadResult {
         SUCCESS, CANCELED, ERROR
+    }
+
+    companion object {
+        private const val BUFFER_SIZE = 4 * 1024
     }
 }

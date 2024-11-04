@@ -32,7 +32,7 @@ class AuthRepository(
     }
 
     suspend fun socialLogin(token: String?, authType: AuthType) {
-        if (token.isNullOrBlank()) throw IllegalArgumentException("Token is null")
+        require(!token.isNullOrBlank()) { "Token is null" }
         api.exchangeAccessToken(
             accessToken = token,
             clientId = config.getOAuthClientId(),

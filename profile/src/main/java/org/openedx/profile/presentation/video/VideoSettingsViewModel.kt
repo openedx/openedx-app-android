@@ -61,13 +61,15 @@ class VideoSettingsViewModel(
 
     fun navigateToVideoStreamingQuality(fragmentManager: FragmentManager) {
         router.navigateToVideoQuality(
-            fragmentManager, VideoQualityType.Streaming
+            fragmentManager,
+            VideoQualityType.Streaming
         )
     }
 
     fun navigateToVideoDownloadQuality(fragmentManager: FragmentManager) {
         router.navigateToVideoQuality(
-            fragmentManager, VideoQualityType.Download
+            fragmentManager,
+            VideoQualityType.Download
         )
     }
 
