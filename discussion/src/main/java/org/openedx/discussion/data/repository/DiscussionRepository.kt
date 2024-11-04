@@ -2,7 +2,6 @@ package org.openedx.discussion.data.repository
 
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.R
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.discussion.data.model.request.CommentBody
@@ -15,6 +14,7 @@ import org.openedx.discussion.domain.model.CommentsData
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.ThreadsData
 import org.openedx.discussion.domain.model.Topic
+import org.openedx.foundation.system.ResourceManager
 
 class DiscussionRepository(
     private val api: DiscussionApi,

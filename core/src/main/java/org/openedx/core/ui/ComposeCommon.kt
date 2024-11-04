@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +34,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -77,6 +78,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -109,16 +111,16 @@ import coil.decode.ImageDecoderDecoder
 import kotlinx.coroutines.launch
 import org.openedx.core.NoContentScreenType
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
-import org.openedx.core.extension.tagId
-import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.tagId
+import org.openedx.foundation.extension.toastMessage
+import org.openedx.foundation.presentation.UIMessage
 
 @Composable
 fun StaticSearchBar(
@@ -479,18 +481,19 @@ fun HyperlinkText(
 
     val uriHandler = LocalUriHandler.current
 
-    ClickableText(
-        modifier = modifier,
+    BasicText(
         text = annotatedString,
-        style = textStyle,
-        onClick = {
-            annotatedString
-                .getStringAnnotations("URL", it, it)
-                .firstOrNull()?.let { stringAnnotation ->
-                    action?.invoke(stringAnnotation.item)
-                        ?: uriHandler.openUri(stringAnnotation.item)
-                }
-        }
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures { offset ->
+                val position = offset.x.toInt()
+                annotatedString.getStringAnnotations("URL", position, position)
+                    .firstOrNull()?.let { stringAnnotation ->
+                        action?.invoke(stringAnnotation.item)
+                            ?: uriHandler.openUri(stringAnnotation.item)
+                    }
+            }
+        },
+        style = textStyle
     )
 }
 
@@ -590,17 +593,18 @@ fun HyperlinkImageText(
         .build()
 
     Column(Modifier.fillMaxWidth()) {
-        ClickableText(
-            modifier = modifier,
+        BasicText(
             text = annotatedString,
-            style = textStyle,
-            onClick = {
-                annotatedString
-                    .getStringAnnotations("URL", it, it)
-                    .firstOrNull()?.let { stringAnnotation ->
-                        uriHandler.openUri(stringAnnotation.item)
-                    }
-            }
+            modifier = modifier.pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val position = offset.x.toInt()
+                    annotatedString.getStringAnnotations("URL", position, position)
+                        .firstOrNull()?.let { stringAnnotation ->
+                            uriHandler.openUri(stringAnnotation.item)
+                        }
+                }
+            },
+            style = textStyle
         )
         imageText.imageLinks.values.forEach {
             Spacer(Modifier.height(8.dp))
@@ -941,11 +945,11 @@ fun IconText(
 
 @Composable
 fun TextIcon(
+    modifier: Modifier = Modifier,
     text: String,
     icon: ImageVector,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
-    modifier: Modifier = Modifier,
     iconModifier: Modifier? = null,
     onClick: (() -> Unit)? = null,
 ) {
@@ -971,11 +975,11 @@ fun TextIcon(
 
 @Composable
 fun TextIcon(
+    iconModifier: Modifier = Modifier,
     text: String,
     painter: Painter,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
-    iconModifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     val modifier = if (onClick == null) {

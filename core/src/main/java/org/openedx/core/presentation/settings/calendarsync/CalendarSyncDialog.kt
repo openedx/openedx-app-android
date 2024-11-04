@@ -24,12 +24,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
-import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.takeIfNotEmpty
 import androidx.compose.ui.window.DialogProperties as AlertDialogProperties
 import org.openedx.core.R as CoreR
 
@@ -230,5 +230,5 @@ private fun CalendarSyncDialogsPreview(
 }
 
 private class CalendarSyncDialogTypeProvider : PreviewParameterProvider<CalendarSyncDialogType> {
-    override val values = CalendarSyncDialogType.values().dropLast(1).asSequence()
+    override val values = CalendarSyncDialogType.entries.dropLast(1).asSequence()
 }

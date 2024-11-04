@@ -1,6 +1,6 @@
 package org.openedx.discovery.presentation.program
 
-import org.openedx.core.UIMessage
+import org.openedx.foundation.presentation.UIMessage
 import org.openedx.core.presentation.global.ErrorType
 
 sealed class ProgramUIState {

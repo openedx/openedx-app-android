@@ -27,7 +27,6 @@ import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
-import org.openedx.core.UIMessage
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
@@ -39,10 +38,10 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
 import org.openedx.core.system.EdxError
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.app.AppEvent
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.SignInEvent
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 import org.openedx.core.R as CoreRes
 

@@ -15,9 +15,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.toFileSize
 
 @Composable
 fun DownloadDialogItem(

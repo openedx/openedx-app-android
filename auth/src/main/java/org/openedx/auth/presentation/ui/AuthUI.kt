@@ -3,8 +3,8 @@ package org.openedx.auth.presentation.ui
 import android.content.res.Configuration
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,7 +55,6 @@ import org.openedx.auth.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.extension.tagId
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.noRippleClickable
@@ -63,6 +62,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.tagId
 
 @Composable
 fun RequiredFields(
@@ -512,7 +512,7 @@ fun ExpandableText(
             targetState = !isExpanded
         }
     }
-    val transition = updateTransition(transitionState, label = "")
+    val transition = rememberTransition(transitionState, label = "")
     val arrowRotationDegree by transition.animateFloat({
         tween(durationMillis = 300)
     }, label = "") {
@@ -534,7 +534,6 @@ fun ExpandableText(
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        //TODO: textStyle
         Text(
             modifier = Modifier,
             text = text,

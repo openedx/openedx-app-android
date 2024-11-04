@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
 import org.openedx.discovery.presentation.DiscoveryNavigator
+import org.openedx.foundation.presentation.BaseViewModel
 
 class MainViewModel(
     private val config: Config,

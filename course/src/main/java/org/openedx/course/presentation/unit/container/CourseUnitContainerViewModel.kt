@@ -9,12 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
-import org.openedx.core.extension.clearAndAddAll
-import org.openedx.core.extension.indexOfFirstFromIndex
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
@@ -26,6 +23,9 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.extension.clearAndAddAll
+import org.openedx.foundation.extension.indexOfFirstFromIndex
+import org.openedx.foundation.presentation.BaseViewModel
 
 class CourseUnitContainerViewModel(
     val courseId: String,

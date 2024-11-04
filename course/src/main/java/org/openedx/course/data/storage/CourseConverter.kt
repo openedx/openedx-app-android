@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import org.openedx.core.data.model.room.BlockDb
 import org.openedx.core.data.model.room.VideoInfoDb
 import org.openedx.core.data.model.room.discovery.CourseDateBlockDb
-import org.openedx.core.extension.genericType
+import org.openedx.foundation.extension.genericType
 
 class CourseConverter {
 

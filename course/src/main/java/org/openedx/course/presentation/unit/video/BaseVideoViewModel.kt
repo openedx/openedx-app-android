@@ -1,9 +1,9 @@
 package org.openedx.course.presentation.unit.video
 
-import org.openedx.core.BaseViewModel
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.presentation.BaseViewModel
 
 open class BaseVideoViewModel(
     private val courseId: String,

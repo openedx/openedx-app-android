@@ -4,13 +4,13 @@ import androidx.fragment.app.FragmentManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.utils.UrlUtils
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.utils.UrlUtils
 
 class WebViewDiscoveryViewModel(
     private val querySearch: String,
