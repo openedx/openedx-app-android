@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.interactor.CalendarInteractor
@@ -23,6 +22,7 @@ import org.openedx.core.system.notifier.calendar.CalendarSyncOffline
 import org.openedx.core.system.notifier.calendar.CalendarSynced
 import org.openedx.core.system.notifier.calendar.CalendarSyncing
 import org.openedx.core.worker.CalendarSyncScheduler
+import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.profile.presentation.ProfileRouter
 
 class CalendarViewModel(

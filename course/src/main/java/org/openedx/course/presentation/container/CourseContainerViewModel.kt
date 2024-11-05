@@ -6,6 +6,9 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,22 +18,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
-import org.openedx.core.ImageProcessor
-import org.openedx.core.SingleEventLiveData
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseAccessError
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isFalse
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.extension.isTrue
-import org.openedx.core.extension.toImageLink
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
 import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
@@ -49,6 +45,13 @@ import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.utils.ImageProcessor
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.extension.toImageLink
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 
@@ -166,8 +169,14 @@ class CourseContainerViewModel(
         _showProgress.value = true
         viewModelScope.launch {
             try {
-                interactor.getCourseStructure(courseId, isNeedRefresh = true)
-                _courseDetails = interactor.getEnrollmentDetails(courseId)
+                val deferredCourse = async(SupervisorJob()) {
+                    interactor.getCourseStructure(courseId, isNeedRefresh = true)
+                }
+                val deferredEnrollment = async(SupervisorJob()) {
+                    interactor.getEnrollmentDetails(courseId)
+                }
+                val (_, enrollment) = awaitAll(deferredCourse, deferredEnrollment)
+                _courseDetails = enrollment as? CourseEnrollmentDetails
                 _showProgress.value = false
                 _courseDetails?.let { courseDetails ->
                     courseName = courseDetails.courseInfoOverview.name

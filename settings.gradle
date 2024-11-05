@@ -3,7 +3,6 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url "https://maven.fullstory.com" }
     }
     buildscript {
         repositories {
@@ -11,11 +10,9 @@ pluginManagement {
             maven {
                 url = uri("https://storage.googleapis.com/r8-releases/raw")
             }
-            maven { url "https://maven.fullstory.com" }
         }
         dependencies {
-            classpath("com.android.tools:r8:8.3.37")
-            classpath 'com.fullstory:gradle-plugin-local:1.47.0'
+            classpath("com.android.tools:r8:8.5.35")
         }
     }
 }
@@ -24,16 +21,14 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://maven.fullstory.com" }
         maven {
             url "http://appboy.github.io/appboy-android-sdk/sdk"
             allowInsecureProtocol = true
         }
-        maven {
-            url "https://appboy.github.io/appboy-segment-android/sdk"
-            allowInsecureProtocol = true
-        }
         maven { url "https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1" }
+        maven {
+            url = uri("https://jitpack.io")
+        }
     }
 }
 //Workaround for AS Iguana https://github.com/gradle/gradle/issues/28407

@@ -72,14 +72,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.domain.model.CourseAccessError
 import org.openedx.core.extension.isFalse
-import org.openedx.core.extension.takeIfNotEmpty
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.RoundTabsBar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -96,6 +93,9 @@ import org.openedx.course.presentation.outline.CourseOutlineScreen
 import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
+import org.openedx.foundation.extension.takeIfNotEmpty
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.rememberWindowSize
 import java.util.Date
 
 class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
@@ -415,7 +415,6 @@ fun CourseDashboard(
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -431,7 +430,7 @@ private fun DashboardPager(
     HorizontalPager(
         state = pagerState,
         userScrollEnabled = isNavigationEnabled,
-        beyondBoundsPageCount = CourseContainerTab.entries.size
+        beyondViewportPageCount = CourseContainerTab.entries.size
     ) { page ->
         when (CourseContainerTab.entries[page]) {
             CourseContainerTab.HOME -> {

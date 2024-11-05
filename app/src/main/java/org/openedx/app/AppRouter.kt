@@ -3,6 +3,7 @@ package org.openedx.app
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
@@ -410,7 +411,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToDiscover(fm: FragmentManager) {
         fm.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance("", "", "DISCOVER"))
+            .replace(R.id.container, MainFragment.newInstance("", "", HomeTab.DISCOVER.name))
             .commit()
     }
 

@@ -18,8 +18,6 @@ import org.openedx.app.deeplink.DeepLink
 import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.system.push.RefreshFirebaseTokenWorker
 import org.openedx.app.system.push.SyncFirebaseTokenWorker
-import org.openedx.core.BaseViewModel
-import org.openedx.core.SingleEventLiveData
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.User
 import org.openedx.core.data.storage.CorePreferences
@@ -28,8 +26,10 @@ import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.app.AppNotifier
 import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.system.notifier.app.SignInEvent
-import org.openedx.core.utils.FileUtil
-
+import org.openedx.core.utils.Directories
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.utils.FileUtil
 
 @SuppressLint("StaticFieldLeak")
 class AppViewModel(
@@ -104,7 +104,7 @@ class AppViewModel(
     }
 
     private fun resetAppDirectory() {
-        fileUtil.deleteOldAppDirectory()
+        fileUtil.deleteOldAppDirectory(Directories.VIDEOS.name)
         preferencesManager.canResetAppDirectory = false
     }
 

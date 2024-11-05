@@ -6,9 +6,6 @@ data class FirebaseConfig(
     @SerializedName("ENABLED")
     val enabled: Boolean = false,
 
-    @SerializedName("ANALYTICS_SOURCE")
-    val analyticsSource: AnalyticsSource = AnalyticsSource.NONE,
-
     @SerializedName("CLOUD_MESSAGING_ENABLED")
     val isCloudMessagingEnabled: Boolean = false,
 
@@ -23,8 +20,4 @@ data class FirebaseConfig(
 
     @SerializedName("API_KEY")
     val apiKey: String = "",
-) {
-    fun isSegmentAnalyticsSource(): Boolean {
-        return enabled && analyticsSource == AnalyticsSource.SEGMENT
-    }
-}
+)

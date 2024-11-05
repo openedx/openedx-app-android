@@ -6,7 +6,6 @@ import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.MediaDb
 import org.openedx.core.data.model.room.discovery.ProgressDb
 import org.openedx.core.domain.model.CourseStructure
-import org.openedx.core.extension.isNotNullOrEmpty
 import org.openedx.core.utils.TimeUtils
 
 data class CourseStructureModel(

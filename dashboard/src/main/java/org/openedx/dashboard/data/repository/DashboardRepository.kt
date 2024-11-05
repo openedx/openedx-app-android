@@ -5,9 +5,9 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseEnrollments
 import org.openedx.core.domain.model.DashboardCourseList
 import org.openedx.core.domain.model.EnrolledCourse
-import org.openedx.core.utils.FileUtil
 import org.openedx.dashboard.data.DashboardDao
 import org.openedx.dashboard.domain.CourseStatusFilter
+import org.openedx.foundation.utils.FileUtil
 
 class DashboardRepository(
     private val api: CourseApi,

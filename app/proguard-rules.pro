@@ -46,8 +46,6 @@
 -dontwarn com.google.crypto.tink.subtle.Ed25519Sign
 -dontwarn com.google.crypto.tink.subtle.Ed25519Verify
 -dontwarn com.google.crypto.tink.subtle.X25519
--dontwarn com.segment.analytics.kotlin.core.platform.plugins.logger.LogFilterKind
--dontwarn com.segment.analytics.kotlin.core.platform.plugins.logger.LogTargetKt
 -dontwarn edu.umd.cs.findbugs.annotations.NonNull
 -dontwarn edu.umd.cs.findbugs.annotations.Nullable
 -dontwarn edu.umd.cs.findbugs.annotations.SuppressFBWarnings

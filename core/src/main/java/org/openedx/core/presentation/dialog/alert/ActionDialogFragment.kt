@@ -40,7 +40,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.utils.UrlUtils
+import org.openedx.foundation.utils.UrlUtils
 
 class ActionDialogFragment : DialogFragment() {
 

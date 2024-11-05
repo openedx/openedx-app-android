@@ -64,8 +64,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.koin.androidx.compose.koinViewModel
-import org.openedx.core.extension.parcelable
-import org.openedx.core.extension.toastMessage
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -74,6 +72,8 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.parcelable
+import org.openedx.foundation.extension.toastMessage
 import org.openedx.profile.R
 import androidx.compose.ui.graphics.Color as ComposeColor
 import org.openedx.core.R as CoreR

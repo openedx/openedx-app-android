@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package org.openedx.core
+package org.openedx.course.utils
 
 import android.content.Context
 import android.graphics.Bitmap

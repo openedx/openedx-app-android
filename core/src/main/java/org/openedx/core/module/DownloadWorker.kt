@@ -26,7 +26,7 @@ import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
-import org.openedx.core.utils.FileUtil
+import org.openedx.foundation.utils.FileUtil
 
 class DownloadWorker(
     val context: Context,
@@ -43,7 +43,8 @@ class DownloadWorker(
     private var downloadEnqueue = listOf<DownloadModel>()
     private var downloadError = mutableListOf<DownloadModel>()
 
-    private val folder = FileUtil(context).getExternalAppDir()
+    private val fileUtil: FileUtil by inject(FileUtil::class.java)
+    private val folder = fileUtil.getExternalAppDir()
 
     private var currentDownload: DownloadModel? = null
     private var lastUpdateTime = 0L

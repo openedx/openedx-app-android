@@ -1,7 +1,7 @@
 package org.openedx.discovery.presentation.catalog
 
 import android.net.Uri
-import org.openedx.core.extension.getQueryParams
+import org.openedx.foundation.extension.getQueryParams
 
 /**
  * To parse and store links that we need within a WebView.
