@@ -3,6 +3,7 @@ package org.openedx.app
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
@@ -163,11 +164,10 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        enrollmentMode: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
+            CourseContainerFragment.newInstance(courseId, courseTitle)
         )
     }
     //endregion
@@ -178,7 +178,6 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        enrollmentMode: String,
         openTab: String,
         resumeBlockId: String,
     ) {
@@ -187,7 +186,6 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             CourseContainerFragment.newInstance(
                 courseId,
                 courseTitle,
-                enrollmentMode,
                 openTab,
                 resumeBlockId
             )
@@ -409,6 +407,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType) {
         replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
+    }
+
+    override fun navigateToDiscover(fm: FragmentManager) {
+        fm.beginTransaction()
+            .replace(R.id.container, MainFragment.newInstance("", "", HomeTab.DISCOVER.name))
+            .commit()
     }
 
     override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {

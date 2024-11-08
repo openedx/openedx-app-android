@@ -300,7 +300,6 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = courseTitle,
-                enrollmentMode = ""
             )
         }
     }
@@ -311,7 +310,6 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                enrollmentMode = "",
                 openTab = "VIDEOS"
             )
         }
@@ -323,7 +321,6 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                enrollmentMode = "",
                 openTab = "DATES"
             )
         }
@@ -335,7 +332,6 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                enrollmentMode = "",
                 openTab = "DISCUSSIONS"
             )
         }
@@ -347,7 +343,6 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                enrollmentMode = "",
                 openTab = "MORE"
             )
         }

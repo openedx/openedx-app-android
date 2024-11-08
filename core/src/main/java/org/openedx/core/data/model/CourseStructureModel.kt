@@ -33,8 +33,12 @@ data class CourseStructureModel(
     var coursewareAccess: CoursewareAccess?,
     @SerializedName("media")
     var media: Media?,
+    @SerializedName("course_access_details")
+    val courseAccessDetails: CourseAccessDetails,
     @SerializedName("certificate")
     val certificate: Certificate?,
+    @SerializedName("enrollment_details")
+    val enrollmentDetails: EnrollmentDetails,
     @SerializedName("is_self_paced")
     var isSelfPaced: Boolean?,
     @SerializedName("course_progress")
@@ -58,7 +62,7 @@ data class CourseStructureModel(
             media = media?.mapToDomain(),
             certificate = certificate?.mapToDomain(),
             isSelfPaced = isSelfPaced ?: false,
-            progress = progress?.mapToDomain()
+            progress = progress?.mapToDomain(),
         )
     }
 
@@ -78,7 +82,7 @@ data class CourseStructureModel(
             media = MediaDb.createFrom(media),
             certificate = certificate?.mapToRoomEntity(),
             isSelfPaced = isSelfPaced ?: false,
-            progress = progress?.mapToRoomEntity() ?: ProgressDb.DEFAULT_PROGRESS
+            progress = progress?.mapToRoomEntity() ?: ProgressDb.DEFAULT_PROGRESS,
         )
     }
 }

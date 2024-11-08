@@ -143,10 +143,9 @@ class DashboardListFragment : Fragment() {
                     onItemClick = {
                         viewModel.dashboardCourseClickedEvent(it.course.id, it.course.name)
                         router.navigateToCourseOutline(
-                            requireActivity().supportFragmentManager,
-                            it.course.id,
-                            it.course.name,
-                            it.mode
+                            fm = requireActivity().supportFragmentManager,
+                            courseId = it.course.id,
+                            courseTitle = it.course.name,
                         )
                     },
                     onSwipeRefresh = {

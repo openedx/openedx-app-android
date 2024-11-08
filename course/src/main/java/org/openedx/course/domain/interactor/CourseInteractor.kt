@@ -2,6 +2,7 @@ package org.openedx.course.domain.interactor
 
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.course.data.repository.CourseRepository
 
@@ -18,6 +19,10 @@ class CourseInteractor(
 
     suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
         return repository.getCourseStructureFromCache(courseId)
+    }
+
+    suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
+        return repository.getEnrollmentDetails(courseId = courseId)
     }
 
     suspend fun getCourseStructureForVideos(

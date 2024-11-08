@@ -30,6 +30,7 @@ import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.data.model.CourseEnrollmentDetails
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
