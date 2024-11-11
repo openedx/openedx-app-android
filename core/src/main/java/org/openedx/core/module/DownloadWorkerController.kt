@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -14,7 +13,6 @@ import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.download.FileDownloader
 import java.io.File
-import java.util.concurrent.ExecutionException
 
 class DownloadWorkerController(
     context: Context,
@@ -23,12 +21,11 @@ class DownloadWorkerController(
 ) {
 
     private val workManager = WorkManager.getInstance(context)
-
     private var downloadTaskList = listOf<DownloadModel>()
 
     init {
         GlobalScope.launch {
-            downloadDao.readAllData().collect { list ->
+            downloadDao.getAllDataFlow().collect { list ->
                 val domainList = list.map { it.mapToDomain() }
                 downloadTaskList = domainList.filter {
                     it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
@@ -46,16 +43,15 @@ class DownloadWorkerController(
     }
 
     private suspend fun updateList() {
-        downloadTaskList =
-            downloadDao.readAllData().first().map { it.mapToDomain() }.filter {
+        downloadTaskList = downloadDao.getAllDataFlow().first()
+            .map { it.mapToDomain() }
+            .filter {
                 it.downloadedState == DownloadedState.WAITING || it.downloadedState == DownloadedState.DOWNLOADING
             }
     }
 
     suspend fun saveModels(downloadModels: List<DownloadModel>) {
-        downloadDao.insertDownloadModel(
-            downloadModels.map { DownloadModelEntity.createFrom(it) }
-        )
+        downloadDao.insertDownloadModel(downloadModels.map { DownloadModelEntity.createFrom(it) })
     }
 
     suspend fun removeModel(id: String) {
@@ -69,11 +65,9 @@ class DownloadWorkerController(
 
         downloadModels.forEach { downloadModel ->
             removeIds.add(downloadModel.id)
-
             if (downloadModel.downloadedState == DownloadedState.DOWNLOADING) {
                 hasDownloading = true
             }
-
             try {
                 File(downloadModel.path).delete()
             } catch (e: Exception) {
@@ -83,6 +77,7 @@ class DownloadWorkerController(
 
         if (hasDownloading) fileDownloader.cancelDownloading()
         downloadDao.removeAllDownloadModels(removeIds)
+        downloadDao.removeOfflineXBlockProgress(removeIds)
 
         updateList()
 
@@ -96,19 +91,14 @@ class DownloadWorkerController(
         workManager.cancelAllWorkByTag(DownloadWorker.WORKER_TAG)
     }
 
-
     private fun isWorkScheduled(tag: String): Boolean {
-        val statuses: ListenableFuture<List<WorkInfo>> = workManager.getWorkInfosByTag(tag)
+        val statuses = workManager.getWorkInfosByTag(tag)
         return try {
-            val workInfoList: List<WorkInfo> = statuses.get()
-            val workInfo = workInfoList.find {
-                (it.state == WorkInfo.State.RUNNING) or (it.state == WorkInfo.State.ENQUEUED)
+            val workInfo = statuses.get().find {
+                it.state == WorkInfo.State.RUNNING || it.state == WorkInfo.State.ENQUEUED
             }
             workInfo != null
-        } catch (e: ExecutionException) {
-            e.printStackTrace()
-            false
-        } catch (e: InterruptedException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             false
         }

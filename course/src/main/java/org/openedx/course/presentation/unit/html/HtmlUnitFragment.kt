@@ -9,13 +9,32 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.webkit.*
+import android.webkit.JavascriptInterface
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,23 +51,40 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.extension.isEmailValid
+import org.koin.core.parameter.parametersOf
+import org.openedx.core.extension.equalsHost
+import org.openedx.core.extension.loadUrl
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.ui.*
+import org.openedx.core.ui.FullScreenErrorView
+import org.openedx.core.ui.roundBorderWithoutBottom
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.EmailUtil
+import org.openedx.foundation.extension.applyDarkModeIfEnabled
+import org.openedx.foundation.extension.isEmailValid
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 
 class HtmlUnitFragment : Fragment() {
 
-    private val viewModel by viewModel<HtmlUnitViewModel>()
-    private var blockId: String = ""
+    private val viewModel by viewModel<HtmlUnitViewModel> {
+        parametersOf(
+            requireArguments().getString(ARG_BLOCK_ID, ""),
+            requireArguments().getString(ARG_COURSE_ID, "")
+        )
+    }
     private var blockUrl: String = ""
+    private var offlineUrl: String = ""
+    private var lastModified: String = ""
+    private var fromDownloadedContent: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        blockId = requireArguments().getString(ARG_BLOCK_ID, "")
         blockUrl = requireArguments().getString(ARG_BLOCK_URL, "")
+        offlineUrl = requireArguments().getString(ARG_OFFLINE_URL, "")
+        lastModified = requireArguments().getString(ARG_LAST_MODIFIED, "")
+        fromDownloadedContent = lastModified.isNotEmpty()
     }
 
     override fun onCreateView(
@@ -61,15 +97,22 @@ class HtmlUnitFragment : Fragment() {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
 
-                var isLoading by remember {
-                    mutableStateOf(true)
-                }
-
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.isOnline)
                 }
 
+                val url by rememberSaveable {
+                    mutableStateOf(
+                        if (!hasInternetConnection && offlineUrl.isNotEmpty()) {
+                            offlineUrl
+                        } else {
+                            blockUrl
+                        }
+                    )
+                }
+
                 val injectJSList by viewModel.injectJSList.collectAsState()
+                val uiState by viewModel.uiState.collectAsState()
 
                 val configuration = LocalConfiguration.current
 
@@ -102,36 +145,47 @@ class HtmlUnitFragment : Fragment() {
                             .then(border),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        if (hasInternetConnection) {
-                            HTMLContentView(
-                                windowSize = windowSize,
-                                url = blockUrl,
-                                cookieManager = viewModel.cookieManager,
-                                apiHostURL = viewModel.apiHostURL,
-                                isLoading = isLoading,
-                                injectJSList = injectJSList,
-                                onCompletionSet = {
-                                    viewModel.notifyCompletionSet()
-                                },
-                                onWebPageLoading = {
-                                    isLoading = true
-                                },
-                                onWebPageLoaded = {
-                                    isLoading = false
-                                    if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
-                                }
-                            )
+                        if (uiState is HtmlUnitUIState.Initialization) return@Box
+                        if ((uiState is HtmlUnitUIState.Error).not()) {
+                            if (hasInternetConnection || fromDownloadedContent) {
+                                HTMLContentView(
+                                    uiState = uiState,
+                                    windowSize = windowSize,
+                                    url = url,
+                                    cookieManager = viewModel.cookieManager,
+                                    apiHostURL = viewModel.apiHostURL,
+                                    isLoading = uiState is HtmlUnitUIState.Loading,
+                                    injectJSList = injectJSList,
+                                    onCompletionSet = {
+                                        viewModel.notifyCompletionSet()
+                                    },
+                                    onWebPageLoading = {
+                                        viewModel.onWebPageLoading()
+                                    },
+                                    onWebPageLoaded = {
+                                        if ((uiState is HtmlUnitUIState.Error).not()) {
+                                            viewModel.onWebPageLoaded()
+                                        }
+                                        if (isAdded) viewModel.setWebPageLoaded(requireContext().assets)
+                                    },
+                                    onWebPageLoadError = {
+                                        if (!fromDownloadedContent) viewModel.onWebPageLoadError()
+                                    },
+                                    saveXBlockProgress = { jsonProgress ->
+                                        viewModel.saveXBlockProgress(jsonProgress)
+                                    },
+                                )
+                            } else {
+                                viewModel.onWebPageLoadError()
+                            }
                         } else {
-                            ConnectionErrorView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.appColors.background)
-                            ) {
+                            val errorType = (uiState as HtmlUnitUIState.Error).errorType
+                            FullScreenErrorView(errorType = errorType) {
                                 hasInternetConnection = viewModel.isOnline
+                                viewModel.onWebPageLoading()
                             }
                         }
-                        if (isLoading && hasInternetConnection) {
+                        if (uiState is HtmlUnitUIState.Loading && hasInternetConnection) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -150,15 +204,24 @@ class HtmlUnitFragment : Fragment() {
 
     companion object {
         private const val ARG_BLOCK_ID = "blockId"
+        private const val ARG_COURSE_ID = "courseId"
         private const val ARG_BLOCK_URL = "blockUrl"
+        private const val ARG_OFFLINE_URL = "offlineUrl"
+        private const val ARG_LAST_MODIFIED = "lastModified"
         fun newInstance(
             blockId: String,
             blockUrl: String,
+            courseId: String,
+            offlineUrl: String = "",
+            lastModified: String = ""
         ): HtmlUnitFragment {
             val fragment = HtmlUnitFragment()
             fragment.arguments = bundleOf(
                 ARG_BLOCK_ID to blockId,
-                ARG_BLOCK_URL to blockUrl
+                ARG_BLOCK_URL to blockUrl,
+                ARG_OFFLINE_URL to offlineUrl,
+                ARG_LAST_MODIFIED to lastModified,
+                ARG_COURSE_ID to courseId
             )
             return fragment
         }
@@ -168,6 +231,7 @@ class HtmlUnitFragment : Fragment() {
 @Composable
 @SuppressLint("SetJavaScriptEnabled")
 private fun HTMLContentView(
+    uiState: HtmlUnitUIState,
     windowSize: WindowSize,
     url: String,
     cookieManager: AppCookieManager,
@@ -177,6 +241,8 @@ private fun HTMLContentView(
     onCompletionSet: () -> Unit,
     onWebPageLoading: () -> Unit,
     onWebPageLoaded: () -> Unit,
+    onWebPageLoadError: () -> Unit,
+    saveXBlockProgress: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -189,6 +255,8 @@ private fun HTMLContentView(
             )
         )
     }
+
+    val isDarkTheme = isSystemInDarkTheme()
 
     AndroidView(
         modifier = Modifier
@@ -203,6 +271,17 @@ private fun HTMLContentView(
                         onCompletionSet()
                     }
                 }, "callback")
+                addJavascriptInterface(
+                    JSBridge(
+                        postMessageCallback = {
+                            coroutineScope.launch {
+                                saveXBlockProgress(it)
+                                setupOfflineProgress(it)
+                            }
+                        }
+                    ),
+                    "AndroidBridge"
+                )
                 webViewClient = object : WebViewClient() {
 
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -257,6 +336,17 @@ private fun HTMLContentView(
                         }
                         super.onReceivedHttpError(view, request, errorResponse)
                     }
+
+                    override fun onReceivedError(
+                        view: WebView,
+                        request: WebResourceRequest,
+                        error: WebResourceError
+                    ) {
+                        if (view.url.equalsHost(request.url.host)) {
+                            onWebPageLoadError()
+                        }
+                        super.onReceivedError(view, request, error)
+                    }
                 }
                 with(settings) {
                     javaScriptEnabled = true
@@ -265,16 +355,38 @@ private fun HTMLContentView(
                     setSupportZoom(true)
                     loadsImagesAutomatically = true
                     domStorageEnabled = true
+                    allowFileAccess = true
+                    allowContentAccess = true
+                    useWideViewPort = true
+                    cacheMode = WebSettings.LOAD_NO_CACHE
                 }
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
-                loadUrl(url)
+
+                loadUrl(url, coroutineScope, cookieManager)
+                applyDarkModeIfEnabled(isDarkTheme)
             }
         },
         update = { webView ->
             if (!isLoading && injectJSList.isNotEmpty()) {
                 injectJSList.forEach { webView.evaluateJavascript(it, null) }
+                val jsonProgress = (uiState as? HtmlUnitUIState.Loaded)?.jsonProgress
+                if (!jsonProgress.isNullOrEmpty()) {
+                    webView.setupOfflineProgress(jsonProgress)
+                }
             }
-        })
+        }
+    )
 }
 
+private fun WebView.setupOfflineProgress(jsonProgress: String) {
+    loadUrl("javascript:markProblemCompleted('$jsonProgress');")
+}
+
+class JSBridge(val postMessageCallback: (String) -> Unit) {
+    @Suppress("unused")
+    @JavascriptInterface
+    fun postMessage(str: String) {
+        postMessageCallback(str)
+    }
+}

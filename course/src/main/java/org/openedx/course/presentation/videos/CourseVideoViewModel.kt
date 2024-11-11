@@ -1,5 +1,6 @@
 package org.openedx.course.presentation.videos
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +10,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
@@ -17,10 +17,9 @@ import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.download.BaseDownloadViewModel
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CourseDataReady
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -29,6 +28,11 @@ import org.openedx.core.system.notifier.VideoQualityChanged
 import org.openedx.course.R
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
+import org.openedx.foundation.utils.FileUtil
 
 class CourseVideoViewModel(
     val courseId: String,
@@ -41,18 +45,23 @@ class CourseVideoViewModel(
     private val courseNotifier: CourseNotifier,
     private val videoNotifier: VideoNotifier,
     private val analytics: CourseAnalytics,
+    private val downloadDialogManager: DownloadDialogManager,
+    private val fileUtil: FileUtil,
+    val courseRouter: CourseRouter,
     coreAnalytics: CoreAnalytics,
     downloadDao: DownloadDao,
-    workerController: DownloadWorkerController
+    workerController: DownloadWorkerController,
+    downloadHelper: DownloadHelper,
 ) : BaseDownloadViewModel(
     courseId,
     downloadDao,
     preferencesManager,
     workerController,
-    coreAnalytics
+    coreAnalytics,
+    downloadHelper,
 ) {
 
-    val isCourseNestedListEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseDropdownNavigationEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
     private val _uiState = MutableStateFlow<CourseVideosUIState>(CourseVideosUIState.Loading)
     val uiState: StateFlow<CourseVideosUIState>
@@ -75,12 +84,8 @@ class CourseVideoViewModel(
                 when (event) {
                     is CourseStructureUpdated -> {
                         if (event.courseId == courseId) {
-                            updateVideos()
+                            getVideos()
                         }
-                    }
-
-                    is CourseDataReady -> {
-                        getVideos()
                     }
                 }
             }
@@ -114,6 +119,8 @@ class CourseVideoViewModel(
         }
 
         _videoSettings.value = preferencesManager.videoSettings
+
+        getVideos()
     }
 
     override fun saveDownloadModels(folder: String, id: String) {
@@ -141,35 +148,38 @@ class CourseVideoViewModel(
         super.saveAllDownloadModels(folder)
     }
 
-    private fun updateVideos() {
-        getVideos()
-    }
-
     fun getVideos() {
         viewModelScope.launch {
-            var courseStructure = interactor.getCourseStructureForVideos()
-            val blocks = courseStructure.blockData
-            if (blocks.isEmpty()) {
-                _uiState.value = CourseVideosUIState.Empty(
-                    message = resourceManager.getString(R.string.course_does_not_include_videos)
-                )
-            } else {
-                setBlocks(courseStructure.blockData)
-                courseSubSections.clear()
-                courseSubSectionUnit.clear()
-                courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
-                initDownloadModelsStatus()
+            try {
+                var courseStructure = interactor.getCourseStructureForVideos(courseId)
+                val blocks = courseStructure.blockData
+                if (blocks.isEmpty()) {
+                    _uiState.value = CourseVideosUIState.Empty
+                } else {
+                    setBlocks(courseStructure.blockData)
+                    courseSubSections.clear()
+                    courseSubSectionUnit.clear()
+                    courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
+                    initDownloadModelsStatus()
 
-                val courseSectionsState =
-                    (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
+                    val courseSectionsState =
+                        (_uiState.value as? CourseVideosUIState.CourseData)?.courseSectionsState.orEmpty()
 
-                _uiState.value =
-                    CourseVideosUIState.CourseData(
-                        courseStructure, getDownloadModelsStatus(), courseSubSections,
-                        courseSectionsState, subSectionsDownloadsCount, getDownloadModelsSize()
-                    )
+                    _uiState.value =
+                        CourseVideosUIState.CourseData(
+                            courseStructure = courseStructure,
+                            downloadedState = getDownloadModelsStatus(),
+                            courseSubSections = courseSubSections,
+                            courseSectionsState = courseSectionsState,
+                            subSectionsDownloadsCount = subSectionsDownloadsCount,
+                            downloadModelsSize = getDownloadModelsSize(),
+                            useRelativeDates = preferencesManager.isRelativeDatesEnabled
+                        )
+                }
+                courseNotifier.send(CourseLoading(false))
+            } catch (e: Exception) {
+                _uiState.value = CourseVideosUIState.Empty
             }
-            courseNotifier.send(CourseLoading(false))
         }
     }
 
@@ -204,20 +214,69 @@ class CourseVideoViewModel(
                 resultBlocks.add(block)
                 block.descendants.forEach { descendant ->
                     blocks.find { it.id == descendant }?.let {
-                        if (isCourseNestedListEnabled) {
-                            courseSubSections.getOrPut(block.id) { mutableListOf() }
-                                .add(it)
-                            courseSubSectionUnit[it.id] = it.getFirstDescendantBlock(blocks)
-                            subSectionsDownloadsCount[it.id] = it.getDownloadsCount(blocks)
-
-                        } else {
-                            resultBlocks.add(it)
-                        }
+                        courseSubSections.getOrPut(block.id) { mutableListOf() }
+                            .add(it)
+                        courseSubSectionUnit[it.id] = it.getFirstDescendantBlock(blocks)
+                        subSectionsDownloadsCount[it.id] = it.getDownloadsCount(blocks)
                         addDownloadableChildrenForSequentialBlock(it)
                     }
                 }
             }
         }
         return resultBlocks.toList()
+    }
+
+    fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {
+        viewModelScope.launch {
+            val courseData = _uiState.value as? CourseVideosUIState.CourseData ?: return@launch
+
+            val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+
+            val blocks = subSectionsBlocks.flatMap { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                allBlocks.values.filter { it.id in verticalBlocks.flatMap { it.descendants } }
+            }
+
+            val downloadableBlocks = blocks.filter { it.isDownloadable }
+            val downloadingBlocks = blocksIds.filter { isBlockDownloading(it) }
+            val isAllBlocksDownloaded = downloadableBlocks.all { isBlockDownloaded(it.id) }
+
+            val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
+                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val notDownloadedBlocks = allBlocks.values.filter {
+                    it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(it.id)
+                }
+                if (notDownloadedBlocks.isNotEmpty()) subSectionsBlock else null
+            }
+
+            val requiredSubSections = notDownloadedSubSectionBlocks.ifEmpty {
+                subSectionsBlocks
+            }
+
+            if (downloadingBlocks.isNotEmpty()) {
+                val downloadableChildren = downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
+                if (config.getCourseUIConfig().isCourseDownloadQueueEnabled) {
+                    courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
+                } else {
+                    downloadableChildren.forEach {
+                        if (!isBlockDownloaded(it)) {
+                            removeBlockDownloadModel(it)
+                        }
+                    }
+                }
+            } else {
+                downloadDialogManager.showPopup(
+                    subSectionsBlocks = requiredSubSections,
+                    courseId = courseId,
+                    isBlocksDownloaded = isAllBlocksDownloaded,
+                    onlyVideoBlocks = true,
+                    fragmentManager = fragmentManager,
+                    removeDownloadModels = ::removeDownloadModels,
+                    saveDownloadModels = { blockId ->
+                        saveDownloadModels(fileUtil.getExternalAppDir().path, blockId)
+                    }
+                )
+            }
+        }
     }
 }

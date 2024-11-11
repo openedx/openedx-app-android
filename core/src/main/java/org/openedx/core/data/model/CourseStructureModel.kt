@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import org.openedx.core.data.model.room.BlockDb
 import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.MediaDb
+import org.openedx.core.data.model.room.discovery.ProgressDb
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.utils.TimeUtils
 
@@ -32,10 +33,16 @@ data class CourseStructureModel(
     var coursewareAccess: CoursewareAccess?,
     @SerializedName("media")
     var media: Media?,
+    @SerializedName("course_access_details")
+    val courseAccessDetails: CourseAccessDetails,
     @SerializedName("certificate")
     val certificate: Certificate?,
+    @SerializedName("enrollment_details")
+    val enrollmentDetails: EnrollmentDetails,
     @SerializedName("is_self_paced")
-    var isSelfPaced: Boolean?
+    var isSelfPaced: Boolean?,
+    @SerializedName("course_progress")
+    val progress: Progress?,
 ) {
     fun mapToDomain(): CourseStructure {
         return CourseStructure(
@@ -54,7 +61,8 @@ data class CourseStructureModel(
             coursewareAccess = coursewareAccess?.mapToDomain(),
             media = media?.mapToDomain(),
             certificate = certificate?.mapToDomain(),
-            isSelfPaced = isSelfPaced ?: false
+            isSelfPaced = isSelfPaced ?: false,
+            progress = progress?.mapToDomain(),
         )
     }
 
@@ -73,7 +81,8 @@ data class CourseStructureModel(
             coursewareAccess = coursewareAccess?.mapToRoomEntity(),
             media = MediaDb.createFrom(media),
             certificate = certificate?.mapToRoomEntity(),
-            isSelfPaced = isSelfPaced ?: false
+            isSelfPaced = isSelfPaced ?: false,
+            progress = progress?.mapToRoomEntity() ?: ProgressDb.DEFAULT_PROGRESS,
         )
     }
 }

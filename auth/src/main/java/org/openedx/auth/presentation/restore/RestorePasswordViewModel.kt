@@ -8,22 +8,22 @@ import org.openedx.auth.domain.interactor.AuthInteractor
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthAnalyticsEvent
 import org.openedx.auth.presentation.AuthAnalyticsKey
-import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
-import org.openedx.core.UIMessage
-import org.openedx.core.extension.isEmailValid
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.system.EdxError
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.foundation.extension.isEmailValid
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 
 class RestorePasswordViewModel(
     private val interactor: AuthInteractor,
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier
 ) : BaseViewModel() {
 
     private val _uiState = MutableLiveData<RestorePasswordUIState>()
@@ -81,8 +81,10 @@ class RestorePasswordViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _appUpgradeEvent.value = event
+                }
             }
         }
     }

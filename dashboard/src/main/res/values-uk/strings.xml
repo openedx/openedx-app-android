@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="dashboard_title">Мої курси</string>
-    <string name="dashboard_courses">Курси</string>
-    <string name="dashboard_welcome_back">Ласкаво просимо назад. Продовжуймо навчатися.</string>
-    <string name="dashboard_you_are_not_enrolled">You are not enrolled in any courses yet.</string>
-
-</resources>

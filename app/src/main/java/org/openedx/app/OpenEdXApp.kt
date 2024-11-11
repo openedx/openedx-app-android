@@ -3,19 +3,23 @@ package org.openedx.app
 import android.app.Application
 import com.braze.Braze
 import com.braze.configuration.BrazeConfig
+import com.braze.ui.BrazeDeeplinkHandler
 import com.google.firebase.FirebaseApp
 import io.branch.referral.Branch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import org.openedx.app.deeplink.BranchBrazeDeeplinkHandler
 import org.openedx.app.di.appModule
 import org.openedx.app.di.networkingModule
 import org.openedx.app.di.screenModule
 import org.openedx.core.config.Config
+import org.openedx.firebase.OEXFirebaseAnalytics
 
 class OpenEdXApp : Application() {
 
     private val config by inject<Config>()
+    private val pluginManager by inject<PluginManager>()
 
     override fun onCreate() {
         super.onCreate()
@@ -36,6 +40,7 @@ class OpenEdXApp : Application() {
                 Branch.enableTestMode()
                 Branch.enableLogging()
             }
+            Branch.expectDelayedSessionInitialization(true)
             Branch.getAutoInstance(this)
         }
 
@@ -50,6 +55,18 @@ class OpenEdXApp : Application() {
                 .setIsFirebaseMessagingServiceOnNewTokenRegistrationEnabled(true)
                 .build()
             Braze.configure(this, brazeConfig)
+
+            if (config.getBranchConfig().enabled) {
+                BrazeDeeplinkHandler.setBrazeDeeplinkHandler(BranchBrazeDeeplinkHandler())
+            }
+        }
+
+        initPlugins()
+    }
+
+    private fun initPlugins() {
+        if (config.getFirebaseConfig().enabled) {
+            pluginManager.addPlugin(OEXFirebaseAnalytics(context = this))
         }
     }
 }

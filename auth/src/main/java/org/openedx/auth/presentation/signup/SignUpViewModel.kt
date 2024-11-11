@@ -22,17 +22,19 @@ import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
-import org.openedx.core.BaseViewModel
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.domain.model.createHonorCodeField
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as coreR
 
 class SignUpViewModel(
@@ -40,7 +42,7 @@ class SignUpViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
     private val preferencesManager: CorePreferences,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier,
     private val agreementProvider: AgreementProvider,
     private val oAuthHelper: OAuthHelper,
     private val config: Config,
@@ -71,6 +73,7 @@ class SignUpViewModel(
 
     init {
         collectAppUpgradeEvent()
+        logRegisterScreenEvent()
     }
 
     fun getRegistrationFields() {
@@ -175,6 +178,7 @@ class SignUpViewModel(
                         )
                         setUserId()
                         _uiState.update { it.copy(successLogin = true, isButtonLoading = false) }
+                        appNotifier.send(SignInEvent())
                     } else {
                         exchangeToken(socialAuth)
                     }
@@ -226,9 +230,14 @@ class SignUpViewModel(
             interactor.loginSocial(socialAuth.accessToken, socialAuth.authType)
         }.onFailure {
             val fields = uiState.value.allFields.toMutableList()
-                .filter { field -> field.type != RegistrationFieldType.PASSWORD }
-            updateField(ApiConstants.NAME, socialAuth.name)
-            updateField(ApiConstants.EMAIL, socialAuth.email)
+                .filter { it.type != RegistrationFieldType.PASSWORD }
+                .map { field ->
+                    when (field.name) {
+                        ApiConstants.NAME -> field.copy(placeholder = socialAuth.name)
+                        ApiConstants.EMAIL -> field.copy(placeholder = socialAuth.email)
+                        else -> field
+                    }
+                }
             setErrorInstructions(emptyMap())
             _uiState.update {
                 it.copy(
@@ -250,6 +259,7 @@ class SignUpViewModel(
             )
             _uiState.update { it.copy(successLogin = true) }
             logger.d { "Social login (${socialAuth.authType.methodName}) success" }
+            appNotifier.send(SignInEvent())
         }
     }
 
@@ -269,8 +279,10 @@ class SignUpViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _uiState.update { it.copy(appUpgradeEvent = event) }
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _uiState.update { it.copy(appUpgradeEvent = event) }
+                }
             }
         }
     }
@@ -310,6 +322,16 @@ class SignUpViewModel(
             params = buildMap {
                 put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
+            }
+        )
+    }
+
+    private fun logRegisterScreenEvent() {
+        val event = AuthAnalyticsEvent.REGISTER
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
             }
         )
     }

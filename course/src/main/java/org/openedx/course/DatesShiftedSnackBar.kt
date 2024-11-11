@@ -1,5 +1,5 @@
 package org.openedx.course
 
-import org.openedx.core.UIMessage
+import org.openedx.foundation.presentation.UIMessage
 
 class DatesShiftedSnackBar : UIMessage()

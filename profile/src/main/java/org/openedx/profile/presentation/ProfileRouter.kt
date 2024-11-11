@@ -1,7 +1,7 @@
 package org.openedx.profile.presentation
 
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.profile.domain.model.Account
 
 interface ProfileRouter {
@@ -21,4 +21,6 @@ interface ProfileRouter {
     fun navigateToWebContent(fm: FragmentManager, title: String, url: String)
 
     fun navigateToManageAccount(fm: FragmentManager)
+
+    fun navigateToCoursesToSync(fm: FragmentManager)
 }

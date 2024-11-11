@@ -9,15 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
-import org.openedx.core.extension.clearAndAddAll
-import org.openedx.core.extension.indexOfFirstFromIndex
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -25,6 +23,9 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.extension.clearAndAddAll
+import org.openedx.foundation.extension.indexOfFirstFromIndex
+import org.openedx.foundation.presentation.BaseViewModel
 
 class CourseUnitContainerViewModel(
     val courseId: String,
@@ -33,13 +34,14 @@ class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
+    private val networkConnection: NetworkConnection,
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
 
-    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
-    val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+    val isCourseUnitProgressEnabled get() = config.getCourseUIConfig().isCourseUnitProgressEnabled
 
     private var currentIndex = 0
     private var currentVerticalIndex = 0
@@ -76,23 +78,31 @@ class CourseUnitContainerViewModel(
     var hasNextBlock = false
 
     private var currentMode: CourseViewMode? = null
+    private var currentComponentId = ""
     private var courseName = ""
 
     private val _descendantsBlocks = MutableStateFlow<List<Block>>(listOf())
     val descendantsBlocks = _descendantsBlocks.asStateFlow()
 
-    fun loadBlocks(mode: CourseViewMode) {
+    val hasNetworkConnection: Boolean
+        get() = networkConnection.isOnline()
+
+    fun loadBlocks(mode: CourseViewMode, componentId: String = "") {
         currentMode = mode
-        try {
-            val courseStructure = when (mode) {
-                CourseViewMode.FULL -> interactor.getCourseStructureFromCache()
-                CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos()
+        viewModelScope.launch {
+            try {
+                val courseStructure = when (mode) {
+                    CourseViewMode.FULL -> interactor.getCourseStructure(courseId)
+                    CourseViewMode.VIDEOS -> interactor.getCourseStructureForVideos(courseId)
+                }
+                val blocks = courseStructure.blockData
+                courseName = courseStructure.name
+                this@CourseUnitContainerViewModel.blocks.clearAndAddAll(blocks)
+
+                setupCurrentIndex(componentId)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            val blocks = courseStructure.blockData
-            courseName = courseStructure.name
-            this.blocks.clearAndAddAll(blocks)
-        } catch (e: Exception) {
-            //ignore e.printStackTrace()
         }
     }
 
@@ -104,7 +114,7 @@ class CourseUnitContainerViewModel(
                 if (event is CourseStructureUpdated) {
                     if (event.courseId != courseId) return@collect
 
-                    currentMode?.let { loadBlocks(it) }
+                    currentMode?.let { loadBlocks(it, currentComponentId) }
                     val blockId = blocks[currentVerticalIndex].id
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(blockId))
@@ -113,10 +123,10 @@ class CourseUnitContainerViewModel(
         }
     }
 
-    fun setupCurrentIndex(componentId: String = "") {
-        if (currentSectionIndex != -1) {
-            return
-        }
+    private fun setupCurrentIndex(componentId: String = "") {
+        if (currentSectionIndex != -1) return
+        currentComponentId = componentId
+
         blocks.forEachIndexed { index, block ->
             if (block.id == unitId) {
                 currentVerticalIndex = index

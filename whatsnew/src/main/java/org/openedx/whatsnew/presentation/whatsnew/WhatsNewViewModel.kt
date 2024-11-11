@@ -3,8 +3,8 @@ package org.openedx.whatsnew.presentation.whatsnew
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.fragment.app.FragmentManager
-import org.openedx.core.BaseViewModel
 import org.openedx.core.presentation.global.AppData
+import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
@@ -41,7 +41,8 @@ class WhatsNewViewModel(
         router.navigateToMain(
             fm,
             courseId,
-            infoType
+            infoType,
+            ""
         )
     }
 

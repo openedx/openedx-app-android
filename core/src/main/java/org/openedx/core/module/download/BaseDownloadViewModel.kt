@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Block
@@ -17,8 +16,7 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.utils.Sha1Util
-import java.io.File
+import org.openedx.foundation.presentation.BaseViewModel
 
 abstract class BaseDownloadViewModel(
     private val courseId: String,
@@ -26,9 +24,10 @@ abstract class BaseDownloadViewModel(
     private val preferencesManager: CorePreferences,
     private val workerController: DownloadWorkerController,
     private val analytics: CoreAnalytics,
+    private val downloadHelper: DownloadHelper,
 ) : BaseViewModel() {
 
-    private val allBlocks = hashMapOf<String, Block>()
+    val allBlocks = hashMapOf<String, Block>()
 
     private val downloadableChildrenMap = hashMapOf<String, List<String>>()
     private val downloadModelsStatus = hashMapOf<String, DownloadedState>()
@@ -42,7 +41,7 @@ abstract class BaseDownloadViewModel(
 
     init {
         viewModelScope.launch {
-            downloadDao.readAllData().map { list -> list.map { it.mapToDomain() } }
+            downloadDao.getAllDataFlow().map { list -> list.map { it.mapToDomain() } }
                 .collect { downloadModels ->
                     updateDownloadModelsStatus(downloadModels)
                     _downloadModelsStatusFlow.emit(downloadModelsStatus)
@@ -56,7 +55,7 @@ abstract class BaseDownloadViewModel(
     }
 
     private suspend fun getDownloadModelList(): List<DownloadModel> {
-        return downloadDao.readAllData().first().map { it.mapToDomain() }
+        return downloadDao.getAllDataFlow().first().map { it.mapToDomain() }
     }
 
     private suspend fun updateDownloadModelsStatus(models: List<DownloadModel>) {
@@ -121,33 +120,16 @@ abstract class BaseDownloadViewModel(
         }
     }
 
-    private suspend fun saveDownloadModels(folder: String, saveBlocksIds: List<String>) {
+    suspend fun saveDownloadModels(folder: String, saveBlocksIds: List<String>) {
         val downloadModels = mutableListOf<DownloadModel>()
         val downloadModelList = getDownloadModelList()
         for (blockId in saveBlocksIds) {
             allBlocks[blockId]?.let { block ->
-                val videoInfo =
-                    block.studentViewData?.encodedVideos?.getPreferredVideoInfoForDownloading(
-                        preferencesManager.videoSettings.videoDownloadQuality
-                    )
-                val size = videoInfo?.fileSize ?: 0
-                val url = videoInfo?.url ?: ""
-                val extension = url.split('.').lastOrNull() ?: "mp4"
-                val path =
-                    folder + File.separator + "${Sha1Util.SHA1(block.displayName)}.$extension"
-                if (downloadModelList.find { it.id == blockId && it.downloadedState.isDownloaded } == null) {
-                    downloadModels.add(
-                        DownloadModel(
-                            block.id,
-                            block.displayName,
-                            size,
-                            path,
-                            url,
-                            block.downloadableType,
-                            DownloadedState.WAITING,
-                            null
-                        )
-                    )
+                val downloadModel = downloadHelper.generateDownloadModelFromBlock(folder, block, courseId)
+                val isNotDownloaded =
+                    downloadModelList.find { it.id == blockId && it.downloadedState.isDownloaded } == null
+                if (isNotDownloaded && downloadModel != null) {
+                    downloadModels.add(downloadModel)
                 }
             }
         }
@@ -212,6 +194,12 @@ abstract class BaseDownloadViewModel(
         }
     }
 
+    fun removeBlockDownloadModel(blockId: String) {
+        viewModelScope.launch {
+            workerController.removeModel(blockId)
+        }
+    }
+
     protected fun addDownloadableChildrenForSequentialBlock(sequentialBlock: Block) {
         for (item in sequentialBlock.descendants) {
             allBlocks[item]?.let { blockDescendant ->
@@ -225,17 +213,6 @@ abstract class BaseDownloadViewModel(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    protected fun addDownloadableChildrenForVerticalBlock(verticalBlock: Block) {
-        for (unitBlockId in verticalBlock.descendants) {
-            val block = allBlocks[unitBlockId]
-            if (block?.isDownloadable == true) {
-                val id = verticalBlock.id
-                val children = downloadableChildrenMap[id] ?: listOf()
-                downloadableChildrenMap[id] = children + block.id
             }
         }
     }

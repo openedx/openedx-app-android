@@ -10,11 +10,14 @@ sealed class CourseOutlineUIState {
         val courseStructure: CourseStructure,
         val downloadedState: Map<String, DownloadedState>,
         val resumeComponent: Block?,
+        val resumeUnitTitle: String,
         val courseSubSections: Map<String, List<Block>>,
         val courseSectionsState: Map<String, Boolean>,
         val subSectionsDownloadsCount: Map<String, Int>,
         val datesBannerInfo: CourseDatesBannerInfo,
+        val useRelativeDates: Boolean,
     ) : CourseOutlineUIState()
 
+    data object Error : CourseOutlineUIState()
     data object Loading : CourseOutlineUIState()
 }

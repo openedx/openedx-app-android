@@ -12,13 +12,16 @@ import org.openedx.auth.presentation.restore.RestorePasswordViewModel
 import org.openedx.auth.presentation.signin.SignInViewModel
 import org.openedx.auth.presentation.signup.SignUpViewModel
 import org.openedx.core.Validator
+import org.openedx.core.domain.interactor.CalendarInteractor
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectDialogViewModel
-import org.openedx.core.presentation.settings.VideoQualityViewModel
+import org.openedx.core.presentation.settings.video.VideoQualityViewModel
+import org.openedx.core.repository.CalendarRepository
 import org.openedx.course.data.repository.CourseRepository
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.container.CourseContainerViewModel
 import org.openedx.course.presentation.dates.CourseDatesViewModel
 import org.openedx.course.presentation.handouts.HandoutsViewModel
+import org.openedx.course.presentation.offline.CourseOfflineViewModel
 import org.openedx.course.presentation.outline.CourseOutlineViewModel
 import org.openedx.course.presentation.section.CourseSectionViewModel
 import org.openedx.course.presentation.unit.container.CourseUnitContainerViewModel
@@ -29,9 +32,11 @@ import org.openedx.course.presentation.unit.video.VideoUnitViewModel
 import org.openedx.course.presentation.unit.video.VideoViewModel
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.settings.download.DownloadQueueViewModel
+import org.openedx.courses.presentation.AllEnrolledCoursesViewModel
+import org.openedx.courses.presentation.DashboardGalleryViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
-import org.openedx.dashboard.presentation.DashboardViewModel
+import org.openedx.dashboard.presentation.DashboardListViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -49,10 +54,16 @@ import org.openedx.discussion.presentation.search.DiscussionSearchThreadViewMode
 import org.openedx.discussion.presentation.threads.DiscussionAddThreadViewModel
 import org.openedx.discussion.presentation.threads.DiscussionThreadsViewModel
 import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.learn.presentation.LearnViewModel
 import org.openedx.profile.data.repository.ProfileRepository
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileViewModel
+import org.openedx.profile.presentation.calendar.CalendarViewModel
+import org.openedx.profile.presentation.calendar.CoursesToSyncViewModel
+import org.openedx.profile.presentation.calendar.DisableCalendarSyncDialogViewModel
+import org.openedx.profile.presentation.calendar.NewCalendarDialogViewModel
 import org.openedx.profile.presentation.delete.DeleteProfileViewModel
 import org.openedx.profile.presentation.edit.EditProfileViewModel
 import org.openedx.profile.presentation.manageaccount.ManageAccountViewModel
@@ -63,7 +74,20 @@ import org.openedx.whatsnew.presentation.whatsnew.WhatsNewViewModel
 
 val screenModule = module {
 
-    viewModel { AppViewModel(get(), get(), get(), get(), get(named("IODispatcher")), get()) }
+    viewModel {
+        AppViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(named("IODispatcher")),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
     viewModel { MainViewModel(get(), get(), get()) }
 
     factory { AuthRepository(get(), get(), get()) }
@@ -81,6 +105,8 @@ val screenModule = module {
 
     viewModel { (courseId: String?, infoType: String?) ->
         SignInViewModel(
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -114,9 +140,24 @@ val screenModule = module {
     }
     viewModel { RestorePasswordViewModel(get(), get(), get(), get()) }
 
-    factory { DashboardRepository(get(), get(), get()) }
+    factory { DashboardRepository(get(), get(), get(), get()) }
     factory { DashboardInteractor(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { DashboardListViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { (windowSize: WindowSize) ->
+        DashboardGalleryViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            windowSize
+        )
+    }
+    viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { LearnViewModel(get(), get(), get()) }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -148,11 +189,32 @@ val screenModule = module {
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
     viewModel { (username: String) -> AnothersProfileViewModel(get(), get(), username) }
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel {
+        SettingsViewModel(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
     viewModel { ManageAccountViewModel(get(), get(), get(), get(), get()) }
+    viewModel { CalendarViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { CoursesToSyncViewModel(get(), get(), get(), get()) }
+    viewModel { NewCalendarDialogViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { DisableCalendarSyncDialogViewModel(get(), get(), get(), get()) }
+    factory { CalendarRepository(get(), get(), get()) }
+    factory { CalendarInteractor(get()) }
 
-    single { CourseRepository(get(), get(), get(), get()) }
+    single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
+
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
             pathId,
@@ -176,14 +238,15 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
         )
     }
-    viewModel { (courseId: String, courseTitle: String, enrollmentMode: String) ->
+    viewModel { (courseId: String, courseTitle: String, resumeBlockId: String) ->
         CourseContainerViewModel(
             courseId,
             courseTitle,
-            enrollmentMode,
+            resumeBlockId,
             get(),
             get(),
             get(),
@@ -194,13 +257,16 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get()
         )
     }
     viewModel { (courseId: String, courseTitle: String) ->
         CourseOutlineViewModel(
             courseId,
             courseTitle,
+            get(),
+            get(),
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -220,11 +286,6 @@ val screenModule = module {
             get(),
             get(),
             get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
         )
     }
     viewModel { (courseId: String, unitId: String) ->
@@ -235,12 +296,17 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
     viewModel { (courseId: String, courseTitle: String) ->
         CourseVideoViewModel(
             courseId,
             courseTitle,
+            get(),
+            get(),
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -279,9 +345,13 @@ val screenModule = module {
             get(),
         )
     }
-    viewModel { (enrollmentMode: String) ->
+    viewModel { (courseId: String, enrollmentMode: String) ->
         CourseDatesViewModel(
+            courseId,
             enrollmentMode,
+            get(),
+            get(),
+            get(),
             get(),
             get(),
             get(),
@@ -305,8 +375,10 @@ val screenModule = module {
 
     single { DiscussionRepository(get(), get(), get()) }
     factory { DiscussionInteractor(get()) }
-    viewModel {
+    viewModel { (courseId: String, courseTitle: String) ->
         DiscussionTopicsViewModel(
+            courseId,
+            courseTitle,
             get(),
             get(),
             get(),
@@ -370,10 +442,38 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
-    viewModel { HtmlUnitViewModel(get(), get(), get(), get()) }
+    viewModel { (blockId: String, courseId: String) ->
+        HtmlUnitViewModel(
+            blockId,
+            courseId,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
 
     viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
+
+    viewModel { (courseId: String, courseTitle: String) ->
+        CourseOfflineViewModel(
+            courseId,
+            courseTitle,
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
 
 }

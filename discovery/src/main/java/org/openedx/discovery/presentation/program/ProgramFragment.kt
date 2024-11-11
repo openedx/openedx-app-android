@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -41,35 +42,43 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.extension.toastMessage
+import org.openedx.core.extension.loadUrl
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
 import org.openedx.core.presentation.dialog.alert.InfoDialogFragment
-import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.presentation.global.webview.WebViewUIAction
+import org.openedx.core.system.AppCookieManager
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
 import org.openedx.discovery.presentation.DiscoveryAnalyticsScreen
 import org.openedx.discovery.presentation.catalog.CatalogWebViewScreen
 import org.openedx.discovery.presentation.catalog.WebViewLink
+import org.openedx.foundation.extension.takeIfNotEmpty
+import org.openedx.foundation.extension.toastMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
-class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
+class ProgramFragment : Fragment() {
 
     private val viewModel by viewModel<ProgramViewModel>()
+    private var isNestedFragment = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (myPrograms.not()) {
+        isNestedFragment = arguments?.getBoolean(ARG_NESTED_FRAGMENT, false) ?: false
+        if (isNestedFragment.not()) {
             lifecycle.addObserver(viewModel)
         }
     }
@@ -77,7 +86,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
@@ -88,7 +97,7 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
 
-                if (myPrograms.not()) {
+                if (isNestedFragment.not()) {
                     DisposableEffect(uiState is ProgramUIState.CourseEnrolled) {
                         if (uiState is ProgramUIState.CourseEnrolled) {
 
@@ -119,14 +128,28 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     windowSize = windowSize,
                     uiState = uiState,
                     contentUrl = getInitialUrl(),
+                    cookieManager = viewModel.cookieManager,
                     canShowBackBtn = arguments?.getString(ARG_PATH_ID, "")
                         ?.isNotEmpty() == true,
+                    isNestedFragment = isNestedFragment,
                     uriScheme = viewModel.uriScheme,
                     hasInternetConnection = hasInternetConnection,
-                    checkInternetConnection = {
-                        hasInternetConnection = viewModel.hasInternetConnection
+                    onWebViewUIAction = { action ->
+                        when (action) {
+                            WebViewUIAction.WEB_PAGE_LOADED -> {
+                                viewModel.showLoading(false)
+                            }
+
+                            WebViewUIAction.WEB_PAGE_ERROR -> {
+                                viewModel.onPageLoadError()
+                            }
+
+                            WebViewUIAction.RELOAD_WEB_PAGE -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
+                                viewModel.showLoading(true)
+                            }
+                        }
                     },
-                    onWebPageLoaded = { viewModel.showLoading(false) },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStackImmediate()
                     },
@@ -147,7 +170,8 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                             }
 
                             linkAuthority.PROGRAM_INFO,
-                            linkAuthority.COURSE_INFO -> {
+                            linkAuthority.COURSE_INFO,
+                            -> {
                                 viewModel.onViewCourseClick(
                                     fragmentManager = requireActivity().supportFragmentManager,
                                     courseId = param,
@@ -181,34 +205,33 @@ class ProgramFragment(private val myPrograms: Boolean = false) : Fragment() {
                     },
                     onSettingsClick = {
                         viewModel.navigateToSettings(requireActivity().supportFragmentManager)
-                    },
-                    refreshSessionCookie = {
-                        viewModel.refreshCookie()
-                    },
+                    }
                 )
             }
         }
     }
 
-
     private fun getInitialUrl(): String {
-        return arguments?.let { args ->
-            val pathId = args.getString(ARG_PATH_ID) ?: ""
-            viewModel.programConfig.programDetailUrlTemplate.replace("{$ARG_PATH_ID}", pathId)
+        val pathId = arguments?.getString(ARG_PATH_ID, "")
+        return pathId?.takeIfNotEmpty()?.let {
+            viewModel.programConfig.programDetailUrlTemplate.replace("{$ARG_PATH_ID}", it)
         } ?: viewModel.programConfig.programUrl
     }
 
     companion object {
         private const val ARG_PATH_ID = "path_id"
+        private const val ARG_NESTED_FRAGMENT = "nested_fragment"
 
         fun newInstance(
-            pathId: String,
+            pathId: String = "",
+            isNestedFragment: Boolean = false,
         ): ProgramFragment {
-            val fragment = ProgramFragment(false)
-            fragment.arguments = bundleOf(
-                ARG_PATH_ID to pathId,
-            )
-            return fragment
+            return ProgramFragment().apply {
+                arguments = bundleOf(
+                    ARG_PATH_ID to pathId,
+                    ARG_NESTED_FRAGMENT to isNestedFragment
+                )
+            }
         }
     }
 }
@@ -219,19 +242,19 @@ private fun ProgramInfoScreen(
     windowSize: WindowSize,
     uiState: ProgramUIState?,
     contentUrl: String,
+    cookieManager: AppCookieManager,
     uriScheme: String,
     canShowBackBtn: Boolean,
+    isNestedFragment: Boolean,
     hasInternetConnection: Boolean,
-    checkInternetConnection: () -> Unit,
-    onWebPageLoaded: () -> Unit,
+    onWebViewUIAction: (WebViewUIAction) -> Unit,
     onSettingsClick: () -> Unit,
     onBackClick: () -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
-    refreshSessionCookie: () -> Unit = {},
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    val isLoading = uiState is ProgramUIState.Loading
+    val coroutineScope = rememberCoroutineScope()
 
     when (uiState) {
         is ProgramUIState.UiMessage -> {
@@ -247,7 +270,7 @@ private fun ProgramInfoScreen(
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true },
         backgroundColor = MaterialTheme.appColors.background
-    ) {
+    ) { paddingValues ->
         val modifierScreenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -261,21 +284,29 @@ private fun ProgramInfoScreen(
             )
         }
 
+        val statusBarPadding = if (isNestedFragment) {
+            Modifier
+        } else {
+            Modifier.statusBarsInset()
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
-                .statusBarsInset()
+                .padding(paddingValues)
+                .then(statusBarPadding)
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Toolbar(
-                label = stringResource(id = R.string.discovery_programs),
-                canShowBackBtn = canShowBackBtn,
-                canShowSettingsIcon = !canShowBackBtn,
-                onBackClick = onBackClick,
-                onSettingsClick = onSettingsClick
-            )
+            if (!isNestedFragment) {
+                Toolbar(
+                    label = stringResource(id = R.string.discovery_programs),
+                    canShowBackBtn = canShowBackBtn,
+                    canShowSettingsIcon = !canShowBackBtn,
+                    onBackClick = onBackClick,
+                    onSettingsClick = onSettingsClick
+                )
+            }
 
             Surface {
                 Box(
@@ -284,37 +315,44 @@ private fun ProgramInfoScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
-                        val webView = CatalogWebViewScreen(
-                            url = contentUrl,
-                            uriScheme = uriScheme,
-                            isAllLinksExternal = true,
-                            onWebPageLoaded = onWebPageLoaded,
-                            refreshSessionCookie = refreshSessionCookie,
-                            onUriClick = onUriClick,
-                        )
+                    if ((uiState is ProgramUIState.Error).not()) {
+                        if (hasInternetConnection) {
+                            val webView = CatalogWebViewScreen(
+                                url = contentUrl,
+                                uriScheme = uriScheme,
+                                isAllLinksExternal = true,
+                                onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
+                                refreshSessionCookie = {
+                                    coroutineScope.launch {
+                                        cookieManager.tryToRefreshSessionCookie()
+                                    }
+                                },
+                                onUriClick = onUriClick,
+                                onWebPageLoadError = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR) }
+                            )
 
-                        AndroidView(
-                            modifier = Modifier
-                                .background(MaterialTheme.appColors.background),
-                            factory = {
-                                webView
-                            },
-                            update = {
-                                webView.loadUrl(contentUrl)
-                            }
-                        )
-                    } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
-                            checkInternetConnection()
+                            AndroidView(
+                                modifier = Modifier
+                                    .background(MaterialTheme.appColors.background),
+                                factory = {
+                                    webView
+                                },
+                                update = {
+                                    webView.loadUrl(contentUrl, coroutineScope, cookieManager)
+                                }
+                            )
+                        } else {
+                            onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                         }
                     }
-                    if (isLoading && hasInternetConnection) {
+
+                    if (uiState is ProgramUIState.Error) {
+                        FullScreenErrorView(errorType = uiState.errorType) {
+                            onWebViewUIAction(WebViewUIAction.RELOAD_WEB_PAGE)
+                        }
+                    }
+
+                    if (uiState == ProgramUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -339,12 +377,13 @@ fun MyProgramsPreview() {
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = ProgramUIState.Loading,
             contentUrl = "https://www.example.com/",
+            cookieManager = koinViewModel<ProgramViewModel>().cookieManager,
             uriScheme = "",
             canShowBackBtn = false,
+            isNestedFragment = false,
             hasInternetConnection = false,
-            checkInternetConnection = {},
+            onWebViewUIAction = {},
             onBackClick = {},
-            onWebPageLoaded = {},
             onSettingsClick = {},
             onUriClick = { _, _ -> },
         )

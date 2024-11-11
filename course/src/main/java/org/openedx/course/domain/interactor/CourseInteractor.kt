@@ -2,6 +2,7 @@ package org.openedx.course.domain.interactor
 
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.course.data.repository.CourseRepository
 
@@ -9,18 +10,26 @@ class CourseInteractor(
     private val repository: CourseRepository
 ) {
 
-    suspend fun preloadCourseStructure(courseId: String) =
-        repository.preloadCourseStructure(courseId)
+    suspend fun getCourseStructure(
+        courseId: String,
+        isNeedRefresh: Boolean = false
+    ): CourseStructure {
+        return repository.getCourseStructure(courseId, isNeedRefresh)
+    }
 
-    suspend fun preloadCourseStructureFromCache(courseId: String) =
-        repository.preloadCourseStructureFromCache(courseId)
+    suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
+        return repository.getCourseStructureFromCache(courseId)
+    }
 
-    @Throws(IllegalStateException::class)
-    fun getCourseStructureFromCache() = repository.getCourseStructureFromCache()
+    suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
+        return repository.getEnrollmentDetails(courseId = courseId)
+    }
 
-    @Throws(IllegalStateException::class)
-    fun getCourseStructureForVideos(): CourseStructure {
-        val courseStructure = repository.getCourseStructureFromCache()
+    suspend fun getCourseStructureForVideos(
+        courseId: String,
+        isNeedRefresh: Boolean = false
+    ): CourseStructure {
+        val courseStructure = repository.getCourseStructure(courseId, isNeedRefresh)
         val blocks = courseStructure.blockData
         val videoBlocks = blocks.filter { it.type == BlockType.VIDEO }
         val resultBlocks = ArrayList<Block>()
@@ -72,4 +81,16 @@ class CourseInteractor(
 
     fun getDownloadModels() = repository.getDownloadModels()
 
+    suspend fun getAllDownloadModels() = repository.getAllDownloadModels()
+
+    suspend fun saveXBlockProgress(blockId: String, courseId: String, jsonProgress: String) {
+        repository.saveOfflineXBlockProgress(blockId, courseId, jsonProgress)
+    }
+
+    suspend fun getXBlockProgress(blockId: String) = repository.getXBlockProgress(blockId)
+
+    suspend fun submitAllOfflineXBlockProgress() = repository.submitAllOfflineXBlockProgress()
+
+    suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) =
+        repository.submitOfflineXBlockProgress(blockId, courseId)
 }

@@ -17,8 +17,8 @@ import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.signin.compose.LoginScreen
 import org.openedx.core.AppUpdateState
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.foundation.presentation.rememberWindowSize
 
 class SignInFragment : Fragment() {
 

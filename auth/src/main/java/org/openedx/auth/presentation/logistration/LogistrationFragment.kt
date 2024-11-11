@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,7 +74,8 @@ class LogistrationFragment : Fragment() {
                     },
                     onSearchClick = { querySearch ->
                         viewModel.navigateToDiscovery(parentFragmentManager, querySearch)
-                    }
+                    },
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled
                 )
             }
         }
@@ -97,6 +99,7 @@ private fun LogistrationScreen(
     onSearchClick: (String) -> Unit,
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
+    isRegistrationEnabled: Boolean,
 ) {
 
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -131,7 +134,6 @@ private fun LogistrationScreen(
                 LogistrationLogoView()
                 Text(
                     text = stringResource(id = R.string.pre_auth_title),
-                    color = MaterialTheme.appColors.textPrimary,
                     style = MaterialTheme.appTypography.headlineSmall,
                     modifier = Modifier
                         .testTag("txt_screen_title")
@@ -177,12 +179,17 @@ private fun LogistrationScreen(
                         },
                     text = stringResource(id = R.string.pre_auth_explore_all_courses),
                     color = MaterialTheme.appColors.primary,
-                    style = MaterialTheme.appTypography.labelLarge
+                    style = MaterialTheme.appTypography.labelLarge,
+                    textDecoration = TextDecoration.Underline
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                AuthButtonsPanel(onRegisterClick = onRegisterClick, onSignInClick = onSignInClick)
+                AuthButtonsPanel(
+                    onRegisterClick = onRegisterClick,
+                    onSignInClick = onSignInClick,
+                    showRegisterButton = isRegistrationEnabled
+                )
             }
         }
     }
@@ -198,7 +205,24 @@ private fun LogistrationPreview() {
         LogistrationScreen(
             onSearchClick = {},
             onSignInClick = {},
-            onRegisterClick = {}
+            onRegisterClick = {},
+            isRegistrationEnabled = true,
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_9_Night", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun LogistrationRegistrationDisabledPreview() {
+    OpenEdXTheme {
+        LogistrationScreen(
+            onSearchClick = {},
+            onSignInClick = {},
+            onRegisterClick = {},
+            isRegistrationEnabled = false,
         )
     }
 }

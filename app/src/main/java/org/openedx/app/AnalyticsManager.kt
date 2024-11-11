@@ -1,58 +1,46 @@
 package org.openedx.app
 
-import android.content.Context
-import org.openedx.app.analytics.Analytics
-import org.openedx.app.analytics.FirebaseAnalytics
-import org.openedx.app.analytics.SegmentAnalytics
 import org.openedx.auth.presentation.AuthAnalytics
-import org.openedx.core.config.Config
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discussion.presentation.DiscussionAnalytics
+import org.openedx.foundation.interfaces.Analytics
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
 
-class AnalyticsManager(
-    context: Context,
-    config: Config,
-) : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAnalytics, CourseAnalytics,
-    DashboardAnalytics, DiscoveryAnalytics, DiscussionAnalytics, ProfileAnalytics,
-    WhatsNewAnalytics {
+class AnalyticsManager : AppAnalytics, AppReviewAnalytics, AuthAnalytics, CoreAnalytics,
+    CourseAnalytics, DashboardAnalytics, DiscoveryAnalytics, DiscussionAnalytics,
+    ProfileAnalytics, WhatsNewAnalytics {
 
-    private val services: ArrayList<Analytics> = arrayListOf()
+    private val analytics: MutableList<Analytics> = mutableListOf()
 
-    init {
-        // Initialise all the analytics libraries here
-        if (config.getFirebaseConfig().enabled) {
-            addAnalyticsTracker(FirebaseAnalytics(context = context))
-        }
-        val segmentConfig = config.getSegmentConfig()
-        if (segmentConfig.enabled && segmentConfig.segmentWriteKey.isNotBlank()) {
-            addAnalyticsTracker(SegmentAnalytics(context = context, config = config))
-        }
-    }
-
-    private fun addAnalyticsTracker(analytic: Analytics) {
-        services.add(analytic)
+    fun addAnalyticsTracker(analytic: Analytics) {
+        analytics.add(analytic)
     }
 
     private fun logEvent(event: Event, params: Map<String, Any?> = mapOf()) {
-        services.forEach { analytics ->
+        analytics.forEach { analytics ->
             analytics.logEvent(event.eventName, params)
         }
     }
 
+    override fun logScreenEvent(screenName: String, params: Map<String, Any?>) {
+        analytics.forEach { analytics ->
+            analytics.logScreenEvent(screenName, params)
+        }
+    }
+
     override fun logEvent(event: String, params: Map<String, Any?>) {
-        services.forEach { analytics ->
+        analytics.forEach { analytics ->
             analytics.logEvent(event, params)
         }
     }
 
     private fun setUserId(userId: Long) {
-        services.forEach { analytics ->
+        analytics.forEach { analytics ->
             analytics.logUserId(userId)
         }
     }

@@ -14,6 +14,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,30 +79,31 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Media
-import org.openedx.core.extension.isEmailValid
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isPreview
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.EmailUtil
 import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.ui.ImageHeader
 import org.openedx.discovery.presentation.ui.WarningLabel
+import org.openedx.foundation.extension.applyDarkModeIfEnabled
+import org.openedx.foundation.extension.isEmailValid
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import java.nio.charset.StandardCharsets
 import java.util.Date
 import org.openedx.core.R as CoreR
@@ -140,6 +142,7 @@ class CourseDetailsFragment : Fragment() {
                     ),
                     hasInternetConnection = viewModel.hasInternetConnection,
                     isUserLoggedIn = viewModel.isUserLoggedIn,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onReloadClick = {
                         viewModel.getCourseDetail()
                     },
@@ -162,7 +165,6 @@ class CourseDetailsFragment : Fragment() {
                                         requireActivity().supportFragmentManager,
                                         currentState.course.courseId,
                                         currentState.course.name,
-                                        "",
                                     )
                                 }
 
@@ -209,6 +211,7 @@ internal fun CourseDetailsScreen(
     htmlBody: String,
     hasInternetConnection: Boolean,
     isUserLoggedIn: Boolean,
+    isRegistrationEnabled: Boolean,
     onReloadClick: () -> Unit,
     onBackClick: () -> Unit,
     onButtonClick: () -> Unit,
@@ -236,7 +239,8 @@ internal fun CourseDetailsScreen(
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -625,6 +629,7 @@ private fun CourseDescription(
     onWebPageLoaded: () -> Unit
 ) {
     val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
     AndroidView(modifier = Modifier.then(modifier), factory = {
         WebView(context).apply {
             webViewClient = object : WebViewClient() {
@@ -674,6 +679,7 @@ private fun CourseDescription(
                 StandardCharsets.UTF_8.name(),
                 null
             )
+            applyDarkModeIfEnabled(isDarkTheme)
         }
     })
 }
@@ -690,6 +696,7 @@ private fun CourseDetailNativeContentPreview() {
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
             onBackClick = {},
@@ -712,6 +719,7 @@ private fun CourseDetailNativeContentTabletPreview() {
             apiHostUrl = "http://localhost:8000",
             hasInternetConnection = false,
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             htmlBody = "<b>Preview text</b>",
             onReloadClick = {},
             onBackClick = {},

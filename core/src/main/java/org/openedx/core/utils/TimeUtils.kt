@@ -5,7 +5,8 @@ import android.text.format.DateUtils
 import com.google.gson.internal.bind.util.ISO8601Utils
 import org.openedx.core.R
 import org.openedx.core.domain.model.StartType
-import org.openedx.core.system.ResourceManager
+import org.openedx.foundation.system.ResourceManager
+import java.text.DateFormat
 import java.text.ParseException
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
@@ -13,14 +14,68 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import kotlin.math.ceil
 
 object TimeUtils {
 
     private const val FORMAT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     private const val FORMAT_ISO_8601_WITH_TIME_ZONE = "yyyy-MM-dd'T'HH:mm:ssXXX"
-
     private const val SEVEN_DAYS_IN_MILLIS = 604800000L
+
+    fun formatToString(context: Context, date: Date, useRelativeDates: Boolean): String {
+        if (!useRelativeDates) {
+            val locale = Locale(Locale.getDefault().language)
+            val dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale)
+            return dateFormat.format(date)
+        }
+
+        val now = Calendar.getInstance()
+        val inputDate = Calendar.getInstance().apply { time = date }
+        val daysDiff = ((now.timeInMillis - inputDate.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+        return when {
+            daysDiff in -5..-1 -> DateUtils.formatDateTime(
+                context,
+                date.time,
+                DateUtils.FORMAT_SHOW_WEEKDAY
+            ).toString()
+
+            daysDiff == -6 -> context.getString(R.string.core_next) + " " + DateUtils.formatDateTime(
+                context,
+                date.time,
+                DateUtils.FORMAT_SHOW_WEEKDAY
+            ).toString()
+
+            daysDiff in -1..1 -> DateUtils.getRelativeTimeSpanString(
+                date.time,
+                now.timeInMillis,
+                DateUtils.DAY_IN_MILLIS,
+                DateUtils.FORMAT_ABBREV_TIME
+            ).toString()
+
+            daysDiff in 2..6 -> DateUtils.getRelativeTimeSpanString(
+                date.time,
+                now.timeInMillis,
+                DateUtils.DAY_IN_MILLIS
+            ).toString()
+
+            inputDate.get(Calendar.YEAR) == now.get(Calendar.YEAR) -> {
+                DateUtils.getRelativeTimeSpanString(
+                    date.time,
+                    now.timeInMillis,
+                    DateUtils.DAY_IN_MILLIS,
+                    DateUtils.FORMAT_SHOW_DATE
+                ).toString()
+            }
+
+            else -> {
+                DateUtils.getRelativeTimeSpanString(
+                    date.time,
+                    now.timeInMillis,
+                    DateUtils.DAY_IN_MILLIS,
+                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
+                ).toString()
+            }
+        }
+    }
 
     fun getCurrentTime(): Long {
         return Calendar.getInstance().timeInMillis
@@ -59,7 +114,7 @@ object TimeUtils {
 
     private fun dateToCourseDate(resourceManager: ResourceManager, date: Date?): String {
         return formatDate(
-            format = resourceManager.getString(R.string.core_date_format_MMMM_dd), date = date
+            format = resourceManager.getString(R.string.core_date_format_MMM_dd_yyyy), date = date
         )
     }
 
@@ -116,12 +171,12 @@ object TimeUtils {
                             DateUtils.SECOND_IN_MILLIS,
                             DateUtils.FORMAT_ABBREV_RELATIVE
                         ).toString()
-                        resourceManager.getString(R.string.core_label_expired, timeSpan)
+                        resourceManager.getString(R.string.core_label_access_expired, timeSpan)
                     }
                 } else {
                     formattedDate = if (dayDifferenceInMillis > SEVEN_DAYS_IN_MILLIS) {
                         resourceManager.getString(
-                            R.string.core_label_expires_on,
+                            R.string.core_label_expires,
                             dateToCourseDate(resourceManager, expiry)
                         )
                     } else {
@@ -152,7 +207,7 @@ object TimeUtils {
                     )
                 } else {
                     resourceManager.getString(
-                        R.string.core_label_ending, dateToCourseDate(resourceManager, end)
+                        R.string.core_label_ends, dateToCourseDate(resourceManager, end)
                     )
                 }
             }
@@ -172,83 +227,11 @@ object TimeUtils {
     }
 
     /**
-     * Method to get the formatted time string in terms of relative time with minimum resolution of minutes.
-     * For example, if the time difference is 1 minute, it will return "1m ago".
-     *
-     * @param date Date object to be formatted.
+     * Returns a formatted date string for the given date using context.
      */
-    fun getFormattedTime(date: Date): String {
-        return DateUtils.getRelativeTimeSpanString(
-            date.time,
-            getCurrentTime(),
-            DateUtils.MINUTE_IN_MILLIS,
-            DateUtils.FORMAT_ABBREV_TIME
-        ).toString()
-    }
-
-    /**
-     * Returns a formatted date string for the given date.
-     */
-    fun getCourseFormattedDate(context: Context, date: Date): String {
-        val inputDate = Calendar.getInstance().also {
-            it.time = date
-            it.clearTimeComponents()
-        }
-        val daysDifference = getDayDifference(inputDate)
-
-        return when {
-            daysDifference == 0 -> {
-                context.getString(R.string.core_date_format_today)
-            }
-
-            daysDifference == 1 -> {
-                context.getString(R.string.core_date_format_tomorrow)
-            }
-
-            daysDifference == -1 -> {
-                context.getString(R.string.core_date_format_yesterday)
-            }
-
-            daysDifference in -2 downTo -7 -> {
-                context.getString(
-                    R.string.core_date_format_days_ago,
-                    ceil(-daysDifference.toDouble()).toInt().toString()
-                )
-            }
-
-            daysDifference in 2..7 -> {
-                DateUtils.formatDateTime(
-                    context,
-                    date.time,
-                    DateUtils.FORMAT_SHOW_WEEKDAY
-                )
-            }
-
-            inputDate.get(Calendar.YEAR) != Calendar.getInstance().get(Calendar.YEAR) -> {
-                DateUtils.formatDateTime(
-                    context,
-                    date.time,
-                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
-                )
-            }
-
-            else -> {
-                DateUtils.formatDateTime(
-                    context,
-                    date.time,
-                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR
-                )
-            }
-        }
-    }
-
-    /**
-     * Returns the number of days difference between the given date and the current date.
-     */
-    private fun getDayDifference(inputDate: Calendar): Int {
-        val currentDate = Calendar.getInstance().also { it.clearTimeComponents() }
-        val difference = inputDate.timeInMillis - currentDate.timeInMillis
-        return TimeUnit.MILLISECONDS.toDays(difference).toInt()
+    fun getCourseAccessFormattedDate(context: Context, date: Date): String {
+        val resourceManager = ResourceManager(context)
+        return dateToCourseDate(resourceManager, date)
     }
 }
 
@@ -294,16 +277,6 @@ fun Date.clearTime(): Date {
     calendar.time = this
     calendar.clearTimeComponents()
     return calendar.time
-}
-
-/**
- * Extension function to check if the time difference between the given date and the current date is less than 24 hours.
- */
-fun Date.isTimeLessThan24Hours(): Boolean {
-    val calendar = Calendar.getInstance()
-    calendar.time = this
-    val timeInMillis = (calendar.timeInMillis - TimeUtils.getCurrentTime()).unaryPlus()
-    return timeInMillis < TimeUnit.DAYS.toMillis(1)
 }
 
 fun Date.toCalendar(): Calendar {

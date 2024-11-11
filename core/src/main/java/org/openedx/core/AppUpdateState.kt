@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 
 object AppUpdateState {
     var wasUpdateDialogDisplayed = false

@@ -29,10 +29,10 @@ import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.BlockType
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.DateType
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseComponentStatus
@@ -48,14 +48,19 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
+import org.openedx.course.presentation.CourseRouter
+import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
+import org.openedx.foundation.utils.FileUtil
 import java.net.UnknownHostException
 import java.util.Date
 
@@ -77,10 +82,20 @@ class CourseOutlineViewModelTest {
     private val workerController = mockk<DownloadWorkerController>()
     private val analytics = mockk<CourseAnalytics>()
     private val coreAnalytics = mockk<CoreAnalytics>()
+    private val courseRouter = mockk<CourseRouter>()
+    private val fileUtil = mockk<FileUtil>()
+    private val downloadDialogManager = mockk<DownloadDialogManager>()
+    private val downloadHelper = mockk<DownloadHelper>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
     private val cantDownload = "You can download content only from Wi-fi"
+
+    private val assignmentProgress = AssignmentProgress(
+        assignmentType = "Homework",
+        numPointsEarned = 1f,
+        numPointsPossible = 3f
+    )
 
     private val blocks = listOf(
         Block(
@@ -97,7 +112,10 @@ class CourseOutlineViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("1", "id1"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date(),
+            offlineDownload = null,
         ),
         Block(
             id = "id1",
@@ -113,7 +131,10 @@ class CourseOutlineViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = listOf("id2"),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date(),
+            offlineDownload = null,
         ),
         Block(
             id = "id2",
@@ -129,7 +150,10 @@ class CourseOutlineViewModelTest {
             blockCounts = BlockCounts(0),
             descendants = emptyList(),
             descendantsType = BlockType.HTML,
-            completion = 0.0
+            completion = 0.0,
+            assignmentProgress = assignmentProgress,
+            due = Date(),
+            offlineDownload = null,
         )
     )
 
@@ -154,7 +178,8 @@ class CourseOutlineViewModelTest {
         ),
         media = null,
         certificate = null,
-        isSelfPaced = false
+        isSelfPaced = false,
+        progress = null
     )
 
     private val dateBlock = CourseDateBlock(
@@ -192,6 +217,7 @@ class CourseOutlineViewModelTest {
     private val downloadModel = DownloadModel(
         "id",
         "title",
+        "",
         0,
         "",
         "url",
@@ -207,6 +233,8 @@ class CourseOutlineViewModelTest {
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
         every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
         every { config.getApiHostURL() } returns "http://localhost:8000"
+        every { downloadDialogManager.showDownloadFailedPopup(any(), any()) } returns Unit
+        every { preferencesManager.isRelativeDatesEnabled } returns true
 
         coEvery { interactor.getCourseDates(any()) } returns mockedCourseDatesResult
     }
@@ -218,9 +246,10 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `getCourseDataInternal no internet connection exception`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
-        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
+        every { downloadDialogManager.showPopup(any(), any(), any(), any(), any(), any(), any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } throws UnknownHostException()
 
         val viewModel = CourseOutlineViewModel(
@@ -233,9 +262,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
             workerController,
+            downloadHelper,
         )
 
         val message = async {
@@ -244,18 +277,18 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assertEquals(noInternet, message.await()?.message)
-        assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
+        assert(viewModel.uiState.value is CourseOutlineUIState.Error)
     }
 
     @Test
     fun `getCourseDataInternal unknown exception`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
-        every { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         coEvery { interactor.getCourseStatus(any()) } throws Exception()
         val viewModel = CourseOutlineViewModel(
             "",
@@ -267,9 +300,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
 
         val message = async {
@@ -278,18 +315,18 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assertEquals(somethingWrong, message.await()?.message)
-        assert(viewModel.uiState.value is CourseOutlineUIState.Loading)
+        assert(viewModel.uiState.value is CourseOutlineUIState.Error)
     }
 
     @Test
     fun `getCourseDataInternal success with internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(
                 listOf(
                     DownloadModelEntity.createFrom(
@@ -299,7 +336,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseNestedListEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -311,9 +348,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
 
         val message = async {
@@ -321,11 +362,12 @@ class CourseOutlineViewModelTest {
                 viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
             }
         }
+
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
-        coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
         assert(viewModel.uiState.value is CourseOutlineUIState.CourseData)
@@ -333,9 +375,9 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `getCourseDataInternal success without internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns false
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(
                 listOf(
                     DownloadModelEntity.createFrom(
@@ -345,7 +387,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseNestedListEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -357,9 +399,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
 
         val message = async {
@@ -370,7 +416,7 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        verify(exactly = 1) { interactor.getCourseStructureFromCache() }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
@@ -379,9 +425,9 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `updateCourseData success with internet connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
-        coEvery { downloadDao.readAllData() } returns flow {
+        coEvery { downloadDao.getAllDataFlow() } returns flow {
             emit(
                 listOf(
                     DownloadModelEntity.createFrom(
@@ -391,7 +437,7 @@ class CourseOutlineViewModelTest {
             )
         }
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        every { config.isCourseNestedListEnabled() } returns false
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -403,9 +449,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
 
         val message = async {
@@ -414,10 +464,9 @@ class CourseOutlineViewModelTest {
             }
         }
         viewModel.getCourseData()
-        viewModel.updateCourseData()
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { interactor.getCourseStructureFromCache() }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 2) { interactor.getCourseStatus(any()) }
 
         assert(message.await() == null)
@@ -426,7 +475,7 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `CourseStructureUpdated notifier test`() = runTest(UnconfinedTestDispatcher()) {
-        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
+        coEvery { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
         val viewModel = CourseOutlineViewModel(
             "",
             "",
@@ -437,12 +486,16 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
         coEvery { notifier.notifier } returns flow { emit(CourseStructureUpdated("")) }
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
 
@@ -454,14 +507,14 @@ class CourseOutlineViewModelTest {
         viewModel.getCourseData()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructureFromCache() }
+        coVerify(exactly = 2) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 1) { interactor.getCourseStatus(any()) }
     }
 
     @Test
     fun `saveDownloadModels test`() = runTest(UnconfinedTestDispatcher()) {
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns false
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
         every {
@@ -472,8 +525,8 @@ class CourseOutlineViewModelTest {
         } returns Unit
         coEvery { workerController.saveModels(any()) } returns Unit
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
-        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseNestedListEnabled() } returns false
+        coEvery { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
 
         val viewModel = CourseOutlineViewModel(
             "",
@@ -485,9 +538,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
         val message = async {
             withTimeoutOrNull(5000) {
@@ -508,14 +565,14 @@ class CourseOutlineViewModelTest {
 
     @Test
     fun `saveDownloadModels only wifi download, with connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
+        coEvery { interactor.getCourseStructure(any()) } returns courseStructure
         coEvery { interactor.getCourseStatus(any()) } returns CourseComponentStatus("id")
         every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
         every { networkConnection.isWifiConnected() } returns true
         every { networkConnection.isOnline() } returns true
         coEvery { workerController.saveModels(any()) } returns Unit
-        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseNestedListEnabled() } returns false
+        coEvery { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
+        every { config.getCourseUIConfig().isCourseDropdownNavigationEnabled } returns false
         every { coreAnalytics.logEvent(any(), any()) } returns Unit
 
         val viewModel = CourseOutlineViewModel(
@@ -528,9 +585,13 @@ class CourseOutlineViewModelTest {
             networkConnection,
             preferencesManager,
             analytics,
+            downloadDialogManager,
+            fileUtil,
+            courseRouter,
             coreAnalytics,
             downloadDao,
-            workerController
+            workerController,
+            downloadHelper,
         )
         val message = async {
             withTimeoutOrNull(5000) {
@@ -538,42 +599,6 @@ class CourseOutlineViewModelTest {
             }
         }
         viewModel.saveDownloadModels("", "")
-        advanceUntilIdle()
-
-        assert(message.await()?.message.isNullOrEmpty())
-    }
-
-    @Test
-    fun `saveDownloadModels only wifi download, without connection`() = runTest(UnconfinedTestDispatcher()) {
-        every { interactor.getCourseStructureFromCache() } returns courseStructure
-        every { preferencesManager.videoSettings.wifiDownloadOnly } returns true
-        every { networkConnection.isWifiConnected() } returns false
-        every { networkConnection.isOnline() } returns false
-        coEvery { workerController.saveModels(any()) } returns Unit
-        coEvery { downloadDao.readAllData() } returns flow { emit(emptyList()) }
-        every { config.isCourseNestedListEnabled() } returns false
-
-        val viewModel = CourseOutlineViewModel(
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            notifier,
-            networkConnection,
-            preferencesManager,
-            analytics,
-            coreAnalytics,
-            downloadDao,
-            workerController
-        )
-        val message = async {
-            withTimeoutOrNull(5000) {
-                viewModel.uiMessage.first() as? UIMessage.SnackBarMessage
-            }
-        }
-        viewModel.saveDownloadModels("", "")
-
         advanceUntilIdle()
 
         assert(message.await()?.message.isNullOrEmpty())

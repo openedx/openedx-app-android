@@ -59,30 +59,30 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 
 class NativeDiscoveryFragment : Fragment() {
 
@@ -117,6 +117,7 @@ class NativeDiscoveryFragment : Fragment() {
                     hasInternetConnection = viewModel.hasInternetConnection,
                     canShowBackButton = viewModel.canShowBackButton,
                     isUserLoggedIn = viewModel.isUserLoggedIn,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
                         wasUpdateDialogClosed = wasUpdateDialogClosed,
@@ -209,6 +210,7 @@ internal fun DiscoveryScreen(
     hasInternetConnection: Boolean,
     canShowBackButton: Boolean,
     isUserLoggedIn: Boolean,
+    isRegistrationEnabled: Boolean,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -252,7 +254,8 @@ internal fun DiscoveryScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -517,6 +520,7 @@ private fun DiscoveryScreenPreview() {
             refreshing = false,
             hasInternetConnection = true,
             isUserLoggedIn = false,
+            isRegistrationEnabled = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onSignInClick = {},
             onRegisterClick = {},
@@ -558,6 +562,7 @@ private fun DiscoveryScreenTabletPreview() {
             refreshing = false,
             hasInternetConnection = true,
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onSignInClick = {},
             onRegisterClick = {},

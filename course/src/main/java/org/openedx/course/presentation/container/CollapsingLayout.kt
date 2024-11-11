@@ -53,6 +53,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -64,13 +65,13 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.openedx.core.presentation.course.CourseContainerTab
+import org.openedx.core.R
 import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.foundation.presentation.rememberWindowSize
 import kotlin.math.roundToInt
 
 @Composable
@@ -78,6 +79,7 @@ internal fun CollapsingLayout(
     modifier: Modifier = Modifier,
     courseImage: Bitmap,
     imageHeight: Int,
+    isEnabled: Boolean,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
@@ -105,7 +107,8 @@ internal fun CollapsingLayout(
     val factor = if (rawFactor.isNaN() || rawFactor < 0) 0f else rawFactor
     val blurImagePadding = 40.dp
     val blurImagePaddingPx = with(localDensity) { blurImagePadding.toPx() }
-    val toolbarOffset = (offset.value + backgroundImageHeight.floatValue - blurImagePaddingPx).roundToInt()
+    val toolbarOffset =
+        (offset.value + backgroundImageHeight.floatValue - blurImagePaddingPx).roundToInt()
     val imageStartY = (backgroundImageHeight.floatValue - blurImagePaddingPx) * 0.5f
     val imageOffsetY = -(offset.value + imageStartY)
     val toolbarBackgroundOffset = if (toolbarOffset >= 0) {
@@ -164,10 +167,15 @@ internal fun CollapsingLayout(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
+    val collapsingModifier = if (isEnabled) {
+        modifier
             .nestedScroll(nestedScrollConnection)
+    } else {
+        modifier
+    }
+    Box(
+        modifier = collapsingModifier
+            .fillMaxSize()
             .pointerInput(Unit) {
                 var yStart = 0f
                 coroutineScope {
@@ -219,6 +227,7 @@ internal fun CollapsingLayout(
                 backBtnStartPadding = backBtnStartPadding,
                 courseImage = courseImage,
                 imageHeight = imageHeight,
+                isEnabled = isEnabled,
                 onBackClick = onBackClick,
                 expandedTop = expandedTop,
                 navigation = navigation,
@@ -242,6 +251,7 @@ internal fun CollapsingLayout(
                 courseImage = courseImage,
                 imageHeight = imageHeight,
                 toolbarBackgroundOffset = toolbarBackgroundOffset,
+                isEnabled = isEnabled,
                 onBackClick = onBackClick,
                 expandedTop = expandedTop,
                 collapsedTop = collapsedTop,
@@ -263,6 +273,7 @@ private fun CollapsingLayoutTablet(
     backBtnStartPadding: Dp,
     courseImage: Bitmap,
     imageHeight: Int,
+    isEnabled: Boolean,
     onBackClick: () -> Unit,
     expandedTop: @Composable BoxScope.() -> Unit,
     navigation: @Composable BoxScope.() -> Unit,
@@ -394,22 +405,34 @@ private fun CollapsingLayoutTablet(
 
     Box(
         modifier = Modifier
-            .offset { IntOffset(x = 0, y = (backgroundImageHeight.value + expandedTopHeight.value).roundToInt()) }
+            .offset {
+                IntOffset(
+                    x = 0,
+                    y = (backgroundImageHeight.value + expandedTopHeight.value).roundToInt()
+                )
+            }
             .onSizeChanged { size ->
                 navigationHeight.value = size.height.toFloat()
             },
         content = navigation,
     )
 
-    Box(
-        modifier = Modifier
+    val bodyPadding = expandedTopHeight.value + backgroundImageHeight.value + navigationHeight.value
+    val bodyModifier = if (isEnabled) {
+        Modifier
             .offset {
                 IntOffset(
                     x = 0,
-                    y = (expandedTopHeight.value + backgroundImageHeight.value + navigationHeight.value).roundToInt()
+                    y = bodyPadding.roundToInt()
                 )
             }
-            .padding(bottom = with(localDensity) { (expandedTopHeight.value + navigationHeight.value + backgroundImageHeight.value).toDp() }),
+            .padding(bottom = with(localDensity) { bodyPadding.toDp() })
+    } else {
+        Modifier
+            .padding(top = with(localDensity) { if (bodyPadding < 0) 0.toDp() else bodyPadding.toDp() })
+    }
+    Box(
+        modifier = bodyModifier,
         content = bodyContent,
     )
 }
@@ -432,6 +455,7 @@ private fun CollapsingLayoutMobile(
     courseImage: Bitmap,
     imageHeight: Int,
     toolbarBackgroundOffset: Int,
+    isEnabled: Boolean,
     onBackClick: () -> Unit,
     expandedTop: @Composable BoxScope.() -> Unit,
     collapsedTop: @Composable BoxScope.() -> Unit,
@@ -517,7 +541,7 @@ private fun CollapsingLayoutMobile(
                     },
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 tint = MaterialTheme.appColors.textPrimary,
-                contentDescription = null
+                contentDescription = stringResource(id = R.string.core_accessibility_btn_back)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(
@@ -680,7 +704,7 @@ private fun CollapsingLayoutMobile(
                     },
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 tint = MaterialTheme.appColors.textPrimary,
-                contentDescription = null
+                contentDescription = stringResource(id = R.string.core_accessibility_btn_back)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(
@@ -705,15 +729,23 @@ private fun CollapsingLayoutMobile(
             content = navigation,
         )
 
-        Box(
-            modifier = Modifier
+        val bodyPadding =
+            expandedTopHeight.value + offset.value + backgroundImageHeight.value + navigationHeight.value - blurImagePaddingPx * factor
+        val bodyModifier = if (isEnabled) {
+            Modifier
                 .offset {
                     IntOffset(
                         x = 0,
-                        y = (expandedTopHeight.value + offset.value + backgroundImageHeight.value + navigationHeight.value - blurImagePaddingPx * factor).roundToInt()
+                        y = bodyPadding.roundToInt()
                     )
                 }
-                .padding(bottom = with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() }),
+                .padding(bottom = with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() })
+        } else {
+            Modifier
+                .padding(top = with(localDensity) { if (bodyPadding < 0) 0.toDp() else bodyPadding.toDp() })
+        }
+        Box(
+            modifier = bodyModifier,
             content = bodyContent,
         )
     }
@@ -722,8 +754,14 @@ private fun CollapsingLayoutMobile(
 @OptIn(ExperimentalFoundationApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = "spec:parent=pixel_5,orientation=landscape")
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, device = "spec:parent=pixel_5,orientation=landscape")
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    device = "spec:parent=pixel_5,orientation=landscape"
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:parent=pixel_5,orientation=landscape"
+)
 @Preview(device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -748,10 +786,10 @@ private fun CollapsingLayoutPreview() {
                 RoundTabsBar(
                     items = CourseContainerTab.entries,
                     rowState = rememberLazyListState(),
-                    pagerState = rememberPagerState(pageCount = { 5 }),
-                    onPageChange = { }
+                    pagerState = rememberPagerState(pageCount = { CourseContainerTab.entries.size })
                 )
             },
+            isEnabled = true,
             onBackClick = {},
             bodyContent = {}
         )
@@ -760,7 +798,7 @@ private fun CollapsingLayoutPreview() {
 
 suspend fun PointerInputScope.routePointerChangesTo(
     onDown: (PointerInputChange) -> Unit = {},
-    onUp: (PointerInputChange) -> Unit = {}
+    onUp: (PointerInputChange) -> Unit = {},
 ) {
     awaitEachGesture {
         do {
@@ -778,7 +816,7 @@ suspend fun PointerInputScope.routePointerChangesTo(
 @Immutable
 data class PixelAlignment(
     val offsetX: Float,
-    val offsetY: Float
+    val offsetY: Float,
 ) : Alignment {
 
     override fun align(size: IntSize, space: IntSize, layoutDirection: LayoutDirection): IntOffset {

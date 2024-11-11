@@ -3,18 +3,20 @@ package org.openedx.app
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import org.openedx.app.deeplink.HomeTab
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.restore.RestorePasswordFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.auth.presentation.signup.SignUpFragment
+import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
-import org.openedx.core.presentation.settings.VideoQualityFragment
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityFragment
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.container.CourseContainerFragment
 import org.openedx.course.presentation.container.NoAccessCourseContainerFragment
@@ -25,6 +27,7 @@ import org.openedx.course.presentation.unit.container.CourseUnitContainerFragmen
 import org.openedx.course.presentation.unit.video.VideoFullScreenFragment
 import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
+import org.openedx.courses.presentation.AllEnrolledCoursesFragment
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
@@ -44,6 +47,8 @@ import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.anothersaccount.AnothersProfileFragment
+import org.openedx.profile.presentation.calendar.CalendarFragment
+import org.openedx.profile.presentation.calendar.CoursesToSyncFragment
 import org.openedx.profile.presentation.delete.DeleteProfileFragment
 import org.openedx.profile.presentation.edit.EditProfileFragment
 import org.openedx.profile.presentation.manageaccount.ManageAccountFragment
@@ -54,14 +59,23 @@ import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
 class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, AppUpgradeRouter, WhatsNewRouter {
+    ProfileRouter, AppUpgradeRouter, WhatsNewRouter, CalendarRouter {
 
     //region AuthRouter
-    override fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance(courseId, infoType))
-            .commit()
+    override fun navigateToMain(
+        fm: FragmentManager,
+        courseId: String?,
+        infoType: String?,
+        openTab: String
+    ) {
+        try {
+            fm.popBackStack()
+            fm.beginTransaction()
+                .replace(R.id.container, MainFragment.newInstance(courseId, infoType, openTab))
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?) {
@@ -93,18 +107,26 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     }
 
     override fun navigateToWhatsNew(fm: FragmentManager, courseId: String?, infoType: String?) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, WhatsNewFragment.newInstance(courseId, infoType))
-            .commit()
+        try {
+            fm.popBackStack()
+            fm.beginTransaction()
+                .replace(R.id.container, WhatsNewFragment.newInstance(courseId, infoType))
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun clearBackStack(fm: FragmentManager) {
         fm.apply {
-            for (fragment in fragments) {
-                beginTransaction().remove(fragment).commit()
+            try {
+                for (fragment in fragments) {
+                    beginTransaction().remove(fragment).commit()
+                }
+                popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
     //endregion
@@ -122,12 +144,31 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, UpgradeRequiredFragment())
     }
 
+    override fun navigateToAllEnrolledCourses(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, AllEnrolledCoursesFragment())
+    }
+
+    override fun getProgramFragment(): Fragment {
+        return ProgramFragment.newInstance(isNestedFragment = true)
+    }
+
     override fun navigateToCourseInfo(
         fm: FragmentManager,
         courseId: String,
         infoType: String,
     ) {
         replaceFragmentWithBackStack(fm, CourseInfoFragment.newInstance(courseId, infoType))
+    }
+
+    override fun navigateToCourseOutline(
+        fm: FragmentManager,
+        courseId: String,
+        courseTitle: String,
+    ) {
+        replaceFragmentWithBackStack(
+            fm,
+            CourseContainerFragment.newInstance(courseId, courseTitle)
+        )
     }
     //endregion
 
@@ -137,21 +178,30 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         fm: FragmentManager,
         courseId: String,
         courseTitle: String,
-        enrollmentMode: String,
+        openTab: String,
+        resumeBlockId: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            CourseContainerFragment.newInstance(courseId, courseTitle, enrollmentMode)
+            CourseContainerFragment.newInstance(
+                courseId,
+                courseTitle,
+                openTab,
+                resumeBlockId
+            )
         )
     }
 
     override fun navigateToEnrolledProgramInfo(fm: FragmentManager, pathId: String) {
-        replaceFragmentWithBackStack(fm, ProgramFragment.newInstance(pathId))
+        replaceFragmentWithBackStack(
+            fm,
+            ProgramFragment.newInstance(pathId = pathId, isNestedFragment = false)
+        )
     }
 
     override fun navigateToNoAccess(
         fm: FragmentManager,
-        title: String
+        title: String,
     ) {
         replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title))
     }
@@ -165,7 +215,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         subSectionId: String,
         unitId: String,
         componentId: String,
-        mode: CourseViewMode
+        mode: CourseViewMode,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -184,7 +234,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         unitId: String,
         componentId: String,
-        mode: CourseViewMode
+        mode: CourseViewMode,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -202,7 +252,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         unitId: String,
         componentId: String,
-        mode: CourseViewMode
+        mode: CourseViewMode,
     ) {
         replaceFragment(
             fm,
@@ -222,7 +272,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoTime: Long,
         blockId: String,
         courseId: String,
-        isPlaying: Boolean
+        isPlaying: Boolean,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -236,7 +286,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         videoTime: Long,
         blockId: String,
         courseId: String,
-        isPlaying: Boolean
+        isPlaying: Boolean,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -253,12 +303,11 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToHandoutsWebView(
         fm: FragmentManager,
         courseId: String,
-        title: String,
-        type: HandoutsType
+        type: HandoutsType,
     ) {
         replaceFragmentWithBackStack(
             fm,
-            HandoutsWebViewFragment.newInstance(title, type.name, courseId)
+            HandoutsWebViewFragment.newInstance(type.name, courseId)
         )
     }
     //endregion
@@ -270,7 +319,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         courseId: String,
         topicId: String,
         title: String,
-        viewType: FragmentViewType
+        viewType: FragmentViewType,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -288,7 +337,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToDiscussionResponses(
         fm: FragmentManager,
         comment: DiscussionComment,
-        isClosed: Boolean
+        isClosed: Boolean,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -316,7 +365,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
 
     override fun navigateToAnothersProfile(
         fm: FragmentManager,
-        username: String
+        username: String,
     ) {
         replaceFragmentWithBackStack(
             fm,
@@ -360,6 +409,12 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(fm, VideoQualityFragment.newInstance(videoQualityType.name))
     }
 
+    override fun navigateToDiscover(fm: FragmentManager) {
+        fm.beginTransaction()
+            .replace(R.id.container, MainFragment.newInstance("", "", HomeTab.DISCOVER.name))
+            .commit()
+    }
+
     override fun navigateToWebContent(fm: FragmentManager, title: String, url: String) {
         replaceFragmentWithBackStack(
             fm,
@@ -370,32 +425,56 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToManageAccount(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, ManageAccountFragment())
     }
+
+    override fun navigateToCalendarSettings(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, CalendarFragment())
+    }
+
+    override fun navigateToCoursesToSync(fm: FragmentManager) {
+        replaceFragmentWithBackStack(fm, CoursesToSyncFragment())
+    }
     //endregion
 
+    fun getVisibleFragment(fm: FragmentManager): Fragment? {
+        return fm.fragments.firstOrNull { it.isVisible }
+    }
+
     private fun replaceFragmentWithBackStack(fm: FragmentManager, fragment: Fragment) {
-        fm.beginTransaction()
-            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
-            .addToBackStack(fragment.javaClass.simpleName)
-            .commit()
+        try {
+            fm.beginTransaction()
+                .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+                .addToBackStack(fragment.javaClass.simpleName)
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun replaceFragment(
         fm: FragmentManager,
         fragment: Fragment,
-        transaction: Int = FragmentTransaction.TRANSIT_NONE
+        transaction: Int = FragmentTransaction.TRANSIT_NONE,
     ) {
-        fm.beginTransaction()
-            .setTransition(transaction)
-            .replace(R.id.container, fragment, fragment.javaClass.simpleName)
-            .commit()
+        try {
+            fm.beginTransaction()
+                .setTransition(transaction)
+                .replace(R.id.container, fragment, fragment.javaClass.simpleName)
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     //App upgrade
     override fun navigateToUserProfile(fm: FragmentManager) {
-        fm.popBackStack()
-        fm.beginTransaction()
-            .replace(R.id.container, ProfileFragment())
-            .commit()
+        try {
+            fm.popBackStack()
+            fm.beginTransaction()
+                .replace(R.id.container, ProfileFragment())
+                .commit()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
     //endregion
 }

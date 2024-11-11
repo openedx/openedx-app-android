@@ -5,9 +5,9 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthAnalyticsEvent
 import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
-import org.openedx.core.extension.takeIfNotEmpty
+import org.openedx.foundation.extension.takeIfNotEmpty
+import org.openedx.foundation.presentation.BaseViewModel
 
 class LogistrationViewModel(
     private val courseId: String,
@@ -17,6 +17,11 @@ class LogistrationViewModel(
 ) : BaseViewModel() {
 
     private val discoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
+    val isRegistrationEnabled get() = config.isRegistrationEnabled()
+
+    init {
+        logLogistrationScreenEvent()
+    }
 
     fun navigateToSignIn(parentFragmentManager: FragmentManager) {
         router.navigateToSignIn(parentFragmentManager, courseId, null)
@@ -59,6 +64,16 @@ class LogistrationViewModel(
             params = buildMap {
                 put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
+            }
+        )
+    }
+
+    private fun logLogistrationScreenEvent() {
+        val event = AuthAnalyticsEvent.Logistration
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
             }
         )
     }

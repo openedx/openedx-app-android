@@ -19,33 +19,32 @@ import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
+import org.openedx.core.module.download.AbstractDownloader.DownloadResult
 import org.openedx.core.module.download.CurrentProgress
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
+import org.openedx.core.system.notifier.DownloadFailed
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.DownloadProgressChanged
-import java.io.File
+import org.openedx.foundation.utils.FileUtil
 
 class DownloadWorker(
     val context: Context,
-    parameters: WorkerParameters
+    parameters: WorkerParameters,
 ) : CoroutineWorker(context, parameters), CoroutineScope {
 
-    private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as
-                NotificationManager
-
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
 
     private val notifier by inject<DownloadNotifier>(DownloadNotifier::class.java)
     private val downloadDao: DownloadDao by inject(DownloadDao::class.java)
+    private val downloadHelper: DownloadHelper by inject(DownloadHelper::class.java)
 
     private var downloadEnqueue = listOf<DownloadModel>()
+    private var downloadError = mutableListOf<DownloadModel>()
 
-    private val folder = File(
-        context.externalCacheDir.toString() + File.separator +
-                context.getString(R.string.app_name)
-                    .replace(Regex("\\s"), "_")
-    )
+    private val fileUtil: FileUtil by inject(FileUtil::class.java)
+    private val folder = fileUtil.getExternalAppDir()
 
     private var currentDownload: DownloadModel? = null
     private var lastUpdateTime = 0L
@@ -60,7 +59,6 @@ class DownloadWorker(
         fileDownloader.progressListener = null
         return Result.success()
     }
-
 
     private fun createForegroundInfo(): ForegroundInfo {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -119,7 +117,7 @@ class DownloadWorker(
             folder.mkdir()
         }
 
-        downloadEnqueue = downloadDao.readAllData().first()
+        downloadEnqueue = downloadDao.getAllDataFlow().first()
             .map { it.mapToDomain() }
             .filter { it.downloadedState == DownloadedState.WAITING }
 
@@ -134,21 +132,34 @@ class DownloadWorker(
                     )
                 )
             )
-            val isSuccess = fileDownloader.download(downloadTask.url, downloadTask.path)
-            if (isSuccess) {
-                downloadDao.updateDownloadModel(
-                    DownloadModelEntity.createFrom(
-                        downloadTask.copy(
-                            downloadedState = DownloadedState.DOWNLOADED,
-                            size = File(downloadTask.path).length().toInt()
+            val downloadResult = fileDownloader.download(downloadTask.url, downloadTask.path)
+            when (downloadResult) {
+                DownloadResult.SUCCESS -> {
+                    val updatedModel = downloadHelper.updateDownloadStatus(downloadTask)
+                    if (updatedModel == null) {
+                        downloadDao.removeDownloadModel(downloadTask.id)
+                        downloadError.add(downloadTask)
+                    } else {
+                        downloadDao.updateDownloadModel(
+                            DownloadModelEntity.createFrom(updatedModel)
                         )
-                    )
-                )
-            } else {
-                downloadDao.removeDownloadModel(downloadTask.id)
+                    }
+                }
+
+                DownloadResult.CANCELED -> {
+                    downloadDao.removeDownloadModel(downloadTask.id)
+                }
+
+                DownloadResult.ERROR -> {
+                    downloadDao.removeDownloadModel(downloadTask.id)
+                    downloadError.add(downloadTask)
+                }
             }
             newDownload()
         } else {
+            if (downloadError.isNotEmpty()) {
+                notifier.send(DownloadFailed(downloadError))
+            }
             return
         }
     }

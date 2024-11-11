@@ -6,14 +6,10 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -27,17 +23,11 @@ import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.computeWindowSizeClasses
-import org.openedx.core.extension.dpToPixel
-import org.openedx.core.extension.objectToString
-import org.openedx.core.extension.stringToObject
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
@@ -46,6 +36,11 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
+import org.openedx.foundation.extension.computeWindowSizeClasses
+import org.openedx.foundation.extension.dpToPixel
+import org.openedx.foundation.extension.objectToString
+import org.openedx.foundation.extension.stringToObject
+import org.openedx.foundation.presentation.WindowSize
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
@@ -91,7 +86,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
         }
         viewModel.downloadSubtitles()
-        handler.removeCallbacks(videoTimeRunnable)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,11 +99,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
         binding.connectionError.setContent {
             OpenEdXTheme {
-                ConnectionErrorView(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.appColors.background)
-                ) {
+                ConnectionErrorView {
                     binding.connectionError.isVisible =
                         !viewModel.hasInternetConnection && !viewModel.isDownloaded
                 }
@@ -202,9 +192,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             if (!viewModel.isPlayerSetUp) {
                 setPlayerMedia(mediaItem)
                 viewModel.getActivePlayer()?.prepare()
-                viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying
+                viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying && isResumed
                 viewModel.isPlayerSetUp = true
             }
+            viewModel.getActivePlayer()?.seekTo(viewModel.getCurrentVideoTime())
 
             viewModel.castPlayer?.setSessionAvailabilityListener(
                 object : SessionAvailabilityListener {

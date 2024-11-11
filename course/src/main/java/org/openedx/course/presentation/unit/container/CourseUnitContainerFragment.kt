@@ -31,7 +31,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
-import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -47,6 +46,7 @@ import org.openedx.course.presentation.ui.NavigationUnitsButtons
 import org.openedx.course.presentation.ui.SubSectionUnitsList
 import org.openedx.course.presentation.ui.SubSectionUnitsTitle
 import org.openedx.course.presentation.ui.VerticalPageIndicator
+import org.openedx.foundation.extension.serializable
 
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
@@ -134,8 +134,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
         super.onCreate(savedInstanceState)
         lifecycle.addObserver(viewModel)
         componentId = requireArguments().getString(ARG_COMPONENT_ID, "")
-        viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!)
-        viewModel.setupCurrentIndex(componentId)
+        viewModel.loadBlocks(requireArguments().serializable(ARG_MODE)!!, componentId)
         viewModel.courseUnitContainerShowedEvent()
     }
 

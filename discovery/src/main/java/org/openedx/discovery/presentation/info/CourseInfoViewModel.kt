@@ -8,16 +8,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openedx.core.BaseViewModel
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.system.ResourceManager
+import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseDashboardUpdate
 import org.openedx.core.system.notifier.DiscoveryNotifier
@@ -28,6 +27,10 @@ import org.openedx.discovery.presentation.DiscoveryAnalyticsEvent
 import org.openedx.discovery.presentation.DiscoveryAnalyticsKey
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.catalog.WebViewLink
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 
@@ -46,12 +49,16 @@ class CourseInfoViewModel(
 
     private val _uiState =
         MutableStateFlow(
-            CourseInfoUIState(
+            CourseInfoUIState.CourseInfo(
                 initialUrl = getInitialUrl(),
                 isPreLogin = config.isPreLoginExperienceEnabled() && corePreferences.user == null
             )
         )
     internal val uiState: StateFlow<CourseInfoUIState> = _uiState
+
+    private val _webViewUIState = MutableStateFlow<WebViewUIState>(WebViewUIState.Loading)
+    val webViewState
+        get() = _webViewUIState.asStateFlow()
 
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
@@ -63,6 +70,8 @@ class CourseInfoViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     val uriScheme: String get() = config.getUriScheme()
 
@@ -122,7 +131,6 @@ class CourseInfoViewModel(
                 fm = fragmentManager,
                 courseId = courseId,
                 courseTitle = "",
-                enrollmentMode = "",
             )
         }
     }
@@ -146,11 +154,11 @@ class CourseInfoViewModel(
     }
 
     fun courseInfoClickedEvent(courseId: String) {
-        logEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
+        logScreenEvent(DiscoveryAnalyticsEvent.COURSE_INFO, courseId)
     }
 
     fun programInfoClickedEvent(courseId: String) {
-        logEvent(DiscoveryAnalyticsEvent.PROGRAM_INFO, courseId)
+        logScreenEvent(DiscoveryAnalyticsEvent.PROGRAM_INFO, courseId)
     }
 
     fun courseEnrollClickedEvent(courseId: String) {
@@ -165,15 +173,39 @@ class CourseInfoViewModel(
         event: DiscoveryAnalyticsEvent,
         courseId: String,
     ) {
-        analytics.logEvent(
-            event.eventName,
-            buildMap {
-                put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
-                put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
-                put(DiscoveryAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
-                put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
-            }
-        )
+        analytics.logEvent(event.eventName, buildEventDataMap(event, courseId))
+    }
+
+    private fun logScreenEvent(
+        event: DiscoveryAnalyticsEvent,
+        courseId: String,
+    ) {
+        analytics.logScreenEvent(event.eventName, buildEventDataMap(event, courseId))
+    }
+
+    private fun buildEventDataMap(
+        event: DiscoveryAnalyticsEvent,
+        courseId: String,
+    ): Map<String, String> {
+        return buildMap {
+            put(DiscoveryAnalyticsKey.NAME.key, event.biValue)
+            put(DiscoveryAnalyticsKey.COURSE_ID.key, courseId)
+            put(DiscoveryAnalyticsKey.CATEGORY.key, CoreAnalyticsKey.DISCOVERY.key)
+            put(DiscoveryAnalyticsKey.CONVERSION.key, courseId)
+        }
+    }
+
+    fun onWebPageLoaded() {
+        _webViewUIState.value = WebViewUIState.Loaded
+    }
+
+    fun onWebPageError() {
+        _webViewUIState.value =
+            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+    }
+
+    fun onWebPageLoading() {
+        _webViewUIState.value = WebViewUIState.Loading
     }
 
     companion object {

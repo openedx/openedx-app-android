@@ -17,6 +17,7 @@ data class AppTypography(
     val displayLarge: TextStyle,
     val displayMedium: TextStyle,
     val displaySmall: TextStyle,
+    val headlineBold: TextStyle,
     val headlineLarge: TextStyle,
     val headlineMedium: TextStyle,
     val headlineSmall: TextStyle,
@@ -34,7 +35,6 @@ data class AppTypography(
 val fontFamily = FontFamily(
     Font(R.font.regular, FontWeight.Black, FontStyle.Normal),
     Font(R.font.bold, FontWeight.Bold, FontStyle.Normal),
-    Font(R.font.bold, FontWeight.Bold, FontStyle.Normal),
     Font(R.font.extra_light, FontWeight.Light, FontStyle.Normal),
     Font(R.font.light, FontWeight.Light, FontStyle.Normal),
     Font(R.font.medium, FontWeight.Medium, FontStyle.Normal),
@@ -42,7 +42,6 @@ val fontFamily = FontFamily(
     Font(R.font.semi_bold, FontWeight.Bold, FontStyle.Normal),
     Font(R.font.thin, FontWeight.Thin, FontStyle.Normal),
 )
-
 
 internal val LocalTypography = staticCompositionLocalOf {
     AppTypography(
@@ -71,6 +70,13 @@ internal val LocalTypography = staticCompositionLocalOf {
             fontSize = 32.sp,
             lineHeight = 40.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+            fontFamily = fontFamily
+        ),
+        headlineBold = TextStyle(
+            fontSize = 34.sp,
+            lineHeight = 24.sp,
+            fontWeight = FontWeight.Bold,
             letterSpacing = 0.sp,
             fontFamily = fontFamily
         ),

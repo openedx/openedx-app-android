@@ -3,4 +3,6 @@
     <color name="background">#FFFFFF</color>
     <color name="primary">#3C68FF</color>
     <color name="splash">#517BFE</color>
+    <color name="checked_tab_item">#3C68FF</color>
+    <color name="unchecked_tab_item">#97A5BB</color>
 </resources>

@@ -12,21 +12,27 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.window.layout.WindowMetricsCalculator
+import com.braze.support.toStringMap
 import io.branch.referral.Branch
 import io.branch.referral.Branch.BranchUniversalReferralInitListener
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.app.databinding.ActivityAppBinding
+import org.openedx.app.deeplink.DeepLink
 import org.openedx.auth.presentation.logistration.LogistrationFragment
 import org.openedx.auth.presentation.signin.SignInFragment
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.presentation.global.WindowSizeHolder
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.utils.Logger
+import org.openedx.core.worker.CalendarSyncScheduler
+import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.foundation.extension.requestApplyInsetsWhenAttached
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
@@ -48,6 +54,8 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private val whatsNewManager by inject<WhatsNewManager>()
     private val corePreferencesManager by inject<CorePreferences>()
     private val profileRouter by inject<ProfileRouter>()
+    private val downloadDialogManager by inject<DownloadDialogManager>()
+    private val calendarSyncScheduler by inject<CalendarSyncScheduler>()
 
     private val branchLogger = Logger(BRANCH_TAG)
 
@@ -56,6 +64,20 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
     private var _insetCutout = 0
 
     private var _windowSize = WindowSize(WindowType.Compact, WindowType.Compact)
+
+    private val branchCallback =
+        BranchUniversalReferralInitListener { branchUniversalObject, _, error ->
+            if (branchUniversalObject?.contentMetadata?.customMetadata != null) {
+                branchLogger.i { "Branch init complete." }
+                branchLogger.i { branchUniversalObject.contentMetadata.customMetadata.toString() }
+                viewModel.makeExternalRoute(
+                    fm = supportFragmentManager,
+                    deepLink = DeepLink(branchUniversalObject.contentMetadata.customMetadata)
+                )
+            } else if (error != null) {
+                branchLogger.e { "Branch init failed. Caused by -" + error.message }
+            }
+        }
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putInt(TOP_INSET, topInset)
@@ -134,28 +156,35 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
                     addFragment(MainFragment.newInstance())
                 }
             }
+
+            val extras = intent.extras
+            if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
+                handlePushNotification(extras)
+            }
         }
 
         viewModel.logoutUser.observe(this) {
             profileRouter.restartApp(supportFragmentManager, viewModel.isLogistrationEnabled)
         }
+
+        lifecycleScope.launch {
+            viewModel.downloadFailedDialog.collect {
+                downloadDialogManager.showDownloadFailedPopup(
+                    downloadModel = it.downloadModel,
+                    fragmentManager = supportFragmentManager,
+                )
+            }
+        }
+
+        calendarSyncScheduler.scheduleDailySync()
     }
 
     override fun onStart() {
         super.onStart()
 
         if (viewModel.isBranchEnabled) {
-            val callback = BranchUniversalReferralInitListener { _, linkProperties, error ->
-                if (linkProperties != null) {
-                    branchLogger.i { "Branch init complete." }
-                    branchLogger.i { linkProperties.controlParams.toString() }
-                } else if (error != null) {
-                    branchLogger.e { "Branch init failed. Caused by -" + error.message }
-                }
-            }
-
             Branch.sessionBuilder(this)
-                .withCallback(callback)
+                .withCallback(branchCallback)
                 .withData(this.intent.data)
                 .init()
         }
@@ -165,15 +194,16 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         super.onNewIntent(intent)
         this.intent = intent
 
+        val extras = intent?.extras
+        if (extras?.containsKey(DeepLink.Keys.NOTIFICATION_TYPE.value) == true) {
+            handlePushNotification(extras)
+        }
+
         if (viewModel.isBranchEnabled) {
             if (intent?.getBooleanExtra(BRANCH_FORCE_NEW_SESSION, false) == true) {
-                Branch.sessionBuilder(this).withCallback { referringParams, error ->
-                    if (error != null) {
-                        branchLogger.e { error.message }
-                    } else if (referringParams != null) {
-                        branchLogger.i { referringParams.toString() }
-                    }
-                }.reInit()
+                Branch.sessionBuilder(this)
+                    .withCallback(branchCallback)
+                    .reInit()
             }
         }
     }
@@ -211,6 +241,11 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
             Configuration.UI_MODE_NIGHT_UNDEFINED -> false
             else -> false
         }
+    }
+
+    private fun handlePushNotification(data: Bundle) {
+        val deepLink = DeepLink(data.toStringMap())
+        viewModel.makeExternalRoute(supportFragmentManager, deepLink)
     }
 
     companion object {

@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="dashboard_title">Dashboard</string>
+<resources>
     <string name="dashboard_courses">Courses</string>
-    <string name="dashboard_welcome_back">Welcome back. Let\'s keep learning.</string>
     <string name="dashboard_you_are_not_enrolled">You are not enrolled in any courses yet.</string>
+    <string name="dashboard_learn">Learn</string>
+    <string name="dashboard_programs">Programs</string>
+    <string name="dashboard_course_date">Course %1$s</string>
+    <string name="dashboard_start_course">Start Course</string>
+    <string name="dashboard_resume_course">Resume Course</string>
+    <string name="dashboard_view_all_with_count">View All Courses (%1$d)</string>
+    <string name="dashboard_view_all">View All</string>
+    <string name="dashboard_assignment_due" translatable="false">%1$s %2$s</string>
+    <string name="dashboard_course_filter_all">All</string>
+    <string name="dashboard_course_filter_in_progress">In Progress</string>
+    <string name="dashboard_course_filter_completed">Completed</string>
+    <string name="dashboard_course_filter_expired">Expired</string>
+    <string name="dashboard_all_courses">All Courses</string>
+    <string name="dashboard_all_courses_empty_title">No Courses</string>
+    <string name="dashboard_all_courses_empty_description">You are not currently enrolled in any courses, would you like to explore the course catalog?</string>
+    <string name="dashboard_find_a_course">Find a Course</string>
+    <string name="dashboard_no_status_courses">No %1$s Courses</string>
+    <string name="dashboard_pull_to_refresh">Swipe down to refresh</string>
+
+    <plurals name="dashboard_past_due_assignment">
+        <item quantity="one">%1$d Past Due Assignment</item>
+        <item quantity="other">%1$d Past Due Assignments</item>
+    </plurals>
 </resources>

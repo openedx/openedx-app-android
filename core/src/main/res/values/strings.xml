@@ -16,13 +16,12 @@
     <string name="core_cancel">Cancel</string>
     <string name="core_search">Search</string>
     <string name="core_select_value">Select value</string>
-    <string name="core_label_starting">Starting %1$s</string>
-    <string name="core_label_ended">Ended %1$s</string>
-    <string name="core_label_ending">Ending %1$s</string>
-    <string name="core_label_expires">Course access expires %1$s</string>
-    <string name="core_label_expires_on">Course access expires on %1$s</string>
-    <string name="core_label_expired">Course access expired %1$s</string>
-    <string name="core_label_expired_on">Course access expired on %1$s</string>
+    <string name="core_label_starting">Starts %1$s</string>
+    <string name="core_label_ended">Ended on %1$s</string>
+    <string name="core_label_ends">Ends %1$s</string>
+    <string name="core_label_expires">Access expires %1$s</string>
+    <string name="core_label_access_expired">Access expired %1$s</string>
+    <string name="core_label_expired_on">Expired on %1$s</string>
     <string name="core_password">Password</string>
     <string name="core_assessment_soon">Soon</string>
     <string name="core_offline">Offline</string>
@@ -46,7 +45,7 @@
     <string name="core_android_os_version" translatable="false">OS version: </string>
     <string name="core_android_device_model" translatable="false">Device model: </string>
     <string name="core_email_subject" translatable="false">Feedback</string>
-    <string name="core_date_format_MMMM_dd">MMMM dd</string>
+    <string name="core_date_format_MMM_dd_yyyy">MMM dd, yyyy</string>
     <string name="core_full_date_with_time">dd MMM yyyy hh:mm aaa</string>
     <string name="core_app_upgrade_title">App Update</string>
     <string name="core_app_upgrade_dialog_description">We recommend that you update to the latest version. Upgrade now to receive the latest features and fixes.</string>
@@ -76,6 +75,8 @@
     <string name="core_thank_you_dialog_negative_description">We received your feedback and will use it to help improve your learning experience going forward. Thank you for sharing!</string>
     <string name="core_no_internet_connection">No internet connection</string>
     <string name="core_no_internet_connection_description">Please connect to the internet to view this content.</string>
+    <string name="core_try_again">Try Again</string>
+    <string name="core_something_went_wrong_description">Something went wrong</string>
     <string name="core_ok" tools:ignore="MissingTranslation">OK</string>
     <string name="core_continue" tools:ignore="MissingTranslation">Continue</string>
     <string name="core_leaving_the_app" tools:ignore="MissingTranslation">Leaving the app</string>
@@ -92,10 +93,7 @@
     <string name="core_date_type_next_week" tools:ignore="MissingTranslation">Next Week</string>
     <string name="core_date_type_upcoming" tools:ignore="MissingTranslation">Upcoming</string>
     <string name="core_date_type_none" tools:ignore="MissingTranslation">None</string>
-    <string name="core_date_format_today" tools:ignore="MissingTranslation">Today</string>
-    <string name="core_date_format_tomorrow" tools:ignore="MissingTranslation">Tomorrow</string>
-    <string name="core_date_format_yesterday" tools:ignore="MissingTranslation">Yesterday</string>
-    <string name="core_date_format_days_ago" tools:ignore="MissingTranslation">%1$s days ago</string>
+    <string name="core_date_format_assignment_due" tools:ignore="MissingTranslation">Due %1$s</string>
     <plurals name="core_date_items_hidden" tools:ignore="MissingTranslation">
         <item quantity="one">%d Item Hidden</item>
         <item quantity="other">%d Items Hidden</item>
@@ -132,9 +130,61 @@
     <string name="core_video_download_quality">Video download quality</string>
     <string name="core_manage_account">Manage Account</string>
 
+    <string name="core_assignment_due_tag" tools:ignore="MissingTranslation">Assignment Due</string>
+    <string name="core_title_syncing_calendar" tools:ignore="MissingTranslation">Syncing calendar…</string>
+
+    <!-- region: Calendar Sync -->
+    <string name="core_header_sync_to_calendar" tools:ignore="MissingTranslation">Sync to calendar</string>
+    <string name="core_body_sync_to_calendar" tools:ignore="MissingTranslation">Automatically sync all deadlines and due dates for this course to your calendar.</string>
+
+    <string name="core_title_request_calendar_permission" tools:ignore="MissingTranslation">\“%s\” Would Like to Access Your Calendar</string>
+    <string name="core_message_request_calendar_permission" tools:ignore="MissingTranslation">%s would like to use your calendar list to subscribe to your personalized %s calendar for this course.</string>
+    <string name="core_label_do_not_allow" tools:ignore="MissingTranslation">Don’t allow</string>
+
+    <string name="core_title_add_course_calendar" tools:ignore="MissingTranslation">Add Course Dates to Calendar</string>
+    <string name="core_message_add_course_calendar" tools:ignore="MissingTranslation">Would you like to add \“%s\” dates to your calendar? \n\nYou can edit or remove your course dates at any time from your calendar or settings.</string>
+
+    <string name="core_message_course_calendar_added" tools:ignore="MissingTranslation">\“%s\” has been added to your phone\'s calendar.</string>
+    <string name="core_label_view_events" tools:ignore="MissingTranslation">View Events</string>
+    <string name="core_label_done" tools:ignore="MissingTranslation">Done</string>
+
+    <string name="core_title_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Dates from Calendar</string>
+    <string name="core_message_remove_course_calendar" tools:ignore="MissingTranslation">Would you like to remove the \“%s\” dates from your calendar?</string>
+    <string name="core_label_remove" tools:ignore="MissingTranslation">Remove</string>
+
+    <string name="core_title_calendar_out_of_date" tools:ignore="MissingTranslation">Your course calendar is out of date</string>
+    <string name="core_message_calendar_out_of_date" tools:ignore="MissingTranslation">Your course dates have been shifted and your course calendar is no longer up to date with your new schedule.</string>
+    <string name="core_label_update_now" tools:ignore="MissingTranslation">Update Now</string>
+    <string name="core_label_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Calendar</string>
+
+    <string name="core_snackbar_course_calendar_added" tools:ignore="MissingTranslation">Your course calendar has been added.</string>
+    <string name="core_snackbar_course_calendar_removed" tools:ignore="MissingTranslation">Your course calendar has been removed.</string>
+    <string name="core_snackbar_course_calendar_updated" tools:ignore="MissingTranslation">Your course calendar has been updated.</string>
+    <string name="core_snackbar_course_calendar_error" tools:ignore="MissingTranslation">Error Adding Calendar, Please try later</string>
+
+    <!-- endregion -->
+
     <string name="core_course_container_nav_home">Home</string>
     <string name="core_course_container_nav_videos">Videos</string>
     <string name="core_course_container_nav_discussions">Discussions</string>
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
+    <string name="core_no_course_content">No course content is currently available.</string>
+    <string name="core_no_videos">There are currently no videos for this course.</string>
+    <string name="core_no_dates">Course dates are currently not available.</string>
+    <string name="core_no_discussion">Unable to load discussions.\n Please try again later.</string>
+    <string name="core_no_handouts">There are currently no handouts for this course.</string>
+    <string name="core_no_announcements">There are currently no announcements for this course.</string>
+    <string name="course_confirm_download">Confirm Download</string>
+    <string name="core_edit">Edit</string>
+    <string name="core_offline_progress_sync">Offline Progress Sync</string>
+    <string name="core_close">Close</string>
+
+    <string name="core_calendar_sync_failed">Calendar Sync Failed</string>
+    <string name="core_synced_to_calendar">Synced to Calendar</string>
+    <string name="core_syncing_failed">Sync Failed</string>
+    <string name="core_to_sync">To Sync</string>
+    <string name="core_not_synced">Not Synced</string>
+    <string name="core_syncing_to_calendar">Syncing to calendar…</string>
+    <string name="core_next">Next</string>
 </resources>
