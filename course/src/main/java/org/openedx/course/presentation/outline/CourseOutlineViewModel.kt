@@ -184,69 +184,82 @@ class CourseOutlineViewModel(
     private fun getCourseDataInternal() {
         viewModelScope.launch {
             try {
-                var courseStructure = interactor.getCourseStructure(courseId)
+                val courseStructure = interactor.getCourseStructure(courseId)
                 val blocks = courseStructure.blockData
-
-                val courseStatus = if (networkConnection.isOnline()) {
-                    interactor.getCourseStatus(courseId)
-                } else {
-                    CourseComponentStatus("")
-                }
-
-                val courseDatesResult = if (networkConnection.isOnline()) {
-                    interactor.getCourseDates(courseId)
-                } else {
-                    CourseDatesResult(
-                        datesSection = linkedMapOf(),
-                        courseBanner = CourseDatesBannerInfo(
-                            missedDeadlines = false,
-                            missedGatedContent = false,
-                            verifiedUpgradeLink = "",
-                            contentTypeGatingEnabled = false,
-                            hasEnded = false
-                        )
-                    )
-                }
+                val courseStatus = fetchCourseStatus()
+                val courseDatesResult = fetchCourseDates()
                 val datesBannerInfo = courseDatesResult.courseBanner
 
                 checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
                 updateOutdatedOfflineXBlocks(courseStructure)
 
-                setBlocks(blocks)
-                courseSubSections.clear()
-                courseSubSectionUnit.clear()
-                courseStructure = courseStructure.copy(blockData = sortBlocks(blocks))
-                initDownloadModelsStatus()
-
-                val courseSectionsState =
-                    (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState.orEmpty()
-
-                _uiState.value = CourseOutlineUIState.CourseData(
-                    courseStructure = courseStructure,
-                    downloadedState = getDownloadModelsStatus(),
-                    resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
-                    resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
-                    courseSubSections = courseSubSections,
-                    courseSectionsState = courseSectionsState,
-                    subSectionsDownloadsCount = subSectionsDownloadsCount,
-                    datesBannerInfo = datesBannerInfo,
-                    useRelativeDates = preferencesManager.isRelativeDatesEnabled
-                )
+                initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
             } catch (e: Exception) {
-                _uiState.value = CourseOutlineUIState.Error
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(R.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                    )
-                }
+                handleCourseDataError(e)
             }
         }
+    }
+
+    private suspend fun fetchCourseStatus(): CourseComponentStatus {
+        return if (networkConnection.isOnline()) {
+            interactor.getCourseStatus(courseId)
+        } else {
+            CourseComponentStatus("")
+        }
+    }
+
+    private suspend fun fetchCourseDates(): CourseDatesResult {
+        return if (networkConnection.isOnline()) {
+            interactor.getCourseDates(courseId)
+        } else {
+            CourseDatesResult(
+                datesSection = linkedMapOf(),
+                courseBanner = CourseDatesBannerInfo(
+                    missedDeadlines = false,
+                    missedGatedContent = false,
+                    verifiedUpgradeLink = "",
+                    contentTypeGatingEnabled = false,
+                    hasEnded = false
+                )
+            )
+        }
+    }
+
+    private suspend fun initializeCourseData(
+        blocks: List<Block>,
+        courseStructure: CourseStructure,
+        courseStatus: CourseComponentStatus,
+        datesBannerInfo: CourseDatesBannerInfo
+    ) {
+        setBlocks(blocks)
+        courseSubSections.clear()
+        courseSubSectionUnit.clear()
+        val sortedStructure = courseStructure.copy(blockData = sortBlocks(blocks))
+        initDownloadModelsStatus()
+
+        val courseSectionsState =
+            (_uiState.value as? CourseOutlineUIState.CourseData)?.courseSectionsState.orEmpty()
+
+        _uiState.value = CourseOutlineUIState.CourseData(
+            courseStructure = sortedStructure,
+            downloadedState = getDownloadModelsStatus(),
+            resumeComponent = getResumeBlock(blocks, courseStatus.lastVisitedBlockId),
+            resumeUnitTitle = resumeVerticalBlock?.displayName ?: "",
+            courseSubSections = courseSubSections,
+            courseSectionsState = courseSectionsState,
+            subSectionsDownloadsCount = subSectionsDownloadsCount,
+            datesBannerInfo = datesBannerInfo,
+            useRelativeDates = preferencesManager.isRelativeDatesEnabled
+        )
+    }
+
+    private suspend fun handleCourseDataError(e: Exception) {
+        _uiState.value = CourseOutlineUIState.Error
+        val errorMessage = when {
+            e.isInternetError() -> R.string.core_error_no_connection
+            else -> R.string.core_error_unknown_error
+        }
+        _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {

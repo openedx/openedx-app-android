@@ -105,19 +105,14 @@ class TranscriptManager(
     }
 
     private fun fetchTranscriptResponse(url: String?): InputStream? {
-        if (url == null) {
-            return null
-        }
-        val response: InputStream?
-        try {
-            if (has(url)) {
-                response = getInputStream(url)
-                return response
-            }
+        if (url == null) return null
+
+        return try {
+            if (has(url)) getInputStream(url) else null
         } catch (e: IOException) {
             e.printStackTrace()
+            null
         }
-        return null
     }
 
     private fun getTranscriptDir(): File? {

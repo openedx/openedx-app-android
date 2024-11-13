@@ -14,12 +14,12 @@ class HandleErrorInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val response = chain.proceed(chain.request())
 
-        if (isErrorResponse(response)) {
-            val jsonStr = response.body?.string() ?: return response
-            return handleErrorResponse(response, jsonStr)
+        return if (isErrorResponse(response)) {
+            val jsonStr = response.body?.string()
+            if (jsonStr != null) handleErrorResponse(response, jsonStr) else response
+        } else {
+            response
         }
-
-        return response
     }
 
     private fun isErrorResponse(response: Response): Boolean {

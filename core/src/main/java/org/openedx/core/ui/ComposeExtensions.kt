@@ -3,8 +3,6 @@ package org.openedx.core.ui
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.ViewTreeObserver
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
@@ -40,9 +38,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.presentation.global.InsetHolder
 
@@ -182,21 +177,6 @@ fun isImeVisibleState(): State<Boolean> {
     return keyboardState
 }
 
-fun LazyListState.disableScrolling(scope: CoroutineScope) {
-    scope.launch {
-        scroll(scrollPriority = MutatePriority.PreventUserInput) {
-            awaitCancellation()
-        }
-    }
-}
-
-fun LazyListState.reEnableScrolling(scope: CoroutineScope) {
-    scope.launch {
-        scroll(scrollPriority = MutatePriority.PreventUserInput) {}
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
 fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
     return (currentPage - page) + currentPageOffsetFraction
 }

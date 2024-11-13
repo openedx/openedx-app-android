@@ -66,6 +66,7 @@ class OauthRefreshTokenAuthenticator(
             .create(AuthApi::class.java)
     }
 
+    @Suppress("ReturnCount")
     @Synchronized
     override fun authenticate(route: Route?, response: Response): Request? {
         val accessToken = preferencesManager.accessToken
@@ -85,14 +86,16 @@ class OauthRefreshTokenAuthenticator(
             }
 
             DISABLED_USER_ERROR_MESSAGE, JWT_DISABLED_USER_ERROR_MESSAGE, JWT_USER_EMAIL_MISMATCH -> {
-                runBlocking {
-                    appNotifier.send(LogoutEvent(true))
-                }
-                null
+                handleDisabledUser()
             }
 
             else -> null
         }
+    }
+
+    private fun handleDisabledUser(): Request? {
+        runBlocking { appNotifier.send(LogoutEvent(true)) }
+        return null
     }
 
     // Helper function for handling token expiration logic

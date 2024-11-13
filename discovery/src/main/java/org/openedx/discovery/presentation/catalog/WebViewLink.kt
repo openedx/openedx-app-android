@@ -29,24 +29,22 @@ class WebViewLink(
 
     companion object {
         fun parse(uriStr: String?, uriScheme: String): WebViewLink? {
-            if (uriStr.isNullOrEmpty()) {
-                return null
-            }
+            if (uriStr.isNullOrEmpty()) return null
 
             val sanitizedUriStr = uriStr.replace("+", "%2B")
             val uri = Uri.parse(sanitizedUriStr)
 
             // Validate URI scheme and authority
-            val isSchemeValid = (uriScheme == uri.scheme)
+            val isSchemeValid = uriScheme == uri.scheme
             val uriAuthority = Authority.entries.find { it.key == uri.authority }
 
-            if (!isSchemeValid || uriAuthority == null) {
-                return null
+            return if (isSchemeValid && uriAuthority != null) {
+                // Parse the URI params
+                val params = uri.getQueryParams()
+                WebViewLink(uriAuthority, params)
+            } else {
+                null
             }
-
-            // Parse the Uri params
-            val params = uri.getQueryParams()
-            return WebViewLink(uriAuthority, params)
         }
     }
 }

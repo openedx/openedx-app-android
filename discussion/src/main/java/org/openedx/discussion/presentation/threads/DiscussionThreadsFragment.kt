@@ -210,7 +210,7 @@ class DiscussionThreadsFragment : Fragment() {
     }
 }
 
-@Suppress("MaximumLineLength")
+@Suppress("MaximumLineLength", "MaxLineLength")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DiscussionThreadsScreen(

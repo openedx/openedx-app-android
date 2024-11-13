@@ -88,14 +88,15 @@ open class VideoUnitViewModel(
 
     private fun getTranscriptUrl(): String {
         val defaultTranscripts = transcripts[transcriptLanguage]
-        if (!defaultTranscripts.isNullOrEmpty()) {
-            return defaultTranscripts
+        return when {
+            !defaultTranscripts.isNullOrEmpty() -> defaultTranscripts
+            transcripts.values.isNotEmpty() -> {
+                transcriptLanguage = transcripts.keys.first()
+                transcripts[transcriptLanguage] ?: ""
+            }
+
+            else -> ""
         }
-        if (transcripts.values.isNotEmpty()) {
-            transcriptLanguage = transcripts.keys.toList().first()
-            return transcripts[transcriptLanguage] ?: ""
-        }
-        return ""
     }
 
     open fun markBlockCompleted(blockId: String, medium: String) {

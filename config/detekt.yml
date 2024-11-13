@@ -43,13 +43,8 @@ style:
     active: true
     ignoreAnnotated:
       - 'Preview'
-  MaxLineLength:
-    active: false
   ForbiddenComment:
     active: false
-  ReturnCount:
-    active: true
-    max: 3
   SerialVersionUIDInSerializableClass:
     active: false
 
@@ -57,7 +52,6 @@ complexity:
   active: true
   LongMethod:
     active: true
-    threshold: 80
     ignoreAnnotated: [ 'Composable' ]
     ignoreFunction: [ 'onCreateView' ]
   LargeClass:
@@ -71,7 +65,6 @@ complexity:
   TooManyFunctions:
     active: true
     thresholdInClasses: 30
-    thresholdInFiles: 30
     thresholdInInterfaces: 30
     ignoreAnnotatedFunctions: [ 'Composable' ]
     ignoreOverridden: true

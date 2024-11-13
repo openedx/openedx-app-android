@@ -63,13 +63,11 @@ data class Block(
     fun isCompleted() = completion == 1.0
 
     fun getFirstDescendantBlock(blocks: List<Block>): Block? {
-        if (blocks.isEmpty()) return null
-        descendants.forEach { descendant ->
-            blocks.find { it.id == descendant }?.let { descendantBlock ->
-                return descendantBlock
-            }
+        return descendants.firstOrNull { descendant ->
+            blocks.find { it.id == descendant } != null
+        }?.let { descendant ->
+            blocks.find { it.id == descendant }
         }
-        return null
     }
 
     fun getDownloadsCount(blocks: List<Block>): Int {
