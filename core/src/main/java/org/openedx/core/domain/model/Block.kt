@@ -158,33 +158,16 @@ data class EncodedVideos(
     }
 
     private fun getDefaultVideoInfoForDownloading(): VideoInfo? {
-        var result: VideoInfo? = null
+        return when {
+            isPreferredVideoInfo(mobileLow) -> mobileLow
+            isPreferredVideoInfo(mobileHigh) -> mobileHigh
+            isPreferredVideoInfo(desktopMp4) -> desktopMp4
+            fallback != null && isPreferredVideoInfo(fallback) &&
+                    !VideoUtil.videoHasFormat(fallback!!.url, AppDataConstants.VIDEO_FORMAT_M3U8) -> fallback
 
-        if (isPreferredVideoInfo(mobileLow)) {
-            result = mobileLow
-        } else if (isPreferredVideoInfo(mobileHigh)) {
-            result = mobileHigh
-        } else if (isPreferredVideoInfo(desktopMp4)) {
-            result = desktopMp4
-        } else {
-            fallback?.let {
-                if (isPreferredVideoInfo(it) &&
-                    !VideoUtil.videoHasFormat(it.url, AppDataConstants.VIDEO_FORMAT_M3U8)
-                ) {
-                    result = fallback
-                }
-            }
-
-            if (result == null) {
-                hls?.let {
-                    if (isPreferredVideoInfo(it)) {
-                        result = hls
-                    }
-                }
-            }
+            hls != null && isPreferredVideoInfo(hls) -> hls
+            else -> null
         }
-
-        return result
     }
 
     private fun isPreferredVideoInfo(videoInfo: VideoInfo?): Boolean {

@@ -38,39 +38,41 @@ abstract class AbstractDownloader : KoinComponent {
     ): DownloadResult {
         isCanceled = false
         return try {
-            val response = downloadApi.downloadFile(url).body()
-            if (response != null) {
-                val file = File(path)
-                if (file.exists()) {
-                    file.delete()
+            val responseBody = downloadApi.downloadFile(url).body() ?: return DownloadResult.ERROR
+            initializeFile(path)
+            responseBody.byteStream().use { inputStream ->
+                FileOutputStream(File(path)).use { outputStream ->
+                    writeToFile(inputStream, outputStream)
                 }
-                file.createNewFile()
-                input = response.byteStream()
-                currentDownloadingFilePath = path
-                fos = FileOutputStream(file)
-                fos.use { output ->
-                    val buffer = ByteArray(BUFFER_SIZE)
-                    var read: Int
-                    while (input!!.read(buffer).also { read = it } != -1) {
-                        output?.write(buffer, 0, read)
-                    }
-                    output?.flush()
-                }
-                DownloadResult.SUCCESS
-            } else {
-                DownloadResult.ERROR
             }
+            DownloadResult.SUCCESS
         } catch (e: Exception) {
             e.printStackTrace()
-            if (isCanceled) {
-                DownloadResult.CANCELED
-            } else {
-                DownloadResult.ERROR
-            }
+            if (isCanceled) DownloadResult.CANCELED else DownloadResult.ERROR
         } finally {
-            fos?.close()
-            input?.close()
+            closeResources()
         }
+    }
+
+    private fun initializeFile(path: String) {
+        val file = File(path)
+        if (file.exists()) file.delete()
+        file.createNewFile()
+        currentDownloadingFilePath = path
+    }
+
+    private fun writeToFile(inputStream: InputStream, outputStream: FileOutputStream) {
+        val buffer = ByteArray(BUFFER_SIZE)
+        var bytesRead: Int
+        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+            outputStream.write(buffer, 0, bytesRead)
+        }
+        outputStream.flush()
+    }
+
+    private fun closeResources() {
+        fos?.close()
+        input?.close()
     }
 
     suspend fun cancelDownloading() {

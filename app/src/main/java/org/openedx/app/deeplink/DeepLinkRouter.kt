@@ -78,9 +78,7 @@ class DeepLinkRouter(
                 navigateToCourseDashboard(fm, deepLink, courseTitle)
             }
 
-            DeepLinkType.UNENROLL, DeepLinkType.REMOVE_BETA_TESTER -> { /* Just navigate to dashboard */
-            }
-
+            DeepLinkType.UNENROLL, DeepLinkType.REMOVE_BETA_TESTER -> {} // Just navigate to dashboard
             DeepLinkType.COURSE_VIDEOS -> navigateToCourseVideos(fm, deepLink)
             DeepLinkType.COURSE_DATES -> navigateToCourseDates(fm, deepLink)
             DeepLinkType.COURSE_DISCUSSION -> navigateToCourseDiscussion(fm, deepLink)
@@ -94,8 +92,7 @@ class DeepLinkRouter(
             }
 
             DeepLinkType.FORUM_COMMENT -> navigateToDiscussionCommentWithDiscussion(fm, deepLink)
-            else -> { /* ignore */
-            }
+            else -> {} // ignore
         }
     }
 

@@ -60,33 +60,54 @@ abstract class BaseDownloadViewModel(
 
     private suspend fun updateDownloadModelsStatus(models: List<DownloadModel>) {
         val downloadModelMap = models.associateBy { it.id }
-        for (item in downloadableChildrenMap) {
-            var downloadingCount = 0
-            var downloadedCount = 0
-            item.value.forEach { blockId ->
-                val downloadModel = downloadModelMap[blockId]
-                if (downloadModel != null) {
-                    if (downloadModel.downloadedState.isWaitingOrDownloading) {
-                        downloadModelsStatus[blockId] = DownloadedState.DOWNLOADING
-                        downloadingCount++
-                    } else if (downloadModel.downloadedState.isDownloaded) {
-                        downloadModelsStatus[blockId] = DownloadedState.DOWNLOADED
-                        downloadedCount++
-                    }
-                } else {
-                    downloadModelsStatus[blockId] = DownloadedState.NOT_DOWNLOADED
-                }
-            }
 
-            downloadModelsStatus[item.key] = when {
-                downloadingCount > 0 -> DownloadedState.DOWNLOADING
-                downloadedCount == item.value.size -> DownloadedState.DOWNLOADED
-                else -> DownloadedState.NOT_DOWNLOADED
-            }
+        downloadableChildrenMap.forEach { (parentId, children) ->
+            val (downloadingCount, downloadedCount) = updateChildrenStatus(children, downloadModelMap)
+            updateParentStatus(parentId, children.size, downloadingCount, downloadedCount)
         }
 
         downloadingModelsList = models.filter { it.downloadedState.isWaitingOrDownloading }
         _downloadingModelsFlow.emit(downloadingModelsList)
+    }
+
+    private fun updateChildrenStatus(
+        children: List<String>,
+        downloadModelMap: Map<String, DownloadModel>
+    ): Pair<Int, Int> {
+        var downloadingCount = 0
+        var downloadedCount = 0
+
+        children.forEach { blockId ->
+            val downloadModel = downloadModelMap[blockId]
+            downloadModelsStatus[blockId] = when {
+                downloadModel?.downloadedState?.isWaitingOrDownloading == true -> {
+                    downloadingCount++
+                    DownloadedState.DOWNLOADING
+                }
+
+                downloadModel?.downloadedState?.isDownloaded == true -> {
+                    downloadedCount++
+                    DownloadedState.DOWNLOADED
+                }
+
+                else -> DownloadedState.NOT_DOWNLOADED
+            }
+        }
+
+        return downloadingCount to downloadedCount
+    }
+
+    private fun updateParentStatus(
+        parentId: String,
+        childrenSize: Int,
+        downloadingCount: Int,
+        downloadedCount: Int
+    ) {
+        downloadModelsStatus[parentId] = when {
+            downloadingCount > 0 -> DownloadedState.DOWNLOADING
+            downloadedCount == childrenSize -> DownloadedState.DOWNLOADED
+            else -> DownloadedState.NOT_DOWNLOADED
+        }
     }
 
     protected fun setBlocks(list: List<Block>) {
@@ -200,21 +221,25 @@ abstract class BaseDownloadViewModel(
         }
     }
 
+    @Suppress("NestedBlockDepth")
     protected fun addDownloadableChildrenForSequentialBlock(sequentialBlock: Block) {
-        for (item in sequentialBlock.descendants) {
-            allBlocks[item]?.let { blockDescendant ->
-                if (blockDescendant.type == BlockType.VERTICAL) {
-                    for (unitBlockId in blockDescendant.descendants) {
-                        val block = allBlocks[unitBlockId]
-                        if (block?.isDownloadable == true) {
-                            val id = sequentialBlock.id
-                            val children = downloadableChildrenMap[id] ?: listOf()
-                            downloadableChildrenMap[id] = children + block.id
-                        }
+        sequentialBlock.descendants.forEach { descendantId ->
+            val blockDescendant = allBlocks[descendantId] ?: return@forEach
+
+            if (blockDescendant.type == BlockType.VERTICAL) {
+                blockDescendant.descendants.forEach { unitBlockId ->
+                    val block = allBlocks[unitBlockId]
+                    if (block?.isDownloadable == true) {
+                        addDownloadableChild(sequentialBlock.id, block.id)
                     }
                 }
             }
         }
+    }
+
+    private fun addDownloadableChild(parentId: String, childId: String) {
+        val children = downloadableChildrenMap[parentId] ?: listOf()
+        downloadableChildrenMap[parentId] = children + childId
     }
 
     fun logBulkDownloadToggleEvent(toggle: Boolean) {

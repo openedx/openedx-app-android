@@ -223,23 +223,38 @@ class CourseVideoViewModel(
     }
 
     private fun sortBlocks(blocks: List<Block>): List<Block> {
-        val resultBlocks = mutableListOf<Block>()
         if (blocks.isEmpty()) return emptyList()
+
+        val resultBlocks = mutableListOf<Block>()
         blocks.forEach { block ->
             if (block.type == BlockType.CHAPTER) {
                 resultBlocks.add(block)
-                block.descendants.forEach { descendant ->
-                    blocks.find { it.id == descendant }?.let {
-                        courseSubSections.getOrPut(block.id) { mutableListOf() }
-                            .add(it)
-                        courseSubSectionUnit[it.id] = it.getFirstDescendantBlock(blocks)
-                        subSectionsDownloadsCount[it.id] = it.getDownloadsCount(blocks)
-                        addDownloadableChildrenForSequentialBlock(it)
-                    }
-                }
+                processDescendants(block, blocks)
             }
         }
-        return resultBlocks.toList()
+        return resultBlocks
+    }
+
+    private fun processDescendants(chapterBlock: Block, blocks: List<Block>) {
+        chapterBlock.descendants.forEach { descendantId ->
+            val sequentialBlock = blocks.find { it.id == descendantId } ?: return@forEach
+            addToSubSections(chapterBlock, sequentialBlock)
+            updateSubSectionUnit(sequentialBlock, blocks)
+            updateDownloadsCount(sequentialBlock, blocks)
+            addDownloadableChildrenForSequentialBlock(sequentialBlock)
+        }
+    }
+
+    private fun addToSubSections(chapterBlock: Block, sequentialBlock: Block) {
+        courseSubSections.getOrPut(chapterBlock.id) { mutableListOf() }.add(sequentialBlock)
+    }
+
+    private fun updateSubSectionUnit(sequentialBlock: Block, blocks: List<Block>) {
+        courseSubSectionUnit[sequentialBlock.id] = sequentialBlock.getFirstDescendantBlock(blocks)
+    }
+
+    private fun updateDownloadsCount(sequentialBlock: Block, blocks: List<Block>) {
+        subSectionsDownloadsCount[sequentialBlock.id] = sequentialBlock.getDownloadsCount(blocks)
     }
 
     fun downloadBlocks(blocksIds: List<String>, fragmentManager: FragmentManager) {

@@ -76,9 +76,6 @@ complexity:
     ignoreAnnotatedFunctions: [ 'Composable' ]
     ignoreOverridden: true
     ignorePrivate: true
-  NestedBlockDepth:
-    active: true
-    threshold: 6
   CyclomaticComplexMethod:
     active: true
     ignoreAnnotated: [ 'Composable' ]
