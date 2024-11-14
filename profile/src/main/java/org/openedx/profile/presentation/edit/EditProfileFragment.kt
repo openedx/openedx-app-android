@@ -278,10 +278,9 @@ class EditProfileFragment : Fragment() {
         fos.write(bitmapData)
         fos.flush()
         fos.close()
-        // TODO: get applicationId instead of packageName
         return FileProvider.getUriForFile(
             requireContext(),
-            requireContext().packageName + ".fileprovider",
+            viewModel.config.getAppId() + ".fileprovider",
             newFile
         )!!
     }

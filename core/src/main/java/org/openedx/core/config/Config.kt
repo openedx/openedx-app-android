@@ -8,6 +8,7 @@ import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
+@Suppress("TooManyFunctions")
 class Config(context: Context) {
 
     private var configProperties: JsonObject = try {

@@ -184,7 +184,7 @@ val screenModule = module {
             profileRouter = get(),
         )
     }
-    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
+    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }

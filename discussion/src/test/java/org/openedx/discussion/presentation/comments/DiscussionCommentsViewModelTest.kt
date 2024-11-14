@@ -40,6 +40,7 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
+@Suppress("LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscussionCommentsViewModelTest {
 

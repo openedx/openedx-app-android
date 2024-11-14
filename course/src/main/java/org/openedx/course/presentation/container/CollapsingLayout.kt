@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,7 +73,12 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.foundation.presentation.rememberWindowSize
 import kotlin.math.roundToInt
 
-@Suppress("MagicNumber")
+private const val FLING_DELAY = 50L
+private const val SCROLL_UP_THRESHOLD = 0.15f
+private const val SCROLL_DOWN_THRESHOLD = 0.85f
+private const val SHADE_HEIGHT_MULTIPLIER = 0.1f
+private const val BLUR_PADDING_FACTOR = 3
+
 @Composable
 internal fun CollapsingLayout(
     modifier: Modifier = Modifier,
@@ -110,7 +114,7 @@ internal fun CollapsingLayout(
     val blurImagePaddingPx = with(localDensity) { blurImagePadding.toPx() }
     val toolbarOffset =
         (offset.value + backgroundImageHeight.floatValue - blurImagePaddingPx).roundToInt()
-    val imageStartY = (backgroundImageHeight.floatValue - blurImagePaddingPx) * 0.5f
+    val imageStartY = (backgroundImageHeight.floatValue - blurImagePaddingPx) / 2f
     val imageOffsetY = -(offset.value + imageStartY)
     val toolbarBackgroundOffset = if (toolbarOffset >= 0) {
         toolbarOffset
@@ -194,18 +198,18 @@ internal fun CollapsingLayout(
 
                             launch {
                                 // Handle Fling, offset.animateTo does not work if the value changes faster than 10ms
-                                if (change.uptimeMillis - change.previousUptimeMillis <= 50) {
-                                    delay(50)
+                                if (change.uptimeMillis - change.previousUptimeMillis <= FLING_DELAY) {
+                                    delay(FLING_DELAY)
                                 }
 
                                 if (scrollDown) {
-                                    if (offset.value > -backgroundImageHeight.floatValue * 0.85) {
+                                    if (offset.value > -backgroundImageHeight.floatValue * SCROLL_DOWN_THRESHOLD) {
                                         offset.animateTo(expandedOffset)
                                     } else {
                                         offset.animateTo(collapsedOffset)
                                     }
                                 } else {
-                                    if (offset.value < -backgroundImageHeight.floatValue * 0.15) {
+                                    if (offset.value < -backgroundImageHeight.floatValue * SCROLL_UP_THRESHOLD) {
                                         offset.animateTo(collapsedOffset)
                                     } else {
                                         offset.animateTo(expandedOffset)
@@ -263,7 +267,6 @@ internal fun CollapsingLayout(
     }
 }
 
-@Suppress("MagicNumber")
 @Composable
 private fun CollapsingLayoutTablet(
     localDensity: Density,
@@ -328,7 +331,11 @@ private fun CollapsingLayoutTablet(
                 modifier = Modifier
                     .background(MaterialTheme.appColors.courseHomeHeaderShade)
                     .fillMaxWidth()
-                    .height(with(localDensity) { (expandedTopHeight.value + navigationHeight.value).toDp() } * 0.1f)
+                    .height(
+                        with(localDensity) {
+                            (expandedTopHeight.value + navigationHeight.value).toDp() * SHADE_HEIGHT_MULTIPLIER
+                        }
+                    )
                     .align(Alignment.BottomCenter)
             )
         }
@@ -446,7 +453,6 @@ private fun CollapsingLayoutTablet(
     )
 }
 
-@Suppress("MagicNumber")
 @Composable
 private fun CollapsingLayoutMobile(
     configuration: Configuration,
@@ -505,7 +511,9 @@ private fun CollapsingLayoutMobile(
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
                         .height(
-                            with(localDensity) { (collapsedTopHeight.value + navigationHeight.value).toDp() } * 0.1f
+                            with(localDensity) {
+                                (collapsedTopHeight.value + navigationHeight.value).toDp() * SHADE_HEIGHT_MULTIPLIER
+                            }
                         )
                         .align(Alignment.BottomCenter)
                 )
@@ -605,7 +613,7 @@ private fun CollapsingLayoutMobile(
                     .background(Color.White)
                     .blur(100.dp)
             ) {
-                val adaptiveBlurImagePadding = blurImagePadding.value * (3 - rawFactor)
+                val adaptiveBlurImagePadding = blurImagePadding.value * (BLUR_PADDING_FACTOR - rawFactor)
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.surface)
@@ -631,7 +639,11 @@ private fun CollapsingLayoutMobile(
                     modifier = Modifier
                         .background(MaterialTheme.appColors.courseHomeHeaderShade)
                         .fillMaxWidth()
-                        .height(with(localDensity) { (expandedTopHeight.value + navigationHeight.value).toDp() } * 0.1f)
+                        .height(
+                            with(localDensity) {
+                                (expandedTopHeight.value + navigationHeight.value).toDp() * SHADE_HEIGHT_MULTIPLIER
+                            }
+                        )
                         .align(Alignment.BottomCenter)
                 )
             }
@@ -777,7 +789,6 @@ private fun CollapsingLayoutMobile(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(

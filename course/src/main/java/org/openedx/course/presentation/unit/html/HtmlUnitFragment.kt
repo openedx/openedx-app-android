@@ -320,12 +320,7 @@ private fun HTMLContentView(
                         request: WebResourceRequest?
                     ): Boolean {
                         val clickUrl = request?.url?.toString() ?: ""
-                        return if (clickUrl.isNotEmpty() &&
-                            (
-                                    clickUrl.startsWith("http://") ||
-                                            clickUrl.startsWith("https://")
-                                    )
-                        ) {
+                        return if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
                             true
                         } else if (clickUrl.startsWith("mailto:")) {

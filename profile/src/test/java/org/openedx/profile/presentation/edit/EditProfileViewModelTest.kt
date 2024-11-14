@@ -20,6 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
+import org.openedx.core.config.Config
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
@@ -43,6 +44,7 @@ class EditProfileViewModelTest {
     private val interactor = mockk<ProfileInteractor>()
     private val notifier = mockk<ProfileNotifier>()
     private val analytics = mockk<ProfileAnalytics>()
+    private val config = mockk<Config>()
 
     private val account = Account(
         username = "thom84",
@@ -84,7 +86,7 @@ class EditProfileViewModelTest {
     @Test
     fun `updateAccount no internet connection`() = runTest {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         coEvery { interactor.updateAccount(any()) } throws UnknownHostException()
         viewModel.updateAccount(emptyMap())
         advanceUntilIdle()
@@ -99,7 +101,7 @@ class EditProfileViewModelTest {
     @Test
     fun `updateAccount unknown exception`() = runTest {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         coEvery { interactor.updateAccount(any()) } throws Exception()
 
         viewModel.updateAccount(emptyMap())
@@ -115,7 +117,7 @@ class EditProfileViewModelTest {
     @Test
     fun `updateAccount success`() = runTest {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(any<AccountUpdated>()) } returns Unit
         every { analytics.logEvent(any(), any()) } returns Unit
@@ -132,7 +134,7 @@ class EditProfileViewModelTest {
     @Test
     fun `updateAccountAndImage no internet connection`() = runTest {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         coEvery { interactor.setProfileImage(any(), any()) } throws UnknownHostException()
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(AccountUpdated()) } returns Unit
@@ -152,7 +154,7 @@ class EditProfileViewModelTest {
     @Test
     fun `updateAccountAndImage unknown exception`() = runTest {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         coEvery { interactor.setProfileImage(any(), any()) } throws Exception()
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(AccountUpdated()) } returns Unit
@@ -172,7 +174,7 @@ class EditProfileViewModelTest {
     @Test
     fun `updateAccountAndImage success`() = runTest {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         coEvery { interactor.setProfileImage(any(), any()) } returns Unit
         coEvery { interactor.updateAccount(any()) } returns account
         coEvery { notifier.send(any<AccountUpdated>()) } returns Unit
@@ -194,7 +196,7 @@ class EditProfileViewModelTest {
     @Test
     fun `setImageUri set new value`() {
         val viewModel =
-            EditProfileViewModel(interactor, resourceManager, notifier, analytics, account)
+            EditProfileViewModel(interactor, resourceManager, notifier, analytics, config, account)
         viewModel.setImageUri(mockk())
 
         assert(viewModel.selectedImageUri.value != null)
