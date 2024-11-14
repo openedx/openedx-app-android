@@ -65,9 +65,8 @@ class DiscussionAddThreadViewModel(
     }
 
     fun getHandledTopicById(topicId: String): Pair<String, String> {
-        return getHandledTopics().find{
-            it.second == topicId
-        } ?: getHandledTopics()[0]
+        val topics = getHandledTopics()
+        return topics.find { it.second == topicId } ?: topics.firstOrNull() ?: Pair("", "")
     }
 
     fun sendThreadAdded() {
