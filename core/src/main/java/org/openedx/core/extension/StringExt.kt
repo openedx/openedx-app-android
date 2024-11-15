@@ -5,7 +5,7 @@ import java.net.URL
 fun String?.equalsHost(host: String?): Boolean {
     return try {
         host?.startsWith(URL(this).host, ignoreCase = true) == true
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }

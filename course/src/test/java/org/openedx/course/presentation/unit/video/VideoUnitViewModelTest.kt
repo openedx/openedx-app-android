@@ -44,7 +44,6 @@ class VideoUnitViewModelTest {
     private val transcriptManager = mockk<TranscriptManager>()
     private val courseAnalytics = mockk<CourseAnalytics>()
 
-
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
@@ -162,5 +161,4 @@ class VideoUnitViewModelTest {
         assert(viewModel.currentVideoTime.value == 10L)
         assert(viewModel.isUpdated.value == true)
     }
-
 }

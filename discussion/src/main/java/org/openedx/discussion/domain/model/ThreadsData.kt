@@ -7,6 +7,3 @@ data class ThreadsData(
     val textSearchRewrite: String,
     val pagination: Pagination
 )
-
-
-

@@ -185,7 +185,7 @@ fun CalendarSetUpView(
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 OpenEdXButton(
-                                    modifier = Modifier.fillMaxWidth(0.75f),
+                                    modifier = Modifier.fillMaxWidth(fraction = 0.75f),
                                     text = stringResource(id = R.string.profile_set_up_calendar_sync),
                                     onClick = {
                                         setUpCalendarSync()

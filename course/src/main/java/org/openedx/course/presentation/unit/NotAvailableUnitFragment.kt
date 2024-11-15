@@ -122,7 +122,6 @@ class NotAvailableUnitFragment : Fragment() {
             return fragment
         }
     }
-
 }
 
 @Composable
@@ -138,7 +137,6 @@ private fun NotAvailableUnitScreen(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState
     ) {
-
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(

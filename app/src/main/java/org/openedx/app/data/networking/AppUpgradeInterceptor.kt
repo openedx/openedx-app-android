@@ -28,7 +28,9 @@ class AppUpgradeInterceptor(
                     appNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent(latestAppVersion))
                 }
 
-                latestAppVersion.isNotEmpty() && BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {
+                latestAppVersion.isNotEmpty() &&
+                        BuildConfig.VERSION_NAME != latestAppVersion &&
+                        lastSupportedDateTime < Date().time -> {
                     appNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
             }
@@ -41,4 +43,3 @@ class AppUpgradeInterceptor(
         const val HEADER_APP_VERSION_LAST_SUPPORTED_DATE = "EDX-APP-VERSION-LAST-SUPPORTED-DATE"
     }
 }
-

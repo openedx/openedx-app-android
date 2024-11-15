@@ -65,9 +65,9 @@ class DiscussionAddThreadViewModel(
     }
 
     fun getHandledTopicById(topicId: String): Pair<String, String> {
-        return getHandledTopics().find{
-            it.second == topicId
-        } ?: getHandledTopics()[0]
+        return getHandledTopics()
+            .find { it.second == topicId }
+            ?: getHandledTopics()[0]
     }
 
     fun sendThreadAdded() {
@@ -75,5 +75,4 @@ class DiscussionAddThreadViewModel(
             notifier.send(DiscussionThreadAdded())
         }
     }
-
 }

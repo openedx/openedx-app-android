@@ -1,11 +1,8 @@
 package org.openedx.core.data.model
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.parcelize.Parcelize
 import org.openedx.core.data.model.room.discovery.EnrollmentDetailsDB
 import org.openedx.core.utils.TimeUtils
-
 import org.openedx.core.domain.model.EnrollmentDetails as DomainEnrollmentDetails
 
 data class EnrollmentDetails(

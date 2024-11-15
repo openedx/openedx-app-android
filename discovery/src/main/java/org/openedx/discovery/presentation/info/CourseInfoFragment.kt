@@ -358,7 +358,6 @@ private fun CourseInfoWebView(
     onUriClick: (String, linkAuthority) -> Unit,
     onWebPageLoadError: () -> Unit
 ) {
-
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,

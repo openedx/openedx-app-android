@@ -3,9 +3,12 @@ package org.openedx.core.utils
 import org.openedx.core.AppDataConstants.USER_MAX_YEAR
 import org.openedx.core.AppDataConstants.defaultLocale
 import org.openedx.core.domain.model.RegistrationField
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 object LocaleUtils {
+
+    private const val MIN_USER_AGE = 13
 
     fun getBirthYearsRange(): List<RegistrationField.Option> {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
@@ -17,7 +20,7 @@ object LocaleUtils {
     fun isProfileLimited(inputYear: String?): Boolean {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         return if (!inputYear.isNullOrEmpty()) {
-            currentYear - inputYear.toInt() < 13
+            currentYear - inputYear.toInt() < MIN_USER_AGE
         } else {
             true
         }
@@ -53,7 +56,6 @@ object LocaleUtils {
         .sortedBy { it.name }
         .toList()
 
-
     private fun getAvailableLanguages() = Locale.getISOLanguages()
         .asSequence()
         .filter { it.length == 2 }
@@ -66,5 +68,4 @@ object LocaleUtils {
     fun getDisplayLanguage(languageCode: String): String {
         return Locale(languageCode, "").getDisplayLanguage(defaultLocale)
     }
-
 }

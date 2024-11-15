@@ -151,11 +151,11 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
                 val completePercentage = second / youtubeTrackerListener.videoDuration
-                if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
+                if (completePercentage >= VIDEO_COMPLETION_THRESHOLD && !isMarkBlockCompletedCalled) {
                     viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
                     isMarkBlockCompletedCalled = true
                 }
-                if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
+                if (completePercentage >= RATE_DIALOG_THRESHOLD && !appReviewManager.isDialogShowed) {
                     appReviewManager.tryToOpenRateDialog()
                 }
             }
@@ -202,11 +202,13 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 viewModel.videoUrl.split("watch?v=").getOrNull(1)?.let { videoId ->
                     if (viewModel.isPlaying && isResumed) {
                         youTubePlayer.loadVideo(
-                            videoId, viewModel.getCurrentVideoTime().toFloat() / 1000
+                            videoId,
+                            viewModel.getCurrentVideoTime().toFloat() / 1000
                         )
                     } else {
                         youTubePlayer.cueVideo(
-                            videoId, viewModel.getCurrentVideoTime().toFloat() / 1000
+                            videoId,
+                            viewModel.getCurrentVideoTime().toFloat() / 1000
                         )
                     }
                 }
@@ -245,6 +247,9 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "blockTitle"
+
+        const val VIDEO_COMPLETION_THRESHOLD = 0.8f
+        const val RATE_DIALOG_THRESHOLD = 0.99f
 
         fun newInstance(
             blockId: String,

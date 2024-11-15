@@ -92,7 +92,6 @@ fun DiscoveryCourseItem(
     windowSize: WindowSize,
     onClick: (String) -> Unit,
 ) {
-
     val imageWidth by remember(key1 = windowSize) {
         mutableStateOf(
             windowSize.windowSizeValue(
@@ -139,7 +138,8 @@ fun DiscoveryCourseItem(
                     modifier = Modifier
                         .testTag("txt_course_org")
                         .padding(top = 12.dp),
-                    text = course.org, color = MaterialTheme.appColors.textFieldHint,
+                    text = course.org,
+                    color = MaterialTheme.appColors.textFieldHint,
                     style = MaterialTheme.appTypography.labelMedium
                 )
                 Text(

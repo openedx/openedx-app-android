@@ -36,12 +36,6 @@ class HandoutsViewModelTest {
     private val interactor = mockk<CourseInteractor>()
     private val analytics = mockk<CourseAnalytics>()
 
-    //region mockHandoutsModel
-
-    private val handoutsModel = HandoutsModel("")
-
-    //endregion
-
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)

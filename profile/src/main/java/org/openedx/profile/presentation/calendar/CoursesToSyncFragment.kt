@@ -255,7 +255,6 @@ private fun SyncCourseTabRow(
     }
 }
 
-
 @Composable
 private fun CourseCheckboxList(
     selectedTab: SyncCourseTab,

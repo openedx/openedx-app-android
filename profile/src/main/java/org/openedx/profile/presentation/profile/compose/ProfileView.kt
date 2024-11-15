@@ -67,7 +67,8 @@ internal fun ProfileView(
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
-        onRefresh = { onAction(ProfileViewAction.SwipeRefresh) })
+        onRefresh = { onAction(ProfileViewAction.SwipeRefresh) }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -185,7 +186,6 @@ private fun ProfileScreenPreview() {
         )
     }
 }
-
 
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)

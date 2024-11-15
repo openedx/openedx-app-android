@@ -13,19 +13,28 @@ object Sha1Util {
             val sha1hash = md.digest()
             convertToHex(sha1hash)
         } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
             text
         } catch (e: UnsupportedEncodingException) {
+            e.printStackTrace()
             text
         }
     }
 
+    @Suppress("MagicNumber")
     fun convertToHex(data: ByteArray): String {
         val buf = StringBuilder()
         for (b in data) {
             var halfbyte = b.toInt() ushr 4 and 0x0F
             var twoHalfs = 0
             do {
-                buf.append(if (halfbyte in 0..9) ('0'.code + halfbyte).toChar() else ('a'.code + (halfbyte - 10)).toChar())
+                buf.append(
+                    if (halfbyte in 0..9) {
+                        ('0'.code + halfbyte).toChar()
+                    } else {
+                        ('a'.code + (halfbyte - 10)).toChar()
+                    }
+                )
                 halfbyte = b.toInt() and 0x0F
             } while (twoHalfs++ < 1)
         }

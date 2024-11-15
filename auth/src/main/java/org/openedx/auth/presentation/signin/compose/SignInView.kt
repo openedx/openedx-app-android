@@ -128,7 +128,7 @@ internal fun LoginScreen(
         Image(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.3f),
+                .fillMaxHeight(fraction = 0.3f),
             painter = painterResource(id = coreR.drawable.core_top_header),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
@@ -284,7 +284,7 @@ private fun AuthForm(
                         onEvent(AuthEvent.ForgotPasswordClick)
                     },
                 text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.info_variant,
+                color = MaterialTheme.appColors.infoVariant,
                 style = MaterialTheme.appTypography.labelLarge
             )
         }
@@ -379,8 +379,11 @@ private fun PasswordTextField(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
-        visualTransformation = if (isPasswordVisible) VisualTransformation.None
-        else PasswordVisualTransformation(),
+        visualTransformation = if (isPasswordVisible) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
         keyboardActions = KeyboardActions {
             focusManager.clearFocus()
             onPressDone()

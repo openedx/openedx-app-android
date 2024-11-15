@@ -215,7 +215,8 @@ private fun LearnDropdownMenu(
             when (currentValue) {
                 LearnType.COURSES -> 0
                 LearnType.PROGRAMS -> 1
-            }, false
+            },
+            false
         )
     }
 

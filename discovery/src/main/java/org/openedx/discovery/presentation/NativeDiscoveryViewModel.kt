@@ -76,7 +76,9 @@ class NativeDiscoveryViewModel(
                 isLoading = true
                 val response = if (networkConnection.isOnline() || page > 1) {
                     interactor.getCoursesList(username, organization, page)
-                } else null
+                } else {
+                    null
+                }
                 if (response != null) {
                     if (response.pagination.next.isNotEmpty() && page != response.pagination.numPages) {
                         _canLoadMore.value = true
@@ -149,7 +151,6 @@ class NativeDiscoveryViewModel(
                 _isUpdating.value = false
             }
         }
-
     }
 
     fun fetchMore() {

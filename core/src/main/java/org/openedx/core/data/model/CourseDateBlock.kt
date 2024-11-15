@@ -12,7 +12,7 @@ data class CourseDateBlock(
     @SerializedName("complete")
     val complete: Boolean = false,
     @SerializedName("date")
-    val date: String = "",  // ISO 8601 compliant format
+    val date: String = "", // ISO 8601 compliant format
     @SerializedName("assignment_type")
     val assignmentType: String? = "",
     @SerializedName("date_type")

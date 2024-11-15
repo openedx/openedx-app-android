@@ -118,9 +118,9 @@ class DiscussionResponsesViewModelTest {
 
     //endregion
 
-
     private val comments = listOf(
-        mockComment.copy(id = "0"), mockComment.copy(id = "1")
+        mockComment.copy(id = "0"),
+        mockComment.copy(id = "1")
     )
 
     @Before
@@ -128,7 +128,9 @@ class DiscussionResponsesViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added) } returns commentAddedSuccessfully
+        every {
+            resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+        } returns commentAddedSuccessfully
     }
 
     @After
@@ -474,7 +476,6 @@ class DiscussionResponsesViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(noInternet, message?.message)
-
     }
 
     @Test
@@ -498,7 +499,6 @@ class DiscussionResponsesViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(somethingWrong, message?.message)
-
     }
 
     @Test
@@ -519,7 +519,6 @@ class DiscussionResponsesViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
-
 
         assert(viewModel.uiMessage.value != null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
@@ -566,5 +565,4 @@ class DiscussionResponsesViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
-
 }

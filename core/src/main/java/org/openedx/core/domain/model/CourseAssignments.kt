@@ -7,4 +7,4 @@ import kotlinx.parcelize.Parcelize
 data class CourseAssignments(
     val futureAssignments: List<CourseDateBlock>?,
     val pastAssignments: List<CourseDateBlock>?
-): Parcelable
+) : Parcelable

@@ -7,4 +7,3 @@ data class DownloadModelsSize(
     val allCount: Int,
     val allSize: Long
 )
-

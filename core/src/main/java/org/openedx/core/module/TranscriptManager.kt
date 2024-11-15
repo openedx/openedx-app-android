@@ -29,14 +29,14 @@ class TranscriptManager(
             get() = OkHttpClient.Builder().build()
     }
 
-    var transcriptObject: TimedTextObject? = null
+    private var transcriptObject: TimedTextObject? = null
 
-    fun has(url: String): Boolean {
+    private fun has(url: String): Boolean {
         val transcriptDir = getTranscriptDir() ?: return false
         val hash = Sha1Util.SHA1(url)
         val file = File(transcriptDir, hash)
         return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(
-            5
+            FILE_VALIDITY_DURATION_HOURS
         )
     }
 
@@ -59,23 +59,24 @@ class TranscriptManager(
         return if (!file.exists()) {
             // not in cache
             null
-        } else FileInputStream(file)
+        } else {
+            FileInputStream(file)
+        }
     }
 
     private suspend fun startTranscriptDownload(downloadLink: String) {
-        if (!has(downloadLink)) {
-            val file = File(getTranscriptDir(), Sha1Util.SHA1(downloadLink))
-            val result = transcriptDownloader.download(
-                downloadLink,
-                file.path
-            )
-            if (result == AbstractDownloader.DownloadResult.SUCCESS) {
-                getInputStream(downloadLink)?.let {
-                    try {
-                        transcriptObject = convertIntoTimedTextObject(it)
-                    } catch (e: NullPointerException) {
-                        logger.e(throwable = e, submitCrashReport = true)
-                    }
+        if (has(downloadLink)) return
+        val file = File(getTranscriptDir(), Sha1Util.SHA1(downloadLink))
+        val result = transcriptDownloader.download(
+            downloadLink,
+            file.path
+        )
+        if (result == AbstractDownloader.DownloadResult.SUCCESS) {
+            getInputStream(downloadLink)?.let {
+                try {
+                    transcriptObject = convertIntoTimedTextObject(it)
+                } catch (e: NullPointerException) {
+                    logger.e(throwable = e, submitCrashReport = true)
                 }
             }
         }
@@ -107,20 +108,15 @@ class TranscriptManager(
         return timedTextObject
     }
 
-    fun fetchTranscriptResponse(url: String?): InputStream? {
-        if (url == null) {
-            return null
-        }
-        val response: InputStream?
-        try {
-            if (has(url)) {
-                response = getInputStream(url)
-                return response
-            }
+    private fun fetchTranscriptResponse(url: String?): InputStream? {
+        if (url == null) return null
+
+        return try {
+            if (has(url)) getInputStream(url) else null
         } catch (e: IOException) {
             e.printStackTrace()
+            null
         }
-        return null
     }
 
     private fun getTranscriptDir(): File? {
@@ -134,7 +130,8 @@ class TranscriptManager(
         return null
     }
 
-    private companion object {
-        const val TAG = "TranscriptManager"
+    companion object {
+        private const val TAG = "TranscriptManager"
+        private const val FILE_VALIDITY_DURATION_HOURS = 5L
     }
 }

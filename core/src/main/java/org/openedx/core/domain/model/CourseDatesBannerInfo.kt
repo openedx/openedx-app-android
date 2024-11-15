@@ -61,5 +61,5 @@ enum class CourseBannerType(
         headerResId = R.string.core_dates_reset_dates_banner_header,
         bodyResId = R.string.core_dates_reset_dates_banner_body,
         buttonResId = R.string.core_dates_reset_dates_banner_button
-    );
+    )
 }

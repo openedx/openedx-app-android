@@ -38,7 +38,6 @@ class NativeDiscoveryViewModelTest {
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
 
-
     private val dispatcher = StandardTestDispatcher()
 
     private val config = mockk<Config>()
@@ -158,7 +157,8 @@ class NativeDiscoveryViewModelTest {
                 "2",
                 7,
                 "1"
-            ), emptyList()
+            ),
+            emptyList()
         )
         advanceUntilIdle()
 
@@ -188,7 +188,8 @@ class NativeDiscoveryViewModelTest {
                 "",
                 7,
                 "1"
-            ), emptyList()
+            ),
+            emptyList()
         )
         advanceUntilIdle()
 
@@ -199,7 +200,6 @@ class NativeDiscoveryViewModelTest {
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)
         assert(viewModel.canLoadMore.value == false)
     }
-
 
     @Test
     fun `updateData no internet connection`() = runTest {
@@ -269,7 +269,8 @@ class NativeDiscoveryViewModelTest {
                 "2",
                 7,
                 "1"
-            ), emptyList()
+            ),
+            emptyList()
         )
         viewModel.updateData()
         advanceUntilIdle()
@@ -300,7 +301,8 @@ class NativeDiscoveryViewModelTest {
                 "",
                 7,
                 "1"
-            ), emptyList()
+            ),
+            emptyList()
         )
         viewModel.updateData()
         advanceUntilIdle()
@@ -312,5 +314,4 @@ class NativeDiscoveryViewModelTest {
         assert(viewModel.canLoadMore.value == false)
         assert(viewModel.uiState.value is DiscoveryUIState.Courses)
     }
-
 }

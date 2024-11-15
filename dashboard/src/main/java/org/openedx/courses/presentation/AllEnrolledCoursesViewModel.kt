@@ -86,9 +86,17 @@ class AllEnrolledCoursesViewModel(
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_unknown_error)
+                        )
+                    )
                 }
             }
             _uiState.update { it.copy(refreshing = false, showProgress = false) }
@@ -128,9 +136,17 @@ class AllEnrolledCoursesViewModel(
                 _uiState.update { it.copy(courses = coursesList.toList()) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_unknown_error)
+                        )
+                    )
                 }
             }
             _uiState.update { it.copy(refreshing = false, showProgress = false) }
@@ -160,7 +176,8 @@ class AllEnrolledCoursesViewModel(
 
     fun navigateToCourseSearch(fragmentManager: FragmentManager) {
         dashboardRouter.navigateToCourseSearch(
-            fragmentManager, ""
+            fragmentManager,
+            ""
         )
     }
 

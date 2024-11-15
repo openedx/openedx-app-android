@@ -287,7 +287,6 @@ class DiscussionSearchThreadViewModelTest {
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.isEmpty())
     }
 
-
     @Test
     fun `notifier DiscussionThreadDataChanged with list`() = runTest {
         val viewModel = DiscussionSearchThreadViewModel(interactor, resourceManager, notifier, "")
@@ -321,5 +320,4 @@ class DiscussionSearchThreadViewModelTest {
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Threads)
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.size == 1)
     }
-
 }

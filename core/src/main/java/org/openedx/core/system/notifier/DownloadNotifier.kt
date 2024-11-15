@@ -12,5 +12,4 @@ class DownloadNotifier {
 
     suspend fun send(event: DownloadProgressChanged) = channel.emit(event)
     suspend fun send(event: DownloadFailed) = channel.emit(event)
-
 }

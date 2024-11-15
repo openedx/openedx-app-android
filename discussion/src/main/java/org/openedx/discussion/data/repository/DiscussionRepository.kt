@@ -137,7 +137,6 @@ class DiscussionRepository(
     ) =
         api.createComment(CommentBody(threadId, rawBody, parentId)).mapToDomain()
 
-
     suspend fun createThread(
         topicId: String,
         courseId: String,
@@ -156,5 +155,4 @@ class DiscussionRepository(
         )
         return api.markBlocksCompletion(blocksCompletionBody)
     }
-
 }

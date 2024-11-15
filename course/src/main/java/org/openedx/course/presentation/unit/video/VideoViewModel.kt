@@ -24,7 +24,6 @@ class VideoViewModel(
 
     private var isBlockAlreadyCompleted = false
 
-
     fun sendTime() {
         if (currentVideoTime != C.TIME_UNSET) {
             viewModelScope.launch {
@@ -51,6 +50,7 @@ class VideoViewModel(
                     )
                     notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     isBlockAlreadyCompleted = false
                 }
             }

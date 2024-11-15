@@ -141,7 +141,7 @@ internal fun SignUpView(
     LaunchedEffect(uiState.validationError) {
         if (uiState.validationError) {
             coroutine.launch {
-                scrollState.animateScrollTo(0, tween(300))
+                scrollState.animateScrollTo(0, tween(durationMillis = 300))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
         }
@@ -151,7 +151,7 @@ internal fun SignUpView(
         if (uiState.socialAuth != null) {
             coroutine.launch {
                 showErrorMap.clear()
-                scrollState.animateScrollTo(0, tween(300))
+                scrollState.animateScrollTo(0, tween(durationMillis = 300))
             }
         }
     }
@@ -173,7 +173,6 @@ internal fun SignUpView(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val topBarPadding by remember {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -246,7 +245,7 @@ internal fun SignUpView(
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.3f),
+                    .fillMaxHeight(fraction = 0.3f),
                 painter = painterResource(id = coreR.drawable.core_top_header),
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
@@ -296,8 +295,8 @@ internal fun SignUpView(
                     ) {
                         if (uiState.isLoading) {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
