@@ -176,7 +176,6 @@ class RestorePasswordViewModelTest {
         assertEquals(somethingWrong, message?.message)
     }
 
-
     @Test
     fun `success restore password`() = runTest {
         val viewModel =

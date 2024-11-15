@@ -7,7 +7,7 @@ data class ProgramConfig(
     private val viewType: String = Config.ViewType.NATIVE.name,
     @SerializedName("WEBVIEW")
     val webViewConfig: ProgramWebViewConfig = ProgramWebViewConfig(),
-){
+) {
     fun isViewTypeWebView(): Boolean {
         return Config.ViewType.WEBVIEW.name.equals(viewType, ignoreCase = true)
     }

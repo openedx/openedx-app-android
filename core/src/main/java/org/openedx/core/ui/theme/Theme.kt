@@ -60,7 +60,7 @@ private val DarkColorPalette = AppColors(
 
     warning = dark_warning,
     info = dark_info,
-    info_variant = dark_info_variant,
+    infoVariant = dark_info_variant,
     onWarning = dark_onWarning,
     onInfo = dark_onInfo,
 
@@ -149,7 +149,7 @@ private val LightColorPalette = AppColors(
 
     warning = light_warning,
     info = light_info,
-    info_variant = light_info_variant,
+    infoVariant = light_info_variant,
     onWarning = light_onWarning,
     onInfo = light_onInfo,
 
@@ -204,7 +204,7 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
 
     MaterialTheme(
         colors = colors.material,
-        //typography = LocalTypography.current.material,
+        // typography = LocalTypography.current.material,
         shapes = LocalShapes.current.material,
     ) {
         CompositionLocalProvider(

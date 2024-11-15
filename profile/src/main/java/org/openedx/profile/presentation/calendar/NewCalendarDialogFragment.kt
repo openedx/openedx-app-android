@@ -75,6 +75,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.foundation.extension.parcelable
 import org.openedx.foundation.extension.toastMessage
 import org.openedx.profile.R
+import org.openedx.profile.presentation.calendar.NewCalendarDialogFragment.Companion.MAX_CALENDAR_TITLE_LENGTH
 import androidx.compose.ui.graphics.Color as ComposeColor
 import org.openedx.core.R as CoreR
 
@@ -124,6 +125,7 @@ class NewCalendarDialogFragment : DialogFragment() {
     companion object {
         const val DIALOG_TAG = "NewCalendarDialogFragment"
         const val ARG_DIALOG_TYPE = "ARG_DIALOG_TYPE"
+        const val MAX_CALENDAR_TITLE_LENGTH = 40
 
         fun newInstance(
             newCalendarDialogType: NewCalendarDialogType
@@ -239,7 +241,6 @@ private fun CalendarTitleTextField(
     onValueChanged: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val maxChar = 40
     var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
             TextFieldValue("")
@@ -260,7 +261,7 @@ private fun CalendarTitleTextField(
                 .height(48.dp),
             value = textFieldValue,
             onValueChange = {
-                if (it.text.length <= maxChar) textFieldValue = it
+                if (it.text.length <= MAX_CALENDAR_TITLE_LENGTH) textFieldValue = it
                 onValueChanged(it.text.trim())
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(

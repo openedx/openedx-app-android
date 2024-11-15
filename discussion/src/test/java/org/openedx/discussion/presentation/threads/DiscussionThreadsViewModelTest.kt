@@ -488,7 +488,6 @@ class DiscussionThreadsViewModelTest {
             DiscussionTopicsViewModel.TOPIC
         )
 
-
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)
@@ -537,6 +536,4 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 2) { interactor.getThreads(any(), any(), any(), any(), any()) }
     }
-
-
 }

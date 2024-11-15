@@ -9,5 +9,5 @@ enum class DatesSection(val stringResId: Int) {
     THIS_WEEK(R.string.core_date_type_this_week),
     NEXT_WEEK(R.string.core_date_type_next_week),
     UPCOMING(R.string.core_date_type_upcoming),
-    NONE(R.string.core_date_type_none);
+    NONE(R.string.core_date_type_none)
 }

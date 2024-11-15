@@ -200,8 +200,13 @@ class CourseInfoViewModel(
     }
 
     fun onWebPageError() {
-        _webViewUIState.value =
-            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+        _webViewUIState.value = WebViewUIState.Error(
+            if (networkConnection.isOnline()) {
+                ErrorType.UNKNOWN_ERROR
+            } else {
+                ErrorType.CONNECTION_ERROR
+            }
+        )
     }
 
     fun onWebPageLoading() {

@@ -85,9 +85,7 @@ class NoAccessCourseContainerFragment : Fragment() {
             return fragment
         }
     }
-
 }
-
 
 @Composable
 private fun NoAccessCourseContainerScreen(
@@ -164,12 +162,10 @@ private fun NoAccessCourseContainerScreen(
                         )
                     }
                 }
-
             }
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

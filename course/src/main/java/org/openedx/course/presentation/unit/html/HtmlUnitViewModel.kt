@@ -52,8 +52,13 @@ class HtmlUnitViewModel(
     }
 
     fun onWebPageLoadError() {
-        _uiState.value =
-            HtmlUnitUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+        _uiState.value = HtmlUnitUIState.Error(
+            if (networkConnection.isOnline()) {
+                ErrorType.UNKNOWN_ERROR
+            } else {
+                ErrorType.CONNECTION_ERROR
+            }
+        )
     }
 
     fun setWebPageLoaded(assets: AssetManager) {
@@ -61,9 +66,9 @@ class HtmlUnitViewModel(
 
         val jsList = mutableListOf<String>()
 
-        //Injection to intercept completion state for xBlocks
+        // Injection to intercept completion state for xBlocks
         assets.readAsText("js_injection/completions.js")?.let { jsList.add(it) }
-        //Injection to fix CSS issues for Survey xBlock
+        // Injection to fix CSS issues for Survey xBlock
         assets.readAsText("js_injection/survey_css.js")?.let { jsList.add(it) }
 
         _injectJSList.value = jsList

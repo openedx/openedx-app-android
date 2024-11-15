@@ -57,7 +57,6 @@ val networkingModule = module {
     single { provideApi<NotificationsApi>(get()) }
 }
 
-
 inline fun <reified T> provideApi(retrofit: Retrofit): T {
     return retrofit.create(T::class.java)
 }

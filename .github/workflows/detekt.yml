@@ -1,0 +1,33 @@
+name: Detekt
+
+on:
+  workflow_dispatch:
+  pull_request: { }
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
+  CI_GRADLE_ARG_PROPERTIES: --stacktrace
+
+jobs:
+  linting:
+    name: Run Detekt
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+
+      - name: Run Detekt
+        run: ./gradlew detektAll
+
+      - name: Upload report
+        uses: github/codeql-action/upload-sarif@v3
+        if: success() || failure()
+        with:
+          sarif_file: build/reports/detekt/detekt.sarif

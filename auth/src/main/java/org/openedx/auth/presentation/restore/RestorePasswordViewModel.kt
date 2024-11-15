@@ -60,7 +60,9 @@ class RestorePasswordViewModel(
                 } else {
                     _uiState.value = RestorePasswordUIState.Initial
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(org.openedx.auth.R.string.auth_invalid_email))
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(org.openedx.auth.R.string.auth_invalid_email)
+                        )
                     logResetPasswordEvent(false)
                 }
             } catch (e: Exception) {
@@ -70,10 +72,14 @@ class RestorePasswordViewModel(
                     _uiMessage.value = UIMessage.SnackBarMessage(e.error)
                 } else if (e.isInternetError()) {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
                 } else {
                     _uiMessage.value =
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_unknown_error)
+                        )
                 }
             }
         }

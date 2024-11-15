@@ -47,7 +47,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.utils.ImageProcessor
 import org.openedx.foundation.system.ResourceManager
-import java.net.UnknownHostException
 import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -100,22 +99,34 @@ class CourseContainerViewModelTest {
             false,
             null,
             coursewareAccess = CoursewareAccess(
-                false, "", "", "",
-                "", ""
-
+                false,
+                "",
+                "",
+                "",
+                "",
+                ""
             )
         ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
-            null, "audit", false, Date()
+            null,
+            "audit",
+            false,
+            Date()
         ),
         courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course", "", "OpenedX", Date(),
-            "", "", null, false, null,
+            "Open edX Demo Course",
+            "",
+            "OpenedX",
+            Date(),
+            "",
+            "",
+            null,
+            false,
+            null,
             CourseSharingUtmParameters("", ""),
             "",
         )
-
     )
 
     private val courseStructure = CourseStructure(
@@ -154,17 +165,31 @@ class CourseContainerViewModelTest {
             false,
             null,
             CoursewareAccess(
-                false, "", "", "",
-                "", ""
+                false,
+                "",
+                "",
+                "",
+                "",
+                ""
             )
         ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
-            null, "", false, null
+            null,
+            "",
+            false,
+            null
         ),
         courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course", "", "OpenedX", null,
-            "", "", null, false, null,
+            "Open edX Demo Course",
+            "",
+            "OpenedX",
+            null,
+            "",
+            "",
+            null,
+            false,
+            null,
             CourseSharingUtmParameters("", ""),
             "",
         )

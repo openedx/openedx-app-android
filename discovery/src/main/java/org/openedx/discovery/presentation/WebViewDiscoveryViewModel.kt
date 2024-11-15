@@ -54,8 +54,13 @@ class WebViewDiscoveryViewModel(
     }
 
     fun onWebPageLoadError() {
-        _uiState.value =
-            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+        _uiState.value = WebViewUIState.Error(
+            if (networkConnection.isOnline()) {
+                ErrorType.UNKNOWN_ERROR
+            } else {
+                ErrorType.CONNECTION_ERROR
+            }
+        )
     }
 
     fun updateDiscoveryUrl(url: String) {

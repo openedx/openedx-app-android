@@ -18,5 +18,4 @@ class SelectDialogViewModel(
             notifier.send(CourseSubtitleLanguageChanged(value))
         }
     }
-
 }

@@ -135,7 +135,8 @@ private fun CourseOfflineUI(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .displayCutoutForLandscape(), contentAlignment = Alignment.TopCenter
+                .displayCutoutForLandscape(),
+            contentAlignment = Alignment.TopCenter
         ) {
             Surface(
                 modifier = modifierScreenWidth,
