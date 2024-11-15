@@ -37,7 +37,6 @@ class LearnViewModelTest {
         }
     }
 
-
     @Test
     fun `getProgramFragment returns correct program fragment`() = runTest {
         viewModel.getProgramFragment

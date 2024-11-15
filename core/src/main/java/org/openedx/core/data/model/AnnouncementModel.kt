@@ -9,6 +9,7 @@ data class AnnouncementModel(
     val content: String
 ) {
     fun mapToDomain() = org.openedx.core.domain.model.AnnouncementModel(
-        date, content
+        date,
+        content
     )
 }

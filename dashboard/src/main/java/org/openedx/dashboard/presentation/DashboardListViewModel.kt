@@ -181,5 +181,4 @@ class DashboardListViewModel(
     fun dashboardCourseClickedEvent(courseId: String, courseName: String) {
         analytics.dashboardCourseClickedEvent(courseId, courseName)
     }
-
 }

@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -50,6 +49,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
@@ -278,7 +278,6 @@ private fun WebViewDiscoveryScreen(
                                 contentUrl = contentUrl,
                                 uriScheme = uriScheme,
                                 userAgent = userAgent,
-                                isPreLogin = isPreLogin,
                                 onWebPageLoaded = {
                                     if ((uiState is WebViewUIState.Error).not()) {
                                         onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED)
@@ -321,7 +320,6 @@ private fun DiscoveryWebView(
     contentUrl: String,
     uriScheme: String,
     userAgent: String,
-    isPreLogin: Boolean,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,

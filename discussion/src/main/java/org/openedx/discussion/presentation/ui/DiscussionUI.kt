@@ -147,12 +147,19 @@ fun ThreadMainItem(
             }
             IconText(
                 text = stringResource(id = R.string.discussion_follow),
-                painter = painterResource(if (thread.following) R.drawable.discussion_star_filled else R.drawable.discussion_star),
+                painter = painterResource(
+                    if (thread.following) {
+                        R.drawable.discussion_star_filled
+                    } else {
+                        R.drawable.discussion_star
+                    }
+                ),
                 textStyle = MaterialTheme.appTypography.labelLarge,
                 color = MaterialTheme.appColors.textPrimaryVariant,
                 onClick = {
                     onClick(DiscussionCommentsFragment.ACTION_FOLLOW_THREAD, !thread.following)
-                })
+                }
+            )
         }
         Spacer(modifier = Modifier.height(24.dp))
         HyperlinkImageText(
@@ -193,7 +200,6 @@ fun ThreadMainItem(
         Spacer(modifier = Modifier.height(16.dp))
         Divider(color = MaterialTheme.appColors.cardViewBorder)
     }
-
 }
 
 @Composable
@@ -306,7 +312,8 @@ fun CommentItem(
                             comment.id,
                             !comment.abuseFlagged
                         )
-                    })
+                    }
+                )
             }
             Spacer(modifier = Modifier.height(14.dp))
             HyperlinkImageText(
@@ -352,11 +359,9 @@ fun CommentItem(
                     }
                 )
             }
-
         }
     }
 }
-
 
 @Composable
 fun CommentMainItem(
@@ -489,9 +494,9 @@ fun CommentMainItem(
                             comment.id,
                             !comment.abuseFlagged
                         )
-                    })
+                    }
+                )
             }
-
         }
     }
 }
@@ -539,13 +544,13 @@ fun ThreadItem(
                 ) {
                     Box {
                         Icon(
-                            modifier = Modifier.size((MaterialTheme.appTypography.labelSmall.fontSize.value + 4).dp),
+                            modifier = Modifier.size((MaterialTheme.appTypography.labelLarge.fontSize.value).dp),
                             painter = painterResource(id = R.drawable.discussion_ic_unread_replies),
                             tint = MaterialTheme.appColors.textPrimaryVariant,
                             contentDescription = null
                         )
                         Image(
-                            modifier = Modifier.size((MaterialTheme.appTypography.labelSmall.fontSize.value + 4).dp),
+                            modifier = Modifier.size((MaterialTheme.appTypography.labelLarge.fontSize.value).dp),
                             painter = painterResource(id = R.drawable.discussion_ic_unread_replies_dot),
                             contentDescription = null
                         )
@@ -593,7 +598,6 @@ fun ThreadItem(
     }
 }
 
-
 @Composable
 fun ThreadItemCategory(
     name: String,
@@ -610,7 +614,8 @@ fun ThreadItemCategory(
                     MaterialTheme.appShapes.cardShape
                 )
                 .clip(MaterialTheme.appShapes.cardShape)
-                .clickable { onClick() }),
+                .clickable { onClick() }
+        ),
         shape = MaterialTheme.appShapes.cardShape,
         backgroundColor = MaterialTheme.appColors.surface
     ) {
@@ -651,7 +656,8 @@ fun TopicItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = topic.name, style = MaterialTheme.appTypography.titleMedium,
+            text = topic.name,
+            style = MaterialTheme.appTypography.titleMedium,
             color = MaterialTheme.appColors.textPrimary
         )
         Icon(
@@ -660,17 +666,16 @@ fun TopicItem(
             contentDescription = "Expandable Arrow"
         )
     }
-
 }
 
 @Preview
 @Composable
 private fun TopicItemPreview() {
-    OpenEdXTheme() {
-        TopicItem(topic = mockTopic,
-            onClick = { _, _ ->
-
-            })
+    OpenEdXTheme {
+        TopicItem(
+            topic = mockTopic,
+            onClick = { _, _ -> }
+        )
     }
 }
 
@@ -678,17 +683,18 @@ private fun TopicItemPreview() {
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun ThreadItemPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         ThreadItem(
             thread = mockThread,
-            onClick = {})
+            onClick = {}
+        )
     }
 }
 
 @Preview
 @Composable
 private fun CommentItemPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         CommentItem(
             modifier = Modifier.fillMaxWidth(),
             comment = mockComment,

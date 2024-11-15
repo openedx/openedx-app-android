@@ -385,7 +385,7 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
         verify(exactly = 1) { appNotifier.notifier }
 
-        //val fields = viewModel.uiState.value as? SignUpUIState.Fields
+        // val fields = viewModel.uiState.value as? SignUpUIState.Fields
 
         assertFalse(viewModel.uiState.value.isLoading)
     }

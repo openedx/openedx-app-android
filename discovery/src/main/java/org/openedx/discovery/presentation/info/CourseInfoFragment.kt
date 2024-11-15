@@ -321,7 +321,6 @@ private fun CourseInfoScreen(
                                 contentUrl = (uiState as CourseInfoUIState.CourseInfo).initialUrl,
                                 uriScheme = uriScheme,
                                 userAgent = userAgent,
-                                isPreLogin = uiState.isPreLogin,
                                 onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
                                 onUriClick = onUriClick,
                                 onWebPageLoadError = {
@@ -359,12 +358,10 @@ private fun CourseInfoWebView(
     contentUrl: String,
     uriScheme: String,
     userAgent: String,
-    isPreLogin: Boolean,
     onWebPageLoaded: () -> Unit,
     onUriClick: (String, linkAuthority) -> Unit,
     onWebPageLoadError: () -> Unit
 ) {
-
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,

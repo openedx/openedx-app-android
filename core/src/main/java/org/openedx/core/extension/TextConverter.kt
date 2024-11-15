@@ -70,6 +70,7 @@ object TextConverter : KoinComponent {
 
     fun isLinkValid(link: String) = Patterns.WEB_URL.matcher(link.lowercase()).matches()
 
+    @Suppress("MagicNumber")
     private fun getHeaders(document: Document): List<String> {
         val headersList = mutableListOf<String>()
         for (index in 1..6) {

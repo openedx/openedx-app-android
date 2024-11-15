@@ -132,17 +132,19 @@ data class ThreadsResponse(
             )
         }
 
-        fun serverTypeToLocalType(): DiscussionType {
+        private fun serverTypeToLocalType(): DiscussionType {
             val actualType = if (type.contains("-")) {
                 type.replace("-", "_")
-            } else type
+            } else {
+                type
+            }
             return try {
                 DiscussionType.valueOf(actualType.uppercase())
             } catch (e: Exception) {
-                throw IllegalStateException("Unknown thread type")
+                e.printStackTrace()
+                error("Unknown thread type")
             }
         }
-
     }
 
     fun mapToDomain(): ThreadsData {
@@ -152,6 +154,4 @@ data class ThreadsResponse(
             pagination.mapToDomain()
         )
     }
-
 }
-

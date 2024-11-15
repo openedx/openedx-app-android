@@ -8,5 +8,5 @@ sealed class CourseSectionUIState {
         val sectionName: String,
         val courseName: String
     ) : CourseSectionUIState()
-    object Loading : CourseSectionUIState()
+    data object Loading : CourseSectionUIState()
 }

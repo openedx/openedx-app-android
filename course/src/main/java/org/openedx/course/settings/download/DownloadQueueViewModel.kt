@@ -40,7 +40,6 @@ class DownloadQueueViewModel(
                     if (descendants.isEmpty()) models else models.filter { descendants.contains(it.id) }
                 if (filteredModels.isEmpty()) {
                     _uiState.value = DownloadQueueUIState.Empty
-
                 } else {
                     if (_uiState.value is DownloadQueueUIState.Models) {
                         val state = _uiState.value as DownloadQueueUIState.Models

@@ -100,7 +100,6 @@ class ProgramFragment : Fragment() {
                 if (isNestedFragment.not()) {
                     DisposableEffect(uiState is ProgramUIState.CourseEnrolled) {
                         if (uiState is ProgramUIState.CourseEnrolled) {
-
                             val courseId = (uiState as ProgramUIState.CourseEnrolled).courseId
                             val isEnrolled = (uiState as ProgramUIState.CourseEnrolled).isEnrolled
 

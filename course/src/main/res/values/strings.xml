@@ -59,8 +59,8 @@
     <string name="course_download_untitled">(Untitled)</string>
     <string name="course_download_big_files_confirmation_title">Download</string>
     <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
-    <string name="course_delete_while_downloading_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
-    <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
+    <string name="course_delete_in_process_confirmation" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
+    <string name="course_delete_confirmation" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
     <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
     <string name="course_subsection_assignment_info" translatable="false">%1$s - %2$s - %3$d / %4$d</string>
     <string name="course_download_no_internet_dialog_description">Downloading this content requires an active internet connection. Please connect to the internet and try again.</string>

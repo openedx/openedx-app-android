@@ -52,27 +52,33 @@ data class CourseDetails(
 
     fun mapToDomain(): Course {
         return Course(
-            id = id ?: "",
-            blocksUrl = blocksUrl ?: "",
-            courseId = courseId ?: "",
-            effort = effort ?: "",
-            enrollmentStart = TimeUtils.iso8601ToDate(enrollmentStart ?: ""),
-            enrollmentEnd = TimeUtils.iso8601ToDate(enrollmentEnd ?: ""),
+            id = id.orEmpty(),
+            blocksUrl = blocksUrl.orEmpty(),
+            courseId = courseId.orEmpty(),
+            effort = effort.orEmpty(),
+            enrollmentStart = parseEnrollmentStartDate(),
+            enrollmentEnd = parseEnrollmentEndDate(),
             hidden = hidden ?: false,
             invitationOnly = invitationOnly ?: false,
             mobileAvailable = mobileAvailable ?: false,
-            name = name ?: "",
-            number = number ?: "",
-            org = organization ?: "",
-            shortDescription = shortDescription ?: "",
-            start = start ?: "",
-            end = end ?: "",
-            startDisplay = startDisplay ?: "",
-            startType = startType ?: "",
-            pacing = pacing ?: "",
-            overview = overview ?: "",
+            name = name.orEmpty(),
+            number = number.orEmpty(),
+            org = organization.orEmpty(),
+            shortDescription = shortDescription.orEmpty(),
+            start = start.orEmpty(),
+            end = end.orEmpty(),
+            startDisplay = startDisplay.orEmpty(),
+            startType = startType.orEmpty(),
+            pacing = pacing.orEmpty(),
+            overview = overview.orEmpty(),
             isEnrolled = isEnrolled ?: false,
-            media = media?.mapToDomain() ?: org.openedx.core.domain.model.Media()
+            media = mapMediaToDomain()
         )
     }
+
+    private fun parseEnrollmentStartDate() = TimeUtils.iso8601ToDate(enrollmentStart.orEmpty())
+
+    private fun parseEnrollmentEndDate() = TimeUtils.iso8601ToDate(enrollmentEnd.orEmpty())
+
+    private fun mapMediaToDomain() = media?.mapToDomain() ?: org.openedx.core.domain.model.Media()
 }

@@ -26,7 +26,7 @@ data class CourseVideo(
 @Parcelize
 data class CourseImage(
     val uri: String,
-    val name : String
+    val name: String
 ) : Parcelable
 
 @Parcelize

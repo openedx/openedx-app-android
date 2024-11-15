@@ -147,7 +147,6 @@ fun CourseDatesScreen(
                         fragmentManager,
                         ActionDialogFragment::class.simpleName
                     )
-
                 }
             }
         },
@@ -225,7 +224,8 @@ private fun CourseDatesUI(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-                .displayCutoutForLandscape(), contentAlignment = Alignment.TopCenter
+                .displayCutoutForLandscape(),
+            contentAlignment = Alignment.TopCenter
         ) {
             Surface(
                 modifier = modifierScreenWidth,
@@ -362,14 +362,14 @@ fun ExpandableView(
     val enterTransition = remember {
         expandVertically(
             expandFrom = Alignment.Top,
-            animationSpec = tween(300)
-        ) + fadeIn(initialAlpha = 0.3f, animationSpec = tween(300))
+            animationSpec = tween(durationMillis = 300)
+        ) + fadeIn(initialAlpha = 0.3f, animationSpec = tween(durationMillis = 300))
     }
     val exitTransition = remember {
         shrinkVertically(
             shrinkTowards = Alignment.Top,
-            animationSpec = tween(300)
-        ) + fadeOut(animationSpec = tween(300))
+            animationSpec = tween(durationMillis = 300)
+        ) + fadeOut(animationSpec = tween(durationMillis = 300))
     }
     Box(
         modifier = Modifier
@@ -378,10 +378,12 @@ fun ExpandableView(
             .background(MaterialTheme.appColors.cardViewBackground, MaterialTheme.shapes.medium)
             .border(0.75.dp, MaterialTheme.appColors.cardViewBorder, MaterialTheme.shapes.medium)
     ) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, start = 16.dp, end = 8.dp, bottom = 8.dp)
-            .clickable { expanded = !expanded }) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, start = 16.dp, end = 8.dp, bottom = 8.dp)
+                .clickable { expanded = !expanded }
+        ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -407,7 +409,6 @@ fun ExpandableView(
                             .fillMaxWidth()
                     )
                 }
-
             }
             Spacer(modifier = Modifier.width(16.dp))
             Icon(
@@ -491,7 +492,8 @@ private fun DateBullet(
             .fillMaxHeight()
             .padding(top = 2.dp, bottom = 2.dp)
             .background(
-                color = barColor, shape = MaterialTheme.shapes.medium
+                color = barColor,
+                shape = MaterialTheme.shapes.medium
             )
     )
 }
@@ -550,15 +552,23 @@ private fun CourseDateItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 4.dp)
-                .clickable(enabled = dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess,
-                    onClick = { onItemClick(dateBlock) })
+                .clickable(
+                    enabled = dateBlock.blockId.isNotEmpty() && dateBlock.learnerHasAccess,
+                    onClick = { onItemClick(dateBlock) }
+                )
         ) {
             dateBlock.dateType.drawableResId?.let { icon ->
                 Icon(
                     modifier = Modifier
                         .padding(end = 4.dp)
                         .align(Alignment.CenterVertically),
-                    painter = painterResource(id = if (dateBlock.learnerHasAccess.not()) CoreR.drawable.core_ic_lock else icon),
+                    painter = painterResource(
+                        id = if (dateBlock.learnerHasAccess.not()) {
+                            CoreR.drawable.core_ic_lock
+                        } else {
+                            icon
+                        }
+                    ),
                     contentDescription = null,
                     tint = MaterialTheme.appColors.textDark
                 )
@@ -602,7 +612,6 @@ private fun CourseDateItem(
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -678,23 +687,30 @@ val mockedCourseBannerInfo = CourseDatesBannerInfo(
 private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
     linkedMapOf(
         Pair(
-            DatesSection.COMPLETED, listOf(
+            DatesSection.COMPLETED,
+            listOf(
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                 )
             )
-        ), Pair(
-            DatesSection.COMPLETED, listOf(
+        ),
+
+        Pair(
+            DatesSection.COMPLETED,
+            listOf(
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-20T15:08:07Z")!!,
                 )
             )
-        ), Pair(
-            DatesSection.PAST_DUE, listOf(
+        ),
+
+        Pair(
+            DatesSection.PAST_DUE,
+            listOf(
                 CourseDateBlock(
                     title = "Homework 1: ABCD",
                     description = "After this date, course content will be archived",
@@ -702,42 +718,58 @@ private val mockedResponse: LinkedHashMap<DatesSection, List<CourseDateBlock>> =
                     dateType = DateType.ASSIGNMENT_DUE_DATE,
                 )
             )
-        ), Pair(
-            DatesSection.TODAY, listOf(
+        ),
+
+        Pair(
+            DatesSection.TODAY,
+            listOf(
                 CourseDateBlock(
                     title = "Homework 2: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-21T15:08:07Z")!!,
                 )
             )
-        ), Pair(
-            DatesSection.THIS_WEEK, listOf(
+        ),
+
+        Pair(
+            DatesSection.THIS_WEEK,
+            listOf(
                 CourseDateBlock(
                     title = "Assignment Due: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-22T15:08:07Z")!!,
                     dateType = DateType.ASSIGNMENT_DUE_DATE,
-                ), CourseDateBlock(
+                ),
+
+                CourseDateBlock(
                     title = "Assignment Due",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-23T15:08:07Z")!!,
                     dateType = DateType.ASSIGNMENT_DUE_DATE,
-                ), CourseDateBlock(
+                ),
+
+                CourseDateBlock(
                     title = "Surprise Assignment",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-24T15:08:07Z")!!,
                 )
             )
-        ), Pair(
-            DatesSection.NEXT_WEEK, listOf(
+        ),
+
+        Pair(
+            DatesSection.NEXT_WEEK,
+            listOf(
                 CourseDateBlock(
                     title = "Homework 5: ABCD",
                     description = "After this date, course content will be archived",
                     date = TimeUtils.iso8601ToDate("2023-10-25T15:08:07Z")!!,
                 )
             )
-        ), Pair(
-            DatesSection.UPCOMING, listOf(
+        ),
+
+        Pair(
+            DatesSection.UPCOMING,
+            listOf(
                 CourseDateBlock(
                     title = "Last Assignment",
                     description = "After this date, course content will be archived",

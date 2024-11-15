@@ -14,12 +14,14 @@ class FileDownloader : AbstractDownloader(), ProgressListener {
     private var firstUpdate = true
 
     override val client: OkHttpClient = OkHttpClient.Builder()
-        .addNetworkInterceptor(Interceptor { chain: Interceptor.Chain ->
-            val originalResponse: Response = chain.proceed(chain.request())
-            originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, this))
-                .build()
-        })
+        .addNetworkInterceptor(
+            Interceptor { chain: Interceptor.Chain ->
+                val originalResponse: Response = chain.proceed(chain.request())
+                originalResponse.newBuilder()
+                    .body(ProgressResponseBody(originalResponse.body!!, this))
+                    .build()
+            }
+        )
         .build()
     var progressListener: CurrentProgress? = null
 
@@ -42,7 +44,6 @@ class FileDownloader : AbstractDownloader(), ProgressListener {
             }
         }
     }
-
 }
 
 interface CurrentProgress {
@@ -54,5 +55,4 @@ interface DownloadApi {
     @Streaming
     @GET
     suspend fun downloadFile(@Url fileUrl: String): retrofit2.Response<ResponseBody>
-
 }

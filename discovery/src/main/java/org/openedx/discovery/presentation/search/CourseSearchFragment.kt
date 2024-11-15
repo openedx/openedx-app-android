@@ -75,6 +75,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.search.CourseSearchFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -101,7 +102,8 @@ class CourseSearchFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(
                     CourseSearchUIState.Courses(
-                        emptyList(), 0
+                        emptyList(),
+                        0
                     )
                 )
                 val uiMessage by viewModel.uiMessage.observeAsState()
@@ -150,6 +152,7 @@ class CourseSearchFragment : Fragment() {
 
     companion object {
         private const val ARG_SEARCH_QUERY = "query_search"
+        const val LOAD_MORE_THRESHOLD = 4
         fun newInstance(querySearch: String): CourseSearchFragment {
             val fragment = CourseSearchFragment()
             fragment.arguments = bundleOf(
@@ -159,7 +162,6 @@ class CourseSearchFragment : Fragment() {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -205,7 +207,6 @@ private fun CourseSearchScreen(
         focusManager.clearFocus()
     }
 
-
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
@@ -231,7 +232,6 @@ private fun CourseSearchScreen(
             }
         }
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -386,7 +386,8 @@ private fun CourseSearchScreen(
                                             windowSize = windowSize,
                                             onClick = { courseId ->
                                                 onItemClick(courseId)
-                                            })
+                                            }
+                                        )
                                         Divider()
                                     }
                                     item {
@@ -401,7 +402,7 @@ private fun CourseSearchScreen(
                                             }
                                         }
                                     }
-                                    if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                    if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                         paginationCallback()
                                     }
                                 }
@@ -473,7 +474,6 @@ fun CourseSearchScreenTabletPreview() {
         )
     }
 }
-
 
 private val mockCourse = Course(
     id = "id",

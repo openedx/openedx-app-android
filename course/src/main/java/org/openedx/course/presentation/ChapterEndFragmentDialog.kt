@@ -58,7 +58,7 @@ class ChapterEndFragmentDialog : DialogFragment() {
     override fun onResume() {
         super.onResume()
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setWidthPercent(66)
+            setWidthPercent(percentage = 66)
         }
     }
 
@@ -155,7 +155,7 @@ private fun ChapterEndDialogScreen(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(0.95f)
+            .fillMaxWidth(fraction = 0.95f)
             .clip(MaterialTheme.appShapes.courseImageShape),
         backgroundColor = MaterialTheme.appColors.background,
         shape = MaterialTheme.appShapes.courseImageShape
@@ -244,7 +244,6 @@ private fun ChapterEndDialogScreen(
         }
     }
 }
-
 
 @Composable
 private fun ChapterEndDialogScreenLandscape(

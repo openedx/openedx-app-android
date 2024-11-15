@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
-import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
+import org.openedx.core.presentation.global.appupgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes

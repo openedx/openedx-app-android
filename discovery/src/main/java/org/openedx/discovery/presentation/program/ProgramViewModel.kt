@@ -111,7 +111,15 @@ class ProgramViewModel(
 
     fun onPageLoadError() {
         viewModelScope.launch {
-            _uiState.emit(ProgramUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR))
+            _uiState.emit(
+                ProgramUIState.Error(
+                    if (networkConnection.isOnline()) {
+                        ErrorType.UNKNOWN_ERROR
+                    } else {
+                        ErrorType.CONNECTION_ERROR
+                    }
+                )
+            )
         }
     }
 }

@@ -226,7 +226,6 @@ private fun ProfileScreenPreview() {
     }
 }
 
-
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
 @Composable
@@ -243,7 +242,8 @@ private fun ProfileScreenTabletPreview() {
 
 private val mockAccount = Account(
     username = "thom84",
-    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
+    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper " +
+            "questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
     requiresParentalConsent = true,
     name = "Thomas",
     country = "Ukraine",

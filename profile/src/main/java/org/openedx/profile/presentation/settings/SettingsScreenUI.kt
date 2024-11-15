@@ -514,7 +514,7 @@ private fun AppVersionItemAppToDate(versionName: String) {
         ) {
             Icon(
                 modifier = Modifier.size(
-                    (MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp
+                    size = (MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp
                 ),
                 painter = painterResource(id = R.drawable.core_ic_check),
                 contentDescription = null,
@@ -597,7 +597,7 @@ fun AppVersionItemUpgradeRequired(
             ) {
                 Image(
                     modifier = Modifier
-                        .size((MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
+                        .size(size = (MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
                     painter = painterResource(id = R.drawable.core_ic_warning),
                     contentDescription = null
                 )
@@ -640,7 +640,6 @@ private val mockConfiguration = Configuration(
 private val mockUiState = SettingsUIState.Data(
     configuration = mockConfiguration
 )
-
 
 @Preview
 @Composable

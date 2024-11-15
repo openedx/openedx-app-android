@@ -36,7 +36,7 @@ class RateDialogFragment : BaseAppReviewDialogFragment() {
 
     private fun onSubmitClick(rating: Int) {
         onSubmitRatingClick(rating)
-        if (rating > 3) {
+        if (rating > MIN_RATE) {
             openThankYouDialog()
         } else {
             openFeedbackDialog()
@@ -66,6 +66,8 @@ class RateDialogFragment : BaseAppReviewDialogFragment() {
     }
 
     companion object {
+        private const val MIN_RATE = 3
+
         fun newInstance(): RateDialogFragment {
             return RateDialogFragment()
         }
