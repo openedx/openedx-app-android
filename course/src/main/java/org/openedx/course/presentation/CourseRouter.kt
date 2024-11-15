@@ -56,7 +56,9 @@ interface CourseRouter {
     )
 
     fun navigateToHandoutsWebView(
-        fm: FragmentManager, courseId: String, type: HandoutsType
+        fm: FragmentManager,
+        courseId: String,
+        type: HandoutsType
     )
 
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())

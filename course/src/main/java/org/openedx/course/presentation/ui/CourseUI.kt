@@ -108,6 +108,8 @@ import subtitleFile.TimedTextObject
 import java.util.Date
 import org.openedx.core.R as coreR
 
+const val AUTO_SCROLL_DELAY = 3000L
+
 @Composable
 fun CourseSectionCard(
     block: Block,
@@ -117,7 +119,9 @@ fun CourseSectionCard(
 ) {
     val iconModifier = Modifier.size(24.dp)
 
-    Column(Modifier.clickable { onItemClick(block) }) {
+    Column(
+        modifier = Modifier.clickable { onItemClick(block) }
+    ) {
         Row(
             Modifier
                 .fillMaxWidth()
@@ -129,12 +133,16 @@ fun CourseSectionCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            val completedIconPainter =
-                if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-                    coreR.drawable.ic_core_chapter_icon
-                )
-            val completedIconColor =
-                if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
+            val completedIconPainter = if (block.isCompleted()) {
+                painterResource(R.drawable.course_ic_task_alt)
+            } else {
+                painterResource(coreR.drawable.ic_core_chapter_icon)
+            }
+            val completedIconColor = if (block.isCompleted()) {
+                MaterialTheme.appColors.primary
+            } else {
+                MaterialTheme.appColors.onSurface
+            }
             val completedIconDescription = if (block.isCompleted()) {
                 stringResource(id = R.string.course_accessibility_section_completed)
             } else {
@@ -160,20 +168,23 @@ fun CourseSectionCard(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
+                if (downloadedState == DownloadedState.DOWNLOADED ||
+                    downloadedState == DownloadedState.NOT_DOWNLOADED
+                ) {
                     val downloadIcon = if (downloadedState == DownloadedState.DOWNLOADED) {
                         Icons.Default.CloudDone
                     } else {
                         Icons.Outlined.CloudDownload
                     }
-                    val downloadIconDescription =
-                        if (downloadedState == DownloadedState.DOWNLOADED) {
-                            stringResource(id = R.string.course_accessibility_remove_course_section)
-                        } else {
-                            stringResource(id = R.string.course_accessibility_download_course_section)
-                        }
-                    IconButton(modifier = iconModifier,
-                        onClick = { onDownloadClick(block) }) {
+                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
+                        stringResource(id = R.string.course_accessibility_remove_course_section)
+                    } else {
+                        stringResource(id = R.string.course_accessibility_download_course_section)
+                    }
+                    IconButton(
+                        modifier = iconModifier,
+                        onClick = { onDownloadClick(block) }
+                    ) {
                         Icon(
                             imageVector = downloadIcon,
                             contentDescription = downloadIconDescription,
@@ -182,7 +193,9 @@ fun CourseSectionCard(
                     }
                 } else if (downloadedState != null) {
                     Box(contentAlignment = Alignment.Center) {
-                        if (downloadedState == DownloadedState.DOWNLOADING || downloadedState == DownloadedState.WAITING) {
+                        if (downloadedState == DownloadedState.DOWNLOADING ||
+                            downloadedState == DownloadedState.WAITING
+                        ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(34.dp),
                                 backgroundColor = Color.LightGray,
@@ -192,10 +205,12 @@ fun CourseSectionCard(
                         }
                         IconButton(
                             modifier = iconModifier.padding(top = 2.dp),
-                            onClick = { onDownloadClick(block) }) {
+                            onClick = { onDownloadClick(block) }
+                        ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                                contentDescription =
+                                stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
                                 tint = MaterialTheme.appColors.error
                             )
                         }
@@ -245,7 +260,11 @@ fun OfflineQueueCard(
                 maxLines = 1
             )
 
-            val progress = if (progressSize == 0L) 0f else progressValue.toFloat() / progressSize
+            val progress = if (progressSize == 0L) {
+                0f
+            } else {
+                progressValue.toFloat() / progressSize
+            }
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -266,12 +285,14 @@ fun OfflineQueueCard(
                 color = MaterialTheme.appColors.primary
             )
             IconButton(
-                modifier = iconModifier
-                    .padding(2.dp),
-                onClick = { onDownloadClick(downloadModel) }) {
+                modifier = iconModifier.padding(2.dp),
+                onClick = { onDownloadClick(downloadModel) }
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                    contentDescription = stringResource(
+                        id = R.string.course_accessibility_stop_downloading_course_section
+                    ),
                     tint = MaterialTheme.appColors.error
                 )
             }
@@ -481,12 +502,12 @@ fun Indicator(
 ) {
     val size by animateDpAsState(
         targetValue = if (isSelected) selectedSize else defaultRadius,
-        animationSpec = tween(300),
+        animationSpec = tween(durationMillis = 300),
         label = ""
     )
     val color by animateColorAsState(
         targetValue = if (isSelected) selectedColor else defaultColor,
-        animationSpec = tween(300),
+        animationSpec = tween(durationMillis = 300),
         label = ""
     )
 
@@ -509,7 +530,6 @@ fun VideoSubtitles(
     onSettingsClick: () -> Unit,
 ) {
     timedTextObject?.let {
-        val autoScrollDelay = 3000L
         var lastScrollTime by remember {
             mutableLongStateOf(0L)
         }
@@ -518,7 +538,7 @@ fun VideoSubtitles(
         }
 
         LaunchedEffect(key1 = currentIndex) {
-            if (currentIndex > 1 && lastScrollTime + autoScrollDelay < Date().time) {
+            if (currentIndex > 1 && lastScrollTime + AUTO_SCROLL_DELAY < Date().time) {
                 listState.animateScrollToItem(currentIndex - 1)
             }
         }
@@ -600,7 +620,12 @@ fun CourseSection(
     onDownloadClick: (blocksIds: List<String>) -> Unit,
 ) {
     val arrowRotation by animateFloatAsState(
-        targetValue = if (courseSectionsState == true) -90f else 90f, label = ""
+        targetValue = if (courseSectionsState == true) {
+            -90f
+        } else {
+            90f
+        },
+        label = ""
     )
     val subSectionIds = courseSubSections?.map { it.id }.orEmpty()
     val filteredStatuses = downloadedStateMap.filterKeys { it in subSectionIds }.values
@@ -611,15 +636,16 @@ fun CourseSection(
         else -> DownloadedState.NOT_DOWNLOADED
     }
 
-    Column(modifier = modifier
-        .clip(MaterialTheme.appShapes.cardShape)
-        .noRippleClickable { onItemClick(block) }
-        .background(MaterialTheme.appColors.cardViewBackground)
-        .border(
-            1.dp,
-            MaterialTheme.appColors.cardViewBorder,
-            MaterialTheme.appShapes.cardShape
-        )
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.appShapes.cardShape)
+            .noRippleClickable { onItemClick(block) }
+            .background(MaterialTheme.appColors.cardViewBackground)
+            .border(
+                1.dp,
+                MaterialTheme.appColors.cardViewBorder,
+                MaterialTheme.appShapes.cardShape
+            )
     ) {
         CourseExpandableChapterCard(
             block = block,
@@ -686,26 +712,25 @@ fun CourseExpandableChapterCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (downloadedState == DownloadedState.DOWNLOADED || downloadedState == DownloadedState.NOT_DOWNLOADED) {
-                val downloadIcon =
-                    if (downloadedState == DownloadedState.DOWNLOADED) {
-                        Icons.Default.CloudDone
-                    } else {
-                        Icons.Outlined.CloudDownload
-                    }
-                val downloadIconDescription =
-                    if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_accessibility_remove_course_section)
-                    } else {
-                        stringResource(id = R.string.course_accessibility_download_course_section)
-                    }
-                val downloadIconTint =
-                    if (downloadedState == DownloadedState.DOWNLOADED) {
-                        MaterialTheme.appColors.successGreen
-                    } else {
-                        MaterialTheme.appColors.textAccent
-                    }
-                IconButton(modifier = iconModifier,
-                    onClick = { onDownloadClick() }) {
+                val downloadIcon = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    Icons.Default.CloudDone
+                } else {
+                    Icons.Outlined.CloudDownload
+                }
+                val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    stringResource(id = R.string.course_accessibility_remove_course_section)
+                } else {
+                    stringResource(id = R.string.course_accessibility_download_course_section)
+                }
+                val downloadIconTint = if (downloadedState == DownloadedState.DOWNLOADED) {
+                    MaterialTheme.appColors.successGreen
+                } else {
+                    MaterialTheme.appColors.textAccent
+                }
+                IconButton(
+                    modifier = iconModifier,
+                    onClick = { onDownloadClick() }
+                ) {
                     Icon(
                         imageVector = downloadIcon,
                         contentDescription = downloadIconDescription,
@@ -724,16 +749,21 @@ fun CourseExpandableChapterCard(
                     } else if (downloadedState == DownloadedState.WAITING) {
                         Icon(
                             painter = painterResource(id = R.drawable.course_download_waiting),
-                            contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                            contentDescription = stringResource(
+                                id = R.string.course_accessibility_stop_downloading_course_section
+                            ),
                             tint = MaterialTheme.appColors.error
                         )
                     }
                     IconButton(
                         modifier = iconModifier.padding(2.dp),
-                        onClick = { onDownloadClick() }) {
+                        onClick = { onDownloadClick() }
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(id = R.string.course_accessibility_stop_downloading_course_section),
+                            contentDescription = stringResource(
+                                id = R.string.course_accessibility_stop_downloading_course_section
+                            ),
                             tint = MaterialTheme.appColors.error
                         )
                     }
@@ -751,10 +781,16 @@ fun CourseSubSectionItem(
     onClick: (Block) -> Unit,
 ) {
     val context = LocalContext.current
-    val icon =
-        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(coreR.drawable.ic_core_chapter_icon)
-    val iconColor =
-        if (block.isCompleted()) MaterialTheme.appColors.successGreen else MaterialTheme.appColors.onSurface
+    val icon = if (block.isCompleted()) {
+        painterResource(R.drawable.course_ic_task_alt)
+    } else {
+        painterResource(coreR.drawable.ic_core_chapter_icon)
+    }
+    val iconColor = if (block.isCompleted()) {
+        MaterialTheme.appColors.successGreen
+    } else {
+        MaterialTheme.appColors.onSurface
+    }
     val due by rememberSaveable {
         mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
     }
@@ -905,8 +941,11 @@ fun SubSectionUnitsList(
                 Column(
                     modifier = Modifier
                         .background(
-                            if (index == selectedUnitIndex) MaterialTheme.appColors.surface else
+                            if (index == selectedUnitIndex) {
+                                MaterialTheme.appColors.surface
+                            } else {
                                 MaterialTheme.appColors.background
+                            }
                         )
                         .clickable { onUnitClick(index, unit) }
                 ) {
@@ -960,7 +999,9 @@ fun SubSectionUnitsList(
                                 modifier = Modifier
                                     .padding(start = 8.dp, end = 8.dp)
                                     .weight(1f),
-                                text = stringResource(id = R.string.course_gated_content_label),
+                                text = stringResource(
+                                    id = R.string.course_gated_content_label
+                                ),
                                 color = MaterialTheme.appColors.textPrimaryVariant,
                                 style = MaterialTheme.appTypography.labelSmall,
                                 maxLines = 2,
@@ -1124,7 +1165,8 @@ fun DatesShiftedSnackBar(
                     borderColor = MaterialTheme.appColors.primary,
                     onClick = {
                         onViewDates()
-                    })
+                    }
+                )
             }
         }
     }
@@ -1170,7 +1212,6 @@ fun CourseMessage(
             color = MaterialTheme.appColors.divider
         )
     }
-
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
@@ -1183,7 +1224,8 @@ private fun NavigationUnitsButtonsOnlyNextButtonPreview() {
             hasNextBlock = true,
             isVerticalNavigation = true,
             nextButtonText = "Next",
-            onPrevClick = {}) {}
+            onPrevClick = {}
+        ) {}
     }
 }
 
@@ -1197,7 +1239,8 @@ private fun NavigationUnitsButtonsOnlyFinishButtonPreview() {
             hasNextBlock = false,
             isVerticalNavigation = true,
             nextButtonText = "Finish",
-            onPrevClick = {}) {}
+            onPrevClick = {}
+        ) {}
     }
 }
 
@@ -1211,7 +1254,8 @@ private fun NavigationUnitsButtonsWithFinishPreview() {
             hasNextBlock = false,
             isVerticalNavigation = true,
             nextButtonText = "Finish",
-            onPrevClick = {}) {}
+            onPrevClick = {}
+        ) {}
     }
 }
 
@@ -1225,7 +1269,8 @@ private fun NavigationUnitsButtonsWithNextPreview() {
             hasNextBlock = true,
             isVerticalNavigation = true,
             nextButtonText = "Next",
-            onPrevClick = {}) {}
+            onPrevClick = {}
+        ) {}
     }
 }
 

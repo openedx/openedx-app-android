@@ -28,7 +28,7 @@ fun Lock(modifier: Modifier = Modifier) {
                 .size(32.dp)
                 .padding(top = 8.dp, end = 8.dp)
                 .background(
-                    color = MaterialTheme.appColors.onPrimary.copy(0.5f),
+                    color = MaterialTheme.appColors.onPrimary.copy(alpha = 0.5f),
                     shape = CircleShape
                 )
                 .padding(4.dp)

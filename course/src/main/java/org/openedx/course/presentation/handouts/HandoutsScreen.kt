@@ -57,7 +57,6 @@ fun HandoutsScreen(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -153,7 +152,9 @@ private fun HandoutsScreenPreview() {
     OpenEdXTheme {
         HandoutsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            onHandoutsClick = {}, onAnnouncementsClick = {})
+            onHandoutsClick = {},
+            onAnnouncementsClick = {}
+        )
     }
 }
 
@@ -164,6 +165,8 @@ private fun HandoutsScreenTabletPreview() {
     OpenEdXTheme {
         HandoutsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
-            onHandoutsClick = {}, onAnnouncementsClick = {})
+            onHandoutsClick = {},
+            onAnnouncementsClick = {}
+        )
     }
 }

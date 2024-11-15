@@ -46,26 +46,18 @@ data class Block(
     val offlineDownload: OfflineDownload?,
 ) {
     fun mapToDomain(blockData: Map<String, Block>): DomainBlock {
-        val blockType = BlockType.getBlockType(type ?: "")
-        val descendantsType = if (blockType == BlockType.VERTICAL) {
-            val types = descendants?.map { descendant ->
-                BlockType.getBlockType(blockData[descendant]?.type ?: "")
-            } ?: emptyList()
-            val sortedBlockTypes = BlockType.sortByPriority(types)
-            sortedBlockTypes.firstOrNull() ?: blockType
-        } else {
-            blockType
-        }
+        val blockType = BlockType.getBlockType(type.orEmpty())
+        val descendantsType = determineDescendantsType(blockType, blockData)
 
         return DomainBlock(
-            id = id ?: "",
-            blockId = blockId ?: "",
-            lmsWebUrl = lmsWebUrl ?: "",
-            legacyWebUrl = legacyWebUrl ?: "",
-            studentViewUrl = studentViewUrl ?: "",
+            id = id.orEmpty(),
+            blockId = blockId.orEmpty(),
+            lmsWebUrl = lmsWebUrl.orEmpty(),
+            legacyWebUrl = legacyWebUrl.orEmpty(),
+            studentViewUrl = studentViewUrl.orEmpty(),
             type = blockType,
-            displayName = displayName ?: "",
-            descendants = descendants ?: emptyList(),
+            displayName = displayName.orEmpty(),
+            descendants = descendants.orEmpty(),
             descendantsType = descendantsType,
             graded = graded ?: false,
             studentViewData = studentViewData?.mapToDomain(),
@@ -74,9 +66,19 @@ data class Block(
             completion = completion ?: 0.0,
             containsGatedContent = containsGatedContent ?: false,
             assignmentProgress = assignmentProgress?.mapToDomain(),
-            due = TimeUtils.iso8601ToDate(due ?: ""),
+            due = TimeUtils.iso8601ToDate(due.orEmpty()),
             offlineDownload = offlineDownload?.mapToDomain()
         )
+    }
+
+    private fun determineDescendantsType(blockType: BlockType, blockData: Map<String, Block>): BlockType {
+        if (blockType != BlockType.VERTICAL) return blockType
+
+        val types = descendants?.map { descendant ->
+            BlockType.getBlockType(blockData[descendant]?.type.orEmpty())
+        }.orEmpty()
+
+        return BlockType.sortByPriority(types).firstOrNull() ?: blockType
     }
 }
 
@@ -94,15 +96,13 @@ data class StudentViewData(
     @SerializedName("topic_id")
     val topicId: String?
 ) {
-    fun mapToDomain(): DomainStudentViewData {
-        return DomainStudentViewData(
-            onlyOnWeb = onlyOnWeb ?: false,
-            duration = duration ?: "",
-            transcripts = transcripts,
-            encodedVideos = encodedVideos?.mapToDomain(),
-            topicId = topicId ?: ""
-        )
-    }
+    fun mapToDomain() = DomainStudentViewData(
+        onlyOnWeb = onlyOnWeb ?: false,
+        duration = duration ?: "",
+        transcripts = transcripts,
+        encodedVideos = encodedVideos?.mapToDomain(),
+        topicId = topicId.orEmpty()
+    )
 }
 
 data class EncodedVideos(
@@ -119,17 +119,14 @@ data class EncodedVideos(
     @SerializedName("mobile_low")
     var mobileLow: VideoInfo?
 ) {
-
-    fun mapToDomain(): DomainEncodedVideos {
-        return DomainEncodedVideos(
-            youtube = videoInfo?.mapToDomain(),
-            hls = hls?.mapToDomain(),
-            fallback = fallback?.mapToDomain(),
-            desktopMp4 = desktopMp4?.mapToDomain(),
-            mobileHigh = mobileHigh?.mapToDomain(),
-            mobileLow = mobileLow?.mapToDomain()
-        )
-    }
+    fun mapToDomain() = DomainEncodedVideos(
+        youtube = videoInfo?.mapToDomain(),
+        hls = hls?.mapToDomain(),
+        fallback = fallback?.mapToDomain(),
+        desktopMp4 = desktopMp4?.mapToDomain(),
+        mobileHigh = mobileHigh?.mapToDomain(),
+        mobileLow = mobileLow?.mapToDomain()
+    )
 }
 
 data class VideoInfo(
@@ -138,21 +135,17 @@ data class VideoInfo(
     @SerializedName("file_size")
     var fileSize: Long?
 ) {
-    fun mapToDomain(): DomainVideoInfo {
-        return DomainVideoInfo(
-            url = url ?: "",
-            fileSize = fileSize ?: 0
-        )
-    }
+    fun mapToDomain() = DomainVideoInfo(
+        url = url.orEmpty(),
+        fileSize = fileSize ?: 0
+    )
 }
 
 data class BlockCounts(
     @SerializedName("video")
     var video: Int?
 ) {
-    fun mapToDomain(): DomainBlockCounts {
-        return DomainBlockCounts(
-            video = video ?: 0
-        )
-    }
+    fun mapToDomain() = DomainBlockCounts(
+        video = video ?: 0
+    )
 }

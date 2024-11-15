@@ -37,7 +37,6 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
-import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.system.connection.NetworkConnection
@@ -66,7 +65,6 @@ class CourseSectionViewModelTest {
     private val notifier = mockk<CourseNotifier>()
     private val analytics = mockk<CourseAnalytics>()
     private val coreAnalytics = mockk<CoreAnalytics>()
-    private val downloadHelper = mockk<DownloadHelper>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -180,7 +178,9 @@ class CourseSectionViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi) } returns cantDownload
+        every {
+            resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi)
+        } returns cantDownload
     }
 
     @After
@@ -341,5 +341,4 @@ class CourseSectionViewModelTest {
 
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
     }
-
 }

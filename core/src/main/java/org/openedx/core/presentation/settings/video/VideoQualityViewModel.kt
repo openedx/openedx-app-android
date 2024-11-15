@@ -29,9 +29,11 @@ class VideoQualityViewModel(
     }
 
     fun getCurrentVideoQuality(): VideoQuality {
-        return if (getQualityType() == VideoQualityType.Streaming)
-            preferencesManager.videoSettings.videoStreamingQuality else
+        return if (getQualityType() == VideoQualityType.Streaming) {
+            preferencesManager.videoSettings.videoStreamingQuality
+        } else {
             preferencesManager.videoSettings.videoDownloadQuality
+        }
     }
 
     fun setVideoQuality(quality: VideoQuality) {
@@ -51,11 +53,11 @@ class VideoQualityViewModel(
     fun getQualityType() = VideoQualityType.valueOf(qualityType)
 
     private fun logVideoQualityChangedEvent(oldQuality: VideoQuality, newQuality: VideoQuality) {
-        val event =
-            if (getQualityType() == VideoQualityType.Streaming)
+        val event = if (getQualityType() == VideoQualityType.Streaming) {
                 CoreAnalyticsEvent.VIDEO_STREAMING_QUALITY_CHANGED
-            else
+        } else {
                 CoreAnalyticsEvent.VIDEO_DOWNLOAD_QUALITY_CHANGED
+        }
 
         analytics.logEvent(
             event.eventName,

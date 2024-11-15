@@ -93,22 +93,14 @@ class DownloadHelper(
     }
 
     private fun calculateDirectorySize(directory: File): Long {
-        var size: Long = 0
+        if (!directory.exists()) return 0
 
-        if (directory.exists()) {
-            val files = directory.listFiles()
-
-            if (files != null) {
-                for (file in files) {
-                    size += if (file.isDirectory) {
-                        calculateDirectorySize(file)
-                    } else {
-                        file.length()
-                    }
-                }
+        return directory.listFiles()?.sumOf { file ->
+            if (file.isDirectory) {
+                calculateDirectorySize(file)
+            } else {
+                file.length()
             }
-        }
-
-        return size
+        } ?: 0
     }
 }

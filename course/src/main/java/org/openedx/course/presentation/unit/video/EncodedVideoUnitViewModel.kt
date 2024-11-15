@@ -76,7 +76,6 @@ class EncodedVideoUnitViewModel(
                 _isVideoEnded.value = true
                 markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
             }
-
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {

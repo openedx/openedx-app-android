@@ -84,31 +84,29 @@ data class CourseEntity(
 
     companion object {
         fun createFrom(model: CourseDetails): CourseEntity {
-            with(model) {
-                return CourseEntity(
-                    id = id ?: "",
-                    blocksUrl = blocksUrl ?: "",
-                    courseId = courseId ?: "",
-                    effort = effort ?: "",
-                    enrollmentStart = enrollmentStart ?: "",
-                    enrollmentEnd = enrollmentEnd ?: "",
-                    hidden = hidden ?: false,
-                    invitationOnly = invitationOnly ?: false,
-                    mobileAvailable = mobileAvailable ?: false,
-                    name = name ?: "",
-                    number = number ?: "",
-                    org = organization ?: "",
-                    shortDescription = shortDescription ?: "",
-                    start = start ?: "",
-                    end = end ?: "",
-                    startDisplay = startDisplay ?: "",
-                    startType = startType ?: "",
-                    pacing = pacing ?: "",
-                    overview = overview ?: "",
-                    media = MediaDb.createFrom(media),
-                    isEnrolled = isEnrolled ?: false
-                )
-            }
+            return CourseEntity(
+                id = model.id.orEmpty(),
+                blocksUrl = model.blocksUrl.orEmpty(),
+                courseId = model.courseId.orEmpty(),
+                effort = model.effort.orEmpty(),
+                enrollmentStart = model.enrollmentStart.orEmpty(),
+                enrollmentEnd = model.enrollmentEnd.orEmpty(),
+                hidden = model.hidden ?: false,
+                invitationOnly = model.invitationOnly ?: false,
+                mobileAvailable = model.mobileAvailable ?: false,
+                name = model.name.orEmpty(),
+                number = model.number.orEmpty(),
+                org = model.organization.orEmpty(),
+                shortDescription = model.shortDescription.orEmpty(),
+                start = model.start.orEmpty(),
+                end = model.end.orEmpty(),
+                startDisplay = model.startDisplay.orEmpty(),
+                startType = model.startType.orEmpty(),
+                pacing = model.pacing.orEmpty(),
+                overview = model.overview.orEmpty(),
+                media = MediaDb.createFrom(model.media),
+                isEnrolled = model.isEnrolled ?: false
+            )
         }
     }
 }

@@ -330,5 +330,4 @@ class CourseUnitContainerViewModelTest {
         coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 1) { interactor.getCourseStructureForVideos(any()) }
     }
-
 }

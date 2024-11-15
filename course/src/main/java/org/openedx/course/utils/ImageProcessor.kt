@@ -41,7 +41,7 @@ class ImageProcessor(private val context: Context) {
         ScriptIntrinsicBlur.create(renderScript, bitmapAlloc.element).apply {
             setRadius(blurRadio)
             setInput(bitmapAlloc)
-            repeat(3) {
+            repeat(times = 3) {
                 forEach(bitmapAlloc)
             }
         }

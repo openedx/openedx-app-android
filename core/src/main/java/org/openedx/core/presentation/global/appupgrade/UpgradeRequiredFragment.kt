@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.global.app_upgrade
+package org.openedx.core.presentation.global.appupgrade
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,8 +8,8 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
-import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.AppUpdateState
+import org.openedx.core.ui.theme.OpenEdXTheme
 
 class UpgradeRequiredFragment : Fragment() {
 

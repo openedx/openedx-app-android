@@ -130,7 +130,10 @@ class CourseDetailsViewModel(
 
     private fun getColorFromULong(color: ULong): String {
         if (color == ULong.MIN_VALUE) return "black"
-        return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
+        return java.lang.Long.toHexString(color.toLong()).substring(
+            startIndex = 2,
+            endIndex = 8
+        )
     }
 
     private fun courseEnrollClickedEvent(courseId: String, courseTitle: String) {
@@ -143,7 +146,8 @@ class CourseDetailsViewModel(
 
     private fun logEvent(
         event: DiscoveryAnalyticsEvent,
-        courseId: String, courseTitle: String,
+        courseId: String,
+        courseTitle: String,
     ) {
         analytics.logEvent(
             event.eventName,

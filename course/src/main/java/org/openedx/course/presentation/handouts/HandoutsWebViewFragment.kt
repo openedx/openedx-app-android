@@ -162,8 +162,11 @@ fun HandoutsEmptyScreen(
     onBackClick: () -> Unit
 ) {
     val handoutScreenType =
-        if (handoutType == HandoutsType.Handouts) NoContentScreenType.COURSE_HANDOUTS
-        else NoContentScreenType.COURSE_ANNOUNCEMENTS
+        if (handoutType == HandoutsType.Handouts) {
+            NoContentScreenType.COURSE_HANDOUTS
+        } else {
+            NoContentScreenType.COURSE_ANNOUNCEMENTS
+        }
 
     val scaffoldState = rememberScaffoldState()
     Scaffold(
@@ -176,7 +179,6 @@ fun HandoutsEmptyScreen(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(

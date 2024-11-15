@@ -40,7 +40,7 @@ class AppViewModelTest {
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
 
-    private val dispatcher = StandardTestDispatcher()//UnconfinedTestDispatcher()
+    private val dispatcher = StandardTestDispatcher() // UnconfinedTestDispatcher()
 
     private val config = mockk<Config>()
     private val notifier = mockk<AppNotifier>()

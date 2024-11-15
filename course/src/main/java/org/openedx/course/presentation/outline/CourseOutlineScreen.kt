@@ -181,7 +181,6 @@ private fun CourseOutlineUI(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -275,7 +274,6 @@ private fun CourseOutlineUI(
                                             )
                                         }
                                     }
-
 
                                     val progress = uiState.courseStructure.progress
                                     if (progress != null && progress.totalAssignmentsCount > 0) {
@@ -408,7 +406,6 @@ private fun ResumeCourse(
     }
 }
 
-
 @Composable
 private fun ResumeCourseTablet(
     modifier: Modifier = Modifier,
@@ -436,7 +433,7 @@ private fun ResumeCourseTablet(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
-                    modifier = Modifier.size((MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
+                    modifier = Modifier.size(size = (MaterialTheme.appTypography.titleMedium.fontSize.value + 4).dp),
                     painter = painterResource(id = getUnitBlockIcon(block)),
                     contentDescription = null,
                     tint = MaterialTheme.appColors.textPrimary
