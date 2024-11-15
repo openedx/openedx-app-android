@@ -52,7 +52,7 @@ class MainViewModel(
     fun logLearnTabClickedEvent() {
         logScreenEvent(AppAnalyticsEvent.LEARN)
     }
-    
+
     fun logDiscoveryTabClickedEvent() {
         logScreenEvent(AppAnalyticsEvent.DISCOVER)
     }

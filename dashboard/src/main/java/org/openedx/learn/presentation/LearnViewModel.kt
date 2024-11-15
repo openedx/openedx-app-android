@@ -1,12 +1,12 @@
 package org.openedx.learn.presentation
 
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import androidx.fragment.app.FragmentManager
 import org.openedx.DashboardNavigator
 import org.openedx.core.config.Config
 import org.openedx.dashboard.presentation.DashboardAnalytics
@@ -64,11 +64,11 @@ class LearnViewModel(
         }
     }
 
-    private fun logMyCoursesTabClickedEvent() {
+    fun logMyCoursesTabClickedEvent() {
         logScreenEvent(DashboardAnalyticsEvent.MY_COURSES)
     }
 
-    private fun logMyProgramsTabClickedEvent() {
+    fun logMyProgramsTabClickedEvent() {
         logScreenEvent(DashboardAnalyticsEvent.MY_PROGRAMS)
     }
 

@@ -75,7 +75,8 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
                     when (uiState.learnType) {
                         LearnType.COURSES -> 0
                         LearnType.PROGRAMS -> 1
-                    }, false
+                    },
+                    false
                 )
                 Header(
                     fragmentManager = requireParentFragment().parentFragmentManager,

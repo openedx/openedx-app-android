@@ -8,8 +8,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.core.extension.equalsHost
+import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")

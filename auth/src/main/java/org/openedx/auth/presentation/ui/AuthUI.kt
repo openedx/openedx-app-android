@@ -136,9 +136,7 @@ fun RequiredFields(
                 )
             }
 
-            RegistrationFieldType.UNKNOWN -> {
-
-            }
+            RegistrationFieldType.UNKNOWN -> {}
         }
     }
 }
@@ -155,7 +153,8 @@ fun OptionalFields(
     Column {
         fields.forEach { field ->
             when (field.type) {
-                RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
+                RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL,
+                RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
                     InputRegistrationField(
                         modifier = Modifier.fillMaxWidth(),
                         isErrorShown = showErrorMap[field.name]
@@ -202,7 +201,8 @@ fun OptionalFields(
                             ?: "",
                         onClick = { serverName, list ->
                             onSelectClick(serverName, field, list)
-                        })
+                        }
+                    )
                 }
 
                 RegistrationFieldType.TEXTAREA -> {
@@ -579,9 +579,7 @@ fun SelectRegistrationFieldPreview() {
                 field,
                 false,
                 initialValue = "",
-                onClick = { _, _ ->
-
-                }
+                onClick = { _, _ -> }
             )
         }
     }
@@ -597,9 +595,7 @@ fun InputRegistrationFieldPreview() {
                 modifier = Modifier.fillMaxWidth(),
                 isErrorShown = false,
                 registrationField = field,
-                onValueChanged = { _, _, _ ->
-
-                }
+                onValueChanged = { _, _, _ -> }
             )
         }
     }
@@ -613,7 +609,7 @@ private fun OptionalFieldsPreview() {
         Column(Modifier.background(MaterialTheme.appColors.background)) {
             val optionalField = field.copy(required = false)
             OptionalFields(
-                fields = List(3) { optionalField },
+                fields = List(size = 3) { optionalField },
                 showErrorMap = SnapshotStateMap(),
                 selectableNamesMap = SnapshotStateMap(),
                 onSelectClick = { _, _, _ -> },

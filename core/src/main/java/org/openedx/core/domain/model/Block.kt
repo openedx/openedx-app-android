@@ -63,13 +63,11 @@ data class Block(
     fun isCompleted() = completion == 1.0
 
     fun getFirstDescendantBlock(blocks: List<Block>): Block? {
-        if (blocks.isEmpty()) return null
-        descendants.forEach { descendant ->
-            blocks.find { it.id == descendant }?.let { descendantBlock ->
-                return descendantBlock
-            }
+        return descendants.firstOrNull { descendant ->
+            blocks.find { it.id == descendant } != null
+        }?.let { descendant ->
+            blocks.find { it.id == descendant }
         }
-        return null
     }
 
     fun getDownloadsCount(blocks: List<Block>): Int {
@@ -120,11 +118,11 @@ data class EncodedVideos(
                 isPreferredVideoInfo(mobileLow)
 
     val hasNonYoutubeVideo: Boolean
-        get() = mobileHigh?.url != null
-                || mobileLow?.url != null
-                || desktopMp4?.url != null
-                || hls?.url != null
-                || fallback?.url != null
+        get() = mobileHigh?.url != null ||
+                mobileLow?.url != null ||
+                desktopMp4?.url != null ||
+                hls?.url != null ||
+                fallback?.url != null
 
     val videoUrl: String
         get() = fallback?.url
@@ -158,29 +156,16 @@ data class EncodedVideos(
     }
 
     private fun getDefaultVideoInfoForDownloading(): VideoInfo? {
-        if (isPreferredVideoInfo(mobileLow)) {
-            return mobileLow
+        return when {
+            isPreferredVideoInfo(mobileLow) -> mobileLow
+            isPreferredVideoInfo(mobileHigh) -> mobileHigh
+            isPreferredVideoInfo(desktopMp4) -> desktopMp4
+            fallback != null && isPreferredVideoInfo(fallback) &&
+                    !VideoUtil.videoHasFormat(fallback!!.url, AppDataConstants.VIDEO_FORMAT_M3U8) -> fallback
+
+            hls != null && isPreferredVideoInfo(hls) -> hls
+            else -> null
         }
-        if (isPreferredVideoInfo(mobileHigh)) {
-            return mobileHigh
-        }
-        if (isPreferredVideoInfo(desktopMp4)) {
-            return desktopMp4
-        }
-        fallback?.let {
-            if (isPreferredVideoInfo(it) &&
-                !VideoUtil.videoHasFormat(it.url, AppDataConstants.VIDEO_FORMAT_M3U8)
-            ) {
-                return fallback
-            }
-        }
-        hls?.let {
-            if (isPreferredVideoInfo(it)
-            ) {
-                return hls
-            }
-        }
-        return null
     }
 
     private fun isPreferredVideoInfo(videoInfo: VideoInfo?): Boolean {
@@ -188,7 +173,6 @@ data class EncodedVideos(
                 URLUtil.isNetworkUrl(videoInfo.url) &&
                 VideoUtil.isValidVideoUrl(videoInfo.url)
     }
-
 }
 
 @Parcelize

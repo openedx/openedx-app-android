@@ -40,7 +40,11 @@ class CalendarViewModel(
         get() = CalendarUIState(
             isCalendarExist = isCalendarExist(),
             calendarData = null,
-            calendarSyncState = if (networkConnection.isOnline()) CalendarSyncState.SYNCED else CalendarSyncState.OFFLINE,
+            calendarSyncState = if (networkConnection.isOnline()) {
+                CalendarSyncState.SYNCED
+            } else {
+                CalendarSyncState.OFFLINE
+            },
             isCalendarSyncEnabled = calendarPreferences.isCalendarSyncEnabled,
             coursesSynced = null,
             isRelativeDateEnabled = corePreferences.isRelativeDatesEnabled,
@@ -141,6 +145,7 @@ class CalendarViewModel(
             calendarPreferences.calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST &&
                     calendarManager.isCalendarExist(calendarPreferences.calendarId)
         } catch (e: SecurityException) {
+            e.printStackTrace()
             false
         }
     }

@@ -129,5 +129,4 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
             return dialog
         }
     }
-
 }

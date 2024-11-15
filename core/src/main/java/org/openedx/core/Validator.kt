@@ -7,7 +7,8 @@ class Validator {
     fun isEmailOrUserNameValid(input: String): Boolean {
         return if (input.contains("@")) {
             val validEmailAddressRegex = Pattern.compile(
-                "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE
+                "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$",
+                Pattern.CASE_INSENSITIVE
             )
             validEmailAddressRegex.matcher(input).find()
         } else {
@@ -18,5 +19,4 @@ class Validator {
     fun isPasswordValid(password: String): Boolean {
         return password.length >= 2
     }
-
 }

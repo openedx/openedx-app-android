@@ -88,7 +88,6 @@ fun PageIndicatorView(
     animationDurationInMillis: Int,
     modifier: Modifier = Modifier,
 ) {
-
     val color: Color by animateColorAsState(
         targetValue = if (isSelected) {
             selectedColor
@@ -164,7 +163,7 @@ fun PrevButton(
 ) {
     val prevButtonAnimationFactor by animateFloatAsState(
         targetValue = if (hasPrevPage) 1f else 0f,
-        animationSpec = tween(300),
+        animationSpec = tween(durationMillis = 300),
         label = ""
     )
 
@@ -308,7 +307,8 @@ private fun NavigationUnitsButtonsPrevInTheEnd() {
 private fun PageIndicatorViewPreview() {
     OpenEdXTheme {
         PageIndicator(
-            numberOfPages = 4, selectedPage = 2
+            numberOfPages = 4,
+            selectedPage = 2
         )
     }
 }

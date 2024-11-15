@@ -55,7 +55,11 @@ class DiscussionTopicsViewModel(
             } catch (e: Exception) {
                 _uiState.value = DiscussionTopicsUIState.Error
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 }
             } finally {
                 courseNotifier.send(CourseLoading(false))

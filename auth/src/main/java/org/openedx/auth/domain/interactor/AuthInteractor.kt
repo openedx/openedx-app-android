@@ -33,5 +33,4 @@ class AuthInteractor(private val repository: AuthRepository) {
     suspend fun passwordReset(email: String): Boolean {
         return repository.passwordReset(email)
     }
-
 }

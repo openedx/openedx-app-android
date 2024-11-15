@@ -7,5 +7,3 @@ data class EditProfileUIState(
     val isUpdating: Boolean = false,
     val isLimited: Boolean
 )
-
-

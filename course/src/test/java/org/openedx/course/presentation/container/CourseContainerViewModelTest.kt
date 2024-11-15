@@ -100,22 +100,34 @@ class CourseContainerViewModelTest {
             false,
             null,
             coursewareAccess = CoursewareAccess(
-                false, "", "", "",
-                "", ""
-
+                false,
+                "",
+                "",
+                "",
+                "",
+                ""
             )
         ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
-            null, "audit", false, Date()
+            null,
+            "audit",
+            false,
+            Date()
         ),
         courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course", "", "OpenedX", Date(),
-            "", "", null, false, null,
+            "Open edX Demo Course",
+            "",
+            "OpenedX",
+            Date(),
+            "",
+            "",
+            null,
+            false,
+            null,
             CourseSharingUtmParameters("", ""),
             "",
         )
-
     )
 
     private val courseStructure = CourseStructure(
@@ -154,17 +166,31 @@ class CourseContainerViewModelTest {
             false,
             null,
             CoursewareAccess(
-                false, "", "", "",
-                "", ""
+                false,
+                "",
+                "",
+                "",
+                "",
+                ""
             )
         ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
-            null, "", false, null
+            null,
+            "",
+            false,
+            null
         ),
         courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course", "", "OpenedX", null,
-            "", "", null, false, null,
+            "Open edX Demo Course",
+            "",
+            "OpenedX",
+            null,
+            "",
+            "",
+            null,
+            false,
+            null,
             CourseSharingUtmParameters("", ""),
             "",
         )
@@ -216,6 +242,12 @@ class CourseContainerViewModelTest {
                 any()
             )
         } returns Unit
+        every {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
+                any()
+            )
+        } returns Unit
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
@@ -223,6 +255,12 @@ class CourseContainerViewModelTest {
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
                 any()
             )
         }

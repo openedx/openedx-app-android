@@ -30,5 +30,4 @@ class DiscoveryInteractor(private val repository: DiscoveryRepository) {
     suspend fun getCoursesListFromCache(): List<Course> {
         return repository.getCachedCoursesList()
     }
-
 }

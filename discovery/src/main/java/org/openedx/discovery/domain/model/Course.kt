@@ -3,7 +3,6 @@ package org.openedx.discovery.domain.model
 import org.openedx.core.domain.model.Media
 import java.util.Date
 
-
 data class Course(
     val id: String,
     val blocksUrl: String,

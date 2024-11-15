@@ -86,6 +86,7 @@ import org.openedx.discussion.R
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.presentation.DiscussionRouter
+import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discussion.presentation.ui.CommentItem
 import org.openedx.discussion.presentation.ui.ThreadMainItem
 import org.openedx.foundation.extension.parcelable
@@ -94,7 +95,6 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
-
 
 class DiscussionCommentsFragment : Fragment() {
 
@@ -121,7 +121,6 @@ class DiscussionCommentsFragment : Fragment() {
                 val uiState by viewModel.uiState.observeAsState(DiscussionCommentsUIState.Loading)
                 val uiMessage by viewModel.uiMessage.observeAsState()
                 val canLoadMore by viewModel.canLoadMore.observeAsState(false)
-                val scrollToBottom by viewModel.scrollToBottom.observeAsState(false)
                 val refreshing by viewModel.isUpdating.observeAsState(false)
 
                 DiscussionCommentsScreen(
@@ -130,7 +129,6 @@ class DiscussionCommentsFragment : Fragment() {
                     uiMessage = uiMessage,
                     title = viewModel.title,
                     canLoadMore = canLoadMore,
-                    scrollToBottom = scrollToBottom,
                     refreshing = refreshing,
                     onSwipeRefresh = {
                         viewModel.updateThreadComments()
@@ -156,12 +154,15 @@ class DiscussionCommentsFragment : Fragment() {
                     },
                     onCommentClick = {
                         router.navigateToDiscussionResponses(
-                            requireActivity().supportFragmentManager, it, viewModel.thread.closed
+                            requireActivity().supportFragmentManager,
+                            it,
+                            viewModel.thread.closed
                         )
                     },
                     onUserPhotoClick = { username ->
                         router.navigateToAnothersProfile(
-                            requireActivity().supportFragmentManager, username
+                            requireActivity().supportFragmentManager,
+                            username
                         )
                     },
                     onAddResponseClick = {
@@ -181,6 +182,7 @@ class DiscussionCommentsFragment : Fragment() {
         const val ACTION_UPVOTE_THREAD = "action_upvote_thread"
         const val ACTION_REPORT_THREAD = "action_report_thread"
         const val ACTION_FOLLOW_THREAD = "action_follow_thread"
+        const val LOAD_MORE_THRESHOLD = 4
 
         private const val ARG_THREAD = "argThread"
 
@@ -192,7 +194,6 @@ class DiscussionCommentsFragment : Fragment() {
             return fragment
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -203,7 +204,6 @@ private fun DiscussionCommentsScreen(
     uiMessage: UIMessage?,
     title: String,
     canLoadMore: Boolean,
-    scrollToBottom: Boolean,
     refreshing: Boolean,
     onSwipeRefresh: () -> Unit,
     paginationCallBack: () -> Unit,
@@ -349,7 +349,7 @@ private fun DiscussionCommentsScreen(
                                                     .padding(horizontal = paddingContent)
                                                     .padding(top = 24.dp, bottom = 4.dp),
                                                 text = pluralStringResource(
-                                                    id = org.openedx.discussion.R.plurals.discussion_responses_capitalized,
+                                                    id = R.plurals.discussion_responses_capitalized,
                                                     uiState.count,
                                                     uiState.count
                                                 ),
@@ -375,7 +375,8 @@ private fun DiscussionCommentsScreen(
                                             },
                                             onUserPhotoClick = {
                                                 onUserPhotoClick(comment.author)
-                                            })
+                                            }
+                                        )
                                     }
                                     item {
                                         if (canLoadMore) {
@@ -388,7 +389,7 @@ private fun DiscussionCommentsScreen(
                                         }
                                     }
                                 }
-                                if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                     paginationCallBack()
                                 }
                                 if (!isSystemInDarkTheme()) {
@@ -453,7 +454,9 @@ private fun DiscussionCommentsScreen(
                                             Icon(
                                                 modifier = Modifier.padding(7.dp),
                                                 painter = painterResource(id = R.drawable.discussion_ic_send),
-                                                contentDescription = stringResource(id = R.string.discussion_add_response),
+                                                contentDescription = stringResource(
+                                                    id = R.string.discussion_add_response
+                                                ),
                                                 tint = iconButtonColor
                                             )
                                         }
@@ -464,8 +467,9 @@ private fun DiscussionCommentsScreen(
 
                         is DiscussionCommentsUIState.Loading -> {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
@@ -482,14 +486,13 @@ private fun DiscussionCommentsScreen(
     }
 }
 
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DiscussionCommentsScreenPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         DiscussionCommentsScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionCommentsUIState.Success(
@@ -501,13 +504,10 @@ private fun DiscussionCommentsScreenPreview() {
             title = "Test Screen",
             canLoadMore = false,
             paginationCallBack = {},
-            onItemClick = { _, _, _ ->
-
-            },
+            onItemClick = { _, _, _ -> },
             onCommentClick = {},
             onAddResponseClick = {},
             onBackClick = {},
-            scrollToBottom = false,
             refreshing = false,
             onSwipeRefresh = {},
             onUserPhotoClick = {}
@@ -515,12 +515,11 @@ private fun DiscussionCommentsScreenPreview() {
     }
 }
 
-
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DiscussionCommentsScreenTabletPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         DiscussionCommentsScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionCommentsUIState.Success(
@@ -532,13 +531,10 @@ private fun DiscussionCommentsScreenTabletPreview() {
             title = "Test Screen",
             canLoadMore = false,
             paginationCallBack = {},
-            onItemClick = { _, _, _ ->
-
-            },
+            onItemClick = { _, _, _ -> },
             onCommentClick = {},
             onAddResponseClick = {},
             onBackClick = {},
-            scrollToBottom = false,
             refreshing = false,
             onSwipeRefresh = {},
             onUserPhotoClick = {}

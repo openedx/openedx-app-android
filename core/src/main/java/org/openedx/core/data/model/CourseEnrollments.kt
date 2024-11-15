@@ -44,7 +44,8 @@ data class CourseEnrollments(
                     (json as JsonObject).get("primary"),
                     EnrolledCourse::class.java
                 )
-            } catch (ex: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 null
             }
         }
@@ -55,7 +56,8 @@ data class CourseEnrollments(
                     (json as JsonObject).get("enrollments"),
                     DashboardCourseList::class.java
                 )
-            } catch (ex: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 DashboardCourseList(
                     next = null,
                     previous = null,
@@ -83,7 +85,7 @@ data class CourseEnrollments(
                     config.asString,
                     AppConfig::class.java
                 )
-            } catch (ex: Exception) {
+            } catch (_: Exception) {
                 AppConfig()
             }
         }

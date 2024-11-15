@@ -58,7 +58,6 @@ class CourseRepository(
             )
             courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
             courseStructure[courseId] = response.mapToDomain()
-
         } else {
             val cachedCourseStructure = courseDao.getCourseStructureById(courseId)
             if (cachedCourseStructure != null) {
