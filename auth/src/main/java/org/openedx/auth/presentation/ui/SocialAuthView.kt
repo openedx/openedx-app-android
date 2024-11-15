@@ -140,6 +140,6 @@ internal fun SocialAuthView(
 @Composable
 private fun SocialAuthViewPreview() {
     OpenEdXTheme {
-        SocialAuthView() {}
+        SocialAuthView {}
     }
 }

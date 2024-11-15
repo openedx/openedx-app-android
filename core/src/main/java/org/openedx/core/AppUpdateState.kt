@@ -15,6 +15,7 @@ object AppUpdateState {
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}")))
         } catch (e: ActivityNotFoundException) {
+            e.printStackTrace()
             context.startActivity(
                 Intent(
                     Intent.ACTION_VIEW,

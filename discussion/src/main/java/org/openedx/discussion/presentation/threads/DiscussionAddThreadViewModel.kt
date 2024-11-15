@@ -74,5 +74,4 @@ class DiscussionAddThreadViewModel(
             notifier.send(DiscussionThreadAdded())
         }
     }
-
 }

@@ -124,7 +124,6 @@ class DeleteProfileFragment : Fragment() {
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -290,7 +289,6 @@ fun DeleteProfileScreen(
         }
     }
 }
-
 
 @Preview(
     name = "PIXEL_3A_Light",

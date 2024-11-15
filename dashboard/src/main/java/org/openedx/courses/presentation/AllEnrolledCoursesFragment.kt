@@ -24,4 +24,10 @@ class AllEnrolledCoursesFragment : Fragment() {
             }
         }
     }
+
+    companion object {
+        const val LOAD_MORE_THRESHOLD = 4
+        const val TABLET_GRID_COLUMNS = 3
+        const val MOBILE_GRID_COLUMNS = 2
+    }
 }

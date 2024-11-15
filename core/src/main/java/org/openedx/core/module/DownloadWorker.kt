@@ -64,9 +64,11 @@ class DownloadWorker(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createChannel()
         }
-        val serviceType =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC else 0
+        val serviceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        } else {
+            0
+        }
 
         return ForegroundInfo(
             NOTIFICATION_ID,
@@ -87,7 +89,7 @@ class DownloadWorker(
                 val progress = 100 * value / size
                 // Update no more than 5 times per sec
                 if (!fileDownloader.isCanceled &&
-                    (System.currentTimeMillis() - lastUpdateTime > 200)
+                    (System.currentTimeMillis() - lastUpdateTime > PROGRESS_UPDATE_INTERVAL)
                 ) {
                     lastUpdateTime = System.currentTimeMillis()
 
@@ -177,6 +179,6 @@ class DownloadWorker(
         private const val CHANNEL_ID = "download_channel_ID"
         private const val CHANNEL_NAME = "download_channel_name"
         private const val NOTIFICATION_ID = 10
+        private const val PROGRESS_UPDATE_INTERVAL = 200L
     }
-
 }

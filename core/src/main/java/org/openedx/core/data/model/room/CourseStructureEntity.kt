@@ -64,5 +64,4 @@ data class CourseStructureEntity(
             progress.mapToDomain()
         )
     }
-
 }

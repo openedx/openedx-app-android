@@ -34,7 +34,8 @@ class DiscussionSearchThreadViewModel(
 
     private val _uiState = MutableLiveData<DiscussionSearchThreadUIState>(
         DiscussionSearchThreadUIState.Threads(
-            emptyList(), 0
+            emptyList(),
+            0
         )
     )
     val uiState: LiveData<DiscussionSearchThreadUIState>
@@ -51,7 +52,6 @@ class DiscussionSearchThreadViewModel(
     private val _isUpdating = MutableLiveData<Boolean>()
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
-
 
     private var nextPage: Int? = 1
     private var currentQuery: String? = null
@@ -90,7 +90,7 @@ class DiscussionSearchThreadViewModel(
         viewModelScope.launch {
             queryChannel
                 .asSharedFlow()
-                .debounce(400)
+                .debounce(SEARCH_DEBOUNCE)
                 .collect { query ->
                     nextPage = 1
                     threadsList.clear()
@@ -168,4 +168,7 @@ class DiscussionSearchThreadViewModel(
             .launchIn(viewModelScope)
     }
 
+    companion object {
+        private const val SEARCH_DEBOUNCE = 400L
+    }
 }

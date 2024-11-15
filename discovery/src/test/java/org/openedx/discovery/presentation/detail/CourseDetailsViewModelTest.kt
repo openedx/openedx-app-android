@@ -256,7 +256,6 @@ class CourseDetailsViewModelTest {
             )
         } returns Unit
 
-
         viewModel.enrollInACourse("", "")
         advanceUntilIdle()
 
@@ -304,7 +303,6 @@ class CourseDetailsViewModelTest {
         coEvery { notifier.send(CourseDashboardUpdate()) } returns Unit
         every { networkConnection.isOnline() } returns true
         coEvery { interactor.getCourseDetails(any()) } returns mockCourse
-
 
         delay(200)
         viewModel.enrollInACourse("", "")

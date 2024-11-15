@@ -12,8 +12,8 @@ import org.openedx.auth.presentation.signup.SignUpFragment
 import org.openedx.core.CalendarRouter
 import org.openedx.core.FragmentViewType
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
-import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
+import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
 import org.openedx.core.presentation.settings.video.VideoQualityFragment
 import org.openedx.core.presentation.settings.video.VideoQualityType
@@ -58,10 +58,18 @@ import org.openedx.profile.presentation.video.VideoSettingsFragment
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment
 
-class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, DiscussionRouter,
-    ProfileRouter, AppUpgradeRouter, WhatsNewRouter, CalendarRouter {
+class AppRouter :
+    AuthRouter,
+    DiscoveryRouter,
+    DashboardRouter,
+    CourseRouter,
+    DiscussionRouter,
+    ProfileRouter,
+    AppUpgradeRouter,
+    WhatsNewRouter,
+    CalendarRouter {
 
-    //region AuthRouter
+    // region AuthRouter
     override fun navigateToMain(
         fm: FragmentManager,
         courseId: String?,
@@ -129,9 +137,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             }
         }
     }
-    //endregion
+    // endregion
 
-    //region DiscoveryRouter
+    // region DiscoveryRouter
     override fun navigateToCourseDetail(fm: FragmentManager, courseId: String) {
         replaceFragmentWithBackStack(fm, CourseDetailsFragment.newInstance(courseId))
     }
@@ -170,9 +178,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             CourseContainerFragment.newInstance(courseId, courseTitle)
         )
     }
-    //endregion
+    // endregion
 
-    //region DashboardRouter
+    // region DashboardRouter
 
     override fun navigateToCourseOutline(
         fm: FragmentManager,
@@ -205,9 +213,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     ) {
         replaceFragment(fm, NoAccessCourseContainerFragment.newInstance(title))
     }
-    //endregion
+    // endregion
 
-    //region CourseRouter
+    // region CourseRouter
 
     override fun navigateToCourseSubsections(
         fm: FragmentManager,
@@ -310,9 +318,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             HandoutsWebViewFragment.newInstance(type.name, courseId)
         )
     }
-    //endregion
+    // endregion
 
-    //region DiscussionRouter
+    // region DiscussionRouter
     override fun navigateToDiscussionThread(
         fm: FragmentManager,
         action: String,
@@ -372,9 +380,9 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             AnothersProfileFragment.newInstance(username)
         )
     }
-    //endregion
+    // endregion
 
-    //region ProfileRouter
+    // region ProfileRouter
     override fun navigateToEditProfile(fm: FragmentManager, account: Account) {
         replaceFragmentWithBackStack(fm, EditProfileFragment.newInstance(account))
     }
@@ -433,7 +441,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
     override fun navigateToCoursesToSync(fm: FragmentManager) {
         replaceFragmentWithBackStack(fm, CoursesToSyncFragment())
     }
-    //endregion
+    // endregion
 
     fun getVisibleFragment(fm: FragmentManager): Fragment? {
         return fm.fragments.firstOrNull { it.isVisible }
@@ -465,7 +473,7 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         }
     }
 
-    //App upgrade
+    // App upgrade
     override fun navigateToUserProfile(fm: FragmentManager) {
         try {
             fm.popBackStack()
@@ -476,5 +484,5 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
             e.printStackTrace()
         }
     }
-    //endregion
+    // endregion
 }

@@ -1,11 +1,21 @@
 package org.openedx.profile.data.api
 
-import org.openedx.core.ApiConstants
-import org.openedx.profile.data.model.Account
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import org.openedx.core.ApiConstants
+import org.openedx.profile.data.model.Account
 import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ProfileApi {
 
@@ -26,7 +36,7 @@ interface ProfileApi {
     suspend fun updateAccount(
         @Path("username") username: String,
         @Body fields: Map<String, Any?>
-    ) : Account
+    ): Account
 
     @Headers("Cache-Control: no-cache")
     @POST("/api/user/v1/accounts/{username}/image")
@@ -35,7 +45,7 @@ interface ProfileApi {
         @Header("Content-Disposition") contentDisposition: String?,
         @Query("mobile") mobile: Boolean = true,
         @Body file: RequestBody?
-    ) : Response<Unit>
+    ): Response<Unit>
 
     @Headers("Cache-Control: no-cache")
     @DELETE("/api/user/v1/accounts/{username}/image")
@@ -46,5 +56,4 @@ interface ProfileApi {
     suspend fun deactivateAccount(
         @Field("password") password: String
     ): Response<Unit>
-
 }

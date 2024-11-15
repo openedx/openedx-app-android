@@ -40,5 +40,5 @@ enum class CalendarSyncDialogType(
     LOADING_DIALOG(
         titleResId = R.string.core_title_syncing_calendar
     ),
-    NONE;
+    NONE
 }

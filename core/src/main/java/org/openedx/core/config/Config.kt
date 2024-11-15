@@ -8,6 +8,7 @@ import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
+@Suppress("TooManyFunctions")
 class Config(context: Context) {
 
     private var configProperties: JsonObject = try {
@@ -15,6 +16,7 @@ class Config(context: Context) {
         val config = JsonParser.parseReader(InputStreamReader(inputStream))
         config.asJsonObject
     } catch (e: Exception) {
+        e.printStackTrace()
         JsonObject()
     }
 
@@ -133,12 +135,14 @@ class Config(context: Context) {
             try {
                 cls.getDeclaredConstructor().newInstance()
             } catch (e: InstantiationException) {
-                throw RuntimeException(e)
+                throw ConfigParsingException(e)
             } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
+                throw ConfigParsingException(e)
             }
         }
     }
+
+    class ConfigParsingException(cause: Throwable) : Exception(cause)
 
     private fun getObject(key: String): JsonElement? {
         return configProperties.get(key)

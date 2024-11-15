@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -66,6 +65,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
@@ -94,6 +94,8 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
+import org.openedx.courses.presentation.DashboardGalleryFragment.Companion.MOBILE_COURSE_LIST_ITEM_COUNT
+import org.openedx.courses.presentation.DashboardGalleryFragment.Companion.TABLET_COURSE_LIST_ITEM_COUNT
 import org.openedx.dashboard.R
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
@@ -327,7 +329,11 @@ private fun SecondaryCourses(
     onViewAllClick: () -> Unit
 ) {
     val windowSize = rememberWindowSize()
-    val itemsCount = if (windowSize.isTablet) 7 else 5
+    val itemsCount = if (windowSize.isTablet) {
+        TABLET_COURSE_LIST_ITEM_COUNT
+    } else {
+        MOBILE_COURSE_LIST_ITEM_COUNT
+    }
     val rows = if (windowSize.isTablet) 2 else 1
     val height = if (windowSize.isTablet) 322.dp else 152.dp
     val items = courses.take(itemsCount)
@@ -552,7 +558,8 @@ private fun PrimaryCourseCard(
                     .height(140.dp)
             )
             val progress: Float = try {
-                primaryCourse.progress.assignmentsCompleted.toFloat() / primaryCourse.progress.totalAssignmentsCount.toFloat()
+                primaryCourse.progress.assignmentsCompleted.toFloat() /
+                        primaryCourse.progress.totalAssignmentsCount.toFloat()
             } catch (_: ArithmeticException) {
                 0f
             }

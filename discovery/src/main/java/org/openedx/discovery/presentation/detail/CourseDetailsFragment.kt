@@ -200,7 +200,6 @@ class CourseDetailsFragment : Fragment() {
     }
 }
 
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun CourseDetailsScreen(
@@ -246,7 +245,6 @@ internal fun CourseDetailsScreen(
             }
         }
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -366,7 +364,8 @@ internal fun CourseDetailsScreen(
                                             body = htmlBody,
                                             onWebPageLoaded = {
                                                 webViewAlpha = 1f
-                                            })
+                                            }
+                                        )
                                     }
                                 }
                             }
@@ -391,7 +390,6 @@ internal fun CourseDetailsScreen(
         }
     }
 }
-
 
 @Composable
 private fun CourseDetailNativeContent(
@@ -431,7 +429,7 @@ private fun CourseDetailNativeContent(
         Box(contentAlignment = Alignment.Center) {
             ImageHeader(
                 modifier = Modifier
-                    .aspectRatio(1.86f)
+                    .aspectRatio(ratio = 1.86f)
                     .padding(6.dp),
                 apiHostUrl = apiHostUrl,
                 courseImage = course.media.image?.large,
@@ -500,7 +498,6 @@ private fun CourseDetailNativeContent(
     }
 }
 
-
 @Composable
 private fun CourseDetailNativeContentLandscape(
     windowSize: WindowSize,
@@ -533,7 +530,7 @@ private fun CourseDetailNativeContentLandscape(
         Column(
             Modifier
                 .fillMaxHeight()
-                .weight(3f),
+                .weight(weight = 3f),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -643,11 +640,10 @@ private fun CourseDescription(
                     request: WebResourceRequest?
                 ): Boolean {
                     val clickUrl = request?.url?.toString() ?: ""
-                    return if (clickUrl.isNotEmpty() &&
-                        (clickUrl.startsWith("http://") ||
-                                clickUrl.startsWith("https://"))
-                    ) {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl)))
+                    return if (clickUrl.isNotEmpty() && clickUrl.startsWith("http")) {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(clickUrl))
+                        )
                         true
                     } else if (clickUrl.startsWith("mailto:")) {
                         val email = clickUrl.replace("mailto:", "")
