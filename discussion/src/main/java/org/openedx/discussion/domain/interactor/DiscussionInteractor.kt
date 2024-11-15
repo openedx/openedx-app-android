@@ -1,7 +1,6 @@
 package org.openedx.discussion.domain.interactor
 
 import org.openedx.discussion.data.repository.DiscussionRepository
-import org.openedx.discussion.domain.model.CommentsData
 import org.openedx.discussion.domain.model.DiscussionComment
 
 class DiscussionInteractor(

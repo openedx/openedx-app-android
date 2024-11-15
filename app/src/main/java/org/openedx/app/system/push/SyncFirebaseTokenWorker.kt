@@ -10,7 +10,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.openedx.app.data.api.NotificationsApi
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.module.DownloadWorker
 
 class SyncFirebaseTokenWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params),
@@ -21,7 +20,6 @@ class SyncFirebaseTokenWorker(context: Context, params: WorkerParameters) :
 
     override suspend fun doWork(): Result {
         if (preferences.user != null && preferences.pushToken.isNotEmpty()) {
-
             api.syncFirebaseToken(preferences.pushToken)
 
             return Result.success()

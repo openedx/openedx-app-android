@@ -91,7 +91,9 @@ class CourseSectionViewModel(
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     resultList.add(blockDescendant)
                 }
-            } else continue
+            } else {
+                continue
+            }
         }
         return resultList
     }

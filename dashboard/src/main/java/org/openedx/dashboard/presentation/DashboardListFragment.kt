@@ -37,7 +37,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -83,7 +82,7 @@ import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
 import org.openedx.core.domain.model.Progress
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendedBox
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
@@ -95,6 +94,7 @@ import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dashboard.R
+import org.openedx.dashboard.presentation.DashboardListFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.foundation.extension.toImageLink
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.WindowSize
@@ -163,6 +163,10 @@ class DashboardListFragment : Fragment() {
                 )
             }
         }
+    }
+
+    companion object {
+        const val LOAD_MORE_THRESHOLD = 4
     }
 }
 
@@ -245,7 +249,6 @@ internal fun DashboardListView(
                 .displayCutoutForLandscape(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Surface(
                 color = MaterialTheme.appColors.background,
                 shape = MaterialTheme.appShapes.screenBackgroundShape
@@ -258,8 +261,9 @@ internal fun DashboardListView(
                     when (state) {
                         is DashboardUIState.Loading -> {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
@@ -282,7 +286,10 @@ internal fun DashboardListView(
                                                 apiHostUrl,
                                                 course,
                                                 windowSize,
-                                                onClick = { onItemClick(it) })
+                                                onClick = {
+                                                    onItemClick(it)
+                                                }
+                                            )
                                             Divider()
                                         }
                                         item {
@@ -297,8 +304,9 @@ internal fun DashboardListView(
                                                 }
                                             }
                                         }
-                                    })
-                                if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                    }
+                                )
+                                if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                     paginationCallback()
                                 }
                             }
@@ -525,7 +533,8 @@ private fun CourseItemPreview() {
             "http://localhost:8000",
             mockCourseEnrolled,
             WindowSize(WindowType.Compact, WindowType.Compact),
-            onClick = {})
+            onClick = {}
+        )
     }
 }
 
@@ -590,7 +599,6 @@ private fun DashboardListViewTabletPreview() {
         )
     }
 }
-
 
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)

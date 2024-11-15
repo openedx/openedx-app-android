@@ -49,14 +49,12 @@ class CourseUnitContainerViewModel(
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return _descendantsBlocks.value.firstOrNull() ==
-                    _descendantsBlocks.value.getOrNull(currentIndex)
+            return _descendantsBlocks.value.firstOrNull() == _descendantsBlocks.value.getOrNull(currentIndex)
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return _descendantsBlocks.value.lastOrNull() ==
-                    _descendantsBlocks.value.getOrNull(currentIndex)
+            return _descendantsBlocks.value.lastOrNull() == _descendantsBlocks.value.getOrNull(currentIndex)
         }
 
     private val _verticalBlockCounts = MutableLiveData<Int>()
@@ -140,7 +138,6 @@ class CourseUnitContainerViewModel(
                         }
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(unitId))
-
                 } else {
                     setNextVerticalIndex()
                 }
@@ -173,7 +170,9 @@ class CourseUnitContainerViewModel(
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     resultList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
                 }
-            } else continue
+            } else {
+                continue
+            }
         }
         return resultList
     }

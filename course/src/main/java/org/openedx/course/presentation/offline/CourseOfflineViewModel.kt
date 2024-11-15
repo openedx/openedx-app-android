@@ -191,7 +191,7 @@ class CourseOfflineViewModel(
         val realDownloadedSize = completedDownloads.sumOf { it.size }
         val largestDownloads = completedDownloads
             .sortedByDescending { it.size }
-            .take(5)
+            .take(n = 5)
 
         _uiState.update {
             it.copy(

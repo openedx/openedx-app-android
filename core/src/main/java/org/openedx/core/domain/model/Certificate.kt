@@ -8,5 +8,4 @@ data class Certificate(
     val certificateURL: String?
 ) : Parcelable {
     fun isCertificateEarned() = certificateURL?.isNotEmpty() == true
-
 }

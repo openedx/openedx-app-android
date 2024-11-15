@@ -51,6 +51,7 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
 import org.openedx.course.domain.model.DownloadDialogResource
 import org.openedx.course.presentation.download.DownloadDialogManager.Companion.DOWNLOAD_SIZE_FACTOR
+import org.openedx.course.presentation.download.DownloadStorageErrorDialogFragment.Companion.STORAGE_BAR_MIN_SIZE
 import org.openedx.foundation.extension.parcelable
 import org.openedx.foundation.extension.toFileSize
 import org.openedx.foundation.system.PreviewFragmentManager
@@ -88,6 +89,7 @@ class DownloadStorageErrorDialogFragment : DialogFragment() {
     companion object {
         const val DIALOG_TAG = "DownloadStorageErrorDialogFragment"
         const val ARG_UI_STATE = "uiState"
+        const val STORAGE_BAR_MIN_SIZE = 0.1f
 
         fun newInstance(
             uiState: DownloadDialogUIState
@@ -177,9 +179,8 @@ private fun StorageBar(
     val cornerRadius = 2.dp
     val boxPadding = 1.dp
     val usedSpace = totalSpace - freeSpace
-    val minSize = 0.1f
-    val freePercentage = freeSpace / requiredSpace.toFloat() + minSize
-    val reqPercentage = (requiredSpace - freeSpace) / requiredSpace.toFloat() + minSize
+    val freePercentage = freeSpace / requiredSpace.toFloat() + STORAGE_BAR_MIN_SIZE
+    val reqPercentage = (requiredSpace - freeSpace) / requiredSpace.toFloat() + STORAGE_BAR_MIN_SIZE
 
     val animReqPercentage = remember { Animatable(Float.MIN_VALUE) }
     LaunchedEffect(Unit) {

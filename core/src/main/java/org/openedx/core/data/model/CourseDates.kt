@@ -51,22 +51,22 @@ data class CourseDates(
         courseDatesResponse[DatesSection.TODAY] =
             datesList.filter { it.date.isToday() }.also { datesList.removeAll(it) }
 
-        //Update the date for upcoming comparison without time
+        // Update the date for upcoming comparison without time
         currentDate.clearTime()
 
         // for current week except today
         courseDatesResponse[DatesSection.THIS_WEEK] = datesList.filter {
-            it.date.after(currentDate) && it.date.before(currentDate.addDays(8))
+            it.date.after(currentDate) && it.date.before(currentDate.addDays(days = 8))
         }.also { datesList.removeAll(it) }
 
         // for coming week
         courseDatesResponse[DatesSection.NEXT_WEEK] = datesList.filter {
-            it.date.after(currentDate.addDays(7)) && it.date.before(currentDate.addDays(15))
+            it.date.after(currentDate.addDays(days = 7)) && it.date.before(currentDate.addDays(days = 15))
         }.also { datesList.removeAll(it) }
 
         // for upcoming
         courseDatesResponse[DatesSection.UPCOMING] = datesList.filter {
-            it.date.after(currentDate.addDays(14))
+            it.date.after(currentDate.addDays(days = 14))
         }.also { datesList.removeAll(it) }
 
         return courseDatesResponse

@@ -38,7 +38,6 @@ class CourseSearchViewModelTest {
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
 
-
     private val dispatcher = UnconfinedTestDispatcher()
 
     private val config = mockk<Config>()
@@ -148,7 +147,8 @@ class CourseSearchViewModelTest {
                 "",
                 5,
                 ""
-            ), emptyList()
+            ),
+            emptyList()
         )
         every { analytics.discoveryCourseSearchEvent(any(), any()) } returns Unit
 
@@ -174,7 +174,8 @@ class CourseSearchViewModelTest {
                 "2",
                 5,
                 ""
-            ), listOf(mockCourse, mockCourse)
+            ),
+            listOf(mockCourse, mockCourse)
         )
         coEvery {
             interactor.getCoursesListByQuery(
@@ -209,7 +210,8 @@ class CourseSearchViewModelTest {
                 "2",
                 5,
                 ""
-            ), listOf(mockCourse, mockCourse)
+            ),
+            listOf(mockCourse, mockCourse)
         )
         coEvery {
             interactor.getCoursesListByQuery(
@@ -245,7 +247,8 @@ class CourseSearchViewModelTest {
                 "2",
                 5,
                 ""
-            ), listOf(mockCourse, mockCourse)
+            ),
+            listOf(mockCourse, mockCourse)
         )
 
         viewModel.updateSearchQuery()

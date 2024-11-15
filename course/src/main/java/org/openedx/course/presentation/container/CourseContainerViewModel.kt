@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseAccessError
+import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isFalse
@@ -207,15 +208,18 @@ class CourseContainerViewModel(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                if (e.isInternetError() || e is NoCachedDataException) {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_no_connection)
+                if (isNetworkRelatedError(e)) {
+                    _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
                 } else {
                     _courseAccessStatus.value = CourseAccessError.UNKNOWN
                 }
                 _showProgress.value = false
             }
         }
+    }
+
+    private fun isNetworkRelatedError(e: Exception): Boolean {
+        return e.isInternetError() || e is NoCachedDataException
     }
 
     private fun loadCourseImage(imageUrl: String?) {
@@ -306,8 +310,18 @@ class CourseContainerViewModel(
 
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) ||
-                (calendarSync.isInstructorPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isFalse()))
+        return calendarSync.isEnabled && (
+                isSelfPacedCalendarSyncEnabled(calendarSync) ||
+                        isInstructorPacedCalendarSyncEnabled(calendarSync)
+                )
+    }
+
+    private fun isSelfPacedCalendarSyncEnabled(calendarSync: CourseDatesCalendarSync): Boolean {
+        return calendarSync.isSelfPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()
+    }
+
+    private fun isInstructorPacedCalendarSyncEnabled(calendarSync: CourseDatesCalendarSync): Boolean {
+        return calendarSync.isInstructorPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isFalse()
     }
 
     private fun courseDashboardViewed() {
@@ -367,8 +381,11 @@ class CourseContainerViewModel(
                 )
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (_courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) CourseAnalyticsKey.SELF_PACED.key
-                    else CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    if (_courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) {
+                        CourseAnalyticsKey.SELF_PACED.key
+                    } else {
+                        CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    }
                 )
                 putAll(param)
             }

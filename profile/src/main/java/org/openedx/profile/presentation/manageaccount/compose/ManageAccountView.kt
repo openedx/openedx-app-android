@@ -71,7 +71,8 @@ internal fun ManageAccountView(
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
-        onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) })
+        onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -185,7 +186,8 @@ internal fun ManageAccountView(
                                         color = MaterialTheme.appColors.error,
                                         onClick = {
                                             onAction(ManageAccountViewAction.DeleteAccount)
-                                        })
+                                        }
+                                    )
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
@@ -218,7 +220,6 @@ private fun ManageAccountViewPreview() {
         )
     }
 }
-
 
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)

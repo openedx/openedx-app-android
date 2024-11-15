@@ -149,7 +149,6 @@ data class StudentViewDataDb(
                 topicId = studentViewData?.topicId ?: ""
             )
         }
-
     }
 }
 
@@ -190,7 +189,6 @@ data class EncodedVideosDb(
             )
         }
     }
-
 }
 
 data class VideoInfoDb(

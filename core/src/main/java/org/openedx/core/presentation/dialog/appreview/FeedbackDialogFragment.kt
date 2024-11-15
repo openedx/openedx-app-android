@@ -76,7 +76,6 @@ class FeedbackDialogFragment : BaseAppReviewDialogFragment() {
         )
     }
 
-
     override fun dismiss() {
         onDismiss()
     }

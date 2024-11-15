@@ -1,10 +1,10 @@
 package org.openedx.discussion.domain.model
 
 import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.extension.LinkedImageText
 import org.openedx.discussion.R
-import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Thread(

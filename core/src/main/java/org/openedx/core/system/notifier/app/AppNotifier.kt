@@ -15,5 +15,4 @@ class AppNotifier {
     suspend fun send(event: LogoutEvent) = channel.emit(event)
 
     suspend fun send(event: AppUpgradeEvent) = channel.emit(event)
-
 }

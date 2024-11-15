@@ -1,4 +1,4 @@
-package org.openedx.core.presentation.global.app_upgrade
+package org.openedx.core.presentation.global.appupgrade
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.UI_MODE_NIGHT_NO

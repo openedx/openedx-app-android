@@ -69,5 +69,4 @@ class CourseConverter {
         val type = genericType<List<CourseDateBlockDb>>()
         return Gson().fromJson(value, type)
     }
-
 }

@@ -341,5 +341,4 @@ class DashboardListViewModelTest {
         coVerify(exactly = 1) { interactor.getEnrolledCourses(any()) }
         verify(exactly = 1) { appNotifier.notifier }
     }
-
 }

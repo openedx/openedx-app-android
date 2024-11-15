@@ -81,10 +81,11 @@ class VideoQualityFragment : Fragment() {
                 val windowSize = rememberWindowSize()
 
                 val title = stringResource(
-                    id = if (viewModel.getQualityType() == VideoQualityType.Streaming)
+                    id = if (viewModel.getQualityType() == VideoQualityType.Streaming) {
                         R.string.core_video_streaming_quality
-                    else
+                    } else {
                         R.string.core_video_download_quality
+                    }
                 )
                 val videoQuality by viewModel.videoQuality.observeAsState(viewModel.getCurrentVideoQuality())
 
@@ -97,7 +98,8 @@ class VideoQualityFragment : Fragment() {
                     },
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
-                    })
+                    }
+                )
             }
         }
     }
@@ -260,7 +262,7 @@ private fun VideoQualityScreenPreview() {
             title = "",
             selectedVideoQuality = VideoQuality.OPTION_720P,
             onQualityChanged = {},
-            onBackClick = {})
+            onBackClick = {}
+        )
     }
 }
-

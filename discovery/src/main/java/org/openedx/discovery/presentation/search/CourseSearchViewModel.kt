@@ -65,7 +65,7 @@ class CourseSearchViewModel(
         viewModelScope.launch {
             queryChannel
                 .asSharedFlow()
-                .debounce(400)
+                .debounce(SEARCH_DEBOUNCE)
                 .collect {
                     nextPage = 1
                     currentQuery = it
@@ -143,4 +143,7 @@ class CourseSearchViewModel(
         }
     }
 
+    companion object {
+        private const val SEARCH_DEBOUNCE = 400L
+    }
 }

@@ -3,8 +3,6 @@ package org.openedx.core.ui
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.ViewTreeObserver
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
@@ -40,11 +38,10 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.presentation.global.InsetHolder
+
+const val KEYBOARD_VISIBILITY_THRESHOLD = 0.15f
 
 inline val isPreview: Boolean
     @ReadOnlyComposable
@@ -107,7 +104,8 @@ fun Modifier.displayCutoutForLandscape(): Modifier = composed {
 inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier = composed {
     this then Modifier.clickable(
         indication = null,
-        interactionSource = remember { MutableInteractionSource() }) {
+        interactionSource = remember { MutableInteractionSource() }
+    ) {
         onClick()
     }
 }
@@ -167,7 +165,7 @@ fun isImeVisibleState(): State<Boolean> {
             view.getWindowVisibleDisplayFrame(rect)
             val screenHeight = view.rootView.height
             val keypadHeight = screenHeight - rect.bottom
-            keyboardState.value = keypadHeight > screenHeight * 0.15
+            keyboardState.value = keypadHeight > screenHeight * KEYBOARD_VISIBILITY_THRESHOLD
         }
         view.viewTreeObserver.addOnGlobalLayoutListener(onGlobalListener)
 
@@ -179,21 +177,6 @@ fun isImeVisibleState(): State<Boolean> {
     return keyboardState
 }
 
-fun LazyListState.disableScrolling(scope: CoroutineScope) {
-    scope.launch {
-        scroll(scrollPriority = MutatePriority.PreventUserInput) {
-            awaitCancellation()
-        }
-    }
-}
-
-fun LazyListState.reEnableScrolling(scope: CoroutineScope) {
-    scope.launch {
-        scroll(scrollPriority = MutatePriority.PreventUserInput) {}
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
 fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
     return (currentPage - page) + currentPageOffsetFraction
 }

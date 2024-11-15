@@ -48,10 +48,6 @@ class DiscussionCommentsViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _scrollToBottom = MutableLiveData<Boolean>()
-    val scrollToBottom: LiveData<Boolean>
-        get() = _scrollToBottom
-
     private val comments = mutableListOf<DiscussionComment>()
     private var page = 1
     private var isLoading = false
@@ -68,10 +64,11 @@ class DiscussionCommentsViewModel(
                             comments.toList(),
                             commentCount
                         )
-                        _scrollToBottom.value = true
                     } else {
                         _uiMessage.value =
-                            UIMessage.ToastMessage(resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added))
+                            UIMessage.ToastMessage(
+                                resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+                            )
                     }
                     thread = thread.copy(commentCount = thread.commentCount + 1)
                     sendThreadUpdated()
@@ -290,7 +287,9 @@ class DiscussionCommentsViewModel(
                     comments.add(response)
                 } else {
                     _uiMessage.value =
-                        UIMessage.ToastMessage(resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added))
+                        UIMessage.ToastMessage(
+                            resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+                        )
                 }
                 _uiState.value =
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
@@ -305,5 +304,4 @@ class DiscussionCommentsViewModel(
             }
         }
     }
-
 }

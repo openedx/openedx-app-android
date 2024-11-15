@@ -68,7 +68,12 @@ class CoursesToSyncViewModel(
                 val coursesCalendarState = calendarInteractor.getAllCourseCalendarStateFromCache()
                 _uiState.update { it.copy(coursesCalendarState = coursesCalendarState) }
             } catch (e: Exception) {
-                _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                e.printStackTrace()
+                _uiMessage.emit(
+                    UIMessage.SnackBarMessage(
+                        resourceManager.getString(R.string.core_error_unknown_error)
+                    )
+                )
             }
         }
     }
@@ -80,9 +85,19 @@ class CoursesToSyncViewModel(
                 _uiState.update { it.copy(enrollmentsStatus = enrollmentsStatus) }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(
+                                R.string.core_error_no_connection
+                            )
+                        )
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_unknown_error)
+                        )
+                    )
                 }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
