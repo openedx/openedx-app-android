@@ -1215,7 +1215,7 @@ fun FullScreenErrorView(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = errorType.actionResId),
-            textColor = MaterialTheme.appColors.primaryButtonText,
+            textColor = MaterialTheme.appColors.secondaryButtonText,
             backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = onReloadClick,
         )

@@ -8,7 +8,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.openedx.core.extension.equalsHost
 import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
@@ -17,6 +16,7 @@ import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkA
 fun CatalogWebViewScreen(
     url: String,
     uriScheme: String,
+    userAgent: String,
     isAllLinksExternal: Boolean = false,
     onWebPageLoaded: () -> Unit,
     refreshSessionCookie: () -> Unit = {},
@@ -90,7 +90,7 @@ fun CatalogWebViewScreen(
                     request: WebResourceRequest,
                     error: WebResourceError
                 ) {
-                    if (view.url.equalsHost(request.url.host)) {
+                    if (request.url.toString() == view.url) {
                         onWebPageLoadError()
                     }
                     super.onReceivedError(view, request, error)
@@ -104,6 +104,7 @@ fun CatalogWebViewScreen(
                 setSupportZoom(true)
                 loadsImagesAutomatically = true
                 domStorageEnabled = true
+                userAgentString = "$userAgentString $userAgent"
             }
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false

@@ -97,6 +97,7 @@ class WebViewDiscoveryFragment : Fragment() {
                     isPreLogin = viewModel.isPreLogin,
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
+                    userAgent = viewModel.appUserAgent,
                     isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     hasInternetConnection = hasInternetConnection,
                     onWebViewUIAction = { action ->
@@ -195,6 +196,7 @@ private fun WebViewDiscoveryScreen(
     contentUrl: String,
     uriScheme: String,
     isRegistrationEnabled: Boolean,
+    userAgent: String,
     hasInternetConnection: Boolean,
     onWebViewUIAction: (WebViewUIAction) -> Unit,
     onWebPageUpdated: (String) -> Unit,
@@ -275,6 +277,7 @@ private fun WebViewDiscoveryScreen(
                             DiscoveryWebView(
                                 contentUrl = contentUrl,
                                 uriScheme = uriScheme,
+                                userAgent = userAgent,
                                 onWebPageLoaded = {
                                     if ((uiState is WebViewUIState.Error).not()) {
                                         onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED)
@@ -316,6 +319,7 @@ private fun WebViewDiscoveryScreen(
 private fun DiscoveryWebView(
     contentUrl: String,
     uriScheme: String,
+    userAgent: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
@@ -324,6 +328,7 @@ private fun DiscoveryWebView(
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,
+        userAgent = userAgent,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
         onUriClick = onUriClick,
@@ -396,6 +401,7 @@ private fun WebViewDiscoveryScreenPreview() {
             contentUrl = "https://www.example.com/",
             uriScheme = "",
             isRegistrationEnabled = true,
+            userAgent = "",
             hasInternetConnection = false,
             onWebViewUIAction = {},
             onWebPageUpdated = {},
