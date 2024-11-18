@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import org.openedx.core.module.download.AbstractDownloader
 import org.openedx.core.utils.Directories
 import org.openedx.core.utils.IOUtils
+import org.openedx.core.utils.Logger
 import org.openedx.core.utils.Sha1Util
 import org.openedx.foundation.utils.FileUtil
 import subtitleFile.FormatSRT
@@ -20,6 +21,8 @@ class TranscriptManager(
     val context: Context,
     val fileUtil: FileUtil
 ) {
+
+    private val logger = Logger(TAG)
 
     private val transcriptDownloader = object : AbstractDownloader() {
         override val client: OkHttpClient
@@ -62,17 +65,18 @@ class TranscriptManager(
     }
 
     private suspend fun startTranscriptDownload(downloadLink: String) {
-        if (!has(downloadLink)) {
-            val file = File(getTranscriptDir(), Sha1Util.SHA1(downloadLink))
-            val result = transcriptDownloader.download(
-                downloadLink,
-                file.path
-            )
-            if (result == AbstractDownloader.DownloadResult.SUCCESS) {
-                getInputStream(downloadLink)?.let {
-                    val transcriptTimedTextObject =
-                        convertIntoTimedTextObject(it)
-                    transcriptObject = transcriptTimedTextObject
+        if (has(downloadLink)) return
+        val file = File(getTranscriptDir(), Sha1Util.SHA1(downloadLink))
+        val result = transcriptDownloader.download(
+            downloadLink,
+            file.path
+        )
+        if (result == AbstractDownloader.DownloadResult.SUCCESS) {
+            getInputStream(downloadLink)?.let {
+                try {
+                    transcriptObject = convertIntoTimedTextObject(it)
+                } catch (e: NullPointerException) {
+                    logger.e(throwable = e, submitCrashReport = true)
                 }
             }
         }
@@ -86,7 +90,7 @@ class TranscriptManager(
             try {
                 transcriptObject = convertIntoTimedTextObject(transcriptInputStream)
             } catch (e: Exception) {
-                e.printStackTrace()
+                logger.e(throwable = e, submitCrashReport = true)
             }
         } else {
             startTranscriptDownload(transcriptUrl)
@@ -127,6 +131,7 @@ class TranscriptManager(
     }
 
     companion object {
+        private const val TAG = "TranscriptManager"
         private const val FILE_VALIDITY_DURATION_HOURS = 5L
     }
 }
