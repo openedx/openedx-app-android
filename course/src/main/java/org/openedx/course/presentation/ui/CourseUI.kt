@@ -884,7 +884,7 @@ fun SubSectionUnitsTitle(
     onUnitsClick: () -> Unit,
 ) {
     val textStyle = MaterialTheme.appTypography.titleMedium
-    val hasUnits = unitsCount > 0
+    val hasMultipleUnits = unitsCount > 1
     var rowModifier = Modifier
         .fillMaxWidth()
         .padding(
@@ -892,7 +892,7 @@ fun SubSectionUnitsTitle(
             vertical = 8.dp
         )
         .displayCutoutForLandscape()
-    if (hasUnits) {
+    if (hasMultipleUnits) {
         rowModifier = rowModifier.noRippleClickable { onUnitsClick() }
     }
 
@@ -912,7 +912,7 @@ fun SubSectionUnitsTitle(
             textAlign = TextAlign.Start
         )
 
-        if (hasUnits) {
+        if (hasMultipleUnits) {
             Icon(
                 modifier = Modifier.rotate(if (unitsListShowed) 180f else 0f),
                 painter = painterResource(id = R.drawable.ic_course_arrow_down),

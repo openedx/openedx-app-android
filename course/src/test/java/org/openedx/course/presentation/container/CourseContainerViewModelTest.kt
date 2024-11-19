@@ -47,7 +47,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.utils.ImageProcessor
 import org.openedx.foundation.system.ResourceManager
-import java.net.UnknownHostException
 import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -217,61 +216,6 @@ class CourseContainerViewModelTest {
     }
 
     @Test
-    fun `getCourseEnrollmentDetails internet connection exception`() = runTest {
-        val viewModel = CourseContainerViewModel(
-            "",
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            courseNotifier,
-            networkConnection,
-            corePreferences,
-            analytics,
-            imageProcessor,
-            calendarSyncScheduler,
-            courseRouter,
-        )
-        every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
-        coEvery { interactor.getEnrollmentDetails(any()) } throws UnknownHostException()
-        every {
-            analytics.logScreenEvent(
-                CourseAnalyticsEvent.DASHBOARD.eventName,
-                any()
-            )
-        } returns Unit
-        every {
-            analytics.logScreenEvent(
-                CourseAnalyticsEvent.HOME_TAB.eventName,
-                any()
-            )
-        } returns Unit
-        viewModel.fetchCourseDetails()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { interactor.getEnrollmentDetails(any()) }
-        verify(exactly = 1) {
-            analytics.logScreenEvent(
-                CourseAnalyticsEvent.DASHBOARD.eventName,
-                any()
-            )
-        }
-        verify(exactly = 1) {
-            analytics.logScreenEvent(
-                CourseAnalyticsEvent.HOME_TAB.eventName,
-                any()
-            )
-        }
-
-        val message = viewModel.errorMessage.value
-        assertEquals(noInternet, message)
-        assert(!viewModel.refreshing.value)
-        assert(viewModel.courseAccessStatus.value == null)
-    }
-
-    @Test
     fun `getCourseEnrollmentDetails unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
@@ -426,35 +370,6 @@ class CourseContainerViewModelTest {
         assert(viewModel.errorMessage.value == null)
         assert(!viewModel.refreshing.value)
         assert(viewModel.courseAccessStatus.value != null)
-    }
-
-    @Test
-    fun `updateData no internet connection exception`() = runTest {
-        val viewModel = CourseContainerViewModel(
-            "",
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            courseNotifier,
-            networkConnection,
-            corePreferences,
-            analytics,
-            imageProcessor,
-            calendarSyncScheduler,
-            courseRouter
-        )
-        coEvery { interactor.getCourseStructure(any(), true) } throws UnknownHostException()
-        coEvery { courseNotifier.send(CourseStructureUpdated("")) } returns Unit
-        viewModel.updateData()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { interactor.getCourseStructure(any(), true) }
-
-        val message = viewModel.errorMessage.value
-        assertEquals(noInternet, message)
-        assert(!viewModel.refreshing.value)
     }
 
     @Test

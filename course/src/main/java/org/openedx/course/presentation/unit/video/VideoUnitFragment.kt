@@ -222,7 +222,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                             mediaItem,
                             viewModel.exoPlayer?.currentPosition ?: 0L
                         )
-                        viewModel.castPlayer?.playWhenReady = false
+                        viewModel.castPlayer?.playWhenReady = true
                         showVideoControllerIndefinitely(true)
                     }
 

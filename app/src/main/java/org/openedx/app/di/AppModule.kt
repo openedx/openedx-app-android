@@ -180,7 +180,14 @@ val appModule = module {
         DownloadWorkerController(get(), get(), get())
     }
 
-    single { AppData(versionName = BuildConfig.VERSION_NAME) }
+    single {
+        val resourceManager = get<ResourceManager>()
+        AppData(
+            appName = resourceManager.getString(R.string.app_name),
+            versionName = BuildConfig.VERSION_NAME,
+            applicationId = BuildConfig.APPLICATION_ID,
+        )
+    }
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get(), get()) }
