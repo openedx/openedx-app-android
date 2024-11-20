@@ -103,10 +103,8 @@ class EncodedVideoUnitViewModel(
         initPlayer()
 
         val executor = Executors.newSingleThreadExecutor()
-        CastContext.getSharedInstance(context, executor).addOnCompleteListener {
-            it.result?.let { castContext ->
-                castPlayer = CastPlayer(castContext)
-            }
+        CastContext.getSharedInstance(context, executor).result?.let { castContext ->
+            castPlayer = CastPlayer(castContext)
         }
     }
 
@@ -118,8 +116,12 @@ class EncodedVideoUnitViewModel(
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        exoPlayer?.removeListener(exoPlayerListener)
-        exoPlayer?.pause()
+        if (isCastActive) {
+            getActivePlayer()?.release()
+        } else {
+            exoPlayer?.removeListener(exoPlayerListener)
+            exoPlayer?.pause()
+        }
     }
 
     fun getActivePlayer(): Player? {
