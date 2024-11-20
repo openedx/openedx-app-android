@@ -36,8 +36,8 @@ import androidx.fragment.app.DialogFragment
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -61,8 +61,10 @@ class DownloadConfirmDialogFragment : DialogFragment() {
         setContent {
             OpenEdXTheme {
                 val dialogType =
-                    requireArguments().parcelable<DownloadConfirmDialogType>(ARG_DIALOG_TYPE) ?: return@OpenEdXTheme
-                val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE) ?: return@OpenEdXTheme
+                    requireArguments().parcelable<DownloadConfirmDialogType>(ARG_DIALOG_TYPE)
+                        ?: return@OpenEdXTheme
+                val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE)
+                    ?: return@OpenEdXTheme
                 val sizeSumString = uiState.sizeSum.toFileSize(1, false)
                 val dialogData = when (dialogType) {
                     DownloadConfirmDialogType.CONFIRM -> DownloadDialogResource(
@@ -201,7 +203,7 @@ private fun DownloadConfirmDialogView(
                     onClick = onConfirmClick
                 }
             }
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 text = buttonText,
                 backgroundColor = buttonColor,
                 onClick = onClick,
@@ -214,12 +216,10 @@ private fun DownloadConfirmDialogView(
                     )
                 }
             )
-            OpenEdXOutlinedButton(
+            OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = coreR.string.core_cancel),
-                backgroundColor = MaterialTheme.appColors.background,
                 borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }

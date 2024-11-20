@@ -31,16 +31,17 @@ val light_text_field_text = Color(0xFF3D4964)
 val light_text_field_hint = Color(0xFF97A5BB)
 val light_text_hyper_link = Color(0xFF3C68FF)
 
+val light_primary_button_text = Color.White
 val light_primary_button_background = Color(0xFF3C68FF)
 val light_primary_button_border = Color(0xFF97A5BB)
-val light_primary_button_text = Color.White
 val light_primary_button_bordered_text = Color(0xFF3C68FF)
+val light_primary_button_bordered_background = Color.Transparent
 
-val light_secondary_button_background = light_primary_button_background
 val light_secondary_button_text = light_primary_button_text
+val light_secondary_button_background = light_primary_button_background
 val light_secondary_button_border = light_primary_button_border
-val light_secondary_button_bordered_background = Color.White
 val light_secondary_button_bordered_text = light_primary_button_bordered_text
+val light_secondary_button_bordered_background = light_primary_button_bordered_background
 
 val light_card_view_background = Color(0xFFF9FAFB)
 val light_card_view_border = Color(0xFFCCD4E0)
@@ -101,16 +102,17 @@ val dark_text_field_text = Color.White
 val dark_text_field_hint = Color(0xFF79889F)
 val dark_text_hyper_link = Color(0xFF5478F9)
 
-val dark_primary_button_background = Color(0xFF5478F9)
 val dark_primary_button_text = Color.White
+val dark_primary_button_background = Color(0xFF5478F9)
 val dark_primary_button_border = Color(0xFF4E5A70)
 val dark_primary_button_bordered_text = Color(0xFF5478F9)
+val dark_primary_button_bordered_background = Color.Transparent
 
-val dark_secondary_button_background = dark_primary_button_background
 val dark_secondary_button_text = dark_primary_button_text
+val dark_secondary_button_background = dark_primary_button_background
 val dark_secondary_button_border = dark_primary_button_border
-val dark_secondary_button_bordered_background = Color(0xFF19212F)
 val dark_secondary_button_bordered_text = dark_primary_button_bordered_text
+val dark_secondary_button_bordered_background = dark_primary_button_bordered_background
 
 val dark_card_view_background = Color(0xFF273346)
 val dark_card_view_border = Color(0xFF4E5A70)

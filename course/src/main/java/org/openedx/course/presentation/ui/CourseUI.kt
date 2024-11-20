@@ -89,8 +89,8 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -176,11 +176,12 @@ fun CourseSectionCard(
                     } else {
                         Icons.Outlined.CloudDownload
                     }
-                    val downloadIconDescription = if (downloadedState == DownloadedState.DOWNLOADED) {
-                        stringResource(id = R.string.course_accessibility_remove_course_section)
-                    } else {
-                        stringResource(id = R.string.course_accessibility_download_course_section)
-                    }
+                    val downloadIconDescription =
+                        if (downloadedState == DownloadedState.DOWNLOADED) {
+                            stringResource(id = R.string.course_accessibility_remove_course_section)
+                        } else {
+                            stringResource(id = R.string.course_accessibility_download_course_section)
+                        }
                     IconButton(
                         modifier = iconModifier,
                         onClick = { onDownloadClick(block) }
@@ -691,7 +692,8 @@ fun CourseExpandableChapterCard(
         if (block.isCompleted()) {
             val completedIconPainter = painterResource(R.drawable.course_ic_task_alt)
             val completedIconColor = MaterialTheme.appColors.successGreen
-            val completedIconDescription = stringResource(id = R.string.course_accessibility_section_completed)
+            val completedIconDescription =
+                stringResource(id = R.string.course_accessibility_section_completed)
 
             Icon(
                 painter = completedIconPainter,
@@ -792,9 +794,11 @@ fun CourseSubSectionItem(
         MaterialTheme.appColors.onSurface
     }
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) } ?: "")
+        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) }
+            ?: "")
     }
-    val isAssignmentEnable = !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
+    val isAssignmentEnable =
+        !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -1055,7 +1059,7 @@ fun CourseDatesBanner(
         }
 
         banner.bannerType.buttonResId.nonZero()?.let {
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 text = stringResource(id = it),
                 onClick = resetDates,
             )
@@ -1109,7 +1113,7 @@ fun CourseDatesBannerTablet(
             }
         }
         banner.bannerType.buttonResId.nonZero()?.let {
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 modifier = Modifier.width(210.dp),
                 text = stringResource(id = it),
                 onClick = resetDates,
@@ -1155,14 +1159,12 @@ fun DatesShiftedSnackBar(
                 style = MaterialTheme.appTypography.titleSmall,
             )
             if (showAction) {
-                OpenEdXOutlinedButton(
+                OpenEdXPrimaryOutlinedButton(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .fillMaxWidth(),
                     text = stringResource(id = coreR.string.core_dates_view_all_dates),
-                    backgroundColor = MaterialTheme.appColors.background,
-                    textColor = MaterialTheme.appColors.primary,
-                    borderColor = MaterialTheme.appColors.primary,
+                    borderColor = MaterialTheme.appColors.primaryButtonBackground,
                     onClick = {
                         onViewDates()
                     }

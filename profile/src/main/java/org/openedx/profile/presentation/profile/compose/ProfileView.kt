@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
@@ -143,7 +143,7 @@ internal fun ProfileView(
                                         subtitle = "@${uiState.account.username}"
                                     )
                                     ProfileInfoSection(uiState.account)
-                                    OpenEdXOutlinedButton(
+                                    OpenEdXPrimaryOutlinedButton(
                                         modifier = Modifier
                                             .fillMaxWidth(),
                                         text = stringResource(id = org.openedx.profile.R.string.profile_edit_profile),

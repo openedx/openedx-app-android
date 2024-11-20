@@ -35,8 +35,8 @@ import androidx.fragment.app.DialogFragment
 import org.koin.android.ext.android.inject
 import org.openedx.core.config.Config
 import org.openedx.core.presentation.dialog.DefaultDialogBox
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -123,7 +123,7 @@ private fun CalendarAccessDialog(
                 style = MaterialTheme.appTypography.bodyMedium,
                 color = MaterialTheme.appColors.textDark
             )
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     onGrantCalendarAccessClick()
@@ -138,12 +138,10 @@ private fun CalendarAccessDialog(
                     )
                 }
             )
-            OpenEdXOutlinedButton(
+            OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = CoreR.string.core_cancel),
-                backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
+                borderColor = MaterialTheme.appColors.primaryButtonBorderedText,
                 onClick = {
                     onCancelClick()
                 }

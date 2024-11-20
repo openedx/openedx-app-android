@@ -21,18 +21,19 @@ data class AppColors(
     val textFieldText: Color,
     val textFieldHint: Color,
 
-    val primaryButtonBackground: Color,
     val primaryButtonText: Color,
+    val primaryButtonBackground: Color,
     val primaryButtonBorder: Color,
     val primaryButtonBorderedText: Color,
+    val primaryButtonBorderedBackground: Color,
 
     // The default secondary button styling is identical to the primary button styling.
     // However, you can customize it if your brand utilizes two accent colors.
-    val secondaryButtonBackground: Color,
     val secondaryButtonText: Color,
+    val secondaryButtonBackground: Color,
     val secondaryButtonBorder: Color,
-    val secondaryButtonBorderedBackground: Color,
     val secondaryButtonBorderedText: Color,
+    val secondaryButtonBorderedBackground: Color,
 
     val cardViewBackground: Color,
     val cardViewBorder: Color,

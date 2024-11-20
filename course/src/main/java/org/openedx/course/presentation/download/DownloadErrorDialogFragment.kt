@@ -31,8 +31,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.ui.AutoSizeText
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
+import org.openedx.core.ui.OpenEdXSecondaryButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -54,8 +54,10 @@ class DownloadErrorDialogFragment : DialogFragment() {
         setContent {
             OpenEdXTheme {
                 val dialogType =
-                    requireArguments().parcelable<DownloadErrorDialogType>(ARG_DIALOG_TYPE) ?: return@OpenEdXTheme
-                val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE) ?: return@OpenEdXTheme
+                    requireArguments().parcelable<DownloadErrorDialogType>(ARG_DIALOG_TYPE)
+                        ?: return@OpenEdXTheme
+                val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE)
+                    ?: return@OpenEdXTheme
                 val downloadDialogResource = when (dialogType) {
                     DownloadErrorDialogType.NO_CONNECTION -> DownloadDialogResource(
                         title = stringResource(id = coreR.string.core_no_internet_connection),
@@ -166,18 +168,15 @@ private fun DownloadErrorDialogView(
                 color = MaterialTheme.appColors.textDark
             )
             if (dialogType == DownloadErrorDialogType.DOWNLOAD_FAILED) {
-                OpenEdXButton(
+                OpenEdXSecondaryButton(
                     text = stringResource(id = coreR.string.core_error_try_again),
-                    backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                     onClick = onTryAgainClick,
                 )
             }
-            OpenEdXOutlinedButton(
+            OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = dismissButtonText,
-                backgroundColor = MaterialTheme.appColors.background,
                 borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }

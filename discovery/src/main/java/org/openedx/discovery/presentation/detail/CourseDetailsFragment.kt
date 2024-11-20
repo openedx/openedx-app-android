@@ -83,7 +83,7 @@ import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isPreview
@@ -488,7 +488,7 @@ private fun CourseDetailNativeContent(
             )
             if (!(enrollmentEnd != null && Date() > enrollmentEnd)) {
                 Spacer(Modifier.height(32.dp))
-                OpenEdXButton(
+                OpenEdXPrimaryButton(
                     modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick
@@ -565,7 +565,7 @@ private fun CourseDetailNativeContentLandscape(
                 EnrollOverLabel()
                 Spacer(Modifier.height(24.dp))
             } else {
-                OpenEdXButton(
+                OpenEdXPrimaryButton(
                     modifier = buttonWidth,
                     text = buttonText,
                     onClick = onButtonClick

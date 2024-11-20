@@ -40,16 +40,17 @@ private val DarkColorPalette = AppColors(
     textFieldText = dark_text_field_text,
     textFieldHint = dark_text_field_hint,
 
-    primaryButtonBackground = dark_primary_button_background,
     primaryButtonText = dark_primary_button_text,
+    primaryButtonBackground = dark_primary_button_background,
     primaryButtonBorder = dark_primary_button_border,
     primaryButtonBorderedText = dark_primary_button_bordered_text,
+    primaryButtonBorderedBackground = dark_primary_button_bordered_background,
 
-    secondaryButtonBackground = dark_secondary_button_background,
     secondaryButtonText = dark_secondary_button_text,
+    secondaryButtonBackground = dark_secondary_button_background,
     secondaryButtonBorder = dark_secondary_button_border,
-    secondaryButtonBorderedBackground = dark_secondary_button_bordered_background,
     secondaryButtonBorderedText = dark_secondary_button_bordered_text,
+    secondaryButtonBorderedBackground = dark_secondary_button_bordered_background,
 
     cardViewBackground = dark_card_view_background,
     cardViewBorder = dark_card_view_border,
@@ -129,10 +130,11 @@ private val LightColorPalette = AppColors(
     textFieldText = light_text_field_text,
     textFieldHint = light_text_field_hint,
 
-    primaryButtonBackground = light_primary_button_background,
     primaryButtonText = light_primary_button_text,
+    primaryButtonBackground = light_primary_button_background,
     primaryButtonBorder = light_primary_button_border,
     primaryButtonBorderedText = light_primary_button_bordered_text,
+    primaryButtonBorderedBackground = light_primary_button_bordered_background,
 
     secondaryButtonBackground = light_secondary_button_background,
     secondaryButtonText = light_secondary_button_text,

@@ -2,8 +2,6 @@ package org.openedx.core.ui
 
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,14 +36,11 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
@@ -1081,87 +1075,13 @@ fun OfflineModeDialog(
 }
 
 @Composable
-fun OpenEdXButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    text: String = "",
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    textColor: Color = MaterialTheme.appColors.primaryButtonText,
-    backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null
-) {
-    Button(
-        modifier = Modifier
-            .testTag("btn_${text.tagId()}")
-            .then(modifier)
-            .height(42.dp),
-        shape = MaterialTheme.appShapes.buttonShape,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor
-        ),
-        enabled = enabled,
-        onClick = onClick
-    ) {
-        if (content == null) {
-            Text(
-                modifier = Modifier.testTag("txt_${text.tagId()}"),
-                text = text,
-                color = textColor,
-                style = MaterialTheme.appTypography.labelLarge
-            )
-        } else {
-            content()
-        }
-    }
-}
-
-@Composable
-fun OpenEdXOutlinedButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    backgroundColor: Color = Color.Transparent,
-    borderColor: Color,
-    textColor: Color,
-    text: String = "",
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-    content: (@Composable RowScope.() -> Unit)? = null,
-) {
-    OutlinedButton(
-        modifier = Modifier
-            .testTag("btn_${text.tagId()}")
-            .then(modifier)
-            .height(42.dp),
-        onClick = onClick,
-        enabled = enabled,
-        border = BorderStroke(1.dp, borderColor),
-        shape = MaterialTheme.appShapes.buttonShape,
-        colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
-    ) {
-        if (content == null) {
-            Text(
-                modifier = Modifier.testTag("txt_${text.tagId()}"),
-                text = text,
-                style = MaterialTheme.appTypography.labelLarge,
-                color = textColor
-            )
-        } else {
-            content()
-        }
-    }
-}
-
-@Composable
 fun BackBtn(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.appColors.primary,
     onBackClick: () -> Unit,
 ) {
-    IconButton(
-        modifier = modifier.testTag("ib_back"),
-        onClick = {
-            onBackClick()
-        }
-    ) {
+    IconButton(modifier = modifier.testTag("ib_back"),
+        onClick = { onBackClick() }) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),
             contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
@@ -1211,12 +1131,10 @@ fun FullScreenErrorView(
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
-        OpenEdXButton(
+        OpenEdXSecondaryButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = errorType.actionResId),
-            textColor = MaterialTheme.appColors.secondaryButtonText,
-            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = onReloadClick,
         )
     }
@@ -1265,19 +1183,17 @@ fun AuthButtonsPanel(
 ) {
     Row {
         if (showRegisterButton) {
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 modifier = Modifier
                     .testTag("btn_register")
                     .width(0.dp)
                     .weight(1f),
                 text = stringResource(id = R.string.core_register),
-                textColor = MaterialTheme.appColors.primaryButtonText,
-                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                 onClick = { onRegisterClick() }
             )
         }
 
-        OpenEdXOutlinedButton(
+        OpenEdXSecondaryOutlinedButton(
             modifier = Modifier
                 .testTag("btn_sign_in")
                 .then(
@@ -1290,15 +1206,11 @@ fun AuthButtonsPanel(
                     }
                 ),
             text = stringResource(id = R.string.core_sign_in),
-            onClick = { onSignInClick() },
-            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
-            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
-            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
+            onClick = { onSignInClick() }
         )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RoundTabsBar(
     modifier: Modifier = Modifier,
@@ -1484,7 +1396,6 @@ val mockTab = object : TabItem {
     override val icon: ImageVector = Icons.Default.AccountCircle
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
 private fun RoundTabsBarPreview() {

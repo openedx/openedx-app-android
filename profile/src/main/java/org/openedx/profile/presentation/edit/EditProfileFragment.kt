@@ -114,8 +114,8 @@ import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
@@ -858,7 +858,7 @@ private fun ChangeImageDialog(
                     color = MaterialTheme.appColors.textPrimary
                 )
                 Spacer(Modifier.height(20.dp))
-                OpenEdXButton(
+                OpenEdXPrimaryButton(
                     text = stringResource(id = R.string.profile_select_from_gallery),
                     onClick = onSelectFromGalleryClick,
                     content = {
@@ -872,9 +872,8 @@ private fun ChangeImageDialog(
                     }
                 )
                 Spacer(Modifier.height(16.dp))
-                OpenEdXOutlinedButton(
+                OpenEdXPrimaryOutlinedButton(
                     borderColor = MaterialTheme.appColors.error,
-                    textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = R.string.profile_remove_photo),
                     onClick = onRemoveImageClick,
                     content = {
@@ -888,9 +887,7 @@ private fun ChangeImageDialog(
                     }
                 )
                 Spacer(Modifier.height(40.dp))
-                OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textPrimaryVariant,
-                    textColor = MaterialTheme.appColors.textPrimary,
+                OpenEdXPrimaryOutlinedButton(
                     text = stringResource(id = coreR.string.core_cancel),
                     onClick = onCancelClick
                 )
@@ -1140,25 +1137,13 @@ private fun LeaveProfile(
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.size(40.dp))
-                OpenEdXButton(
-                    text = stringResource(id = R.string.profile_leave),
-                    onClick = onLeaveClick,
+                OpenEdXPrimaryButton(
                     backgroundColor = MaterialTheme.appColors.primary,
-                    content = {
-                        Text(
-                            modifier = Modifier
-                                .testTag("txt_leave")
-                                .fillMaxWidth(),
-                            text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.primaryButtonText,
-                            style = MaterialTheme.appTypography.labelLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    text = stringResource(id = R.string.profile_leave),
+                    onClick = onLeaveClick
                 )
                 Spacer(Modifier.height(24.dp))
-                OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textFieldBorder,
+                OpenEdXPrimaryOutlinedButton(
                     textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
@@ -1234,7 +1219,7 @@ private fun LeaveProfileLandscape(
                         Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        OpenEdXButton(
+                        OpenEdXPrimaryButton(
                             text = stringResource(id = R.string.profile_leave),
                             backgroundColor = MaterialTheme.appColors.primary,
                             content = {
@@ -1248,9 +1233,7 @@ private fun LeaveProfileLandscape(
                             onClick = onLeaveClick
                         )
                         Spacer(Modifier.height(16.dp))
-                        OpenEdXOutlinedButton(
-                            borderColor = MaterialTheme.appColors.textFieldBorder,
-                            textColor = MaterialTheme.appColors.textPrimary,
+                        OpenEdXPrimaryOutlinedButton(
                             text = stringResource(id = R.string.profile_keep_editing),
                             onClick = onDismissRequest,
                             content = {

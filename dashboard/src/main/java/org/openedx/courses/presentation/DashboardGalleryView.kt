@@ -87,7 +87,7 @@ import org.openedx.core.domain.model.Pagination
 import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -237,7 +237,12 @@ private fun DashboardGalleryView(
                                     onAction(DashboardGalleryScreenAction.NavigateToDates(it))
                                 },
                                 resumeBlockId = { course, blockId ->
-                                    onAction(DashboardGalleryScreenAction.OpenBlock(course, blockId))
+                                    onAction(
+                                        DashboardGalleryScreenAction.OpenBlock(
+                                            course,
+                                            blockId
+                                        )
+                                    )
                                 }
                             )
                         }
@@ -620,7 +625,11 @@ private fun PrimaryCourseCard(
                         nearestAssignment.assignmentType ?: "",
                         stringResource(
                             id = CoreR.string.core_date_format_assignment_due,
-                            TimeUtils.formatToString(context, nearestAssignment.date, useRelativeDates)
+                            TimeUtils.formatToString(
+                                context,
+                                nearestAssignment.date,
+                                useRelativeDates
+                            )
                         )
                     )
                 )
@@ -631,7 +640,10 @@ private fun PrimaryCourseCard(
                     if (primaryCourse.courseStatus == null) {
                         openCourse(primaryCourse)
                     } else {
-                        resumeBlockId(primaryCourse, primaryCourse.courseStatus?.lastVisitedBlockId ?: "")
+                        resumeBlockId(
+                            primaryCourse,
+                            primaryCourse.courseStatus?.lastVisitedBlockId ?: ""
+                        )
                     }
                 }
             )
@@ -743,19 +755,13 @@ private fun FindACourseButton(
     modifier: Modifier = Modifier,
     findACourseClick: () -> Unit
 ) {
-    OpenEdXButton(
+    OpenEdXPrimaryButton(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 20.dp),
-        onClick = {
-            findACourseClick()
-        }
-    ) {
-        Text(
-            color = MaterialTheme.appColors.primaryButtonText,
-            text = stringResource(id = R.string.dashboard_find_a_course)
-        )
-    }
+        text = stringResource(id = R.string.dashboard_find_a_course),
+        onClick = { findACourseClick() }
+    )
 }
 
 @Composable

@@ -19,8 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
 import org.openedx.auth.data.model.AuthType
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 
@@ -40,7 +40,7 @@ internal fun SocialAuthView(
             } else {
                 R.string.auth_continue_google
             }
-            OpenEdXOutlinedButton(
+            OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier
                     .testTag("btn_google_auth")
                     .padding(top = 24.dp)
@@ -74,7 +74,7 @@ internal fun SocialAuthView(
             } else {
                 R.string.auth_continue_facebook
             }
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 modifier = Modifier
                     .testTag("btn_facebook_auth")
                     .padding(top = 12.dp)
@@ -106,7 +106,7 @@ internal fun SocialAuthView(
             } else {
                 R.string.auth_continue_microsoft
             }
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 modifier = Modifier
                     .testTag("btn_microsoft_auth")
                     .padding(top = 12.dp)
