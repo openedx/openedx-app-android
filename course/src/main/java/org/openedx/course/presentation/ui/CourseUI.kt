@@ -794,8 +794,10 @@ fun CourseSubSectionItem(
         MaterialTheme.appColors.onSurface
     }
     val due by rememberSaveable {
-        mutableStateOf(block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) }
-            ?: "")
+        mutableStateOf(
+            block.due?.let { TimeUtils.formatToString(context, it, useRelativeDates) }
+                ?: ""
+        )
     }
     val isAssignmentEnable =
         !block.isCompleted() && block.assignmentProgress != null && due.isNotEmpty()
