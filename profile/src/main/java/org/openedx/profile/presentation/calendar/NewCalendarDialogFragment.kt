@@ -216,7 +216,6 @@ private fun NewCalendarDialog(
             OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = CoreR.string.core_cancel),
-                borderColor = MaterialTheme.appColors.primaryButtonBorderedText,
                 onClick = {
                     onCancelClick()
                 }

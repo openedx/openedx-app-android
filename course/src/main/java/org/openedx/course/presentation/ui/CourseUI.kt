@@ -1166,7 +1166,6 @@ fun DatesShiftedSnackBar(
                         .padding(top = 16.dp)
                         .fillMaxWidth(),
                     text = stringResource(id = coreR.string.core_dates_view_all_dates),
-                    borderColor = MaterialTheme.appColors.primaryButtonBackground,
                     onClick = {
                         onViewDates()
                     }

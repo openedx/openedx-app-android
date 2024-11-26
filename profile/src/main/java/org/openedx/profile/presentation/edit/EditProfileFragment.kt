@@ -114,6 +114,7 @@ import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
+import org.openedx.core.ui.OpenEdXErrorOutlinedButton
 import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.SheetContent
@@ -872,8 +873,7 @@ private fun ChangeImageDialog(
                     }
                 )
                 Spacer(Modifier.height(16.dp))
-                OpenEdXPrimaryOutlinedButton(
-                    borderColor = MaterialTheme.appColors.error,
+                OpenEdXErrorOutlinedButton(
                     text = stringResource(id = R.string.profile_remove_photo),
                     onClick = onRemoveImageClick,
                     content = {
@@ -1138,13 +1138,11 @@ private fun LeaveProfile(
                 )
                 Spacer(Modifier.size(40.dp))
                 OpenEdXPrimaryButton(
-                    backgroundColor = MaterialTheme.appColors.primary,
                     text = stringResource(id = R.string.profile_leave),
                     onClick = onLeaveClick
                 )
                 Spacer(Modifier.height(24.dp))
                 OpenEdXPrimaryOutlinedButton(
-                    textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
                 )
@@ -1221,7 +1219,6 @@ private fun LeaveProfileLandscape(
                     ) {
                         OpenEdXPrimaryButton(
                             text = stringResource(id = R.string.profile_leave),
-                            backgroundColor = MaterialTheme.appColors.primary,
                             content = {
                                 AutoSizeText(
                                     modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),

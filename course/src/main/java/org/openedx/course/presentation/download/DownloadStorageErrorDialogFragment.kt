@@ -160,7 +160,6 @@ private fun DownloadStorageErrorDialogView(
             OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = coreR.string.core_cancel),
-                borderColor = MaterialTheme.appColors.primaryButtonBorder,
                 onClick = {
                     onCancelClick()
                 }

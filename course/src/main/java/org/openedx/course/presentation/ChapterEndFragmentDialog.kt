@@ -220,7 +220,6 @@ private fun ChapterEndDialogScreen(
             }
             OpenEdXPrimaryOutlinedButton(
                 text = stringResource(id = R.string.course_back_to_outline),
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = onBackButtonClick,
                 content = {
                     AutoSizeText(
@@ -334,7 +333,6 @@ private fun ChapterEndDialogScreenLandscape(
                     }
                     OpenEdXPrimaryOutlinedButton(
                         text = stringResource(id = R.string.course_back_to_outline),
-                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
                         onClick = onBackButtonClick,
                         content = {
                             AutoSizeText(

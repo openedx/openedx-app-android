@@ -266,7 +266,6 @@ fun SyncOptionsButton(
     OpenEdXPrimaryOutlinedButton(
         modifier = Modifier.fillMaxWidth(),
         text = stringResource(R.string.profile_change_sync_options),
-        borderColor = MaterialTheme.appColors.primaryButtonBorderedText,
         onClick = {
             onChangeSyncOptionClick()
         }

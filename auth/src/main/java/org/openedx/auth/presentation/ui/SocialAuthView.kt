@@ -46,7 +46,6 @@ internal fun SocialAuthView(
                     .padding(top = 24.dp)
                     .fillMaxWidth(),
                 backgroundColor = MaterialTheme.appColors.authGoogleButtonBackground,
-                borderColor = MaterialTheme.appColors.primary,
                 textColor = Color.Unspecified,
                 onClick = {
                     onEvent(AuthType.GOOGLE)

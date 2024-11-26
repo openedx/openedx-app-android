@@ -176,7 +176,6 @@ private fun DownloadErrorDialogView(
             OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = dismissButtonText,
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }

@@ -162,7 +162,6 @@ private fun DisableCalendarSyncDialogView(
             OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.profile_disable_syncing),
-                borderColor = MaterialTheme.appColors.primaryButtonBorderedText,
                 onClick = {
                     onDisableSyncingClick()
                 }

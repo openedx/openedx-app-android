@@ -33,7 +33,7 @@ val light_text_hyper_link = Color(0xFF3C68FF)
 
 val light_primary_button_text = Color.White
 val light_primary_button_background = Color(0xFF3C68FF)
-val light_primary_button_border = Color(0xFF97A5BB)
+val light_primary_button_border = Color(0xFF3C68FF)
 val light_primary_button_bordered_text = Color(0xFF3C68FF)
 val light_primary_button_bordered_background = Color.Transparent
 
@@ -103,9 +103,9 @@ val dark_text_field_hint = Color(0xFF79889F)
 val dark_text_hyper_link = Color(0xFF5478F9)
 
 val dark_primary_button_text = Color.White
-val dark_primary_button_background = Color(0xFF5478F9)
-val dark_primary_button_border = Color(0xFF4E5A70)
-val dark_primary_button_bordered_text = Color(0xFF5478F9)
+val dark_primary_button_background = Color(0xFF3F68F8)
+val dark_primary_button_border = Color(0xFF879FF5)
+val dark_primary_button_bordered_text = Color(0xFF879FF5)
 val dark_primary_button_bordered_background = Color.Transparent
 
 val dark_secondary_button_text = dark_primary_button_text

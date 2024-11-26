@@ -219,7 +219,6 @@ private fun DownloadConfirmDialogView(
             OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = coreR.string.core_cancel),
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }
