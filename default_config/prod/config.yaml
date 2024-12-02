@@ -77,6 +77,10 @@ WHATS_NEW_ENABLED: false
 SOCIAL_AUTH_ENABLED: false
 #feature flag to enable registration from app
 REGISTRATION_ENABLED: true
+#feature flag to do the authentication flow in the browser to log in
+BROWSER_LOGIN: false
+#feature flag to do the registration for in the browser
+BROWSER_REGISTRATION: false
 #Course navigation feature flags
 UI_COMPONENTS:
   COURSE_DROPDOWN_NAVIGATION_ENABLED: false

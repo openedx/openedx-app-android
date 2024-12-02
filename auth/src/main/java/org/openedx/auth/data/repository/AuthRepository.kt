@@ -43,6 +43,16 @@ class AuthRepository(
             .processAuthResponse()
     }
 
+    suspend fun browserAuthCodeLogin(code: String) {
+        api.getAccessTokenFromCode(
+            grantType = ApiConstants.GRANT_TYPE_CODE,
+            clientId = config.getOAuthClientId(),
+            code = code,
+            redirectUri = "${config.getAppId()}://${ApiConstants.BrowserLogin.REDIRECT_HOST}",
+            tokenType = config.getAccessTokenType(),
+        ).mapToDomain().processAuthResponse()
+    }
+
     suspend fun getRegistrationFields(): List<RegistrationField> {
         return api.getRegistrationFields().fields?.map { it.mapToDomain() } ?: emptyList()
     }
