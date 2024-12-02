@@ -168,12 +168,10 @@ class AppActivity : AppCompatActivity(), InsetHolder, WindowSizeHolder {
         if (savedInstanceState == null) {
             when {
                 corePreferencesManager.user == null -> {
-                    val authCode = authCode;
-
-                    if (viewModel.isLogistrationEnabled && authCode == null) {
-                        addFragment(LogistrationFragment())
+                    val fragment = if (viewModel.isLogistrationEnabled && authCode == null) {
+                        LogistrationFragment()
                     } else {
-                        addFragment(SignInFragment.newInstance(null, null, authCode = authCode))
+                        SignInFragment.newInstance(null, null, authCode = authCode)
                     }
                     addFragment(fragment)
                 }
