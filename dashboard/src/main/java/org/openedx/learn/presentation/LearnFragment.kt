@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -42,6 +41,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.widget.ViewPager2
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.openedx.core.adapter.NavigationFragmentAdapter
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.crop
@@ -60,24 +60,30 @@ import org.openedx.core.R as CoreR
 class LearnFragment : Fragment(R.layout.fragment_learn) {
 
     private val binding by viewBinding(FragmentLearnBinding::bind)
-    private val viewModel by viewModel<LearnViewModel>()
+    private val viewModel by viewModel<LearnViewModel> {
+        parametersOf(requireArguments().getString(ARG_OPEN_TAB, LearnTab.COURSES.name))
+    }
     private lateinit var adapter: NavigationFragmentAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViewPager()
-        val openTab = requireArguments().getString(ARG_OPEN_TAB, LearnTab.COURSES.name)
-        val defaultLearnType = if (openTab == LearnTab.PROGRAMS.name) {
-            LearnType.PROGRAMS
-        } else {
-            LearnType.COURSES
-        }
         binding.header.setContent {
             OpenEdXTheme {
+                val uiState by viewModel.uiState.collectAsState()
+                binding.viewPager.setCurrentItem(
+                    when (uiState.learnType) {
+                        LearnType.COURSES -> 0
+                        LearnType.PROGRAMS -> 1
+                    },
+                    false
+                )
                 Header(
                     fragmentManager = requireParentFragment().parentFragmentManager,
-                    defaultLearnType = defaultLearnType,
-                    viewPager = binding.viewPager
+                    selectedLearnType = uiState.learnType,
+                    onUpdateLearnType = { learnType ->
+                        viewModel.updateLearnType(learnType)
+                    },
                 )
             }
         }
@@ -93,23 +99,12 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         }
         binding.viewPager.adapter = adapter
         binding.viewPager.setUserInputEnabled(false)
-
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                if (LearnType.COURSES.ordinal == position) {
-                    viewModel.logMyCoursesTabClickedEvent()
-                } else {
-                    viewModel.logMyProgramsTabClickedEvent()
-                }
-            }
-        })
     }
 
     companion object {
         private const val ARG_OPEN_TAB = "open_tab"
         fun newInstance(
-            openTab: String = LearnTab.COURSES.name
+            openTab: String = LearnTab.COURSES.name,
         ): LearnFragment {
             val fragment = LearnFragment()
             fragment.arguments = bundleOf(
@@ -123,8 +118,8 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
 @Composable
 private fun Header(
     fragmentManager: FragmentManager,
-    defaultLearnType: LearnType,
-    viewPager: ViewPager2,
+    selectedLearnType: LearnType,
+    onUpdateLearnType: (LearnType) -> Unit
 ) {
     val viewModel: LearnViewModel = koinViewModel()
     val windowSize = rememberWindowSize()
@@ -156,8 +151,8 @@ private fun Header(
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(horizontal = 16.dp),
-                defaultLearnType = defaultLearnType,
-                viewPager = viewPager
+                selectedLearnType = selectedLearnType,
+                onUpdateLearnType = onUpdateLearnType
             )
         }
     }
@@ -200,25 +195,14 @@ private fun Title(
 @Composable
 private fun LearnDropdownMenu(
     modifier: Modifier = Modifier,
-    defaultLearnType: LearnType,
-    viewPager: ViewPager2,
+    selectedLearnType: LearnType,
+    onUpdateLearnType: (LearnType) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var currentValue by remember { mutableStateOf(defaultLearnType) }
     val iconRotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
         label = ""
     )
-
-    LaunchedEffect(currentValue) {
-        viewPager.setCurrentItem(
-            when (currentValue) {
-                LearnType.COURSES -> 0
-                LearnType.PROGRAMS -> 1
-            },
-            false
-        )
-    }
 
     Column(
         modifier = modifier
@@ -231,7 +215,7 @@ private fun LearnDropdownMenu(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(id = currentValue.title),
+                text = stringResource(id = selectedLearnType.title),
                 color = MaterialTheme.appColors.textDark,
                 style = MaterialTheme.appTypography.titleSmall
             )
@@ -262,7 +246,7 @@ private fun LearnDropdownMenu(
                 for (learnType in LearnType.entries) {
                     val background: Color
                     val textColor: Color
-                    if (currentValue == learnType) {
+                    if (selectedLearnType == learnType) {
                         background = MaterialTheme.appColors.primary
                         textColor = MaterialTheme.appColors.primaryButtonText
                     } else {
@@ -273,7 +257,7 @@ private fun LearnDropdownMenu(
                         modifier = Modifier
                             .background(background),
                         onClick = {
-                            currentValue = learnType
+                            onUpdateLearnType(learnType)
                             expanded = false
                         }
                     ) {
@@ -304,10 +288,9 @@ private fun HeaderPreview() {
 @Composable
 private fun LearnDropdownMenuPreview() {
     OpenEdXTheme {
-        val context = LocalContext.current
         LearnDropdownMenu(
-            defaultLearnType = LearnType.COURSES,
-            viewPager = ViewPager2(context)
+            selectedLearnType = LearnType.COURSES,
+            onUpdateLearnType = {}
         )
     }
 }

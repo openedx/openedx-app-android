@@ -322,6 +322,7 @@ class CourseContainerViewModel(
 
     private fun courseDashboardViewed() {
         logCourseContainerEvent(CourseAnalyticsEvent.DASHBOARD)
+        courseTabClickedEvent()
     }
 
     private fun courseTabClickedEvent() {

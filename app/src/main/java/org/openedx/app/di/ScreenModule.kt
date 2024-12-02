@@ -157,7 +157,9 @@ val screenModule = module {
         )
     }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { LearnViewModel(get(), get(), get()) }
+    viewModel { (openTab: String) ->
+        LearnViewModel(openTab, get(), get(), get())
+    }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
