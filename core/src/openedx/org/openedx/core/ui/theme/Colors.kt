@@ -43,6 +43,9 @@ val light_secondary_button_border = light_primary_button_border
 val light_secondary_button_bordered_text = light_primary_button_bordered_text
 val light_secondary_button_bordered_background = light_primary_button_bordered_background
 
+val light_downloading_success = Color(0xFF198571)
+val light_downloading_not_started = Color(0xFF3C68FF)
+
 val light_card_view_background = Color(0xFFF9FAFB)
 val light_card_view_border = Color(0xFFCCD4E0)
 val light_divider = Color(0xFFCCD4E0)
@@ -113,6 +116,9 @@ val dark_secondary_button_background = dark_primary_button_background
 val dark_secondary_button_border = dark_primary_button_border
 val dark_secondary_button_bordered_text = dark_primary_button_bordered_text
 val dark_secondary_button_bordered_background = dark_primary_button_bordered_background
+
+val dark_downloading_success = Color(0xFF198571)
+val dark_downloading_not_started = Color(0xFF879FF5)
 
 val dark_card_view_background = Color(0xFF273346)
 val dark_card_view_border = Color(0xFF4E5A70)

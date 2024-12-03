@@ -89,8 +89,8 @@ import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
+import org.openedx.core.ui.OpenEdXSecondaryButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -725,9 +725,9 @@ fun CourseExpandableChapterCard(
                     stringResource(id = R.string.course_accessibility_download_course_section)
                 }
                 val downloadIconTint = if (downloadedState == DownloadedState.DOWNLOADED) {
-                    MaterialTheme.appColors.successGreen
+                    MaterialTheme.appColors.downloadingSuccess
                 } else {
-                    MaterialTheme.appColors.textAccent
+                    MaterialTheme.appColors.downloadingNotStarted
                 }
                 IconButton(
                     modifier = iconModifier,
@@ -1061,7 +1061,7 @@ fun CourseDatesBanner(
         }
 
         banner.bannerType.buttonResId.nonZero()?.let {
-            OpenEdXPrimaryButton(
+            OpenEdXSecondaryButton(
                 text = stringResource(id = it),
                 onClick = resetDates,
             )
@@ -1115,7 +1115,7 @@ fun CourseDatesBannerTablet(
             }
         }
         banner.bannerType.buttonResId.nonZero()?.let {
-            OpenEdXPrimaryButton(
+            OpenEdXSecondaryButton(
                 modifier = Modifier.width(210.dp),
                 text = stringResource(id = it),
                 onClick = resetDates,

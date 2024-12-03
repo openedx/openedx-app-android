@@ -52,6 +52,9 @@ private val DarkColorPalette = AppColors(
     secondaryButtonBorderedText = dark_secondary_button_bordered_text,
     secondaryButtonBorderedBackground = dark_secondary_button_bordered_background,
 
+    downloadingSuccess = dark_downloading_success,
+    downloadingNotStarted = dark_downloading_not_started,
+
     cardViewBackground = dark_card_view_background,
     cardViewBorder = dark_card_view_border,
     divider = dark_divider,
@@ -141,6 +144,9 @@ private val LightColorPalette = AppColors(
     secondaryButtonBorder = light_secondary_button_border,
     secondaryButtonBorderedBackground = light_secondary_button_bordered_background,
     secondaryButtonBorderedText = light_secondary_button_bordered_text,
+
+    downloadingSuccess = light_downloading_success,
+    downloadingNotStarted = light_downloading_not_started,
 
     cardViewBackground = light_card_view_background,
     cardViewBorder = light_card_view_border,

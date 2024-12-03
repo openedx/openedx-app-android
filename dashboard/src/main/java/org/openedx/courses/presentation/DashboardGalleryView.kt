@@ -662,7 +662,7 @@ private fun ResumeButton(
             .fillMaxWidth()
             .clickable { onClick() }
             .heightIn(min = 60.dp)
-            .background(MaterialTheme.appColors.primary)
+            .background(MaterialTheme.appColors.primaryButtonBackground)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)

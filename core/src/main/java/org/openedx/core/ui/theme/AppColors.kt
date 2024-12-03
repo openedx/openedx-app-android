@@ -35,6 +35,9 @@ data class AppColors(
     val secondaryButtonBorderedText: Color,
     val secondaryButtonBorderedBackground: Color,
 
+    val downloadingSuccess: Color,
+    val downloadingNotStarted: Color,
+
     val cardViewBackground: Color,
     val cardViewBorder: Color,
     val divider: Color,
