@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import org.openedx.core.R
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
@@ -168,15 +168,13 @@ internal fun ManageAccountView(
                                         title = uiState.account.name,
                                         subtitle = uiState.account.email ?: ""
                                     )
-                                    OpenEdXOutlinedButton(
+                                    OpenEdXPrimaryOutlinedButton(
                                         modifier = Modifier
                                             .fillMaxWidth(),
                                         text = stringResource(id = ProfileR.string.profile_edit_profile),
                                         onClick = {
                                             onAction(ManageAccountViewAction.EditAccountClick)
-                                        },
-                                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                                        textColor = MaterialTheme.appColors.textAccent
+                                        }
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     IconText(

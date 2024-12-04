@@ -58,7 +58,8 @@ import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.NoContentScreen
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXSecondaryButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -389,7 +390,7 @@ private fun ResumeCourse(
             )
         }
         Spacer(Modifier.height(24.dp))
-        OpenEdXButton(
+        OpenEdXSecondaryButton(
             text = stringResource(id = R.string.course_resume),
             onClick = {
                 onResumeClick(block.id)
@@ -398,7 +399,7 @@ private fun ResumeCourse(
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
                     painter = painterResource(id = CoreR.drawable.core_ic_forward),
-                    color = MaterialTheme.appColors.primaryButtonText,
+                    color = MaterialTheme.appColors.secondaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }
@@ -447,7 +448,7 @@ private fun ResumeCourseTablet(
                 )
             }
         }
-        OpenEdXButton(
+        OpenEdXPrimaryButton(
             modifier = Modifier.width(210.dp),
             text = stringResource(id = R.string.course_resume),
             onClick = {
@@ -457,7 +458,7 @@ private fun ResumeCourseTablet(
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
                     painter = painterResource(id = CoreR.drawable.core_ic_forward),
-                    color = MaterialTheme.appColors.primaryButtonText,
+                    color = MaterialTheme.appColors.secondaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
             }

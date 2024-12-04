@@ -78,7 +78,7 @@ import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
@@ -626,7 +626,7 @@ private fun DiscussionThreadsScreen(
                                                         textAlign = TextAlign.Center
                                                     )
                                                     Spacer(Modifier.height(40.dp))
-                                                    OpenEdXOutlinedButton(
+                                                    OpenEdXPrimaryOutlinedButton(
                                                         modifier = Modifier
                                                             .widthIn(184.dp, Dp.Unspecified),
                                                         text = stringResource(
@@ -652,8 +652,6 @@ private fun DiscussionThreadsScreen(
                                                                 style = MaterialTheme.appTypography.labelLarge
                                                             )
                                                         },
-                                                        borderColor = MaterialTheme.appColors.primary,
-                                                        textColor = MaterialTheme.appColors.primary
                                                     )
                                                 }
                                             }
