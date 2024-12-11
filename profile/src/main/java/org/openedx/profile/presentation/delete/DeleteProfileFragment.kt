@@ -57,8 +57,8 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
@@ -274,7 +274,7 @@ fun DeleteProfileScreen(
                             errorText = errorText
                         )
                         Spacer(Modifier.height(38.dp))
-                        OpenEdXButton(
+                        OpenEdXPrimaryButton(
                             text = stringResource(id = profileR.string.profile_yes_delete_account),
                             enabled = uiState !is DeleteProfileFragmentUIState.Loading && password.isNotEmpty(),
                             backgroundColor = MaterialTheme.appColors.error,

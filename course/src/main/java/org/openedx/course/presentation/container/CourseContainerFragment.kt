@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -73,7 +72,7 @@ import org.openedx.core.extension.isFalse
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.RoundTabsBar
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -238,7 +237,7 @@ class CourseContainerFragment : Fragment(R.layout.fragment_course_container) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CourseDashboard(
     viewModel: CourseContainerViewModel,
@@ -345,7 +344,7 @@ fun CourseDashboard(
                                 CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE,
                                 CourseAccessError.NOT_YET_STARTED,
                                 CourseAccessError.UNKNOWN,
-                                -> {
+                                    -> {
                                     CourseAccessErrorView(
                                         viewModel = viewModel,
                                         accessError = accessStatus.value,
@@ -413,7 +412,6 @@ fun CourseDashboard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DashboardPager(
     windowSize: WindowSize,
@@ -609,8 +607,8 @@ private fun SetupCourseAccessErrorButtons(
     when (accessError) {
         CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE,
         CourseAccessError.NOT_YET_STARTED,
-        -> {
-            OpenEdXButton(
+            -> {
+            OpenEdXPrimaryButton(
                 text = stringResource(R.string.course_label_back),
                 onClick = { fragmentManager.popBackStack() },
             )
@@ -618,7 +616,7 @@ private fun SetupCourseAccessErrorButtons(
 
         CourseAccessError.UNKNOWN -> {
             if (viewModel.hasInternetConnection) {
-                OpenEdXButton(
+                OpenEdXPrimaryButton(
                     text = stringResource(R.string.course_label_back),
                     onClick = { fragmentManager.popBackStack() },
                 )
@@ -629,7 +627,6 @@ private fun SetupCourseAccessErrorButtons(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 private fun scrollToDates(scope: CoroutineScope, pagerState: PagerState) {
     scope.launch {
         pagerState.animateScrollToPage(CourseContainerTab.entries.indexOf(CourseContainerTab.DATES))
