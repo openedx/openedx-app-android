@@ -58,11 +58,14 @@ class AllEnrolledCoursesViewModel(
 
     init {
         collectDiscoveryNotifier()
-        getCourses(currentFilter.value)
+        loadCachedCourses()
+        getCourses(currentFilter.value, showLoadingProgress = false)
     }
 
-    fun getCourses(courseStatusFilter: CourseStatusFilter? = null) {
-        _uiState.update { it.copy(showProgress = true) }
+    fun getCourses(courseStatusFilter: CourseStatusFilter? = null, showLoadingProgress: Boolean = true) {
+        if (showLoadingProgress) {
+            _uiState.update { it.copy(showProgress = true) }
+        }
         coursesList.clear()
         internalLoadingCourses(courseStatusFilter ?: currentFilter.value)
     }
@@ -101,6 +104,13 @@ class AllEnrolledCoursesViewModel(
             }
             _uiState.update { it.copy(refreshing = false, showProgress = false) }
             isLoading = false
+        }
+    }
+
+    private fun loadCachedCourses() {
+        viewModelScope.launch {
+            val cachedList = interactor.getEnrolledCoursesFromCache()
+            _uiState.update { it.copy(courses = cachedList.toList()) }
         }
     }
 

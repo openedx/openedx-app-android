@@ -67,8 +67,18 @@ class DashboardGalleryViewModel(
     fun getCourses() {
         viewModelScope.launch {
             try {
+                isLoading = true
+                val courseEnrollments = fileUtil.getObjectFromFile<CourseEnrollments>()
+                if (courseEnrollments == null) {
+                    _uiState.value = DashboardGalleryUIState.Empty
+                } else {
+                    _uiState.value =
+                        DashboardGalleryUIState.Courses(
+                            courseEnrollments.mapToDomain(),
+                            corePreferences.isRelativeDatesEnabled
+                        )
+                }
                 if (networkConnection.isOnline()) {
-                    isLoading = true
                     val pageSize = if (windowSize.isTablet) {
                         PAGE_SIZE_TABLET
                     } else {
@@ -82,17 +92,6 @@ class DashboardGalleryViewModel(
                             response,
                             corePreferences.isRelativeDatesEnabled
                         )
-                    }
-                } else {
-                    val courseEnrollments = fileUtil.getObjectFromFile<CourseEnrollments>()
-                    if (courseEnrollments == null) {
-                        _uiState.value = DashboardGalleryUIState.Empty
-                    } else {
-                        _uiState.value =
-                            DashboardGalleryUIState.Courses(
-                                courseEnrollments.mapToDomain(),
-                                corePreferences.isRelativeDatesEnabled
-                            )
                     }
                 }
             } catch (e: Exception) {

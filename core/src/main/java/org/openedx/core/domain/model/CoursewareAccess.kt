@@ -2,6 +2,7 @@ package org.openedx.core.domain.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.openedx.core.data.model.room.discovery.CoursewareAccessDb
 
 @Parcelize
 data class CoursewareAccess(
@@ -11,4 +12,14 @@ data class CoursewareAccess(
     val userMessage: String,
     val additionalContextUserMessage: String,
     val userFragment: String
-) : Parcelable
+) : Parcelable {
+
+    fun mapToEntity() = CoursewareAccessDb(
+        hasAccess = hasAccess,
+        errorCode = errorCode,
+        developerMessage = developerMessage,
+        userMessage = userMessage,
+        additionalContextUserMessage = additionalContextUserMessage,
+        userFragment = userFragment
+    )
+}

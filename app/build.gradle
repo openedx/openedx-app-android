@@ -180,3 +180,7 @@ private def setupFirebaseConfigFields(buildType) {
 
     buildType.manifestPlaceholders = [fcmEnabled: firebaseEnabled && cloudMessagingEnabled]
 }
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}

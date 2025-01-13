@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,15 +13,15 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseAccessError
 import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseEnrollmentDetails
-import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isFalse
 import org.openedx.core.extension.isTrue
@@ -38,6 +37,8 @@ import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.core.system.notifier.RefreshDiscussions
+import org.openedx.core.ui.Result
+import org.openedx.core.ui.asResult
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -167,110 +168,72 @@ class CourseContainerViewModel(
         // If data is already loaded, do nothing
         if (_dataReady.value != null) return
 
-        _showProgress.value = true
-
         viewModelScope.launch {
-            try {
-                val (courseStructure, courseEnrollmentDetails) = fetchCourseData(courseId)
-                _showProgress.value = false
-                when {
-                    courseEnrollmentDetails != null -> {
-                        handleCourseEnrollment(courseEnrollmentDetails)
+            val courseFlow = interactor.getCourseStructureFlow(courseId)
+            val enrollmentFlow = interactor.getEnrollmentDetailsFlow(courseId)
+            // Combining the first emission from both flows, ensuring they emit at least once before combining
+            courseFlow.take(1).combine(enrollmentFlow.take(1)) { course, enrollment ->
+                course to enrollment
+            }.asResult().collect { result ->
+                when (result) {
+                    is Result.Loading -> _showProgress.value = true
+                    is Result.Success -> {
+                        result.data.let { (_, enrollment) ->
+                            processCourseData(enrollment)
+                        }
                     }
-
-                    courseStructure != null -> {
-                        handleCourseStructureOnly(courseStructure)
-                    }
-
-                    else -> {
-                        _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                    is Result.Error -> {
+                        _showProgress.value = false
+                        result.exception?.let { e ->
+                            e.printStackTrace()
+                            if (isNetworkRelatedError(e)) {
+                                _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
+                            } else {
+                                _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                            }
+                        } ?: run {
+                            _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                        }
                     }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                handleFetchError(e)
-                _showProgress.value = false
             }
         }
     }
 
-    private suspend fun fetchCourseData(
-        courseId: String
-    ): Pair<CourseStructure?, CourseEnrollmentDetails?> = supervisorScope {
-        val deferredCourse = async {
-            runCatching {
-                interactor.getCourseStructure(courseId, isNeedRefresh = true)
-            }.getOrNull()
-        }
-        val deferredEnrollment = async {
-            runCatching {
-                interactor.getEnrollmentDetails(courseId)
-            }.getOrNull()
-        }
-
-        Pair(deferredCourse.await(), deferredEnrollment.await())
-    }
-
-    /**
-     * Handles the scenario where [CourseEnrollmentDetails] is successfully fetched.
-     */
-    private fun handleCourseEnrollment(courseDetails: CourseEnrollmentDetails) {
-        _courseDetails = courseDetails
-        courseName = courseDetails.courseInfoOverview.name
-        loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
-
-        if (courseDetails.hasAccess.isFalse()) {
-            _dataReady.value = false
-            _courseAccessStatus.value = when {
-                courseDetails.isAuditAccessExpired -> CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
-                courseDetails.courseInfoOverview.isStarted.not() -> CourseAccessError.NOT_YET_STARTED
-                else -> CourseAccessError.UNKNOWN
-            }
-        } else {
-            _courseAccessStatus.value = CourseAccessError.NONE
-            _isNavigationEnabled.value = true
-            _calendarSyncUIState.update { state ->
-                state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
-            }
-            if (resumeBlockId.isNotEmpty()) {
-                // Small delay before sending block open event
-                viewModelScope.launch {
+    private suspend fun processCourseData(enrollment: CourseEnrollmentDetails) {
+        _courseDetails = enrollment
+        _showProgress.value = false
+        _courseDetails?.let { courseDetails ->
+            courseName = courseDetails.courseInfoOverview.name
+            loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
+            if (courseDetails.hasAccess.isFalse()) {
+                _dataReady.value = false
+                if (courseDetails.isAuditAccessExpired) {
+                    _courseAccessStatus.value =
+                        CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
+                } else if (courseDetails.courseInfoOverview.isStarted.not()) {
+                    _courseAccessStatus.value = CourseAccessError.NOT_YET_STARTED
+                } else {
+                    _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                }
+            } else {
+                _courseAccessStatus.value = CourseAccessError.NONE
+                _isNavigationEnabled.value = true
+                _calendarSyncUIState.update { state ->
+                    state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+                }
+                if (resumeBlockId.isNotEmpty()) {
                     delay(500L)
                     courseNotifier.send(CourseOpenBlock(resumeBlockId))
                 }
+                _dataReady.value = true
             }
-            _dataReady.value = true
-        }
-    }
-
-    /**
-     * Handles the scenario where we only have [CourseStructure] but no enrollment details.
-     */
-    private fun handleCourseStructureOnly(courseStructure: CourseStructure) {
-        loadCourseImage(courseStructure.media?.image?.large)
-        _courseAccessStatus.value = CourseAccessError.NONE
-        _isNavigationEnabled.value = true
-        _calendarSyncUIState.update { state ->
-            state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
-        }
-        if (resumeBlockId.isNotEmpty()) {
-            viewModelScope.launch {
-                delay(500L)
-                courseNotifier.send(CourseOpenBlock(resumeBlockId))
-            }
-        }
-        _dataReady.value = true
-    }
-
-    private fun handleFetchError(e: Exception) {
-        if (isNetworkRelatedError(e)) {
-            _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
-        } else {
+        } ?: run {
             _courseAccessStatus.value = CourseAccessError.UNKNOWN
         }
     }
 
-    private fun isNetworkRelatedError(e: Exception): Boolean {
+    private fun isNetworkRelatedError(e: Throwable): Boolean {
         return e.isInternetError() || e is NoCachedDataException
     }
 
