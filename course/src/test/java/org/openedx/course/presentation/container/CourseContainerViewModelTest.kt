@@ -11,6 +11,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -40,6 +41,8 @@ import org.openedx.core.domain.model.EnrollmentDetails
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
+import org.openedx.core.ui.Result
+import org.openedx.core.ui.asResult
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
@@ -233,8 +236,12 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any(), any()) } throws Exception()
-        coEvery { interactor.getEnrollmentDetails(any()) } throws Exception()
+        coEvery {
+            interactor.getCourseStructureFlow(any(), any()).asResult()
+        } returns flowOf(Result.Error(Exception()))
+        coEvery {
+            interactor.getEnrollmentDetailsFlow(any()).asResult()
+        } returns flowOf(Result.Error(Exception()))
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -250,7 +257,7 @@ class CourseContainerViewModelTest {
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrollmentDetails(any()) }
+        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any()) }
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -285,8 +292,8 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
-        coEvery { interactor.getEnrollmentDetails(any()) } returns enrollmentDetails
+        coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(courseStructure)
+        coEvery { interactor.getEnrollmentDetailsFlow(any()) } returns flowOf(enrollmentDetails)
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -302,7 +309,7 @@ class CourseContainerViewModelTest {
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getEnrollmentDetails(any()) }
+        coVerify(exactly = 1) { interactor.getEnrollmentDetailsFlow(any()) }
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
@@ -338,7 +345,8 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns false
-        coEvery { interactor.getEnrollmentDetails(any()) } returns enrollmentDetails
+        coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(courseStructure)
+        coEvery { interactor.getEnrollmentDetailsFlow(any()) } returns flowOf(enrollmentDetails)
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,

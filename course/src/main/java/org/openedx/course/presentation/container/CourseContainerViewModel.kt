@@ -22,6 +22,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseAccessError
 import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseEnrollmentDetails
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isFalse
 import org.openedx.core.extension.isTrue
@@ -39,6 +40,7 @@ import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.core.system.notifier.RefreshDiscussions
 import org.openedx.core.ui.Result
 import org.openedx.core.ui.asResult
+import org.openedx.core.ui.isLoading
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -175,61 +177,59 @@ class CourseContainerViewModel(
             courseFlow.take(1).combine(enrollmentFlow.take(1)) { course, enrollment ->
                 course to enrollment
             }.asResult().collect { result ->
-                when (result) {
-                    is Result.Loading -> _showProgress.value = true
-                    is Result.Success -> {
-                        result.data.let { (_, enrollment) ->
-                            processCourseData(enrollment)
-                        }
+                _showProgress.value = result.isLoading
+                if (result is Result.Success) {
+                    result.data.let { (structure, enrollment) ->
+                        processCourseData(structure, enrollment)
                     }
-                    is Result.Error -> {
-                        _showProgress.value = false
-                        result.exception?.let { e ->
-                            e.printStackTrace()
-                            if (isNetworkRelatedError(e)) {
-                                _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
-                            } else {
-                                _courseAccessStatus.value = CourseAccessError.UNKNOWN
-                            }
-                        } ?: run {
+                }
+                if (result is Result.Error) {
+                    result.exception?.let { e ->
+                        e.printStackTrace()
+                        if (isNetworkRelatedError(e)) {
+                            _errorMessage.value =
+                                resourceManager.getString(CoreR.string.core_error_no_connection)
+                        } else {
                             _courseAccessStatus.value = CourseAccessError.UNKNOWN
                         }
+                    } ?: run {
+                        _courseAccessStatus.value = CourseAccessError.UNKNOWN
                     }
                 }
             }
         }
     }
 
-    private suspend fun processCourseData(enrollment: CourseEnrollmentDetails) {
-        _courseDetails = enrollment
-        _showProgress.value = false
-        _courseDetails?.let { courseDetails ->
-            courseName = courseDetails.courseInfoOverview.name
-            loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
-            if (courseDetails.hasAccess.isFalse()) {
-                _dataReady.value = false
-                if (courseDetails.isAuditAccessExpired) {
-                    _courseAccessStatus.value =
-                        CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
-                } else if (courseDetails.courseInfoOverview.isStarted.not()) {
-                    _courseAccessStatus.value = CourseAccessError.NOT_YET_STARTED
-                } else {
-                    _courseAccessStatus.value = CourseAccessError.UNKNOWN
-                }
-            } else {
-                _courseAccessStatus.value = CourseAccessError.NONE
-                _isNavigationEnabled.value = true
-                _calendarSyncUIState.update { state ->
-                    state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
-                }
-                if (resumeBlockId.isNotEmpty()) {
+    private fun processCourseData(
+        courseStructure: CourseStructure,
+        courseDetails: CourseEnrollmentDetails
+    ) {
+        _courseDetails = courseDetails
+        courseName = courseDetails.courseInfoOverview.name
+        val courseImage = courseDetails.courseInfoOverview.media?.image?.large
+            ?: courseStructure.media?.image?.large
+        loadCourseImage(courseImage)
+        if (courseDetails.hasAccess.isFalse()) {
+            _dataReady.value = false
+            _courseAccessStatus.value = when {
+                courseDetails.isAuditAccessExpired -> CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
+                courseDetails.courseInfoOverview.isStarted.not() -> CourseAccessError.NOT_YET_STARTED
+                else -> CourseAccessError.UNKNOWN
+            }
+        } else {
+            _courseAccessStatus.value = CourseAccessError.NONE
+            _isNavigationEnabled.value = true
+            _calendarSyncUIState.update { state ->
+                state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+            }
+            if (resumeBlockId.isNotEmpty()) {
+                // Small delay before sending block open event
+                viewModelScope.launch {
                     delay(500L)
                     courseNotifier.send(CourseOpenBlock(resumeBlockId))
                 }
-                _dataReady.value = true
             }
-        } ?: run {
-            _courseAccessStatus.value = CourseAccessError.UNKNOWN
+            _dataReady.value = true
         }
     }
 

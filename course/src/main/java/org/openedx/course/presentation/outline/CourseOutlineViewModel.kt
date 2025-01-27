@@ -187,30 +187,34 @@ class CourseOutlineViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
-            val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-            val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
-            val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
-            combine(
-                courseStructureFlow.take(1),
-                courseStatusFlow.take(1),
-                courseDatesFlow.take(1)
-            ) { courseStructure, courseStatus, courseDatesResult ->
-                Triple(courseStructure, courseStatus, courseDatesResult)
-            }.asResult().collect {
-                if (it is Result.Success) {
-                    it.data.let { (courseStructure, courseStatus, courseDatesResult) ->
-                        val blocks = courseStructure.blockData
-                        val datesBannerInfo = courseDatesResult.courseBanner
+            try {
+                val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
+                val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
+                val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
+                combine(
+                    courseStructureFlow.take(1),
+                    courseStatusFlow.take(1),
+                    courseDatesFlow.take(1)
+                ) { courseStructure, courseStatus, courseDatesResult ->
+                    Triple(courseStructure, courseStatus, courseDatesResult)
+                }.asResult().collect {
+                    if (it is Result.Success) {
+                        it.data.let { (courseStructure, courseStatus, courseDatesResult) ->
+                            val blocks = courseStructure.blockData
+                            val datesBannerInfo = courseDatesResult.courseBanner
 
-                        checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
-                        updateOutdatedOfflineXBlocks(courseStructure)
+                            checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
+                            updateOutdatedOfflineXBlocks(courseStructure)
 
-                        initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
+                            initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
+                        }
+                    }
+                    if (it is Result.Error) {
+                        handleCourseDataError(it.error)
                     }
                 }
-                if (it is Result.Error) {
-                    handleCourseDataError(it.error)
-                }
+            } catch (e: Exception) {
+                handleCourseDataError(e)
             }
         }
     }
