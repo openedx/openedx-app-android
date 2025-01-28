@@ -233,7 +233,7 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any(), any()) } throws Exception()
         coEvery { interactor.getEnrollmentDetails(any()) } throws Exception()
         every {
             analytics.logScreenEvent(
