@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
-import org.openedx.core.presentation.global.appupgrade.TransparentTextButton
+import org.openedx.core.ui.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
@@ -44,7 +44,7 @@ fun CalendarSyncDialog(
     when (syncDialogType) {
         CalendarSyncDialogType.SYNC_DIALOG,
         CalendarSyncDialogType.UN_SYNC_DIALOG,
-        -> {
+            -> {
             CalendarAlertDialog(
                 dialogProperties = DialogProperties(
                     title = stringResource(syncDialogType.titleResId),

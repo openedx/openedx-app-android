@@ -54,7 +54,7 @@ import org.openedx.core.R
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
@@ -428,7 +428,7 @@ private fun LogoutDialog(
                     textAlign = TextAlign.Center
                 )
                 Spacer(Modifier.size(36.dp))
-                OpenEdXButton(
+                OpenEdXPrimaryButton(
                     text = stringResource(id = profileR.string.profile_logout),
                     backgroundColor = MaterialTheme.appColors.warning,
                     onClick = onLogoutClick,

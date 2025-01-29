@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.ui.AutoSizeText
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.TextIcon
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -203,7 +203,7 @@ private fun ChapterEndDialogScreen(
             )
             Spacer(Modifier.height(42.dp))
             if (nextSectionName.isNotEmpty()) {
-                OpenEdXButton(
+                OpenEdXPrimaryButton(
                     text = stringResource(id = R.string.course_next_section),
                     content = {
                         TextIcon(
@@ -218,9 +218,7 @@ private fun ChapterEndDialogScreen(
                 )
                 Spacer(Modifier.height(16.dp))
             }
-            OpenEdXOutlinedButton(
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
+            OpenEdXPrimaryOutlinedButton(
                 text = stringResource(id = R.string.course_back_to_outline),
                 onClick = onBackButtonClick,
                 content = {
@@ -319,7 +317,7 @@ private fun ChapterEndDialogScreenLandscape(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (nextSectionName.isNotEmpty()) {
-                        OpenEdXButton(
+                        OpenEdXPrimaryButton(
                             text = stringResource(id = R.string.course_next_section),
                             content = {
                                 TextIcon(
@@ -333,9 +331,7 @@ private fun ChapterEndDialogScreenLandscape(
                         )
                         Spacer(Modifier.height(16.dp))
                     }
-                    OpenEdXOutlinedButton(
-                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                        textColor = MaterialTheme.appColors.primaryButtonBackground,
+                    OpenEdXPrimaryOutlinedButton(
                         text = stringResource(id = R.string.course_back_to_outline),
                         onClick = onBackButtonClick,
                         content = {

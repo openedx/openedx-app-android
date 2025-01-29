@@ -44,7 +44,7 @@ import androidx.fragment.app.DialogFragment
 import org.openedx.core.presentation.dialog.DefaultDialogBox
 import org.openedx.core.system.StorageManager
 import org.openedx.core.ui.AutoSizeText
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
@@ -68,7 +68,8 @@ class DownloadStorageErrorDialogFragment : DialogFragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             OpenEdXTheme {
-                val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE) ?: return@OpenEdXTheme
+                val uiState = requireArguments().parcelable<DownloadDialogUIState>(ARG_UI_STATE)
+                    ?: return@OpenEdXTheme
                 val downloadDialogResource = DownloadDialogResource(
                     title = stringResource(id = R.string.course_device_storage_full),
                     description = stringResource(id = R.string.course_download_device_storage_full_dialog_description),
@@ -156,12 +157,9 @@ private fun DownloadStorageErrorDialogView(
                 style = MaterialTheme.appTypography.bodyMedium,
                 color = MaterialTheme.appColors.textDark
             )
-            OpenEdXOutlinedButton(
+            OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = coreR.string.core_cancel),
-                backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }
@@ -214,7 +212,12 @@ private fun StorageBar(
                 modifier = Modifier
                     .weight(freePercentage)
                     .fillMaxHeight()
-                    .padding(top = boxPadding, bottom = boxPadding, start = boxPadding, end = boxPadding / 2)
+                    .padding(
+                        top = boxPadding,
+                        bottom = boxPadding,
+                        start = boxPadding,
+                        end = boxPadding / 2
+                    )
                     .clip(RoundedCornerShape(topStart = cornerRadius, bottomStart = cornerRadius))
                     .background(MaterialTheme.appColors.cardViewBorder)
             )
@@ -222,7 +225,12 @@ private fun StorageBar(
                 modifier = Modifier
                     .weight(animReqPercentage.value)
                     .fillMaxHeight()
-                    .padding(top = boxPadding, bottom = boxPadding, end = boxPadding, start = boxPadding / 2)
+                    .padding(
+                        top = boxPadding,
+                        bottom = boxPadding,
+                        end = boxPadding,
+                        start = boxPadding / 2
+                    )
                     .clip(RoundedCornerShape(topEnd = cornerRadius, bottomEnd = cornerRadius))
                     .background(MaterialTheme.appColors.error)
             )

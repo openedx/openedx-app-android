@@ -65,8 +65,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.presentation.dialog.DefaultDialogBox
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
+import org.openedx.core.ui.OpenEdXPrimaryOutlinedButton
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -109,7 +109,9 @@ class NewCalendarDialogFragment : DialogFragment() {
                 }
 
                 NewCalendarDialog(
-                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(ARG_DIALOG_TYPE)
+                    newCalendarDialogType = requireArguments().parcelable<NewCalendarDialogType>(
+                        ARG_DIALOG_TYPE
+                    )
                         ?: NewCalendarDialogType.CREATE_NEW,
                     onCancelClick = {
                         dismiss()
@@ -211,22 +213,23 @@ private fun NewCalendarDialog(
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.appColors.textDark
             )
-            OpenEdXOutlinedButton(
+            OpenEdXPrimaryOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = CoreR.string.core_cancel),
-                backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.primaryButtonBackground,
-                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 onClick = {
                     onCancelClick()
                 }
             )
-            OpenEdXButton(
+            OpenEdXPrimaryButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(id = R.string.profile_begin_syncing),
                 onClick = {
                     onBeginSyncingClick(
-                        calendarTitle.ifEmpty { NewCalendarDialogFragment.getDefaultCalendarTitle(context) },
+                        calendarTitle.ifEmpty {
+                            NewCalendarDialogFragment.getDefaultCalendarTitle(
+                                context
+                            )
+                        },
                         calendarColor
                     )
                 }

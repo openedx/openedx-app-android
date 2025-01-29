@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.Toolbar
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
@@ -184,7 +184,7 @@ fun CalendarSetUpView(
                                     color = MaterialTheme.appColors.textDark
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
-                                OpenEdXButton(
+                                OpenEdXPrimaryButton(
                                     modifier = Modifier.fillMaxWidth(fraction = 0.75f),
                                     text = stringResource(id = R.string.profile_set_up_calendar_sync),
                                     onClick = {

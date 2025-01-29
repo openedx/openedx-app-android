@@ -61,7 +61,7 @@ import org.openedx.core.R
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXPrimaryButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -186,7 +186,7 @@ private fun RestorePasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
-            painter = painterResource(id = org.openedx.core.R.drawable.core_top_header),
+            painter = painterResource(id = R.drawable.core_top_header),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
         )
@@ -297,7 +297,7 @@ private fun RestorePasswordScreen(
                                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }
                                 } else {
-                                    OpenEdXButton(
+                                    OpenEdXPrimaryButton(
                                         modifier = buttonWidth.testTag("btn_reset_password"),
                                         text = stringResource(id = authR.string.auth_reset_password),
                                         onClick = {
@@ -350,7 +350,7 @@ private fun RestorePasswordScreen(
                                     color = MaterialTheme.appColors.textPrimary
                                 )
                                 Spacer(Modifier.height(48.dp))
-                                OpenEdXButton(
+                                OpenEdXPrimaryButton(
                                     modifier = buttonWidth,
                                     text = stringResource(id = R.string.core_sign_in),
                                     onClick = {

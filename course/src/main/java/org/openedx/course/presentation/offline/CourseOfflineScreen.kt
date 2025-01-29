@@ -53,8 +53,8 @@ import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.IconText
-import org.openedx.core.ui.OpenEdXButton
-import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.OpenEdXErrorOutlinedButton
+import org.openedx.core.ui.OpenEdXSecondaryButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -158,9 +158,8 @@ private fun CourseOfflineUI(
                         }
                         if (uiState.progressBarValue != 1f && !uiState.isDownloading && hasInternetConnection) {
                             Spacer(modifier = Modifier.height(20.dp))
-                            OpenEdXButton(
+                            OpenEdXSecondaryButton(
                                 text = stringResource(R.string.course_download_all),
-                                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                                 onClick = onDownloadAllClick,
                                 enabled = uiState.isHaveDownloadableBlocks,
                                 content = {
@@ -179,12 +178,9 @@ private fun CourseOfflineUI(
                             )
                         } else if (uiState.isDownloading) {
                             Spacer(modifier = Modifier.height(20.dp))
-                            OpenEdXOutlinedButton(
+                            OpenEdXErrorOutlinedButton(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = stringResource(R.string.course_cancel_course_download),
-                                backgroundColor = MaterialTheme.appColors.background,
-                                borderColor = MaterialTheme.appColors.error,
-                                textColor = MaterialTheme.appColors.error,
                                 onClick = onCancelDownloadClick,
                                 content = {
                                     IconText(
@@ -262,12 +258,9 @@ private fun LargestDownloads(
             )
         }
         if (!isDownloading) {
-            OpenEdXOutlinedButton(
+            OpenEdXErrorOutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.course_remove_all_downloads),
-                backgroundColor = MaterialTheme.appColors.background,
-                borderColor = MaterialTheme.appColors.error,
-                textColor = MaterialTheme.appColors.error,
                 onClick = onDeleteAllClick,
                 content = {
                     IconText(
