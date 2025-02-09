@@ -1,5 +1,6 @@
 package org.openedx.auth.presentation.signin
 
+import android.content.res.Resources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
@@ -45,6 +46,7 @@ class SignInViewModel(
     private val appUpgradeNotifier: AppUpgradeNotifier,
     private val analytics: AuthAnalytics,
     private val oAuthHelper: OAuthHelper,
+    private val configuration: Config,
     private val router: AuthRouter,
     private val whatsNewGlobalManager: WhatsNewGlobalManager,
     agreementProvider: AgreementProvider,
@@ -57,6 +59,10 @@ class SignInViewModel(
 
     private val _uiState = MutableStateFlow(
         SignInUIState(
+            isLoginRegistrationFormEnabled = config.isLoginRegistrationEnabled(),
+            isSSOLoginEnabled = config.isSSOLoginEnabled(),
+            ssoButtonTitle = config.getSSOButtonTitle(key = Resources.getSystem().getConfiguration().locales[0].language.uppercase(), ""),
+            isSSODefaultLoginButton = config.isSSODefaultLoginButton(),
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
@@ -97,6 +103,50 @@ class SignInViewModel(
             try {
                 interactor.login(username, password)
                 _uiState.update { it.copy(loginSuccess = true) }
+                setUserId()
+                logEvent(
+                    AuthAnalyticsEvent.SIGN_IN_SUCCESS,
+                    buildMap {
+                        put(
+                            AuthAnalyticsKey.METHOD.key,
+                            AuthType.PASSWORD.methodName.lowercase()
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                if (e is EdxError.InvalidGrantException) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_invalid_grant))
+                } else if (e.isInternetError()) {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_no_connection))
+                } else {
+                    _uiMessage.value =
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreRes.string.core_error_unknown_error))
+                }
+            }
+            _uiState.update { it.copy(showProgress = false) }
+        }
+    }
+
+    fun ssoClicked(fragmentManager: FragmentManager) {
+        router.navigateToSSOWebContent(
+            fm = fragmentManager,
+            title = resourceManager.getString(org.openedx.core.R.string.core_sso_sign_in),
+            url = configuration.getSSOURL(),
+        )
+    }
+
+    fun ssoLogin(token: String) {
+        logEvent(AuthAnalyticsEvent.USER_SIGN_IN_CLICKED)
+
+
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            try {
+                interactor.ssoLogin("JWT $token")
+                _uiState.update { it.copy(loginSuccess = true) }
+
                 setUserId()
                 logEvent(
                     AuthAnalyticsEvent.SIGN_IN_SUCCESS,

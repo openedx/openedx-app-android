@@ -45,10 +45,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -62,8 +64,10 @@ import org.openedx.core.UIMessage
 import org.openedx.core.extension.TextConverter
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.HorizontalLine
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
+import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
@@ -167,20 +171,23 @@ internal fun LoginScreen(
                             .displayCutoutForLandscape()
                             .then(contentPaddings),
                     ) {
-                        Text(
-                            modifier = Modifier.testTag("txt_sign_in_title"),
-                            text = stringResource(id = coreR.string.core_sign_in),
-                            color = MaterialTheme.appColors.textPrimary,
-                            style = MaterialTheme.appTypography.displaySmall
-                        )
-                        Text(
-                            modifier = Modifier
-                                .testTag("txt_sign_in_description")
-                                .padding(top = 4.dp),
-                            text = stringResource(id = R.string.auth_welcome_back),
-                            color = MaterialTheme.appColors.textPrimary,
-                            style = MaterialTheme.appTypography.titleSmall
-                        )
+                        if (state.isLoginRegistrationFormEnabled) {
+                            Text(
+                                modifier = Modifier.testTag("txt_sign_in_title"),
+                                text = stringResource(id = coreR.string.core_sign_in),
+                                color = MaterialTheme.appColors.textPrimary,
+                                style = MaterialTheme.appTypography.displaySmall
+                            )
+                            Text(
+                                modifier = Modifier
+                                    .testTag("txt_sign_in_description")
+                                    .padding(top = 4.dp),
+                                text = stringResource(id = R.string.auth_welcome_back),
+                                color = MaterialTheme.appColors.textPrimary,
+                                style = MaterialTheme.appTypography.titleSmall
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(24.dp))
                         AuthForm(
                             buttonWidth,
@@ -217,78 +224,141 @@ private fun AuthForm(
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        LoginTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = stringResource(id = R.string.auth_email_username),
-            description = stringResource(id = R.string.auth_enter_email_username),
-            onValueChanged = {
-                login = it
-            })
+    if (state.isLoginRegistrationFormEnabled) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            LoginTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                title = stringResource(id = R.string.auth_email_username),
+                description = stringResource(id = R.string.auth_enter_email_username),
+                onValueChanged = {
+                    login = it
+                })
 
-        Spacer(modifier = Modifier.height(18.dp))
-        PasswordTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            onValueChanged = {
-                password = it
-            },
-            onPressDone = {
-                onEvent(AuthEvent.SignIn(login = login, password = password))
-            }
-        )
+            Spacer(modifier = Modifier.height(18.dp))
+            PasswordTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onValueChanged = {
+                    password = it
+                },
+                onPressDone = {
+                    onEvent(AuthEvent.SignIn(login = login, password = password))
+                }
+            )
 
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 36.dp)
-        ) {
-            if (state.isLogistrationEnabled.not()) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = 36.dp)
+            ) {
+                if (state.isLogistrationEnabled.not()) {
+                    Text(
+                        modifier = Modifier
+                            .testTag("txt_register")
+                            .noRippleClickable {
+                                onEvent(AuthEvent.RegisterClick)
+                            },
+                        text = stringResource(id = coreR.string.core_register),
+                        color = MaterialTheme.appColors.primary,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     modifier = Modifier
-                        .testTag("txt_register")
+                        .testTag("txt_forgot_password")
                         .noRippleClickable {
-                            onEvent(AuthEvent.RegisterClick)
+                            onEvent(AuthEvent.ForgotPasswordClick)
                         },
-                    text = stringResource(id = coreR.string.core_register),
+                    text = stringResource(id = R.string.auth_forgot_password),
                     color = MaterialTheme.appColors.primary,
                     style = MaterialTheme.appTypography.labelLarge
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
+
+            if (state.showProgress) {
+                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+            } else {
+                OpenEdXButton(
+                    modifier = buttonWidth.testTag("btn_sign_in"),
+                    text = stringResource(id = coreR.string.core_sign_in),
+                    onClick = {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    }
+                )
+            }
+            if (state.isSocialAuthEnabled) {
+                SocialAuthView(
+                    modifier = buttonWidth,
+                    isGoogleAuthEnabled = state.isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = state.isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
+                    isSignIn = true,
+                ) {
+                    onEvent(AuthEvent.SocialSignIn(it))
+                }
+            }
+        }
+    }
+    if (state.isSSOLoginEnabled){
+        Spacer(modifier = Modifier.height(18.dp))
+        if (state.isLoginRegistrationFormEnabled){
+            Text(
+                modifier = Modifier.testTag("txt_sso_header"),
+                text = stringResource(id = coreR.string.core_sign_in_sso_heading),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            HorizontalLine()
+            Spacer(modifier = Modifier.height(18.dp))
             Text(
                 modifier = Modifier
-                    .testTag("txt_forgot_password")
-                    .noRippleClickable {
-                        onEvent(AuthEvent.ForgotPasswordClick)
-                    },
-                text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.primary,
-                style = MaterialTheme.appTypography.labelLarge
+                    .testTag("txt_sso_login_title")
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(),
+                text = stringResource(id = org.openedx.core.R.string.core_sign_in_sso_login_title),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.titleLarge,
+                textAlign = TextAlign.Center
             )
+            Text(
+                modifier = Modifier
+                    .testTag("txt_sso_login_subtitle")
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(),
+                text = stringResource(id = org.openedx.core.R.string.core_sign_in_sso_login_subtitle),
+                color = MaterialTheme.appColors.textPrimary,
+                style = MaterialTheme.appTypography.bodyLarge,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(18.dp))
         }
+
 
         if (state.showProgress) {
             CircularProgressIndicator(color = MaterialTheme.appColors.primary)
         } else {
-            OpenEdXButton(
-                modifier = buttonWidth.testTag("btn_sign_in"),
-                text = stringResource(id = coreR.string.core_sign_in),
-                onClick = {
-                    onEvent(AuthEvent.SignIn(login = login, password = password))
-                }
-            )
-        }
-        if (state.isSocialAuthEnabled) {
-            SocialAuthView(
-                modifier = buttonWidth,
-                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
-                isFacebookAuthEnabled = state.isFacebookAuthEnabled,
-                isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
-                isSignIn = true,
-            ) {
-                onEvent(AuthEvent.SocialSignIn(it))
+            if (state.isSSODefaultLoginButton){
+                OpenEdXButton(
+                    modifier = buttonWidth.testTag("btn_sso")
+                        .fillMaxWidth(),
+                    text = state.ssoButtonTitle,
+                    onClick = {
+                        onEvent(AuthEvent.SsoSignIn(jwtToken = ""))
+                    }
+                )
+            }else{
+                OpenEdXOutlinedButton(
+                    modifier = buttonWidth.testTag("btn_sso")
+                        .fillMaxWidth(),
+                    text = stringResource(id = coreR.string.core_sso_sign_in),
+                    borderColor = MaterialTheme.appColors.primary,
+                    textColor = MaterialTheme.appColors.textPrimary,
+                    onClick = {  onEvent(AuthEvent.SsoSignIn(jwtToken = "")) }
+                )
             }
         }
     }
@@ -373,6 +443,9 @@ private fun SignInScreenTabletPreview() {
         LoginScreen(
             windowSize = WindowSize(WindowType.Expanded, WindowType.Expanded),
             state = SignInUIState().copy(
+                isLoginRegistrationFormEnabled = false,
+                isSSOLoginEnabled = true,
+                isSSODefaultLoginButton = true,
                 isSocialAuthEnabled = true,
                 isFacebookAuthEnabled = true,
                 isGoogleAuthEnabled = true,

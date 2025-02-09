@@ -14,6 +14,12 @@ class AuthInteractor(private val repository: AuthRepository) {
         repository.login(username, password)
     }
 
+    suspend fun ssoLogin(
+        jwtToken: String
+    ) {
+        repository.ssoLogin(jwtToken)
+    }
+
     suspend fun loginSocial(token: String?, authType: AuthType) {
         repository.socialLogin(token, authType)
     }

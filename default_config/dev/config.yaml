@@ -1,10 +1,19 @@
 API_HOST_URL: 'http://localhost:8000'
+SSO_URL: 'http://localhost:8000'
+SSO_FINISHED_URL:  'http://localhost:8000'
 APPLICATION_ID: 'org.openedx.app'
 ENVIRONMENT_DISPLAY_NAME: 'Localhost'
 URI_SCHEME: ''
 FEEDBACK_EMAIL_ADDRESS: 'support@example.com'
 FAQ_URL: ''
 OAUTH_CLIENT_ID: 'OAUTH_CLIENT_ID'
+LOGIN_REGISTRATION_ENABLED: true
+SAML_SSO_LOGIN_ENABLED: false
+SAML_SSO_DEFAULT_LOGIN_BUTTON: false
+
+SSO_BUTTON_TITLE:
+  AR: "الدخول عبر SSO"
+  EN: "Sign in with SSO"
 
 # Keep empty to hide setting
 AGREEMENT_URLS:

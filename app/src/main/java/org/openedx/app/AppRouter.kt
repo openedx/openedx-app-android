@@ -12,6 +12,7 @@ import org.openedx.core.FragmentViewType
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
 import org.openedx.core.presentation.global.app_upgrade.UpgradeRequiredFragment
+import org.openedx.core.presentation.global.webview.SSOWebContentFragment
 import org.openedx.core.presentation.global.webview.WebContentFragment
 import org.openedx.core.presentation.settings.VideoQualityFragment
 import org.openedx.core.presentation.settings.VideoQualityType
@@ -364,6 +365,13 @@ class AppRouter : AuthRouter, DiscoveryRouter, DashboardRouter, CourseRouter, Di
         replaceFragmentWithBackStack(
             fm,
             WebContentFragment.newInstance(title = title, url = url)
+        )
+    }
+
+    override fun navigateToSSOWebContent(fm: FragmentManager, title: String, url: String) {
+        replaceFragmentWithBackStack(
+            fm,
+            SSOWebContentFragment.newInstance(title = title, url = url)
         )
     }
 
