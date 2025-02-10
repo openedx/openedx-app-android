@@ -8,15 +8,13 @@ import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
-@Suppress("TooManyFunctions")
 class Config(context: Context) {
 
     private var configProperties: JsonObject = try {
         val inputStream = context.assets.open("config/config.json")
-        val config = JsonParser.parseReader(InputStreamReader(inputStream))
+        val config = Gson().fromJson(InputStreamReader(inputStream), JsonObject::class.java)
         config.asJsonObject
     } catch (e: Exception) {
-        e.printStackTrace()
         JsonObject()
     }
 
@@ -112,12 +110,18 @@ class Config(context: Context) {
         return getObjectOrNewInstance(UI_COMPONENTS, UIConfig::class.java)
     }
 
+    fun isBrowserLoginEnabled(): Boolean {
+        return getBoolean(BROWSER_LOGIN, false)
+    }
+
+    fun isBrowserRegistrationEnabled(): Boolean {
+        return getBoolean(BROWSER_REGISTRATION, false)
+    }
+
     fun isRegistrationEnabled(): Boolean {
         return getBoolean(REGISTRATION_ENABLED, true)
     }
 
-    fun isBrowserLoginEnabled(): Boolean {
-        return getBoolean(BROWSER_LOGIN, false)
     fun isLoginRegistrationEnabled(): Boolean {
         return getBoolean(LOGIN_REGISTRATION_ENABLED, true)
     }
@@ -133,14 +137,6 @@ class Config(context: Context) {
     fun getSSOButtonTitle(key: String, defaultValue: String): String{
         val element = getObject(SSO_BUTTON_TITLE)
         return element?.asJsonObject?.get(key)?.asString ?: defaultValue
-    }
-
-    fun isCourseNestedListEnabled(): Boolean {
-        return getBoolean(COURSE_NESTED_LIST_ENABLED, false)
-    }
-
-    fun isBrowserRegistrationEnabled(): Boolean {
-        return getBoolean(BROWSER_REGISTRATION, false)
     }
 
     private fun getString(key: String, defaultValue: String = ""): String {
@@ -166,14 +162,12 @@ class Config(context: Context) {
             try {
                 cls.getDeclaredConstructor().newInstance()
             } catch (e: InstantiationException) {
-                throw ConfigParsingException(e)
+                throw RuntimeException(e)
             } catch (e: IllegalAccessException) {
-                throw ConfigParsingException(e)
+                throw RuntimeException(e)
             }
         }
     }
-
-    class ConfigParsingException(cause: Throwable) : Exception(cause)
 
     private fun getObject(key: String): JsonElement? {
         return configProperties.get(key)
@@ -202,9 +196,9 @@ class Config(context: Context) {
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
-        private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
         private const val BROWSER_LOGIN = "BROWSER_LOGIN"
         private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
+        private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
         private const val DASHBOARD = "DASHBOARD"

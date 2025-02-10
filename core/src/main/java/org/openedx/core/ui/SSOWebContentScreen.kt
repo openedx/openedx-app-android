@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import org.openedx.core.ui.theme.appColors
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -50,11 +52,10 @@ fun SSOWebContentScreen(
     )
     val screenWidth by remember(key1 = windowSize) {
         mutableStateOf(
-            windowSize.windowSizeValue(
-                expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
-                compact = Modifier.fillMaxWidth(),
-
-                )
+           windowSize.windowSizeValue(
+               expanded = Modifier.widthIn(Dp.Unspecified, 560.dp),
+               compact = Modifier.fillMaxWidth(),
+               )
         )
     }
 

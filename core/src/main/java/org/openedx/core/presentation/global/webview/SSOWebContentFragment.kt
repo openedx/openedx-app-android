@@ -11,7 +11,7 @@ import androidx.fragment.app.setFragmentResult
 import org.koin.android.ext.android.inject
 import org.openedx.core.config.Config
 import org.openedx.core.ui.SSOWebContentScreen
-import org.openedx.core.ui.rememberWindowSize
+import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
 
 class SSOWebContentFragment : Fragment() {

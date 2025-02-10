@@ -71,8 +71,6 @@ import org.openedx.core.ui.HorizontalLine
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -235,109 +233,109 @@ private fun AuthForm(
     var isPasswordError by rememberSaveable { mutableStateOf(false) }
 
     if (state.isLoginRegistrationFormEnabled) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!state.isBrowserLoginEnabled) {
-            LoginTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                title = stringResource(id = R.string.auth_email_username),
-                description = stringResource(id = R.string.auth_enter_email_username),
-                onValueChanged = {
-                    login = it
-                    isEmailError = false
-                },
-                isError = isEmailError,
-                errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
-            )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (!state.isBrowserLoginEnabled) {
+                LoginTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    title = stringResource(id = R.string.auth_email_username),
+                    description = stringResource(id = R.string.auth_enter_email_username),
+                    onValueChanged = {
+                        login = it
+                        isEmailError = false
+                    },
+                    isError = isEmailError,
+                    errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
+                )
 
-            Spacer(modifier = Modifier.height(18.dp))
-            PasswordTextField(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                onValueChanged = {
-                    password = it
-                    isPasswordError = false
-                },
-                onPressDone = {
-                    keyboardController?.hide()
-                    if (password.isNotEmpty()) {
-                        onEvent(AuthEvent.SignIn(login = login, password = password))
-                    } else {
-                        isEmailError = login.isEmpty()
-                        isPasswordError = password.isEmpty()
-                    }
-                },
-                isError = isPasswordError,
-            )
-        } else {
-            Spacer(modifier = Modifier.height(40.dp))
-        }
-
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 36.dp)
-        ) {
-            if (state.isLogistrationEnabled.not()) {
-                if (!state.isBrowserLoginEnabled) {
-                    if (state.isLogistrationEnabled.not() && state.isRegistrationEnabled) {
-                        Text(
-                            modifier = Modifier
-                                .testTag("txt_register")
-                                .noRippleClickable {
-                                    onEvent(AuthEvent.RegisterClick)
-                                },
-                            text = stringResource(id = coreR.string.core_register),
-                            color = MaterialTheme.appColors.primary,
-                            style = MaterialTheme.appTypography.labelLarge
-                        )
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier
-                            .testTag("txt_forgot_password")
-                            .noRippleClickable {
-                                onEvent(AuthEvent.ForgotPasswordClick)
-                            },
-                        text = stringResource(id = R.string.auth_forgot_password),
-                        color = MaterialTheme.appColors.infoVariant,
-                        style = MaterialTheme.appTypography.labelLarge
-                    )
-                }
-            }
-        }
-
-
-        if (state.showProgress) {
-            CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-        } else {
-            OpenEdXButton(
-                modifier = buttonWidth.testTag("btn_sign_in"),
-                text = stringResource(id = coreR.string.core_sign_in),
-                textColor = MaterialTheme.appColors.primaryButtonText,
-                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
-                onClick = {
-                    if (state.isBrowserLoginEnabled) {
-                        onEvent(AuthEvent.SignInBrowser)
-                    } else {
+                Spacer(modifier = Modifier.height(18.dp))
+                PasswordTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onValueChanged = {
+                        password = it
+                        isPasswordError = false
+                    },
+                    onPressDone = {
                         keyboardController?.hide()
-                        if (login.isNotEmpty() && password.isNotEmpty()) {
+                        if (password.isNotEmpty()) {
                             onEvent(AuthEvent.SignIn(login = login, password = password))
                         } else {
                             isEmailError = login.isEmpty()
                             isPasswordError = password.isEmpty()
                         }
+                    },
+                    isError = isPasswordError,
+                )
+            } else {
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = 36.dp)
+            ) {
+                if (state.isLogistrationEnabled.not()) {
+                    if (!state.isBrowserLoginEnabled) {
+                        if (state.isLogistrationEnabled.not() && state.isRegistrationEnabled) {
+                            Text(
+                                modifier = Modifier
+                                    .testTag("txt_register")
+                                    .noRippleClickable {
+                                        onEvent(AuthEvent.RegisterClick)
+                                    },
+                                text = stringResource(id = coreR.string.core_register),
+                                color = MaterialTheme.appColors.primary,
+                                style = MaterialTheme.appTypography.labelLarge
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            modifier = Modifier
+                                .testTag("txt_forgot_password")
+                                .noRippleClickable {
+                                    onEvent(AuthEvent.ForgotPasswordClick)
+                                },
+                            text = stringResource(id = R.string.auth_forgot_password),
+                            color = MaterialTheme.appColors.infoVariant,
+                            style = MaterialTheme.appTypography.labelLarge
+                        )
                     }
                 }
-            )
-        }
-        if (state.isSocialAuthEnabled) {
-            SocialAuthView(
-                modifier = buttonWidth,
-                isGoogleAuthEnabled = state.isGoogleAuthEnabled,
-                isFacebookAuthEnabled = state.isFacebookAuthEnabled,
-                isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
-                isSignIn = true,
+            }
+
+
+            if (state.showProgress) {
+                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+            } else {
+                OpenEdXButton(
+                    modifier = buttonWidth.testTag("btn_sign_in"),
+                    text = stringResource(id = coreR.string.core_sign_in),
+                    textColor = MaterialTheme.appColors.primaryButtonText,
+                    backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                    onClick = {
+                        if (state.isBrowserLoginEnabled) {
+                            onEvent(AuthEvent.SignInBrowser)
+                        } else {
+                            keyboardController?.hide()
+                            if (login.isNotEmpty() && password.isNotEmpty()) {
+                                onEvent(AuthEvent.SignIn(login = login, password = password))
+                            } else {
+                                isEmailError = login.isEmpty()
+                                isPasswordError = password.isEmpty()
+                            }
+                        }
+                    }
+                )
+            }
+            if (state.isSocialAuthEnabled) {
+                SocialAuthView(
+                    modifier = buttonWidth,
+                    isGoogleAuthEnabled = state.isGoogleAuthEnabled,
+                    isFacebookAuthEnabled = state.isFacebookAuthEnabled,
+                    isMicrosoftAuthEnabled = state.isMicrosoftAuthEnabled,
+                    isSignIn = true,
             ) {
                 keyboardController?.hide()
                 onEvent(AuthEvent.SocialSignIn(it))
