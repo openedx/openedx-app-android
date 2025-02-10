@@ -304,15 +304,19 @@ private fun AuthForm(
     if (state.isSSOLoginEnabled){
         Spacer(modifier = Modifier.height(18.dp))
         if (state.isLoginRegistrationFormEnabled){
+            HorizontalLine()
+            Spacer(modifier = Modifier.height(18.dp))
+
             Text(
-                modifier = Modifier.testTag("txt_sso_header"),
+                modifier = Modifier
+                    .testTag("txt_sso_header")
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(),
                 text = stringResource(id = coreR.string.core_sign_in_sso_heading),
                 color = MaterialTheme.appColors.textPrimary,
                 style = MaterialTheme.appTypography.headlineSmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(18.dp))
-            HorizontalLine()
             Spacer(modifier = Modifier.height(18.dp))
             Text(
                 modifier = Modifier

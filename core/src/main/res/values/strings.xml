@@ -138,7 +138,7 @@
     <string name="core_course_container_nav_more">More</string>
     <string name="core_course_container_nav_dates" tools:ignore="MissingTranslation">Dates</string>
     <string name="core_sso_sign_in">Sign in with SSO</string>
-    <string name="core_sign_in_sso_heading">Start today to build your career with confidence</string>
+    <string name="core_sign_in_sso_heading">OR</string>
     <string name="core_sign_in_sso_login_title">Sign in</string>
     <string name="core_sign_in_sso_login_subtitle">Sign in through the national unified sign-on service</string>
 </resources>
