@@ -20,16 +20,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Media
 import org.openedx.core.domain.model.Pagination
-import org.openedx.core.system.ResourceManager
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.domain.model.CourseList
 import org.openedx.discovery.presentation.DiscoveryAnalytics
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,7 +37,6 @@ class CourseSearchViewModelTest {
 
     @get:Rule
     val testInstantTaskExecutorRule: TestRule = InstantTaskExecutorRule()
-
 
     private val dispatcher = UnconfinedTestDispatcher()
 
@@ -148,7 +147,8 @@ class CourseSearchViewModelTest {
                 "",
                 5,
                 ""
-            ), emptyList()
+            ),
+            emptyList()
         )
         every { analytics.discoveryCourseSearchEvent(any(), any()) } returns Unit
 
@@ -174,7 +174,8 @@ class CourseSearchViewModelTest {
                 "2",
                 5,
                 ""
-            ), listOf(mockCourse, mockCourse)
+            ),
+            listOf(mockCourse, mockCourse)
         )
         coEvery {
             interactor.getCoursesListByQuery(
@@ -209,7 +210,8 @@ class CourseSearchViewModelTest {
                 "2",
                 5,
                 ""
-            ), listOf(mockCourse, mockCourse)
+            ),
+            listOf(mockCourse, mockCourse)
         )
         coEvery {
             interactor.getCoursesListByQuery(
@@ -245,7 +247,8 @@ class CourseSearchViewModelTest {
                 "2",
                 5,
                 ""
-            ), listOf(mockCourse, mockCourse)
+            ),
+            listOf(mockCourse, mockCourse)
         )
 
         viewModel.updateSearchQuery()

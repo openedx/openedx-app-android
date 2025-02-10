@@ -34,13 +34,13 @@ import org.openedx.core.config.Config
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.presentation.CoreAnalyticsKey
-import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
-import org.openedx.core.presentation.global.app_upgrade.TransparentTextButton
+import org.openedx.core.presentation.global.appupgrade.DefaultTextButton
+import org.openedx.core.presentation.global.appupgrade.TransparentTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.utils.UrlUtils
+import org.openedx.foundation.utils.UrlUtils
 
 class ActionDialogFragment : DialogFragment() {
 

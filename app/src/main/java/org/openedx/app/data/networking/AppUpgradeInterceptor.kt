@@ -4,13 +4,13 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.openedx.app.BuildConfig
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.utils.TimeUtils
 import java.util.Date
 
 class AppUpgradeInterceptor(
-    private val appUpgradeNotifier: AppUpgradeNotifier
+    private val appNotifier: AppNotifier
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val response = chain.proceed(chain.request())
@@ -21,15 +21,17 @@ class AppUpgradeInterceptor(
         runBlocking {
             when {
                 responseCode == 426 -> {
-                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                    appNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
 
                 BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime > Date().time -> {
-                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent(latestAppVersion))
+                    appNotifier.send(AppUpgradeEvent.UpgradeRecommendedEvent(latestAppVersion))
                 }
 
-                latestAppVersion.isNotEmpty() && BuildConfig.VERSION_NAME != latestAppVersion && lastSupportedDateTime < Date().time -> {
-                    appUpgradeNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
+                latestAppVersion.isNotEmpty() &&
+                        BuildConfig.VERSION_NAME != latestAppVersion &&
+                        lastSupportedDateTime < Date().time -> {
+                    appNotifier.send(AppUpgradeEvent.UpgradeRequiredEvent)
                 }
             }
         }
@@ -41,4 +43,3 @@ class AppUpgradeInterceptor(
         const val HEADER_APP_VERSION_LAST_SUPPORTED_DATE = "EDX-APP-VERSION-LAST-SUPPORTED-DATE"
     }
 }
-

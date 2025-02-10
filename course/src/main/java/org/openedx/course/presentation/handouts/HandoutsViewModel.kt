@@ -1,10 +1,10 @@
 package org.openedx.course.presentation.handouts
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.AnnouncementModel
 import org.openedx.core.domain.model.HandoutsModel
@@ -12,6 +12,7 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.presentation.BaseViewModel
 
 class HandoutsViewModel(
     private val courseId: String,
@@ -23,26 +24,40 @@ class HandoutsViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
 
-    private val _htmlContent = MutableLiveData<String>()
-    val htmlContent: LiveData<String>
-        get() = _htmlContent
+    private val _uiState = MutableStateFlow<HandoutsUIState>(HandoutsUIState.Loading)
+    val uiState: StateFlow<HandoutsUIState>
+        get() = _uiState.asStateFlow()
 
     init {
-        getEnrolledCourse()
+        getCourseHandouts()
     }
 
-    private fun getEnrolledCourse() {
+    private fun getCourseHandouts() {
         viewModelScope.launch {
+            var emptyState = false
             try {
                 if (HandoutsType.valueOf(handoutsType) == HandoutsType.Handouts) {
                     val handouts = interactor.getHandouts(courseId)
-                    _htmlContent.value = handoutsToHtml(handouts)
+                    if (handouts.handoutsHtml.isNotBlank()) {
+                        _uiState.value = HandoutsUIState.HTMLContent(handoutsToHtml(handouts))
+                    } else {
+                        emptyState = true
+                    }
                 } else {
                     val announcements = interactor.getAnnouncements(courseId)
-                    _htmlContent.value = announcementsToHtml(announcements)
+                    if (announcements.isNotEmpty()) {
+                        _uiState.value =
+                            HandoutsUIState.HTMLContent(announcementsToHtml(announcements))
+                    } else {
+                        emptyState = true
+                    }
                 }
-            } catch (e: Exception) {
-                //ignore e.printStackTrace()
+            } catch (_: Exception) {
+                // ignore e.printStackTrace()
+                emptyState = true
+            }
+            if (emptyState) {
+                _uiState.value = HandoutsUIState.Error
             }
         }
     }
@@ -80,11 +95,11 @@ class HandoutsViewModel(
 
     fun injectDarkMode(content: String, bgColor: ULong, textColor: ULong): String {
         val darkThemeStyle = "<style>\n" +
-                "      body {\n" +
-                "        background-color: #${getColorFromULong(bgColor)};\n" +
-                "        color: #${getColorFromULong(textColor)};\n" +
-                "      }\n" +
-                "    </style>"
+                " body {\n" +
+                "   background-color: #${getColorFromULong(bgColor)};\n" +
+                "   color: #${getColorFromULong(textColor)};\n" +
+                " }\n" +
+                "</style>"
         val buff = StringBuffer().apply {
             if (bgColor != ULong.MIN_VALUE) append(darkThemeStyle)
             append(content)
@@ -92,14 +107,15 @@ class HandoutsViewModel(
         return buff.toString()
     }
 
+    @Suppress("MagicNumber")
     private fun getColorFromULong(color: ULong): String {
         if (color == ULong.MIN_VALUE) return "black"
         return java.lang.Long.toHexString(color.toLong()).substring(2, 8)
     }
 
     fun logEvent(event: CourseAnalyticsEvent) {
-        courseAnalytics.logEvent(
-            event = event.eventName,
+        courseAnalytics.logScreenEvent(
+            screenName = event.eventName,
             params = buildMap {
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)

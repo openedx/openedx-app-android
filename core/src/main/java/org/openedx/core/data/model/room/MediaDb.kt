@@ -1,7 +1,11 @@
 package org.openedx.core.data.model.room
 
 import androidx.room.ColumnInfo
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.BannerImage
+import org.openedx.core.domain.model.CourseImage
+import org.openedx.core.domain.model.CourseVideo
+import org.openedx.core.domain.model.Image
+import org.openedx.core.domain.model.Media
 
 data class MediaDb(
     @ColumnInfo("bannerImage")
@@ -44,7 +48,9 @@ data class ImageDb(
     val small: String
 ) {
     fun mapToDomain() = Image(
-        large, raw, small
+        large,
+        raw,
+        small
     )
 
     companion object {
@@ -56,7 +62,6 @@ data class ImageDb(
             )
     }
 }
-
 
 data class CourseVideoDb(
     @ColumnInfo("uri")
@@ -103,5 +108,4 @@ data class BannerImageDb(
                 uriAbsolute = bannerImage?.uriAbsolute ?: ""
             )
     }
-
 }

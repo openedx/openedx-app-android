@@ -41,18 +41,18 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.domain.model.Account
 import org.openedx.profile.presentation.ui.ProfileInfoSection
 import org.openedx.profile.presentation.ui.ProfileTopic
@@ -226,7 +226,6 @@ private fun ProfileScreenPreview() {
     }
 }
 
-
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = UI_MODE_NIGHT_YES)
 @Composable
@@ -243,7 +242,8 @@ private fun ProfileScreenTabletPreview() {
 
 private val mockAccount = Account(
     username = "thom84",
-    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
+    bio = "He as compliment unreserved projecting. Between had observe pretend delight for believe. Do newspaper " +
+            "questions consulted sweetness do. Our sportsman his unwilling fulfilled departure law.",
     requiresParentalConsent = true,
     name = "Thomas",
     country = "Ukraine",

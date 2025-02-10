@@ -23,7 +23,6 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,24 +40,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.module.db.FileType
 import org.openedx.core.ui.BackBtn
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
 import org.openedx.course.presentation.ui.OfflineQueueCard
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 
 class DownloadQueueFragment : Fragment() {
 
@@ -80,7 +80,7 @@ class DownloadQueueFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
-                val uiState by viewModel.uiState.collectAsState(DownloadQueueUIState.Loading)
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle(DownloadQueueUIState.Loading)
 
                 DownloadQueueScreen(
                     windowSize = windowSize,
@@ -184,11 +184,17 @@ private fun DownloadQueueScreen(
                                 LazyColumn {
                                     items(uiState.downloadingModels) { model ->
                                         val progressValue =
-                                            if (model.id == uiState.currentProgressId)
-                                                uiState.currentProgressValue else 0
+                                            if (model.id == uiState.currentProgressId) {
+                                                uiState.currentProgressValue
+                                            } else {
+                                                0
+                                            }
                                         val progressSize =
-                                            if (model.id == uiState.currentProgressId)
-                                                uiState.currentProgressSize else 0
+                                            if (model.id == uiState.currentProgressId) {
+                                                uiState.currentProgressSize
+                                            } else {
+                                                0
+                                            }
 
                                         OfflineQueueCard(
                                             downloadModel = model,
@@ -212,7 +218,6 @@ private fun DownloadQueueScreen(
     }
 }
 
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.TABLET)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -223,6 +228,7 @@ private fun DownloadQueueScreenPreview() {
             uiState = DownloadQueueUIState.Models(
                 listOf(
                     DownloadModel(
+                        courseId = "",
                         id = "",
                         title = "1",
                         size = 0,
@@ -230,9 +236,9 @@ private fun DownloadQueueScreenPreview() {
                         url = "",
                         type = FileType.VIDEO,
                         downloadedState = DownloadedState.DOWNLOADING,
-                        progress = 0f
                     ),
                     DownloadModel(
+                        courseId = "",
                         id = "",
                         title = "2",
                         size = 0,
@@ -240,7 +246,6 @@ private fun DownloadQueueScreenPreview() {
                         url = "",
                         type = FileType.VIDEO,
                         downloadedState = DownloadedState.DOWNLOADING,
-                        progress = 0f
                     )
                 ),
                 currentProgressId = "",

@@ -27,10 +27,12 @@ private val DarkColorPalette = AppColors(
     ),
     textPrimary = dark_text_primary,
     textPrimaryVariant = dark_text_primary_variant,
+    textPrimaryLight = dark_text_primary_light,
     textSecondary = dark_text_secondary,
     textDark = dark_text_dark,
     textAccent = dark_text_accent,
     textWarning = dark_text_warning,
+    textHyperLink = dark_text_hyper_link,
 
     textFieldBackground = dark_text_field_background,
     textFieldBackgroundVariant = dark_text_field_background_variant,
@@ -38,9 +40,16 @@ private val DarkColorPalette = AppColors(
     textFieldText = dark_text_field_text,
     textFieldHint = dark_text_field_hint,
 
-    buttonBackground = dark_button_background,
-    buttonSecondaryBackground = dark_button_secondary_background,
-    buttonText = dark_button_text,
+    primaryButtonBackground = dark_primary_button_background,
+    primaryButtonText = dark_primary_button_text,
+    primaryButtonBorder = dark_primary_button_border,
+    primaryButtonBorderedText = dark_primary_button_bordered_text,
+
+    secondaryButtonBackground = dark_secondary_button_background,
+    secondaryButtonText = dark_secondary_button_text,
+    secondaryButtonBorder = dark_secondary_button_border,
+    secondaryButtonBorderedBackground = dark_secondary_button_bordered_background,
+    secondaryButtonBorderedText = dark_secondary_button_bordered_text,
 
     cardViewBackground = dark_card_view_background,
     cardViewBorder = dark_card_view_border,
@@ -51,12 +60,16 @@ private val DarkColorPalette = AppColors(
 
     warning = dark_warning,
     info = dark_info,
+    infoVariant = dark_info_variant,
+    onWarning = dark_onWarning,
+    onInfo = dark_onInfo,
 
     rateStars = dark_rate_stars,
     inactiveButtonBackground = dark_inactive_button_background,
-    inactiveButtonText = dark_button_text,
+    inactiveButtonText = dark_primary_button_text,
 
-    accessGreen = dark_access_green,
+    successGreen = dark_success_green,
+    successBackground = dark_success_background,
 
     datesSectionBarPastDue = dark_dates_section_bar_past_due,
     datesSectionBarToday = dark_dates_section_bar_today,
@@ -64,6 +77,8 @@ private val DarkColorPalette = AppColors(
     datesSectionBarNextWeek = dark_dates_section_bar_next_week,
     datesSectionBarUpcoming = dark_dates_section_bar_upcoming,
 
+    authSSOSuccessBackground = dark_auth_sso_success_background,
+    authGoogleButtonBackground = dark_auth_google_button_background,
     authFacebookButtonBackground = dark_auth_facebook_button_background,
     authMicrosoftButtonBackground = dark_auth_microsoft_button_background,
 
@@ -78,7 +93,10 @@ private val DarkColorPalette = AppColors(
     courseHomeHeaderShade = dark_course_home_header_shade,
     courseHomeBackBtnBackground = dark_course_home_back_btn_background,
 
-    settingsTitleContent = dark_settings_title_content
+    settingsTitleContent = dark_settings_title_content,
+
+    progressBarColor = dark_progress_bar_color,
+    progressBarBackgroundColor = dark_progress_bar_background_color
 )
 
 private val LightColorPalette = AppColors(
@@ -98,10 +116,12 @@ private val LightColorPalette = AppColors(
     ),
     textPrimary = light_text_primary,
     textPrimaryVariant = light_text_primary_variant,
+    textPrimaryLight = light_text_primary_light,
     textSecondary = light_text_secondary,
     textDark = light_text_dark,
     textAccent = light_text_accent,
     textWarning = light_text_warning,
+    textHyperLink = light_text_hyper_link,
 
     textFieldBackground = light_text_field_background,
     textFieldBackgroundVariant = light_text_field_background_variant,
@@ -109,9 +129,16 @@ private val LightColorPalette = AppColors(
     textFieldText = light_text_field_text,
     textFieldHint = light_text_field_hint,
 
-    buttonBackground = light_button_background,
-    buttonSecondaryBackground = light_button_secondary_background,
-    buttonText = light_button_text,
+    primaryButtonBackground = light_primary_button_background,
+    primaryButtonText = light_primary_button_text,
+    primaryButtonBorder = light_primary_button_border,
+    primaryButtonBorderedText = light_primary_button_bordered_text,
+
+    secondaryButtonBackground = light_secondary_button_background,
+    secondaryButtonText = light_secondary_button_text,
+    secondaryButtonBorder = light_secondary_button_border,
+    secondaryButtonBorderedBackground = light_secondary_button_bordered_background,
+    secondaryButtonBorderedText = light_secondary_button_bordered_text,
 
     cardViewBackground = light_card_view_background,
     cardViewBorder = light_card_view_border,
@@ -122,12 +149,16 @@ private val LightColorPalette = AppColors(
 
     warning = light_warning,
     info = light_info,
+    infoVariant = light_info_variant,
+    onWarning = light_onWarning,
+    onInfo = light_onInfo,
 
     rateStars = light_rate_stars,
     inactiveButtonBackground = light_inactive_button_background,
-    inactiveButtonText = light_button_text,
+    inactiveButtonText = light_primary_button_text,
 
-    accessGreen = light_access_green,
+    successGreen = light_success_green,
+    successBackground = light_success_background,
 
     datesSectionBarPastDue = light_dates_section_bar_past_due,
     datesSectionBarToday = light_dates_section_bar_today,
@@ -135,6 +166,8 @@ private val LightColorPalette = AppColors(
     datesSectionBarNextWeek = light_dates_section_bar_next_week,
     datesSectionBarUpcoming = light_dates_section_bar_upcoming,
 
+    authSSOSuccessBackground = light_auth_sso_success_background,
+    authGoogleButtonBackground = light_auth_google_button_background,
     authFacebookButtonBackground = light_auth_facebook_button_background,
     authMicrosoftButtonBackground = light_auth_microsoft_button_background,
 
@@ -149,7 +182,10 @@ private val LightColorPalette = AppColors(
     courseHomeHeaderShade = light_course_home_header_shade,
     courseHomeBackBtnBackground = light_course_home_back_btn_background,
 
-    settingsTitleContent = light_settings_title_content
+    settingsTitleContent = light_settings_title_content,
+
+    progressBarColor = light_progress_bar_color,
+    progressBarBackgroundColor = light_progress_bar_background_color
 )
 
 val MaterialTheme.appColors: AppColors
@@ -168,7 +204,7 @@ fun OpenEdXTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
 
     MaterialTheme(
         colors = colors.material,
-        //typography = LocalTypography.current.material,
+        // typography = LocalTypography.current.material,
         shapes = LocalShapes.current.material,
     ) {
         CompositionLocalProvider(

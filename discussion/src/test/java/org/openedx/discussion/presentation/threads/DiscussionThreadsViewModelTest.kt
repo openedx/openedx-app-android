@@ -25,10 +25,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.domain.model.ThreadsData
@@ -36,6 +34,8 @@ import org.openedx.discussion.presentation.topics.DiscussionTopicsViewModel
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadAdded
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -488,7 +488,6 @@ class DiscussionThreadsViewModelTest {
             DiscussionTopicsViewModel.TOPIC
         )
 
-
         val mockLifeCycleOwner: LifecycleOwner = mockk()
         val lifecycleRegistry = LifecycleRegistry(mockLifeCycleOwner)
         lifecycleRegistry.addObserver(viewModel)
@@ -537,6 +536,4 @@ class DiscussionThreadsViewModelTest {
 
         coVerify(exactly = 2) { interactor.getThreads(any(), any(), any(), any(), any()) }
     }
-
-
 }

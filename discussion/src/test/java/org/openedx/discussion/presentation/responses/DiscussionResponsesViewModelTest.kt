@@ -1,24 +1,35 @@
 package org.openedx.discussion.presentation.responses
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TestRule
 import org.openedx.core.R
-import org.openedx.core.UIMessage
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.Pagination
 import org.openedx.core.extension.LinkedImageText
-import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.CommentsData
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.system.notifier.DiscussionNotifier
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
-import org.junit.*
-import org.junit.Assert.*
-import org.junit.rules.TestRule
-import org.openedx.core.data.storage.CorePreferences
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -107,9 +118,9 @@ class DiscussionResponsesViewModelTest {
 
     //endregion
 
-
     private val comments = listOf(
-        mockComment.copy(id = "0"), mockComment.copy(id = "1")
+        mockComment.copy(id = "0"),
+        mockComment.copy(id = "1")
     )
 
     @Before
@@ -117,7 +128,9 @@ class DiscussionResponsesViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added) } returns commentAddedSuccessfully
+        every {
+            resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+        } returns commentAddedSuccessfully
     }
 
     @After
@@ -463,7 +476,6 @@ class DiscussionResponsesViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(noInternet, message?.message)
-
     }
 
     @Test
@@ -487,7 +499,6 @@ class DiscussionResponsesViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(somethingWrong, message?.message)
-
     }
 
     @Test
@@ -508,7 +519,6 @@ class DiscussionResponsesViewModelTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { interactor.createComment(any(), any(), any()) }
-
 
         assert(viewModel.uiMessage.value != null)
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
@@ -555,5 +565,4 @@ class DiscussionResponsesViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionResponsesUIState.Success)
     }
-
 }

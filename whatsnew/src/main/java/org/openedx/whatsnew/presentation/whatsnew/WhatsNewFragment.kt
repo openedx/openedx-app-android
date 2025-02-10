@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -56,18 +56,19 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.calculateCurrentOffsetForPage
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.whatsnew.domain.model.WhatsNewItem
 import org.openedx.whatsnew.domain.model.WhatsNewMessage
 import org.openedx.whatsnew.presentation.ui.NavigationUnitsButtons
 import org.openedx.whatsnew.presentation.ui.PageIndicator
+import org.openedx.whatsnew.presentation.whatsnew.WhatsNewFragment.Companion.BASE_ALPHA_VALUE
 
 class WhatsNewFragment : Fragment() {
 
@@ -108,6 +109,7 @@ class WhatsNewFragment : Fragment() {
     companion object {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_INFO_TYPE = "info_type"
+        const val BASE_ALPHA_VALUE = 0.2f
 
         fun newInstance(courseId: String? = null, infoType: String? = null): WhatsNewFragment {
             val fragment = WhatsNewFragment()
@@ -120,7 +122,7 @@ class WhatsNewFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WhatsNewScreen(
     windowSize: WindowSize,
@@ -140,6 +142,7 @@ fun WhatsNewScreen(
                     .semantics {
                         testTagsAsResourceId = true
                     }
+                    .navigationBarsPadding()
                     .fillMaxSize(),
                 scaffoldState = scaffoldState,
                 topBar = {
@@ -174,7 +177,6 @@ fun WhatsNewScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WhatsNewTopBar(
     windowSize: WindowSize,
@@ -229,7 +231,6 @@ private fun WhatsNewTopBar(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WhatsNewScreenPortrait(
     modifier: Modifier = Modifier,
@@ -247,26 +248,26 @@ private fun WhatsNewScreenPortrait(
                 .background(MaterialTheme.appColors.background),
             contentAlignment = Alignment.TopCenter
         ) {
-            HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.Top,
-                state = pagerState
-            ) { page ->
-                val image = whatsNewItem.messages[page].image
-                Image(
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp, vertical = 36.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                HorizontalPager(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 36.dp, vertical = 48.dp),
-                    painter = painterResource(id = image),
-                    contentDescription = null
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 24.dp, vertical = 120.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
+                        .weight(1.0f),
+                    verticalAlignment = Alignment.Top,
+                    state = pagerState
+                ) { page ->
+                    val image = whatsNewItem.messages[page].image
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        painter = painterResource(id = image),
+                        contentDescription = null
+                    )
+                }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -338,7 +339,6 @@ private fun WhatsNewScreenPortrait(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WhatsNewScreenLandscape(
     modifier: Modifier = Modifier,
@@ -365,7 +365,7 @@ private fun WhatsNewScreenLandscape(
                     state = pagerState
                 ) { page ->
                     val image = whatsNewItem.messages[page].image
-                    val alpha = (0.2f + pagerState.calculateCurrentOffsetForPage(page)) * 10
+                    val alpha = (BASE_ALPHA_VALUE + pagerState.calculateCurrentOffsetForPage(page)) * 10
                     Image(
                         modifier = Modifier
                             .alpha(alpha)
@@ -442,7 +442,7 @@ private fun WhatsNewScreenLandscape(
             }
 
             PageIndicator(
-                modifier = Modifier.weight(0.25f),
+                modifier = Modifier.weight(weight = 0.25f),
                 numberOfPages = pagerState.pageCount,
                 selectedPage = pagerState.currentPage,
                 defaultRadius = 12.dp,
@@ -464,7 +464,6 @@ val whatsNewItemPreview = WhatsNewItem(
     messages = listOf(whatsNewMessagePreview, whatsNewMessagePreview, whatsNewMessagePreview)
 )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -473,12 +472,13 @@ private fun WhatsNewPortraitPreview() {
         WhatsNewScreenPortrait(
             whatsNewItem = whatsNewItemPreview,
             onDoneClick = {},
-            pagerState = rememberPagerState { 4 }
+            pagerState = rememberPagerState(
+                pageCount = { 4 }
+            )
         )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_NO,
     device = Devices.AUTOMOTIVE_1024p,
@@ -497,7 +497,9 @@ private fun WhatsNewLandscapePreview() {
         WhatsNewScreenLandscape(
             whatsNewItem = whatsNewItemPreview,
             onDoneClick = {},
-            pagerState = rememberPagerState { 4 }
+            pagerState = rememberPagerState(
+                pageCount = { 4 }
+            )
         )
     }
 }

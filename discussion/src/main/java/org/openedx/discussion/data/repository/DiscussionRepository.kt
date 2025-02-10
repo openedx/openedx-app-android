@@ -2,7 +2,6 @@ package org.openedx.discussion.data.repository
 
 import org.openedx.core.data.model.BlocksCompletionBody
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.R
 import org.openedx.discussion.data.api.DiscussionApi
 import org.openedx.discussion.data.model.request.CommentBody
@@ -12,8 +11,10 @@ import org.openedx.discussion.data.model.request.ReportBody
 import org.openedx.discussion.data.model.request.ThreadBody
 import org.openedx.discussion.data.model.request.VoteBody
 import org.openedx.discussion.domain.model.CommentsData
+import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.ThreadsData
 import org.openedx.discussion.domain.model.Topic
+import org.openedx.foundation.system.ResourceManager
 
 class DiscussionRepository(
     private val api: DiscussionApi,
@@ -58,6 +59,14 @@ class DiscussionRepository(
         return api.getCourseThreads(courseId, following, topicId, orderBy, view, page).mapToDomain()
     }
 
+    suspend fun getCourseThread(
+        threadId: String,
+        courseId: String,
+        topicId: String
+    ): org.openedx.discussion.domain.model.Thread {
+        return api.getCourseThread(threadId, courseId, topicId).mapToDomain()
+    }
+
     suspend fun searchThread(
         courseId: String,
         query: String,
@@ -71,6 +80,12 @@ class DiscussionRepository(
         page: Int
     ): CommentsData {
         return api.getThreadComments(threadId, page).mapToDomain()
+    }
+
+    suspend fun getResponse(
+        responseId: String
+    ): DiscussionComment {
+        return api.getResponse(responseId).mapToDomain()
     }
 
     suspend fun getThreadQuestionComments(
@@ -122,7 +137,6 @@ class DiscussionRepository(
     ) =
         api.createComment(CommentBody(threadId, rawBody, parentId)).mapToDomain()
 
-
     suspend fun createThread(
         topicId: String,
         courseId: String,
@@ -141,5 +155,4 @@ class DiscussionRepository(
         )
         return api.markBlocksCompletion(blocksCompletionBody)
     }
-
 }

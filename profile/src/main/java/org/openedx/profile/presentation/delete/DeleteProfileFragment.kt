@@ -56,22 +56,22 @@ import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.presentation.ProfileRouter
 import org.openedx.profile.presentation.settings.SettingsViewModel
 import org.openedx.profile.R as profileR
@@ -124,7 +124,6 @@ class DeleteProfileFragment : Fragment() {
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -290,7 +289,6 @@ fun DeleteProfileScreen(
         }
     }
 }
-
 
 @Preview(
     name = "PIXEL_3A_Light",

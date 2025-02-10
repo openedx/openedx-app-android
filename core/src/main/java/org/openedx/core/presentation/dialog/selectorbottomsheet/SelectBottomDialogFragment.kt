@@ -32,13 +32,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.R
 import org.openedx.core.domain.model.RegistrationField
-import org.openedx.core.extension.parcelableArrayList
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
+import org.openedx.foundation.extension.parcelableArrayList
 
 class SelectBottomDialogFragment : BottomSheetDialogFragment() {
 
@@ -95,7 +95,7 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
                                 )
                                 .clip(MaterialTheme.appShapes.screenBackgroundShape)
                                 .padding(bottom = if (isImeVisible) 120.dp else 0.dp)
-                                .noRippleClickable {  }
+                                .noRippleClickable { }
                         ) {
                             SheetContent(
                                 searchValue = searchValue,
@@ -129,5 +129,4 @@ class SelectBottomDialogFragment : BottomSheetDialogFragment() {
             return dialog
         }
     }
-
 }

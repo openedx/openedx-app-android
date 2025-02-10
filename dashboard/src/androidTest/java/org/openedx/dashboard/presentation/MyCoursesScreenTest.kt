@@ -17,6 +17,7 @@ import org.openedx.core.domain.model.CourseSharingUtmParameters
 import org.openedx.core.domain.model.CoursewareAccess
 import org.openedx.core.domain.model.EnrolledCourse
 import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.WindowType
 import java.util.Date
@@ -61,14 +62,17 @@ class MyCoursesScreenTest {
             discussionUrl = "",
             videoOutline = "",
             isSelfPaced = false
-        )
+        ),
+        progress = Progress(0, 0),
+        courseStatus = null,
+        courseAssignments = null,
     )
     //endregion
 
     @Test
     fun dashboardScreenLoading() {
         composeTestRule.setContent {
-            MyCoursesScreen(
+            DashboardListView(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
                 state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
@@ -81,7 +85,6 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
             )
         }
 
@@ -101,7 +104,7 @@ class MyCoursesScreenTest {
     @Test
     fun dashboardScreenLoaded() {
         composeTestRule.setContent {
-            MyCoursesScreen(
+            DashboardListView(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
                 state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
@@ -114,7 +117,6 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
             )
         }
 
@@ -127,7 +129,7 @@ class MyCoursesScreenTest {
     @Test
     fun dashboardScreenRefreshing() {
         composeTestRule.setContent {
-            MyCoursesScreen(
+            DashboardListView(
                 windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
                 apiHostUrl = "http://localhost:8000",
                 state = DashboardUIState.Courses(listOf(mockCourseEnrolled, mockCourseEnrolled)),
@@ -140,7 +142,6 @@ class MyCoursesScreenTest {
                 paginationCallback = {},
                 onItemClick = {},
                 appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
-                onSettingsClick = {}
             )
         }
 
@@ -162,5 +163,4 @@ class MyCoursesScreenTest {
             )
         }
     }
-
 }

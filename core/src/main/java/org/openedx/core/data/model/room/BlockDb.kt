@@ -3,7 +3,18 @@ package org.openedx.core.data.model.room
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import org.openedx.core.BlockType
-import org.openedx.core.domain.model.*
+import org.openedx.core.data.model.Block
+import org.openedx.core.data.model.BlockCounts
+import org.openedx.core.data.model.EncodedVideos
+import org.openedx.core.data.model.StudentViewData
+import org.openedx.core.data.model.VideoInfo
+import org.openedx.core.utils.TimeUtils
+import org.openedx.core.domain.model.AssignmentProgress as DomainAssignmentProgress
+import org.openedx.core.domain.model.Block as DomainBlock
+import org.openedx.core.domain.model.BlockCounts as DomainBlockCounts
+import org.openedx.core.domain.model.EncodedVideos as DomainEncodedVideos
+import org.openedx.core.domain.model.StudentViewData as DomainStudentViewData
+import org.openedx.core.domain.model.VideoInfo as DomainVideoInfo
 
 data class BlockDb(
     @ColumnInfo("id")
@@ -33,9 +44,15 @@ data class BlockDb(
     @ColumnInfo("completion")
     val completion: Double,
     @ColumnInfo("contains_gated_content")
-    val containsGatedContent: Boolean
+    val containsGatedContent: Boolean,
+    @Embedded
+    val assignmentProgress: AssignmentProgressDb?,
+    @ColumnInfo("due")
+    val due: String?,
+    @Embedded
+    val offlineDownload: OfflineDownloadDb?,
 ) {
-    fun mapToDomain(blocks: List<BlockDb>): Block {
+    fun mapToDomain(blocks: List<BlockDb>): DomainBlock {
         val blockType = BlockType.getBlockType(type)
         val descendantsType = if (blockType == BlockType.VERTICAL) {
             val types = descendants.map { descendant ->
@@ -47,7 +64,7 @@ data class BlockDb(
             blockType
         }
 
-        return Block(
+        return DomainBlock(
             id = id,
             blockId = blockId,
             lmsWebUrl = lmsWebUrl,
@@ -62,14 +79,17 @@ data class BlockDb(
             descendants = descendants,
             descendantsType = descendantsType,
             completion = completion,
-            containsGatedContent = containsGatedContent
+            containsGatedContent = containsGatedContent,
+            assignmentProgress = assignmentProgress?.mapToDomain(),
+            due = TimeUtils.iso8601ToDate(due ?: ""),
+            offlineDownload = offlineDownload?.mapToDomain()
         )
     }
 
     companion object {
 
         fun createFrom(
-            block: org.openedx.core.data.model.Block
+            block: Block
         ): BlockDb {
             with(block) {
                 return BlockDb(
@@ -86,7 +106,10 @@ data class BlockDb(
                     studentViewMultiDevice = studentViewMultiDevice ?: false,
                     blockCounts = BlockCountsDb.createFrom(blockCounts),
                     completion = completion ?: 0.0,
-                    containsGatedContent = containsGatedContent ?: false
+                    containsGatedContent = containsGatedContent ?: false,
+                    assignmentProgress = assignmentProgress?.mapToRoomEntity(),
+                    due = due,
+                    offlineDownload = offlineDownload?.mapToRoomEntity()
                 )
             }
         }
@@ -105,8 +128,8 @@ data class StudentViewDataDb(
     @Embedded
     val encodedVideos: EncodedVideosDb?
 ) {
-    fun mapToDomain(): StudentViewData {
-        return StudentViewData(
+    fun mapToDomain(): DomainStudentViewData {
+        return DomainStudentViewData(
             onlyOnWeb,
             duration,
             transcripts,
@@ -117,7 +140,7 @@ data class StudentViewDataDb(
 
     companion object {
 
-        fun createFrom(studentViewData: org.openedx.core.data.model.StudentViewData?): StudentViewDataDb {
+        fun createFrom(studentViewData: StudentViewData?): StudentViewDataDb {
             return StudentViewDataDb(
                 onlyOnWeb = studentViewData?.onlyOnWeb ?: false,
                 duration = studentViewData?.duration.toString(),
@@ -126,7 +149,6 @@ data class StudentViewDataDb(
                 topicId = studentViewData?.topicId ?: ""
             )
         }
-
     }
 }
 
@@ -144,9 +166,9 @@ data class EncodedVideosDb(
     @ColumnInfo("mobileLow")
     var mobileLow: VideoInfoDb?
 ) {
-    fun mapToDomain(): EncodedVideos {
-        return EncodedVideos(
-            youtube?.mapToDomain(),
+    fun mapToDomain(): DomainEncodedVideos {
+        return DomainEncodedVideos(
+            youtube = youtube?.mapToDomain(),
             hls = hls?.mapToDomain(),
             fallback = fallback?.mapToDomain(),
             desktopMp4 = desktopMp4?.mapToDomain(),
@@ -156,7 +178,7 @@ data class EncodedVideosDb(
     }
 
     companion object {
-        fun createFrom(encodedVideos: org.openedx.core.data.model.EncodedVideos?): EncodedVideosDb {
+        fun createFrom(encodedVideos: EncodedVideos?): EncodedVideosDb {
             return EncodedVideosDb(
                 youtube = VideoInfoDb.createFrom(encodedVideos?.videoInfo),
                 hls = VideoInfoDb.createFrom(encodedVideos?.hls),
@@ -167,19 +189,18 @@ data class EncodedVideosDb(
             )
         }
     }
-
 }
 
 data class VideoInfoDb(
     @ColumnInfo("url")
     val url: String,
     @ColumnInfo("fileSize")
-    val fileSize: Int
+    val fileSize: Long
 ) {
-    fun mapToDomain() = VideoInfo(url, fileSize)
+    fun mapToDomain() = DomainVideoInfo(url, fileSize)
 
     companion object {
-        fun createFrom(videoInfo: org.openedx.core.data.model.VideoInfo?): VideoInfoDb? {
+        fun createFrom(videoInfo: VideoInfo?): VideoInfoDb? {
             if (videoInfo == null) return null
             return VideoInfoDb(
                 videoInfo.url ?: "",
@@ -193,11 +214,43 @@ data class BlockCountsDb(
     @ColumnInfo("video")
     val video: Int
 ) {
-    fun mapToDomain() = BlockCounts(video)
+    fun mapToDomain() = DomainBlockCounts(video)
 
     companion object {
-        fun createFrom(blocksCounts: org.openedx.core.data.model.BlockCounts?): BlockCountsDb {
+        fun createFrom(blocksCounts: BlockCounts?): BlockCountsDb {
             return BlockCountsDb(blocksCounts?.video ?: 0)
         }
+    }
+}
+
+data class AssignmentProgressDb(
+    @ColumnInfo("assignment_type")
+    val assignmentType: String?,
+    @ColumnInfo("num_points_earned")
+    val numPointsEarned: Float?,
+    @ColumnInfo("num_points_possible")
+    val numPointsPossible: Float?,
+) {
+    fun mapToDomain() = DomainAssignmentProgress(
+        assignmentType = assignmentType ?: "",
+        numPointsEarned = numPointsEarned ?: 0f,
+        numPointsPossible = numPointsPossible ?: 0f
+    )
+}
+
+data class OfflineDownloadDb(
+    @ColumnInfo("file_url")
+    var fileUrl: String?,
+    @ColumnInfo("last_modified")
+    var lastModified: String?,
+    @ColumnInfo("file_size")
+    var fileSize: Long?,
+) {
+    fun mapToDomain(): org.openedx.core.domain.model.OfflineDownload {
+        return org.openedx.core.domain.model.OfflineDownload(
+            fileUrl = fileUrl ?: "",
+            lastModified = lastModified,
+            fileSize = fileSize ?: 0
+        )
     }
 }

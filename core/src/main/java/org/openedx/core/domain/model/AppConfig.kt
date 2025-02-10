@@ -1,14 +1,18 @@
 package org.openedx.core.domain.model
 
-import java.io.Serializable
+import com.google.gson.annotations.SerializedName
 
 data class AppConfig(
-    val courseDatesCalendarSync: CourseDatesCalendarSync,
-) : Serializable
+    val courseDatesCalendarSync: CourseDatesCalendarSync = CourseDatesCalendarSync(),
+)
 
 data class CourseDatesCalendarSync(
-    val isEnabled: Boolean,
-    val isSelfPacedEnabled: Boolean,
-    val isInstructorPacedEnabled: Boolean,
-    val isDeepLinkEnabled: Boolean,
-) : Serializable
+    @SerializedName("is_enabled")
+    val isEnabled: Boolean = false,
+    @SerializedName("is_self_paced_enabled")
+    val isSelfPacedEnabled: Boolean = false,
+    @SerializedName("is_instructor_paced_enabled")
+    val isInstructorPacedEnabled: Boolean = false,
+    @SerializedName("is_deep_link_enabled")
+    val isDeepLinkEnabled: Boolean = false,
+)

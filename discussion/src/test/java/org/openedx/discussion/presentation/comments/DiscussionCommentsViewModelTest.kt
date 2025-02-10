@@ -4,27 +4,43 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Pagination
-import org.openedx.core.extension.TextConverter
-import org.openedx.core.system.ResourceManager
-import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.domain.model.CommentsData
-import org.openedx.discussion.domain.model.DiscussionComment
-import org.openedx.discussion.domain.model.DiscussionType
-import org.openedx.discussion.system.notifier.*
-import io.mockk.*
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
-import org.junit.*
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.Pagination
+import org.openedx.core.extension.TextConverter
+import org.openedx.discussion.domain.interactor.DiscussionInteractor
+import org.openedx.discussion.domain.model.CommentsData
+import org.openedx.discussion.domain.model.DiscussionComment
+import org.openedx.discussion.domain.model.DiscussionType
+import org.openedx.discussion.system.notifier.DiscussionCommentAdded
+import org.openedx.discussion.system.notifier.DiscussionCommentDataChanged
+import org.openedx.discussion.system.notifier.DiscussionNotifier
+import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
+@Suppress("LargeClass")
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscussionCommentsViewModelTest {
 
@@ -109,11 +125,11 @@ class DiscussionCommentsViewModelTest {
         mapOf()
     )
 
-    //endregion
-
+    // endregion
 
     private val comments = listOf(
-        mockComment.copy(id = "0"), mockComment.copy(id = "1")
+        mockComment.copy(id = "0"),
+        mockComment.copy(id = "1")
     )
 
     @Before
@@ -121,7 +137,9 @@ class DiscussionCommentsViewModelTest {
         Dispatchers.setMain(dispatcher)
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added) } returns commentAddedSuccessfully
+        every {
+            resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+        } returns commentAddedSuccessfully
     }
 
     @After
@@ -268,7 +286,6 @@ class DiscussionCommentsViewModelTest {
         coVerify(exactly = 0) { interactor.getThreadQuestionComments(any(), any(), any()) }
         coVerify(exactly = 1) { interactor.setThreadRead(any()) }
 
-
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
         assert(viewModel.isUpdating.value == false)
@@ -290,7 +307,6 @@ class DiscussionCommentsViewModelTest {
             notifier,
             mockThread
         )
-
 
         coEvery { interactor.getThreadQuestionComments(any(), any(), any()) } returns CommentsData(
             comments,
@@ -358,7 +374,6 @@ class DiscussionCommentsViewModelTest {
             notifier,
             mockThread
         )
-
 
         coEvery { interactor.setThreadVoted(any(), any()) } throws UnknownHostException()
 
@@ -446,7 +461,6 @@ class DiscussionCommentsViewModelTest {
                 mockThread
             )
 
-
         coEvery { interactor.setCommentFlagged(any(), any()) } throws UnknownHostException()
 
         viewModel.setCommentReported("", true)
@@ -475,7 +489,6 @@ class DiscussionCommentsViewModelTest {
                 notifier,
                 mockThread
             )
-
 
         coEvery { interactor.setCommentFlagged(any(), any()) } throws Exception()
 
@@ -515,7 +528,6 @@ class DiscussionCommentsViewModelTest {
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
-
 
     @Test
     fun `setCommentUpvoted no internet connection exception`() = runTest {
@@ -683,7 +695,6 @@ class DiscussionCommentsViewModelTest {
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
 
-
     @Test
     fun `setThreadFollowed no internet connection exception`() = runTest {
         coEvery { interactor.getThreadComments(any(), any()) } returns CommentsData(
@@ -727,7 +738,6 @@ class DiscussionCommentsViewModelTest {
             notifier,
             mockThread
         )
-
 
         coEvery { interactor.setThreadFollowed(any(), any()) } throws Exception()
 
@@ -799,9 +809,7 @@ class DiscussionCommentsViewModelTest {
 
         assert(viewModel.uiMessage.value == null)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
-        assert(viewModel.scrollToBottom.value == true)
     }
-
 
     @Test
     fun `DiscussionCommentAdded notifier test all comments not loaded`() = runTest {
@@ -835,7 +843,6 @@ class DiscussionCommentsViewModelTest {
         val message = viewModel.uiMessage.value as? UIMessage.ToastMessage
         assert(commentAddedSuccessfully == message?.message)
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
-        assert(viewModel.scrollToBottom.value == null)
     }
 
     @Test
@@ -895,7 +902,6 @@ class DiscussionCommentsViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(noInternet, message?.message)
-
     }
 
     @Test
@@ -922,7 +928,6 @@ class DiscussionCommentsViewModelTest {
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
         Assert.assertEquals(somethingWrong, message?.message)
-
     }
 
     @Test
@@ -972,7 +977,6 @@ class DiscussionCommentsViewModelTest {
 
         viewModel.createComment("")
         advanceUntilIdle()
-
     }
 
     @Test
@@ -1022,5 +1026,4 @@ class DiscussionCommentsViewModelTest {
 
         assert(viewModel.uiState.value is DiscussionCommentsUIState.Success)
     }
-
 }

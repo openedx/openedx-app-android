@@ -8,17 +8,17 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.system.ResourceManager
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryAnalytics
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 
 class CourseSearchViewModel(
     private val config: Config,
@@ -30,6 +30,7 @@ class CourseSearchViewModel(
 
     val apiHostUrl get() = config.getApiHostURL()
     val isUserLoggedIn get() = corePreferences.user != null
+    val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     private val _uiState =
         MutableLiveData<CourseSearchUIState>(CourseSearchUIState.Courses(emptyList(), 0))
@@ -64,7 +65,7 @@ class CourseSearchViewModel(
         viewModelScope.launch {
             queryChannel
                 .asSharedFlow()
-                .debounce(400)
+                .debounce(SEARCH_DEBOUNCE)
                 .collect {
                     nextPage = 1
                     currentQuery = it
@@ -142,4 +143,7 @@ class CourseSearchViewModel(
         }
     }
 
+    companion object {
+        private const val SEARCH_DEBOUNCE = 400L
+    }
 }

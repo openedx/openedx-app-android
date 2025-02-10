@@ -88,7 +88,6 @@ fun PageIndicatorView(
     animationDurationInMillis: Int,
     modifier: Modifier = Modifier,
 ) {
-
     val color: Color by animateColorAsState(
         targetValue = if (isSelected) {
             selectedColor
@@ -164,7 +163,7 @@ fun PrevButton(
 ) {
     val prevButtonAnimationFactor by animateFloatAsState(
         targetValue = if (hasPrevPage) 1f else 0f,
-        animationSpec = tween(300),
+        animationSpec = tween(durationMillis = 300),
         label = ""
     )
 
@@ -210,7 +209,7 @@ fun NextFinishButton(
             .testTag("btn_next")
             .height(42.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.appColors.buttonBackground
+            backgroundColor = MaterialTheme.appColors.primaryButtonBackground
         ),
         elevation = null,
         shape = MaterialTheme.appShapes.navigationButtonShape,
@@ -231,14 +230,14 @@ fun NextFinishButton(
                     Text(
                         modifier = Modifier.testTag("txt_next"),
                         text = stringResource(id = R.string.whats_new_navigation_next),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
                         style = MaterialTheme.appTypography.labelLarge
                     )
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(id = org.openedx.core.R.drawable.core_ic_forward),
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText
+                        tint = MaterialTheme.appColors.primaryButtonText
                     )
                 }
             } else {
@@ -249,14 +248,14 @@ fun NextFinishButton(
                     Text(
                         modifier = Modifier.testTag("txt_done"),
                         text = stringResource(id = R.string.whats_new_navigation_done),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
                         style = MaterialTheme.appTypography.labelLarge
                     )
                     Spacer(Modifier.width(8.dp))
                     Icon(
                         painter = painterResource(id = org.openedx.core.R.drawable.core_ic_check),
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText
+                        tint = MaterialTheme.appColors.primaryButtonText
                     )
                 }
             }
@@ -308,7 +307,8 @@ private fun NavigationUnitsButtonsPrevInTheEnd() {
 private fun PageIndicatorViewPreview() {
     OpenEdXTheme {
         PageIndicator(
-            numberOfPages = 4, selectedPage = 2
+            numberOfPages = 4,
+            selectedPage = 2
         )
     }
 }

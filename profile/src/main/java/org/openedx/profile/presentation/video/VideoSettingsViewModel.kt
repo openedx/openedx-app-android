@@ -7,12 +7,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.core.system.notifier.VideoNotifier
 import org.openedx.core.system.notifier.VideoQualityChanged
+import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
@@ -61,13 +61,15 @@ class VideoSettingsViewModel(
 
     fun navigateToVideoStreamingQuality(fragmentManager: FragmentManager) {
         router.navigateToVideoQuality(
-            fragmentManager, VideoQualityType.Streaming
+            fragmentManager,
+            VideoQualityType.Streaming
         )
     }
 
     fun navigateToVideoDownloadQuality(fragmentManager: FragmentManager) {
         router.navigateToVideoQuality(
-            fragmentManager, VideoQualityType.Download
+            fragmentManager,
+            VideoQualityType.Download
         )
     }
 

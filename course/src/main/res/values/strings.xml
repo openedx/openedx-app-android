@@ -5,18 +5,13 @@
     <string name="course_units">Course units</string>
     <string name="course_subsections">Course subsections</string>
     <string name="course_videos">Videos</string>
-    <string name="course_passed_course">You have passed the course! Now you can get the certificate</string>
-    <string name="course_passed">You’ve completed the course</string>
-    <string name="course_congratulations">Congratulations!</string>
-    <string name="course_view_certificate">View the certificate</string>
-    <string name="course_you_can_get_certificate">You can get a certificate after completing the course (earn required grade)</string>
-    <string name="course_get_certificate">Get the certificate</string>
+    <string name="course_you_earned_certificate">Congratulations, you have earned this course certificate in \"%s\".</string>
+    <string name="course_view_certificate">View certificate</string>
     <string name="course_navigation_prev">Prev</string>
     <string name="course_navigation_prev_unit">Previous Unit</string>
     <string name="course_navigation_next">Next</string>
     <string name="course_navigation_next_unit">Next Unit</string>
     <string name="course_navigation_finish">Finish</string>
-    <string name="course_does_not_include_videos">This course does not include any videos.</string>
     <string name="course_resume_unit_title">Last unit:</string>
     <string name="course_resume_unit_btn">Resume</string>
     <string name="course_discussion">Discussion</string>
@@ -31,8 +26,8 @@
     <string name="course_not_started">This course hasn’t started yet.</string>
     <string name="course_not_connected_to_internet">You are not connected to the Internet. Please check your Internet connection.</string>
     <string name="course_can_download_only_with_wifi">You can download content only from Wi-fi</string>
-    <string name="course_this_interactive_component">This interactive component isn\'t available on mobile.</string>
-    <string name="course_explore_other_parts">Explore other parts of this course or view this on web.</string>
+    <string name="course_this_interactive_component">This interactive component isn’t yet available</string>
+    <string name="course_explore_other_parts_on_web">Explore other parts of this course or view this on web.</string>
     <string name="course_open_in_browser">Open in browser</string>
     <string name="course_subtitles">Subtitles</string>
     <string name="course_continue_with">Continue with:</string>
@@ -45,40 +40,12 @@
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
 
-    <!-- region: Calendar Sync -->
-    <string name="course_header_sync_to_calendar" tools:ignore="MissingTranslation">Sync to calendar</string>
-    <string name="course_body_sync_to_calendar" tools:ignore="MissingTranslation">Automatically sync all deadlines and due dates for this course to your calendar.</string>
-
-    <string name="course_title_request_calendar_permission" tools:ignore="MissingTranslation">\“%s\” Would Like to Access Your Calendar</string>
-    <string name="course_message_request_calendar_permission" tools:ignore="MissingTranslation">%s would like to use your calendar list to subscribe to your personalized %s calendar for this course.</string>
-    <string name="course_label_do_not_allow" tools:ignore="MissingTranslation">Don’t allow</string>
-
-    <string name="course_title_add_course_calendar" tools:ignore="MissingTranslation">Add Course Dates to Calendar</string>
-    <string name="course_message_add_course_calendar" tools:ignore="MissingTranslation">Would you like to add \“%s\” dates to your calendar? \n\nYou can edit or remove your course dates at any time from your calendar or settings.</string>
-
-    <string name="course_title_syncing_calendar" tools:ignore="MissingTranslation">Syncing calendar…</string>
-
-    <string name="course_message_course_calendar_added" tools:ignore="MissingTranslation">\“%s\” has been added to your phone\'s calendar.</string>
-    <string name="course_label_view_events" tools:ignore="MissingTranslation">View Events</string>
-    <string name="course_label_done" tools:ignore="MissingTranslation">Done</string>
-
-    <string name="course_title_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Dates from Calendar</string>
-    <string name="course_message_remove_course_calendar" tools:ignore="MissingTranslation">Would you like to remove the \“%s\” dates from your calendar?</string>
-    <string name="course_label_remove" tools:ignore="MissingTranslation">Remove</string>
-
-    <string name="course_title_calendar_out_of_date" tools:ignore="MissingTranslation">Your course calendar is out of date</string>
-    <string name="course_message_calendar_out_of_date" tools:ignore="MissingTranslation">Your course dates have been shifted and your course calendar is no longer up to date with your new schedule.</string>
-    <string name="course_label_update_now" tools:ignore="MissingTranslation">Update Now</string>
-    <string name="course_label_remove_course_calendar" tools:ignore="MissingTranslation">Remove Course Calendar</string>
-
-    <string name="course_snackbar_course_calendar_added" tools:ignore="MissingTranslation">Your course calendar has been added.</string>
-    <string name="course_snackbar_course_calendar_removed" tools:ignore="MissingTranslation">Your course calendar has been removed.</string>
-    <string name="course_snackbar_course_calendar_updated" tools:ignore="MissingTranslation">Your course calendar has been updated.</string>
-    <string name="course_snackbar_course_calendar_error" tools:ignore="MissingTranslation">Error Adding Calendar, Please try later</string>
-
-    <string name="course_assignment_due_tag" tools:ignore="MissingTranslation">Assignment Due</string>
-
-    <!-- endregion -->
+    <string name="course_container_nav_home">Home</string>
+    <string name="course_container_nav_videos">Videos</string>
+    <string name="course_container_nav_discussions">Discussions</string>
+    <string name="course_container_nav_more">More</string>
+    <string name="course_container_nav_dates">Dates</string>
+    <string name="course_container_nav_downloads">Downloads</string>
 
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>
@@ -92,8 +59,49 @@
     <string name="course_download_untitled">(Untitled)</string>
     <string name="course_download_big_files_confirmation_title">Download</string>
     <string name="course_download_big_files_confirmation_text">The videos you\'ve selected are larger than 1 GB. Do you want to download these videos?</string>
-    <string name="course_delete_while_downloading_confirmation_text" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
-    <string name="course_delete_downloads_confirmation_text" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
+    <string name="course_delete_in_process_confirmation" formatted="false">Turning off the switch will stop downloading and delete all downloaded videos for \"%s\"?</string>
+    <string name="course_delete_confirmation" formatted="false">Are you sure you want to delete all video(s) for \"%s\"?</string>
     <string name="course_delete_download_confirmation_text" formatted="false">Are you sure you want to delete video(s) for \"%s\"?</string>
+    <string name="course_subsection_assignment_info" translatable="false">%1$s - %2$s - %3$d / %4$d</string>
+    <string name="course_download_no_internet_dialog_description">Downloading this content requires an active internet connection. Please connect to the internet and try again.</string>
+    <string name="course_wifi_required">Wi-Fi Required</string>
+    <string name="course_download_wifi_required_dialog_description">Downloading this content requires an active WiFi connection. Please connect to a WiFi network and try again.</string>
+    <string name="course_download_failed">Download Failed</string>
+    <string name="course_download_failed_dialog_description">Unfortunately, this content failed to download. Please try again later or report this issue.</string>
+    <string name="course_download_confirm_dialog_description">Downloading this %1$s of content will save available blocks offline.</string>
+    <string name="course_download_on_cellural">Download on Cellular?</string>
+    <string name="course_download_on_cellural_dialog_description">Downloading this content will use %1$s of cellular data.</string>
+    <string name="course_download_remove_offline_content">Remove Offline Content?</string>
+    <string name="course_download_remove_dialog_description">Removing this content will free up %1$s.</string>
+    <string name="course_download">Download</string>
+    <string name="course_remove">Remove</string>
+    <string name="course_device_storage_full">Device Storage Full</string>
+    <string name="course_download_device_storage_full_dialog_description">Your device does not have enough free space to download this content. Please free up some space and try again.</string>
+    <string name="course_used_free_storage">%1$s used, %2$s free</string>
+    <string name="course_0mb">0MB</string>
+    <string name="course_available_to_download">Available to download</string>
+    <string name="course_no_available_to_download_offline">None of this course’s content is currently available to download offline.</string>
+    <string name="course_download_all">Download all</string>
+    <string name="course_downloaded">Downloaded</string>
+    <string name="course_ready_to_download">Ready to Download</string>
+    <string name="course_you_can_download_course_content_offline">You can download course content offline to learn on the go, without requiring an active internet connection or using mobile data.</string>
+    <string name="course_downloading">Downloading</string>
+    <string name="course_largest_downloads">Largest Downloads</string>
+    <string name="course_remove_all_downloads">Remove all downloads</string>
+    <string name="course_cancel_course_download">Cancel Course Download</string>
+    <string name="course_not_available_offline">This component is not yet available offline</string>
+    <string name="course_explore_other_parts_when_reconnect">Explore other parts of this course or view this when you reconnect.</string>
+    <string name="course_not_downloaded">This component is not downloaded</string>
+    <string name="course_explore_other_parts_when_reconnect_or_download">Explore other parts of this course or download this when you reconnect.</string>
 
+    <plurals name="course_assignments_complete" tools:ignore="MissingTranslation">
+        <item quantity="one">%1$s of %2$s  assignment complete</item>
+        <item quantity="other">%1$s of %2$s  assignments complete</item>
+    </plurals>
+
+    <string name="course_label_back">Back</string>
+    <string name="course_error_expired_not_upgradeable_title" formatted="false">Your free audit access to this course expired on %s.</string>
+    <string name="course_find_new_course_button">Find a new course</string>
+    <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
+    <string name="course_an_error_occurred">An error occurred while loading your course</string>
 </resources>

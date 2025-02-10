@@ -63,24 +63,25 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Media
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.SearchBar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.domain.model.Course
 import org.openedx.discovery.presentation.DiscoveryRouter
+import org.openedx.discovery.presentation.search.CourseSearchFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.discovery.R as discoveryR
 
 class CourseSearchFragment : Fragment() {
@@ -101,7 +102,8 @@ class CourseSearchFragment : Fragment() {
 
                 val uiState by viewModel.uiState.observeAsState(
                     CourseSearchUIState.Courses(
-                        emptyList(), 0
+                        emptyList(),
+                        0
                     )
                 )
                 val uiMessage by viewModel.uiMessage.observeAsState()
@@ -118,6 +120,7 @@ class CourseSearchFragment : Fragment() {
                     refreshing = refreshing,
                     querySearch = querySearch,
                     isUserLoggedIn = viewModel.isUserLoggedIn,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
                     },
@@ -149,6 +152,7 @@ class CourseSearchFragment : Fragment() {
 
     companion object {
         private const val ARG_SEARCH_QUERY = "query_search"
+        const val LOAD_MORE_THRESHOLD = 4
         fun newInstance(querySearch: String): CourseSearchFragment {
             val fragment = CourseSearchFragment()
             fragment.arguments = bundleOf(
@@ -158,7 +162,6 @@ class CourseSearchFragment : Fragment() {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -171,6 +174,7 @@ private fun CourseSearchScreen(
     refreshing: Boolean,
     querySearch: String,
     isUserLoggedIn: Boolean,
+    isRegistrationEnabled: Boolean,
     onBackClick: () -> Unit,
     onSearchTextChanged: (String) -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -203,7 +207,6 @@ private fun CourseSearchScreen(
         focusManager.clearFocus()
     }
 
-
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
@@ -222,13 +225,13 @@ private fun CourseSearchScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
         }
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -383,7 +386,8 @@ private fun CourseSearchScreen(
                                             windowSize = windowSize,
                                             onClick = { courseId ->
                                                 onItemClick(courseId)
-                                            })
+                                            }
+                                        )
                                         Divider()
                                     }
                                     item {
@@ -398,7 +402,7 @@ private fun CourseSearchScreen(
                                             }
                                         }
                                     }
-                                    if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                    if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                         paginationCallback()
                                     }
                                 }
@@ -433,6 +437,7 @@ fun CourseSearchScreenPreview() {
             refreshing = false,
             querySearch = "",
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
@@ -458,6 +463,7 @@ fun CourseSearchScreenTabletPreview() {
             refreshing = false,
             querySearch = "",
             isUserLoggedIn = false,
+            isRegistrationEnabled = true,
             onBackClick = {},
             onSearchTextChanged = {},
             onSwipeRefresh = {},
@@ -468,7 +474,6 @@ fun CourseSearchScreenTabletPreview() {
         )
     }
 }
-
 
 private val mockCourse = Course(
     id = "id",

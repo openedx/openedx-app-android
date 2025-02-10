@@ -6,20 +6,50 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,13 +74,30 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.FragmentViewType
-import org.openedx.core.UIMessage
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.ui.*
-import org.openedx.core.ui.theme.*
+import org.openedx.core.ui.BackBtn
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.IconText
+import org.openedx.core.ui.OpenEdXOutlinedButton
+import org.openedx.core.ui.SheetContent
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.isImeVisibleState
+import org.openedx.core.ui.noRippleClickable
+import org.openedx.core.ui.shouldLoadMore
+import org.openedx.core.ui.statusBarsInset
+import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
+import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionType
 import org.openedx.discussion.presentation.DiscussionRouter
+import org.openedx.discussion.presentation.threads.DiscussionThreadsFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discussion.presentation.ui.ThreadItem
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.discussion.R as discussionR
 
 class DiscussionThreadsFragment : Fragment() {
@@ -139,6 +186,7 @@ class DiscussionThreadsFragment : Fragment() {
         private const val ARG_TOPIC_ID = "topicId"
         private const val ARG_TITLE = "title"
         private const val ARG_FRAGMENT_VIEW_TYPE = "fragmentViewType"
+        const val LOAD_MORE_THRESHOLD = 4
 
         fun newInstance(
             threadType: String,
@@ -162,6 +210,7 @@ class DiscussionThreadsFragment : Fragment() {
     }
 }
 
+@Suppress("MaximumLineLength", "MaxLineLength")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DiscussionThreadsScreen(
@@ -180,7 +229,6 @@ private fun DiscussionThreadsScreen(
     paginationCallback: () -> Unit,
     onBackClick: () -> Unit
 ) {
-
     val scaffoldState = rememberScaffoldState()
     val bottomSheetScaffoldState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -253,7 +301,6 @@ private fun DiscussionThreadsScreen(
         modifier = scaffoldModifier,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val contentWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -367,7 +414,13 @@ private fun DiscussionThreadsScreen(
                         }
                     }
                     Surface(
-                        modifier = Modifier.padding(top = if (viewType == FragmentViewType.FULL_CONTENT) 6.dp else 0.dp),
+                        modifier = Modifier.padding(
+                            top = if (viewType == FragmentViewType.FULL_CONTENT) {
+                                6.dp
+                            } else {
+                                0.dp
+                            }
+                        ),
                         color = MaterialTheme.appColors.background
                     ) {
                         Box(Modifier.pullRefresh(pullRefreshState)) {
@@ -391,9 +444,11 @@ private fun DiscussionThreadsScreen(
                                             ) {
                                                 IconText(
                                                     text = filterType.first,
-                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_filter),
+                                                    painter = painterResource(
+                                                        id = discussionR.drawable.discussion_ic_filter
+                                                    ),
                                                     textStyle = MaterialTheme.appTypography.labelMedium,
-                                                    color = MaterialTheme.appColors.textAccent,
+                                                    color = MaterialTheme.appColors.textPrimary,
                                                     onClick = {
                                                         currentSelectedList = FilterType.type
                                                         expandedList = listOf(
@@ -421,9 +476,11 @@ private fun DiscussionThreadsScreen(
                                                 )
                                                 IconText(
                                                     text = sortType.first,
-                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_sort),
+                                                    painter = painterResource(
+                                                        id = discussionR.drawable.discussion_ic_sort
+                                                    ),
                                                     textStyle = MaterialTheme.appTypography.labelMedium,
-                                                    color = MaterialTheme.appColors.textAccent,
+                                                    color = MaterialTheme.appColors.textPrimary,
                                                     onClick = {
                                                         currentSelectedList = SortType.type
                                                         expandedList = listOf(
@@ -475,7 +532,9 @@ private fun DiscussionThreadsScreen(
                                                                 Modifier
                                                                     .size(40.dp)
                                                                     .clip(CircleShape)
-                                                                    .background(MaterialTheme.appColors.primary)
+                                                                    .background(
+                                                                        MaterialTheme.appColors.secondaryButtonBackground
+                                                                    )
                                                                     .clickable {
                                                                         onCreatePostClick()
                                                                     },
@@ -483,9 +542,13 @@ private fun DiscussionThreadsScreen(
                                                             ) {
                                                                 Icon(
                                                                     modifier = Modifier.size(16.dp),
-                                                                    painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
-                                                                    contentDescription = stringResource(id = discussionR.string.discussion_add_comment),
-                                                                    tint = MaterialTheme.appColors.buttonText
+                                                                    painter = painterResource(
+                                                                        discussionR.drawable.discussion_ic_add_comment
+                                                                    ),
+                                                                    contentDescription = stringResource(
+                                                                        discussionR.string.discussion_add_comment
+                                                                    ),
+                                                                    tint = MaterialTheme.appColors.primaryButtonText
                                                                 )
                                                             }
                                                         }
@@ -504,13 +567,15 @@ private fun DiscussionThreadsScreen(
                                                                     .padding(vertical = 16.dp),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                                                CircularProgressIndicator(
+                                                                    color = MaterialTheme.appColors.primary
+                                                                )
                                                             }
                                                         }
                                                     }
                                                     if (scrollState.shouldLoadMore(
                                                             firstVisibleIndex,
-                                                            4
+                                                            LOAD_MORE_THRESHOLD
                                                         )
                                                     ) {
                                                         paginationCallback()
@@ -536,7 +601,9 @@ private fun DiscussionThreadsScreen(
                                                     Spacer(modifier = Modifier.height(20.dp))
                                                     Icon(
                                                         modifier = Modifier.size(100.dp),
-                                                        painter = painterResource(id = discussionR.drawable.discussion_ic_empty),
+                                                        painter = painterResource(
+                                                            id = discussionR.drawable.discussion_ic_empty
+                                                        ),
                                                         contentDescription = null,
                                                         tint = MaterialTheme.appColors.textPrimary
                                                     )
@@ -551,7 +618,9 @@ private fun DiscussionThreadsScreen(
                                                     Spacer(Modifier.height(12.dp))
                                                     Text(
                                                         modifier = Modifier.fillMaxWidth(),
-                                                        text = stringResource(discussionR.string.discussion_click_button_create_discussion),
+                                                        text = stringResource(
+                                                            discussionR.string.discussion_click_button_create_discussion
+                                                        ),
                                                         style = MaterialTheme.appTypography.bodyLarge,
                                                         color = MaterialTheme.appColors.textPrimary,
                                                         textAlign = TextAlign.Center
@@ -560,19 +629,25 @@ private fun DiscussionThreadsScreen(
                                                     OpenEdXOutlinedButton(
                                                         modifier = Modifier
                                                             .widthIn(184.dp, Dp.Unspecified),
-                                                        text = stringResource(id = discussionR.string.discussion_create_post),
+                                                        text = stringResource(
+                                                            id = discussionR.string.discussion_create_post
+                                                        ),
                                                         onClick = {
                                                             onCreatePostClick()
                                                         },
                                                         content = {
                                                             Icon(
-                                                                painter = painterResource(id = discussionR.drawable.discussion_ic_add_comment),
+                                                                painter = painterResource(
+                                                                    id = discussionR.drawable.discussion_ic_add_comment
+                                                                ),
                                                                 contentDescription = null,
                                                                 tint = MaterialTheme.appColors.primary
                                                             )
                                                             Spacer(modifier = Modifier.width(6.dp))
                                                             Text(
-                                                                text = stringResource(id = discussionR.string.discussion_create_post),
+                                                                text = stringResource(
+                                                                    id = discussionR.string.discussion_create_post
+                                                                ),
                                                                 color = MaterialTheme.appColors.primary,
                                                                 style = MaterialTheme.appTypography.labelLarge
                                                             )
@@ -589,7 +664,8 @@ private fun DiscussionThreadsScreen(
                                 is DiscussionThreadsUIState.Loading -> {
                                     Box(
                                         Modifier
-                                            .fillMaxSize(), contentAlignment = Alignment.Center
+                                            .fillMaxSize(),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                                     }

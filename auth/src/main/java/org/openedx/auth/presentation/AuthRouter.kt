@@ -4,7 +4,12 @@ import androidx.fragment.app.FragmentManager
 
 interface AuthRouter {
 
-    fun navigateToMain(fm: FragmentManager, courseId: String?, infoType: String?)
+    fun navigateToMain(
+        fm: FragmentManager,
+        courseId: String?,
+        infoType: String?,
+        openTab: String = ""
+    )
 
     fun navigateToSignIn(fm: FragmentManager, courseId: String?, infoType: String?)
 

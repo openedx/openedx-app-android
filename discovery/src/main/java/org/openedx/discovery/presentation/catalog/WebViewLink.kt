@@ -1,7 +1,7 @@
 package org.openedx.discovery.presentation.catalog
 
 import android.net.Uri
-import org.openedx.core.extension.getQueryParams
+import org.openedx.foundation.extension.getQueryParams
 
 /**
  * To parse and store links that we need within a WebView.
@@ -29,24 +29,22 @@ class WebViewLink(
 
     companion object {
         fun parse(uriStr: String?, uriScheme: String): WebViewLink? {
-            if (uriStr.isNullOrEmpty()) {
-                return null
-            }
+            if (uriStr.isNullOrEmpty()) return null
+
             val sanitizedUriStr = uriStr.replace("+", "%2B")
             val uri = Uri.parse(sanitizedUriStr)
 
-            // Validate the URI scheme
-            if (uriScheme != uri.scheme) {
-                return null
+            // Validate URI scheme and authority
+            val isSchemeValid = uriScheme == uri.scheme
+            val uriAuthority = Authority.entries.find { it.key == uri.authority }
+
+            return if (isSchemeValid && uriAuthority != null) {
+                // Parse the URI params
+                val params = uri.getQueryParams()
+                WebViewLink(uriAuthority, params)
+            } else {
+                null
             }
-
-            // Validate the Uri authority
-            val uriAuthority = Authority.entries.find { it.key == uri.authority } ?: return null
-
-            // Parse the Uri params
-            val params = uri.getQueryParams()
-
-            return WebViewLink(uriAuthority, params)
         }
     }
 }

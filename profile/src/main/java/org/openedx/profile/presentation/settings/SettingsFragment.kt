@@ -10,8 +10,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.foundation.presentation.rememberWindowSize
 
 class SettingsFragment : Fragment() {
 
@@ -83,8 +83,14 @@ class SettingsFragment : Fragment() {
                                 )
                             }
 
-                            SettingsScreenAction.ManageAccount -> {
+                            SettingsScreenAction.ManageAccountClick -> {
                                 viewModel.manageAccountClicked(
+                                    requireActivity().supportFragmentManager
+                                )
+                            }
+
+                            SettingsScreenAction.CalendarSettingsClick -> {
+                                viewModel.calendarSettingsClicked(
                                     requireActivity().supportFragmentManager
                                 )
                             }
@@ -112,6 +118,6 @@ internal interface SettingsScreenAction {
     object TermsClick : SettingsScreenAction
     object SupportClick : SettingsScreenAction
     object VideoSettingsClick : SettingsScreenAction
-    object ManageAccount : SettingsScreenAction
+    object ManageAccountClick : SettingsScreenAction
+    object CalendarSettingsClick : SettingsScreenAction
 }
-

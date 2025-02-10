@@ -4,14 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -24,15 +20,10 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiCo
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.computeWindowSizeClasses
-import org.openedx.core.extension.objectToString
-import org.openedx.core.extension.stringToObject
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoUnitBinding
@@ -40,6 +31,10 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
+import org.openedx.foundation.extension.computeWindowSizeClasses
+import org.openedx.foundation.extension.objectToString
+import org.openedx.foundation.extension.stringToObject
+import org.openedx.foundation.presentation.WindowSize
 
 class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) {
 
@@ -84,6 +79,13 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (viewModel.isPlaying) {
+            _youTubePlayer?.play()
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -95,11 +97,7 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
 
         binding.connectionError.setContent {
             OpenEdXTheme {
-                ConnectionErrorView(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.appColors.background)
-                ) {
+                ConnectionErrorView {
                     binding.connectionError.isVisible = !viewModel.hasInternetConnection
                 }
             }
@@ -153,11 +151,11 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 super.onCurrentSecond(youTubePlayer, second)
                 viewModel.setCurrentVideoTime((second * 1000f).toLong())
                 val completePercentage = second / youtubeTrackerListener.videoDuration
-                if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
+                if (completePercentage >= VIDEO_COMPLETION_THRESHOLD && !isMarkBlockCompletedCalled) {
                     viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
                     isMarkBlockCompletedCalled = true
                 }
-                if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
+                if (completePercentage >= RATE_DIALOG_THRESHOLD && !appReviewManager.isDialogShowed) {
                     appReviewManager.tryToOpenRateDialog()
                 }
             }
@@ -202,13 +200,15 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
                 }
 
                 viewModel.videoUrl.split("watch?v=").getOrNull(1)?.let { videoId ->
-                    if (viewModel.isPlaying) {
+                    if (viewModel.isPlaying && isResumed) {
                         youTubePlayer.loadVideo(
-                            videoId, viewModel.getCurrentVideoTime().toFloat() / 1000
+                            videoId,
+                            viewModel.getCurrentVideoTime().toFloat() / 1000
                         )
                     } else {
                         youTubePlayer.cueVideo(
-                            videoId, viewModel.getCurrentVideoTime().toFloat() / 1000
+                            videoId,
+                            viewModel.getCurrentVideoTime().toFloat() / 1000
                         )
                     }
                 }
@@ -247,6 +247,9 @@ class YoutubeVideoUnitFragment : Fragment(R.layout.fragment_youtube_video_unit) 
         private const val ARG_BLOCK_ID = "blockId"
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "blockTitle"
+
+        const val VIDEO_COMPLETION_THRESHOLD = 0.8f
+        const val RATE_DIALOG_THRESHOLD = 0.99f
 
         fun newInstance(
             blockId: String,

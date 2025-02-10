@@ -37,24 +37,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
-import org.koin.androidx.compose.koinViewModel
 import org.openedx.core.FragmentViewType
-import org.openedx.core.UIMessage
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.StaticSearchBar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.discussion.R
 import org.openedx.discussion.domain.model.Topic
 import org.openedx.discussion.presentation.ui.ThreadItemCategory
 import org.openedx.discussion.presentation.ui.TopicItem
-import org.openedx.discussion.R as discussionR
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
 
 @Composable
 fun DiscussionTopicsScreen(
@@ -109,7 +110,6 @@ private fun DiscussionTopicsUI(
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -157,15 +157,17 @@ private fun DiscussionTopicsUI(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(screenWidth) {
-                StaticSearchBar(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .then(searchTabWidth)
-                        .padding(horizontal = contentPaddings)
-                        .fillMaxWidth(),
-                    text = stringResource(id = discussionR.string.discussion_search_all_posts),
-                    onClick = onSearchClick
-                )
+                if ((uiState is DiscussionTopicsUIState.Error).not()) {
+                    StaticSearchBar(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .then(searchTabWidth)
+                            .padding(horizontal = contentPaddings)
+                            .fillMaxWidth(),
+                        text = stringResource(id = R.string.discussion_search_all_posts),
+                        onClick = onSearchClick
+                    )
+                }
                 Surface(
                     modifier = Modifier.padding(top = 10.dp),
                     color = MaterialTheme.appColors.background,
@@ -188,7 +190,7 @@ private fun DiscussionTopicsUI(
                                         item {
                                             Text(
                                                 modifier = Modifier,
-                                                text = stringResource(id = discussionR.string.discussion_main_categories),
+                                                text = stringResource(id = R.string.discussion_main_categories),
                                                 style = MaterialTheme.appTypography.titleMedium,
                                                 color = MaterialTheme.appColors.textPrimaryVariant
                                             )
@@ -199,8 +201,10 @@ private fun DiscussionTopicsUI(
                                                 horizontalArrangement = Arrangement.spacedBy(14.dp)
                                             ) {
                                                 ThreadItemCategory(
-                                                    name = stringResource(id = discussionR.string.discussion_all_posts),
-                                                    painterResource = painterResource(id = discussionR.drawable.discussion_all_posts),
+                                                    name = stringResource(id = R.string.discussion_all_posts),
+                                                    painterResource = painterResource(
+                                                        id = R.drawable.discussion_all_posts
+                                                    ),
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .height(categoriesHeight),
@@ -208,12 +212,13 @@ private fun DiscussionTopicsUI(
                                                         onItemClick(
                                                             DiscussionTopicsViewModel.ALL_POSTS,
                                                             "",
-                                                            context.getString(discussionR.string.discussion_all_posts)
+                                                            context.getString(R.string.discussion_all_posts)
                                                         )
-                                                    })
+                                                    }
+                                                )
                                                 ThreadItemCategory(
-                                                    name = stringResource(id = discussionR.string.discussion_posts_following),
-                                                    painterResource = painterResource(id = discussionR.drawable.discussion_star),
+                                                    name = stringResource(id = R.string.discussion_posts_following),
+                                                    painterResource = painterResource(id = R.drawable.discussion_star),
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .height(categoriesHeight),
@@ -221,9 +226,10 @@ private fun DiscussionTopicsUI(
                                                         onItemClick(
                                                             DiscussionTopicsViewModel.FOLLOWING_POSTS,
                                                             "",
-                                                            context.getString(discussionR.string.discussion_posts_following)
+                                                            context.getString(R.string.discussion_posts_following)
                                                         )
-                                                    })
+                                                    }
+                                                )
                                             }
                                         }
                                         itemsIndexed(uiState.data) { index, topic ->
@@ -253,6 +259,9 @@ private fun DiscussionTopicsUI(
                                 }
 
                                 DiscussionTopicsUIState.Loading -> {}
+                                else -> {
+                                    NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_DISCUSSIONS)
+                                }
                             }
                         }
                     }
@@ -272,6 +281,23 @@ private fun DiscussionTopicsScreenPreview() {
         DiscussionTopicsUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionTopicsUIState.Topics(listOf(mockTopic, mockTopic)),
+            uiMessage = null,
+            onItemClick = { _, _, _ -> },
+            onSearchClick = {}
+        )
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ErrorDiscussionTopicsScreenPreview() {
+    OpenEdXTheme {
+        DiscussionTopicsUI(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            uiState = DiscussionTopicsUIState.Error,
             uiMessage = null,
             onItemClick = { _, _, _ -> },
             onSearchClick = {}

@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -53,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -67,15 +67,12 @@ import org.openedx.auth.presentation.ui.ExpandableText
 import org.openedx.auth.presentation.ui.OptionalFields
 import org.openedx.auth.presentation.ui.RequiredFields
 import org.openedx.auth.presentation.ui.SocialAuthView
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.SheetContent
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
@@ -85,10 +82,13 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as coreR
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SignUpView(
     windowSize: WindowSize,
@@ -141,7 +141,7 @@ internal fun SignUpView(
     LaunchedEffect(uiState.validationError) {
         if (uiState.validationError) {
             coroutine.launch {
-                scrollState.animateScrollTo(0, tween(300))
+                scrollState.animateScrollTo(0, tween(durationMillis = 300))
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
         }
@@ -151,7 +151,7 @@ internal fun SignUpView(
         if (uiState.socialAuth != null) {
             coroutine.launch {
                 showErrorMap.clear()
-                scrollState.animateScrollTo(0, tween(300))
+                scrollState.animateScrollTo(0, tween(durationMillis = 300))
             }
         }
     }
@@ -173,7 +173,6 @@ internal fun SignUpView(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val topBarPadding by remember {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -246,7 +245,7 @@ internal fun SignUpView(
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.3f),
+                    .fillMaxHeight(fraction = 0.3f),
                 painter = painterResource(id = coreR.drawable.core_top_header),
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
@@ -296,8 +295,8 @@ internal fun SignUpView(
                     ) {
                         if (uiState.isLoading) {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
@@ -317,10 +316,11 @@ internal fun SignUpView(
                                         Text(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(top = 4.dp),
+                                                .padding(top = 8.dp),
                                             text = stringResource(
                                                 id = R.string.auth_compete_registration
                                             ),
+                                            fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.appColors.textPrimary,
                                             style = MaterialTheme.appTypography.titleSmall
                                         )
@@ -329,7 +329,7 @@ internal fun SignUpView(
                                             modifier = Modifier
                                                 .testTag("txt_sign_up_title")
                                                 .fillMaxWidth(),
-                                            text = stringResource(id = R.string.auth_sign_up),
+                                            text = stringResource(id = coreR.string.core_register),
                                             color = MaterialTheme.appColors.textPrimary,
                                             style = MaterialTheme.appTypography.displaySmall
                                         )
@@ -437,7 +437,10 @@ internal fun SignUpView(
                                     OpenEdXButton(
                                         modifier = buttonWidth.testTag("btn_create_account"),
                                         text = stringResource(id = R.string.auth_create_account),
+                                        textColor = MaterialTheme.appColors.primaryButtonText,
+                                        backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                                         onClick = {
+                                            keyboardController?.hide()
                                             showErrorMap.clear()
                                             onRegisterClick(AuthType.PASSWORD)
                                         }
@@ -451,6 +454,7 @@ internal fun SignUpView(
                                         isMicrosoftAuthEnabled = uiState.isMicrosoftAuthEnabled,
                                         isSignIn = false,
                                     ) {
+                                        keyboardController?.hide()
                                         onRegisterClick(it)
                                     }
                                 }
@@ -474,7 +478,10 @@ private fun RegistrationScreenPreview() {
         SignUpView(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = SignUpUIState(
-                allFields = listOf(field, field, field.copy(required = false)),
+                allFields = listOf(field),
+                requiredFields = listOf(field, field),
+                optionalFields = listOf(field, field),
+                agreementFields = listOf(field),
             ),
             uiMessage = null,
             onBackClick = {},

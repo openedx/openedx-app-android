@@ -2,6 +2,7 @@ package org.openedx.course.domain.interactor
 
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
+import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.course.data.repository.CourseRepository
 
@@ -16,6 +17,14 @@ class CourseInteractor(
         return repository.getCourseStructure(courseId, isNeedRefresh)
     }
 
+    suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
+        return repository.getCourseStructureFromCache(courseId)
+    }
+
+    suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
+        return repository.getEnrollmentDetails(courseId = courseId)
+    }
+
     suspend fun getCourseStructureForVideos(
         courseId: String,
         isNeedRefresh: Boolean = false
@@ -23,37 +32,40 @@ class CourseInteractor(
         val courseStructure = repository.getCourseStructure(courseId, isNeedRefresh)
         val blocks = courseStructure.blockData
         val videoBlocks = blocks.filter { it.type == BlockType.VIDEO }
-        val resultBlocks = ArrayList<Block>()
-        videoBlocks.forEach { videoBlock ->
-            val verticalBlock = blocks.firstOrNull { it.descendants.contains(videoBlock.id) }
-            if (verticalBlock != null) {
-                val sequentialBlock =
-                    blocks.firstOrNull { it.descendants.contains(verticalBlock.id) }
-                if (sequentialBlock != null) {
-                    val chapterBlock =
-                        blocks.firstOrNull { it.descendants.contains(sequentialBlock.id) }
-                    if (chapterBlock != null) {
-                        resultBlocks.add(videoBlock)
-                        val verticalIndex = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
-                        if (verticalIndex == -1) {
-                            resultBlocks.add(verticalBlock.copy(descendants = listOf(videoBlock.id)))
-                        } else {
-                            val block = resultBlocks[verticalIndex]
-                            resultBlocks[verticalIndex] =
-                                block.copy(descendants = block.descendants + videoBlock.id)
-                        }
-                        if (!resultBlocks.contains(sequentialBlock)) {
-                            resultBlocks.add(sequentialBlock)
-                        }
-                        if (!resultBlocks.contains(chapterBlock)) {
-                            resultBlocks.add(chapterBlock)
-                        }
-                    }
-                }
+        val resultBlocks = mutableListOf<Block>()
 
-            }
+        videoBlocks.forEach { videoBlock ->
+            val verticalBlock = findParentBlock(videoBlock.id, blocks) ?: return@forEach
+            val sequentialBlock = findParentBlock(verticalBlock.id, blocks) ?: return@forEach
+            val chapterBlock = findParentBlock(sequentialBlock.id, blocks) ?: return@forEach
+
+            addToResultBlocks(videoBlock, verticalBlock, resultBlocks)
+            addIfAbsent(resultBlocks, sequentialBlock)
+            addIfAbsent(resultBlocks, chapterBlock)
         }
-        return courseStructure.copy(blockData = resultBlocks.toList())
+
+        return courseStructure.copy(blockData = resultBlocks)
+    }
+
+    private fun findParentBlock(childId: String, blocks: List<Block>): Block? {
+        return blocks.firstOrNull { it.descendants.contains(childId) }
+    }
+
+    private fun addToResultBlocks(videoBlock: Block, verticalBlock: Block, resultBlocks: MutableList<Block>) {
+        resultBlocks.add(videoBlock)
+        val verticalIndex = resultBlocks.indexOfFirst { it.id == verticalBlock.id }
+        if (verticalIndex == -1) {
+            resultBlocks.add(verticalBlock.copy(descendants = listOf(videoBlock.id)))
+        } else {
+            val block = resultBlocks[verticalIndex]
+            resultBlocks[verticalIndex] = block.copy(descendants = block.descendants + videoBlock.id)
+        }
+    }
+
+    private fun addIfAbsent(resultBlocks: MutableList<Block>, block: Block) {
+        if (!resultBlocks.contains(block)) {
+            resultBlocks.add(block)
+        }
     }
 
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
@@ -72,4 +84,16 @@ class CourseInteractor(
 
     fun getDownloadModels() = repository.getDownloadModels()
 
+    suspend fun getAllDownloadModels() = repository.getAllDownloadModels()
+
+    suspend fun saveXBlockProgress(blockId: String, courseId: String, jsonProgress: String) {
+        repository.saveOfflineXBlockProgress(blockId, courseId, jsonProgress)
+    }
+
+    suspend fun getXBlockProgress(blockId: String) = repository.getXBlockProgress(blockId)
+
+    suspend fun submitAllOfflineXBlockProgress() = repository.submitAllOfflineXBlockProgress()
+
+    suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) =
+        repository.submitOfflineXBlockProgress(blockId, courseId)
 }

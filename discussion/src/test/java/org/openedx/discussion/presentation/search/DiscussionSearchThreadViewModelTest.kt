@@ -4,16 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.domain.model.Pagination
-import org.openedx.core.extension.TextConverter
-import org.openedx.core.system.ResourceManager
-import org.openedx.discussion.domain.interactor.DiscussionInteractor
-import org.openedx.discussion.domain.model.DiscussionType
-import org.openedx.discussion.domain.model.ThreadsData
-import org.openedx.discussion.system.notifier.DiscussionNotifier
-import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -22,13 +12,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.openedx.core.R
+import org.openedx.core.domain.model.Pagination
+import org.openedx.core.extension.TextConverter
+import org.openedx.discussion.domain.interactor.DiscussionInteractor
+import org.openedx.discussion.domain.model.DiscussionType
+import org.openedx.discussion.domain.model.ThreadsData
+import org.openedx.discussion.system.notifier.DiscussionNotifier
+import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -284,7 +287,6 @@ class DiscussionSearchThreadViewModelTest {
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.isEmpty())
     }
 
-
     @Test
     fun `notifier DiscussionThreadDataChanged with list`() = runTest {
         val viewModel = DiscussionSearchThreadViewModel(interactor, resourceManager, notifier, "")
@@ -318,5 +320,4 @@ class DiscussionSearchThreadViewModelTest {
         assert(viewModel.uiState.value is DiscussionSearchThreadUIState.Threads)
         assert((viewModel.uiState.value as DiscussionSearchThreadUIState.Threads).data.size == 1)
     }
-
 }

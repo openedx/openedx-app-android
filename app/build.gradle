@@ -1,13 +1,15 @@
 def config = configHelper.fetchConfig()
 def appId = config.getOrDefault("APPLICATION_ID", "org.openedx.app")
-def platformName = config.getOrDefault("PLATFORM_NAME", "OpenEdx").toLowerCase()
+def themeDirectory = config.getOrDefault("THEME_DIRECTORY", "openedx")
 def firebaseConfig = config.get('FIREBASE')
 def firebaseEnabled = firebaseConfig?.getOrDefault('ENABLED', false)
 
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
 if (firebaseEnabled) {
     apply plugin: 'com.google.gms.google-services'
     apply plugin: 'com.google.firebase.crashlytics'
@@ -63,13 +65,13 @@ android {
 
     sourceSets {
         prod {
-            res.srcDirs = ["src/$platformName/res"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         develop {
-            res.srcDirs = ["src/$platformName/res"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
         stage {
-            res.srcDirs = ["src/$platformName/res"]
+            res.srcDirs = ["src/$themeDirectory/res"]
         }
     }
 
@@ -91,14 +93,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17
+        freeCompilerArgs = List.of("-Xstring-concat=inline")
     }
     buildFeatures {
         viewBinding true
         compose true
         buildConfig true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "$compose_compiler_version"
     }
     bundle {
         language {
@@ -126,34 +126,24 @@ dependencies {
     implementation project(path: ':discussion')
     implementation project(path: ':whatsnew')
 
-    kapt "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
     implementation 'androidx.core:core-splashscreen:1.0.1'
 
-    // Segment Library
-    implementation "com.segment.analytics.kotlin:android:1.14.2"
-    // Segment's Firebase integration
-    implementation 'com.segment.analytics.kotlin.destinations:firebase:1.5.2'
+    api platform("com.google.firebase:firebase-bom:$firebase_version")
+    api "com.google.firebase:firebase-messaging"
+
     // Braze SDK Integration
-    implementation "com.braze:braze-segment-kotlin:1.4.2"
     implementation "com.braze:android-sdk-ui:30.2.0"
 
-    // Firebase Cloud Messaging Integration for Braze
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
+    // Plugins
+    implementation("com.github.openedx:openedx-app-firebase-analytics-android:1.0.0")
 
-    // Branch SDK Integration
-    implementation 'io.branch.sdk.android:library:5.9.0'
-    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-    implementation "com.android.installreferrer:installreferrer:2.2"
-
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
     testImplementation "junit:junit:$junit_version"
     testImplementation "io.mockk:mockk:$mockk_version"
     testImplementation "io.mockk:mockk-android:$mockk_version"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "androidx.arch.core:core-testing:$android_arch_version"
 }
 

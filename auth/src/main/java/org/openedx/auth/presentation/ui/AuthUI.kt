@@ -3,8 +3,8 @@ package org.openedx.auth.presentation.ui
 import android.content.res.Configuration
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -23,6 +25,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,13 +48,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.openedx.auth.R
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.extension.tagId
 import org.openedx.core.ui.HyperlinkText
 import org.openedx.core.ui.SheetContent
 import org.openedx.core.ui.noRippleClickable
@@ -58,6 +62,7 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.tagId
 
 @Composable
 fun RequiredFields(
@@ -65,11 +70,15 @@ fun RequiredFields(
     showErrorMap: MutableMap<String, Boolean?>,
     selectableNamesMap: MutableMap<String, String?>,
     onFieldUpdated: (String, String) -> Unit,
-    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit
+    onSelectClick: (String, RegistrationField, List<RegistrationField.Option>) -> Unit,
 ) {
     fields.forEach { field ->
         when (field.type) {
-            RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
+            RegistrationFieldType.TEXT,
+            RegistrationFieldType.EMAIL,
+            RegistrationFieldType.CONFIRM_EMAIL,
+            RegistrationFieldType.PASSWORD,
+            -> {
                 InputRegistrationField(
                     modifier = Modifier.fillMaxWidth(),
                     isErrorShown = showErrorMap[field.name] ?: true,
@@ -127,9 +136,7 @@ fun RequiredFields(
                 )
             }
 
-            RegistrationFieldType.UNKNOWN -> {
-
-            }
+            RegistrationFieldType.UNKNOWN -> {}
         }
     }
 }
@@ -146,7 +153,8 @@ fun OptionalFields(
     Column {
         fields.forEach { field ->
             when (field.type) {
-                RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL, RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
+                RegistrationFieldType.TEXT, RegistrationFieldType.EMAIL,
+                RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.PASSWORD -> {
                     InputRegistrationField(
                         modifier = Modifier.fillMaxWidth(),
                         isErrorShown = showErrorMap[field.name]
@@ -170,7 +178,8 @@ fun OptionalFields(
                     HyperlinkText(
                         fullText = linkedText.text,
                         hyperLinks = linkedText.links,
-                        linkTextColor = MaterialTheme.appColors.primary,
+                        linkTextColor = MaterialTheme.appColors.textHyperLink,
+                        linkTextDecoration = TextDecoration.Underline,
                         action = {
                             hyperLinkAction?.invoke(linkedText.links, it)
                         },
@@ -192,7 +201,8 @@ fun OptionalFields(
                             ?: "",
                         onClick = { serverName, list ->
                             onSelectClick(serverName, field, list)
-                        })
+                        }
+                    )
                 }
 
                 RegistrationFieldType.TEXTAREA -> {
@@ -224,9 +234,11 @@ fun LoginTextField(
     modifier: Modifier = Modifier,
     title: String,
     description: String,
+    isError: Boolean = false,
+    errorMessages: String = "",
     onValueChanged: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
-    keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) }
+    keyboardActions: (FocusManager) -> Unit = { it.moveFocus(FocusDirection.Down) },
 ) {
     var loginTextFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
@@ -250,8 +262,10 @@ fun LoginTextField(
             onValueChanged(it.text.trim())
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.appColors.textFieldText,
+            backgroundColor = MaterialTheme.appColors.textFieldBackground,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            backgroundColor = MaterialTheme.appColors.textFieldBackground
+            cursorColor = MaterialTheme.appColors.textFieldText,
         ),
         shape = MaterialTheme.appShapes.textFieldShape,
         placeholder = {
@@ -271,8 +285,20 @@ fun LoginTextField(
         },
         textStyle = MaterialTheme.appTypography.bodyMedium,
         singleLine = true,
-        modifier = modifier.testTag("tf_email")
+        modifier = modifier.testTag("tf_email"),
+        isError = isError
     )
+    if (isError) {
+        Text(
+            modifier = Modifier
+                .testTag("txt_email_error")
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            text = errorMessages,
+            style = MaterialTheme.appTypography.bodySmall,
+            color = MaterialTheme.appColors.error,
+        )
+    }
 }
 
 @Composable
@@ -280,16 +306,20 @@ fun InputRegistrationField(
     modifier: Modifier,
     isErrorShown: Boolean,
     registrationField: RegistrationField,
-    onValueChanged: (String, String, Boolean) -> Unit
+    onValueChanged: (String, String, Boolean) -> Unit,
 ) {
     var inputRegistrationFieldValue by rememberSaveable {
         mutableStateOf(registrationField.placeholder)
     }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
-    val visualTransformation = if (registrationField.type == RegistrationFieldType.PASSWORD) {
-        PasswordVisualTransformation()
-    } else {
-        VisualTransformation.None
+    val visualTransformation = remember(isPasswordVisible) {
+        if (registrationField.type == RegistrationFieldType.PASSWORD && !isPasswordVisible) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        }
     }
     val keyboardType = when (registrationField.type) {
         RegistrationFieldType.CONFIRM_EMAIL, RegistrationFieldType.EMAIL -> KeyboardType.Email
@@ -311,6 +341,18 @@ fun InputRegistrationField(
     } else {
         registrationField.instructions
     }
+    val trailingIcon: @Composable (() -> Unit)? =
+        if (registrationField.type == RegistrationFieldType.PASSWORD) {
+            {
+                PasswordVisibilityIcon(
+                    isPasswordVisible = isPasswordVisible,
+                    onClick = { isPasswordVisible = !isPasswordVisible }
+                )
+            }
+        } else {
+            null
+        }
+
     Column {
         Text(
             modifier = Modifier
@@ -332,8 +374,11 @@ fun InputRegistrationField(
                 }
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
+                focusedBorderColor = MaterialTheme.appColors.textFieldBorder,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground
+                cursorColor = MaterialTheme.appColors.textFieldText,
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
@@ -352,6 +397,7 @@ fun InputRegistrationField(
             keyboardActions = KeyboardActions {
                 focusManager.moveFocus(FocusDirection.Down)
             },
+            trailingIcon = trailingIcon,
             textStyle = MaterialTheme.appTypography.bodyMedium,
             singleLine = isSingleLine,
             modifier = modifier.testTag("tf_${registrationField.name.tagId()}")
@@ -371,7 +417,7 @@ fun SelectableRegisterField(
     registrationField: RegistrationField,
     isErrorShown: Boolean,
     initialValue: String,
-    onClick: (String, List<RegistrationField.Option>) -> Unit
+    onClick: (String, List<RegistrationField.Option>) -> Unit,
 ) {
     val helperTextColor = if (registrationField.errorInstructions.isEmpty()) {
         MaterialTheme.appColors.textSecondary
@@ -411,6 +457,7 @@ fun SelectableRegisterField(
         OutlinedTextField(
             readOnly = true,
             enabled = false,
+            singleLine = true,
             value = initialValue,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
@@ -458,14 +505,14 @@ fun SelectableRegisterField(
 fun ExpandableText(
     modifier: Modifier = Modifier,
     isExpanded: Boolean,
-    onClick: (Boolean) -> Unit
+    onClick: (Boolean) -> Unit,
 ) {
     val transitionState = remember {
         MutableTransitionState(isExpanded).apply {
             targetState = !isExpanded
         }
     }
-    val transition = updateTransition(transitionState, label = "")
+    val transition = rememberTransition(transitionState, label = "")
     val arrowRotationDegree by transition.animateFloat({
         tween(durationMillis = 300)
     }, label = "") {
@@ -487,7 +534,6 @@ fun ExpandableText(
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        //TODO: textStyle
         Text(
             modifier = Modifier,
             text = text,
@@ -503,6 +549,26 @@ fun ExpandableText(
     }
 }
 
+@Composable
+internal fun PasswordVisibilityIcon(
+    isPasswordVisible: Boolean,
+    onClick: () -> Unit,
+) {
+    val (image, description) = if (isPasswordVisible) {
+        Icons.Filled.VisibilityOff to stringResource(R.string.auth_accessibility_hide_password)
+    } else {
+        Icons.Filled.Visibility to stringResource(R.string.auth_accessibility_show_password)
+    }
+
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = image,
+            contentDescription = description,
+            tint = MaterialTheme.appColors.onSurface
+        )
+    }
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -513,9 +579,7 @@ fun SelectRegistrationFieldPreview() {
                 field,
                 false,
                 initialValue = "",
-                onClick = { _, _ ->
-
-                }
+                onClick = { _, _ -> }
             )
         }
     }
@@ -531,9 +595,7 @@ fun InputRegistrationFieldPreview() {
                 modifier = Modifier.fillMaxWidth(),
                 isErrorShown = false,
                 registrationField = field,
-                onValueChanged = { _, _, _ ->
-
-                }
+                onValueChanged = { _, _, _ -> }
             )
         }
     }
@@ -547,7 +609,7 @@ private fun OptionalFieldsPreview() {
         Column(Modifier.background(MaterialTheme.appColors.background)) {
             val optionalField = field.copy(required = false)
             OptionalFields(
-                fields = List(3) { optionalField },
+                fields = List(size = 3) { optionalField },
                 showErrorMap = SnapshotStateMap(),
                 selectableNamesMap = SnapshotStateMap(),
                 onSelectClick = { _, _, _ -> },

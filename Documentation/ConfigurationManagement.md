@@ -49,7 +49,6 @@ TOKEN_TYPE: "JWT"
 
 FIREBASE:
   ENABLED: false
-  ANALYTICS_SOURCE: ''
   CLOUD_MESSAGING_ENABLED: false
   PROJECT_NUMBER: ''
   PROJECT_ID: ''
@@ -82,14 +81,14 @@ android:
 - **Facebook:** Sign in and Sign up via Facebook
 - **Branch:** Deeplinks
 - **Braze:** Cloud Messaging
-- **SegmentIO:** Analytics
 
 ## Available Feature Flags
 - **PRE_LOGIN_EXPERIENCE_ENABLED:** Enables the pre login courses discovery experience.
 - **WHATS_NEW_ENABLED:** Enables the "What's New" feature to present the latest changes to the user.
 - **SOCIAL_AUTH_ENABLED:** Enables SSO buttons on the SignIn and SignUp screens.
-- **COURSE_NESTED_LIST_ENABLED:** Enables an alternative visual representation for the course structure.
-- **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware. 
+- **COURSE_DROPDOWN_NAVIGATION_ENABLED:** Enables an alternative navigation through units.
+- **COURSE_UNIT_PROGRESS_ENABLED:** Enables the display of the unit progress within the courseware.
+- **REGISTRATION_ENABLED:** Enables user registration from the app.
 
 ## Future Support
 - To add config related to some other service, create a class, e.g. `ServiceNameConfig.kt`, to be able to populate related fields.

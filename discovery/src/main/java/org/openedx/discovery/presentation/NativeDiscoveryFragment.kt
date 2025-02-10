@@ -59,30 +59,31 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.AppUpdateState
 import org.openedx.core.AppUpdateState.wasUpdateDialogClosed
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.Media
 import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRecommendedBox
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendedBox
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.AuthButtonsPanel
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.StaticSearchBar
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
 import org.openedx.discovery.domain.model.Course
+import org.openedx.discovery.presentation.NativeDiscoveryFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.discovery.presentation.ui.DiscoveryCourseItem
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 
 class NativeDiscoveryFragment : Fragment() {
 
@@ -117,6 +118,7 @@ class NativeDiscoveryFragment : Fragment() {
                     hasInternetConnection = viewModel.hasInternetConnection,
                     canShowBackButton = viewModel.canShowBackButton,
                     isUserLoggedIn = viewModel.isUserLoggedIn,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     appUpgradeParameters = AppUpdateState.AppUpgradeParameters(
                         appUpgradeEvent = appUpgradeEvent,
                         wasUpdateDialogClosed = wasUpdateDialogClosed,
@@ -139,7 +141,8 @@ class NativeDiscoveryFragment : Fragment() {
                     onSearchClick = {
                         viewModel.discoverySearchBarClickedEvent()
                         router.navigateToCourseSearch(
-                            requireActivity().supportFragmentManager, ""
+                            requireActivity().supportFragmentManager,
+                            ""
                         )
                     },
                     paginationCallback = {
@@ -175,7 +178,8 @@ class NativeDiscoveryFragment : Fragment() {
                 LaunchedEffect(uiState) {
                     if (querySearch.isNotEmpty()) {
                         router.navigateToCourseSearch(
-                            requireActivity().supportFragmentManager, querySearch
+                            requireActivity().supportFragmentManager,
+                            querySearch
                         )
                         arguments?.putString(ARG_SEARCH_QUERY, "")
                     }
@@ -186,6 +190,7 @@ class NativeDiscoveryFragment : Fragment() {
 
     companion object {
         private const val ARG_SEARCH_QUERY = "query_search"
+        const val LOAD_MORE_THRESHOLD = 4
         fun newInstance(querySearch: String = ""): NativeDiscoveryFragment {
             val fragment = NativeDiscoveryFragment()
             fragment.arguments = bundleOf(
@@ -195,7 +200,6 @@ class NativeDiscoveryFragment : Fragment() {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -209,6 +213,7 @@ internal fun DiscoveryScreen(
     hasInternetConnection: Boolean,
     canShowBackButton: Boolean,
     isUserLoggedIn: Boolean,
+    isRegistrationEnabled: Boolean,
     appUpgradeParameters: AppUpdateState.AppUpgradeParameters,
     onSearchClick: () -> Unit,
     onSwipeRefresh: () -> Unit,
@@ -252,13 +257,13 @@ internal fun DiscoveryScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
         }
     ) {
-
         val searchTabWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -351,8 +356,9 @@ internal fun DiscoveryScreen(
                     when (state) {
                         is DiscoveryUIState.Loading -> {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
@@ -396,7 +402,8 @@ internal fun DiscoveryScreen(
                                             windowSize = windowSize,
                                             onClick = {
                                                 onItemClick(course)
-                                            })
+                                            }
+                                        )
                                         Divider()
                                     }
                                     item {
@@ -412,7 +419,7 @@ internal fun DiscoveryScreen(
                                         }
                                     }
                                 }
-                                if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                     paginationCallback()
                                 }
                             }
@@ -482,7 +489,8 @@ private fun CourseItemPreview() {
             apiHostUrl = "",
             course = mockCourse,
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            onClick = {})
+            onClick = {}
+        )
     }
 }
 
@@ -517,6 +525,7 @@ private fun DiscoveryScreenPreview() {
             refreshing = false,
             hasInternetConnection = true,
             isUserLoggedIn = false,
+            isRegistrationEnabled = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onSignInClick = {},
             onRegisterClick = {},
@@ -558,6 +567,7 @@ private fun DiscoveryScreenTabletPreview() {
             refreshing = false,
             hasInternetConnection = true,
             isUserLoggedIn = true,
+            isRegistrationEnabled = true,
             appUpgradeParameters = AppUpdateState.AppUpgradeParameters(),
             onSignInClick = {},
             onRegisterClick = {},

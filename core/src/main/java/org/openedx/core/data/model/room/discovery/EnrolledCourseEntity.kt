@@ -4,9 +4,21 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import org.openedx.core.data.model.DateType
 import org.openedx.core.data.model.room.MediaDb
-import org.openedx.core.domain.model.*
+import org.openedx.core.domain.model.Certificate
+import org.openedx.core.domain.model.CourseAccessDetails
+import org.openedx.core.domain.model.CourseAssignments
+import org.openedx.core.domain.model.CourseDateBlock
+import org.openedx.core.domain.model.CourseSharingUtmParameters
+import org.openedx.core.domain.model.CourseStatus
+import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.EnrolledCourse
+import org.openedx.core.domain.model.EnrolledCourseData
+import org.openedx.core.domain.model.EnrollmentDetails
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.utils.TimeUtils
+import java.util.Date
 
 @Entity(tableName = "course_enrolled_table")
 data class EnrolledCourseEntity(
@@ -25,6 +37,12 @@ data class EnrolledCourseEntity(
     val course: EnrolledCourseDataDb,
     @Embedded
     val certificate: CertificateDb?,
+    @Embedded
+    val progress: ProgressDb,
+    @Embedded
+    val courseStatus: CourseStatusDb?,
+    @Embedded
+    val courseAssignments: CourseAssignmentsDb?,
 ) {
 
     fun mapToDomain(): EnrolledCourse {
@@ -34,7 +52,10 @@ data class EnrolledCourseEntity(
             mode,
             isActive,
             course.mapToDomain(),
-            certificate?.mapToDomain()
+            certificate?.mapToDomain(),
+            progress.mapToDomain(),
+            courseStatus?.mapToDomain(),
+            courseAssignments?.mapToDomain()
         )
     }
 }
@@ -79,7 +100,7 @@ data class EnrolledCourseDataDb(
     @ColumnInfo("videoOutline")
     val videoOutline: String,
     @ColumnInfo("isSelfPaced")
-    val isSelfPaced: Boolean
+    val isSelfPaced: Boolean,
 ) {
     fun mapToDomain(): EnrolledCourseData {
         return EnrolledCourseData(
@@ -119,7 +140,7 @@ data class CoursewareAccessDb(
     @ColumnInfo("additionalContextUserMessage")
     val additionalContextUserMessage: String,
     @ColumnInfo("userFragment")
-    val userFragment: String
+    val userFragment: String,
 ) {
 
     fun mapToDomain(): CoursewareAccess {
@@ -132,12 +153,11 @@ data class CoursewareAccessDb(
             userFragment
         )
     }
-
 }
 
 data class CertificateDb(
     @ColumnInfo("certificateURL")
-    val certificateURL: String?
+    val certificateURL: String?,
 ) {
     fun mapToDomain() = Certificate(certificateURL)
 }
@@ -146,9 +166,127 @@ data class CourseSharingUtmParametersDb(
     @ColumnInfo("facebook")
     val facebook: String,
     @ColumnInfo("twitter")
-    val twitter: String
+    val twitter: String,
 ) {
     fun mapToDomain() = CourseSharingUtmParameters(
-        facebook, twitter
+        facebook,
+        twitter
     )
+}
+
+data class ProgressDb(
+    @ColumnInfo("assignments_completed")
+    val assignmentsCompleted: Int,
+    @ColumnInfo("total_assignments_count")
+    val totalAssignmentsCount: Int,
+) {
+    companion object {
+        val DEFAULT_PROGRESS = ProgressDb(0, 0)
+    }
+
+    fun mapToDomain() = Progress(assignmentsCompleted, totalAssignmentsCount)
+}
+
+data class CourseStatusDb(
+    @ColumnInfo("lastVisitedModuleId")
+    val lastVisitedModuleId: String,
+    @ColumnInfo("lastVisitedModulePath")
+    val lastVisitedModulePath: List<String>,
+    @ColumnInfo("lastVisitedBlockId")
+    val lastVisitedBlockId: String,
+    @ColumnInfo("lastVisitedUnitDisplayName")
+    val lastVisitedUnitDisplayName: String,
+) {
+    fun mapToDomain() = CourseStatus(
+        lastVisitedModuleId,
+        lastVisitedModulePath,
+        lastVisitedBlockId,
+        lastVisitedUnitDisplayName
+    )
+}
+
+data class CourseAssignmentsDb(
+    @ColumnInfo("futureAssignments")
+    val futureAssignments: List<CourseDateBlockDb>?,
+    @ColumnInfo("pastAssignments")
+    val pastAssignments: List<CourseDateBlockDb>?,
+) {
+    fun mapToDomain() = CourseAssignments(
+        futureAssignments = futureAssignments?.map { it.mapToDomain() },
+        pastAssignments = pastAssignments?.map { it.mapToDomain() }
+    )
+}
+
+data class CourseDateBlockDb(
+    @ColumnInfo("title")
+    val title: String = "",
+    @ColumnInfo("description")
+    val description: String = "",
+    @ColumnInfo("link")
+    val link: String = "",
+    @ColumnInfo("blockId")
+    val blockId: String = "",
+    @ColumnInfo("learnerHasAccess")
+    val learnerHasAccess: Boolean = false,
+    @ColumnInfo("complete")
+    val complete: Boolean = false,
+    @Embedded
+    val date: Date,
+    @ColumnInfo("dateType")
+    val dateType: DateType = DateType.NONE,
+    @ColumnInfo("assignmentType")
+    val assignmentType: String? = "",
+) {
+    fun mapToDomain() = CourseDateBlock(
+        title = title,
+        description = description,
+        link = link,
+        blockId = blockId,
+        learnerHasAccess = learnerHasAccess,
+        complete = complete,
+        date = date,
+        dateType = dateType,
+        assignmentType = assignmentType
+    )
+}
+
+data class EnrollmentDetailsDB(
+    @ColumnInfo("created")
+    var created: String?,
+    @ColumnInfo("mode")
+    var mode: String?,
+    @ColumnInfo("isActive")
+    var isActive: Boolean,
+    @ColumnInfo("upgradeDeadline")
+    var upgradeDeadline: String?,
+) {
+    fun mapToDomain() = EnrollmentDetails(
+        TimeUtils.iso8601ToDate(created ?: ""),
+        mode,
+        isActive,
+        TimeUtils.iso8601ToDate(upgradeDeadline ?: "")
+    )
+}
+
+data class CourseAccessDetailsDb(
+    @ColumnInfo("hasUnmetPrerequisites")
+    val hasUnmetPrerequisites: Boolean,
+    @ColumnInfo("isTooEarly")
+    val isTooEarly: Boolean,
+    @ColumnInfo("isStaff")
+    val isStaff: Boolean,
+    @ColumnInfo("auditAccessExpires")
+    var auditAccessExpires: String?,
+    @Embedded
+    val coursewareAccess: CoursewareAccessDb?,
+) {
+    fun mapToDomain(): CourseAccessDetails {
+        return CourseAccessDetails(
+            hasUnmetPrerequisites = hasUnmetPrerequisites,
+            isTooEarly = isTooEarly,
+            isStaff = isStaff,
+            auditAccessExpires = TimeUtils.iso8601ToDate(auditAccessExpires ?: ""),
+            coursewareAccess = coursewareAccess?.mapToDomain()
+        )
+    }
 }

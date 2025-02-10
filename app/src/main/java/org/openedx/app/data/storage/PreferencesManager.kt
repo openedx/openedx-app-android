@@ -4,19 +4,26 @@ import android.content.Context
 import com.google.gson.Gson
 import org.openedx.app.BuildConfig
 import org.openedx.core.data.model.User
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.domain.model.AppConfig
 import org.openedx.core.domain.model.VideoQuality
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.core.extension.replaceSpace
+import org.openedx.core.system.CalendarManager
 import org.openedx.course.data.storage.CoursePreferences
+import org.openedx.foundation.extension.replaceSpace
 import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,
-    WhatsNewPreferences, InAppReviewPreferences, CoursePreferences {
+class PreferencesManager(context: Context) :
+    CorePreferences,
+    ProfilePreferences,
+    WhatsNewPreferences,
+    InAppReviewPreferences,
+    CoursePreferences,
+    CalendarPreferences {
 
     private val sharedPreferences =
         context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
@@ -37,7 +44,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }.apply()
     }
 
-    private fun getLong(key: String): Long = sharedPreferences.getLong(key, 0L)
+    private fun getLong(key: String, defValue: Long = 0): Long = sharedPreferences.getLong(key, defValue)
 
     private fun saveBoolean(key: String, value: Boolean) {
         sharedPreferences.edit().apply {
@@ -49,12 +56,21 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         return sharedPreferences.getBoolean(key, defValue)
     }
 
-    override fun clear() {
+    override fun clearCorePreferences() {
         sharedPreferences.edit().apply {
             remove(ACCESS_TOKEN)
             remove(REFRESH_TOKEN)
             remove(USER)
+            remove(ACCOUNT)
             remove(EXPIRES_IN)
+        }.apply()
+    }
+
+    override fun clearCalendarPreferences() {
+        sharedPreferences.edit().apply {
+            remove(CALENDAR_ID)
+            remove(IS_CALENDAR_SYNC_ENABLED)
+            remove(HIDE_INACTIVE_COURSES)
         }.apply()
     }
 
@@ -70,11 +86,23 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getString(REFRESH_TOKEN)
 
+    override var pushToken: String
+        set(value) {
+            saveString(PUSH_TOKEN, value)
+        }
+        get() = getString(PUSH_TOKEN)
+
     override var accessTokenExpiresAt: Long
         set(value) {
             saveLong(EXPIRES_IN, value)
         }
         get() = getLong(EXPIRES_IN)
+
+    override var calendarId: Long
+        set(value) {
+            saveLong(CALENDAR_ID, value)
+        }
+        get() = getLong(CALENDAR_ID, CalendarManager.CALENDAR_DOES_NOT_EXIST)
 
     override var user: User?
         set(value) {
@@ -122,9 +150,11 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
             saveString(APP_CONFIG, appConfigJson)
         }
         get() {
-            val appConfigString = getString(APP_CONFIG)
+            val appConfigString = getString(APP_CONFIG, getDefaultAppConfig())
             return Gson().fromJson(appConfigString, AppConfig::class.java)
         }
+
+    private fun getDefaultAppConfig() = Gson().toJson(AppConfig())
 
     override var lastWhatsNewVersion: String
         set(value) {
@@ -152,6 +182,36 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         }
         get() = getBoolean(APP_WAS_POSITIVE_RATED)
 
+    override var canResetAppDirectory: Boolean
+        set(value) {
+            saveBoolean(RESET_APP_DIRECTORY, value)
+        }
+        get() = getBoolean(RESET_APP_DIRECTORY, true)
+
+    override var isCalendarSyncEnabled: Boolean
+        set(value) {
+            saveBoolean(IS_CALENDAR_SYNC_ENABLED, value)
+        }
+        get() = getBoolean(IS_CALENDAR_SYNC_ENABLED, true)
+
+    override var calendarUser: String
+        set(value) {
+            saveString(CALENDAR_USER, value)
+        }
+        get() = getString(CALENDAR_USER)
+
+    override var isRelativeDatesEnabled: Boolean
+        set(value) {
+            saveBoolean(IS_RELATIVE_DATES_ENABLED, value)
+        }
+        get() = getBoolean(IS_RELATIVE_DATES_ENABLED, true)
+
+    override var isHideInactiveCourses: Boolean
+        set(value) {
+            saveBoolean(HIDE_INACTIVE_COURSES, value)
+        }
+        get() = getBoolean(HIDE_INACTIVE_COURSES, true)
+
     override fun setCalendarSyncEventsDialogShown(courseName: String) {
         saveBoolean(courseName.replaceSpace("_"), true)
     }
@@ -162,6 +222,7 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
     companion object {
         private const val ACCESS_TOKEN = "access_token"
         private const val REFRESH_TOKEN = "refresh_token"
+        private const val PUSH_TOKEN = "push_token"
         private const val EXPIRES_IN = "expires_in"
         private const val USER = "user"
         private const val ACCOUNT = "account"
@@ -172,5 +233,11 @@ class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences
         private const val VIDEO_SETTINGS_STREAMING_QUALITY = "video_settings_streaming_quality"
         private const val VIDEO_SETTINGS_DOWNLOAD_QUALITY = "video_settings_download_quality"
         private const val APP_CONFIG = "app_config"
+        private const val CALENDAR_ID = "CALENDAR_ID"
+        private const val RESET_APP_DIRECTORY = "reset_app_directory"
+        private const val IS_CALENDAR_SYNC_ENABLED = "IS_CALENDAR_SYNC_ENABLED"
+        private const val IS_RELATIVE_DATES_ENABLED = "IS_RELATIVE_DATES_ENABLED"
+        private const val HIDE_INACTIVE_COURSES = "HIDE_INACTIVE_COURSES"
+        private const val CALENDAR_USER = "CALENDAR_USER"
     }
 }

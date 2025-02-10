@@ -1,12 +1,24 @@
 package org.openedx.discussion.data.api
 
 import org.openedx.core.data.model.BlocksCompletionBody
-import org.openedx.discussion.data.model.request.*
+import org.openedx.discussion.data.model.request.CommentBody
+import org.openedx.discussion.data.model.request.FollowBody
+import org.openedx.discussion.data.model.request.ReadBody
+import org.openedx.discussion.data.model.request.ReportBody
+import org.openedx.discussion.data.model.request.ThreadBody
+import org.openedx.discussion.data.model.request.VoteBody
 import org.openedx.discussion.data.model.response.CommentResult
 import org.openedx.discussion.data.model.response.CommentsResponse
 import org.openedx.discussion.data.model.response.ThreadsResponse
+import org.openedx.discussion.data.model.response.ThreadsResponse.Thread
 import org.openedx.discussion.data.model.response.TopicsResponse
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Headers
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface DiscussionApi {
 
@@ -26,6 +38,14 @@ interface DiscussionApi {
         @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
     ): ThreadsResponse
 
+    @GET("/api/discussion/v1/threads/{thread_id}")
+    suspend fun getCourseThread(
+        @Path("thread_id") threadId: String,
+        @Query("course_id") courseId: String,
+        @Query("topic_id") topicId: String,
+        @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
+    ): Thread
+
     @GET("/api/discussion/v1/threads/")
     suspend fun searchThreads(
         @Query("course_id") courseId: String,
@@ -40,6 +60,12 @@ interface DiscussionApi {
         @Query("page") page: Int,
         @Query("requested_fields") requestedFields: List<String> = listOf("profile_image")
     ): CommentsResponse
+
+    @Headers("Content-type: application/merge-patch+json")
+    @PATCH("/api/discussion/v1/comments/{response_id}/")
+    suspend fun getResponse(
+        @Path("response_id") responseId: String
+    ): CommentResult
 
     @GET("/api/discussion/v1/comments/")
     suspend fun getThreadQuestionComments(
@@ -101,15 +127,14 @@ interface DiscussionApi {
     @POST("/api/discussion/v1/comments/")
     suspend fun createComment(
         @Body commentBody: CommentBody
-    ) : CommentResult
+    ): CommentResult
 
     @POST("/api/discussion/v1/threads/")
-    suspend fun createThread(@Body threadBody: ThreadBody) : ThreadsResponse.Thread
+    suspend fun createThread(@Body threadBody: ThreadBody): Thread
 
     @POST("/api/completion/v1/completion-batch")
     suspend fun markBlocksCompletion(
         @Body
         blocksCompletionBody: BlocksCompletionBody
     )
-
 }

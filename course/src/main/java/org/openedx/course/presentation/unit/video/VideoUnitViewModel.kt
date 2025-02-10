@@ -30,7 +30,7 @@ open class VideoUnitViewModel(
 
     var videoUrl = ""
     var transcripts = emptyMap<String, String>()
-    var isPlaying = false
+    var isPlaying = true
     var transcriptLanguage = AppDataConstants.defaultLocale.language ?: "en"
         private set
 
@@ -88,20 +88,20 @@ open class VideoUnitViewModel(
 
     private fun getTranscriptUrl(): String {
         val defaultTranscripts = transcripts[transcriptLanguage]
-        if (!defaultTranscripts.isNullOrEmpty()) {
-            return defaultTranscripts
+        return when {
+            !defaultTranscripts.isNullOrEmpty() -> defaultTranscripts
+            transcripts.values.isNotEmpty() -> {
+                transcriptLanguage = transcripts.keys.first()
+                transcripts[transcriptLanguage] ?: ""
+            }
+
+            else -> ""
         }
-        if (transcripts.values.isNotEmpty()) {
-            transcriptLanguage = transcripts.keys.toList().first()
-            return transcripts[transcriptLanguage] ?: ""
-        }
-        return ""
     }
 
-
     open fun markBlockCompleted(blockId: String, medium: String) {
-        logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
         if (!isBlockAlreadyCompleted) {
+            logLoadedCompletedEvent(videoUrl, false, getCurrentVideoTime(), medium)
             viewModelScope.launch {
                 try {
                     isBlockAlreadyCompleted = true
@@ -111,6 +111,7 @@ open class VideoUnitViewModel(
                     )
                     notifier.send(CourseCompletionSet())
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     isBlockAlreadyCompleted = false
                 }
             }

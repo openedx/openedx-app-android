@@ -9,18 +9,48 @@ import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.*
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -41,22 +71,31 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.koin.android.ext.android.inject
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.extension.TextConverter
-import org.openedx.core.extension.parcelable
-import org.openedx.core.ui.*
+import org.openedx.core.ui.BackBtn
+import org.openedx.core.ui.HandleUIMessage
+import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.shouldLoadMore
+import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.discussion.domain.model.DiscussionComment
-import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment
-import org.openedx.discussion.presentation.ui.CommentMainItem
 import org.openedx.discussion.presentation.DiscussionRouter
+import org.openedx.discussion.presentation.comments.DiscussionCommentsFragment
+import org.openedx.discussion.presentation.responses.DiscussionResponsesFragment.Companion.LOAD_MORE_THRESHOLD
+import org.openedx.discussion.presentation.ui.CommentMainItem
+import org.openedx.foundation.extension.parcelable
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.discussion.R as discussionR
 
 class DiscussionResponsesFragment : Fragment() {
@@ -111,6 +150,7 @@ class DiscussionResponsesFragment : Fragment() {
                                     )
                                 }
                             }
+
                             DiscussionCommentsFragment.ACTION_REPORT_COMMENT -> {
                                 viewModel.setCommentReported(
                                     id,
@@ -127,7 +167,8 @@ class DiscussionResponsesFragment : Fragment() {
                     },
                     onUserPhotoClick = { username ->
                         router.navigateToAnothersProfile(
-                            requireActivity().supportFragmentManager, username
+                            requireActivity().supportFragmentManager,
+                            username
                         )
                     }
                 )
@@ -138,6 +179,7 @@ class DiscussionResponsesFragment : Fragment() {
     companion object {
         private const val ARG_COMMENT = "comment"
         private const val ARG_IS_CLOSED = "isClosed"
+        const val LOAD_MORE_THRESHOLD = 4
 
         fun newInstance(
             comment: DiscussionComment,
@@ -202,7 +244,6 @@ private fun DiscussionResponsesScreen(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -308,7 +349,7 @@ private fun DiscussionResponsesScreen(
                                                         bool
                                                     )
                                                 },
-                                                onUserPhotoClick = {username ->
+                                                onUserPhotoClick = { username ->
                                                     onUserPhotoClick(username)
                                                 }
                                             )
@@ -354,7 +395,7 @@ private fun DiscussionResponsesScreen(
                                                     onClick = { action, commentId, bool ->
                                                         onItemClick(action, commentId, bool)
                                                     },
-                                                    onUserPhotoClick = {username ->
+                                                    onUserPhotoClick = { username ->
                                                         onUserPhotoClick(username)
                                                     }
                                                 )
@@ -371,7 +412,7 @@ private fun DiscussionResponsesScreen(
                                             }
                                         }
                                     }
-                                    if (scrollState.shouldLoadMore(firstVisibleIndex, 4)) {
+                                    if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
                                         paginationCallBack()
                                     }
                                 }
@@ -407,7 +448,9 @@ private fun DiscussionResponsesScreen(
                                             shape = MaterialTheme.appShapes.buttonShape,
                                             placeholder = {
                                                 Text(
-                                                    text = stringResource(id = org.openedx.discussion.R.string.discussion_add_comment),
+                                                    text = stringResource(
+                                                        id = org.openedx.discussion.R.string.discussion_add_comment
+                                                    ),
                                                     color = MaterialTheme.appColors.textFieldHint,
                                                     style = MaterialTheme.appTypography.labelLarge,
                                                 )
@@ -436,7 +479,9 @@ private fun DiscussionResponsesScreen(
                                         ) {
                                             Icon(
                                                 modifier = Modifier.padding(7.dp),
-                                                painter = painterResource(id = org.openedx.discussion.R.drawable.discussion_ic_send),
+                                                painter = painterResource(
+                                                    id = org.openedx.discussion.R.drawable.discussion_ic_send
+                                                ),
                                                 contentDescription = null,
                                                 tint = iconButtonColor
                                             )
@@ -445,10 +490,12 @@ private fun DiscussionResponsesScreen(
                                 }
                             }
                         }
+
                         is DiscussionResponsesUIState.Loading -> {
                             Box(
-                                Modifier
-                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(color = MaterialTheme.appColors.primary)
                             }
@@ -471,11 +518,12 @@ private fun DiscussionResponsesScreen(
 @Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DiscussionResponsesScreenPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         DiscussionResponsesScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiState = DiscussionResponsesUIState.Success(
-                mockComment, listOf(
+                mockComment,
+                listOf(
                     mockComment,
                     mockComment
                 )
@@ -485,12 +533,8 @@ private fun DiscussionResponsesScreenPreview() {
             refreshing = false,
             onSwipeRefresh = {},
             paginationCallBack = { },
-            onItemClick = { _, _, _ ->
-
-            },
-            addCommentClick = {
-
-            },
+            onItemClick = { _, _, _ -> },
+            addCommentClick = {},
             onBackClick = {},
             isClosed = false,
             onUserPhotoClick = {}
@@ -502,11 +546,12 @@ private fun DiscussionResponsesScreenPreview() {
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DiscussionResponsesScreenTabletPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         DiscussionResponsesScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             uiState = DiscussionResponsesUIState.Success(
-                mockComment, listOf(
+                mockComment,
+                listOf(
                     mockComment,
                     mockComment
                 )
@@ -516,12 +561,8 @@ private fun DiscussionResponsesScreenTabletPreview() {
             refreshing = false,
             onSwipeRefresh = {},
             paginationCallBack = { },
-            onItemClick = { _, _, _ ->
-
-            },
-            addCommentClick = {
-
-            },
+            onItemClick = { _, _, _ -> },
+            addCommentClick = {},
             onBackClick = {},
             isClosed = false,
             onUserPhotoClick = {}
@@ -554,6 +595,3 @@ private val mockComment = DiscussionComment(
     ProfileImage("", "", "", "", false),
     mapOf()
 )
-
-
-

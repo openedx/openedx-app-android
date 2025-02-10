@@ -2,7 +2,7 @@ package org.openedx.course.presentation
 
 import androidx.fragment.app.FragmentManager
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityType
 import org.openedx.course.presentation.handouts.HandoutsType
 
 interface CourseRouter {
@@ -56,10 +56,14 @@ interface CourseRouter {
     )
 
     fun navigateToHandoutsWebView(
-        fm: FragmentManager, courseId: String, title: String, type: HandoutsType
+        fm: FragmentManager,
+        courseId: String,
+        type: HandoutsType
     )
 
     fun navigateToDownloadQueue(fm: FragmentManager, descendants: List<String> = arrayListOf())
 
     fun navigateToVideoQuality(fm: FragmentManager, videoQualityType: VideoQualityType)
+
+    fun navigateToDiscover(fm: FragmentManager)
 }

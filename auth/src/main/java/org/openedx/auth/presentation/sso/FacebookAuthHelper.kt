@@ -12,8 +12,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.domain.model.SocialAuthResponse
 import org.openedx.core.ApiConstants
-import org.openedx.core.extension.safeResume
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.extension.safeResume
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -46,8 +46,8 @@ class FacebookAuthHelper {
                                 continuation.safeResume(
                                     SocialAuthResponse(
                                         accessToken = result.accessToken.token,
-                                        name = obj?.getString(ApiConstants.NAME) ?: "",
-                                        email = obj?.getString(ApiConstants.EMAIL) ?: "",
+                                        name = obj?.optString(ApiConstants.NAME).orEmpty(),
+                                        email = obj?.optString(ApiConstants.EMAIL).orEmpty(),
                                         authType = AuthType.FACEBOOK,
                                     )
                                 ) {

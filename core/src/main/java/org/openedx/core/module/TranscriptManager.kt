@@ -1,9 +1,13 @@
 package org.openedx.core.module
 
 import android.content.Context
-import org.openedx.core.module.download.AbstractDownloader
-import org.openedx.core.utils.*
 import okhttp3.OkHttpClient
+import org.openedx.core.module.download.AbstractDownloader
+import org.openedx.core.utils.Directories
+import org.openedx.core.utils.IOUtils
+import org.openedx.core.utils.Logger
+import org.openedx.core.utils.Sha1Util
+import org.openedx.foundation.utils.FileUtil
 import subtitleFile.FormatSRT
 import subtitleFile.TimedTextObject
 import java.io.File
@@ -14,21 +18,26 @@ import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 class TranscriptManager(
-    val context: Context
+    val context: Context,
+    val fileUtil: FileUtil
 ) {
+
+    private val logger = Logger(TAG)
 
     private val transcriptDownloader = object : AbstractDownloader() {
         override val client: OkHttpClient
             get() = OkHttpClient.Builder().build()
     }
 
-    var transcriptObject: TimedTextObject? = null
+    private var transcriptObject: TimedTextObject? = null
 
-    fun has(url: String): Boolean {
+    private fun has(url: String): Boolean {
         val transcriptDir = getTranscriptDir() ?: return false
         val hash = Sha1Util.SHA1(url)
         val file = File(transcriptDir, hash)
-        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(5)
+        return file.exists() && System.currentTimeMillis() - file.lastModified() < TimeUnit.HOURS.toMillis(
+            FILE_VALIDITY_DURATION_HOURS
+        )
     }
 
     fun get(url: String): String? {
@@ -50,21 +59,24 @@ class TranscriptManager(
         return if (!file.exists()) {
             // not in cache
             null
-        } else FileInputStream(file)
+        } else {
+            FileInputStream(file)
+        }
     }
 
     private suspend fun startTranscriptDownload(downloadLink: String) {
-        if (!has(downloadLink)) {
-            val file = File(getTranscriptDir(), Sha1Util.SHA1(downloadLink))
-            val result = transcriptDownloader.download(
-                downloadLink,
-                file.path
-            )
-            if (result) {
-                getInputStream(downloadLink)?.let {
-                    val transcriptTimedTextObject =
-                        convertIntoTimedTextObject(it)
-                    transcriptObject = transcriptTimedTextObject
+        if (has(downloadLink)) return
+        val file = File(getTranscriptDir(), Sha1Util.SHA1(downloadLink))
+        val result = transcriptDownloader.download(
+            downloadLink,
+            file.path
+        )
+        if (result == AbstractDownloader.DownloadResult.SUCCESS) {
+            getInputStream(downloadLink)?.let {
+                try {
+                    transcriptObject = convertIntoTimedTextObject(it)
+                } catch (e: NullPointerException) {
+                    logger.e(throwable = e, submitCrashReport = true)
                 }
             }
         }
@@ -78,7 +90,7 @@ class TranscriptManager(
             try {
                 transcriptObject = convertIntoTimedTextObject(transcriptInputStream)
             } catch (e: Exception) {
-                e.printStackTrace()
+                logger.e(throwable = e, submitCrashReport = true)
             }
         } else {
             startTranscriptDownload(transcriptUrl)
@@ -96,24 +108,19 @@ class TranscriptManager(
         return timedTextObject
     }
 
-    fun fetchTranscriptResponse(url: String?): InputStream? {
-        if (url == null) {
-            return null
-        }
-        val response: InputStream?
-        try {
-            if (has(url)) {
-                response = getInputStream(url)
-                return response
-            }
+    private fun fetchTranscriptResponse(url: String?): InputStream? {
+        if (url == null) return null
+
+        return try {
+            if (has(url)) getInputStream(url) else null
         } catch (e: IOException) {
             e.printStackTrace()
+            null
         }
-        return null
     }
 
     private fun getTranscriptDir(): File? {
-        val externalAppDir: File = FileUtil.getExternalAppDir(context)
+        val externalAppDir: File = fileUtil.getExternalAppDir()
         if (externalAppDir.exists()) {
             val videosDir = File(externalAppDir, Directories.VIDEOS.name)
             val transcriptDir = File(videosDir, Directories.SUBTITLES.name)
@@ -123,4 +130,8 @@ class TranscriptManager(
         return null
     }
 
+    companion object {
+        private const val TAG = "TranscriptManager"
+        private const val FILE_VALIDITY_DURATION_HOURS = 5L
+    }
 }

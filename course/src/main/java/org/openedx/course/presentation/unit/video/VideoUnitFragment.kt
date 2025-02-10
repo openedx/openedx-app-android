@@ -6,14 +6,10 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.FrameLayout
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -27,17 +23,11 @@ import androidx.window.layout.WindowMetricsCalculator
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.computeWindowSizeClasses
-import org.openedx.core.extension.dpToPixel
-import org.openedx.core.extension.objectToString
-import org.openedx.core.extension.stringToObject
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.dialog.selectorbottomsheet.SelectBottomDialogFragment
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.core.ui.ConnectionErrorView
-import org.openedx.core.ui.WindowSize
 import org.openedx.core.ui.theme.OpenEdXTheme
-import org.openedx.core.ui.theme.appColors
 import org.openedx.core.utils.LocaleUtils
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoUnitBinding
@@ -46,6 +36,11 @@ import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.ui.VideoSubtitles
 import org.openedx.course.presentation.ui.VideoTitle
+import org.openedx.foundation.extension.computeWindowSizeClasses
+import org.openedx.foundation.extension.dpToPixel
+import org.openedx.foundation.extension.objectToString
+import org.openedx.foundation.extension.stringToObject
+import org.openedx.foundation.presentation.WindowSize
 import kotlin.math.roundToInt
 
 class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
@@ -91,7 +86,6 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             viewModel.isDownloaded = getBoolean(ARG_DOWNLOADED)
         }
         viewModel.downloadSubtitles()
-        handler.removeCallbacks(videoTimeRunnable)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,11 +99,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
 
         binding.connectionError.setContent {
             OpenEdXTheme {
-                ConnectionErrorView(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.appColors.background)
-                ) {
+                ConnectionErrorView {
                     binding.connectionError.isVisible =
                         !viewModel.hasInternetConnection && !viewModel.isDownloaded
                 }
@@ -150,25 +140,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         binding.connectionError.isVisible =
             !viewModel.hasInternetConnection && !viewModel.isDownloaded
 
-        val orientation = resources.configuration.orientation
-        val windowMetrics =
-            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
-        val currentBounds = windowMetrics.bounds
-        val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
-        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
-            val width = currentBounds.width() - requireContext().dpToPixel(32)
-            val minHeight = requireContext().dpToPixel(194).roundToInt()
-            val height = (width / 16f * 9f).roundToInt()
-            layoutParams.height = if (windowSize?.isTablet == true) {
-                requireContext().dpToPixel(320).roundToInt()
-            } else if (height < minHeight) {
-                minHeight
-            } else {
-                height
-            }
-        }
-
-        binding.playerView.layoutParams = layoutParams
+        setupPlayerHeight()
 
         viewModel.isUpdated.observe(viewLifecycleOwner) { isUpdated ->
             if (isUpdated) {
@@ -181,6 +153,38 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 appReviewManager.tryToOpenRateDialog()
             }
         }
+    }
+
+    private fun setupPlayerHeight() {
+        val orientation = resources.configuration.orientation
+        val windowMetrics = WindowMetricsCalculator.getOrCreate()
+            .computeCurrentWindowMetrics(requireActivity())
+        val currentBounds = windowMetrics.bounds
+        val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
+            val padding = requireContext().dpToPixel(PLAYER_VIEW_PADDING_DP)
+            val width = currentBounds.width() - padding
+            val minHeight = requireContext().dpToPixel(MIN_PLAYER_HEIGHT_DP).roundToInt()
+            val aspectRatio = VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT
+            val calculatedHeight = (width / aspectRatio).roundToInt()
+
+            layoutParams.height = when {
+                windowSize?.isTablet == true -> {
+                    requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
+                }
+
+                calculatedHeight < minHeight -> {
+                    minHeight
+                }
+
+                else -> {
+                    calculatedHeight
+                }
+            }
+        }
+
+        binding.playerView.layoutParams = layoutParams
     }
 
     @androidx.annotation.OptIn(UnstableApi::class)
@@ -202,9 +206,10 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             if (!viewModel.isPlayerSetUp) {
                 setPlayerMedia(mediaItem)
                 viewModel.getActivePlayer()?.prepare()
-                viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying
+                viewModel.getActivePlayer()?.playWhenReady = viewModel.isPlaying && isResumed
                 viewModel.isPlayerSetUp = true
             }
+            viewModel.getActivePlayer()?.seekTo(viewModel.getCurrentVideoTime())
 
             viewModel.castPlayer?.setSessionAvailabilityListener(
                 object : SessionAvailabilityListener {
@@ -217,7 +222,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                             mediaItem,
                             viewModel.exoPlayer?.currentPosition ?: 0L
                         )
-                        viewModel.castPlayer?.playWhenReady = false
+                        viewModel.castPlayer?.playWhenReady = true
                         showVideoControllerIndefinitely(true)
                     }
 
@@ -234,8 +239,9 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             )
 
             playerView.setFullscreenButtonClickListener {
-                if (viewModel.isCastActive)
+                if (viewModel.isCastActive) {
                     return@setFullscreenButtonClickListener
+                }
 
                 router.navigateToFullScreenVideo(
                     requireActivity().supportFragmentManager,
@@ -267,7 +273,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             binding.playerView.showController()
         } else {
             binding.playerView.controllerAutoShow = true
-            binding.playerView.controllerShowTimeoutMs = 2000
+            binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT
         }
     }
 
@@ -293,6 +299,13 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
         private const val ARG_DOWNLOADED = "isDownloaded"
+
+        private const val PLAYER_VIEW_PADDING_DP = 32
+        private const val MIN_PLAYER_HEIGHT_DP = 194
+        private const val TABLET_PLAYER_HEIGHT_DP = 320
+        private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
+        private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
+        private const val CONTROLLER_SHOW_TIMEOUT = 2000
 
         fun newInstance(
             blockId: String,

@@ -31,7 +31,6 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.BlockType
-import org.openedx.core.extension.serializable
 import org.openedx.core.presentation.course.CourseViewMode
 import org.openedx.core.presentation.global.InsetHolder
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -47,7 +46,7 @@ import org.openedx.course.presentation.ui.NavigationUnitsButtons
 import org.openedx.course.presentation.ui.SubSectionUnitsList
 import org.openedx.course.presentation.ui.SubSectionUnitsTitle
 import org.openedx.course.presentation.ui.VerticalPageIndicator
-
+import org.openedx.foundation.extension.serializable
 
 class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_container) {
 
@@ -76,9 +75,9 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             val blocks = viewModel.getUnitBlocks()
             blocks.getOrNull(position)?.let { currentBlock ->
                 val encodedVideo = currentBlock.studentViewData?.encodedVideos
-                binding.mediaRouteButton.isVisible = currentBlock.type == BlockType.VIDEO
-                        && encodedVideo?.hasNonYoutubeVideo == true
-                        && !encodedVideo.videoUrl.endsWith(".m3u8")
+                binding.mediaRouteButton.isVisible = currentBlock.type == BlockType.VIDEO &&
+                        encodedVideo?.hasNonYoutubeVideo == true &&
+                        !encodedVideo.videoUrl.endsWith(".m3u8")
             }
         }
     }
@@ -150,15 +149,31 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupViewPagerInsets()
+        setupMediaRouteButton()
+        initViewPager()
+        handleSavedInstanceState(savedInstanceState)
+        setupNavigationBar()
+        setupProgressIndicators()
+        setupBackButton()
+        setupSubSectionUnits()
+        checkUnitsListShown()
+        setupChapterEndDialogListener()
+    }
+
+    private fun setupViewPagerInsets() {
         val insetHolder = requireActivity() as InsetHolder
         val containerParams = binding.viewPager.layoutParams as ConstraintLayout.LayoutParams
         containerParams.bottomMargin = insetHolder.bottomInset
         binding.viewPager.layoutParams = containerParams
+    }
 
+    private fun setupMediaRouteButton() {
         binding.mediaRouteButton.setAlwaysVisible(true)
         CastButtonFactory.setUpMediaRouteButton(requireContext(), binding.mediaRouteButton)
+    }
 
-        initViewPager()
+    private fun handleSavedInstanceState(savedInstanceState: Bundle?) {
         if (savedInstanceState == null && componentId.isEmpty()) {
             val currentBlockIndex = viewModel.getUnitBlocks().indexOfFirst {
                 viewModel.getCurrentBlock().id == it.id
@@ -167,7 +182,7 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 binding.viewPager.currentItem = currentBlockIndex
             }
         }
-        if (componentId.isEmpty().not()) {
+        if (componentId.isNotEmpty()) {
             lifecycleScope.launch(Dispatchers.Main) {
                 viewModel.indexInContainer.value?.let { index ->
                     binding.viewPager.setCurrentItem(index, true)
@@ -176,11 +191,15 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             requireArguments().putString(ARG_COMPONENT_ID, "")
             componentId = ""
         }
+    }
 
+    private fun setupNavigationBar() {
         binding.cvNavigationBar.setContent {
             NavigationBar()
         }
+    }
 
+    private fun setupProgressIndicators() {
         if (viewModel.isCourseUnitProgressEnabled) {
             binding.horizontalProgress.setContent {
                 OpenEdXTheme {
@@ -190,7 +209,8 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                     HorizontalPageIndicator(
                         blocks = descendantsBlocks,
                         selectedPage = index,
-                        completedAndSelectedColor = MaterialTheme.appColors.componentHorizontalProgressCompletedAndSelected,
+                        completedAndSelectedColor =
+                        MaterialTheme.appColors.componentHorizontalProgressCompletedAndSelected,
                         completedColor = MaterialTheme.appColors.componentHorizontalProgressCompleted,
                         selectedColor = MaterialTheme.appColors.componentHorizontalProgressSelected,
                         defaultColor = MaterialTheme.appColors.componentHorizontalProgressDefault
@@ -198,7 +218,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                 }
             }
             binding.horizontalProgress.isVisible = true
-
         } else {
             binding.cvCount.setContent {
                 OpenEdXTheme {
@@ -212,35 +231,35 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
                         selectedPage = index,
                         defaultRadius = 3.dp,
                         selectedLength = 5.dp,
-                        modifier = Modifier
-                            .width(24.dp)
+                        modifier = Modifier.width(24.dp)
                     )
                 }
             }
             binding.cvCount.isVisible = true
         }
+    }
 
+    private fun setupBackButton() {
         binding.btnBack.setContent {
             val title = if (viewModel.isCourseExpandableSectionsEnabled) {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
                 unitBlocks.firstOrNull()?.let {
                     viewModel.getSubSectionBlock(it.id).displayName
                 } ?: ""
-
             } else {
                 val index by viewModel.indexInContainer.observeAsState(0)
                 val descendantsBlocks by viewModel.descendantsBlocks.collectAsState()
-                descendantsBlocks[index].displayName
+                descendantsBlocks.getOrNull(index)?.displayName ?: ""
             }
 
             CourseUnitToolbar(
                 title = title,
-                onBackClick = {
-                    navigateToParentFragment()
-                }
+                onBackClick = { navigateToParentFragment() }
             )
         }
+    }
 
+    private fun setupSubSectionUnits() {
         if (viewModel.isCourseExpandableSectionsEnabled) {
             binding.subSectionUnitsTitle.setContent {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
@@ -262,38 +281,45 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
 
             binding.subSectionUnitsList.setContent {
                 val unitBlocks by viewModel.subSectionUnitBlocks.collectAsState()
-                val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == viewModel.unitId }
-                OpenEdXTheme {
-                    SubSectionUnitsList(
-                        unitBlocks = unitBlocks,
-                        selectedUnitIndex = selectedUnitIndex
-                    ) { index, unit ->
-                        if (index != selectedUnitIndex) {
-                            router.navigateToCourseContainer(
-                                fm = requireActivity().supportFragmentManager,
-                                courseId = viewModel.courseId,
-                                unitId = unit.id,
-                                mode = requireArguments().serializable(ARG_MODE)!!
-                            )
-
-                        } else {
-                            handleUnitsClick()
+                // If there is more than one unit in the section, show the list
+                if (unitBlocks.size > 1) {
+                    val selectedUnitIndex = unitBlocks.indexOfFirst { it.id == viewModel.unitId }
+                    OpenEdXTheme {
+                        SubSectionUnitsList(
+                            unitBlocks = unitBlocks,
+                            selectedUnitIndex = selectedUnitIndex
+                        ) { index, unit ->
+                            if (index != selectedUnitIndex) {
+                                router.navigateToCourseContainer(
+                                    fm = requireActivity().supportFragmentManager,
+                                    courseId = viewModel.courseId,
+                                    unitId = unit.id,
+                                    mode = requireArguments().serializable(ARG_MODE)!!
+                                )
+                            } else {
+                                handleUnitsClick()
+                            }
                         }
                     }
                 }
             }
-
         } else {
             binding.subSectionUnitsTitle.isGone = true
         }
+    }
 
-        if (viewModel.unitsListShowed.value == true) handleUnitsClick()
-
-        val chapterEndDialogTag = ChapterEndFragmentDialog::class.simpleName
-        (requireActivity().supportFragmentManager
-            .findFragmentByTag(chapterEndDialogTag) as? ChapterEndFragmentDialog)?.let { fragment ->
-            fragment.listener = dialogListener
+    private fun checkUnitsListShown() {
+        if (viewModel.unitsListShowed.value == true) {
+            handleUnitsClick()
         }
+    }
+
+    private fun setupChapterEndDialogListener() {
+        val chapterEndDialogTag = ChapterEndFragmentDialog::class.simpleName
+        (requireActivity().supportFragmentManager.findFragmentByTag(chapterEndDialogTag) as? ChapterEndFragmentDialog)
+            ?.let { fragment ->
+                fragment.listener = dialogListener
+            }
     }
 
     override fun onResume() {
@@ -400,7 +426,6 @@ class CourseUnitContainerFragment : Fragment(R.layout.fragment_course_unit_conta
             binding.subSectionUnitsList.visibility = View.GONE
             binding.subSectionUnitsBg.visibility = View.GONE
             viewModel.setUnitsListVisibility(false)
-
         } else {
             binding.subSectionUnitsList.visibility = View.VISIBLE
             binding.subSectionUnitsBg.visibility = View.VISIBLE

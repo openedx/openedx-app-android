@@ -16,12 +16,14 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.ui.DefaultPlayerUiCo
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentYoutubeVideoFullScreenBinding
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment.Companion.RATE_DIALOG_THRESHOLD
+import org.openedx.course.presentation.unit.video.YoutubeVideoUnitFragment.Companion.VIDEO_COMPLETION_THRESHOLD
+import org.openedx.foundation.extension.requestApplyInsetsWhenAttached
 
 class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_full_screen) {
 
@@ -69,62 +71,62 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             .rel(0)
             .build()
 
+        binding.youtubePlayerView.initialize(
+            object : AbstractYouTubePlayerListener() {
+                var isMarkBlockCompletedCalled = false
 
-        binding.youtubePlayerView.initialize(object : AbstractYouTubePlayerListener() {
-            var isMarkBlockCompletedCalled = false
-
-            override fun onStateChange(
-                youTubePlayer: YouTubePlayer,
-                state: PlayerConstants.PlayerState,
-            ) {
-                super.onStateChange(youTubePlayer, state)
-                if (state == PlayerConstants.PlayerState.ENDED) {
-                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
-                }
-                viewModel.isPlaying = when (state) {
-                    PlayerConstants.PlayerState.PLAYING -> true
-                    PlayerConstants.PlayerState.PAUSED -> false
-                    else -> return
-                }
-            }
-
-            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-                super.onCurrentSecond(youTubePlayer, second)
-                viewModel.currentVideoTime = (second * 1000f).toLong()
-                val completePercentage = second / youtubeTrackerListener.videoDuration
-                if (completePercentage >= 0.8f && !isMarkBlockCompletedCalled) {
-                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
-                    isMarkBlockCompletedCalled = true
-                }
-                if (completePercentage >= 0.99f && !appReviewManager.isDialogShowed) {
-                    if (!appReviewManager.isDialogShowed) {
-                        appReviewManager.tryToOpenRateDialog()
+                override fun onStateChange(
+                    youTubePlayer: YouTubePlayer,
+                    state: PlayerConstants.PlayerState,
+                ) {
+                    super.onStateChange(youTubePlayer, state)
+                    if (state == PlayerConstants.PlayerState.ENDED) {
+                        viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
+                    }
+                    viewModel.isPlaying = when (state) {
+                        PlayerConstants.PlayerState.PLAYING -> true
+                        PlayerConstants.PlayerState.PAUSED -> false
+                        else -> return
                     }
                 }
-            }
 
-            override fun onReady(youTubePlayer: YouTubePlayer) {
-                super.onReady(youTubePlayer)
-                binding.youtubePlayerView.isVisible = true
-                val defPlayerUiController =
-                    DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
-                defPlayerUiController.setFullScreenButtonClickListener {
-                    parentFragmentManager.popBackStack()
+                override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                    super.onCurrentSecond(youTubePlayer, second)
+                    viewModel.currentVideoTime = (second * 1000f).toLong()
+                    val completePercentage = second / youtubeTrackerListener.videoDuration
+                    if (completePercentage >= VIDEO_COMPLETION_THRESHOLD && !isMarkBlockCompletedCalled) {
+                        viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.YOUTUBE.key)
+                        isMarkBlockCompletedCalled = true
+                    }
+                    if (completePercentage >= RATE_DIALOG_THRESHOLD && !appReviewManager.isDialogShowed) {
+                        if (!appReviewManager.isDialogShowed) {
+                            appReviewManager.tryToOpenRateDialog()
+                        }
+                    }
                 }
 
-                binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
+                override fun onReady(youTubePlayer: YouTubePlayer) {
+                    super.onReady(youTubePlayer)
+                    binding.youtubePlayerView.isVisible = true
+                    val defPlayerUiController =
+                        DefaultPlayerUiController(binding.youtubePlayerView, youTubePlayer)
+                    defPlayerUiController.setFullScreenButtonClickListener {
+                        parentFragmentManager.popBackStack()
+                    }
 
-                val videoId = viewModel.videoUrl.split("watch?v=")[1]
-                if (viewModel.isPlaying == true) {
-                    youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
-                } else {
-                    youTubePlayer.cueVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                    binding.youtubePlayerView.setCustomPlayerUi(defPlayerUiController.rootView)
+
+                    val videoId = viewModel.videoUrl.split("watch?v=")[1]
+                    if (viewModel.isPlaying == true) {
+                        youTubePlayer.loadVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                    } else {
+                        youTubePlayer.cueVideo(videoId, viewModel.currentVideoTime.toFloat() / 1000)
+                    }
+                    youTubePlayer.addListener(youtubeTrackerListener)
                 }
-                youTubePlayer.addListener(youtubeTrackerListener)
-
-            }
-
-        }, options)
+            },
+            options
+        )
     }
 
     override fun onDestroyView() {
@@ -157,5 +159,4 @@ class YoutubeVideoFullScreenFragment : Fragment(R.layout.fragment_youtube_video_
             return fragment
         }
     }
-
 }

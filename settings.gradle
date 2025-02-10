@@ -12,7 +12,7 @@ pluginManagement {
             }
         }
         dependencies {
-            classpath("com.android.tools:r8:8.2.26")
+            classpath("com.android.tools:r8:8.5.35")
         }
     }
 }
@@ -25,11 +25,10 @@ dependencyResolutionManagement {
             url "http://appboy.github.io/appboy-android-sdk/sdk"
             allowInsecureProtocol = true
         }
-        maven {
-            url "https://appboy.github.io/appboy-segment-android/sdk"
-            allowInsecureProtocol = true
-        }
         maven { url "https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1" }
+        maven {
+            url = uri("https://jitpack.io")
+        }
     }
 }
 //Workaround for AS Iguana https://github.com/gradle/gradle/issues/28407

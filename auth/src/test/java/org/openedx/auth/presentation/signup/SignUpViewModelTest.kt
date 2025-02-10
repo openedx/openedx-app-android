@@ -33,7 +33,6 @@ import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.config.FacebookConfig
 import org.openedx.core.config.GoogleConfig
@@ -43,8 +42,9 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.net.UnknownHostException
 
 @ExperimentalCoroutinesApi
@@ -59,7 +59,7 @@ class SignUpViewModelTest {
     private val preferencesManager = mockk<CorePreferences>()
     private val interactor = mockk<AuthInteractor>()
     private val analytics = mockk<AuthAnalytics>()
-    private val appUpgradeNotifier = mockk<AppUpgradeNotifier>()
+    private val appNotifier = mockk<AppNotifier>()
     private val agreementProvider = mockk<AgreementProvider>()
     private val oAuthHelper = mockk<OAuthHelper>()
     private val router = mockk<AuthRouter>()
@@ -111,7 +111,7 @@ class SignUpViewModelTest {
         every { resourceManager.getString(R.string.core_error_invalid_grant) } returns "Invalid credentials"
         every { resourceManager.getString(R.string.core_error_no_connection) } returns noInternet
         every { resourceManager.getString(R.string.core_error_unknown_error) } returns somethingWrong
-        every { appUpgradeNotifier.notifier } returns emptyFlow()
+        every { appNotifier.notifier } returns emptyFlow()
         every { agreementProvider.getAgreement(false) } returns null
         every { config.isSocialAuthEnabled() } returns false
         every { config.getAgreement(Locale.current.language) } returns AgreementUrls()
@@ -119,6 +119,7 @@ class SignUpViewModelTest {
         every { config.getGoogleConfig() } returns GoogleConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
         every { config.getMicrosoftConfig() } returns MicrosoftConfig()
+        every { analytics.logScreenEvent(any(), any()) } returns Unit
     }
 
     @After
@@ -133,7 +134,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -159,10 +160,11 @@ class SignUpViewModelTest {
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
         assertEquals(true, viewModel.uiState.value.validationError)
         assertFalse(viewModel.uiState.value.successLogin)
@@ -176,7 +178,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -206,11 +208,12 @@ class SignUpViewModelTest {
         viewModel.register()
         advanceUntilIdle()
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.validationError)
         assertFalse(viewModel.uiState.value.successLogin)
@@ -225,7 +228,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -245,10 +248,11 @@ class SignUpViewModelTest {
         advanceUntilIdle()
         verify(exactly = 0) { analytics.setUserIdForSession(any()) }
         verify(exactly = 1) { analytics.logEvent(any(), any()) }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
         coVerify(exactly = 1) { interactor.validateRegistrationFields(any()) }
         coVerify(exactly = 0) { interactor.register(any()) }
         coVerify(exactly = 0) { interactor.login(any(), any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.validationError)
         assertFalse(viewModel.uiState.value.successLogin)
@@ -263,7 +267,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -298,7 +302,8 @@ class SignUpViewModelTest {
         coVerify(exactly = 1) { interactor.register(any()) }
         coVerify(exactly = 1) { interactor.login(any(), any()) }
         verify(exactly = 2) { analytics.logEvent(any(), any()) }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { analytics.logScreenEvent(any(), any()) }
+        verify(exactly = 1) { appNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.validationError)
         assertFalse(viewModel.uiState.value.isButtonLoading)
@@ -312,7 +317,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -326,7 +331,7 @@ class SignUpViewModelTest {
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(noInternet, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
@@ -339,7 +344,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -353,7 +358,7 @@ class SignUpViewModelTest {
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(somethingWrong, (deferred.await() as? UIMessage.SnackBarMessage)?.message)
@@ -366,7 +371,7 @@ class SignUpViewModelTest {
             resourceManager = resourceManager,
             analytics = analytics,
             preferencesManager = preferencesManager,
-            appUpgradeNotifier = appUpgradeNotifier,
+            appNotifier = appNotifier,
             oAuthHelper = oAuthHelper,
             agreementProvider = agreementProvider,
             config = config,
@@ -378,9 +383,9 @@ class SignUpViewModelTest {
         viewModel.getRegistrationFields()
         advanceUntilIdle()
         coVerify(exactly = 1) { interactor.getRegistrationFields() }
-        verify(exactly = 1) { appUpgradeNotifier.notifier }
+        verify(exactly = 1) { appNotifier.notifier }
 
-        //val fields = viewModel.uiState.value as? SignUpUIState.Fields
+        // val fields = viewModel.uiState.value as? SignUpUIState.Fields
 
         assertFalse(viewModel.uiState.value.isLoading)
     }

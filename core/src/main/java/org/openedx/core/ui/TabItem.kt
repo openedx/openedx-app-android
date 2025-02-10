@@ -6,5 +6,5 @@ import androidx.compose.ui.graphics.vector.ImageVector
 interface TabItem {
     @get:StringRes
     val labelResId: Int
-    val icon: ImageVector
+    val icon: ImageVector?
 }

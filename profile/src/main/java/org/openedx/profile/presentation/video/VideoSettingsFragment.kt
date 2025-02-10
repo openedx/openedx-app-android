@@ -51,18 +51,18 @@ import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.domain.model.VideoSettings
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.noRippleClickable
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.R
 import org.openedx.core.R as CoreR
 
@@ -106,7 +106,6 @@ class VideoSettingsFragment : Fragment() {
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

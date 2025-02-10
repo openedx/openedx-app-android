@@ -8,6 +8,8 @@ data class AppColors(
 
     val textPrimary: Color,
     val textPrimaryVariant: Color,
+    val textPrimaryLight: Color,
+    val textHyperLink: Color,
     val textSecondary: Color,
     val textDark: Color,
     val textAccent: Color,
@@ -19,9 +21,18 @@ data class AppColors(
     val textFieldText: Color,
     val textFieldHint: Color,
 
-    val buttonBackground: Color,
-    val buttonSecondaryBackground: Color,
-    val buttonText: Color,
+    val primaryButtonBackground: Color,
+    val primaryButtonText: Color,
+    val primaryButtonBorder: Color,
+    val primaryButtonBorderedText: Color,
+
+    // The default secondary button styling is identical to the primary button styling.
+    // However, you can customize it if your brand utilizes two accent colors.
+    val secondaryButtonBackground: Color,
+    val secondaryButtonText: Color,
+    val secondaryButtonBorder: Color,
+    val secondaryButtonBorderedBackground: Color,
+    val secondaryButtonBorderedText: Color,
 
     val cardViewBackground: Color,
     val cardViewBorder: Color,
@@ -31,12 +42,16 @@ data class AppColors(
     val bottomSheetToggle: Color,
     val warning: Color,
     val info: Color,
+    val infoVariant: Color,
+    val onWarning: Color,
+    val onInfo: Color,
 
     val rateStars: Color,
     val inactiveButtonBackground: Color,
     val inactiveButtonText: Color,
 
-    val accessGreen: Color,
+    val successGreen: Color,
+    val successBackground: Color,
 
     val datesSectionBarPastDue: Color,
     val datesSectionBarToday: Color,
@@ -44,6 +59,8 @@ data class AppColors(
     val datesSectionBarNextWeek: Color,
     val datesSectionBarUpcoming: Color,
 
+    val authSSOSuccessBackground: Color,
+    val authGoogleButtonBackground: Color,
     val authFacebookButtonBackground: Color,
     val authMicrosoftButtonBackground: Color,
 
@@ -58,7 +75,10 @@ data class AppColors(
     val courseHomeHeaderShade: Color,
     val courseHomeBackBtnBackground: Color,
 
-    val settingsTitleContent: Color
+    val settingsTitleContent: Color,
+
+    val progressBarColor: Color,
+    val progressBarBackgroundColor: Color
 ) {
     val primary: Color get() = material.primary
     val primaryVariant: Color get() = material.primaryVariant

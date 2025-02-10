@@ -22,17 +22,19 @@ import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.ApiConstants
-import org.openedx.core.BaseViewModel
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.domain.model.RegistrationFieldType
 import org.openedx.core.domain.model.createHonorCodeField
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.SignInEvent
 import org.openedx.core.utils.Logger
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.core.R as coreR
 
 class SignUpViewModel(
@@ -40,7 +42,7 @@ class SignUpViewModel(
     private val resourceManager: ResourceManager,
     private val analytics: AuthAnalytics,
     private val preferencesManager: CorePreferences,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val appNotifier: AppNotifier,
     private val agreementProvider: AgreementProvider,
     private val oAuthHelper: OAuthHelper,
     private val config: Config,
@@ -71,6 +73,7 @@ class SignUpViewModel(
 
     init {
         collectAppUpgradeEvent()
+        logRegisterScreenEvent()
     }
 
     fun getRegistrationFields() {
@@ -134,68 +137,87 @@ class SignUpViewModel(
 
     fun register() {
         logEvent(AuthAnalyticsEvent.CREATE_ACCOUNT_CLICKED)
-        val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
-                mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
-        val resultMap = mapFields.toMutableMap()
-        uiState.value.allFields.filter { !it.required }.forEach { (k, _) ->
-            if (mapFields[k].isNullOrEmpty()) {
-                resultMap.remove(k)
-            }
-        }
+        val mapFields = prepareMapFields()
         _uiState.update { it.copy(isButtonLoading = true, validationError = false) }
+
         viewModelScope.launch {
             try {
                 setErrorInstructions(emptyMap())
                 val validationFields = interactor.validateRegistrationFields(mapFields)
                 setErrorInstructions(validationFields.validationResult)
+
                 if (validationFields.hasValidationError()) {
                     _uiState.update { it.copy(validationError = true, isButtonLoading = false) }
                 } else {
-                    val socialAuth = uiState.value.socialAuth
-                    if (socialAuth?.accessToken != null) {
-                        resultMap[ApiConstants.ACCESS_TOKEN] = socialAuth.accessToken
-                        resultMap[ApiConstants.PROVIDER] = socialAuth.authType.postfix
-                        resultMap[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
-                    }
-                    interactor.register(resultMap.toMap())
-                    logEvent(
-                        event = AuthAnalyticsEvent.REGISTER_SUCCESS,
-                        params = buildMap {
-                            put(
-                                AuthAnalyticsKey.METHOD.key,
-                                (socialAuth?.authType?.methodName
-                                    ?: AuthType.PASSWORD.methodName).lowercase()
-                            )
-                        }
-                    )
-                    if (socialAuth == null) {
-                        interactor.login(
-                            resultMap.getValue(ApiConstants.EMAIL),
-                            resultMap.getValue(ApiConstants.PASSWORD)
-                        )
-                        setUserId()
-                        _uiState.update { it.copy(successLogin = true, isButtonLoading = false) }
-                    } else {
-                        exchangeToken(socialAuth)
-                    }
+                    handleRegistration(mapFields)
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isButtonLoading = false) }
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(coreR.string.core_error_no_connection)
-                        )
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(
-                            resourceManager.getString(coreR.string.core_error_unknown_error)
-                        )
-                    )
+                handleRegistrationError(e)
+            }
+        }
+    }
+
+    private fun prepareMapFields(): MutableMap<String, String> {
+        val mapFields = uiState.value.allFields.associate { it.name to it.placeholder } +
+                mapOf(ApiConstants.RegistrationFields.HONOR_CODE to true.toString())
+
+        return mapFields.toMutableMap().apply {
+            uiState.value.allFields.filter { !it.required }.forEach { (key, _) ->
+                if (mapFields[key].isNullOrEmpty()) {
+                    remove(key)
                 }
             }
         }
+    }
+
+    private suspend fun handleRegistration(mapFields: MutableMap<String, String>) {
+        val resultMap = mapFields.toMutableMap()
+        uiState.value.socialAuth?.let { socialAuth ->
+            resultMap[ApiConstants.ACCESS_TOKEN] = socialAuth.accessToken
+            resultMap[ApiConstants.PROVIDER] = socialAuth.authType.postfix
+            resultMap[ApiConstants.CLIENT_ID] = config.getOAuthClientId()
+        }
+
+        interactor.register(resultMap)
+        logRegisterSuccess()
+
+        if (uiState.value.socialAuth == null) {
+            loginWithCredentials(resultMap)
+        } else {
+            exchangeToken(uiState.value.socialAuth!!)
+        }
+    }
+
+    private fun logRegisterSuccess() {
+        logEvent(
+            AuthAnalyticsEvent.REGISTER_SUCCESS,
+            buildMap {
+                put(
+                    AuthAnalyticsKey.METHOD.key,
+                    (uiState.value.socialAuth?.authType?.methodName ?: AuthType.PASSWORD.methodName).lowercase()
+                )
+            }
+        )
+    }
+
+    private suspend fun loginWithCredentials(resultMap: Map<String, String>) {
+        interactor.login(
+            resultMap.getValue(ApiConstants.EMAIL),
+            resultMap.getValue(ApiConstants.PASSWORD)
+        )
+        setUserId()
+        _uiState.update { it.copy(successLogin = true, isButtonLoading = false) }
+        appNotifier.send(SignInEvent())
+    }
+
+    private suspend fun handleRegistrationError(e: Exception) {
+        _uiState.update { it.copy(isButtonLoading = false) }
+        val errorMessage = if (e.isInternetError()) {
+            coreR.string.core_error_no_connection
+        } else {
+            coreR.string.core_error_unknown_error
+        }
+        _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
     }
 
     fun socialAuth(fragment: Fragment, authType: AuthType) {
@@ -226,9 +248,14 @@ class SignUpViewModel(
             interactor.loginSocial(socialAuth.accessToken, socialAuth.authType)
         }.onFailure {
             val fields = uiState.value.allFields.toMutableList()
-                .filter { field -> field.type != RegistrationFieldType.PASSWORD }
-            updateField(ApiConstants.NAME, socialAuth.name)
-            updateField(ApiConstants.EMAIL, socialAuth.email)
+                .filter { it.type != RegistrationFieldType.PASSWORD }
+                .map { field ->
+                    when (field.name) {
+                        ApiConstants.NAME -> field.copy(placeholder = socialAuth.name)
+                        ApiConstants.EMAIL -> field.copy(placeholder = socialAuth.email)
+                        else -> field
+                    }
+                }
             setErrorInstructions(emptyMap())
             _uiState.update {
                 it.copy(
@@ -250,6 +277,7 @@ class SignUpViewModel(
             )
             _uiState.update { it.copy(successLogin = true) }
             logger.d { "Social login (${socialAuth.authType.methodName}) success" }
+            appNotifier.send(SignInEvent())
         }
     }
 
@@ -269,8 +297,10 @@ class SignUpViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _uiState.update { it.copy(appUpgradeEvent = event) }
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _uiState.update { it.copy(appUpgradeEvent = event) }
+                }
             }
         }
     }
@@ -310,6 +340,16 @@ class SignUpViewModel(
             params = buildMap {
                 put(AuthAnalyticsKey.NAME.key, event.biValue)
                 putAll(params)
+            }
+        )
+    }
+
+    private fun logRegisterScreenEvent() {
+        val event = AuthAnalyticsEvent.REGISTER
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
+                put(AuthAnalyticsKey.NAME.key, event.biValue)
             }
         )
     }

@@ -2,7 +2,12 @@ package org.openedx.core.data.model
 
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.BlockType
-import org.openedx.core.domain.model.Block
+import org.openedx.core.utils.TimeUtils
+import org.openedx.core.domain.model.Block as DomainBlock
+import org.openedx.core.domain.model.BlockCounts as DomainBlockCounts
+import org.openedx.core.domain.model.EncodedVideos as DomainEncodedVideos
+import org.openedx.core.domain.model.StudentViewData as DomainStudentViewData
+import org.openedx.core.domain.model.VideoInfo as DomainVideoInfo
 
 data class Block(
     @SerializedName("id")
@@ -33,36 +38,47 @@ data class Block(
     val completion: Double?,
     @SerializedName("contains_gated_content")
     val containsGatedContent: Boolean?,
+    @SerializedName("assignment_progress")
+    val assignmentProgress: AssignmentProgress?,
+    @SerializedName("due")
+    val due: String?,
+    @SerializedName("offline_download")
+    val offlineDownload: OfflineDownload?,
 ) {
-    fun mapToDomain(blockData: Map<String, org.openedx.core.data.model.Block>): Block {
-        val blockType = BlockType.getBlockType(type ?: "")
-        val descendantsType = if (blockType == BlockType.VERTICAL) {
-            val types = descendants?.map { descendant ->
-                BlockType.getBlockType(blockData[descendant]?.type ?: "")
-            } ?: emptyList()
-            val sortedBlockTypes = BlockType.sortByPriority(types)
-            sortedBlockTypes.firstOrNull() ?: blockType
-        } else {
-            blockType
-        }
+    fun mapToDomain(blockData: Map<String, Block>): DomainBlock {
+        val blockType = BlockType.getBlockType(type.orEmpty())
+        val descendantsType = determineDescendantsType(blockType, blockData)
 
-        return org.openedx.core.domain.model.Block(
-            id = id ?: "",
-            blockId = blockId ?: "",
-            lmsWebUrl = lmsWebUrl ?: "",
-            legacyWebUrl = legacyWebUrl ?: "",
-            studentViewUrl = studentViewUrl ?: "",
+        return DomainBlock(
+            id = id.orEmpty(),
+            blockId = blockId.orEmpty(),
+            lmsWebUrl = lmsWebUrl.orEmpty(),
+            legacyWebUrl = legacyWebUrl.orEmpty(),
+            studentViewUrl = studentViewUrl.orEmpty(),
             type = blockType,
-            displayName = displayName ?: "",
-            descendants = descendants ?: emptyList(),
+            displayName = displayName.orEmpty(),
+            descendants = descendants.orEmpty(),
             descendantsType = descendantsType,
             graded = graded ?: false,
             studentViewData = studentViewData?.mapToDomain(),
             studentViewMultiDevice = studentViewMultiDevice ?: false,
             blockCounts = blockCounts?.mapToDomain()!!,
             completion = completion ?: 0.0,
-            containsGatedContent = containsGatedContent ?: false
+            containsGatedContent = containsGatedContent ?: false,
+            assignmentProgress = assignmentProgress?.mapToDomain(),
+            due = TimeUtils.iso8601ToDate(due.orEmpty()),
+            offlineDownload = offlineDownload?.mapToDomain()
         )
+    }
+
+    private fun determineDescendantsType(blockType: BlockType, blockData: Map<String, Block>): BlockType {
+        if (blockType != BlockType.VERTICAL) return blockType
+
+        val types = descendants?.map { descendant ->
+            BlockType.getBlockType(blockData[descendant]?.type.orEmpty())
+        }.orEmpty()
+
+        return BlockType.sortByPriority(types).firstOrNull() ?: blockType
     }
 }
 
@@ -80,15 +96,13 @@ data class StudentViewData(
     @SerializedName("topic_id")
     val topicId: String?
 ) {
-    fun mapToDomain(): org.openedx.core.domain.model.StudentViewData {
-        return org.openedx.core.domain.model.StudentViewData(
-            onlyOnWeb = onlyOnWeb ?: false,
-            duration = duration ?: "",
-            transcripts = transcripts,
-            encodedVideos = encodedVideos?.mapToDomain(),
-            topicId = topicId ?: ""
-        )
-    }
+    fun mapToDomain() = DomainStudentViewData(
+        onlyOnWeb = onlyOnWeb ?: false,
+        duration = duration ?: "",
+        transcripts = transcripts,
+        encodedVideos = encodedVideos?.mapToDomain(),
+        topicId = topicId.orEmpty()
+    )
 }
 
 data class EncodedVideos(
@@ -105,40 +119,33 @@ data class EncodedVideos(
     @SerializedName("mobile_low")
     var mobileLow: VideoInfo?
 ) {
-
-    fun mapToDomain(): org.openedx.core.domain.model.EncodedVideos {
-        return org.openedx.core.domain.model.EncodedVideos(
-            youtube = videoInfo?.mapToDomain(),
-            hls = hls?.mapToDomain(),
-            fallback = fallback?.mapToDomain(),
-            desktopMp4 = desktopMp4?.mapToDomain(),
-            mobileHigh = mobileHigh?.mapToDomain(),
-            mobileLow = mobileLow?.mapToDomain()
-        )
-    }
+    fun mapToDomain() = DomainEncodedVideos(
+        youtube = videoInfo?.mapToDomain(),
+        hls = hls?.mapToDomain(),
+        fallback = fallback?.mapToDomain(),
+        desktopMp4 = desktopMp4?.mapToDomain(),
+        mobileHigh = mobileHigh?.mapToDomain(),
+        mobileLow = mobileLow?.mapToDomain()
+    )
 }
 
 data class VideoInfo(
     @SerializedName("url")
     var url: String?,
     @SerializedName("file_size")
-    var fileSize: Int?
+    var fileSize: Long?
 ) {
-    fun mapToDomain(): org.openedx.core.domain.model.VideoInfo {
-        return org.openedx.core.domain.model.VideoInfo(
-            url = url ?: "",
-            fileSize = fileSize ?: 0
-        )
-    }
+    fun mapToDomain() = DomainVideoInfo(
+        url = url.orEmpty(),
+        fileSize = fileSize ?: 0
+    )
 }
 
 data class BlockCounts(
     @SerializedName("video")
     var video: Int?
 ) {
-    fun mapToDomain(): org.openedx.core.domain.model.BlockCounts {
-        return org.openedx.core.domain.model.BlockCounts(
-            video = video ?: 0
-        )
-    }
+    fun mapToDomain() = DomainBlockCounts(
+        video = video ?: 0
+    )
 }

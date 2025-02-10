@@ -24,6 +24,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -49,23 +49,27 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.presentation.dialog.alert.ActionDialogFragment
+import org.openedx.core.presentation.global.ErrorType
+import org.openedx.core.presentation.global.webview.WebViewUIAction
+import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.ui.AuthButtonsPanel
-import org.openedx.core.ui.ConnectionErrorView
+import org.openedx.core.ui.FullScreenErrorView
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discovery.R
 import org.openedx.discovery.presentation.catalog.CatalogWebViewScreen
 import org.openedx.discovery.presentation.catalog.WebViewLink
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.core.R as CoreR
 
 class WebViewDiscoveryFragment : Fragment() {
@@ -83,17 +87,34 @@ class WebViewDiscoveryFragment : Fragment() {
         setContent {
             OpenEdXTheme {
                 val windowSize = rememberWindowSize()
+                val uiState by viewModel.uiState.collectAsState()
                 var hasInternetConnection by remember {
                     mutableStateOf(viewModel.hasInternetConnection)
                 }
                 WebViewDiscoveryScreen(
                     windowSize = windowSize,
+                    uiState = uiState,
                     isPreLogin = viewModel.isPreLogin,
                     contentUrl = viewModel.discoveryUrl,
                     uriScheme = viewModel.uriScheme,
+                    userAgent = viewModel.appUserAgent,
+                    isRegistrationEnabled = viewModel.isRegistrationEnabled,
                     hasInternetConnection = hasInternetConnection,
-                    checkInternetConnection = {
-                        hasInternetConnection = viewModel.hasInternetConnection
+                    onWebViewUIAction = { action ->
+                        when (action) {
+                            WebViewUIAction.WEB_PAGE_LOADED -> {
+                                viewModel.onWebPageLoaded()
+                            }
+
+                            WebViewUIAction.WEB_PAGE_ERROR -> {
+                                viewModel.onWebPageLoadError()
+                            }
+
+                            WebViewUIAction.RELOAD_WEB_PAGE -> {
+                                hasInternetConnection = viewModel.hasInternetConnection
+                                viewModel.onWebPageLoading()
+                            }
+                        }
                     },
                     onWebPageUpdated = { url ->
                         viewModel.updateDiscoveryUrl(url)
@@ -170,11 +191,14 @@ class WebViewDiscoveryFragment : Fragment() {
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebViewDiscoveryScreen(
     windowSize: WindowSize,
+    uiState: WebViewUIState,
     isPreLogin: Boolean,
     contentUrl: String,
     uriScheme: String,
+    isRegistrationEnabled: Boolean,
+    userAgent: String,
     hasInternetConnection: Boolean,
-    checkInternetConnection: () -> Unit,
+    onWebViewUIAction: (WebViewUIAction) -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
     onRegisterClick: () -> Unit,
@@ -184,7 +208,6 @@ private fun WebViewDiscoveryScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val configuration = LocalConfiguration.current
-    var isLoading by remember { mutableStateOf(true) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -206,7 +229,8 @@ private fun WebViewDiscoveryScreen(
                 ) {
                     AuthButtonsPanel(
                         onRegisterClick = onRegisterClick,
-                        onSignInClick = onSignInClick
+                        onSignInClick = onSignInClick,
+                        showRegisterButton = isRegistrationEnabled
                     )
                 }
             }
@@ -248,25 +272,33 @@ private fun WebViewDiscoveryScreen(
                         .background(Color.White),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    if (hasInternetConnection) {
-                        DiscoveryWebView(
-                            contentUrl = contentUrl,
-                            uriScheme = uriScheme,
-                            onWebPageLoaded = { isLoading = false },
-                            onWebPageUpdated = onWebPageUpdated,
-                            onUriClick = onUriClick,
-                        )
-                    } else {
-                        ConnectionErrorView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(MaterialTheme.appColors.background)
-                        ) {
-                            checkInternetConnection()
+                    if ((uiState is WebViewUIState.Error).not()) {
+                        if (hasInternetConnection) {
+                            DiscoveryWebView(
+                                contentUrl = contentUrl,
+                                uriScheme = uriScheme,
+                                userAgent = userAgent,
+                                onWebPageLoaded = {
+                                    if ((uiState is WebViewUIState.Error).not()) {
+                                        onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED)
+                                    }
+                                },
+                                onWebPageUpdated = onWebPageUpdated,
+                                onUriClick = onUriClick,
+                                onWebPageLoadError = {
+                                    onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
+                                }
+                            )
+                        } else {
+                            onWebViewUIAction(WebViewUIAction.WEB_PAGE_ERROR)
                         }
                     }
-                    if (isLoading && hasInternetConnection) {
+                    if (uiState is WebViewUIState.Error) {
+                        FullScreenErrorView(errorType = uiState.errorType) {
+                            onWebViewUIAction(WebViewUIAction.RELOAD_WEB_PAGE)
+                        }
+                    }
+                    if (uiState is WebViewUIState.Loading && hasInternetConnection) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -287,16 +319,20 @@ private fun WebViewDiscoveryScreen(
 private fun DiscoveryWebView(
     contentUrl: String,
     uriScheme: String,
+    userAgent: String,
     onWebPageLoaded: () -> Unit,
     onWebPageUpdated: (String) -> Unit,
     onUriClick: (String, WebViewLink.Authority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ) {
     val webView = CatalogWebViewScreen(
         url = contentUrl,
         uriScheme = uriScheme,
+        userAgent = userAgent,
         onWebPageLoaded = onWebPageLoaded,
         onWebPageUpdated = onWebPageUpdated,
         onUriClick = onUriClick,
+        onWebPageLoadError = onWebPageLoadError
     )
 
     AndroidView(
@@ -360,17 +396,20 @@ private fun WebViewDiscoveryScreenPreview() {
     OpenEdXTheme {
         WebViewDiscoveryScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
-            contentUrl = "https://www.example.com/",
+            uiState = WebViewUIState.Error(ErrorType.CONNECTION_ERROR),
             isPreLogin = false,
+            contentUrl = "https://www.example.com/",
             uriScheme = "",
+            isRegistrationEnabled = true,
+            userAgent = "",
             hasInternetConnection = false,
-            checkInternetConnection = {},
+            onWebViewUIAction = {},
             onWebPageUpdated = {},
             onUriClick = { _, _ -> },
             onRegisterClick = {},
             onSignInClick = {},
             onSettingsClick = {},
-            onBackClick = {}
+            onBackClick = {},
         )
     }
 }

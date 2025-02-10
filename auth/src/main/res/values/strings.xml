@@ -11,7 +11,7 @@
     <string name="auth_email_username" tools:ignore="MissingTranslation">Email or Username</string>
     <string name="auth_invalid_email_username" tools:ignore="MissingTranslation">Invalid email or username</string>
     <string name="auth_invalid_password">Password is too short</string>
-    <string name="auth_welcome_back">Welcome back! Please authorize to continue.</string>
+    <string name="auth_welcome_back">Welcome back! Sign in to access your courses.</string>
     <string name="auth_show_optional_fields">Show optional fields</string>
     <string name="auth_hide_optional_fields">Hide optional fields</string>
     <string name="auth_create_account">Create account</string>
@@ -22,8 +22,11 @@
     <string name="auth_restore_password_success">We have sent a password recover instructions to your email %s</string>
     <string name="auth_example_email" translatable="false">username@domain.com</string>
     <string name="auth_enter_email_username" tools:ignore="MissingTranslation">Enter email or username</string>
+    <string name="auth_error_empty_username_email">Please enter your username or e-mail address and try again.</string>
+    <string name="auth_error_empty_email">Please enter your e-mail address and try again.</string>
     <string name="auth_enter_password">Enter password</string>
-    <string name="auth_create_new_account">Create new account.</string>
+    <string name="auth_error_empty_password">Please enter your password and try again.</string>
+    <string name="auth_create_new_account">Create an account to start learning today!</string>
     <string name="auth_compete_registration" translatable="false">Complete your registration</string>
     <string name="auth_google" tools:ignore="ExtraTranslation">Sign in with Google</string>
     <string name="auth_facebook" tools:ignore="ExtraTranslation">Sign in with Facebook</string>
@@ -39,4 +42,6 @@
     <string name="auth_agreement_creating_account" tools:ignore="ExtraTranslation">By creating an account, you agree to the %1$s and %2$s and you acknowledge that %3$s and each Member process your personal data in accordance with the %4$s.</string>
     <string name="auth_agreement_signin_in">By signing in to this app, you agree to the %1$s and %2$s and you acknowledge that %3$s and each Member process your personal data in accordance with the %4$s.</string>
     <string name="auth_cdata_template" translatable="false"><![CDATA[<a href="%1$s">%2$s</a>]]></string>
+    <string name="auth_accessibility_show_password">Show password</string>
+    <string name="auth_accessibility_hide_password">Hide password</string>
 </resources>

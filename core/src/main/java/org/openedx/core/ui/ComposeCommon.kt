@@ -1,11 +1,13 @@
 package org.openedx.core.ui
 
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,14 +30,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -48,6 +54,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,7 +67,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -72,6 +79,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -96,21 +104,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import kotlinx.coroutines.launch
+import org.openedx.core.NoContentScreenType
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.extension.LinkedImageText
-import org.openedx.core.extension.tagId
-import org.openedx.core.extension.toastMessage
+import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.foundation.extension.tagId
+import org.openedx.foundation.extension.toastMessage
+import org.openedx.foundation.presentation.UIMessage
 
 @Composable
 fun StaticSearchBar(
@@ -121,19 +132,21 @@ fun StaticSearchBar(
     Row(
         modifier = modifier
             .testTag("tf_search")
-            .then(Modifier
-                .background(
-                    MaterialTheme.appColors.textFieldBackground,
-                    MaterialTheme.appShapes.textFieldShape
-                )
-                .clip(MaterialTheme.appShapes.textFieldShape)
-                .border(
-                    1.dp,
-                    MaterialTheme.appColors.textFieldBorder,
-                    MaterialTheme.appShapes.textFieldShape
-                )
-                .clickable { onClick() }
-                .padding(horizontal = 20.dp)),
+            .then(
+                Modifier
+                    .background(
+                        MaterialTheme.appColors.textFieldBackground,
+                        MaterialTheme.appShapes.textFieldShape
+                    )
+                    .clip(MaterialTheme.appShapes.textFieldShape)
+                    .border(
+                        1.dp,
+                        MaterialTheme.appColors.textFieldBorder,
+                        MaterialTheme.appShapes.textFieldShape
+                    )
+                    .clickable { onClick() }
+                    .padding(horizontal = 20.dp)
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -199,8 +212,8 @@ fun Toolbar(
                 onClick = { onSettingsClick() }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.core_ic_settings),
-                    tint = MaterialTheme.appColors.primary,
+                    imageVector = Icons.Default.ManageAccounts,
+                    tint = MaterialTheme.appColors.textAccent,
                     contentDescription = stringResource(id = R.string.core_accessibility_settings)
                 )
             }
@@ -208,7 +221,6 @@ fun Toolbar(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
     modifier: Modifier,
@@ -255,7 +267,11 @@ fun SearchBar(
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            backgroundColor = if (isFocused) {
+                MaterialTheme.appColors.background
+            } else {
+                MaterialTheme.appColors.textFieldBackground
+            },
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
@@ -308,7 +324,6 @@ fun SearchBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarStateless(
     modifier: Modifier,
@@ -347,7 +362,11 @@ fun SearchBarStateless(
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            backgroundColor = if (isFocused) {
+                MaterialTheme.appColors.background
+            } else {
+                MaterialTheme.appColors.textFieldBackground
+            },
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
@@ -434,7 +453,7 @@ fun HyperlinkText(
         append(fullText)
         addStyle(
             style = SpanStyle(
-                color = MaterialTheme.appColors.textPrimary,
+                color = MaterialTheme.appColors.textPrimaryLight,
                 fontSize = fontSize
             ),
             start = 0,
@@ -442,7 +461,6 @@ fun HyperlinkText(
         )
 
         for ((key, value) in hyperLinks) {
-
             val startIndex = fullText.indexOf(key)
             val endIndex = startIndex + key.length
             addStyle(
@@ -450,7 +468,7 @@ fun HyperlinkText(
                     color = linkTextColor,
                     fontSize = fontSize,
                     fontWeight = linkTextFontWeight,
-                    textDecoration = linkTextDecoration
+                    textDecoration = linkTextDecoration,
                 ),
                 start = startIndex,
                 end = endIndex
@@ -473,18 +491,19 @@ fun HyperlinkText(
 
     val uriHandler = LocalUriHandler.current
 
-    ClickableText(
-        modifier = modifier,
+    BasicText(
         text = annotatedString,
-        style = textStyle,
-        onClick = {
-            annotatedString
-                .getStringAnnotations("URL", it, it)
-                .firstOrNull()?.let { stringAnnotation ->
-                    action?.invoke(stringAnnotation.item)
-                        ?: uriHandler.openUri(stringAnnotation.item)
-                }
-        }
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures { offset ->
+                val position = offset.x.toInt()
+                annotatedString.getStringAnnotations("URL", position, position)
+                    .firstOrNull()?.let { stringAnnotation ->
+                        action?.invoke(stringAnnotation.item)
+                            ?: uriHandler.openUri(stringAnnotation.item)
+                    }
+            }
+        },
+        style = textStyle
     )
 }
 
@@ -575,7 +594,7 @@ fun HyperlinkImageText(
     val context = LocalContext.current
     val imageLoader = ImageLoader.Builder(context)
         .components {
-            if (SDK_INT >= 28) {
+            if (SDK_INT >= Build.VERSION_CODES.P) {
                 add(ImageDecoderDecoder.Factory())
             } else {
                 add(GifDecoder.Factory())
@@ -584,17 +603,18 @@ fun HyperlinkImageText(
         .build()
 
     Column(Modifier.fillMaxWidth()) {
-        ClickableText(
-            modifier = modifier,
+        BasicText(
             text = annotatedString,
-            style = textStyle,
-            onClick = {
-                annotatedString
-                    .getStringAnnotations("URL", it, it)
-                    .firstOrNull()?.let { stringAnnotation ->
-                        uriHandler.openUri(stringAnnotation.item)
-                    }
-            }
+            modifier = modifier.pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val position = offset.x.toInt()
+                    annotatedString.getStringAnnotations("URL", position, position)
+                        .firstOrNull()?.let { stringAnnotation ->
+                            uriHandler.openUri(stringAnnotation.item)
+                        }
+                }
+            },
+            style = textStyle
         )
         imageText.imageLinks.values.forEach {
             Spacer(Modifier.height(8.dp))
@@ -635,7 +655,8 @@ fun SheetContent(
                 .padding(10.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.appTypography.titleMedium,
-            text = title
+            text = title,
+            color = MaterialTheme.appColors.onBackground
         )
         SearchBarStateless(
             modifier = Modifier
@@ -649,15 +670,21 @@ fun SheetContent(
             },
             onValueChanged = { textField ->
                 searchValueChanged(textField)
-            }, onClearValue = {
+            },
+            onClearValue = {
                 searchValueChanged("")
             }
         )
         Spacer(Modifier.height(10.dp))
-        LazyColumn(Modifier.fillMaxSize(), listState) {
-            items(expandedList.filter {
-                it.name.startsWith(searchValue.text, true)
-            }) { item ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState
+        ) {
+            items(
+                expandedList.filter {
+                    it.name.startsWith(searchValue.text, true)
+                }
+            ) { item ->
                 Text(
                     modifier = Modifier
                         .testTag("txt_${item.value.tagId()}_title")
@@ -667,6 +694,7 @@ fun SheetContent(
                             onItemClick(item)
                         }
                         .padding(vertical = 12.dp),
+                    color = MaterialTheme.appColors.onBackground,
                     text = item.name,
                     style = MaterialTheme.appTypography.bodyLarge,
                     textAlign = TextAlign.Center
@@ -711,15 +739,20 @@ fun SheetContent(
             },
             onValueChanged = { textField ->
                 searchValueChanged(textField)
-            }, onClearValue = {
+            },
+            onClearValue = {
                 searchValueChanged("")
             }
         )
         Spacer(Modifier.height(10.dp))
-        LazyColumn(Modifier.fillMaxWidth()) {
-            items(expandedList.filter {
-                it.first.startsWith(searchValue.text, true)
-            }) { item ->
+        LazyColumn(
+            Modifier.fillMaxWidth()
+        ) {
+            items(
+                expandedList.filter {
+                    it.first.startsWith(searchValue.text, true)
+                }
+            ) { item ->
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -829,6 +862,7 @@ fun AutoSizeText(
     style: TextStyle,
     color: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
+    minSize: Float = 0f
 ) {
     var scaledTextStyle by remember { mutableStateOf(style) }
     var readyToDraw by remember { mutableStateOf(false) }
@@ -845,9 +879,8 @@ fun AutoSizeText(
         softWrap = false,
         maxLines = maxLines,
         onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.didOverflowWidth) {
-                scaledTextStyle =
-                    scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
+            if (textLayoutResult.didOverflowWidth && scaledTextStyle.fontSize.value > minSize) {
+                scaledTextStyle = scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
             } else {
                 readyToDraw = true
             }
@@ -879,7 +912,7 @@ fun IconText(
         Icon(
             modifier = Modifier
                 .testTag("ic_${text.tagId()}")
-                .size((textStyle.fontSize.value + 4).dp),
+                .size(size = (textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
@@ -917,7 +950,7 @@ fun IconText(
         Icon(
             modifier = Modifier
                 .testTag("ic_${text.tagId()}")
-                .size((textStyle.fontSize.value + 4).dp),
+                .size(size = (textStyle.fontSize.value + 4).dp),
             painter = painter,
             contentDescription = null,
             tint = color
@@ -933,25 +966,27 @@ fun IconText(
 
 @Composable
 fun TextIcon(
+    modifier: Modifier = Modifier,
     text: String,
     icon: ImageVector,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
+    iconModifier: Modifier? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val modifier = if (onClick == null) {
-        Modifier
+    val rowModifier = if (onClick == null) {
+        modifier
     } else {
-        Modifier.noRippleClickable { onClick.invoke() }
+        modifier.clickable { onClick.invoke() }
     }
     Row(
-        modifier = modifier,
+        modifier = rowModifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(text = text, color = color, style = textStyle)
         Icon(
-            modifier = Modifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = iconModifier ?: Modifier.size(size = (textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
@@ -961,11 +996,11 @@ fun TextIcon(
 
 @Composable
 fun TextIcon(
+    iconModifier: Modifier = Modifier,
     text: String,
     painter: Painter,
     color: Color,
     textStyle: TextStyle = MaterialTheme.appTypography.bodySmall,
-    iconModifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     val modifier = if (onClick == null) {
@@ -981,7 +1016,7 @@ fun TextIcon(
         Text(text = text, color = color, style = textStyle)
         Icon(
             modifier = iconModifier
-                .size((textStyle.fontSize.value + 4).dp),
+                .size(size = (textStyle.fontSize.value + 4).dp),
             painter = painter,
             contentDescription = null,
             tint = color
@@ -1018,7 +1053,8 @@ fun OfflineModeDialog(
                     modifier = Modifier.size(20.dp),
                     onClick = {
                         onReloadClick()
-                    }) {
+                    }
+                ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         painter = painterResource(R.drawable.core_ic_reload),
@@ -1030,7 +1066,8 @@ fun OfflineModeDialog(
                     modifier = Modifier.size(20.dp),
                     onClick = {
                         onDismissCLick()
-                    }) {
+                    }
+                ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = Icons.Filled.Close,
@@ -1058,8 +1095,9 @@ fun OpenEdXButton(
     text: String = "",
     onClick: () -> Unit,
     enabled: Boolean = true,
-    backgroundColor: Color = MaterialTheme.appColors.buttonBackground,
-    content: (@Composable RowScope.() -> Unit)? = null,
+    textColor: Color = MaterialTheme.appColors.primaryButtonText,
+    backgroundColor: Color = MaterialTheme.appColors.primaryButtonBackground,
+    content: (@Composable RowScope.() -> Unit)? = null
 ) {
     Button(
         modifier = Modifier
@@ -1077,7 +1115,7 @@ fun OpenEdXButton(
             Text(
                 modifier = Modifier.testTag("txt_${text.tagId()}"),
                 text = text,
-                color = MaterialTheme.appColors.buttonText,
+                color = textColor,
                 style = MaterialTheme.appTypography.labelLarge
             )
         } else {
@@ -1093,6 +1131,7 @@ fun OpenEdXOutlinedButton(
     borderColor: Color,
     textColor: Color,
     text: String = "",
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -1102,6 +1141,7 @@ fun OpenEdXOutlinedButton(
             .then(modifier)
             .height(42.dp),
         onClick = onClick,
+        enabled = enabled,
         border = BorderStroke(1.dp, borderColor),
         shape = MaterialTheme.appShapes.buttonShape,
         colors = ButtonDefaults.outlinedButtonColors(backgroundColor = backgroundColor)
@@ -1125,8 +1165,12 @@ fun BackBtn(
     tint: Color = MaterialTheme.appColors.primary,
     onBackClick: () -> Unit,
 ) {
-    IconButton(modifier = modifier.testTag("ib_back"),
-        onClick = { onBackClick() }) {
+    IconButton(
+        modifier = modifier.testTag("ib_back"),
+        onClick = {
+            onBackClick()
+        }
+    ) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),
             contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
@@ -1136,33 +1180,41 @@ fun BackBtn(
 }
 
 @Composable
-fun ConnectionErrorView(
-    modifier: Modifier,
-    onReloadClick: () -> Unit,
+fun ConnectionErrorView(onReloadClick: () -> Unit) {
+    FullScreenErrorView(errorType = ErrorType.CONNECTION_ERROR, onReloadClick = onReloadClick)
+}
+
+@Composable
+fun FullScreenErrorView(
+    modifier: Modifier = Modifier,
+    errorType: ErrorType,
+    onReloadClick: () -> Unit
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.appColors.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             modifier = Modifier.size(100.dp),
-            painter = painterResource(id = R.drawable.core_no_internet_connection),
+            painter = painterResource(id = errorType.iconResId),
             contentDescription = null,
             tint = MaterialTheme.appColors.onSurface
         )
         Spacer(Modifier.height(28.dp))
         Text(
-            modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_no_internet_connection),
+            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+            text = stringResource(id = errorType.titleResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleLarge,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            modifier = Modifier.fillMaxWidth(0.8f),
-            text = stringResource(id = R.string.core_no_internet_connection_description),
+            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+            text = stringResource(id = errorType.descriptionResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyLarge,
             textAlign = TextAlign.Center
@@ -1171,8 +1223,45 @@ fun ConnectionErrorView(
         OpenEdXButton(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
-            text = stringResource(id = R.string.core_reload),
-            onClick = onReloadClick
+            text = stringResource(id = errorType.actionResId),
+            textColor = MaterialTheme.appColors.secondaryButtonText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+            onClick = onReloadClick,
+        )
+    }
+}
+
+@Composable
+fun NoContentScreen(noContentScreenType: NoContentScreenType) {
+    NoContentScreen(
+        message = stringResource(id = noContentScreenType.messageResId),
+        icon = painterResource(id = noContentScreenType.iconResId)
+    )
+}
+
+@Composable
+fun NoContentScreen(message: String, icon: Painter) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            modifier = Modifier.size(80.dp),
+            painter = icon,
+            contentDescription = null,
+            tint = MaterialTheme.appColors.progressBarBackgroundColor,
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+            text = message,
+            color = MaterialTheme.appColors.textPrimary,
+            style = MaterialTheme.appTypography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -1181,26 +1270,39 @@ fun ConnectionErrorView(
 fun AuthButtonsPanel(
     onRegisterClick: () -> Unit,
     onSignInClick: () -> Unit,
+    showRegisterButton: Boolean,
 ) {
     Row {
-        OpenEdXButton(
-            modifier = Modifier
-                .testTag("btn_register")
-                .width(0.dp)
-                .weight(1f),
-            text = stringResource(id = R.string.core_register),
-            onClick = { onRegisterClick() }
-        )
+        if (showRegisterButton) {
+            OpenEdXButton(
+                modifier = Modifier
+                    .testTag("btn_register")
+                    .width(0.dp)
+                    .weight(1f),
+                text = stringResource(id = R.string.core_register),
+                textColor = MaterialTheme.appColors.primaryButtonText,
+                backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
+                onClick = { onRegisterClick() }
+            )
+        }
 
         OpenEdXOutlinedButton(
             modifier = Modifier
                 .testTag("btn_sign_in")
-                .width(100.dp)
-                .padding(start = 16.dp),
+                .then(
+                    if (showRegisterButton) {
+                        Modifier
+                            .width(100.dp)
+                            .padding(start = 16.dp)
+                    } else {
+                        Modifier.weight(1f)
+                    }
+                ),
             text = stringResource(id = R.string.core_sign_in),
             onClick = { onSignInClick() },
-            borderColor = MaterialTheme.appColors.textFieldBorder,
-            textColor = MaterialTheme.appColors.primary
+            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
+            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
         )
     }
 }
@@ -1211,29 +1313,44 @@ fun RoundTabsBar(
     modifier: Modifier = Modifier,
     items: List<TabItem>,
     pagerState: PagerState,
+    contentPadding: PaddingValues = PaddingValues(),
+    withPager: Boolean = false,
     rowState: LazyListState = rememberLazyListState(),
-    onPageChange: (Int) -> Unit
+    onTabClicked: (Int) -> Unit = { }
 ) {
+    // The pager state does not work without the pager and the tabs do not change.
+    if (!withPager) {
+        HorizontalPager(state = pagerState) { }
+    }
+
     val scope = rememberCoroutineScope()
-    val windowSize = rememberWindowSize()
-    val horizontalPadding = if (!windowSize.isTablet) 12.dp else 98.dp
     LazyRow(
         modifier = modifier,
         state = rowState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp, horizontal = horizontalPadding),
+        contentPadding = contentPadding,
     ) {
         itemsIndexed(items) { index, item ->
             val isSelected = pagerState.currentPage == index
-            val backgroundColor =
-                if (isSelected) MaterialTheme.appColors.primary else MaterialTheme.appColors.tabUnselectedBtnBackground
-            val contentColor =
-                if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
-            val border = if (!isSystemInDarkTheme()) Modifier.border(
-                1.dp,
-                MaterialTheme.appColors.primary,
-                CircleShape
-            ) else Modifier
+            val backgroundColor = if (isSelected) {
+                MaterialTheme.appColors.primary
+            } else {
+                MaterialTheme.appColors.tabUnselectedBtnBackground
+            }
+            val contentColor = if (isSelected) {
+                MaterialTheme.appColors.tabSelectedBtnContent
+            } else {
+                MaterialTheme.appColors.tabUnselectedBtnContent
+            }
+            val border = if (!isSystemInDarkTheme()) {
+                Modifier.border(
+                    1.dp,
+                    MaterialTheme.appColors.primary,
+                    CircleShape
+                )
+            } else {
+                Modifier
+            }
 
             RoundTab(
                 modifier = Modifier
@@ -1243,15 +1360,29 @@ fun RoundTabsBar(
                     .then(border)
                     .clickable {
                         scope.launch {
+                            onTabClicked(index)
                             pagerState.scrollToPage(index)
-                            onPageChange(index)
+                            rowState.animateScrollToItem(index)
                         }
                     }
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 16.dp),
                 item = item,
                 contentColor = contentColor
             )
         }
+    }
+}
+
+@Composable
+fun CircularProgress() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.appColors.background)
+            .zIndex(1f),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
     }
 }
 
@@ -1266,12 +1397,15 @@ private fun RoundTab(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = rememberVectorPainter(item.icon),
-            tint = contentColor,
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.width(4.dp))
+        val icon = item.icon
+        if (icon != null) {
+            Icon(
+                painter = rememberVectorPainter(icon),
+                tint = contentColor,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+        }
         Text(
             text = stringResource(item.labelResId),
             color = contentColor
@@ -1319,7 +1453,7 @@ private fun ToolbarPreview() {
 @Preview
 @Composable
 private fun AuthButtonsPanelPreview() {
-    AuthButtonsPanel(onRegisterClick = {}, onSignInClick = {})
+    AuthButtonsPanel(onRegisterClick = {}, onSignInClick = {}, showRegisterButton = true)
 }
 
 @Preview
@@ -1350,11 +1484,7 @@ private fun IconTextPreview() {
 @Composable
 private fun ConnectionErrorViewPreview() {
     OpenEdXTheme(darkTheme = true) {
-        ConnectionErrorView(
-            modifier = Modifier
-                .fillMaxSize(),
-            onReloadClick = {}
-        )
+        ConnectionErrorView(onReloadClick = {})
     }
 }
 
@@ -1372,7 +1502,18 @@ private fun RoundTabsBarPreview() {
             items = listOf(mockTab, mockTab, mockTab),
             rowState = rememberLazyListState(),
             pagerState = rememberPagerState(pageCount = { 3 }),
-            onPageChange = { }
+            onTabClicked = { }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewNoContentScreen() {
+    OpenEdXTheme(darkTheme = true) {
+        NoContentScreen(
+            "No Content available",
+            rememberVectorPainter(image = Icons.Filled.Info)
         )
     }
 }

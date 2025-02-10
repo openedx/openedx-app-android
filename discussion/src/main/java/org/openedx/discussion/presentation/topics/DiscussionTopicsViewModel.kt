@@ -7,18 +7,17 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
 import org.openedx.core.R
-import org.openedx.core.UIMessage
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.presentation.course.CourseContainerTab
-import org.openedx.core.system.ResourceManager
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseRefresh
+import org.openedx.core.system.notifier.RefreshDiscussions
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 
 class DiscussionTopicsViewModel(
     val courseId: String,
@@ -48,12 +47,19 @@ class DiscussionTopicsViewModel(
         viewModelScope.launch {
             try {
                 val response = interactor.getCourseTopics(courseId)
-                _uiState.value = DiscussionTopicsUIState.Topics(response)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                if (response.isEmpty().not()) {
+                    _uiState.value = DiscussionTopicsUIState.Topics(response)
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                    _uiState.value = DiscussionTopicsUIState.Error
+                }
+            } catch (e: Exception) {
+                _uiState.value = DiscussionTopicsUIState.Error
+                if (e.isInternetError()) {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 }
             } finally {
                 courseNotifier.send(CourseLoading(false))
@@ -81,11 +87,7 @@ class DiscussionTopicsViewModel(
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
                 when (event) {
-                    is CourseRefresh -> {
-                        if (event.courseContainerTab == CourseContainerTab.DISCUSSIONS) {
-                            getCourseTopic()
-                        }
-                    }
+                    is RefreshDiscussions -> getCourseTopic()
                 }
             }
         }

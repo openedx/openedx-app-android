@@ -1,11 +1,11 @@
 package org.openedx.core.presentation.dialog.selectorbottomsheet
 
 import androidx.lifecycle.viewModelScope
-import org.openedx.core.BaseViewModel
+import kotlinx.coroutines.launch
 import org.openedx.core.domain.model.RegistrationField
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSubtitleLanguageChanged
-import kotlinx.coroutines.launch
+import org.openedx.foundation.presentation.BaseViewModel
 
 class SelectDialogViewModel(
     private val notifier: CourseNotifier
@@ -18,5 +18,4 @@ class SelectDialogViewModel(
             notifier.send(CourseSubtitleLanguageChanged(value))
         }
     }
-
 }

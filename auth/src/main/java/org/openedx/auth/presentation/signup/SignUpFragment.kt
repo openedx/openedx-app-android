@@ -17,9 +17,9 @@ import org.openedx.auth.data.model.AuthType
 import org.openedx.auth.presentation.AuthRouter
 import org.openedx.auth.presentation.signup.compose.SignUpView
 import org.openedx.core.AppUpdateState
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
-import org.openedx.core.ui.rememberWindowSize
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.theme.OpenEdXTheme
+import org.openedx.foundation.presentation.rememberWindowSize
 
 class SignUpFragment : Fragment() {
 
@@ -66,6 +66,7 @@ class SignUpFragment : Fragment() {
                                     this@SignUpFragment,
                                     authType
                                 )
+                                AuthType.BROWSER -> null
                             }
                         },
                         onFieldUpdated = { key, value ->

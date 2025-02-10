@@ -8,23 +8,24 @@ import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
+@Suppress("TooManyFunctions")
 class Config(context: Context) {
 
-    private var configProperties: JsonObject
+    private var configProperties: JsonObject = try {
+        val inputStream = context.assets.open("config/config.json")
+        val config = JsonParser.parseReader(InputStreamReader(inputStream))
+        config.asJsonObject
+    } catch (e: Exception) {
+        e.printStackTrace()
+        JsonObject()
+    }
 
-    init {
-        configProperties = try {
-            val inputStream = context.assets.open("config/config.json")
-            val parser = JsonParser()
-            val config = parser.parse(InputStreamReader(inputStream))
-            config.asJsonObject
-        } catch (e: Exception) {
-            JsonObject()
-        }
+    fun getAppId(): String {
+        return getString(APPLICATION_ID, "")
     }
 
     fun getApiHostURL(): String {
-        return getString(API_HOST_URL, "")
+        return getString(API_HOST_URL)
     }
 
     fun getSSOURL(): String {
@@ -32,27 +33,27 @@ class Config(context: Context) {
     }
 
     fun getUriScheme(): String {
-        return getString(URI_SCHEME, "")
+        return getString(URI_SCHEME)
     }
 
     fun getOAuthClientId(): String {
-        return getString(OAUTH_CLIENT_ID, "")
+        return getString(OAUTH_CLIENT_ID)
     }
 
     fun getAccessTokenType(): String {
-        return getString(TOKEN_TYPE, "")
+        return getString(TOKEN_TYPE)
     }
 
     fun getFaqUrl(): String {
-        return getString(FAQ_URL, "")
+        return getString(FAQ_URL)
     }
 
     fun getFeedbackEmailAddress(): String {
-        return getString(FEEDBACK_EMAIL_ADDRESS, "")
+        return getString(FEEDBACK_EMAIL_ADDRESS)
     }
 
     fun getPlatformName(): String {
-        return getString(PLATFORM_NAME, "")
+        return getString(PLATFORM_NAME)
     }
 
     fun getAgreement(locale: String): AgreementUrls {
@@ -63,10 +64,6 @@ class Config(context: Context) {
 
     fun getFirebaseConfig(): FirebaseConfig {
         return getObjectOrNewInstance(FIREBASE, FirebaseConfig::class.java)
-    }
-
-    fun getSegmentConfig(): SegmentConfig {
-        return getObjectOrNewInstance(SEGMENT_IO, SegmentConfig::class.java)
     }
 
     fun getBrazeConfig(): BrazeConfig {
@@ -95,6 +92,10 @@ class Config(context: Context) {
         return getObjectOrNewInstance(PROGRAM, ProgramConfig::class.java)
     }
 
+    fun getDashboardConfig(): DashboardConfig {
+        return getObjectOrNewInstance(DASHBOARD, DashboardConfig::class.java)
+    }
+
     fun getBranchConfig(): BranchConfig {
         return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
@@ -107,6 +108,16 @@ class Config(context: Context) {
         return getBoolean(PRE_LOGIN_EXPERIENCE_ENABLED, true)
     }
 
+    fun getCourseUIConfig(): UIConfig {
+        return getObjectOrNewInstance(UI_COMPONENTS, UIConfig::class.java)
+    }
+
+    fun isRegistrationEnabled(): Boolean {
+        return getBoolean(REGISTRATION_ENABLED, true)
+    }
+
+    fun isBrowserLoginEnabled(): Boolean {
+        return getBoolean(BROWSER_LOGIN, false)
     fun isLoginRegistrationEnabled(): Boolean {
         return getBoolean(LOGIN_REGISTRATION_ENABLED, true)
     }
@@ -128,11 +139,11 @@ class Config(context: Context) {
         return getBoolean(COURSE_NESTED_LIST_ENABLED, false)
     }
 
-    fun isCourseUnitProgressEnabled(): Boolean {
-        return getBoolean(COURSE_UNIT_PROGRESS_ENABLED, false)
+    fun isBrowserRegistrationEnabled(): Boolean {
+        return getBoolean(BROWSER_REGISTRATION, false)
     }
 
-    private fun getString(key: String, defaultValue: String): String {
+    private fun getString(key: String, defaultValue: String = ""): String {
         val element = getObject(key)
         return if (element != null) {
             element.asString
@@ -155,18 +166,21 @@ class Config(context: Context) {
             try {
                 cls.getDeclaredConstructor().newInstance()
             } catch (e: InstantiationException) {
-                throw RuntimeException(e)
+                throw ConfigParsingException(e)
             } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
+                throw ConfigParsingException(e)
             }
         }
     }
+
+    class ConfigParsingException(cause: Throwable) : Exception(cause)
 
     private fun getObject(key: String): JsonElement? {
         return configProperties.get(key)
     }
 
     companion object {
+        private const val APPLICATION_ID = "APPLICATION_ID"
         private const val API_HOST_URL = "API_HOST_URL"
         private const val SSO_URL = "SSO_URL"
         private const val SSO_FINISHED_URL = "SSO_FINISHED_URL"
@@ -183,17 +197,19 @@ class Config(context: Context) {
         private const val WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED"
         private const val SOCIAL_AUTH_ENABLED = "SOCIAL_AUTH_ENABLED"
         private const val FIREBASE = "FIREBASE"
-        private const val SEGMENT_IO = "SEGMENT_IO"
         private const val BRAZE = "BRAZE"
         private const val FACEBOOK = "FACEBOOK"
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
+        private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
+        private const val BROWSER_LOGIN = "BROWSER_LOGIN"
+        private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
+        private const val DASHBOARD = "DASHBOARD"
         private const val BRANCH = "BRANCH"
-        private const val COURSE_NESTED_LIST_ENABLED = "COURSE_NESTED_LIST_ENABLED"
-        private const val COURSE_UNIT_PROGRESS_ENABLED = "COURSE_UNIT_PROGRESS_ENABLED"
+        private const val UI_COMPONENTS = "UI_COMPONENTS"
         private const val PLATFORM_NAME = "PLATFORM_NAME"
     }
 

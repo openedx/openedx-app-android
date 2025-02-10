@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
+import androidx.annotation.OptIn
 import androidx.core.os.bundleOf
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -12,6 +13,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.Clock
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -27,12 +29,12 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.domain.model.VideoQuality
-import org.openedx.core.extension.requestApplyInsetsWhenAttached
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.viewBinding
 import org.openedx.course.R
 import org.openedx.course.databinding.FragmentVideoFullScreenBinding
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.extension.requestApplyInsetsWhenAttached
 
 class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
@@ -93,73 +95,84 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun initPlayer() {
-        with(binding) {
-            if (exoPlayer == null) {
-                val videoQuality = viewModel.getVideoQuality()
-                val params = DefaultTrackSelector.Parameters.Builder(requireContext())
-                    .apply {
-                        if (videoQuality != VideoQuality.AUTO) {
-                            setMaxVideoSize(videoQuality.width, videoQuality.height)
-                            setViewportSize(videoQuality.width, videoQuality.height, false)
-                        }
-                    }
-                    .build()
+        if (exoPlayer == null) {
+            exoPlayer = buildExoPlayer()
+        }
+        setupPlayerView()
+        setupMediaItem()
+        setupPlayerListeners()
+    }
 
-                val factory = AdaptiveTrackSelection.Factory()
-                val selector = DefaultTrackSelector(requireContext(), factory)
-                selector.parameters = params
-
-                exoPlayer = ExoPlayer.Builder(
-                    requireContext(),
-                    DefaultRenderersFactory(requireContext()),
-                    DefaultMediaSourceFactory(requireContext(), DefaultExtractorsFactory()),
-                    selector,
-                    DefaultLoadControl(),
-                    DefaultBandwidthMeter.getSingletonInstance(requireContext()),
-                    DefaultAnalyticsCollector(Clock.DEFAULT)
-                ).build()
+    @OptIn(UnstableApi::class)
+    private fun buildExoPlayer(): ExoPlayer {
+        val videoQuality = viewModel.getVideoQuality()
+        val trackSelector = DefaultTrackSelector(requireContext(), AdaptiveTrackSelection.Factory())
+        trackSelector.parameters = DefaultTrackSelector.Parameters.Builder(requireContext()).apply {
+            if (videoQuality != VideoQuality.AUTO) {
+                setMaxVideoSize(videoQuality.width, videoQuality.height)
+                setViewportSize(videoQuality.width, videoQuality.height, false)
             }
-            playerView.player = exoPlayer
-            playerView.setShowNextButton(false)
-            playerView.setShowPreviousButton(false)
-            val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
-            setPlayerMedia(mediaItem)
-            exoPlayer?.prepare()
-            exoPlayer?.playWhenReady = viewModel.isPlaying ?: false
+        }.build()
 
-            playerView.setFullscreenButtonClickListener { _ ->
+        return ExoPlayer.Builder(
+            requireContext(),
+            DefaultRenderersFactory(requireContext()),
+            DefaultMediaSourceFactory(requireContext(), DefaultExtractorsFactory()),
+            trackSelector,
+            DefaultLoadControl(),
+            DefaultBandwidthMeter.getSingletonInstance(requireContext()),
+            DefaultAnalyticsCollector(Clock.DEFAULT)
+        ).build()
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun setupPlayerView() {
+        with(binding.playerView) {
+            player = exoPlayer
+            setShowNextButton(false)
+            setShowPreviousButton(false)
+            setFullscreenButtonClickListener {
                 requireActivity().supportFragmentManager.popBackStackImmediate()
             }
-
-            exoPlayer?.addListener(object : Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    super.onIsPlayingChanged(isPlaying)
-                    viewModel.logPlayPauseEvent(
-                        viewModel.videoUrl,
-                        isPlaying,
-                        viewModel.currentVideoTime,
-                        CourseAnalyticsKey.NATIVE.key
-                    )
-                }
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    super.onPlaybackStateChanged(playbackState)
-                    if (playbackState == Player.STATE_ENDED) {
-                        viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
-                    }
-                }
-
-                override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
-                    super.onPlaybackParametersChanged(playbackParameters)
-                    viewModel.logVideoSpeedEvent(
-                        viewModel.videoUrl,
-                        playbackParameters.speed,
-                        viewModel.currentVideoTime,
-                        CourseAnalyticsKey.NATIVE.key
-                    )
-                }
-            })
         }
+    }
+
+    private fun setupMediaItem() {
+        val mediaItem = MediaItem.fromUri(viewModel.videoUrl)
+        setPlayerMedia(mediaItem)
+        exoPlayer?.prepare()
+        exoPlayer?.playWhenReady = viewModel.isPlaying ?: false
+    }
+
+    private fun setupPlayerListeners() {
+        exoPlayer?.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+                viewModel.logPlayPauseEvent(
+                    viewModel.videoUrl,
+                    isPlaying,
+                    viewModel.currentVideoTime,
+                    CourseAnalyticsKey.NATIVE.key
+                )
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                super.onPlaybackStateChanged(playbackState)
+                if (playbackState == Player.STATE_ENDED) {
+                    viewModel.markBlockCompleted(blockId, CourseAnalyticsKey.NATIVE.key)
+                }
+            }
+
+            override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                super.onPlaybackParametersChanged(playbackParameters)
+                viewModel.logVideoSpeedEvent(
+                    viewModel.videoUrl,
+                    playbackParameters.speed,
+                    viewModel.currentVideoTime,
+                    CourseAnalyticsKey.NATIVE.key
+                )
+            }
+        })
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -194,7 +207,6 @@ class VideoFullScreenFragment : Fragment(R.layout.fragment_video_full_screen) {
         viewModel.sendTime()
         super.onDestroyView()
     }
-
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onDestroy() {

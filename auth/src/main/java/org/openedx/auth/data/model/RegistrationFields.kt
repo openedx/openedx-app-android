@@ -74,5 +74,4 @@ data class RegistrationFields(
             )
         }
     }
-
 }

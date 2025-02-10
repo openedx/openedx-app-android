@@ -38,13 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
@@ -52,7 +49,10 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.presentation.manageaccount.ManageAccountUIState
 import org.openedx.profile.presentation.ui.ProfileTopic
 import org.openedx.profile.presentation.ui.mockAccount
@@ -71,7 +71,8 @@ internal fun ManageAccountView(
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
-        onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) })
+        onRefresh = { onAction(ManageAccountViewAction.SwipeRefresh) }
+    )
 
     Scaffold(
         modifier = Modifier
@@ -174,7 +175,7 @@ internal fun ManageAccountView(
                                         onClick = {
                                             onAction(ManageAccountViewAction.EditAccountClick)
                                         },
-                                        borderColor = MaterialTheme.appColors.buttonBackground,
+                                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
                                         textColor = MaterialTheme.appColors.textAccent
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -185,7 +186,8 @@ internal fun ManageAccountView(
                                         color = MaterialTheme.appColors.error,
                                         onClick = {
                                             onAction(ManageAccountViewAction.DeleteAccount)
-                                        })
+                                        }
+                                    )
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
                             }
@@ -218,7 +220,6 @@ private fun ManageAccountViewPreview() {
         )
     }
 }
-
 
 @Preview(name = "NEXUS_9_Light", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "NEXUS_9_Dark", device = Devices.NEXUS_9, uiMode = Configuration.UI_MODE_NIGHT_YES)

@@ -11,5 +11,5 @@ class DownloadNotifier {
     val notifier: Flow<DownloadEvent> = channel.asSharedFlow()
 
     suspend fun send(event: DownloadProgressChanged) = channel.emit(event)
-
+    suspend fun send(event: DownloadFailed) = channel.emit(event)
 }

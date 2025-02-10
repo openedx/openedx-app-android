@@ -11,8 +11,10 @@ data class DownloadModelEntity(
     val id: String,
     @ColumnInfo("title")
     val title: String,
+    @ColumnInfo("courseId")
+    val courseId: String,
     @ColumnInfo("size")
-    val size: Int,
+    val size: Long,
     @ColumnInfo("path")
     val path: String,
     @ColumnInfo("url")
@@ -21,19 +23,20 @@ data class DownloadModelEntity(
     val type: String,
     @ColumnInfo("downloadedState")
     val downloadedState: String,
-    @ColumnInfo("progress")
-    val progress: Float?
+    @ColumnInfo("lastModified")
+    val lastModified: String?
 ) {
 
     fun mapToDomain() = DownloadModel(
         id,
         title,
+        courseId,
         size,
         path,
         url,
         FileType.valueOf(type),
         DownloadedState.valueOf(downloadedState),
-        progress
+        lastModified
     )
 
     companion object {
@@ -43,16 +46,15 @@ data class DownloadModelEntity(
                 return DownloadModelEntity(
                     id,
                     title,
+                    courseId,
                     size,
                     path,
                     url,
                     type.name,
                     downloadedState.name,
-                    progress
+                    lastModified
                 )
             }
         }
-
     }
-
 }

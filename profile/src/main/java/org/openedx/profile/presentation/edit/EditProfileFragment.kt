@@ -42,7 +42,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
@@ -108,13 +107,9 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.AppDataConstants.DEFAULT_MIME_TYPE
-import org.openedx.core.UIMessage
 import org.openedx.core.domain.model.LanguageProficiency
 import org.openedx.core.domain.model.ProfileImage
 import org.openedx.core.domain.model.RegistrationField
-import org.openedx.core.extension.getFileName
-import org.openedx.core.extension.parcelable
-import org.openedx.core.extension.tagId
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
@@ -122,22 +117,27 @@ import org.openedx.core.ui.IconText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
 import org.openedx.core.ui.SheetContent
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
 import org.openedx.core.ui.rememberSaveableMap
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.core.utils.LocaleUtils
+import org.openedx.foundation.extension.getFileName
+import org.openedx.foundation.extension.parcelable
+import org.openedx.foundation.extension.tagId
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.R
 import org.openedx.profile.domain.model.Account
+import org.openedx.profile.presentation.edit.EditProfileFragment.Companion.LEAVE_PROFILE_WIDTH_FACTOR
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -249,31 +249,38 @@ class EditProfileFragment : Fragment() {
             MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
         }
         val rotatedBitmap = Bitmap.createBitmap(
-            originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true
+            originalBitmap,
+            0,
+            0,
+            originalBitmap.width,
+            originalBitmap.height,
+            matrix,
+            true
         )
         val newFile = File.createTempFile(
-            "Image_${System.currentTimeMillis()}", ".jpg",
+            "Image_${System.currentTimeMillis()}",
+            ".jpg",
             requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         )
 
-        val ratio: Float = rotatedBitmap.width.toFloat() / 500
+        val ratio: Float = rotatedBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
         val newBitmap = Bitmap.createScaledBitmap(
             rotatedBitmap,
-            500,
+            TARGET_IMAGE_WIDTH,
             (rotatedBitmap.height.toFloat() / ratio).toInt(),
             false
         )
         val bos = ByteArrayOutputStream()
-        newBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bos)
+        newBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, bos)
         val bitmapData = bos.toByteArray()
 
         val fos = FileOutputStream(newFile)
         fos.write(bitmapData)
         fos.flush()
         fos.close()
-        //TODO: get applicationId instead of packageName
         return FileProvider.getUriForFile(
-            requireContext(), requireContext().packageName + ".fileprovider",
+            requireContext(),
+            viewModel.config.getAppId() + ".fileprovider",
             newFile
         )!!
     }
@@ -281,33 +288,37 @@ class EditProfileFragment : Fragment() {
     private fun getImageOrientation(uri: Uri): Int {
         var rotation = 0
         val exif = ExifInterface(requireActivity().contentResolver.openInputStream(uri)!!)
-        when (exif.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_NORMAL
-        )) {
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotation = 270
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotation = 180
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotation = 90
+        when (
+            exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+        ) {
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotation = ORIENTATION_ROTATE_270
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotation = ORIENTATION_ROTATE_180
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotation = ORIENTATION_ROTATE_90
         }
         return rotation
     }
 
-
     companion object {
         private const val ARG_ACCOUNT = "argAccount"
+        const val LEAVE_PROFILE_WIDTH_FACTOR = 0.7f
+        private const val ORIENTATION_ROTATE_270 = 270
+        private const val ORIENTATION_ROTATE_180 = 180
+        private const val ORIENTATION_ROTATE_90 = 90
+        private const val IMAGE_QUALITY = 90
+        private const val TARGET_IMAGE_WIDTH = 500
+
         fun newInstance(account: Account): EditProfileFragment {
             val fragment = EditProfileFragment()
             fragment.arguments = bundleOf(ARG_ACCOUNT to account)
             return fragment
         }
     }
-
 }
 
-@OptIn(
-    ExperimentalMaterialApi::class,
-    ExperimentalComposeUiApi::class
-)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun EditProfileScreen(
     windowSize: WindowSize,
@@ -362,13 +373,15 @@ private fun EditProfileScreen(
         )
     }
 
-    val saveButtonEnabled = !(uiState.account.yearOfBirth.toString() == mapFields[YEAR_OF_BIRTH]
-            && uiState.account.languageProficiencies == mapFields[LANGUAGE]
-            && uiState.account.country == mapFields[COUNTRY]
-            && uiState.account.bio == mapFields[BIO]
-            && selectedImageUri == null
-            && !isImageDeleted
-            && uiState.isLimited == uiState.account.isLimited())
+    val saveButtonEnabled = !(
+            uiState.account.yearOfBirth.toString() == mapFields[YEAR_OF_BIRTH] &&
+                    uiState.account.languageProficiencies == mapFields[LANGUAGE] &&
+                    uiState.account.country == mapFields[COUNTRY] &&
+                    uiState.account.bio == mapFields[BIO] &&
+                    selectedImageUri == null &&
+                    !isImageDeleted &&
+                    uiState.isLimited == uiState.account.isLimited()
+            )
     onDataChanged(saveButtonEnabled)
 
     val serverFieldName = rememberSaveable {
@@ -489,8 +502,8 @@ private fun EditProfileScreen(
                         searchValue = TextFieldValue(it)
                     }
                 )
-            }) {
-
+            }
+        ) {
             HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
             if (isOpenChangeImageDialogState && uiState.account.isOlderThanMinAge()) {
@@ -576,7 +589,6 @@ private fun EditProfileScreen(
                                     onSaveClick(mapFields.toMap())
                                 }
                             )
-
                         }
                     }
                 }
@@ -599,7 +611,13 @@ private fun EditProfileScreen(
                         ) {
                             Text(
                                 modifier = Modifier.testTag("txt_edit_profile_type_label"),
-                                text = stringResource(if (uiState.isLimited) R.string.profile_limited_profile else R.string.profile_full_profile),
+                                text = stringResource(
+                                    if (uiState.isLimited) {
+                                        R.string.profile_limited_profile
+                                    } else {
+                                        R.string.profile_full_profile
+                                    }
+                                ),
                                 color = MaterialTheme.appColors.textSecondary,
                                 style = MaterialTheme.appTypography.titleSmall
                             )
@@ -626,7 +644,6 @@ private fun EditProfileScreen(
                                         .padding(2.dp)
                                         .size(100.dp)
                                         .clip(CircleShape)
-
                                         .noRippleClickable {
                                             isOpenChangeImageDialogState = true
                                             if (!uiState.account.isOlderThanMinAge()) {
@@ -648,7 +665,7 @@ private fun EditProfileScreen(
                                         },
                                     painter = painterResource(id = R.drawable.profile_ic_edit_image),
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.appColors.onPrimary
                                 )
                             }
                             Spacer(modifier = Modifier.height(20.dp))
@@ -675,25 +692,29 @@ private fun EditProfileScreen(
                                             openWarningMessageDialog = true
                                         }
                                     },
-                                text = stringResource(if (uiState.isLimited) R.string.profile_switch_to_full else R.string.profile_switch_to_limited),
+                                text = stringResource(
+                                    if (uiState.isLimited) {
+                                        R.string.profile_switch_to_full
+                                    } else {
+                                        R.string.profile_switch_to_limited
+                                    }
+                                ),
                                 color = MaterialTheme.appColors.textAccent,
                                 style = MaterialTheme.appTypography.labelLarge
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             ProfileFields(
                                 disabled = uiState.isLimited,
-                                onFieldClick = { it, title ->
-                                    when (it) {
+                                onFieldClick = { field, title ->
+                                    when (field) {
                                         YEAR_OF_BIRTH -> {
                                             serverFieldName.value = YEAR_OF_BIRTH
-                                            expandedList =
-                                                LocaleUtils.getBirthYearsRange()
+                                            expandedList = LocaleUtils.getBirthYearsRange()
                                         }
 
                                         COUNTRY -> {
                                             serverFieldName.value = COUNTRY
-                                            expandedList =
-                                                LocaleUtils.getCountries()
+                                            expandedList = LocaleUtils.getCountries()
                                         }
 
                                         LANGUAGE -> {
@@ -706,9 +727,9 @@ private fun EditProfileScreen(
                                     coroutine.launch {
                                         val index = expandedList.indexOfFirst { option ->
                                             if (serverFieldName.value == LANGUAGE) {
-                                                option.value == (mapFields[serverFieldName.value] as List<LanguageProficiency>).getOrNull(
-                                                    0
-                                                )?.code
+                                                option.value ==
+                                                        (mapFields[serverFieldName.value] as List<LanguageProficiency>)
+                                                            .getOrNull(0)?.code
                                             } else {
                                                 option.value == mapFields[serverFieldName.value]
                                             }
@@ -738,7 +759,6 @@ private fun EditProfileScreen(
                         }
                     }
                 }
-
             }
         }
     }
@@ -877,7 +897,6 @@ private fun ChangeImageDialog(
                 Spacer(Modifier.height(20.dp))
             }
         }
-
     }
 }
 
@@ -893,8 +912,12 @@ private fun ProfileFields(
     val languageProficiency = (mapFields[LANGUAGE] as List<LanguageProficiency>)
     val lang = if (languageProficiency.isNotEmpty()) {
         LocaleUtils.getLanguageByLanguageCode(languageProficiency[0].code)
-    } else ""
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    } else {
+        ""
+    }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
         SelectableField(
             name = stringResource(id = R.string.profile_year),
             initialValue = mapFields[YEAR_OF_BIRTH].toString(),
@@ -949,10 +972,12 @@ private fun SelectableField(
         )
     } else {
         TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
-            disabledTextColor = MaterialTheme.appColors.textPrimary,
+            textColor = MaterialTheme.appColors.textFieldText,
             backgroundColor = MaterialTheme.appColors.textFieldBackground,
+            unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+            cursorColor = MaterialTheme.appColors.textFieldText,
+            disabledBorderColor = MaterialTheme.appColors.textFieldBorder,
+            disabledTextColor = MaterialTheme.appColors.textFieldHint,
             disabledPlaceholderColor = MaterialTheme.appColors.textFieldHint
         )
     }
@@ -991,7 +1016,7 @@ private fun SelectableField(
                 Text(
                     modifier = Modifier.testTag("txt_placeholder_${name.tagId()}"),
                     text = name,
-                    color = MaterialTheme.appColors.textFieldHint,
+                    color = MaterialTheme.appColors.textFieldText,
                     style = MaterialTheme.appTypography.bodyMedium
                 )
             }
@@ -1029,8 +1054,10 @@ private fun InputEditField(
                 onValueChanged(it)
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = MaterialTheme.appColors.textFieldText,
+                backgroundColor = MaterialTheme.appColors.textFieldBackground,
                 unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
-                backgroundColor = MaterialTheme.appColors.textFieldBackground
+                cursorColor = MaterialTheme.appColors.textFieldText,
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
@@ -1043,7 +1070,7 @@ private fun InputEditField(
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = keyboardType,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Default
             ),
             keyboardActions = KeyboardActions {
                 keyboardController?.hide()
@@ -1116,14 +1143,14 @@ private fun LeaveProfile(
                 OpenEdXButton(
                     text = stringResource(id = R.string.profile_leave),
                     onClick = onLeaveClick,
-                    backgroundColor = MaterialTheme.appColors.warning,
+                    backgroundColor = MaterialTheme.appColors.primary,
                     content = {
                         Text(
                             modifier = Modifier
                                 .testTag("txt_leave")
                                 .fillMaxWidth(),
                             text = stringResource(id = R.string.profile_leave),
-                            color = MaterialTheme.appColors.textWarning,
+                            color = MaterialTheme.appColors.primaryButtonText,
                             style = MaterialTheme.appTypography.labelLarge,
                             textAlign = TextAlign.Center
                         )
@@ -1131,13 +1158,14 @@ private fun LeaveProfile(
                 )
                 Spacer(Modifier.height(24.dp))
                 OpenEdXOutlinedButton(
-                    borderColor = MaterialTheme.appColors.textPrimary,
+                    borderColor = MaterialTheme.appColors.textFieldBorder,
                     textColor = MaterialTheme.appColors.textPrimary,
                     text = stringResource(id = R.string.profile_keep_editing),
                     onClick = onDismissRequest
                 )
             }
-        })
+        }
+    )
 }
 
 @Composable
@@ -1157,7 +1185,7 @@ private fun LeaveProfileLandscape(
         content = {
             Card(
                 modifier = Modifier
-                    .width(screenWidth * 0.7f)
+                    .width(screenWidth * LEAVE_PROFILE_WIDTH_FACTOR)
                     .clip(MaterialTheme.appShapes.courseImageShape)
                     .semantics { testTagsAsResourceId = true },
                 backgroundColor = MaterialTheme.appColors.background,
@@ -1208,20 +1236,20 @@ private fun LeaveProfileLandscape(
                     ) {
                         OpenEdXButton(
                             text = stringResource(id = R.string.profile_leave),
-                            backgroundColor = MaterialTheme.appColors.warning,
+                            backgroundColor = MaterialTheme.appColors.primary,
                             content = {
                                 AutoSizeText(
                                     modifier = Modifier.testTag("txt_leave_profile_dialog_leave"),
                                     text = stringResource(id = R.string.profile_leave),
                                     style = MaterialTheme.appTypography.bodyMedium,
-                                    color = MaterialTheme.appColors.textDark
+                                    color = MaterialTheme.appColors.primaryButtonText
                                 )
                             },
                             onClick = onLeaveClick
                         )
                         Spacer(Modifier.height(16.dp))
                         OpenEdXOutlinedButton(
-                            borderColor = MaterialTheme.appColors.textPrimary,
+                            borderColor = MaterialTheme.appColors.textFieldBorder,
                             textColor = MaterialTheme.appColors.textPrimary,
                             text = stringResource(id = R.string.profile_keep_editing),
                             onClick = onDismissRequest,
@@ -1238,7 +1266,8 @@ private fun LeaveProfileLandscape(
                     }
                 }
             }
-        })
+        }
+    )
 }
 
 @Preview
@@ -1325,7 +1354,6 @@ private fun EditProfileScreenTabletPreview() {
         )
     }
 }
-
 
 private val mockAccount = Account(
     username = "thom84",

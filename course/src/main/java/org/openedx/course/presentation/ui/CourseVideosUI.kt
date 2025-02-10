@@ -1,7 +1,6 @@
 package org.openedx.course.presentation.ui
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,9 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
@@ -48,128 +44,113 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentManager
+import org.koin.compose.koinInject
 import org.openedx.core.AppDataConstants
 import org.openedx.core.BlockType
-import org.openedx.core.UIMessage
+import org.openedx.core.NoContentScreenType
+import org.openedx.core.domain.model.AssignmentProgress
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.Progress
 import org.openedx.core.domain.model.VideoSettings
-import org.openedx.core.extension.toFileSize
 import org.openedx.core.module.download.DownloadModelsSize
 import org.openedx.core.presentation.course.CourseViewMode
-import org.openedx.core.presentation.settings.VideoQualityType
+import org.openedx.core.presentation.settings.video.VideoQualityType
+import org.openedx.core.ui.CircularProgress
 import org.openedx.core.ui.HandleUIMessage
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
+import org.openedx.core.ui.NoContentScreen
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.course.R
-import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.presentation.videos.CourseVideoViewModel
 import org.openedx.course.presentation.videos.CourseVideosUIState
-import java.io.File
+import org.openedx.foundation.extension.toFileSize
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
+import org.openedx.foundation.utils.FileUtil
 import java.util.Date
 
 @Composable
 fun CourseVideosScreen(
     windowSize: WindowSize,
-    courseVideoViewModel: CourseVideoViewModel,
-    fragmentManager: FragmentManager,
-    courseRouter: CourseRouter
+    viewModel: CourseVideoViewModel,
+    fragmentManager: FragmentManager
 ) {
-    val uiState by courseVideoViewModel.uiState.collectAsState(CourseVideosUIState.Loading)
-    val uiMessage by courseVideoViewModel.uiMessage.collectAsState(null)
-    val videoSettings by courseVideoViewModel.videoSettings.collectAsState()
-    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState(CourseVideosUIState.Loading)
+    val uiMessage by viewModel.uiMessage.collectAsState(null)
+    val videoSettings by viewModel.videoSettings.collectAsState()
+    val fileUtil: FileUtil = koinInject()
 
     CourseVideosUI(
         windowSize = windowSize,
         uiState = uiState,
         uiMessage = uiMessage,
-        courseTitle = courseVideoViewModel.courseTitle,
-        isCourseNestedListEnabled = courseVideoViewModel.isCourseNestedListEnabled,
+        courseTitle = viewModel.courseTitle,
         videoSettings = videoSettings,
-        onItemClick = { block ->
-            courseRouter.navigateToCourseSubsections(
-                fm = fragmentManager,
-                courseId = courseVideoViewModel.courseId,
-                subSectionId = block.id,
-                mode = CourseViewMode.VIDEOS
-            )
-        },
         onExpandClick = { block ->
-            courseVideoViewModel.switchCourseSections(block.id)
+            viewModel.switchCourseSections(block.id)
         },
         onSubSectionClick = { subSectionBlock ->
-            courseVideoViewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
-                courseVideoViewModel.sequentialClickedEvent(
-                    unit.blockId,
-                    unit.displayName
+            if (viewModel.isCourseDropdownNavigationEnabled) {
+                viewModel.courseSubSectionUnit[subSectionBlock.id]?.let { unit ->
+                    viewModel.courseRouter.navigateToCourseContainer(
+                        fragmentManager,
+                        courseId = viewModel.courseId,
+                        unitId = unit.id,
+                        mode = CourseViewMode.VIDEOS
+                    )
+                }
+            } else {
+                viewModel.sequentialClickedEvent(
+                    subSectionBlock.blockId,
+                    subSectionBlock.displayName
                 )
-                courseRouter.navigateToCourseContainer(
+                viewModel.courseRouter.navigateToCourseSubsections(
                     fm = fragmentManager,
-                    courseId = courseVideoViewModel.courseId,
-                    unitId = unit.id,
+                    courseId = viewModel.courseId,
+                    subSectionId = subSectionBlock.id,
                     mode = CourseViewMode.VIDEOS
                 )
             }
         },
-        onDownloadClick = {
-            if (courseVideoViewModel.isBlockDownloading(it.id)) {
-                courseRouter.navigateToDownloadQueue(
-                    fm = fragmentManager,
-                    courseVideoViewModel.getDownloadableChildren(it.id)
-                        ?: arrayListOf()
-                )
-            } else if (courseVideoViewModel.isBlockDownloaded(it.id)) {
-                courseVideoViewModel.removeDownloadModels(it.id)
-            } else {
-                courseVideoViewModel.saveDownloadModels(
-                    context.externalCacheDir.toString() +
-                            File.separator +
-                            context
-                                .getString(org.openedx.core.R.string.app_name)
-                                .replace(Regex("\\s"), "_"), it.id
-                )
-            }
+        onDownloadClick = { blocksIds ->
+            viewModel.downloadBlocks(
+                blocksIds = blocksIds,
+                fragmentManager = fragmentManager,
+            )
         },
         onDownloadAllClick = { isAllBlocksDownloadedOrDownloading ->
-            courseVideoViewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
+            viewModel.logBulkDownloadToggleEvent(!isAllBlocksDownloadedOrDownloading)
             if (isAllBlocksDownloadedOrDownloading) {
-                courseVideoViewModel.removeAllDownloadModels()
+                viewModel.removeAllDownloadModels()
             } else {
-                courseVideoViewModel.saveAllDownloadModels(
-                    context.externalCacheDir.toString() +
-                            File.separator +
-                            context
-                                .getString(org.openedx.core.R.string.app_name)
-                                .replace(Regex("\\s"), "_")
+                viewModel.saveAllDownloadModels(
+                    fileUtil.getExternalAppDir().path
                 )
             }
         },
         onDownloadQueueClick = {
-            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
-                courseRouter.navigateToDownloadQueue(fm = fragmentManager)
+            if (viewModel.hasDownloadModelsInQueue()) {
+                viewModel.courseRouter.navigateToDownloadQueue(fm = fragmentManager)
             }
         },
         onVideoDownloadQualityClick = {
-            if (courseVideoViewModel.hasDownloadModelsInQueue()) {
-                courseVideoViewModel.onChangingVideoQualityWhileDownloading()
+            if (viewModel.hasDownloadModelsInQueue()) {
+                viewModel.onChangingVideoQualityWhileDownloading()
             } else {
-                courseRouter.navigateToVideoQuality(
+                viewModel.courseRouter.navigateToVideoQuality(
                     fragmentManager,
                     VideoQualityType.Download
                 )
@@ -184,12 +165,10 @@ private fun CourseVideosUI(
     uiState: CourseVideosUIState,
     uiMessage: UIMessage?,
     courseTitle: String,
-    isCourseNestedListEnabled: Boolean,
     videoSettings: VideoSettings,
-    onItemClick: (Block) -> Unit,
     onExpandClick: (Block) -> Unit,
     onSubSectionClick: (Block) -> Unit,
-    onDownloadClick: (Block) -> Unit,
+    onDownloadClick: (blocksIds: List<String>) -> Unit,
     onDownloadAllClick: (Boolean) -> Unit,
     onDownloadQueueClick: () -> Unit,
     onVideoDownloadQualityClick: () -> Unit
@@ -202,7 +181,6 @@ private fun CourseVideosUI(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -262,20 +240,7 @@ private fun CourseVideosUI(
                     ) {
                         when (uiState) {
                             is CourseVideosUIState.Empty -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState()),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.course_does_not_include_videos),
-                                        color = MaterialTheme.appColors.textPrimary,
-                                        style = MaterialTheme.appTypography.headlineSmall,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(horizontal = 40.dp)
-                                    )
-                                }
+                                NoContentScreen(noContentScreenType = NoContentScreenType.COURSE_VIDEOS)
                             }
 
                             is CourseVideosUIState.CourseData -> {
@@ -304,94 +269,35 @@ private fun CourseVideosUI(
                                         }
                                     }
 
-                                    if (isCourseNestedListEnabled) {
-                                        uiState.courseStructure.blockData.forEach { section ->
-                                            val courseSubSections = uiState.courseSubSections[section.id]
-                                            val courseSectionsState = uiState.courseSectionsState[section.id]
-
-                                            item {
-                                                Column {
-                                                    CourseExpandableChapterCard(
-                                                        modifier = listPadding,
-                                                        block = section,
-                                                        onItemClick = onExpandClick,
-                                                        arrowDegrees = if (courseSectionsState == true) -90f else 90f
-                                                    )
-                                                    Divider()
-                                                }
-                                            }
-
-                                            courseSubSections?.forEach { subSectionBlock ->
-                                                item {
-                                                    Column {
-                                                        AnimatedVisibility(
-                                                            visible = courseSectionsState == true
-                                                        ) {
-                                                            Column {
-                                                                val downloadsCount =
-                                                                    uiState.subSectionsDownloadsCount[subSectionBlock.id]
-                                                                        ?: 0
-
-                                                                CourseSubSectionItem(
-                                                                    modifier = listPadding,
-                                                                    block = subSectionBlock,
-                                                                    downloadedState = uiState.downloadedState[subSectionBlock.id],
-                                                                    downloadsCount = downloadsCount,
-                                                                    onClick = onSubSectionClick,
-                                                                    onDownloadClick = { block ->
-                                                                        if (uiState.downloadedState[block.id]?.isDownloaded == true) {
-                                                                            deleteDownloadBlock =
-                                                                                block
-
-                                                                        } else {
-                                                                            onDownloadClick(block)
-                                                                        }
-                                                                    }
-                                                                )
-                                                                Divider()
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        return@LazyColumn
+                                    item {
+                                        Spacer(modifier = Modifier.height(12.dp))
                                     }
+                                    uiState.courseStructure.blockData.forEach { section ->
+                                        val courseSubSections =
+                                            uiState.courseSubSections[section.id]
+                                        val courseSectionsState =
+                                            uiState.courseSectionsState[section.id]
 
-                                    items(uiState.courseStructure.blockData) { block ->
-                                        Column(listPadding) {
-                                            if (block.type == BlockType.CHAPTER) {
-                                                Text(
-                                                    modifier = Modifier.padding(
-                                                        top = 36.dp,
-                                                        bottom = 8.dp
-                                                    ),
-                                                    text = block.displayName,
-                                                    style = MaterialTheme.appTypography.titleMedium,
-                                                    color = MaterialTheme.appColors.textPrimaryVariant
-                                                )
-                                            } else {
-                                                CourseSectionCard(
-                                                    block = block,
-                                                    downloadedState = uiState.downloadedState[block.id],
-                                                    onItemClick = onItemClick,
-                                                    onDownloadClick = { block ->
-                                                        if (uiState.downloadedState[block.id]?.isDownloaded == true) {
-                                                            deleteDownloadBlock = block
-
-                                                        } else {
-                                                            onDownloadClick(block)
-                                                        }
-                                                    }
-                                                )
-                                                Divider()
-                                            }
+                                        item {
+                                            CourseSection(
+                                                modifier = listPadding.padding(vertical = 4.dp),
+                                                block = section,
+                                                onItemClick = onExpandClick,
+                                                courseSectionsState = courseSectionsState,
+                                                courseSubSections = courseSubSections,
+                                                downloadedStateMap = uiState.downloadedState,
+                                                useRelativeDates = uiState.useRelativeDates,
+                                                onSubSectionClick = onSubSectionClick,
+                                                onDownloadClick = onDownloadClick
+                                            )
                                         }
                                     }
                                 }
                             }
 
-                            CourseVideosUIState.Loading -> {}
+                            CourseVideosUIState.Loading -> {
+                                CircularProgress()
+                            }
                         }
                     }
                 }
@@ -438,14 +344,15 @@ private fun CourseVideosUI(
         }
 
         if (isDeleteDownloadsConfirmationShowed) {
-            val downloadModelsSize =
-                (uiState as? CourseVideosUIState.CourseData)?.downloadModelsSize
+            val downloadModelsSize = (uiState as? CourseVideosUIState.CourseData)?.downloadModelsSize
             val isDownloadedAllVideos =
                 downloadModelsSize?.isAllBlocksDownloadedOrDownloading == true &&
                         downloadModelsSize.remainingCount == 0
-            val dialogTextId = if (isDownloadedAllVideos)
-                R.string.course_delete_downloads_confirmation_text else
-                R.string.course_delete_while_downloading_confirmation_text
+            val dialogTextId = if (isDownloadedAllVideos) {
+                R.string.course_delete_confirmation
+            } else {
+                R.string.course_delete_in_process_confirmation
+            }
 
             AlertDialog(
                 title = {
@@ -507,7 +414,7 @@ private fun CourseVideosUI(
                     TextButton(
                         onClick = {
                             deleteDownloadBlock?.let { block ->
-                                onDownloadClick(block)
+                                onDownloadClick(listOf(block.id))
                             }
                             deleteDownloadBlock = null
                         }
@@ -624,19 +531,24 @@ private fun AllVideosDownloadItem(
                     } else {
                         onDownloadAllClick(false)
                     }
-
                 } else {
                     onDownloadAllClick(true)
                 }
             },
             colors = SwitchDefaults.colors(
+                uncheckedThumbColor = MaterialTheme.appColors.primary,
                 checkedThumbColor = MaterialTheme.appColors.primary,
                 checkedTrackColor = MaterialTheme.appColors.primary
             )
         )
     }
     if (isDownloadingAllVideos) {
-        val progress = 1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+        val progress =
+            if (downloadModelsSize.allSize == 0L) {
+                0f
+            } else {
+                1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+            }
 
         val animatedProgress by animateFloatAsState(
             targetValue = progress,
@@ -714,11 +626,10 @@ private fun CourseVideosScreenPreview() {
                     remainingSize = 0,
                     allCount = 1,
                     allSize = 0
-                )
+                ),
+                useRelativeDates = true
             ),
             courseTitle = "",
-            isCourseNestedListEnabled = false,
-            onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
             videoSettings = VideoSettings.default,
@@ -738,12 +649,8 @@ private fun CourseVideosScreenEmptyPreview() {
         CourseVideosUI(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             uiMessage = null,
-            uiState = CourseVideosUIState.Empty(
-                "This course does not include any videos."
-            ),
+            uiState = CourseVideosUIState.Empty,
             courseTitle = "",
-            isCourseNestedListEnabled = false,
-            onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
             videoSettings = VideoSettings.default,
@@ -775,11 +682,10 @@ private fun CourseVideosScreenTabletPreview() {
                     remainingSize = 0,
                     allCount = 0,
                     allSize = 0
-                )
+                ),
+                useRelativeDates = true
             ),
             courseTitle = "",
-            isCourseNestedListEnabled = false,
-            onItemClick = { },
             onExpandClick = { },
             onSubSectionClick = { },
             videoSettings = VideoSettings.default,
@@ -791,6 +697,11 @@ private fun CourseVideosScreenTabletPreview() {
     }
 }
 
+private val mockAssignmentProgress = AssignmentProgress(
+    assignmentType = "Home",
+    numPointsEarned = 1f,
+    numPointsPossible = 3f
+)
 
 private val mockChapterBlock = Block(
     id = "id",
@@ -807,7 +718,10 @@ private val mockChapterBlock = Block(
     descendants = emptyList(),
     descendantsType = BlockType.CHAPTER,
     completion = 0.0,
-    containsGatedContent = false
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date(),
+    offlineDownload = null
 )
 
 private val mockSequentialBlock = Block(
@@ -825,7 +739,10 @@ private val mockSequentialBlock = Block(
     descendants = emptyList(),
     descendantsType = BlockType.SEQUENTIAL,
     completion = 0.0,
-    containsGatedContent = false
+    containsGatedContent = false,
+    assignmentProgress = mockAssignmentProgress,
+    due = Date(),
+    offlineDownload = null
 )
 
 private val mockCourseStructure = CourseStructure(
@@ -849,5 +766,6 @@ private val mockCourseStructure = CourseStructure(
     ),
     media = null,
     certificate = null,
-    isSelfPaced = false
+    isSelfPaced = false,
+    progress = Progress(1, 3),
 )

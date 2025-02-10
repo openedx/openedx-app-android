@@ -1,11 +1,14 @@
 package org.openedx.discovery.presentation.catalog
 
 import android.annotation.SuppressLint
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import org.openedx.foundation.extension.applyDarkModeIfEnabled
 import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkAuthority
 
 @SuppressLint("SetJavaScriptEnabled", "ComposableNaming")
@@ -13,14 +16,16 @@ import org.openedx.discovery.presentation.catalog.WebViewLink.Authority as linkA
 fun CatalogWebViewScreen(
     url: String,
     uriScheme: String,
+    userAgent: String,
     isAllLinksExternal: Boolean = false,
     onWebPageLoaded: () -> Unit,
     refreshSessionCookie: () -> Unit = {},
     onWebPageUpdated: (String) -> Unit = {},
     onUriClick: (String, linkAuthority) -> Unit,
+    onWebPageLoadError: () -> Unit
 ): WebView {
     val context = LocalContext.current
-
+    val isDarkTheme = isSystemInDarkTheme()
     return remember {
         WebView(context).apply {
             webViewClient = object : DefaultWebViewClient(
@@ -79,6 +84,17 @@ fun CatalogWebViewScreen(
                         else -> false
                     }
                 }
+
+                override fun onReceivedError(
+                    view: WebView,
+                    request: WebResourceRequest,
+                    error: WebResourceError
+                ) {
+                    if (request.url.toString() == view.url) {
+                        onWebPageLoadError()
+                    }
+                    super.onReceivedError(view, request, error)
+                }
             }
 
             with(settings) {
@@ -88,11 +104,13 @@ fun CatalogWebViewScreen(
                 setSupportZoom(true)
                 loadsImagesAutomatically = true
                 domStorageEnabled = true
+                userAgentString = "$userAgentString $userAgent"
             }
             isVerticalScrollBarEnabled = false
             isHorizontalScrollBarEnabled = false
 
             loadUrl(url)
+            applyDarkModeIfEnabled(isDarkTheme)
         }
     }
 }

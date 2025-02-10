@@ -3,6 +3,7 @@ package org.openedx.app.di
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
+import org.openedx.app.data.api.NotificationsApi
 import org.openedx.app.data.networking.AppUpgradeInterceptor
 import org.openedx.app.data.networking.HandleErrorInterceptor
 import org.openedx.app.data.networking.HeadersInterceptor
@@ -53,8 +54,8 @@ val networkingModule = module {
     single { provideApi<ProfileApi>(get()) }
     single { provideApi<DiscussionApi>(get()) }
     single { provideApi<DiscoveryApi>(get()) }
+    single { provideApi<NotificationsApi>(get()) }
 }
-
 
 inline fun <reified T> provideApi(retrofit: Retrofit): T {
     return retrofit.create(T::class.java)

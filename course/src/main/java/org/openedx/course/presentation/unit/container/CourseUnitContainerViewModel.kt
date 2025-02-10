@@ -9,15 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openedx.core.BaseViewModel
 import org.openedx.core.BlockType
 import org.openedx.core.config.Config
 import org.openedx.core.domain.model.Block
-import org.openedx.core.extension.clearAndAddAll
-import org.openedx.core.extension.indexOfFirstFromIndex
 import org.openedx.core.module.db.DownloadModel
 import org.openedx.core.module.db.DownloadedState
 import org.openedx.core.presentation.course.CourseViewMode
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseSectionChanged
 import org.openedx.core.system.notifier.CourseStructureUpdated
@@ -25,6 +23,9 @@ import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
+import org.openedx.foundation.extension.clearAndAddAll
+import org.openedx.foundation.extension.indexOfFirstFromIndex
+import org.openedx.foundation.presentation.BaseViewModel
 
 class CourseUnitContainerViewModel(
     val courseId: String,
@@ -33,13 +34,14 @@ class CourseUnitContainerViewModel(
     private val interactor: CourseInteractor,
     private val notifier: CourseNotifier,
     private val analytics: CourseAnalytics,
+    private val networkConnection: NetworkConnection,
 ) : BaseViewModel() {
 
     private val blocks = ArrayList<Block>()
 
-    val isCourseExpandableSectionsEnabled get() = config.isCourseNestedListEnabled()
+    val isCourseExpandableSectionsEnabled get() = config.getCourseUIConfig().isCourseDropdownNavigationEnabled
 
-    val isCourseUnitProgressEnabled get() = config.isCourseUnitProgressEnabled()
+    val isCourseUnitProgressEnabled get() = config.getCourseUIConfig().isCourseUnitProgressEnabled
 
     private var currentIndex = 0
     private var currentVerticalIndex = 0
@@ -47,14 +49,12 @@ class CourseUnitContainerViewModel(
 
     val isFirstIndexInContainer: Boolean
         get() {
-            return _descendantsBlocks.value.firstOrNull() ==
-                    _descendantsBlocks.value.getOrNull(currentIndex)
+            return _descendantsBlocks.value.firstOrNull() == _descendantsBlocks.value.getOrNull(currentIndex)
         }
 
     val isLastIndexInContainer: Boolean
         get() {
-            return _descendantsBlocks.value.lastOrNull() ==
-                    _descendantsBlocks.value.getOrNull(currentIndex)
+            return _descendantsBlocks.value.lastOrNull() == _descendantsBlocks.value.getOrNull(currentIndex)
         }
 
     private val _verticalBlockCounts = MutableLiveData<Int>()
@@ -81,6 +81,9 @@ class CourseUnitContainerViewModel(
 
     private val _descendantsBlocks = MutableStateFlow<List<Block>>(listOf())
     val descendantsBlocks = _descendantsBlocks.asStateFlow()
+
+    val hasNetworkConnection: Boolean
+        get() = networkConnection.isOnline()
 
     fun loadBlocks(mode: CourseViewMode, componentId: String = "") {
         currentMode = mode
@@ -136,6 +139,9 @@ class CourseUnitContainerViewModel(
                     _subSectionUnitBlocks.value =
                         getSubSectionUnitBlocks(blocks, getSubSectionId(unitId))
 
+                    if (_descendantsBlocks.value.isEmpty()) {
+                        _descendantsBlocks.value = listOf(block)
+                    }
                 } else {
                     setNextVerticalIndex()
                 }
@@ -168,7 +174,9 @@ class CourseUnitContainerViewModel(
                 if (blockDescendant.type == BlockType.VERTICAL) {
                     resultList.add(blockDescendant.copy(type = getUnitType(blockDescendant.descendants)))
                 }
-            } else continue
+            } else {
+                continue
+            }
         }
         return resultList
     }

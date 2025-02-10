@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 
 object AppUpdateState {
     var wasUpdateDialogDisplayed = false
@@ -15,6 +15,7 @@ object AppUpdateState {
         try {
             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}")))
         } catch (e: ActivityNotFoundException) {
+            e.printStackTrace()
             context.startActivity(
                 Intent(
                     Intent.ACTION_VIEW,

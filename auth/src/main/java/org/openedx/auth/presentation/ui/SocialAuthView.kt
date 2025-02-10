@@ -45,7 +45,7 @@ internal fun SocialAuthView(
                     .testTag("btn_google_auth")
                     .padding(top = 24.dp)
                     .fillMaxWidth(),
-                backgroundColor = MaterialTheme.appColors.background,
+                backgroundColor = MaterialTheme.appColors.authGoogleButtonBackground,
                 borderColor = MaterialTheme.appColors.primary,
                 textColor = Color.Unspecified,
                 onClick = {
@@ -62,7 +62,8 @@ internal fun SocialAuthView(
                         modifier = Modifier
                             .testTag("txt_google_auth")
                             .padding(start = 10.dp),
-                        text = stringResource(id = stringRes)
+                        text = stringResource(id = stringRes),
+                        color = MaterialTheme.appColors.primaryButtonBorderedText,
                     )
                 }
             }
@@ -87,13 +88,13 @@ internal fun SocialAuthView(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_auth_facebook),
                         contentDescription = null,
-                        tint = MaterialTheme.appColors.buttonText,
+                        tint = MaterialTheme.appColors.primaryButtonText,
                     )
                     Text(
                         modifier = Modifier
                             .testTag("txt_facebook_auth")
                             .padding(start = 10.dp),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
                         text = stringResource(id = stringRes)
                     )
                 }
@@ -125,7 +126,7 @@ internal fun SocialAuthView(
                         modifier = Modifier
                             .testTag("txt_microsoft_auth")
                             .padding(start = 10.dp),
-                        color = MaterialTheme.appColors.buttonText,
+                        color = MaterialTheme.appColors.primaryButtonText,
                         text = stringResource(id = stringRes)
                     )
                 }
@@ -139,6 +140,6 @@ internal fun SocialAuthView(
 @Composable
 private fun SocialAuthViewPreview() {
     OpenEdXTheme {
-        SocialAuthView() {}
+        SocialAuthView {}
     }
 }

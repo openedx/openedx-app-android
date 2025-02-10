@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <queries>
         <intent>
@@ -39,11 +41,18 @@
             android:exported="true"
             android:fitsSystemWindows="true"
             android:theme="@style/Theme.App.Starting"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${applicationId}"  />
             </intent-filter>
 
             <!-- Branch URI Scheme -->
@@ -102,15 +111,16 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
-        <!-- Braze init -->
+        <!-- FirebaseMessaging init -->
         <service
-            android:name="com.braze.push.BrazeFirebaseMessagingService"
+            android:name=".system.push.OpenEdXFirebaseMessagingService"
             android:enabled="${fcmEnabled}"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>

@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.openedx.core.BaseViewModel
 import org.openedx.core.config.Config
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.NavigationToDiscovery
+import org.openedx.discovery.presentation.DiscoveryNavigator
+import org.openedx.foundation.presentation.BaseViewModel
 
 class MainViewModel(
     private val config: Config,
@@ -30,41 +31,40 @@ class MainViewModel(
         get() = _navigateToDiscovery.asSharedFlow()
 
     val isDiscoveryTypeWebView get() = config.getDiscoveryConfig().isViewTypeWebView()
-
-    val isProgramTypeWebView get() = config.getProgramConfig().isViewTypeWebView()
+    val getDiscoveryFragment get() = DiscoveryNavigator(isDiscoveryTypeWebView).getDiscoveryFragment()
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        notifier.notifier.onEach {
-            if (it is NavigationToDiscovery) {
-                _navigateToDiscovery.emit(true)
+        notifier.notifier
+            .onEach {
+                if (it is NavigationToDiscovery) {
+                    _navigateToDiscovery.emit(true)
+                }
             }
-        }.distinctUntilChanged().launchIn(viewModelScope)
+            .distinctUntilChanged()
+            .launchIn(viewModelScope)
     }
 
     fun enableBottomBar(enable: Boolean) {
         _isBottomBarEnabled.value = enable
     }
 
+    fun logLearnTabClickedEvent() {
+        logScreenEvent(AppAnalyticsEvent.LEARN)
+    }
+
     fun logDiscoveryTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.DISCOVER)
-    }
-
-    fun logMyCoursesTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.MY_COURSES)
-    }
-
-    fun logMyProgramsTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.MY_PROGRAMS)
+        logScreenEvent(AppAnalyticsEvent.DISCOVER)
     }
 
     fun logProfileTabClickedEvent() {
-        logEvent(AppAnalyticsEvent.PROFILE)
+        logScreenEvent(AppAnalyticsEvent.PROFILE)
     }
 
-    private fun logEvent(event: AppAnalyticsEvent) {
-        analytics.logEvent(event.eventName,
-            buildMap {
+    private fun logScreenEvent(event: AppAnalyticsEvent) {
+        analytics.logScreenEvent(
+            screenName = event.eventName,
+            params = buildMap {
                 put(AppAnalyticsKey.NAME.key, event.biValue)
             }
         )

@@ -14,43 +14,53 @@ import org.openedx.app.AnalyticsManager
 import org.openedx.app.AppAnalytics
 import org.openedx.app.AppRouter
 import org.openedx.app.BuildConfig
+import org.openedx.app.PluginManager
 import org.openedx.app.data.storage.PreferencesManager
+import org.openedx.app.deeplink.DeepLinkRouter
 import org.openedx.app.room.AppDatabase
 import org.openedx.app.room.DATABASE_NAME
-import org.openedx.app.system.notifier.AppNotifier
+import org.openedx.app.room.DatabaseManager
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
-import org.openedx.core.ImageProcessor
+import org.openedx.core.CalendarRouter
+import org.openedx.core.R
 import org.openedx.core.config.Config
 import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.data.storage.InAppReviewPreferences
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.TranscriptManager
+import org.openedx.core.module.download.DownloadHelper
 import org.openedx.core.module.download.FileDownloader
 import org.openedx.core.presentation.CoreAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.ResourceManager
+import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.AppUpgradeNotifier
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.DiscoveryNotifier
 import org.openedx.core.system.notifier.DownloadNotifier
 import org.openedx.core.system.notifier.VideoNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.calendar.CalendarNotifier
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.presentation.calendarsync.CalendarManager
+import org.openedx.course.presentation.download.DownloadDialogManager
+import org.openedx.course.utils.ImageProcessor
+import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics
@@ -58,14 +68,17 @@ import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discussion.presentation.DiscussionAnalytics
 import org.openedx.discussion.presentation.DiscussionRouter
 import org.openedx.discussion.system.notifier.DiscussionNotifier
+import org.openedx.foundation.system.ResourceManager
+import org.openedx.foundation.utils.FileUtil
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 import org.openedx.whatsnew.WhatsNewManager
 import org.openedx.whatsnew.WhatsNewRouter
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 import org.openedx.whatsnew.presentation.WhatsNewAnalytics
+import org.openedx.core.DatabaseManager as IDatabaseManager
 
 val appModule = module {
 
@@ -76,11 +89,15 @@ val appModule = module {
     single<WhatsNewPreferences> { get<PreferencesManager>() }
     single<InAppReviewPreferences> { get<PreferencesManager>() }
     single<CoursePreferences> { get<PreferencesManager>() }
+    single<CalendarPreferences> { get<PreferencesManager>() }
 
     single { ResourceManager(get()) }
     single { AppCookieManager(get(), get()) }
     single { ReviewManagerFactory.create(get()) }
-    single { CalendarManager(get(), get(), get()) }
+    single { CalendarManager(get(), get()) }
+    single { DownloadDialogManager(get(), get(), get(), get()) }
+    single { DatabaseManager(get(), get(), get(), get()) }
+    single<IDatabaseManager> { get<DatabaseManager>() }
 
     single { ImageProcessor(get()) }
 
@@ -94,10 +111,10 @@ val appModule = module {
     single { CourseNotifier() }
     single { DiscussionNotifier() }
     single { ProfileNotifier() }
-    single { AppUpgradeNotifier() }
     single { DownloadNotifier() }
     single { VideoNotifier() }
     single { DiscoveryNotifier() }
+    single { CalendarNotifier() }
 
     single { AppRouter() }
     single<AuthRouter> { get<AppRouter>() }
@@ -108,6 +125,8 @@ val appModule = module {
     single<ProfileRouter> { get<AppRouter>() }
     single<WhatsNewRouter> { get<AppRouter>() }
     single<AppUpgradeRouter> { get<AppRouter>() }
+    single { DeepLinkRouter(get(), get(), get(), get(), get(), get()) }
+    single<CalendarRouter> { get<AppRouter>() }
 
     single { NetworkConnection(get()) }
 
@@ -150,6 +169,11 @@ val appModule = module {
     }
 
     single {
+        val room = get<AppDatabase>()
+        room.calendarDao()
+    }
+
+    single {
         FileDownloader()
     }
 
@@ -157,14 +181,20 @@ val appModule = module {
         DownloadWorkerController(get(), get(), get())
     }
 
-    single { AppData(versionName = BuildConfig.VERSION_NAME) }
+    single {
+        val resourceManager = get<ResourceManager>()
+        AppData(
+            appName = resourceManager.getString(R.string.app_name),
+            versionName = BuildConfig.VERSION_NAME,
+            applicationId = BuildConfig.APPLICATION_ID,
+        )
+    }
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
-    single { TranscriptManager(get()) }
+    single { TranscriptManager(get(), get()) }
     single { WhatsNewManager(get(), get(), get(), get()) }
     single<WhatsNewGlobalManager> { get<WhatsNewManager>() }
 
-    single { AnalyticsManager(get(), get()) }
     single<AppAnalytics> { get<AnalyticsManager>() }
     single<AuthAnalytics> { get<AnalyticsManager>() }
     single<AppReviewAnalytics> { get<AnalyticsManager>() }
@@ -180,5 +210,20 @@ val appModule = module {
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
+    factory { BrowserAuthHelper(get()) }
     factory { OAuthHelper(get(), get(), get()) }
+
+    factory { FileUtil(get(), get<ResourceManager>().getString(R.string.app_name)) }
+    single { DownloadHelper(get(), get()) }
+
+    factory { OfflineProgressSyncScheduler(get()) }
+
+    single { CalendarSyncScheduler(get()) }
+
+    single { AnalyticsManager() }
+    single {
+        PluginManager(
+            analyticsManager = get()
+        )
+    }
 }

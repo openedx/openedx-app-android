@@ -2,7 +2,6 @@ package org.openedx.discussion.presentation.comments
 
 import org.openedx.discussion.domain.model.DiscussionComment
 
-
 sealed class DiscussionCommentsUIState {
     data class Success(
         val thread: org.openedx.discussion.domain.model.Thread,
@@ -10,5 +9,5 @@ sealed class DiscussionCommentsUIState {
         val count: Int
     ) : DiscussionCommentsUIState()
 
-    object Loading : DiscussionCommentsUIState()
+    data object Loading : DiscussionCommentsUIState()
 }

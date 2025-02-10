@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import org.openedx.core.R
-import org.openedx.core.presentation.global.app_upgrade.DefaultTextButton
+import org.openedx.core.presentation.global.appupgrade.DefaultTextButton
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes

@@ -26,7 +26,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
@@ -73,25 +72,25 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.openedx.core.UIMessage
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedTextField
 import org.openedx.core.ui.SheetContent
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.isImeVisibleState
 import org.openedx.core.ui.noRippleClickable
-import org.openedx.core.ui.rememberWindowSize
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
 import org.openedx.discussion.domain.model.DiscussionType
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.rememberWindowSize
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.discussion.R as discussionR
 
 class DiscussionAddThreadFragment : Fragment() {
@@ -136,7 +135,6 @@ class DiscussionAddThreadFragment : Fragment() {
                 if (success != null) {
                     viewModel.sendThreadAdded()
                     requireActivity().supportFragmentManager.popBackStack()
-
                 }
             }
         }
@@ -160,8 +158,6 @@ class DiscussionAddThreadFragment : Fragment() {
     }
 }
 
-
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DiscussionAddThreadScreen(
     windowSize: WindowSize,
@@ -219,7 +215,6 @@ private fun DiscussionAddThreadScreen(
             .navigationBarsPadding(),
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -278,7 +273,6 @@ private fun DiscussionAddThreadScreen(
                 )
             }
         ) {
-
             HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
 
             Box(
@@ -345,10 +339,12 @@ private fun DiscussionAddThreadScreen(
                                     color = MaterialTheme.appColors.textPrimary
                                 )
                                 Spacer(Modifier.height(16.dp))
-                                Tabs(tabs = listOf(
-                                    stringResource(id = discussionR.string.discussion_discussion),
-                                    stringResource(id = discussionR.string.discussion_question)
-                                ), currentPage = currentPage,
+                                Tabs(
+                                    tabs = listOf(
+                                        stringResource(id = discussionR.string.discussion_discussion),
+                                        stringResource(id = discussionR.string.discussion_question)
+                                    ),
+                                    currentPage = currentPage,
                                     onItemClick = { bool ->
                                         if (bool) {
                                             discussionType = DiscussionType.QUESTION.value
@@ -357,7 +353,8 @@ private fun DiscussionAddThreadScreen(
                                             discussionType = DiscussionType.DISCUSSION.value
                                             currentPage = 0
                                         }
-                                    })
+                                    }
+                                )
                                 Spacer(Modifier.height(24.dp))
                                 SelectableField(
                                     text = postToTopic.first,
@@ -369,7 +366,8 @@ private fun DiscussionAddThreadScreen(
                                                 bottomSheetScaffoldState.show()
                                             }
                                         }
-                                    })
+                                    }
+                                )
                                 Spacer(Modifier.height(24.dp))
                                 OpenEdXOutlinedTextField(
                                     modifier = Modifier
@@ -390,12 +388,16 @@ private fun DiscussionAddThreadScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(150.dp),
-                                    title = if (currentPage == 0) stringResource(id = org.openedx.discussion.R.string.discussion_discussion) else stringResource(
-                                        id = discussionR.string.discussion_question
-                                    ),
+                                    title = if (currentPage == 0) {
+                                        stringResource(id = org.openedx.discussion.R.string.discussion_discussion)
+                                    } else {
+                                        stringResource(
+                                            id = discussionR.string.discussion_question
+                                        )
+                                    },
                                     isSingleLine = false,
                                     withRequiredMark = true,
-                                    imeAction = ImeAction.Done,
+                                    imeAction = ImeAction.Default,
                                     keyboardActions = { focusManager ->
                                         focusManager.clearFocus()
                                         keyboardController?.hide()
@@ -418,7 +420,8 @@ private fun DiscussionAddThreadScreen(
                                         checked = followPost,
                                         onCheckedChange = {
                                             followPost = it
-                                        })
+                                        }
+                                    )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
                                         text = if (currentPage == 0) {
@@ -473,13 +476,18 @@ private fun Tabs(
     isLimited: Boolean = false,
 ) {
     val isFirstPage = currentPage == 0
-    TabRow(selectedTabIndex = currentPage,
+    TabRow(
+        selectedTabIndex = currentPage,
         backgroundColor = MaterialTheme.appColors.surface,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(20))
-            .border(1.dp, MaterialTheme.appColors.cardViewBorder, RoundedCornerShape(20)),
+            .clip(RoundedCornerShape(percent = 20))
+            .border(
+                1.dp,
+                MaterialTheme.appColors.cardViewBorder,
+                RoundedCornerShape(percent = 20)
+            ),
         indicator = { _ ->
             Box {}
         }
@@ -492,16 +500,19 @@ private fun Tabs(
                 MaterialTheme.appColors.textPrimaryVariant
             }
             Tab(
-                modifier = if (selected) Modifier
-                    .clip(RoundedCornerShape(20))
-                    .background(
-                        MaterialTheme.appColors.primary
-                    )
-                else Modifier
-                    .clip(RoundedCornerShape(20))
-                    .background(
-                        MaterialTheme.appColors.surface
-                    ),
+                modifier = if (selected) {
+                    Modifier
+                        .clip(RoundedCornerShape(percent = 20))
+                        .background(
+                            MaterialTheme.appColors.primary
+                        )
+                } else {
+                    Modifier
+                        .clip(RoundedCornerShape(percent = 20))
+                        .background(
+                            MaterialTheme.appColors.surface
+                        )
+                },
                 selected = selected,
                 onClick = {
                     if (!isLimited && !selected) {
@@ -519,7 +530,7 @@ private fun SelectableField(
     text: String,
     onClick: () -> Unit,
 ) {
-    Column() {
+    Column {
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(id = discussionR.string.discussion_topic),
@@ -557,23 +568,19 @@ private fun SelectableField(
     }
 }
 
-
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun DiscussionAddThreadScreenPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         DiscussionAddThreadScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             topicData = Pair("", "General"),
             topics = emptyList(),
             uiMessage = null,
             isLoading = false,
-            onBackClick = {
-            },
-            onPostDiscussionClick = { _, _, _, _, _ ->
-
-            }
+            onBackClick = {},
+            onPostDiscussionClick = { _, _, _, _, _ -> }
         )
     }
 }
@@ -582,18 +589,15 @@ private fun DiscussionAddThreadScreenPreview() {
 @Preview(uiMode = UI_MODE_NIGHT_YES, device = Devices.NEXUS_9)
 @Composable
 private fun DiscussionAddThreadScreenTabletPreview() {
-    OpenEdXTheme() {
+    OpenEdXTheme {
         DiscussionAddThreadScreen(
             windowSize = WindowSize(WindowType.Medium, WindowType.Medium),
             topicData = Pair("", "General"),
             topics = emptyList(),
             uiMessage = null,
             isLoading = false,
-            onBackClick = {
-            },
-            onPostDiscussionClick = { _, _, _, _, _ ->
-
-            }
+            onBackClick = {},
+            onPostDiscussionClick = { _, _, _, _, _ -> }
         )
     }
 }

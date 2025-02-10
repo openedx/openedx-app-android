@@ -40,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import org.openedx.core.extension.setWidthPercent
 import org.openedx.core.ui.AutoSizeText
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.OpenEdXOutlinedButton
@@ -50,6 +49,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.course.R
+import org.openedx.foundation.extension.setWidthPercent
 
 class ChapterEndFragmentDialog : DialogFragment() {
 
@@ -58,7 +58,7 @@ class ChapterEndFragmentDialog : DialogFragment() {
     override fun onResume() {
         super.onResume()
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setWidthPercent(66)
+            setWidthPercent(percentage = 66)
         }
     }
 
@@ -155,7 +155,7 @@ private fun ChapterEndDialogScreen(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(0.95f)
+            .fillMaxWidth(fraction = 0.95f)
             .clip(MaterialTheme.appShapes.courseImageShape),
         backgroundColor = MaterialTheme.appColors.background,
         shape = MaterialTheme.appShapes.courseImageShape
@@ -209,7 +209,7 @@ private fun ChapterEndDialogScreen(
                         TextIcon(
                             text = stringResource(id = R.string.course_next_section),
                             painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
-                            color = MaterialTheme.appColors.buttonText,
+                            color = MaterialTheme.appColors.primaryButtonText,
                             textStyle = MaterialTheme.appTypography.labelLarge,
                             iconModifier = Modifier.rotate(if (isVerticalNavigation) 90f else 0f)
                         )
@@ -219,15 +219,15 @@ private fun ChapterEndDialogScreen(
                 Spacer(Modifier.height(16.dp))
             }
             OpenEdXOutlinedButton(
-                borderColor = MaterialTheme.appColors.buttonBackground,
-                textColor = MaterialTheme.appColors.buttonBackground,
+                borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                textColor = MaterialTheme.appColors.primaryButtonBackground,
                 text = stringResource(id = R.string.course_back_to_outline),
                 onClick = onBackButtonClick,
                 content = {
                     AutoSizeText(
                         text = stringResource(id = R.string.course_back_to_outline),
                         style = MaterialTheme.appTypography.bodyMedium,
-                        color = MaterialTheme.appColors.buttonBackground
+                        color = MaterialTheme.appColors.primaryButtonBorderedText
                     )
                 }
             )
@@ -244,7 +244,6 @@ private fun ChapterEndDialogScreen(
         }
     }
 }
-
 
 @Composable
 private fun ChapterEndDialogScreenLandscape(
@@ -326,7 +325,7 @@ private fun ChapterEndDialogScreenLandscape(
                                 TextIcon(
                                     text = stringResource(id = R.string.course_next_section),
                                     painter = painterResource(org.openedx.core.R.drawable.core_ic_forward),
-                                    color = MaterialTheme.appColors.buttonText,
+                                    color = MaterialTheme.appColors.primaryButtonText,
                                     textStyle = MaterialTheme.appTypography.labelLarge
                                 )
                             },
@@ -335,15 +334,15 @@ private fun ChapterEndDialogScreenLandscape(
                         Spacer(Modifier.height(16.dp))
                     }
                     OpenEdXOutlinedButton(
-                        borderColor = MaterialTheme.appColors.buttonBackground,
-                        textColor = MaterialTheme.appColors.buttonBackground,
+                        borderColor = MaterialTheme.appColors.primaryButtonBackground,
+                        textColor = MaterialTheme.appColors.primaryButtonBackground,
                         text = stringResource(id = R.string.course_back_to_outline),
                         onClick = onBackButtonClick,
                         content = {
                             AutoSizeText(
                                 text = stringResource(id = R.string.course_back_to_outline),
                                 style = MaterialTheme.appTypography.bodyMedium,
-                                color = MaterialTheme.appColors.buttonBackground
+                                color = MaterialTheme.appColors.primaryButtonBorderedText
                             )
                         }
                     )

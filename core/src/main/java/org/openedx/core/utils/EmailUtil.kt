@@ -55,15 +55,16 @@ object EmailUtil {
                 targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 it.startActivity(targetIntent)
             }
-        } catch (ex: ActivityNotFoundException) {
-            //There is no activity which can perform the intended share Intent
+        } catch (e: ActivityNotFoundException) {
+            // There is no activity which can perform the intended share Intent
+            e.printStackTrace()
             context?.let {
                 Toast.makeText(
-                    it, it.getString(R.string.core_email_client_not_present),
+                    it,
+                    it.getString(R.string.core_email_client_not_present),
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }
     }
-
 }

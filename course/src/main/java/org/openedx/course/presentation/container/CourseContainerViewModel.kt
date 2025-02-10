@@ -3,11 +3,10 @@ package org.openedx.course.presentation.container
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
-import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,63 +16,69 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.openedx.core.BaseViewModel
-import org.openedx.core.ImageProcessor
-import org.openedx.core.SingleEventLiveData
-import org.openedx.core.UIMessage
+import kotlinx.coroutines.supervisorScope
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.domain.model.CourseAccessError
+import org.openedx.core.domain.model.CourseDatesCalendarSync
+import org.openedx.core.domain.model.CourseEnrollmentDetails
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.presentation.course.CourseContainerTab
-import org.openedx.core.system.ResourceManager
+import org.openedx.core.extension.isFalse
+import org.openedx.core.extension.isTrue
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncDialogType
+import org.openedx.core.presentation.settings.calendarsync.CalendarSyncUIState
 import org.openedx.core.system.connection.NetworkConnection
-import org.openedx.core.system.notifier.CalendarSyncEvent.CheckCalendarSyncEvent
 import org.openedx.core.system.notifier.CalendarSyncEvent.CreateCalendarSyncEvent
 import org.openedx.core.system.notifier.CourseCompletionSet
 import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
-import org.openedx.core.system.notifier.CourseRefresh
+import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.utils.TimeUtils
+import org.openedx.core.system.notifier.RefreshDates
+import org.openedx.core.system.notifier.RefreshDiscussions
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.DatesShiftedSnackBar
-import org.openedx.course.R
-import org.openedx.course.data.storage.CoursePreferences
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CalendarSyncDialog
-import org.openedx.course.presentation.CalendarSyncSnackbar
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseAnalyticsKey
 import org.openedx.course.presentation.CourseRouter
-import org.openedx.course.presentation.calendarsync.CalendarManager
-import org.openedx.course.presentation.calendarsync.CalendarSyncDialogType
-import org.openedx.course.presentation.calendarsync.CalendarSyncUIState
-import java.util.Date
+import org.openedx.course.utils.ImageProcessor
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.extension.toImageLink
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import java.util.concurrent.atomic.AtomicReference
 import org.openedx.core.R as CoreR
 
 class CourseContainerViewModel(
     val courseId: String,
     var courseName: String,
-    private val enrollmentMode: String,
+    private var resumeBlockId: String,
     private val config: Config,
     private val interactor: CourseInteractor,
-    private val calendarManager: CalendarManager,
     private val resourceManager: ResourceManager,
     private val courseNotifier: CourseNotifier,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
-    private val coursePreferences: CoursePreferences,
     private val courseAnalytics: CourseAnalytics,
     private val imageProcessor: ImageProcessor,
-    val courseRouter: CourseRouter
+    private val calendarSyncScheduler: CalendarSyncScheduler,
+    val courseRouter: CourseRouter,
 ) : BaseViewModel() {
 
     private val _dataReady = MutableLiveData<Boolean?>()
     val dataReady: LiveData<Boolean?>
         get() = _dataReady
+
+    private val _courseAccessStatus = MutableLiveData<CourseAccessError>()
+    val courseAccessStatus: LiveData<CourseAccessError>
+        get() = _courseAccessStatus
 
     private val _errorMessage = SingleEventLiveData<String>()
     val errorMessage: LiveData<String>
@@ -95,21 +100,13 @@ class CourseContainerViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
-    private var _isSelfPaced: Boolean = true
-    val isSelfPaced: Boolean
-        get() = _isSelfPaced
-
-    private var _organization: String = ""
-    val organization: String
-        get() = _organization
-
-    val calendarPermissions: Array<String>
-        get() = calendarManager.permissions
+    private var _courseDetails: CourseEnrollmentDetails? = null
+    val courseDetails: CourseEnrollmentDetails?
+        get() = _courseDetails
 
     private val _calendarSyncUIState = MutableStateFlow(
         CalendarSyncUIState(
             isCalendarSyncEnabled = isCalendarSyncEnabled(),
-            calendarTitle = calendarManager.getCourseCalendarTitle(courseName),
             courseDates = emptyList(),
             dialogType = CalendarSyncDialogType.NONE,
             checkForOutOfSync = AtomicReference(false),
@@ -134,6 +131,10 @@ class CourseContainerViewModel(
                     }
 
                     is CreateCalendarSyncEvent -> {
+                        // Skip out-of-sync check if any calendar dialog is visible
+                        if (event.checkOutOfSync && _calendarSyncUIState.value.isDialogVisible) {
+                            return@collect
+                        }
                         _calendarSyncUIState.update {
                             val dialogType = CalendarSyncDialogType.valueOf(event.dialogType)
                             it.copy(
@@ -145,6 +146,7 @@ class CourseContainerViewModel(
                     }
 
                     is CourseDatesShifted -> {
+                        calendarSyncScheduler.requestImmediateSync(courseId)
                         _uiMessage.emit(DatesShiftedSnackBar())
                     }
 
@@ -159,42 +161,122 @@ class CourseContainerViewModel(
         }
     }
 
-    fun preloadCourseStructure() {
+    fun fetchCourseDetails() {
         courseDashboardViewed()
-        if (_dataReady.value != null) {
-            return
-        }
+
+        // If data is already loaded, do nothing
+        if (_dataReady.value != null) return
 
         _showProgress.value = true
+
         viewModelScope.launch {
             try {
-                val courseStructure = interactor.getCourseStructure(courseId)
-                courseName = courseStructure.name
-                _organization = courseStructure.org
-                _isSelfPaced = courseStructure.isSelfPaced
-                loadCourseImage(courseStructure.media?.image?.large)
-                _dataReady.value = courseStructure.start?.let { start ->
-                    val isReady = start < Date()
-                    if (isReady) {
-                        _isNavigationEnabled.value = true
+                val (courseStructure, courseEnrollmentDetails) = fetchCourseData(courseId)
+                _showProgress.value = false
+                when {
+                    courseEnrollmentDetails != null -> {
+                        handleCourseEnrollment(courseEnrollmentDetails)
                     }
-                    isReady
+
+                    courseStructure != null -> {
+                        handleCourseStructureOnly(courseStructure)
+                    }
+
+                    else -> {
+                        _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                    }
                 }
             } catch (e: Exception) {
-                if (e.isInternetError() || e is NoCachedDataException) {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_no_connection)
-                } else {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_unknown_error)
-                }
+                e.printStackTrace()
+                handleFetchError(e)
+                _showProgress.value = false
             }
         }
     }
 
+    private suspend fun fetchCourseData(
+        courseId: String
+    ): Pair<CourseStructure?, CourseEnrollmentDetails?> = supervisorScope {
+        val deferredCourse = async {
+            runCatching {
+                interactor.getCourseStructure(courseId, isNeedRefresh = true)
+            }.getOrNull()
+        }
+        val deferredEnrollment = async {
+            runCatching {
+                interactor.getEnrollmentDetails(courseId)
+            }.getOrNull()
+        }
+
+        Pair(deferredCourse.await(), deferredEnrollment.await())
+    }
+
+    /**
+     * Handles the scenario where [CourseEnrollmentDetails] is successfully fetched.
+     */
+    private fun handleCourseEnrollment(courseDetails: CourseEnrollmentDetails) {
+        _courseDetails = courseDetails
+        courseName = courseDetails.courseInfoOverview.name
+        loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
+
+        if (courseDetails.hasAccess.isFalse()) {
+            _dataReady.value = false
+            _courseAccessStatus.value = when {
+                courseDetails.isAuditAccessExpired -> CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
+                courseDetails.courseInfoOverview.isStarted.not() -> CourseAccessError.NOT_YET_STARTED
+                else -> CourseAccessError.UNKNOWN
+            }
+        } else {
+            _courseAccessStatus.value = CourseAccessError.NONE
+            _isNavigationEnabled.value = true
+            _calendarSyncUIState.update { state ->
+                state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+            }
+            if (resumeBlockId.isNotEmpty()) {
+                // Small delay before sending block open event
+                viewModelScope.launch {
+                    delay(500L)
+                    courseNotifier.send(CourseOpenBlock(resumeBlockId))
+                }
+            }
+            _dataReady.value = true
+        }
+    }
+
+    /**
+     * Handles the scenario where we only have [CourseStructure] but no enrollment details.
+     */
+    private fun handleCourseStructureOnly(courseStructure: CourseStructure) {
+        loadCourseImage(courseStructure.media?.image?.large)
+        _courseAccessStatus.value = CourseAccessError.NONE
+        _isNavigationEnabled.value = true
+        _calendarSyncUIState.update { state ->
+            state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+        }
+        if (resumeBlockId.isNotEmpty()) {
+            viewModelScope.launch {
+                delay(500L)
+                courseNotifier.send(CourseOpenBlock(resumeBlockId))
+            }
+        }
+        _dataReady.value = true
+    }
+
+    private fun handleFetchError(e: Exception) {
+        if (isNetworkRelatedError(e)) {
+            _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
+        } else {
+            _courseAccessStatus.value = CourseAccessError.UNKNOWN
+        }
+    }
+
+    private fun isNetworkRelatedError(e: Exception): Boolean {
+        return e.isInternetError() || e is NoCachedDataException
+    }
+
     private fun loadCourseImage(imageUrl: String?) {
         imageProcessor.loadImage(
-            imageUrl = config.getApiHostURL() + imageUrl,
+            imageUrl = imageUrl?.toImageLink(config.getApiHostURL()) ?: "",
             defaultImage = CoreR.drawable.core_no_image_course,
             onComplete = { drawable ->
                 val bitmap = (drawable as BitmapDrawable).bitmap.apply {
@@ -220,15 +302,19 @@ class CourseContainerViewModel(
                 updateData()
             }
 
+            CourseContainerTab.OFFLINE -> {
+                updateData()
+            }
+
             CourseContainerTab.DATES -> {
                 viewModelScope.launch {
-                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                    courseNotifier.send(RefreshDates)
                 }
             }
 
             CourseContainerTab.DISCUSSIONS -> {
                 viewModelScope.launch {
-                    courseNotifier.send(CourseRefresh(courseContainerTab))
+                    courseNotifier.send(RefreshDiscussions)
                 }
             }
 
@@ -242,14 +328,9 @@ class CourseContainerViewModel(
         viewModelScope.launch {
             try {
                 interactor.getCourseStructure(courseId, isNeedRefresh = true)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_no_connection)
-                } else {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_unknown_error)
-                }
+            } catch (ignore: Exception) {
+                _errorMessage.value =
+                    resourceManager.getString(CoreR.string.core_error_unknown_error)
             }
             _refreshing.value = false
             courseNotifier.send(CourseStructureUpdated(courseId))
@@ -263,9 +344,9 @@ class CourseContainerViewModel(
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
             CourseContainerTab.MORE -> moreTabClickedEvent()
+            CourseContainerTab.OFFLINE -> {}
         }
     }
-
 
     fun setCalendarSyncDialogType(dialogType: CalendarSyncDialogType) {
         val currentState = _calendarSyncUIState.value
@@ -274,121 +355,25 @@ class CourseContainerViewModel(
         }
     }
 
-    fun addOrUpdateEventsInCalendar(
-        updatedEvent: Boolean,
-    ) {
-        setCalendarSyncDialogType(CalendarSyncDialogType.LOADING_DIALOG)
-
-        val startSyncTime = TimeUtils.getCurrentTime()
-        val calendarId = getCalendarId()
-
-        if (calendarId == CalendarManager.CALENDAR_DOES_NOT_EXIST) {
-            setUiMessage(R.string.course_snackbar_course_calendar_error)
-            setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
-
-            return
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val courseDates = _calendarSyncUIState.value.courseDates
-            if (courseDates.isNotEmpty()) {
-                courseDates.forEach { courseDateBlock ->
-                    calendarManager.addEventsIntoCalendar(
-                        calendarId = calendarId,
-                        courseId = courseId,
-                        courseName = courseName,
-                        courseDateBlock = courseDateBlock
-                    )
-                }
-            }
-            val elapsedSyncTime = TimeUtils.getCurrentTime() - startSyncTime
-            val delayRemaining = maxOf(0, 1000 - elapsedSyncTime)
-
-            // Ensure minimum 1s delay to prevent flicker for rapid event creation
-            if (delayRemaining > 0) {
-                delay(delayRemaining)
-            }
-
-            setCalendarSyncDialogType(CalendarSyncDialogType.NONE)
-            updateCalendarSyncState()
-
-            if (updatedEvent) {
-                logCalendarSyncSnackbar(CalendarSyncSnackbar.UPDATED)
-                setUiMessage(R.string.course_snackbar_course_calendar_updated)
-            } else if (coursePreferences.isCalendarSyncEventsDialogShown(courseName)) {
-                logCalendarSyncSnackbar(CalendarSyncSnackbar.ADDED)
-                setUiMessage(R.string.course_snackbar_course_calendar_added)
-            } else {
-                coursePreferences.setCalendarSyncEventsDialogShown(courseName)
-                setCalendarSyncDialogType(CalendarSyncDialogType.EVENTS_DIALOG)
-            }
-        }
-    }
-
-    private fun updateCalendarSyncState() {
-        viewModelScope.launch {
-            val isCalendarSynced = calendarManager.isCalendarExists(
-                calendarTitle = _calendarSyncUIState.value.calendarTitle
-            )
-            courseNotifier.send(CheckCalendarSyncEvent(isSynced = isCalendarSynced))
-        }
-    }
-
-    fun checkIfCalendarOutOfDate() {
-        val courseDates = _calendarSyncUIState.value.courseDates
-        if (courseDates.isNotEmpty()) {
-            _calendarSyncUIState.value.checkForOutOfSync.set(false)
-            val outdatedCalendarId = calendarManager.isCalendarOutOfDate(
-                calendarTitle = _calendarSyncUIState.value.calendarTitle,
-                courseDateBlocks = courseDates
-            )
-            if (outdatedCalendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
-                setCalendarSyncDialogType(CalendarSyncDialogType.OUT_OF_SYNC_DIALOG)
-            }
-        }
-    }
-
-    fun deleteCourseCalendar() {
-        if (calendarManager.hasPermissions()) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val calendarId = getCalendarId()
-                if (calendarId != CalendarManager.CALENDAR_DOES_NOT_EXIST) {
-                    calendarManager.deleteCalendar(
-                        calendarId = calendarId,
-                    )
-                }
-                updateCalendarSyncState()
-
-            }
-            logCalendarSyncSnackbar(CalendarSyncSnackbar.REMOVED)
-            setUiMessage(R.string.course_snackbar_course_calendar_removed)
-        }
-    }
-
-    fun openCalendarApp() {
-        calendarManager.openCalendarApp()
-    }
-
-    private fun setUiMessage(@StringRes stringResId: Int) {
-        _calendarSyncUIState.update {
-            it.copy(uiMessage = AtomicReference(resourceManager.getString(stringResId)))
-        }
-    }
-
-    private fun getCalendarId(): Long {
-        return calendarManager.createOrUpdateCalendar(
-            calendarTitle = _calendarSyncUIState.value.calendarTitle
-        )
-    }
-
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && isSelfPaced) ||
-                (calendarSync.isInstructorPacedEnabled && !isSelfPaced))
+        return calendarSync.isEnabled && (
+                isSelfPacedCalendarSyncEnabled(calendarSync) ||
+                        isInstructorPacedCalendarSyncEnabled(calendarSync)
+                )
+    }
+
+    private fun isSelfPacedCalendarSyncEnabled(calendarSync: CourseDatesCalendarSync): Boolean {
+        return calendarSync.isSelfPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()
+    }
+
+    private fun isInstructorPacedCalendarSyncEnabled(calendarSync: CourseDatesCalendarSync): Boolean {
+        return calendarSync.isInstructorPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isFalse()
     }
 
     private fun courseDashboardViewed() {
         logCourseContainerEvent(CourseAnalyticsEvent.DASHBOARD)
+        courseTabClickedEvent()
     }
 
     private fun courseTabClickedEvent() {
@@ -412,8 +397,8 @@ class CourseContainerViewModel(
     }
 
     private fun logCourseContainerEvent(event: CourseAnalyticsEvent) {
-        courseAnalytics.logEvent(
-            event = event.eventName,
+        courseAnalytics.logScreenEvent(
+            screenName = event.eventName,
             params = buildMap {
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)
@@ -429,41 +414,6 @@ class CourseContainerViewModel(
         )
     }
 
-    fun logCalendarAddDates(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.ADD.getBuildMap(action)
-        )
-    }
-
-    fun logCalendarRemoveDates(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.REMOVE.getBuildMap(action)
-        )
-    }
-
-    fun logCalendarSyncedConfirmation(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.CONFIRMED.getBuildMap(action)
-        )
-    }
-
-    fun logCalendarSyncUpdate(action: Boolean) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_DIALOG_ACTION,
-            CalendarSyncDialog.UPDATE.getBuildMap(action)
-        )
-    }
-
-    private fun logCalendarSyncSnackbar(snackbar: CalendarSyncSnackbar) {
-        logCalendarSyncEvent(
-            CourseAnalyticsEvent.DATES_CALENDAR_SYNC_SNACKBAR,
-            snackbar.getBuildMap()
-        )
-    }
-
     private fun logCalendarSyncEvent(
         event: CourseAnalyticsEvent,
         param: Map<String, Any> = emptyMap(),
@@ -473,11 +423,17 @@ class CourseContainerViewModel(
             params = buildMap {
                 put(CourseAnalyticsKey.NAME.key, event.biValue)
                 put(CourseAnalyticsKey.COURSE_ID.key, courseId)
-                put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
+                put(
+                    CourseAnalyticsKey.ENROLLMENT_MODE.key,
+                    _courseDetails?.enrollmentDetails?.mode ?: ""
+                )
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
-                    else CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    if (_courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) {
+                        CourseAnalyticsKey.SELF_PACED.key
+                    } else {
+                        CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    }
                 )
                 putAll(param)
             }

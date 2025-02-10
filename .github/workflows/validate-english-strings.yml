@@ -1,0 +1,32 @@
+name: Validate English strings.xml
+
+on:
+  pull_request: { }
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  translation_strings:
+    name: Validate strings.xml
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install translations requirements
+        run: make translation_requirements
+
+      - name: Validate English plurals in strings.xml
+        run: make validate_english_plurals
+
+      - name: Test extract strings
+        run: |
+          make extract_translations
+          # Ensure the file is extracted
+          test -f i18n/src/main/res/values/strings.xml

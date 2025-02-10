@@ -5,9 +5,14 @@ import org.openedx.auth.data.model.PasswordResetResponse
 import org.openedx.auth.data.model.RegistrationFields
 import org.openedx.auth.data.model.ValidationFields
 import org.openedx.core.ApiConstants
-import org.openedx.core.data.model.*
+import org.openedx.core.data.model.User
 import retrofit2.Call
-import retrofit2.http.*
+import retrofit2.http.Field
+import retrofit2.http.FieldMap
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface AuthApi {
 
@@ -28,6 +33,17 @@ interface AuthApi {
         @Field("client_id") clientId: String,
         @Field("username") username: String,
         @Field("password") password: String,
+        @Field("token_type") tokenType: String,
+        @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
+    ): AuthResponse
+
+    @FormUrlEncoded
+    @POST(ApiConstants.URL_ACCESS_TOKEN)
+    suspend fun getAccessTokenFromCode(
+        @Field("grant_type") grantType: String,
+        @Field("client_id") clientId: String,
+        @Field("code") code: String,
+        @Field("redirect_uri") redirectUri: String,
         @Field("token_type") tokenType: String,
         @Field("asymmetric_jwt") isAsymmetricJwt: Boolean = true,
     ): AuthResponse

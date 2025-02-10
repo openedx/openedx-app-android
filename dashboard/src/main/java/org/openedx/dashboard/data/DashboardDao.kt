@@ -16,6 +16,5 @@ interface DashboardDao {
     suspend fun clearCachedData()
 
     @Query("SELECT * FROM course_enrolled_table")
-    suspend fun readAllData() : List<EnrolledCourseEntity>
-
+    suspend fun readAllData(): List<EnrolledCourseEntity>
 }

@@ -4,12 +4,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import org.openedx.core.BaseViewModel
+import kotlinx.coroutines.launch
 import org.openedx.core.R
-import org.openedx.core.SingleEventLiveData
-import org.openedx.core.UIMessage
-import org.openedx.core.extension.isInternetError
-import org.openedx.core.system.ResourceManager
 import org.openedx.discussion.domain.interactor.DiscussionInteractor
 import org.openedx.discussion.domain.model.DiscussionComment
 import org.openedx.discussion.domain.model.DiscussionType
@@ -17,7 +13,11 @@ import org.openedx.discussion.system.notifier.DiscussionCommentAdded
 import org.openedx.discussion.system.notifier.DiscussionCommentDataChanged
 import org.openedx.discussion.system.notifier.DiscussionNotifier
 import org.openedx.discussion.system.notifier.DiscussionThreadDataChanged
-import kotlinx.coroutines.launch
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.SingleEventLiveData
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 
 class DiscussionCommentsViewModel(
     private val interactor: DiscussionInteractor,
@@ -48,10 +48,6 @@ class DiscussionCommentsViewModel(
     val isUpdating: LiveData<Boolean>
         get() = _isUpdating
 
-    private val _scrollToBottom = MutableLiveData<Boolean>()
-    val scrollToBottom: LiveData<Boolean>
-        get() = _scrollToBottom
-
     private val comments = mutableListOf<DiscussionComment>()
     private var page = 1
     private var isLoading = false
@@ -68,10 +64,11 @@ class DiscussionCommentsViewModel(
                             comments.toList(),
                             commentCount
                         )
-                        _scrollToBottom.value = true
                     } else {
                         _uiMessage.value =
-                            UIMessage.ToastMessage(resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added))
+                            UIMessage.ToastMessage(
+                                resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+                            )
                     }
                     thread = thread.copy(commentCount = thread.commentCount + 1)
                     sendThreadUpdated()
@@ -290,7 +287,9 @@ class DiscussionCommentsViewModel(
                     comments.add(response)
                 } else {
                     _uiMessage.value =
-                        UIMessage.ToastMessage(resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added))
+                        UIMessage.ToastMessage(
+                            resourceManager.getString(org.openedx.discussion.R.string.discussion_comment_added)
+                        )
                 }
                 _uiState.value =
                     DiscussionCommentsUIState.Success(thread, comments.toList(), commentCount)
@@ -305,5 +304,4 @@ class DiscussionCommentsViewModel(
             }
         }
     }
-
 }

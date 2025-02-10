@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -54,11 +53,9 @@ import androidx.compose.ui.window.Dialog
 import org.openedx.core.R
 import org.openedx.core.domain.model.AgreementUrls
 import org.openedx.core.presentation.global.AppData
-import org.openedx.core.system.notifier.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.Toolbar
-import org.openedx.core.ui.WindowSize
-import org.openedx.core.ui.WindowType
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.settingsHeaderBackground
 import org.openedx.core.ui.statusBarsInset
@@ -66,8 +63,11 @@ import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
-import org.openedx.core.ui.windowSizeValue
+import org.openedx.foundation.presentation.WindowSize
+import org.openedx.foundation.presentation.WindowType
+import org.openedx.foundation.presentation.windowSizeValue
 import org.openedx.profile.domain.model.Configuration
+import org.openedx.profile.presentation.ui.SettingsDivider
 import org.openedx.profile.presentation.ui.SettingsItem
 import org.openedx.profile.R as profileR
 
@@ -170,14 +170,19 @@ internal fun SettingsScreen(
                                     Spacer(Modifier.height(30.dp))
 
                                     ManageAccountSection(onManageAccountClick = {
-                                        onAction(SettingsScreenAction.ManageAccount)
+                                        onAction(SettingsScreenAction.ManageAccountClick)
                                     })
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
-                                    SettingsSection(onVideoSettingsClick = {
-                                        onAction(SettingsScreenAction.VideoSettingsClick)
-                                    })
+                                    SettingsSection(
+                                        onVideoSettingsClick = {
+                                            onAction(SettingsScreenAction.VideoSettingsClick)
+                                        },
+                                        onCalendarSettingsClick = {
+                                            onAction(SettingsScreenAction.CalendarSettingsClick)
+                                        }
+                                    )
 
                                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -205,7 +210,10 @@ internal fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
+private fun SettingsSection(
+    onVideoSettingsClick: () -> Unit,
+    onCalendarSettingsClick: () -> Unit
+) {
     Column {
         Text(
             modifier = Modifier.testTag("txt_settings"),
@@ -224,6 +232,11 @@ private fun SettingsSection(onVideoSettingsClick: () -> Unit) {
                 SettingsItem(
                     text = stringResource(id = profileR.string.profile_video),
                     onClick = onVideoSettingsClick
+                )
+                SettingsDivider()
+                SettingsItem(
+                    text = stringResource(id = profileR.string.profile_dates_and_calendar),
+                    onClick = onCalendarSettingsClick
                 )
             }
         }
@@ -273,46 +286,31 @@ private fun SupportInfoSection(
                     SettingsItem(text = stringResource(id = profileR.string.profile_contact_support)) {
                         onAction(SettingsScreenAction.SupportClick)
                     }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
+                    SettingsDivider()
                 }
                 if (uiState.configuration.agreementUrls.tosUrl.isNotBlank()) {
                     SettingsItem(text = stringResource(id = R.string.core_terms_of_use)) {
                         onAction(SettingsScreenAction.TermsClick)
                     }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
+                    SettingsDivider()
                 }
                 if (uiState.configuration.agreementUrls.privacyPolicyUrl.isNotBlank()) {
                     SettingsItem(text = stringResource(id = R.string.core_privacy_policy)) {
                         onAction(SettingsScreenAction.PrivacyPolicyClick)
                     }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
+                    SettingsDivider()
                 }
                 if (uiState.configuration.agreementUrls.cookiePolicyUrl.isNotBlank()) {
                     SettingsItem(text = stringResource(id = R.string.core_cookie_policy)) {
                         onAction(SettingsScreenAction.CookiePolicyClick)
                     }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
+                    SettingsDivider()
                 }
                 if (uiState.configuration.agreementUrls.dataSellConsentUrl.isNotBlank()) {
                     SettingsItem(text = stringResource(id = R.string.core_data_sell)) {
                         onAction(SettingsScreenAction.DataSellClick)
                     }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
+                    SettingsDivider()
                 }
                 if (uiState.configuration.faqUrl.isNotBlank()) {
                     val uriHandler = LocalUriHandler.current
@@ -323,10 +321,7 @@ private fun SupportInfoSection(
                         uriHandler.openUri(uiState.configuration.faqUrl)
                         onAction(SettingsScreenAction.FaqClick)
                     }
-                    Divider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.appColors.divider
-                    )
+                    SettingsDivider()
                 }
                 AppVersionItem(
                     versionName = uiState.configuration.versionName,
@@ -344,16 +339,17 @@ private fun LogoutButton(onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .testTag("btn_logout")
-            .fillMaxWidth()
-            .clickable {
-                onClick()
-            },
+            .fillMaxWidth(),
         shape = MaterialTheme.appShapes.cardShape,
         elevation = 0.dp,
         backgroundColor = MaterialTheme.appColors.cardViewBackground
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier
+                .clickable {
+                    onClick()
+                }
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
@@ -518,11 +514,11 @@ private fun AppVersionItemAppToDate(versionName: String) {
         ) {
             Icon(
                 modifier = Modifier.size(
-                    (MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp
+                    size = (MaterialTheme.appTypography.labelLarge.fontSize.value + 4).dp
                 ),
                 painter = painterResource(id = R.drawable.core_ic_check),
                 contentDescription = null,
-                tint = MaterialTheme.appColors.accessGreen
+                tint = MaterialTheme.appColors.successGreen
             )
             Text(
                 modifier = Modifier.testTag("txt_up_to_date"),
@@ -601,7 +597,7 @@ fun AppVersionItemUpgradeRequired(
             ) {
                 Image(
                     modifier = Modifier
-                        .size((MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
+                        .size(size = (MaterialTheme.appTypography.labelLarge.fontSize.value + 8).dp),
                     painter = painterResource(id = R.drawable.core_ic_warning),
                     contentDescription = null
                 )
@@ -629,7 +625,9 @@ fun AppVersionItemUpgradeRequired(
 }
 
 private val mockAppData = AppData(
+    appName = "openedx",
     versionName = "1.0.0",
+    applicationId = "org.example.com"
 )
 
 private val mockConfiguration = Configuration(
@@ -642,7 +640,6 @@ private val mockConfiguration = Configuration(
 private val mockUiState = SettingsUIState.Data(
     configuration = mockConfiguration
 )
-
 
 @Preview
 @Composable

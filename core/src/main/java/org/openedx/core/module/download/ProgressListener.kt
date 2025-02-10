@@ -2,7 +2,11 @@ package org.openedx.core.module.download
 
 import okhttp3.MediaType
 import okhttp3.ResponseBody
-import okio.*
+import okio.Buffer
+import okio.BufferedSource
+import okio.ForwardingSource
+import okio.Source
+import okio.buffer
 
 class ProgressResponseBody(
     private val responseBody: ResponseBody,
@@ -38,11 +42,9 @@ class ProgressResponseBody(
                 )
                 return bytesRead
             }
-
         }
     }
 }
-
 
 interface ProgressListener {
     fun update(bytesRead: Long, contentLength: Long, done: Boolean)

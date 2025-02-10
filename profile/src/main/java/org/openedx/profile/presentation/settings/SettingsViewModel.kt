@@ -14,26 +14,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openedx.core.AppUpdateState
-import org.openedx.core.BaseViewModel
+import org.openedx.core.CalendarRouter
 import org.openedx.core.R
-import org.openedx.core.UIMessage
 import org.openedx.core.config.Config
-import org.openedx.core.extension.isInternetError
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.system.AppCookieManager
-import org.openedx.core.system.ResourceManager
-import org.openedx.core.system.notifier.AppUpgradeEvent
-import org.openedx.core.system.notifier.AppUpgradeNotifier
+import org.openedx.core.system.notifier.app.AppNotifier
+import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.core.system.notifier.app.LogoutEvent
 import org.openedx.core.utils.EmailUtil
+import org.openedx.foundation.extension.isInternetError
+import org.openedx.foundation.presentation.BaseViewModel
+import org.openedx.foundation.presentation.UIMessage
+import org.openedx.foundation.system.ResourceManager
 import org.openedx.profile.domain.interactor.ProfileInteractor
 import org.openedx.profile.domain.model.Configuration
 import org.openedx.profile.presentation.ProfileAnalytics
 import org.openedx.profile.presentation.ProfileAnalyticsEvent
 import org.openedx.profile.presentation.ProfileAnalyticsKey
 import org.openedx.profile.presentation.ProfileRouter
-import org.openedx.profile.system.notifier.AccountDeactivated
-import org.openedx.profile.system.notifier.ProfileNotifier
+import org.openedx.profile.system.notifier.account.AccountDeactivated
+import org.openedx.profile.system.notifier.profile.ProfileNotifier
 
 class SettingsViewModel(
     private val appData: AppData,
@@ -43,8 +45,9 @@ class SettingsViewModel(
     private val cookieManager: AppCookieManager,
     private val workerController: DownloadWorkerController,
     private val analytics: ProfileAnalytics,
-    private val router: ProfileRouter,
-    private val appUpgradeNotifier: AppUpgradeNotifier,
+    private val profileRouter: ProfileRouter,
+    private val calendarRouter: CalendarRouter,
+    private val appNotifier: AppNotifier,
     private val profileNotifier: ProfileNotifier,
 ) : BaseViewModel() {
 
@@ -94,12 +97,21 @@ class SettingsViewModel(
                 )
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_no_connection)
+                        )
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_error_unknown_error)
+                        )
+                    )
                 }
             } finally {
                 cookieManager.clearWebViewCookie()
+                appNotifier.send(LogoutEvent(false))
                 _successLogout.emit(true)
             }
         }
@@ -107,8 +119,10 @@ class SettingsViewModel(
 
     private fun collectAppUpgradeEvent() {
         viewModelScope.launch {
-            appUpgradeNotifier.notifier.collect { event ->
-                _appUpgradeEvent.value = event
+            appNotifier.notifier.collect { event ->
+                if (event is AppUpgradeEvent) {
+                    _appUpgradeEvent.value = event
+                }
             }
         }
     }
@@ -124,12 +138,12 @@ class SettingsViewModel(
     }
 
     fun videoSettingsClicked(fragmentManager: FragmentManager) {
-        router.navigateToVideoSettings(fragmentManager)
+        profileRouter.navigateToVideoSettings(fragmentManager)
         logProfileEvent(ProfileAnalyticsEvent.VIDEO_SETTING_CLICKED)
     }
 
     fun privacyPolicyClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_privacy_policy),
             url = configuration.agreementUrls.privacyPolicyUrl,
@@ -138,7 +152,7 @@ class SettingsViewModel(
     }
 
     fun cookiePolicyClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_cookie_policy),
             url = configuration.agreementUrls.cookiePolicyUrl,
@@ -147,7 +161,7 @@ class SettingsViewModel(
     }
 
     fun dataSellClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_data_sell),
             url = configuration.agreementUrls.dataSellConsentUrl,
@@ -160,7 +174,7 @@ class SettingsViewModel(
     }
 
     fun termsOfUseClicked(fragmentManager: FragmentManager) {
-        router.navigateToWebContent(
+        profileRouter.navigateToWebContent(
             fm = fragmentManager,
             title = resourceManager.getString(R.string.core_terms_of_use),
             url = configuration.agreementUrls.tosUrl,
@@ -182,11 +196,15 @@ class SettingsViewModel(
     }
 
     fun manageAccountClicked(fragmentManager: FragmentManager) {
-        router.navigateToManageAccount(fragmentManager)
+        profileRouter.navigateToManageAccount(fragmentManager)
+    }
+
+    fun calendarSettingsClicked(fragmentManager: FragmentManager) {
+        calendarRouter.navigateToCalendarSettings(fragmentManager)
     }
 
     fun restartApp(fragmentManager: FragmentManager) {
-        router.restartApp(
+        profileRouter.restartApp(
             fragmentManager,
             isLogistrationEnabled
         )

@@ -44,7 +44,7 @@ class AuthRepository(
     }
 
     suspend fun socialLogin(token: String?, authType: AuthType) {
-        if (token.isNullOrBlank()) throw IllegalArgumentException("Token is null")
+        require(!token.isNullOrBlank()) { "Token is null" }
         api.exchangeAccessToken(
             accessToken = token,
             clientId = config.getOAuthClientId(),
@@ -53,6 +53,16 @@ class AuthRepository(
         )
             .mapToDomain()
             .processAuthResponse()
+    }
+
+    suspend fun browserAuthCodeLogin(code: String) {
+        api.getAccessTokenFromCode(
+            grantType = ApiConstants.GRANT_TYPE_CODE,
+            clientId = config.getOAuthClientId(),
+            code = code,
+            redirectUri = "${config.getAppId()}://${ApiConstants.BrowserLogin.REDIRECT_HOST}",
+            tokenType = config.getAccessTokenType(),
+        ).mapToDomain().processAuthResponse()
     }
 
     suspend fun getRegistrationFields(): List<RegistrationField> {
