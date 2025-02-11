@@ -112,7 +112,9 @@ class CourseDatesViewModel(
             } catch (e: Exception) {
                 _uiState.value = CourseDatesUIState.Error
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    )
                 }
             } finally {
                 courseNotifier.send(CourseLoading(false))
@@ -129,9 +131,15 @@ class CourseDatesViewModel(
                 onResetDates(true)
             } catch (e: Exception) {
                 if (e.isInternetError()) {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(CoreR.string.core_error_no_connection))
+                    )
                 } else {
-                    _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)))
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(
+                            resourceManager.getString(R.string.core_dates_shift_dates_unsuccessful_msg)
+                        )
+                    )
                 }
                 onResetDates(false)
             }
@@ -143,6 +151,7 @@ class CourseDatesViewModel(
             courseStructure?.blockData?.getVerticalBlocks()
                 ?.find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }
@@ -152,6 +161,7 @@ class CourseDatesViewModel(
             courseStructure?.blockData?.getSequentialBlocks()
                 ?.find { it.descendants.contains(blockId) }
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }
@@ -229,8 +239,11 @@ class CourseDatesViewModel(
                 put(CourseAnalyticsKey.ENROLLMENT_MODE.key, enrollmentMode)
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (isSelfPaced) CourseAnalyticsKey.SELF_PACED.key
-                    else CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    if (isSelfPaced) {
+                        CourseAnalyticsKey.SELF_PACED.key
+                    } else {
+                        CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    }
                 )
                 putAll(param)
             }

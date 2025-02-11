@@ -140,25 +140,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         binding.connectionError.isVisible =
             !viewModel.hasInternetConnection && !viewModel.isDownloaded
 
-        val orientation = resources.configuration.orientation
-        val windowMetrics =
-            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(requireActivity())
-        val currentBounds = windowMetrics.bounds
-        val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
-        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
-            val width = currentBounds.width() - requireContext().dpToPixel(32)
-            val minHeight = requireContext().dpToPixel(194).roundToInt()
-            val height = (width / 16f * 9f).roundToInt()
-            layoutParams.height = if (windowSize?.isTablet == true) {
-                requireContext().dpToPixel(320).roundToInt()
-            } else if (height < minHeight) {
-                minHeight
-            } else {
-                height
-            }
-        }
-
-        binding.playerView.layoutParams = layoutParams
+        setupPlayerHeight()
 
         viewModel.isUpdated.observe(viewLifecycleOwner) { isUpdated ->
             if (isUpdated) {
@@ -171,6 +153,38 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                 appReviewManager.tryToOpenRateDialog()
             }
         }
+    }
+
+    private fun setupPlayerHeight() {
+        val orientation = resources.configuration.orientation
+        val windowMetrics = WindowMetricsCalculator.getOrCreate()
+            .computeCurrentWindowMetrics(requireActivity())
+        val currentBounds = windowMetrics.bounds
+        val layoutParams = binding.playerView.layoutParams as FrameLayout.LayoutParams
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT || windowSize?.isTablet == true) {
+            val padding = requireContext().dpToPixel(PLAYER_VIEW_PADDING_DP)
+            val width = currentBounds.width() - padding
+            val minHeight = requireContext().dpToPixel(MIN_PLAYER_HEIGHT_DP).roundToInt()
+            val aspectRatio = VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT
+            val calculatedHeight = (width / aspectRatio).roundToInt()
+
+            layoutParams.height = when {
+                windowSize?.isTablet == true -> {
+                    requireContext().dpToPixel(TABLET_PLAYER_HEIGHT_DP).roundToInt()
+                }
+
+                calculatedHeight < minHeight -> {
+                    minHeight
+                }
+
+                else -> {
+                    calculatedHeight
+                }
+            }
+        }
+
+        binding.playerView.layoutParams = layoutParams
     }
 
     @androidx.annotation.OptIn(UnstableApi::class)
@@ -208,7 +222,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
                             mediaItem,
                             viewModel.exoPlayer?.currentPosition ?: 0L
                         )
-                        viewModel.castPlayer?.playWhenReady = false
+                        viewModel.castPlayer?.playWhenReady = true
                         showVideoControllerIndefinitely(true)
                     }
 
@@ -225,8 +239,9 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             )
 
             playerView.setFullscreenButtonClickListener {
-                if (viewModel.isCastActive)
+                if (viewModel.isCastActive) {
                     return@setFullscreenButtonClickListener
+                }
 
                 router.navigateToFullScreenVideo(
                     requireActivity().supportFragmentManager,
@@ -258,7 +273,7 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
             binding.playerView.showController()
         } else {
             binding.playerView.controllerAutoShow = true
-            binding.playerView.controllerShowTimeoutMs = 2000
+            binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT
         }
     }
 
@@ -284,6 +299,13 @@ class VideoUnitFragment : Fragment(R.layout.fragment_video_unit) {
         private const val ARG_COURSE_ID = "courseId"
         private const val ARG_TITLE = "title"
         private const val ARG_DOWNLOADED = "isDownloaded"
+
+        private const val PLAYER_VIEW_PADDING_DP = 32
+        private const val MIN_PLAYER_HEIGHT_DP = 194
+        private const val TABLET_PLAYER_HEIGHT_DP = 320
+        private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
+        private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
+        private const val CONTROLLER_SHOW_TIMEOUT = 2000
 
         fun newInstance(
             blockId: String,

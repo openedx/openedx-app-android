@@ -121,4 +121,3 @@ internal interface SettingsScreenAction {
     object ManageAccountClick : SettingsScreenAction
     object CalendarSettingsClick : SettingsScreenAction
 }
-

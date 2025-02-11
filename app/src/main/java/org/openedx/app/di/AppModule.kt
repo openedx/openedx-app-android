@@ -23,6 +23,7 @@ import org.openedx.app.room.DatabaseManager
 import org.openedx.auth.presentation.AgreementProvider
 import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.FacebookAuthHelper
 import org.openedx.auth.presentation.sso.GoogleAuthHelper
 import org.openedx.auth.presentation.sso.MicrosoftAuthHelper
@@ -30,7 +31,6 @@ import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.CalendarRouter
 import org.openedx.core.R
 import org.openedx.core.config.Config
-import org.openedx.core.data.model.CourseEnrollmentDetails
 import org.openedx.core.data.model.CourseEnrollments
 import org.openedx.core.data.storage.CalendarPreferences
 import org.openedx.core.data.storage.CorePreferences
@@ -44,7 +44,7 @@ import org.openedx.core.presentation.dialog.appreview.AppReviewAnalytics
 import org.openedx.core.presentation.dialog.appreview.AppReviewManager
 import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.WhatsNewGlobalManager
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRouter
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRouter
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.CalendarManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -181,7 +181,14 @@ val appModule = module {
         DownloadWorkerController(get(), get(), get())
     }
 
-    single { AppData(versionName = BuildConfig.VERSION_NAME) }
+    single {
+        val resourceManager = get<ResourceManager>()
+        AppData(
+            appName = resourceManager.getString(R.string.app_name),
+            versionName = BuildConfig.VERSION_NAME,
+            applicationId = BuildConfig.APPLICATION_ID,
+        )
+    }
     factory { (activity: AppCompatActivity) -> AppReviewManager(activity, get(), get()) }
 
     single { TranscriptManager(get(), get()) }
@@ -203,6 +210,7 @@ val appModule = module {
     factory { FacebookAuthHelper() }
     factory { GoogleAuthHelper(get()) }
     factory { MicrosoftAuthHelper() }
+    factory { BrowserAuthHelper(get()) }
     factory { OAuthHelper(get(), get(), get()) }
 
     factory { FileUtil(get(), get<ResourceManager>().getString(R.string.app_name)) }

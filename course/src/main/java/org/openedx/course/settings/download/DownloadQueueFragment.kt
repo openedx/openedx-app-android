@@ -184,11 +184,17 @@ private fun DownloadQueueScreen(
                                 LazyColumn {
                                     items(uiState.downloadingModels) { model ->
                                         val progressValue =
-                                            if (model.id == uiState.currentProgressId)
-                                                uiState.currentProgressValue else 0
+                                            if (model.id == uiState.currentProgressId) {
+                                                uiState.currentProgressValue
+                                            } else {
+                                                0
+                                            }
                                         val progressSize =
-                                            if (model.id == uiState.currentProgressId)
-                                                uiState.currentProgressSize else 0
+                                            if (model.id == uiState.currentProgressId) {
+                                                uiState.currentProgressSize
+                                            } else {
+                                                0
+                                            }
 
                                         OfflineQueueCard(
                                             downloadModel = model,
@@ -211,7 +217,6 @@ private fun DownloadQueueScreen(
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.TABLET)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

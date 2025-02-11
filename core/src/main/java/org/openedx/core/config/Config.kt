@@ -8,6 +8,7 @@ import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
+@Suppress("TooManyFunctions")
 class Config(context: Context) {
 
     private var configProperties: JsonObject = try {
@@ -15,6 +16,7 @@ class Config(context: Context) {
         val config = JsonParser.parseReader(InputStreamReader(inputStream))
         config.asJsonObject
     } catch (e: Exception) {
+        e.printStackTrace()
         JsonObject()
     }
 
@@ -110,6 +112,14 @@ class Config(context: Context) {
         return getBoolean(REGISTRATION_ENABLED, true)
     }
 
+    fun isBrowserLoginEnabled(): Boolean {
+        return getBoolean(BROWSER_LOGIN, false)
+    }
+
+    fun isBrowserRegistrationEnabled(): Boolean {
+        return getBoolean(BROWSER_REGISTRATION, false)
+    }
+
     private fun getString(key: String, defaultValue: String = ""): String {
         val element = getObject(key)
         return if (element != null) {
@@ -133,12 +143,14 @@ class Config(context: Context) {
             try {
                 cls.getDeclaredConstructor().newInstance()
             } catch (e: InstantiationException) {
-                throw RuntimeException(e)
+                throw ConfigParsingException(e)
             } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
+                throw ConfigParsingException(e)
             }
         }
     }
+
+    class ConfigParsingException(cause: Throwable) : Exception(cause)
 
     private fun getObject(key: String): JsonElement? {
         return configProperties.get(key)
@@ -162,6 +174,8 @@ class Config(context: Context) {
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
         private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
+        private const val BROWSER_LOGIN = "BROWSER_LOGIN"
+        private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
         private const val DASHBOARD = "DASHBOARD"

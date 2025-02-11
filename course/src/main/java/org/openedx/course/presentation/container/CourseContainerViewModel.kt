@@ -6,9 +6,7 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,10 +16,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseAccessError
+import org.openedx.core.domain.model.CourseDatesCalendarSync
 import org.openedx.core.domain.model.CourseEnrollmentDetails
+import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.exception.NoCachedDataException
 import org.openedx.core.extension.isFalse
 import org.openedx.core.extension.isTrue
@@ -162,60 +163,115 @@ class CourseContainerViewModel(
 
     fun fetchCourseDetails() {
         courseDashboardViewed()
-        if (_dataReady.value != null) {
-            return
-        }
+
+        // If data is already loaded, do nothing
+        if (_dataReady.value != null) return
 
         _showProgress.value = true
+
         viewModelScope.launch {
             try {
-                val deferredCourse = async(SupervisorJob()) {
-                    interactor.getCourseStructure(courseId, isNeedRefresh = true)
-                }
-                val deferredEnrollment = async(SupervisorJob()) {
-                    interactor.getEnrollmentDetails(courseId)
-                }
-                val (_, enrollment) = awaitAll(deferredCourse, deferredEnrollment)
-                _courseDetails = enrollment as? CourseEnrollmentDetails
+                val (courseStructure, courseEnrollmentDetails) = fetchCourseData(courseId)
                 _showProgress.value = false
-                _courseDetails?.let { courseDetails ->
-                    courseName = courseDetails.courseInfoOverview.name
-                    loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
-                    if (courseDetails.hasAccess.isFalse()) {
-                        _dataReady.value = false
-                        if (courseDetails.isAuditAccessExpired) {
-                            _courseAccessStatus.value =
-                                CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
-                        } else if (courseDetails.courseInfoOverview.isStarted.not()) {
-                            _courseAccessStatus.value = CourseAccessError.NOT_YET_STARTED
-                        } else {
-                            _courseAccessStatus.value = CourseAccessError.UNKNOWN
-                        }
-                    } else {
-                        _courseAccessStatus.value = CourseAccessError.NONE
-                        _isNavigationEnabled.value = true
-                        _calendarSyncUIState.update { state ->
-                            state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
-                        }
-                        if (resumeBlockId.isNotEmpty()) {
-                            delay(500L)
-                            courseNotifier.send(CourseOpenBlock(resumeBlockId))
-                        }
+                when {
+                    courseEnrollmentDetails != null -> {
+                        handleCourseEnrollment(courseEnrollmentDetails)
                     }
-                } ?: run {
-                    _courseAccessStatus.value = CourseAccessError.UNKNOWN
+
+                    courseStructure != null -> {
+                        handleCourseStructureOnly(courseStructure)
+                    }
+
+                    else -> {
+                        _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                if (e.isInternetError() || e is NoCachedDataException) {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_no_connection)
-                } else {
-                    _courseAccessStatus.value = CourseAccessError.UNKNOWN
-                }
+                handleFetchError(e)
                 _showProgress.value = false
             }
         }
+    }
+
+    private suspend fun fetchCourseData(
+        courseId: String
+    ): Pair<CourseStructure?, CourseEnrollmentDetails?> = supervisorScope {
+        val deferredCourse = async {
+            runCatching {
+                interactor.getCourseStructure(courseId, isNeedRefresh = true)
+            }.getOrNull()
+        }
+        val deferredEnrollment = async {
+            runCatching {
+                interactor.getEnrollmentDetails(courseId)
+            }.getOrNull()
+        }
+
+        Pair(deferredCourse.await(), deferredEnrollment.await())
+    }
+
+    /**
+     * Handles the scenario where [CourseEnrollmentDetails] is successfully fetched.
+     */
+    private fun handleCourseEnrollment(courseDetails: CourseEnrollmentDetails) {
+        _courseDetails = courseDetails
+        courseName = courseDetails.courseInfoOverview.name
+        loadCourseImage(courseDetails.courseInfoOverview.media?.image?.large)
+
+        if (courseDetails.hasAccess.isFalse()) {
+            _dataReady.value = false
+            _courseAccessStatus.value = when {
+                courseDetails.isAuditAccessExpired -> CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE
+                courseDetails.courseInfoOverview.isStarted.not() -> CourseAccessError.NOT_YET_STARTED
+                else -> CourseAccessError.UNKNOWN
+            }
+        } else {
+            _courseAccessStatus.value = CourseAccessError.NONE
+            _isNavigationEnabled.value = true
+            _calendarSyncUIState.update { state ->
+                state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+            }
+            if (resumeBlockId.isNotEmpty()) {
+                // Small delay before sending block open event
+                viewModelScope.launch {
+                    delay(500L)
+                    courseNotifier.send(CourseOpenBlock(resumeBlockId))
+                }
+            }
+            _dataReady.value = true
+        }
+    }
+
+    /**
+     * Handles the scenario where we only have [CourseStructure] but no enrollment details.
+     */
+    private fun handleCourseStructureOnly(courseStructure: CourseStructure) {
+        loadCourseImage(courseStructure.media?.image?.large)
+        _courseAccessStatus.value = CourseAccessError.NONE
+        _isNavigationEnabled.value = true
+        _calendarSyncUIState.update { state ->
+            state.copy(isCalendarSyncEnabled = isCalendarSyncEnabled())
+        }
+        if (resumeBlockId.isNotEmpty()) {
+            viewModelScope.launch {
+                delay(500L)
+                courseNotifier.send(CourseOpenBlock(resumeBlockId))
+            }
+        }
+        _dataReady.value = true
+    }
+
+    private fun handleFetchError(e: Exception) {
+        if (isNetworkRelatedError(e)) {
+            _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
+        } else {
+            _courseAccessStatus.value = CourseAccessError.UNKNOWN
+        }
+    }
+
+    private fun isNetworkRelatedError(e: Exception): Boolean {
+        return e.isInternetError() || e is NoCachedDataException
     }
 
     private fun loadCourseImage(imageUrl: String?) {
@@ -272,14 +328,9 @@ class CourseContainerViewModel(
         viewModelScope.launch {
             try {
                 interactor.getCourseStructure(courseId, isNeedRefresh = true)
-            } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_no_connection)
-                } else {
-                    _errorMessage.value =
-                        resourceManager.getString(CoreR.string.core_error_unknown_error)
-                }
+            } catch (ignore: Exception) {
+                _errorMessage.value =
+                    resourceManager.getString(CoreR.string.core_error_unknown_error)
             }
             _refreshing.value = false
             courseNotifier.send(CourseStructureUpdated(courseId))
@@ -306,12 +357,23 @@ class CourseContainerViewModel(
 
     private fun isCalendarSyncEnabled(): Boolean {
         val calendarSync = corePreferences.appConfig.courseDatesCalendarSync
-        return calendarSync.isEnabled && ((calendarSync.isSelfPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) ||
-                (calendarSync.isInstructorPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isFalse()))
+        return calendarSync.isEnabled && (
+                isSelfPacedCalendarSyncEnabled(calendarSync) ||
+                        isInstructorPacedCalendarSyncEnabled(calendarSync)
+                )
+    }
+
+    private fun isSelfPacedCalendarSyncEnabled(calendarSync: CourseDatesCalendarSync): Boolean {
+        return calendarSync.isSelfPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()
+    }
+
+    private fun isInstructorPacedCalendarSyncEnabled(calendarSync: CourseDatesCalendarSync): Boolean {
+        return calendarSync.isInstructorPacedEnabled && _courseDetails?.courseInfoOverview?.isSelfPaced.isFalse()
     }
 
     private fun courseDashboardViewed() {
         logCourseContainerEvent(CourseAnalyticsEvent.DASHBOARD)
+        courseTabClickedEvent()
     }
 
     private fun courseTabClickedEvent() {
@@ -367,8 +429,11 @@ class CourseContainerViewModel(
                 )
                 put(
                     CourseAnalyticsKey.PACING.key,
-                    if (_courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) CourseAnalyticsKey.SELF_PACED.key
-                    else CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    if (_courseDetails?.courseInfoOverview?.isSelfPaced.isTrue()) {
+                        CourseAnalyticsKey.SELF_PACED.key
+                    } else {
+                        CourseAnalyticsKey.INSTRUCTOR_PACED.key
+                    }
                 )
                 putAll(param)
             }

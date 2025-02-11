@@ -128,7 +128,7 @@ internal fun LoginScreen(
         Image(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.3f),
+                .fillMaxHeight(fraction = 0.3f),
             painter = painterResource(id = coreR.drawable.core_top_header),
             contentScale = ContentScale.FillBounds,
             contentDescription = null
@@ -226,67 +226,73 @@ private fun AuthForm(
     var isPasswordError by rememberSaveable { mutableStateOf(false) }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        LoginTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            title = stringResource(id = R.string.auth_email_username),
-            description = stringResource(id = R.string.auth_enter_email_username),
-            onValueChanged = {
-                login = it
-                isEmailError = false
-            },
-            isError = isEmailError,
-            errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
-        )
+        if (!state.isBrowserLoginEnabled) {
+            LoginTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                title = stringResource(id = R.string.auth_email_username),
+                description = stringResource(id = R.string.auth_enter_email_username),
+                onValueChanged = {
+                    login = it
+                    isEmailError = false
+                },
+                isError = isEmailError,
+                errorMessages = stringResource(id = R.string.auth_error_empty_username_email)
+            )
 
-        Spacer(modifier = Modifier.height(18.dp))
-        PasswordTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            onValueChanged = {
-                password = it
-                isPasswordError = false
-            },
-            onPressDone = {
-                keyboardController?.hide()
-                if (password.isNotEmpty()) {
-                    onEvent(AuthEvent.SignIn(login = login, password = password))
-                } else {
-                    isEmailError = login.isEmpty()
-                    isPasswordError = password.isEmpty()
-                }
-            },
-            isError = isPasswordError,
-        )
+            Spacer(modifier = Modifier.height(18.dp))
+            PasswordTextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onValueChanged = {
+                    password = it
+                    isPasswordError = false
+                },
+                onPressDone = {
+                    keyboardController?.hide()
+                    if (password.isNotEmpty()) {
+                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    } else {
+                        isEmailError = login.isEmpty()
+                        isPasswordError = password.isEmpty()
+                    }
+                },
+                isError = isPasswordError,
+            )
+        } else {
+            Spacer(modifier = Modifier.height(40.dp))
+        }
 
         Row(
             Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp, bottom = 36.dp)
         ) {
-            if (state.isLogistrationEnabled.not() && state.isRegistrationEnabled) {
+            if (!state.isBrowserLoginEnabled) {
+                if (state.isLogistrationEnabled.not() && state.isRegistrationEnabled) {
+                    Text(
+                        modifier = Modifier
+                            .testTag("txt_register")
+                            .noRippleClickable {
+                                onEvent(AuthEvent.RegisterClick)
+                            },
+                        text = stringResource(id = coreR.string.core_register),
+                        color = MaterialTheme.appColors.primary,
+                        style = MaterialTheme.appTypography.labelLarge
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     modifier = Modifier
-                        .testTag("txt_register")
+                        .testTag("txt_forgot_password")
                         .noRippleClickable {
-                            onEvent(AuthEvent.RegisterClick)
+                            onEvent(AuthEvent.ForgotPasswordClick)
                         },
-                    text = stringResource(id = coreR.string.core_register),
-                    color = MaterialTheme.appColors.primary,
+                    text = stringResource(id = R.string.auth_forgot_password),
+                    color = MaterialTheme.appColors.infoVariant,
                     style = MaterialTheme.appTypography.labelLarge
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                modifier = Modifier
-                    .testTag("txt_forgot_password")
-                    .noRippleClickable {
-                        onEvent(AuthEvent.ForgotPasswordClick)
-                    },
-                text = stringResource(id = R.string.auth_forgot_password),
-                color = MaterialTheme.appColors.info_variant,
-                style = MaterialTheme.appTypography.labelLarge
-            )
         }
 
         if (state.showProgress) {
@@ -298,12 +304,16 @@ private fun AuthForm(
                 textColor = MaterialTheme.appColors.primaryButtonText,
                 backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
                 onClick = {
-                    keyboardController?.hide()
-                    if (login.isNotEmpty() && password.isNotEmpty()) {
-                        onEvent(AuthEvent.SignIn(login = login, password = password))
+                    if (state.isBrowserLoginEnabled) {
+                        onEvent(AuthEvent.SignInBrowser)
                     } else {
-                        isEmailError = login.isEmpty()
-                        isPasswordError = password.isEmpty()
+                        keyboardController?.hide()
+                        if (login.isNotEmpty() && password.isNotEmpty()) {
+                            onEvent(AuthEvent.SignIn(login = login, password = password))
+                        } else {
+                            isEmailError = login.isEmpty()
+                            isPasswordError = password.isEmpty()
+                        }
                     }
                 }
             )
@@ -379,8 +389,11 @@ private fun PasswordTextField(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
-        visualTransformation = if (isPasswordVisible) VisualTransformation.None
-        else PasswordVisualTransformation(),
+        visualTransformation = if (isPasswordVisible) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
         keyboardActions = KeyboardActions {
             focusManager.clearFocus()
             onPressDone()
@@ -412,6 +425,24 @@ private fun SignInScreenPreview() {
         LoginScreen(
             windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
             state = SignInUIState(),
+            uiMessage = null,
+            onEvent = {},
+        )
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(name = "NEXUS_5_Light", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_NO)
+@Preview(name = "NEXUS_5_Dark", device = Devices.NEXUS_5, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun SignInUsingBrowserScreenPreview() {
+    OpenEdXTheme {
+        LoginScreen(
+            windowSize = WindowSize(WindowType.Compact, WindowType.Compact),
+            state = SignInUIState().copy(
+                isBrowserLoginEnabled = true,
+            ),
             uiMessage = null,
             onEvent = {},
         )

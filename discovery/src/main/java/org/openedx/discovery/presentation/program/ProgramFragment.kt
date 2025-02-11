@@ -100,7 +100,6 @@ class ProgramFragment : Fragment() {
                 if (isNestedFragment.not()) {
                     DisposableEffect(uiState is ProgramUIState.CourseEnrolled) {
                         if (uiState is ProgramUIState.CourseEnrolled) {
-
                             val courseId = (uiState as ProgramUIState.CourseEnrolled).courseId
                             val isEnrolled = (uiState as ProgramUIState.CourseEnrolled).isEnrolled
 
@@ -133,6 +132,7 @@ class ProgramFragment : Fragment() {
                         ?.isNotEmpty() == true,
                     isNestedFragment = isNestedFragment,
                     uriScheme = viewModel.uriScheme,
+                    userAgent = viewModel.appUserAgent,
                     hasInternetConnection = hasInternetConnection,
                     onWebViewUIAction = { action ->
                         when (action) {
@@ -244,6 +244,7 @@ private fun ProgramInfoScreen(
     contentUrl: String,
     cookieManager: AppCookieManager,
     uriScheme: String,
+    userAgent: String,
     canShowBackBtn: Boolean,
     isNestedFragment: Boolean,
     hasInternetConnection: Boolean,
@@ -320,6 +321,7 @@ private fun ProgramInfoScreen(
                             val webView = CatalogWebViewScreen(
                                 url = contentUrl,
                                 uriScheme = uriScheme,
+                                userAgent = userAgent,
                                 isAllLinksExternal = true,
                                 onWebPageLoaded = { onWebViewUIAction(WebViewUIAction.WEB_PAGE_LOADED) },
                                 refreshSessionCookie = {
@@ -379,6 +381,7 @@ fun MyProgramsPreview() {
             contentUrl = "https://www.example.com/",
             cookieManager = koinViewModel<ProgramViewModel>().cookieManager,
             uriScheme = "",
+            userAgent = "",
             canShowBackBtn = false,
             isNestedFragment = false,
             hasInternetConnection = false,

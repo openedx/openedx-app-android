@@ -1,5 +1,6 @@
 package org.openedx.core.ui
 
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -131,19 +132,21 @@ fun StaticSearchBar(
     Row(
         modifier = modifier
             .testTag("tf_search")
-            .then(Modifier
-                .background(
-                    MaterialTheme.appColors.textFieldBackground,
-                    MaterialTheme.appShapes.textFieldShape
-                )
-                .clip(MaterialTheme.appShapes.textFieldShape)
-                .border(
-                    1.dp,
-                    MaterialTheme.appColors.textFieldBorder,
-                    MaterialTheme.appShapes.textFieldShape
-                )
-                .clickable { onClick() }
-                .padding(horizontal = 20.dp)),
+            .then(
+                Modifier
+                    .background(
+                        MaterialTheme.appColors.textFieldBackground,
+                        MaterialTheme.appShapes.textFieldShape
+                    )
+                    .clip(MaterialTheme.appShapes.textFieldShape)
+                    .border(
+                        1.dp,
+                        MaterialTheme.appColors.textFieldBorder,
+                        MaterialTheme.appShapes.textFieldShape
+                    )
+                    .clickable { onClick() }
+                    .padding(horizontal = 20.dp)
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -264,7 +267,11 @@ fun SearchBar(
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            backgroundColor = if (isFocused) {
+                MaterialTheme.appColors.background
+            } else {
+                MaterialTheme.appColors.textFieldBackground
+            },
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
@@ -355,7 +362,11 @@ fun SearchBarStateless(
         },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             textColor = MaterialTheme.appColors.textPrimary,
-            backgroundColor = if (isFocused) MaterialTheme.appColors.background else MaterialTheme.appColors.textFieldBackground,
+            backgroundColor = if (isFocused) {
+                MaterialTheme.appColors.background
+            } else {
+                MaterialTheme.appColors.textFieldBackground
+            },
             focusedBorderColor = MaterialTheme.appColors.primary,
             unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
             cursorColor = MaterialTheme.appColors.primary,
@@ -450,7 +461,6 @@ fun HyperlinkText(
         )
 
         for ((key, value) in hyperLinks) {
-
             val startIndex = fullText.indexOf(key)
             val endIndex = startIndex + key.length
             addStyle(
@@ -584,7 +594,7 @@ fun HyperlinkImageText(
     val context = LocalContext.current
     val imageLoader = ImageLoader.Builder(context)
         .components {
-            if (SDK_INT >= 28) {
+            if (SDK_INT >= Build.VERSION_CODES.P) {
                 add(ImageDecoderDecoder.Factory())
             } else {
                 add(GifDecoder.Factory())
@@ -660,15 +670,21 @@ fun SheetContent(
             },
             onValueChanged = { textField ->
                 searchValueChanged(textField)
-            }, onClearValue = {
+            },
+            onClearValue = {
                 searchValueChanged("")
             }
         )
         Spacer(Modifier.height(10.dp))
-        LazyColumn(Modifier.fillMaxSize(), listState) {
-            items(expandedList.filter {
-                it.name.startsWith(searchValue.text, true)
-            }) { item ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState
+        ) {
+            items(
+                expandedList.filter {
+                    it.name.startsWith(searchValue.text, true)
+                }
+            ) { item ->
                 Text(
                     modifier = Modifier
                         .testTag("txt_${item.value.tagId()}_title")
@@ -723,15 +739,20 @@ fun SheetContent(
             },
             onValueChanged = { textField ->
                 searchValueChanged(textField)
-            }, onClearValue = {
+            },
+            onClearValue = {
                 searchValueChanged("")
             }
         )
         Spacer(Modifier.height(10.dp))
-        LazyColumn(Modifier.fillMaxWidth()) {
-            items(expandedList.filter {
-                it.first.startsWith(searchValue.text, true)
-            }) { item ->
+        LazyColumn(
+            Modifier.fillMaxWidth()
+        ) {
+            items(
+                expandedList.filter {
+                    it.first.startsWith(searchValue.text, true)
+                }
+            ) { item ->
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -891,7 +912,7 @@ fun IconText(
         Icon(
             modifier = Modifier
                 .testTag("ic_${text.tagId()}")
-                .size((textStyle.fontSize.value + 4).dp),
+                .size(size = (textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
@@ -929,7 +950,7 @@ fun IconText(
         Icon(
             modifier = Modifier
                 .testTag("ic_${text.tagId()}")
-                .size((textStyle.fontSize.value + 4).dp),
+                .size(size = (textStyle.fontSize.value + 4).dp),
             painter = painter,
             contentDescription = null,
             tint = color
@@ -965,7 +986,7 @@ fun TextIcon(
     ) {
         Text(text = text, color = color, style = textStyle)
         Icon(
-            modifier = iconModifier ?: Modifier.size((textStyle.fontSize.value + 4).dp),
+            modifier = iconModifier ?: Modifier.size(size = (textStyle.fontSize.value + 4).dp),
             imageVector = icon,
             contentDescription = null,
             tint = color
@@ -995,7 +1016,7 @@ fun TextIcon(
         Text(text = text, color = color, style = textStyle)
         Icon(
             modifier = iconModifier
-                .size((textStyle.fontSize.value + 4).dp),
+                .size(size = (textStyle.fontSize.value + 4).dp),
             painter = painter,
             contentDescription = null,
             tint = color
@@ -1032,7 +1053,8 @@ fun OfflineModeDialog(
                     modifier = Modifier.size(20.dp),
                     onClick = {
                         onReloadClick()
-                    }) {
+                    }
+                ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         painter = painterResource(R.drawable.core_ic_reload),
@@ -1044,7 +1066,8 @@ fun OfflineModeDialog(
                     modifier = Modifier.size(20.dp),
                     onClick = {
                         onDismissCLick()
-                    }) {
+                    }
+                ) {
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = Icons.Filled.Close,
@@ -1133,8 +1156,12 @@ fun BackBtn(
     tint: Color = MaterialTheme.appColors.primary,
     onBackClick: () -> Unit,
 ) {
-    IconButton(modifier = modifier.testTag("ib_back"),
-        onClick = { onBackClick() }) {
+    IconButton(
+        modifier = modifier.testTag("ib_back"),
+        onClick = {
+            onBackClick()
+        }
+    ) {
         Icon(
             painter = painterResource(id = R.drawable.core_ic_back),
             contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
@@ -1169,7 +1196,7 @@ fun FullScreenErrorView(
         )
         Spacer(Modifier.height(28.dp))
         Text(
-            modifier = Modifier.fillMaxWidth(0.8f),
+            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
             text = stringResource(id = errorType.titleResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.titleLarge,
@@ -1177,7 +1204,7 @@ fun FullScreenErrorView(
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            modifier = Modifier.fillMaxWidth(0.8f),
+            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
             text = stringResource(id = errorType.descriptionResId),
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyLarge,
@@ -1188,7 +1215,7 @@ fun FullScreenErrorView(
             modifier = Modifier
                 .widthIn(Dp.Unspecified, 162.dp),
             text = stringResource(id = errorType.actionResId),
-            textColor = MaterialTheme.appColors.primaryButtonText,
+            textColor = MaterialTheme.appColors.secondaryButtonText,
             backgroundColor = MaterialTheme.appColors.secondaryButtonBackground,
             onClick = onReloadClick,
         )
@@ -1220,7 +1247,7 @@ fun NoContentScreen(message: String, icon: Painter) {
         )
         Spacer(Modifier.height(24.dp))
         Text(
-            modifier = Modifier.fillMaxWidth(0.8f),
+            modifier = Modifier.fillMaxWidth(fraction = 0.8f),
             text = message,
             color = MaterialTheme.appColors.textPrimary,
             style = MaterialTheme.appTypography.bodyMedium,
@@ -1255,7 +1282,9 @@ fun AuthButtonsPanel(
                 .testTag("btn_sign_in")
                 .then(
                     if (showRegisterButton) {
-                        Modifier.width(100.dp).padding(start = 16.dp)
+                        Modifier
+                            .width(100.dp)
+                            .padding(start = 16.dp)
                     } else {
                         Modifier.weight(1f)
                     }
@@ -1294,15 +1323,25 @@ fun RoundTabsBar(
     ) {
         itemsIndexed(items) { index, item ->
             val isSelected = pagerState.currentPage == index
-            val backgroundColor =
-                if (isSelected) MaterialTheme.appColors.primary else MaterialTheme.appColors.tabUnselectedBtnBackground
-            val contentColor =
-                if (isSelected) MaterialTheme.appColors.tabSelectedBtnContent else MaterialTheme.appColors.tabUnselectedBtnContent
-            val border = if (!isSystemInDarkTheme()) Modifier.border(
-                1.dp,
-                MaterialTheme.appColors.primary,
-                CircleShape
-            ) else Modifier
+            val backgroundColor = if (isSelected) {
+                MaterialTheme.appColors.primary
+            } else {
+                MaterialTheme.appColors.tabUnselectedBtnBackground
+            }
+            val contentColor = if (isSelected) {
+                MaterialTheme.appColors.tabSelectedBtnContent
+            } else {
+                MaterialTheme.appColors.tabUnselectedBtnContent
+            }
+            val border = if (!isSystemInDarkTheme()) {
+                Modifier.border(
+                    1.dp,
+                    MaterialTheme.appColors.primary,
+                    CircleShape
+                )
+            } else {
+                Modifier
+            }
 
             RoundTab(
                 modifier = Modifier

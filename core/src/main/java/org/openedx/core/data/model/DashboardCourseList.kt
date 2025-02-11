@@ -29,5 +29,4 @@ data class DashboardCourseList(
             results.map { it.mapToDomain() }
         )
     }
-
 }

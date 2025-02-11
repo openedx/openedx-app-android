@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.config.Config
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.system.AppCookieManager
 import org.openedx.core.system.connection.NetworkConnection
@@ -22,6 +23,7 @@ import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.system.ResourceManager
 
 class ProgramViewModel(
+    private val appData: AppData,
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val router: DiscoveryRouter,
@@ -37,6 +39,8 @@ class ProgramViewModel(
     val cookieManager get() = edxCookieManager
 
     val hasInternetConnection: Boolean get() = networkConnection.isOnline()
+
+    val appUserAgent get() = appData.appUserAgent
 
     private val _uiState = MutableStateFlow<ProgramUIState>(ProgramUIState.Loading)
     val uiState: StateFlow<ProgramUIState> get() = _uiState.asStateFlow()
@@ -107,7 +111,15 @@ class ProgramViewModel(
 
     fun onPageLoadError() {
         viewModelScope.launch {
-            _uiState.emit(ProgramUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR))
+            _uiState.emit(
+                ProgramUIState.Error(
+                    if (networkConnection.isOnline()) {
+                        ErrorType.UNKNOWN_ERROR
+                    } else {
+                        ErrorType.CONNECTION_ERROR
+                    }
+                )
+            )
         }
     }
 }

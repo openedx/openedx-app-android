@@ -100,11 +100,13 @@ val screenModule = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
 
-    viewModel { (courseId: String?, infoType: String?) ->
+    viewModel { (courseId: String?, infoType: String?, authCode: String) ->
         SignInViewModel(
+            get(),
             get(),
             get(),
             get(),
@@ -120,6 +122,7 @@ val screenModule = module {
             get(),
             courseId,
             infoType,
+            authCode,
         )
     }
 
@@ -157,7 +160,9 @@ val screenModule = module {
         )
     }
     viewModel { AllEnrolledCoursesViewModel(get(), get(), get(), get(), get(), get(), get()) }
-    viewModel { LearnViewModel(get(), get(), get()) }
+    viewModel { (openTab: String) ->
+        LearnViewModel(openTab, get(), get(), get())
+    }
 
     factory { DiscoveryRepository(get(), get(), get()) }
     factory { DiscoveryInteractor(get()) }
@@ -165,6 +170,7 @@ val screenModule = module {
     viewModel { (querySearch: String) ->
         WebViewDiscoveryViewModel(
             querySearch,
+            get(),
             get(),
             get(),
             get(),
@@ -184,7 +190,7 @@ val screenModule = module {
             profileRouter = get(),
         )
     }
-    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), account) }
+    viewModel { (account: Account) -> EditProfileViewModel(get(), get(), get(), get(), get(), account) }
     viewModel { VideoSettingsViewModel(get(), get(), get(), get()) }
     viewModel { (qualityType: String) -> VideoQualityViewModel(qualityType, get(), get(), get()) }
     viewModel { DeleteProfileViewModel(get(), get(), get(), get(), get()) }
@@ -219,6 +225,7 @@ val screenModule = module {
         CourseInfoViewModel(
             pathId,
             infoType,
+            get(),
             get(),
             get(),
             get(),
@@ -458,7 +465,7 @@ val screenModule = module {
         )
     }
 
-    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ProgramViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
     viewModel { (courseId: String, courseTitle: String) ->
         CourseOfflineViewModel(
@@ -475,5 +482,4 @@ val screenModule = module {
             get(),
         )
     }
-
 }

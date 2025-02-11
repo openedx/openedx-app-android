@@ -1,14 +1,24 @@
 package org.openedx.discussion.data.api
 
-import org.json.JSONObject
 import org.openedx.core.data.model.BlocksCompletionBody
-import org.openedx.discussion.data.model.request.*
+import org.openedx.discussion.data.model.request.CommentBody
+import org.openedx.discussion.data.model.request.FollowBody
+import org.openedx.discussion.data.model.request.ReadBody
+import org.openedx.discussion.data.model.request.ReportBody
+import org.openedx.discussion.data.model.request.ThreadBody
+import org.openedx.discussion.data.model.request.VoteBody
 import org.openedx.discussion.data.model.response.CommentResult
 import org.openedx.discussion.data.model.response.CommentsResponse
 import org.openedx.discussion.data.model.response.ThreadsResponse
 import org.openedx.discussion.data.model.response.ThreadsResponse.Thread
 import org.openedx.discussion.data.model.response.TopicsResponse
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Headers
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface DiscussionApi {
 
@@ -117,15 +127,14 @@ interface DiscussionApi {
     @POST("/api/discussion/v1/comments/")
     suspend fun createComment(
         @Body commentBody: CommentBody
-    ) : CommentResult
+    ): CommentResult
 
     @POST("/api/discussion/v1/threads/")
-    suspend fun createThread(@Body threadBody: ThreadBody) : ThreadsResponse.Thread
+    suspend fun createThread(@Body threadBody: ThreadBody): Thread
 
     @POST("/api/completion/v1/completion-batch")
     suspend fun markBlocksCompletion(
         @Body
         blocksCompletionBody: BlocksCompletionBody
     )
-
 }

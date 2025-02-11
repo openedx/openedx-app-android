@@ -1,0 +1,90 @@
+build:
+  maxIssues: 0
+  weights:
+    complexity: 2
+    LongParameterList: 1
+    style: 1
+
+config:
+  validation: true
+
+processors:
+  active: true
+  exclude:
+    - 'FunctionCountProcessor'
+    - 'PropertyCountProcessor'
+
+console-reports:
+  active: true
+
+naming:
+  active: true
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Za-z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '(_)?[A-Za-z][A-Za-z0-9]*'
+  FunctionNaming:
+    active: true
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    excludeClassPattern: '$^'
+    ignoreAnnotated: [ 'Composable' ]
+
+style:
+  active: true
+  MagicNumber:
+    active: true
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreNumbers: [ '-1', '0', '1', '2', '10', '100', '90', '-90', '180', '1000', '400', '402', '401', '403', '404', '426', '500' ]
+    ignoreNamedArgument: true
+    ignoreEnums: true
+  UnusedPrivateMember:
+    active: true
+    ignoreAnnotated:
+      - 'Preview'
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    ignoreAnnotated: [ 'Composable' ]
+    ignoreFunction: [ 'onCreateView' ]
+  LongParameterList:
+    active: true
+    functionThreshold: 15
+    constructorThreshold: 20
+    ignoreDataClasses: true
+    ignoreAnnotated: [ 'Composable' ]
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 21
+    thresholdInInterfaces: 20
+    ignoreAnnotatedFunctions: [ 'Composable' ]
+    ignoreOverridden: true
+    ignorePrivate: true
+  CyclomaticComplexMethod:
+    active: true
+    ignoreAnnotated: [ 'Composable' ]
+  ComplexCondition:
+    active: true
+    threshold: 6
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false
+  PrintStackTrace:
+    active: false
+  InstanceOfCheckForException:
+    active: false
+
+performance:
+  active: true
+  SpreadOperator:
+    active: false
+
+formatting:
+  active: true
+  Indentation:
+    active: false

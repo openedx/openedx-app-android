@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.presentation.CoreAnalyticsKey
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
@@ -37,6 +38,7 @@ import org.openedx.core.R as CoreR
 class CourseInfoViewModel(
     val pathId: String,
     val infoType: String,
+    private val appData: AppData,
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val router: DiscoveryRouter,
@@ -74,6 +76,8 @@ class CourseInfoViewModel(
     val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
 
     val uriScheme: String get() = config.getUriScheme()
+
+    val appUserAgent get() = appData.appUserAgent
 
     private val webViewConfig get() = config.getDiscoveryConfig().webViewConfig
 
@@ -200,8 +204,13 @@ class CourseInfoViewModel(
     }
 
     fun onWebPageError() {
-        _webViewUIState.value =
-            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+        _webViewUIState.value = WebViewUIState.Error(
+            if (networkConnection.isOnline()) {
+                ErrorType.UNKNOWN_ERROR
+            } else {
+                ErrorType.CONNECTION_ERROR
+            }
+        )
     }
 
     fun onWebPageLoading() {

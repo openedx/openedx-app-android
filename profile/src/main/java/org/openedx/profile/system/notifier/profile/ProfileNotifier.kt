@@ -14,5 +14,4 @@ class ProfileNotifier {
 
     suspend fun send(event: AccountUpdated) = channel.emit(event)
     suspend fun send(event: AccountDeactivated) = channel.emit(event)
-
 }

@@ -72,7 +72,15 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `getCourseTopics no internet exception`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = DiscussionTopicsViewModel("id", "", interactor, resourceManager, analytics, courseNotifier, router)
+        val viewModel = DiscussionTopicsViewModel(
+            "id",
+            "",
+            interactor,
+            resourceManager,
+            analytics,
+            courseNotifier,
+            router
+        )
 
         coEvery { interactor.getCourseTopics(any()) } throws UnknownHostException()
         val message = async {
@@ -89,7 +97,15 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `getCourseTopics unknown exception`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = DiscussionTopicsViewModel("id", "", interactor, resourceManager, analytics, courseNotifier, router)
+        val viewModel = DiscussionTopicsViewModel(
+            "id",
+            "",
+            interactor,
+            resourceManager,
+            analytics,
+            courseNotifier,
+            router
+        )
 
         coEvery { interactor.getCourseTopics(any()) } throws Exception()
         val message = async {
@@ -107,7 +123,15 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `getCourseTopics success`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = DiscussionTopicsViewModel("id", "", interactor, resourceManager, analytics, courseNotifier, router)
+        val viewModel = DiscussionTopicsViewModel(
+            "id",
+            "",
+            interactor,
+            resourceManager,
+            analytics,
+            courseNotifier,
+            router
+        )
 
         coEvery { interactor.getCourseTopics(any()) } returns listOf(mockTopic, mockTopic)
         advanceUntilIdle()
@@ -124,7 +148,15 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `updateCourseTopics no internet exception`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = DiscussionTopicsViewModel("id", "", interactor, resourceManager, analytics, courseNotifier, router)
+        val viewModel = DiscussionTopicsViewModel(
+            "id",
+            "",
+            interactor,
+            resourceManager,
+            analytics,
+            courseNotifier,
+            router
+        )
 
         coEvery { interactor.getCourseTopics(any()) } throws UnknownHostException()
         val message = async {
@@ -141,7 +173,15 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `updateCourseTopics unknown exception`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = DiscussionTopicsViewModel("id", "", interactor, resourceManager, analytics, courseNotifier, router)
+        val viewModel = DiscussionTopicsViewModel(
+            "id",
+            "",
+            interactor,
+            resourceManager,
+            analytics,
+            courseNotifier,
+            router
+        )
 
         coEvery { interactor.getCourseTopics(any()) } throws Exception()
         val message = async {
@@ -159,7 +199,15 @@ class DiscussionTopicsViewModelTest {
 
     @Test
     fun `updateCourseTopics success`() = runTest(UnconfinedTestDispatcher()) {
-        val viewModel = DiscussionTopicsViewModel("id", "", interactor, resourceManager, analytics, courseNotifier, router)
+        val viewModel = DiscussionTopicsViewModel(
+            "id",
+            "",
+            interactor,
+            resourceManager,
+            analytics,
+            courseNotifier,
+            router
+        )
 
         coEvery { interactor.getCourseTopics(any()) } returns listOf(mockTopic, mockTopic)
         val message = async {
@@ -174,5 +222,4 @@ class DiscussionTopicsViewModelTest {
         assert(message.await()?.message.isNullOrEmpty())
         assert(viewModel.uiState.value is DiscussionTopicsUIState.Topics)
     }
-
 }

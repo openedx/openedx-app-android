@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.openedx.core.R
+import org.openedx.core.config.Config
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
@@ -24,6 +25,7 @@ class EditProfileViewModel(
     private val resourceManager: ResourceManager,
     private val notifier: ProfileNotifier,
     private val analytics: ProfileAnalytics,
+    val config: Config,
     account: Account,
 ) : BaseViewModel() {
 
@@ -56,8 +58,11 @@ class EditProfileViewModel(
                 buildMap {
                     put(
                         ProfileAnalyticsKey.ACTION.key,
-                        if (isLimitedProfile) ProfileAnalyticsKey.LIMITED_PROFILE.key
-                        else ProfileAnalyticsKey.FULL_PROFILE.key
+                        if (isLimitedProfile) {
+                            ProfileAnalyticsKey.LIMITED_PROFILE.key
+                        } else {
+                            ProfileAnalyticsKey.FULL_PROFILE.key
+                        }
                     )
                 }
             )

@@ -44,7 +44,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -92,7 +91,6 @@ fun CourseVideosScreen(
     val uiState by viewModel.uiState.collectAsState(CourseVideosUIState.Loading)
     val uiMessage by viewModel.uiMessage.collectAsState(null)
     val videoSettings by viewModel.videoSettings.collectAsState()
-    val context = LocalContext.current
     val fileUtil: FileUtil = koinInject()
 
     CourseVideosUI(
@@ -183,7 +181,6 @@ private fun CourseVideosUI(
         scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.appColors.background
     ) {
-
         val screenWidth by remember(key1 = windowSize) {
             mutableStateOf(
                 windowSize.windowSizeValue(
@@ -347,14 +344,15 @@ private fun CourseVideosUI(
         }
 
         if (isDeleteDownloadsConfirmationShowed) {
-            val downloadModelsSize =
-                (uiState as? CourseVideosUIState.CourseData)?.downloadModelsSize
+            val downloadModelsSize = (uiState as? CourseVideosUIState.CourseData)?.downloadModelsSize
             val isDownloadedAllVideos =
                 downloadModelsSize?.isAllBlocksDownloadedOrDownloading == true &&
                         downloadModelsSize.remainingCount == 0
-            val dialogTextId = if (isDownloadedAllVideos)
-                R.string.course_delete_downloads_confirmation_text else
-                R.string.course_delete_while_downloading_confirmation_text
+            val dialogTextId = if (isDownloadedAllVideos) {
+                R.string.course_delete_confirmation
+            } else {
+                R.string.course_delete_in_process_confirmation
+            }
 
             AlertDialog(
                 title = {
@@ -533,7 +531,6 @@ private fun AllVideosDownloadItem(
                     } else {
                         onDownloadAllClick(false)
                     }
-
                 } else {
                     onDownloadAllClick(true)
                 }
@@ -546,7 +543,12 @@ private fun AllVideosDownloadItem(
         )
     }
     if (isDownloadingAllVideos) {
-        val progress = 1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+        val progress =
+            if (downloadModelsSize.allSize == 0L) {
+                0f
+            } else {
+                1 - downloadModelsSize.remainingSize.toFloat() / downloadModelsSize.allSize
+            }
 
         val animatedProgress by animateFloatAsState(
             targetValue = progress,
@@ -680,7 +682,8 @@ private fun CourseVideosScreenTabletPreview() {
                     remainingSize = 0,
                     allCount = 0,
                     allSize = 0
-                ), useRelativeDates = true
+                ),
+                useRelativeDates = true
             ),
             courseTitle = "",
             onExpandClick = { },

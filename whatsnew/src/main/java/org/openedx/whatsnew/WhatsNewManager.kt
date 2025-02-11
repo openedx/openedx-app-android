@@ -24,8 +24,8 @@ class WhatsNewManager(
 
     override fun shouldShowWhatsNew(): Boolean {
         val dataVersion = getNewestData().version
-        return appData.versionName == dataVersion
-                && whatsNewPreferences.lastWhatsNewVersion != dataVersion
-                && config.isWhatsNewEnabled()
+        return appData.versionName == dataVersion &&
+                whatsNewPreferences.lastWhatsNewVersion != dataVersion &&
+                config.isWhatsNewEnabled()
     }
 }

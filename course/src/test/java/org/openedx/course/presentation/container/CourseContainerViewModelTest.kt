@@ -47,7 +47,6 @@ import org.openedx.course.presentation.CourseAnalyticsEvent
 import org.openedx.course.presentation.CourseRouter
 import org.openedx.course.utils.ImageProcessor
 import org.openedx.foundation.system.ResourceManager
-import java.net.UnknownHostException
 import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -100,22 +99,34 @@ class CourseContainerViewModelTest {
             false,
             null,
             coursewareAccess = CoursewareAccess(
-                false, "", "", "",
-                "", ""
-
+                false,
+                "",
+                "",
+                "",
+                "",
+                ""
             )
         ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
-            null, "audit", false, Date()
+            null,
+            "audit",
+            false,
+            Date()
         ),
         courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course", "", "OpenedX", Date(),
-            "", "", null, false, null,
+            "Open edX Demo Course",
+            "",
+            "OpenedX",
+            Date(),
+            "",
+            "",
+            null,
+            false,
+            null,
             CourseSharingUtmParameters("", ""),
             "",
         )
-
     )
 
     private val courseStructure = CourseStructure(
@@ -154,17 +165,31 @@ class CourseContainerViewModelTest {
             false,
             null,
             CoursewareAccess(
-                false, "", "", "",
-                "", ""
+                false,
+                "",
+                "",
+                "",
+                "",
+                ""
             )
         ),
         certificate = null,
         enrollmentDetails = EnrollmentDetails(
-            null, "", false, null
+            null,
+            "",
+            false,
+            null
         ),
         courseInfoOverview = CourseInfoOverview(
-            "Open edX Demo Course", "", "OpenedX", null,
-            "", "", null, false, null,
+            "Open edX Demo Course",
+            "",
+            "OpenedX",
+            null,
+            "",
+            "",
+            null,
+            false,
+            null,
             CourseSharingUtmParameters("", ""),
             "",
         )
@@ -191,49 +216,6 @@ class CourseContainerViewModelTest {
     }
 
     @Test
-    fun `getCourseEnrollmentDetails internet connection exception`() = runTest {
-        val viewModel = CourseContainerViewModel(
-            "",
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            courseNotifier,
-            networkConnection,
-            corePreferences,
-            analytics,
-            imageProcessor,
-            calendarSyncScheduler,
-            courseRouter,
-        )
-        every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
-        coEvery { interactor.getEnrollmentDetails(any()) } throws UnknownHostException()
-        every {
-            analytics.logScreenEvent(
-                CourseAnalyticsEvent.DASHBOARD.eventName,
-                any()
-            )
-        } returns Unit
-        viewModel.fetchCourseDetails()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { interactor.getEnrollmentDetails(any()) }
-        verify(exactly = 1) {
-            analytics.logScreenEvent(
-                CourseAnalyticsEvent.DASHBOARD.eventName,
-                any()
-            )
-        }
-
-        val message = viewModel.errorMessage.value
-        assertEquals(noInternet, message)
-        assert(!viewModel.refreshing.value)
-        assert(viewModel.courseAccessStatus.value == null)
-    }
-
-    @Test
     fun `getCourseEnrollmentDetails unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
             "",
@@ -251,11 +233,17 @@ class CourseContainerViewModelTest {
             courseRouter
         )
         every { networkConnection.isOnline() } returns true
-        coEvery { interactor.getCourseStructure(any(), any()) } returns courseStructure
+        coEvery { interactor.getCourseStructure(any(), any()) } throws Exception()
         coEvery { interactor.getEnrollmentDetails(any()) } throws Exception()
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
+                any()
+            )
+        } returns Unit
+        every {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
                 any()
             )
         } returns Unit
@@ -266,6 +254,12 @@ class CourseContainerViewModelTest {
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
                 any()
             )
         }
@@ -299,6 +293,12 @@ class CourseContainerViewModelTest {
                 any()
             )
         } returns Unit
+        every {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
+                any()
+            )
+        } returns Unit
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
 
@@ -306,6 +306,12 @@ class CourseContainerViewModelTest {
         verify(exactly = 1) {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
                 any()
             )
         }
@@ -339,6 +345,12 @@ class CourseContainerViewModelTest {
                 any()
             )
         } returns Unit
+        every {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
+                any()
+            )
+        } returns Unit
         viewModel.fetchCourseDetails()
         advanceUntilIdle()
         coVerify(exactly = 0) { courseApi.getEnrollmentDetails(any()) }
@@ -348,39 +360,16 @@ class CourseContainerViewModelTest {
                 any()
             )
         }
+        verify(exactly = 1) {
+            analytics.logScreenEvent(
+                CourseAnalyticsEvent.HOME_TAB.eventName,
+                any()
+            )
+        }
 
         assert(viewModel.errorMessage.value == null)
         assert(!viewModel.refreshing.value)
         assert(viewModel.courseAccessStatus.value != null)
-    }
-
-    @Test
-    fun `updateData no internet connection exception`() = runTest {
-        val viewModel = CourseContainerViewModel(
-            "",
-            "",
-            "",
-            config,
-            interactor,
-            resourceManager,
-            courseNotifier,
-            networkConnection,
-            corePreferences,
-            analytics,
-            imageProcessor,
-            calendarSyncScheduler,
-            courseRouter
-        )
-        coEvery { interactor.getCourseStructure(any(), true) } throws UnknownHostException()
-        coEvery { courseNotifier.send(CourseStructureUpdated("")) } returns Unit
-        viewModel.updateData()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { interactor.getCourseStructure(any(), true) }
-
-        val message = viewModel.errorMessage.value
-        assertEquals(noInternet, message)
-        assert(!viewModel.refreshing.value)
     }
 
     @Test

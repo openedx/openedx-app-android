@@ -34,7 +34,8 @@ class WebContentFragment : Fragment() {
                     contentUrl = requireArguments().getString(ARG_URL, ""),
                     onBackClick = {
                         requireActivity().supportFragmentManager.popBackStack()
-                    })
+                    }
+                )
             }
         }
     }

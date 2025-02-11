@@ -3,7 +3,7 @@ package org.openedx.profile.data.model
 import com.google.gson.annotations.SerializedName
 import org.openedx.core.data.model.ProfileImage
 import org.openedx.profile.domain.model.Account
-import java.util.*
+import java.util.Date
 import org.openedx.profile.domain.model.Account as DomainAccount
 
 data class Account(
@@ -44,6 +44,7 @@ data class Account(
     enum class Privacy {
         @SerializedName("private")
         PRIVATE,
+
         @SerializedName("all_users")
         ALL_USERS
     }
@@ -51,7 +52,7 @@ data class Account(
     fun mapToDomain(): Account {
         return Account(
             username = username ?: "",
-            bio = bio?:"",
+            bio = bio ?: "",
             requiresParentalConsent = requiresParentalConsent ?: false,
             name = name ?: "",
             country = country ?: "",
@@ -67,9 +68,11 @@ data class Account(
             mailingAddress = mailingAddress ?: "",
             email = email,
             dateJoined = dateJoined,
-            accountPrivacy = if (accountPrivacy == Privacy.PRIVATE) DomainAccount.Privacy.PRIVATE else DomainAccount.Privacy.ALL_USERS
+            accountPrivacy = if (accountPrivacy == Privacy.PRIVATE) {
+                DomainAccount.Privacy.PRIVATE
+            } else {
+                DomainAccount.Privacy.ALL_USERS
+            }
         )
     }
 }
-
-

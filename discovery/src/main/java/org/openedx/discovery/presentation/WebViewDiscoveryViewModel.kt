@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
+import org.openedx.core.presentation.global.AppData
 import org.openedx.core.presentation.global.ErrorType
 import org.openedx.core.presentation.global.webview.WebViewUIState
 import org.openedx.core.system.connection.NetworkConnection
@@ -14,6 +15,7 @@ import org.openedx.foundation.utils.UrlUtils
 
 class WebViewDiscoveryViewModel(
     private val querySearch: String,
+    private val appData: AppData,
     private val config: Config,
     private val networkConnection: NetworkConnection,
     private val corePreferences: CorePreferences,
@@ -29,6 +31,8 @@ class WebViewDiscoveryViewModel(
 
     val isPreLogin get() = config.isPreLoginExperienceEnabled() && corePreferences.user == null
     val isRegistrationEnabled: Boolean get() = config.isRegistrationEnabled()
+
+    val appUserAgent get() = appData.appUserAgent
 
     private var _discoveryUrl = webViewConfig.baseUrl
     val discoveryUrl: String
@@ -54,8 +58,13 @@ class WebViewDiscoveryViewModel(
     }
 
     fun onWebPageLoadError() {
-        _uiState.value =
-            WebViewUIState.Error(if (networkConnection.isOnline()) ErrorType.UNKNOWN_ERROR else ErrorType.CONNECTION_ERROR)
+        _uiState.value = WebViewUIState.Error(
+            if (networkConnection.isOnline()) {
+                ErrorType.UNKNOWN_ERROR
+            } else {
+                ErrorType.CONNECTION_ERROR
+            }
+        )
     }
 
     fun updateDiscoveryUrl(url: String) {

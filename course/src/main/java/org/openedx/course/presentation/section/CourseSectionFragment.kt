@@ -286,9 +286,13 @@ private fun CourseSubsectionItem(
     onClick: (Block) -> Unit,
 ) {
     val completedIconPainter =
-        if (block.isCompleted()) painterResource(R.drawable.course_ic_task_alt) else painterResource(
-            CoreR.drawable.ic_core_chapter_icon
-        )
+        if (block.isCompleted()) {
+            painterResource(R.drawable.course_ic_task_alt)
+        } else {
+            painterResource(
+                CoreR.drawable.ic_core_chapter_icon
+            )
+        }
     val completedIconColor =
         if (block.isCompleted()) MaterialTheme.appColors.primary else MaterialTheme.appColors.onSurface
     val completedIconDescription = if (block.isCompleted()) {

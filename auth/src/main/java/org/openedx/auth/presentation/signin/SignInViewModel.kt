@@ -1,5 +1,6 @@
 package org.openedx.auth.presentation.signin
 
+import android.app.Activity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
@@ -20,6 +21,7 @@ import org.openedx.auth.presentation.AuthAnalytics
 import org.openedx.auth.presentation.AuthAnalyticsEvent
 import org.openedx.auth.presentation.AuthAnalyticsKey
 import org.openedx.auth.presentation.AuthRouter
+import org.openedx.auth.presentation.sso.BrowserAuthHelper
 import org.openedx.auth.presentation.sso.OAuthHelper
 import org.openedx.core.Validator
 import org.openedx.core.config.Config
@@ -53,9 +55,11 @@ class SignInViewModel(
     private val calendarPreferences: CalendarPreferences,
     private val calendarInteractor: CalendarInteractor,
     agreementProvider: AgreementProvider,
-    config: Config,
+    private val browserAuthHelper: BrowserAuthHelper,
+    val config: Config,
     val courseId: String?,
     val infoType: String?,
+    val authCode: String,
 ) : BaseViewModel() {
 
     private val logger = Logger("SignInViewModel")
@@ -65,6 +69,8 @@ class SignInViewModel(
             isFacebookAuthEnabled = config.getFacebookConfig().isEnabled(),
             isGoogleAuthEnabled = config.getGoogleConfig().isEnabled(),
             isMicrosoftAuthEnabled = config.getMicrosoftConfig().isEnabled(),
+            isBrowserLoginEnabled = config.isBrowserLoginEnabled(),
+            isBrowserRegistrationEnabled = config.isBrowserRegistrationEnabled(),
             isSocialAuthEnabled = config.isSocialAuthEnabled(),
             isLogistrationEnabled = config.isPreLoginExperienceEnabled(),
             isRegistrationEnabled = config.isRegistrationEnabled(),
@@ -158,9 +164,39 @@ class SignInViewModel(
         }
     }
 
+    fun signInBrowser(activityContext: Activity) {
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            runCatching {
+                browserAuthHelper.signIn(activityContext)
+            }.onFailure {
+                logger.e { "Browser auth error: $it" }
+            }
+        }
+    }
+
     fun navigateToSignUp(parentFragmentManager: FragmentManager) {
         router.navigateToSignUp(parentFragmentManager, null, null)
         logEvent(AuthAnalyticsEvent.REGISTER_CLICKED)
+    }
+
+    fun signInAuthCode(authCode: String) {
+        _uiState.update { it.copy(showProgress = true) }
+        viewModelScope.launch {
+            runCatching {
+                interactor.loginAuthCode(authCode)
+            }
+                .onFailure {
+                    logger.e { "OAuth2 code error: $it" }
+                    onUnknownError()
+                    _uiState.update { it.copy(loginFailure = true) }
+                }.onSuccess {
+                    _uiState.update { it.copy(loginSuccess = true) }
+                    setUserId()
+                    appNotifier.send(SignInEvent())
+                    _uiState.update { it.copy(showProgress = false) }
+                }
+        }
     }
 
     fun navigateToForgotPassword(parentFragmentManager: FragmentManager) {

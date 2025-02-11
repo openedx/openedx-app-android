@@ -38,7 +38,9 @@ class DeleteProfileViewModel(
         logDeleteProfileClickedEvent()
         if (!validator.isPasswordValid(password)) {
             _uiState.value =
-                DeleteProfileFragmentUIState.Error(resourceManager.getString(org.openedx.profile.R.string.profile_invalid_password))
+                DeleteProfileFragmentUIState.Error(
+                    resourceManager.getString(org.openedx.profile.R.string.profile_invalid_password)
+                )
             return
         }
         viewModelScope.launch {
@@ -59,7 +61,9 @@ class DeleteProfileViewModel(
                     _uiState.value = DeleteProfileFragmentUIState.Initial
                 } else {
                     _uiState.value =
-                        DeleteProfileFragmentUIState.Error(resourceManager.getString(org.openedx.profile.R.string.profile_password_is_incorrect))
+                        DeleteProfileFragmentUIState.Error(
+                            resourceManager.getString(org.openedx.profile.R.string.profile_password_is_incorrect)
+                        )
                 }
                 logDeleteProfileEvent(false)
             }

@@ -58,7 +58,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.auth.presentation.ui.LoginTextField
 import org.openedx.core.AppUpdateState
 import org.openedx.core.R
-import org.openedx.core.presentation.global.app_upgrade.AppUpgradeRequiredScreen
+import org.openedx.core.presentation.global.appupgrade.AppUpgradeRequiredScreen
 import org.openedx.core.ui.BackBtn
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.OpenEdXButton
@@ -365,7 +365,6 @@ private fun RestorePasswordScreen(
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)

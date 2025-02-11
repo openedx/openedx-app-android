@@ -17,8 +17,13 @@ import org.openedx.profile.data.model.Account
 import org.openedx.profile.data.storage.ProfilePreferences
 import org.openedx.whatsnew.data.storage.WhatsNewPreferences
 
-class PreferencesManager(context: Context) : CorePreferences, ProfilePreferences,
-    WhatsNewPreferences, InAppReviewPreferences, CoursePreferences, CalendarPreferences {
+class PreferencesManager(context: Context) :
+    CorePreferences,
+    ProfilePreferences,
+    WhatsNewPreferences,
+    InAppReviewPreferences,
+    CoursePreferences,
+    CalendarPreferences {
 
     private val sharedPreferences =
         context.getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE)
