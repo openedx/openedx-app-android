@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
@@ -35,9 +34,6 @@ import org.openedx.core.system.notifier.CourseDatesShifted
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseOpenBlock
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.ui.Result
-import org.openedx.core.ui.asResult
-import org.openedx.core.ui.error
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseAnalyticsEvent
@@ -192,26 +188,18 @@ class CourseOutlineViewModel(
                 val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
                 val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
                 combine(
-                    courseStructureFlow.take(1),
-                    courseStatusFlow.take(1),
-                    courseDatesFlow.take(1)
+                    courseStructureFlow, courseStatusFlow, courseDatesFlow
                 ) { courseStructure, courseStatus, courseDatesResult ->
                     Triple(courseStructure, courseStatus, courseDatesResult)
-                }.asResult().collect {
-                    if (it is Result.Success) {
-                        it.data.let { (courseStructure, courseStatus, courseDatesResult) ->
-                            val blocks = courseStructure.blockData
-                            val datesBannerInfo = courseDatesResult.courseBanner
+                }.collect { (courseStructure, courseStatus, courseDates) ->
+                    if (courseStructure == null) return@collect
+                    val blocks = courseStructure.blockData
+                    val datesBannerInfo = courseDates.courseBanner
 
-                            checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
-                            updateOutdatedOfflineXBlocks(courseStructure)
+                    checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
+                    updateOutdatedOfflineXBlocks(courseStructure)
 
-                            initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
-                        }
-                    }
-                    if (it is Result.Error) {
-                        handleCourseDataError(it.error)
-                    }
+                    initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
                 }
             } catch (e: Exception) {
                 handleCourseDataError(e)

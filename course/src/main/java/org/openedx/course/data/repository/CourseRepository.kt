@@ -47,11 +47,30 @@ class CourseRepository(
 
     suspend fun getCourseStructureFlow(courseId: String, forceRefresh: Boolean = true): Flow<CourseStructure> =
         channelFlowWithAwait {
-            // Send the local result first
-            trySend(getCourseStructureFromCache(courseId))
-            // Send the updated network result if needed
-            if (networkConnection.isOnline() && forceRefresh) {
-                trySend(getCourseStructure(courseId, true))
+            var hasCourseStructure = false
+            val cachedCourseStructure =
+                courseStructure[courseId] ?: (courseDao.getCourseStructureById(courseId)
+                    ?.mapToDomain())
+            if (cachedCourseStructure != null) {
+                hasCourseStructure = true
+                trySend(cachedCourseStructure)
+            }
+            val fetchRemoteCourse = !hasCourseStructure || forceRefresh
+            if (networkConnection.isOnline() && fetchRemoteCourse) {
+                val response = api.getCourseStructure(
+                    "stale-if-error=0",
+                    "v4",
+                    preferencesManager.user?.username,
+                    courseId
+                )
+                courseDao.insertCourseStructureEntity(response.mapToRoomEntity())
+                val courseDomainModel = response.mapToDomain()
+                courseStructure[courseId] = courseDomainModel
+                trySend(courseDomainModel)
+                hasCourseStructure = true
+            }
+            if (!hasCourseStructure) {
+                throw NoCachedDataException()
             }
         }
 

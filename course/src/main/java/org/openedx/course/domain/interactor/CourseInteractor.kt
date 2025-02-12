@@ -15,7 +15,7 @@ class CourseInteractor(
     suspend fun getCourseStructureFlow(
         courseId: String,
         forceRefresh: Boolean = true
-    ): Flow<CourseStructure> {
+    ): Flow<CourseStructure?> {
         return repository.getCourseStructureFlow(courseId, forceRefresh)
     }
 
@@ -30,7 +30,7 @@ class CourseInteractor(
         return repository.getCourseStructureFromCache(courseId)
     }
 
-    suspend fun getEnrollmentDetailsFlow(courseId: String): Flow<CourseEnrollmentDetails> {
+    suspend fun getEnrollmentDetailsFlow(courseId: String): Flow<CourseEnrollmentDetails?> {
         return repository.getEnrollmentDetailsFlow(courseId)
     }
 

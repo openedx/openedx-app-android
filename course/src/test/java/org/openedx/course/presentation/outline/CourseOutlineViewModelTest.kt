@@ -55,7 +55,6 @@ import org.openedx.core.presentation.CoreAnalyticsEvent
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.CourseStructureUpdated
-import org.openedx.core.ui.asResult
 import org.openedx.course.domain.interactor.CourseInteractor
 import org.openedx.course.presentation.CourseAnalytics
 import org.openedx.course.presentation.CourseRouter
@@ -307,7 +306,7 @@ class CourseOutlineViewModelTest {
         coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(courseStructure)
         every { networkConnection.isOnline() } returns true
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
-        coEvery { interactor.getCourseStatusFlow(any()).asResult() } throws Exception()
+        coEvery { interactor.getCourseStatusFlow(any()) } throws Exception()
         val viewModel = CourseOutlineViewModel(
             "",
             "",
