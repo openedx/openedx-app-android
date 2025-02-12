@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
@@ -183,28 +184,27 @@ class CourseOutlineViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
-            try {
-                val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
-                val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
-                val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
-                combine(
-                    courseStructureFlow,
-                    courseStatusFlow,
-                    courseDatesFlow
-                ) { courseStructure, courseStatus, courseDatesResult ->
-                    Triple(courseStructure, courseStatus, courseDatesResult)
-                }.collect { (courseStructure, courseStatus, courseDates) ->
-                    if (courseStructure == null) return@collect
-                    val blocks = courseStructure.blockData
-                    val datesBannerInfo = courseDates.courseBanner
-
-                    checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
-                    updateOutdatedOfflineXBlocks(courseStructure)
-
-                    initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
-                }
-            } catch (e: Exception) {
+            val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
+                .catch { emit(null) }
+            val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
+            val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
+            combine(
+                courseStructureFlow,
+                courseStatusFlow,
+                courseDatesFlow
+            ) { courseStructure, courseStatus, courseDatesResult ->
+                Triple(courseStructure, courseStatus, courseDatesResult)
+            }.catch { e ->
                 handleCourseDataError(e)
+            }.collect { (courseStructure, courseStatus, courseDates) ->
+                if (courseStructure == null) return@collect
+                val blocks = courseStructure.blockData
+                val datesBannerInfo = courseDates.courseBanner
+
+                checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
+                updateOutdatedOfflineXBlocks(courseStructure)
+
+                initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
             }
         }
     }

@@ -11,6 +11,7 @@ import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -216,6 +217,7 @@ class CourseContainerViewModelTest {
         Dispatchers.resetMain()
     }
 
+    @Suppress("TooGenericExceptionThrown")
     @Test
     fun `getCourseEnrollmentDetails unknown exception`() = runTest {
         val viewModel = CourseContainerViewModel(
@@ -236,10 +238,10 @@ class CourseContainerViewModelTest {
         every { networkConnection.isOnline() } returns true
         coEvery {
             interactor.getCourseStructureFlow(any(), any())
-        } returns flowOf(courseStructure)
+        } returns flowOf(null)
         coEvery {
             interactor.getEnrollmentDetailsFlow(any())
-        } throws Exception()
+        } returns flow { throw Exception() }
         every {
             analytics.logScreenEvent(
                 CourseAnalyticsEvent.DASHBOARD.eventName,

@@ -170,25 +170,23 @@ class CourseContainerViewModel(
         _showProgress.value = true
 
         viewModelScope.launch {
-            try {
-                val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
-                    .catch { e ->
-                        handleFetchError(e)
-                        emit(null)
-                    }
-                val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(courseId)
-                    .catch { emit(null) }
-                courseStructureFlow.combine(courseDetailsFlow) { courseStructure, courseEnrollmentDetails ->
-                    courseStructure to courseEnrollmentDetails
-                }.collect { (courseStructure, courseEnrollmentDetails) ->
-                    when {
-                        courseEnrollmentDetails != null -> handleCourseEnrollment(courseEnrollmentDetails)
-                        courseStructure != null -> handleCourseStructureOnly(courseStructure)
-                        else -> _courseAccessStatus.value = CourseAccessError.UNKNOWN
-                    }
+            val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
+                .catch { e ->
+                    handleFetchError(e)
+                    emit(null)
                 }
-            } catch (e: Exception) {
+            val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(courseId)
+                .catch { emit(null) }
+            courseStructureFlow.combine(courseDetailsFlow) { courseStructure, courseEnrollmentDetails ->
+                courseStructure to courseEnrollmentDetails
+            }.catch { e ->
                 handleFetchError(e)
+            }.collect { (courseStructure, courseEnrollmentDetails) ->
+                when {
+                    courseEnrollmentDetails != null -> handleCourseEnrollment(courseEnrollmentDetails)
+                    courseStructure != null -> handleCourseStructureOnly(courseStructure)
+                    else -> _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                }
             }
         }
     }

@@ -267,7 +267,7 @@ class CourseOutlineViewModelTest {
                     any()
                 )
             } returns Unit
-            coEvery { interactor.getCourseStatusFlow(any()) } throws UnknownHostException()
+            coEvery { interactor.getCourseStatusFlow(any()) } returns flow { throw UnknownHostException() }
 
             val viewModel = CourseOutlineViewModel(
                 "",
@@ -301,12 +301,13 @@ class CourseOutlineViewModelTest {
             assert(viewModel.uiState.value is CourseOutlineUIState.Error)
         }
 
+    @Suppress("TooGenericExceptionThrown")
     @Test
     fun `getCourseDataInternal unknown exception`() = runTest(UnconfinedTestDispatcher()) {
         coEvery { interactor.getCourseStructureFlow(any(), any()) } returns flowOf(courseStructure)
         every { networkConnection.isOnline() } returns true
         every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
-        coEvery { interactor.getCourseStatusFlow(any()) } throws Exception()
+        coEvery { interactor.getCourseStatusFlow(any()) } returns flow { throw Exception() }
         val viewModel = CourseOutlineViewModel(
             "",
             "",
