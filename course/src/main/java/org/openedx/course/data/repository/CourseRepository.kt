@@ -48,9 +48,9 @@ class CourseRepository(
     suspend fun getCourseStructureFlow(courseId: String, forceRefresh: Boolean = true): Flow<CourseStructure> =
         channelFlowWithAwait {
             var hasCourseStructure = false
-            val cachedCourseStructure =
-                courseStructure[courseId] ?: (courseDao.getCourseStructureById(courseId)
-                    ?.mapToDomain())
+            val cachedCourseStructure = courseStructure[courseId] ?: (
+                    courseDao.getCourseStructureById(courseId)?.mapToDomain()
+                    )
             if (cachedCourseStructure != null) {
                 hasCourseStructure = true
                 trySend(cachedCourseStructure)

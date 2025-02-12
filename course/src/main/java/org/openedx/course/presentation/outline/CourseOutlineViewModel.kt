@@ -188,7 +188,9 @@ class CourseOutlineViewModel(
                 val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
                 val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
                 combine(
-                    courseStructureFlow, courseStatusFlow, courseDatesFlow
+                    courseStructureFlow,
+                    courseStatusFlow,
+                    courseDatesFlow
                 ) { courseStructure, courseStatus, courseDatesResult ->
                     Triple(courseStructure, courseStatus, courseDatesResult)
                 }.collect { (courseStructure, courseStatus, courseDates) ->
