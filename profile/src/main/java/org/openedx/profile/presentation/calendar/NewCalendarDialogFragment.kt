@@ -265,7 +265,8 @@ private fun CalendarTitleTextField(
                 onValueChanged(it.text.trim())
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder
+                unfocusedBorderColor = MaterialTheme.appColors.textFieldBorder,
+                textColor = MaterialTheme.appColors.textPrimary
             ),
             shape = MaterialTheme.appShapes.textFieldShape,
             placeholder = {
