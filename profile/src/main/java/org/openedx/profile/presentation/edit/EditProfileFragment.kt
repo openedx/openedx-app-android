@@ -6,8 +6,6 @@ import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.graphics.Matrix
-import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -236,8 +234,6 @@ class EditProfileFragment : Fragment() {
 
     @Suppress("DEPRECATION")
     private fun cropImage(uri: Uri): Uri {
-        val matrix = Matrix()
-        matrix.postRotate(getImageOrientation(uri).toFloat())
         val originalBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ImageDecoder.decodeBitmap(
                 ImageDecoder.createSource(
@@ -248,26 +244,17 @@ class EditProfileFragment : Fragment() {
         } else {
             MediaStore.Images.Media.getBitmap(requireContext().contentResolver, uri)
         }
-        val rotatedBitmap = Bitmap.createBitmap(
-            originalBitmap,
-            0,
-            0,
-            originalBitmap.width,
-            originalBitmap.height,
-            matrix,
-            true
-        )
         val newFile = File.createTempFile(
             "Image_${System.currentTimeMillis()}",
             ".jpg",
             requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         )
 
-        val ratio: Float = rotatedBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
+        val ratio: Float = originalBitmap.width.toFloat() / TARGET_IMAGE_WIDTH
         val newBitmap = Bitmap.createScaledBitmap(
-            rotatedBitmap,
+            originalBitmap,
             TARGET_IMAGE_WIDTH,
-            (rotatedBitmap.height.toFloat() / ratio).toInt(),
+            (originalBitmap.height.toFloat() / ratio).toInt(),
             false
         )
         val bos = ByteArrayOutputStream()
@@ -285,28 +272,9 @@ class EditProfileFragment : Fragment() {
         )!!
     }
 
-    private fun getImageOrientation(uri: Uri): Int {
-        var rotation = 0
-        val exif = ExifInterface(requireActivity().contentResolver.openInputStream(uri)!!)
-        when (
-            exif.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL
-            )
-        ) {
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotation = ORIENTATION_ROTATE_270
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotation = ORIENTATION_ROTATE_180
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotation = ORIENTATION_ROTATE_90
-        }
-        return rotation
-    }
-
     companion object {
         private const val ARG_ACCOUNT = "argAccount"
         const val LEAVE_PROFILE_WIDTH_FACTOR = 0.7f
-        private const val ORIENTATION_ROTATE_270 = 270
-        private const val ORIENTATION_ROTATE_180 = 180
-        private const val ORIENTATION_ROTATE_90 = 90
         private const val IMAGE_QUALITY = 90
         private const val TARGET_IMAGE_WIDTH = 500
 
