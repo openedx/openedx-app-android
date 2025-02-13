@@ -31,7 +31,7 @@ import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.rememberScaffoldState
@@ -598,7 +598,7 @@ private fun AllVideosDownloadItem(
         Icon(
             modifier = Modifier
                 .padding(end = 16.dp),
-            imageVector = Icons.Filled.ChevronRight,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             tint = MaterialTheme.appColors.onSurface,
             contentDescription = "Expandable Arrow"
         )

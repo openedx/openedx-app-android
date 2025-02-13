@@ -23,6 +23,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,7 +77,6 @@ import org.openedx.foundation.presentation.WindowSize
 import org.openedx.foundation.presentation.WindowType
 import org.openedx.foundation.presentation.windowSizeValue
 import java.util.Date
-import org.openedx.core.R as CoreR
 
 @Composable
 fun CourseOutlineScreen(
@@ -397,7 +398,7 @@ private fun ResumeCourse(
             content = {
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
-                    painter = painterResource(id = CoreR.drawable.core_ic_forward),
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
                     color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )
@@ -456,7 +457,7 @@ private fun ResumeCourseTablet(
             content = {
                 TextIcon(
                     text = stringResource(id = R.string.course_resume),
-                    painter = painterResource(id = CoreR.drawable.core_ic_forward),
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
                     color = MaterialTheme.appColors.primaryButtonText,
                     textStyle = MaterialTheme.appTypography.labelLarge
                 )

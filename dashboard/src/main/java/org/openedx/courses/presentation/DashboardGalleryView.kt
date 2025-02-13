@@ -33,8 +33,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -347,7 +346,7 @@ private fun SecondaryCourses(
             modifier = Modifier.padding(horizontal = 18.dp),
             text = stringResource(R.string.dashboard_view_all_with_count, courses.size + 1),
             textStyle = MaterialTheme.appTypography.titleSmall,
-            icon = Icons.Default.ChevronRight,
+            icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             color = MaterialTheme.appColors.textDark,
             iconModifier = Modifier.size(22.dp),
             onClick = onViewAllClick
@@ -512,8 +511,8 @@ private fun AssignmentItem(
             }
         }
         Icon(
-            modifier = Modifier.size(16.dp),
-            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            modifier = Modifier.size(22.dp),
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             tint = MaterialTheme.appColors.textDark,
             contentDescription = null
         )
@@ -690,8 +689,8 @@ private fun ResumeButton(
             }
         }
         Icon(
-            modifier = Modifier.size(16.dp),
-            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            modifier = Modifier.size(22.dp),
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             tint = MaterialTheme.appColors.primaryButtonText,
             contentDescription = null
         )

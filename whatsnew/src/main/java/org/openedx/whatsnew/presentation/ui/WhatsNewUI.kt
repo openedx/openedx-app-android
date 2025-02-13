@@ -23,6 +23,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -185,7 +188,7 @@ fun PrevButton(
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                painter = painterResource(id = org.openedx.core.R.drawable.core_ic_back),
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null,
                 tint = MaterialTheme.appColors.primary
             )
@@ -235,7 +238,7 @@ fun NextFinishButton(
                     )
                     Spacer(Modifier.width(8.dp))
                     Icon(
-                        painter = painterResource(id = org.openedx.core.R.drawable.core_ic_forward),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = null,
                         tint = MaterialTheme.appColors.primaryButtonText
                     )

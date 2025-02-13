@@ -25,7 +25,7 @@ import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -253,7 +253,7 @@ private fun VideoSettingsScreen(
                                 )
                             }
                             Icon(
-                                imageVector = Icons.Filled.ChevronRight,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 tint = MaterialTheme.appColors.onSurface,
                                 contentDescription = stringResource(CoreR.string.core_accessibility_expandable_arrow)
                             )
@@ -284,7 +284,7 @@ private fun VideoSettingsScreen(
                                 )
                             }
                             Icon(
-                                imageVector = Icons.Filled.ChevronRight,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 tint = MaterialTheme.appColors.onSurface,
                                 contentDescription = stringResource(CoreR.string.core_accessibility_expandable_arrow)
                             )
