@@ -8,15 +8,13 @@ import com.google.gson.JsonParser
 import org.openedx.core.domain.model.AgreementUrls
 import java.io.InputStreamReader
 
-@Suppress("TooManyFunctions")
 class Config(context: Context) {
 
     private var configProperties: JsonObject = try {
         val inputStream = context.assets.open("config/config.json")
-        val config = JsonParser.parseReader(InputStreamReader(inputStream))
+        val config = Gson().fromJson(InputStreamReader(inputStream), JsonObject::class.java)
         config.asJsonObject
     } catch (e: Exception) {
-        e.printStackTrace()
         JsonObject()
     }
 
@@ -26,6 +24,10 @@ class Config(context: Context) {
 
     fun getApiHostURL(): String {
         return getString(API_HOST_URL)
+    }
+
+    fun getSSOURL(): String {
+        return getString(SSO_URL, "")
     }
 
     fun getUriScheme(): String {
@@ -108,16 +110,33 @@ class Config(context: Context) {
         return getObjectOrNewInstance(UI_COMPONENTS, UIConfig::class.java)
     }
 
-    fun isRegistrationEnabled(): Boolean {
-        return getBoolean(REGISTRATION_ENABLED, true)
-    }
-
     fun isBrowserLoginEnabled(): Boolean {
         return getBoolean(BROWSER_LOGIN, false)
     }
 
     fun isBrowserRegistrationEnabled(): Boolean {
         return getBoolean(BROWSER_REGISTRATION, false)
+    }
+
+    fun isRegistrationEnabled(): Boolean {
+        return getBoolean(REGISTRATION_ENABLED, true)
+    }
+
+    fun isLoginRegistrationEnabled(): Boolean {
+        return getBoolean(LOGIN_REGISTRATION_ENABLED, true)
+    }
+
+    fun isSSOLoginEnabled(): Boolean {
+        return getBoolean(SAML_SSO_LOGIN_ENABLED, false)
+    }
+
+    fun isSSODefaultLoginButton(): Boolean {
+        return getBoolean(SAML_SSO_DEFAULT_LOGIN_BUTTON, false)
+    }
+
+    fun getSSOButtonTitle(key: String, defaultValue: String): String{
+        val element = getObject(SSO_BUTTON_TITLE)
+        return element?.asJsonObject?.get(key)?.asString ?: defaultValue
     }
 
     private fun getString(key: String, defaultValue: String = ""): String {
@@ -143,14 +162,12 @@ class Config(context: Context) {
             try {
                 cls.getDeclaredConstructor().newInstance()
             } catch (e: InstantiationException) {
-                throw ConfigParsingException(e)
+                throw RuntimeException(e)
             } catch (e: IllegalAccessException) {
-                throw ConfigParsingException(e)
+                throw RuntimeException(e)
             }
         }
     }
-
-    class ConfigParsingException(cause: Throwable) : Exception(cause)
 
     private fun getObject(key: String): JsonElement? {
         return configProperties.get(key)
@@ -159,6 +176,12 @@ class Config(context: Context) {
     companion object {
         private const val APPLICATION_ID = "APPLICATION_ID"
         private const val API_HOST_URL = "API_HOST_URL"
+        private const val SSO_URL = "SSO_URL"
+        private const val SSO_FINISHED_URL = "SSO_FINISHED_URL"
+        private const val SSO_BUTTON_TITLE = "SSO_BUTTON_TITLE"
+        private const val SAML_SSO_LOGIN_ENABLED = "SAML_SSO_LOGIN_ENABLED"
+        private const val SAML_SSO_DEFAULT_LOGIN_BUTTON = "SAML_SSO_DEFAULT_LOGIN_BUTTON"
+        private const val LOGIN_REGISTRATION_ENABLED = "LOGIN_REGISTRATION_ENABLED"
         private const val URI_SCHEME = "URI_SCHEME"
         private const val OAUTH_CLIENT_ID = "OAUTH_CLIENT_ID"
         private const val TOKEN_TYPE = "TOKEN_TYPE"
@@ -173,9 +196,9 @@ class Config(context: Context) {
         private const val GOOGLE = "GOOGLE"
         private const val MICROSOFT = "MICROSOFT"
         private const val PRE_LOGIN_EXPERIENCE_ENABLED = "PRE_LOGIN_EXPERIENCE_ENABLED"
-        private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
         private const val BROWSER_LOGIN = "BROWSER_LOGIN"
         private const val BROWSER_REGISTRATION = "BROWSER_REGISTRATION"
+        private const val REGISTRATION_ENABLED = "REGISTRATION_ENABLED"
         private const val DISCOVERY = "DISCOVERY"
         private const val PROGRAM = "PROGRAM"
         private const val DASHBOARD = "DASHBOARD"

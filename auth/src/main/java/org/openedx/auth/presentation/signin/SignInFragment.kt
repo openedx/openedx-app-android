@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.auth.data.model.AuthType
@@ -47,6 +48,9 @@ class SignInFragment : Fragment() {
                     if (viewModel.authCode != "" && !state.loginFailure && !state.loginSuccess) {
                         viewModel.signInAuthCode(viewModel.authCode)
                     }
+                    setFragmentResultListener("requestKey") { requestKey, bundle ->
+                        viewModel.ssoLogin(token = requestKey)
+                    }
                     LoginScreen(
                         windowSize = windowSize,
                         state = state,
@@ -54,6 +58,7 @@ class SignInFragment : Fragment() {
                         onEvent = { event ->
                             when (event) {
                                 is AuthEvent.SignIn -> viewModel.login(event.login, event.password)
+                                is AuthEvent.SsoSignIn -> viewModel.ssoClicked(parentFragmentManager)
                                 is AuthEvent.SocialSignIn -> viewModel.socialAuth(
                                     this@SignInFragment,
                                     event.authType
@@ -115,6 +120,7 @@ class SignInFragment : Fragment() {
 
 internal sealed interface AuthEvent {
     data class SignIn(val login: String, val password: String) : AuthEvent
+    data class SsoSignIn(val jwtToken: String) : AuthEvent
     data class SocialSignIn(val authType: AuthType) : AuthEvent
     data class OpenLink(val links: Map<String, String>, val link: String) : AuthEvent
     object SignInBrowser : AuthEvent

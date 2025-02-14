@@ -31,6 +31,18 @@ class AuthRepository(
             .processAuthResponse()
     }
 
+    suspend fun ssoLogin(
+        jwtToken: String
+    ) {
+        if (preferencesManager.accessToken.isBlank() ||
+            preferencesManager.refreshToken.isBlank()){
+            preferencesManager.accessToken = jwtToken
+            preferencesManager.refreshToken = jwtToken
+        }
+        val user = api.getProfile()
+        preferencesManager.user = user
+    }
+
     suspend fun socialLogin(token: String?, authType: AuthType) {
         require(!token.isNullOrBlank()) { "Token is null" }
         api.exchangeAccessToken(

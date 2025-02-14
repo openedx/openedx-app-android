@@ -187,4 +187,8 @@
     <string name="core_not_synced">Not Synced</string>
     <string name="core_syncing_to_calendar">Syncing to calendar…</string>
     <string name="core_next">Next</string>
+    <string name="core_sso_sign_in">Sign in with SSO</string>
+    <string name="core_sign_in_sso_heading">OR</string>
+    <string name="core_sign_in_sso_login_title">Sign in</string>
+    <string name="core_sign_in_sso_login_subtitle">Sign in through the national unified sign-on service</string>
 </resources>
