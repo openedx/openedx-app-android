@@ -2,5 +2,6 @@
     <string name="app_navigation_discovery">Discover</string>
     <string name="app_navigation_learn">Learn</string>
     <string name="app_navigation_profile">Profile</string>
+    <string name="app_navigation_dates">Dates</string>
     <string name="app_navigation_downloads">Downloads</string>
 </resources>

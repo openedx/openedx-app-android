@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dates">Dates</string>
+    <string name="dates_category_past_due">Past Due</string>
+    <string name="dates_category_today">Today</string>
+    <string name="dates_category_this_week">This Week</string>
+    <string name="dates_category_next_week">Next Week</string>
+    <string name="dates_category_upcoming">Upcoming</string>
+    <string name="dates_empty_state_title">No Dates</string>
+    <string name="dates_empty_state_description">You currently have no active courses with scheduled events. Enroll in a course to view important dates and deadlines.</string>
+</resources>

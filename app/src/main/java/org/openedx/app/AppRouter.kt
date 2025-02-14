@@ -29,6 +29,7 @@ import org.openedx.course.presentation.unit.video.YoutubeVideoFullScreenFragment
 import org.openedx.course.settings.download.DownloadQueueFragment
 import org.openedx.courses.presentation.AllEnrolledCoursesFragment
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dates.presentation.DatesRouter
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.discovery.presentation.NativeDiscoveryFragment
 import org.openedx.discovery.presentation.WebViewDiscoveryFragment
@@ -69,7 +70,8 @@ class AppRouter :
     AppUpgradeRouter,
     WhatsNewRouter,
     CalendarRouter,
-    DownloadsRouter {
+    DownloadsRouter,
+    DatesRouter {
 
     // region AuthRouter
     override fun navigateToMain(

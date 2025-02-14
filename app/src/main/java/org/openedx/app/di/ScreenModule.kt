@@ -42,6 +42,7 @@ import org.openedx.courses.presentation.DashboardGalleryViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardListViewModel
+import org.openedx.dates.presentation.dates.DatesViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
 import org.openedx.discovery.presentation.NativeDiscoveryViewModel
@@ -237,7 +238,6 @@ val screenModule = module {
 
     single { CourseRepository(get(), get(), get(), get(), get()) }
     factory { CourseInteractor(get()) }
-    single<org.openedx.core.domain.interactor.CourseInteractor> { get<CourseInteractor>() }
 
     viewModel { (pathId: String, infoType: String) ->
         CourseInfoViewModel(
@@ -581,6 +581,12 @@ val screenModule = module {
             courseRouter = get(),
             courseNotifier = get(),
             analytics = get()
+        )
+    }
+
+    viewModel {
+        DatesViewModel(
+            datesRouter = get(),
         )
     }
 }

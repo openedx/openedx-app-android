@@ -65,6 +65,10 @@ class MainViewModel(
         logScreenEvent(AppAnalyticsEvent.DOWNLOADS)
     }
 
+    fun logDatesTabClickedEvent() {
+        logScreenEvent(AppAnalyticsEvent.DATES)
+    }
+
     fun logProfileTabClickedEvent() {
         logScreenEvent(AppAnalyticsEvent.PROFILE)
     }

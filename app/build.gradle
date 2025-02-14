@@ -127,6 +127,7 @@ dependencies {
     implementation project(path: ':profile')
     implementation project(path: ':discussion')
     implementation project(path: ':whatsnew')
+    implementation project(path: ':dates')
     implementation project(path: ':downloads')
 
     ksp "androidx.room:room-compiler:$room_version"
