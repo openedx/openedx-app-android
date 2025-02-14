@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.openedx.core.BlockType
 import org.openedx.core.R
@@ -17,7 +19,6 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseComponentStatus
 import org.openedx.core.domain.model.CourseDateBlock
 import org.openedx.core.domain.model.CourseDatesBannerInfo
-import org.openedx.core.domain.model.CourseDatesResult
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.extension.getSequentialBlocks
 import org.openedx.core.extension.getVerticalBlocks
@@ -183,45 +184,28 @@ class CourseOutlineViewModel(
 
     private fun getCourseDataInternal() {
         viewModelScope.launch {
-            try {
-                val courseStructure = interactor.getCourseStructure(courseId)
+            val courseStructureFlow = interactor.getCourseStructureFlow(courseId, false)
+                .catch { emit(null) }
+            val courseStatusFlow = interactor.getCourseStatusFlow(courseId)
+            val courseDatesFlow = interactor.getCourseDatesFlow(courseId)
+            combine(
+                courseStructureFlow,
+                courseStatusFlow,
+                courseDatesFlow
+            ) { courseStructure, courseStatus, courseDatesResult ->
+                Triple(courseStructure, courseStatus, courseDatesResult)
+            }.catch { e ->
+                handleCourseDataError(e)
+            }.collect { (courseStructure, courseStatus, courseDates) ->
+                if (courseStructure == null) return@collect
                 val blocks = courseStructure.blockData
-                val courseStatus = fetchCourseStatus()
-                val courseDatesResult = fetchCourseDates()
-                val datesBannerInfo = courseDatesResult.courseBanner
+                val datesBannerInfo = courseDates.courseBanner
 
-                checkIfCalendarOutOfDate(courseDatesResult.datesSection.values.flatten())
+                checkIfCalendarOutOfDate(courseDates.datesSection.values.flatten())
                 updateOutdatedOfflineXBlocks(courseStructure)
 
                 initializeCourseData(blocks, courseStructure, courseStatus, datesBannerInfo)
-            } catch (e: Exception) {
-                handleCourseDataError(e)
             }
-        }
-    }
-
-    private suspend fun fetchCourseStatus(): CourseComponentStatus {
-        return if (networkConnection.isOnline()) {
-            interactor.getCourseStatus(courseId)
-        } else {
-            CourseComponentStatus("")
-        }
-    }
-
-    private suspend fun fetchCourseDates(): CourseDatesResult {
-        return if (networkConnection.isOnline()) {
-            interactor.getCourseDates(courseId)
-        } else {
-            CourseDatesResult(
-                datesSection = linkedMapOf(),
-                courseBanner = CourseDatesBannerInfo(
-                    missedDeadlines = false,
-                    missedGatedContent = false,
-                    verifiedUpgradeLink = "",
-                    contentTypeGatingEnabled = false,
-                    hasEnded = false
-                )
-            )
         }
     }
 
@@ -253,10 +237,10 @@ class CourseOutlineViewModel(
         )
     }
 
-    private suspend fun handleCourseDataError(e: Exception) {
+    private suspend fun handleCourseDataError(e: Throwable?) {
         _uiState.value = CourseOutlineUIState.Error
         val errorMessage = when {
-            e.isInternetError() -> R.string.core_error_no_connection
+            e?.isInternetError() == true -> R.string.core_error_no_connection
             else -> R.string.core_error_unknown_error
         }
         _uiMessage.emit(UIMessage.SnackBarMessage(resourceManager.getString(errorMessage)))
@@ -279,8 +263,10 @@ class CourseOutlineViewModel(
         block.descendants.forEach { descendantId ->
             val sequentialBlock = blocks.find { it.id == descendantId } ?: return@forEach
             addSequentialBlockToSubSections(block, sequentialBlock)
-            courseSubSectionUnit[sequentialBlock.id] = sequentialBlock.getFirstDescendantBlock(blocks)
-            subSectionsDownloadsCount[sequentialBlock.id] = sequentialBlock.getDownloadsCount(blocks)
+            courseSubSectionUnit[sequentialBlock.id] =
+                sequentialBlock.getFirstDescendantBlock(blocks)
+            subSectionsDownloadsCount[sequentialBlock.id] =
+                sequentialBlock.getDownloadsCount(blocks)
             addDownloadableChildrenForSequentialBlock(sequentialBlock)
         }
     }
@@ -434,10 +420,12 @@ class CourseOutlineViewModel(
         viewModelScope.launch {
             val courseData = _uiState.value as? CourseOutlineUIState.CourseData ?: return@launch
 
-            val subSectionsBlocks = courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
+            val subSectionsBlocks =
+                courseData.courseSubSections.values.flatten().filter { it.id in blocksIds }
 
             val blocks = subSectionsBlocks.flatMap { subSectionsBlock ->
-                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val verticalBlocks =
+                    allBlocks.values.filter { it.id in subSectionsBlock.descendants }
                 allBlocks.values.filter { it.id in verticalBlocks.flatMap { it.descendants } }
             }
 
@@ -446,9 +434,12 @@ class CourseOutlineViewModel(
             val isAllBlocksDownloaded = downloadableBlocks.all { isBlockDownloaded(it.id) }
 
             val notDownloadedSubSectionBlocks = subSectionsBlocks.mapNotNull { subSectionsBlock ->
-                val verticalBlocks = allBlocks.values.filter { it.id in subSectionsBlock.descendants }
+                val verticalBlocks =
+                    allBlocks.values.filter { it.id in subSectionsBlock.descendants }
                 val notDownloadedBlocks = allBlocks.values.filter {
-                    it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(it.id)
+                    it.id in verticalBlocks.flatMap { it.descendants } && it.isDownloadable && !isBlockDownloaded(
+                        it.id
+                    )
                 }
                 if (notDownloadedBlocks.isNotEmpty()) {
                     subSectionsBlock
@@ -462,7 +453,8 @@ class CourseOutlineViewModel(
             }
 
             if (downloadingBlocks.isNotEmpty()) {
-                val downloadableChildren = downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
+                val downloadableChildren =
+                    downloadingBlocks.flatMap { getDownloadableChildren(it).orEmpty() }
                 if (config.getCourseUIConfig().isCourseDownloadQueueEnabled) {
                     courseRouter.navigateToDownloadQueue(fragmentManager, downloadableChildren)
                 } else {

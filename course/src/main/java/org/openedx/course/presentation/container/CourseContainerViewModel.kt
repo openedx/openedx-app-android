@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,9 +13,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import org.openedx.core.config.Config
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseAccessError
@@ -170,45 +170,25 @@ class CourseContainerViewModel(
         _showProgress.value = true
 
         viewModelScope.launch {
-            try {
-                val (courseStructure, courseEnrollmentDetails) = fetchCourseData(courseId)
-                _showProgress.value = false
-                when {
-                    courseEnrollmentDetails != null -> {
-                        handleCourseEnrollment(courseEnrollmentDetails)
-                    }
-
-                    courseStructure != null -> {
-                        handleCourseStructureOnly(courseStructure)
-                    }
-
-                    else -> {
-                        _courseAccessStatus.value = CourseAccessError.UNKNOWN
-                    }
+            val courseStructureFlow = interactor.getCourseStructureFlow(courseId)
+                .catch { e ->
+                    handleFetchError(e)
+                    emit(null)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            val courseDetailsFlow = interactor.getEnrollmentDetailsFlow(courseId)
+                .catch { emit(null) }
+            courseStructureFlow.combine(courseDetailsFlow) { courseStructure, courseEnrollmentDetails ->
+                courseStructure to courseEnrollmentDetails
+            }.catch { e ->
                 handleFetchError(e)
-                _showProgress.value = false
+            }.collect { (courseStructure, courseEnrollmentDetails) ->
+                when {
+                    courseEnrollmentDetails != null -> handleCourseEnrollment(courseEnrollmentDetails)
+                    courseStructure != null -> handleCourseStructureOnly(courseStructure)
+                    else -> _courseAccessStatus.value = CourseAccessError.UNKNOWN
+                }
             }
         }
-    }
-
-    private suspend fun fetchCourseData(
-        courseId: String
-    ): Pair<CourseStructure?, CourseEnrollmentDetails?> = supervisorScope {
-        val deferredCourse = async {
-            runCatching {
-                interactor.getCourseStructure(courseId, isNeedRefresh = true)
-            }.getOrNull()
-        }
-        val deferredEnrollment = async {
-            runCatching {
-                interactor.getEnrollmentDetails(courseId)
-            }.getOrNull()
-        }
-
-        Pair(deferredCourse.await(), deferredEnrollment.await())
     }
 
     /**
@@ -262,15 +242,17 @@ class CourseContainerViewModel(
         _dataReady.value = true
     }
 
-    private fun handleFetchError(e: Exception) {
+    private fun handleFetchError(e: Throwable) {
+        e.printStackTrace()
         if (isNetworkRelatedError(e)) {
             _errorMessage.value = resourceManager.getString(CoreR.string.core_error_no_connection)
         } else {
             _courseAccessStatus.value = CourseAccessError.UNKNOWN
         }
+        _showProgress.value = false
     }
 
-    private fun isNetworkRelatedError(e: Exception): Boolean {
+    private fun isNetworkRelatedError(e: Throwable): Boolean {
         return e.isInternetError() || e is NoCachedDataException
     }
 

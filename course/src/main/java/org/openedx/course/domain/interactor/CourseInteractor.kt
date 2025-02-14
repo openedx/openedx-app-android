@@ -1,14 +1,23 @@
 package org.openedx.course.domain.interactor
 
+import kotlinx.coroutines.flow.Flow
 import org.openedx.core.BlockType
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseEnrollmentDetails
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.course.data.repository.CourseRepository
 
+@Suppress("TooManyFunctions")
 class CourseInteractor(
     private val repository: CourseRepository
 ) {
+
+    suspend fun getCourseStructureFlow(
+        courseId: String,
+        forceRefresh: Boolean = true
+    ): Flow<CourseStructure?> {
+        return repository.getCourseStructureFlow(courseId, forceRefresh)
+    }
 
     suspend fun getCourseStructure(
         courseId: String,
@@ -19,6 +28,10 @@ class CourseInteractor(
 
     suspend fun getCourseStructureFromCache(courseId: String): CourseStructure {
         return repository.getCourseStructureFromCache(courseId)
+    }
+
+    suspend fun getEnrollmentDetailsFlow(courseId: String): Flow<CourseEnrollmentDetails?> {
+        return repository.getEnrollmentDetailsFlow(courseId)
     }
 
     suspend fun getEnrollmentDetails(courseId: String): CourseEnrollmentDetails {
@@ -68,7 +81,11 @@ class CourseInteractor(
         }
     }
 
+    suspend fun getCourseStatusFlow(courseId: String) = repository.getCourseStatusFlow(courseId)
+
     suspend fun getCourseStatus(courseId: String) = repository.getCourseStatus(courseId)
+
+    suspend fun getCourseDatesFlow(courseId: String) = repository.getCourseDatesFlow(courseId)
 
     suspend fun getCourseDates(courseId: String) = repository.getCourseDates(courseId)
 
