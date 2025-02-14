@@ -52,6 +52,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
@@ -1163,7 +1164,7 @@ fun BackBtn(
         }
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.core_ic_back),
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = stringResource(id = R.string.core_accessibility_btn_back),
             tint = tint
         )

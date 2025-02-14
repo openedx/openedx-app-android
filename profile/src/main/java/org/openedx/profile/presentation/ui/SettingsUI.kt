@@ -11,7 +11,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +32,7 @@ fun SettingsItem(
     val icon = if (external) {
         Icons.AutoMirrored.Filled.OpenInNew
     } else {
-        Icons.AutoMirrored.Filled.ArrowForwardIos
+        Icons.AutoMirrored.Filled.KeyboardArrowRight
     }
     Row(
         Modifier
@@ -57,7 +57,7 @@ fun SettingsItem(
             color = MaterialTheme.appColors.textPrimary
         )
         Icon(
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(22.dp),
             imageVector = icon,
             contentDescription = null
         )

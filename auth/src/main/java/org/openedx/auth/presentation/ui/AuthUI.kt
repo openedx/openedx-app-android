@@ -23,7 +23,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -524,7 +524,7 @@ fun ExpandableText(
     } else {
         stringResource(id = R.string.auth_show_optional_fields)
     }
-    val icon = Icons.Filled.ChevronRight
+    val icon = Icons.AutoMirrored.Filled.KeyboardArrowRight
 
     Row(
         modifier = modifier

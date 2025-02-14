@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -179,13 +178,12 @@ fun HtmlUnitView(
         Surface(
             modifier = Modifier
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-            color = Color.White
+            color = MaterialTheme.colors.background
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = bottomPadding)
-                    .background(Color.White)
                     .then(border),
                 contentAlignment = Alignment.TopCenter
             ) {

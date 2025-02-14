@@ -44,7 +44,7 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.outlined.CloudDownload
@@ -305,7 +305,7 @@ fun CardArrow(
     degrees: Float,
 ) {
     Icon(
-        imageVector = Icons.Filled.ChevronRight,
+        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
         tint = MaterialTheme.appColors.textDark,
         contentDescription = "Expandable Arrow",
         modifier = Modifier.rotate(degrees),
@@ -822,7 +822,7 @@ fun CourseSubSectionItem(
             Spacer(modifier = Modifier.width(16.dp))
             if (isAssignmentEnable) {
                 Icon(
-                    imageVector = Icons.Filled.ChevronRight,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     tint = MaterialTheme.appColors.onSurface,
                     contentDescription = null
                 )
