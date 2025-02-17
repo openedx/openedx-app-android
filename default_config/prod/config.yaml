@@ -31,6 +31,9 @@ PROGRAM:
 DASHBOARD:
   TYPE: 'gallery'
 
+DATES:
+  ENABLED: true
+
 FIREBASE:
   ENABLED: false
   CLOUD_MESSAGING_ENABLED: false
