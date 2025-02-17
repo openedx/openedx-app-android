@@ -24,12 +24,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -92,8 +96,8 @@ class DatesFragment : Fragment() {
                                 viewModel.onSettingsClick(requireActivity().supportFragmentManager)
                             }
 
-                            DatesViewActions.ReloadData -> {
-
+                            DatesViewActions.SwipeRefresh -> {
+                                viewModel.refreshData()
                             }
 
                             is DatesViewActions.OpenEvent -> {
@@ -108,6 +112,7 @@ class DatesFragment : Fragment() {
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun DatesScreen(
     uiState: DatesUIState,
@@ -124,10 +129,15 @@ private fun DatesScreen(
             )
         )
     }
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = uiState.isRefreshing,
+        onRefresh = { onAction(DatesViewActions.SwipeRefresh) }
+    )
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         backgroundColor = MaterialTheme.appColors.background,
         topBar = {
             MainScreenTitle(
@@ -141,58 +151,71 @@ private fun DatesScreen(
             )
         },
         content = { paddingValues ->
-            HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
-
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.appColors.primary)
-                }
-            } else if (uiState.dates.isEmpty()) {
-                EmptyState()
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .displayCutoutForLandscape()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    LazyColumn(
-                        modifier = contentWidth,
-                        contentPadding = PaddingValues(bottom = 20.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(pullRefreshState)
+            ) {
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        uiState.dates.keys.forEach { dueDateCategory ->
-                            val dates = uiState.dates[dueDateCategory] ?: emptyList()
-                            if (dates.isNotEmpty()) {
-                                item {
-                                    Text(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(bottom = 8.dp, top = 20.dp),
-                                        text = stringResource(id = dueDateCategory.label),
-                                        color = MaterialTheme.appColors.textDark,
-                                        style = MaterialTheme.appTypography.titleMedium,
-                                    )
-                                }
-                                itemsIndexed(dates) { index, date ->
-                                    val itemPosition = ListItemPosition.detectPosition(index, dates)
-                                    DateItem(
-                                        date = date,
-                                        lineColor = dueDateCategory.color,
-                                        itemPosition = itemPosition,
-                                        onClick = {
-                                            onAction(DatesViewActions.OpenEvent())
-                                        }
-                                    )
+                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                    }
+                } else if (uiState.dates.isEmpty()) {
+                    EmptyState()
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .displayCutoutForLandscape()
+                            .padding(paddingValues)
+                            .padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        LazyColumn(
+                            modifier = contentWidth,
+                            contentPadding = PaddingValues(bottom = 20.dp)
+                        ) {
+                            uiState.dates.keys.forEach { dueDateCategory ->
+                                val dates = uiState.dates[dueDateCategory] ?: emptyList()
+                                if (dates.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 8.dp, top = 20.dp),
+                                            text = stringResource(id = dueDateCategory.label),
+                                            color = MaterialTheme.appColors.textDark,
+                                            style = MaterialTheme.appTypography.titleMedium,
+                                        )
+                                    }
+                                    itemsIndexed(dates) { index, date ->
+                                        val itemPosition =
+                                            ListItemPosition.detectPosition(index, dates)
+                                        DateItem(
+                                            date = date,
+                                            lineColor = dueDateCategory.color,
+                                            itemPosition = itemPosition,
+                                            onClick = {
+                                                onAction(DatesViewActions.OpenEvent())
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                HandleUIMessage(uiMessage = uiMessage, scaffoldState = scaffoldState)
+
+                PullRefreshIndicator(
+                    uiState.isRefreshing,
+                    pullRefreshState,
+                    Modifier.align(Alignment.TopCenter)
+                )
             }
         }
     )

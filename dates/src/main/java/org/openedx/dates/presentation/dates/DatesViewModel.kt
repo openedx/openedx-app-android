@@ -35,6 +35,7 @@ class DatesViewModel(
             _uiState.update { state ->
                 state.copy(
                     isLoading = false,
+                    isRefreshing = false,
                     dates = mapOf(
                         DueDateCategory.PAST_DUE to listOf("Date1", "Date2", "Date3"),
                         DueDateCategory.TODAY to listOf("Date1"),
@@ -46,6 +47,15 @@ class DatesViewModel(
         }
     }
 
+    fun refreshData() {
+        _uiState.update { state ->
+            state.copy(
+                isRefreshing = true,
+            )
+        }
+        fetchDates()
+    }
+
     fun onSettingsClick(fragmentManager: FragmentManager) {
         datesRouter.navigateToSettings(fragmentManager)
     }
@@ -54,5 +64,5 @@ class DatesViewModel(
 interface DatesViewActions {
     object OpenSettings : DatesViewActions
     class OpenEvent() : DatesViewActions
-    object ReloadData : DatesViewActions
+    object SwipeRefresh : DatesViewActions
 }
