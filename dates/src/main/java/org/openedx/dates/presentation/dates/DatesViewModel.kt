@@ -10,12 +10,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.dates.presentation.DatesRouter
 import org.openedx.foundation.presentation.BaseViewModel
 import org.openedx.foundation.presentation.UIMessage
 
 class DatesViewModel(
     private val datesRouter: DatesRouter,
+    private val networkConnection: NetworkConnection,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(DatesUIState())
@@ -25,6 +27,9 @@ class DatesViewModel(
     private val _uiMessage = MutableSharedFlow<UIMessage>()
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
+
+    val hasInternetConnection: Boolean
+        get() = networkConnection.isOnline()
 
     init {
         fetchDates()

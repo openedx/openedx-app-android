@@ -587,6 +587,7 @@ val screenModule = module {
     viewModel {
         DatesViewModel(
             datesRouter = get(),
+            networkConnection = get()
         )
     }
 }

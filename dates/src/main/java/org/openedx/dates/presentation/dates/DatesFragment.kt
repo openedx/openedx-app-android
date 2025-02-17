@@ -40,6 +40,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,6 +60,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.openedx.core.presentation.ListItemPosition
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.MainScreenTitle
+import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
@@ -90,6 +93,7 @@ class DatesFragment : Fragment() {
                 DatesScreen(
                     uiState = uiState,
                     uiMessage = uiMessage,
+                    hasInternetConnection = viewModel.hasInternetConnection,
                     onAction = { action ->
                         when (action) {
                             DatesViewActions.OpenSettings -> {
@@ -117,6 +121,7 @@ class DatesFragment : Fragment() {
 private fun DatesScreen(
     uiState: DatesUIState,
     uiMessage: UIMessage?,
+    hasInternetConnection: Boolean,
     onAction: (DatesViewActions) -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -133,6 +138,9 @@ private fun DatesScreen(
         refreshing = uiState.isRefreshing,
         onRefresh = { onAction(DatesViewActions.SwipeRefresh) }
     )
+    var isInternetConnectionShown by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -216,6 +224,21 @@ private fun DatesScreen(
                     pullRefreshState,
                     Modifier.align(Alignment.TopCenter)
                 )
+
+                if (!isInternetConnectionShown && !hasInternetConnection) {
+                    OfflineModeDialog(
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        onDismissCLick = {
+                            isInternetConnectionShown = true
+                        },
+                        onReloadClick = {
+                            isInternetConnectionShown = true
+                            onAction(DatesViewActions.SwipeRefresh)
+                        }
+                    )
+                }
             }
         }
     )
@@ -372,6 +395,7 @@ private fun DatesScreenPreview() {
         DatesScreen(
             uiState = DatesUIState(isLoading = false),
             uiMessage = null,
+            hasInternetConnection = true,
             onAction = {}
         )
     }
