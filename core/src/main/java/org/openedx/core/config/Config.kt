@@ -96,6 +96,10 @@ class Config(context: Context) {
         return getExperimentalFeaturesConfig().appLevelDownloadsConfig
     }
 
+    fun getDatesConfig(): AppLevelDatesConfig {
+        return getExperimentalFeaturesConfig().appLevelDatesConfig
+    }
+
     fun getBranchConfig(): BranchConfig {
         return getObjectOrNewInstance(BRANCH, BranchConfig::class.java)
     }
