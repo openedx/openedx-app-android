@@ -31,6 +31,8 @@ import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.BlockCounts
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.core.domain.model.CoursewareAccess
+import org.openedx.core.domain.model.GatedContent
+import org.openedx.core.domain.model.Subsection
 import org.openedx.core.module.DownloadWorkerController
 import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModel
@@ -161,6 +163,36 @@ class CourseSectionViewModelTest {
         progress = null
     )
 
+    private val subsection = Subsection(
+        elementId = "id",
+        itemId = "id",
+        bannerText = "bannerText",
+        gatedContent = GatedContent(
+            prereqId = null,
+            prereqUrl = null,
+            prereqSubsectionName = null,
+            gated = false,
+            gatedSubsectionName = null
+        ),
+        subsectionName = "subsectionName",
+        displayName = "displayName"
+    )
+
+    private val gatedSubsection = Subsection(
+        elementId = "id",
+        itemId = "id",
+        bannerText = "bannerText",
+        gatedContent = GatedContent(
+            prereqId = "prereqId",
+            prereqUrl = "prereqUrl",
+            prereqSubsectionName = "prereqSubsectionName",
+            gated = true,
+            gatedSubsectionName = "gatedSubsectionName"
+        ),
+        subsectionName = "subsectionName",
+        displayName = "displayName"
+    )
+
     private val downloadModel = DownloadModel(
         "id",
         "title",
@@ -181,6 +213,8 @@ class CourseSectionViewModelTest {
         every {
             resourceManager.getString(org.openedx.course.R.string.course_can_download_only_with_wifi)
         } returns cantDownload
+        every { networkConnection.isOnline() } returns true
+        coEvery { interactor.getSubsection("id") } returns subsection
     }
 
     @After
@@ -195,17 +229,20 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
+            networkConnection,
             notifier,
             analytics,
         )
 
+        coEvery { interactor.getSubsection("") } throws UnknownHostException()
         coEvery { interactor.getCourseStructure(any()) } throws UnknownHostException()
         coEvery { interactor.getCourseStructureForVideos(any()) } throws UnknownHostException()
 
         viewModel.getBlocks("", CourseViewMode.FULL)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getSubsection("") }
+        coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -220,17 +257,20 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
+            networkConnection,
             notifier,
             analytics,
         )
 
+        coEvery { interactor.getSubsection("id2") } throws Exception()
         coEvery { interactor.getCourseStructure(any()) } throws Exception()
         coEvery { interactor.getCourseStructureForVideos(any()) } throws Exception()
 
         viewModel.getBlocks("id2", CourseViewMode.FULL)
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { interactor.getCourseStructure(any()) }
+        coVerify(exactly = 1) { interactor.getSubsection("id2") }
+        coVerify(exactly = 0) { interactor.getCourseStructure(any()) }
         coVerify(exactly = 0) { interactor.getCourseStructureForVideos(any()) }
 
         val message = viewModel.uiMessage.value as? UIMessage.SnackBarMessage
@@ -247,6 +287,7 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
+            networkConnection,
             notifier,
             analytics,
         )
@@ -276,6 +317,7 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
+            networkConnection,
             notifier,
             analytics,
         )
@@ -298,6 +340,7 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
+            networkConnection,
             notifier,
             analytics,
         )
@@ -323,6 +366,7 @@ class CourseSectionViewModelTest {
             "",
             interactor,
             resourceManager,
+            networkConnection,
             notifier,
             analytics,
         )
@@ -340,5 +384,25 @@ class CourseSectionViewModelTest {
         advanceUntilIdle()
 
         assert(viewModel.uiState.value is CourseSectionUIState.Blocks)
+    }
+
+    @Test
+    fun `subsection is gated`() = runTest {
+        every { downloadDao.getAllDataFlow() } returns flow { emit(emptyList()) }
+        val viewModel = CourseSectionViewModel(
+            "",
+            interactor,
+            resourceManager,
+            networkConnection,
+            notifier,
+            analytics,
+        )
+
+        coEvery { interactor.getSubsection("id") } returns gatedSubsection
+
+        viewModel.getBlocks("id", CourseViewMode.FULL)
+        advanceUntilIdle()
+
+        assert(viewModel.uiState.value is CourseSectionUIState.Gated)
     }
 }

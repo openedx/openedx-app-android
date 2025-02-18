@@ -34,6 +34,8 @@
     <string name="course_resume">Resume</string>
     <string name="course_to_proceed">To proceed with \"%s\" press \"Next section\".</string>
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
+    <string name="course_gated_subsection">Content locked. You must complete the prerequisite: \“%s\” to access this content.</string>
+    <string name="course_go_to_prerequisite_section">Go To Prerequisite Section</string>
     <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
     <string name="course_dates_shifted_message">Dates Shifted</string>
 

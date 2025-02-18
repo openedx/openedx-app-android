@@ -9,4 +9,9 @@ sealed class CourseSectionUIState {
         val courseName: String
     ) : CourseSectionUIState()
     data object Loading : CourseSectionUIState()
+    data class Gated(
+        val gatedSubsectionName: String?,
+        val prereqSubsectionName: String?,
+        val prereqId: String?,
+    ) : CourseSectionUIState()
 }
