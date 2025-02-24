@@ -1265,6 +1265,24 @@ fun AuthButtonsPanel(
     showRegisterButton: Boolean,
 ) {
     Row {
+        OpenEdXOutlinedButton(
+            modifier = Modifier
+                .testTag("btn_sign_in")
+                .then(
+                    if (showRegisterButton) {
+                        Modifier
+                            .width(100.dp)
+                            .padding(end = 16.dp)
+                    } else {
+                        Modifier.weight(1f)
+                    }
+                ),
+            text = stringResource(id = R.string.core_sign_in),
+            onClick = { onSignInClick() },
+            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
+            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
+            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
+        )
         if (showRegisterButton) {
             OpenEdXButton(
                 modifier = Modifier
@@ -1277,25 +1295,6 @@ fun AuthButtonsPanel(
                 onClick = { onRegisterClick() }
             )
         }
-
-        OpenEdXOutlinedButton(
-            modifier = Modifier
-                .testTag("btn_sign_in")
-                .then(
-                    if (showRegisterButton) {
-                        Modifier
-                            .width(100.dp)
-                            .padding(start = 16.dp)
-                    } else {
-                        Modifier.weight(1f)
-                    }
-                ),
-            text = stringResource(id = R.string.core_sign_in),
-            onClick = { onSignInClick() },
-            textColor = MaterialTheme.appColors.secondaryButtonBorderedText,
-            backgroundColor = MaterialTheme.appColors.secondaryButtonBorderedBackground,
-            borderColor = MaterialTheme.appColors.secondaryButtonBorder,
-        )
     }
 }
 
