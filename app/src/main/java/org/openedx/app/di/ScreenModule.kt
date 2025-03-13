@@ -42,6 +42,8 @@ import org.openedx.courses.presentation.DashboardGalleryViewModel
 import org.openedx.dashboard.data.repository.DashboardRepository
 import org.openedx.dashboard.domain.interactor.DashboardInteractor
 import org.openedx.dashboard.presentation.DashboardListViewModel
+import org.openedx.dates.data.repository.DatesRepository
+import org.openedx.dates.domain.interactor.DatesInteractor
 import org.openedx.dates.presentation.dates.DatesViewModel
 import org.openedx.discovery.data.repository.DiscoveryRepository
 import org.openedx.discovery.domain.interactor.DiscoveryInteractor
@@ -584,10 +586,23 @@ val screenModule = module {
         )
     }
 
+    factory {
+        DatesRepository(
+            api = get(),
+            preferencesManager = get()
+        )
+    }
+    factory {
+        DatesInteractor(
+            repository = get()
+        )
+    }
     viewModel {
         DatesViewModel(
             datesRouter = get(),
-            networkConnection = get()
+            networkConnection = get(),
+            resourceManager = get(),
+            datesInteractor = get()
         )
     }
 }

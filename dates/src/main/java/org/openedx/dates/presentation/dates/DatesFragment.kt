@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -47,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -57,6 +60,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.presentation.ListItemPosition
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.MainScreenTitle
@@ -66,6 +70,7 @@ import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
+import org.openedx.core.utils.TimeUtils
 import org.openedx.dates.R
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.rememberWindowSize
@@ -166,7 +171,8 @@ private fun DatesScreen(
             ) {
                 if (uiState.isLoading) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(color = MaterialTheme.appColors.primary)
@@ -203,7 +209,7 @@ private fun DatesScreen(
                                         val itemPosition =
                                             ListItemPosition.detectPosition(index, dates)
                                         DateItem(
-                                            date = date,
+                                            courseDate = date,
                                             lineColor = dueDateCategory.color,
                                             itemPosition = itemPosition,
                                             onClick = {
@@ -247,11 +253,12 @@ private fun DatesScreen(
 @Composable
 private fun DateItem(
     modifier: Modifier = Modifier,
-    date: String,
+    courseDate: CourseDate,
     lineColor: Color,
     itemPosition: ListItemPosition,
     onClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     val boxCornerWidth = 8.dp
     val boxCornerRadius = boxCornerWidth / 2
     val infoPadding = 8.dp
@@ -313,7 +320,7 @@ private fun DateItem(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = date,
+                text = TimeUtils.formatToString(context, courseDate.dueDate, true),
                 style = MaterialTheme.appTypography.labelMedium,
                 color = MaterialTheme.appColors.textDark
             )
@@ -326,13 +333,13 @@ private fun DateItem(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = date,
+                    text = courseDate.assignmentTitle,
                     style = MaterialTheme.appTypography.titleMedium,
                     color = MaterialTheme.appColors.textDark
                 )
             }
             Text(
-                text = date,
+                text = courseDate.courseName,
                 style = MaterialTheme.appTypography.labelMedium,
                 color = MaterialTheme.appColors.textPrimaryVariant
             )
@@ -352,7 +359,9 @@ private fun EmptyState(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center
     ) {
         Column(
