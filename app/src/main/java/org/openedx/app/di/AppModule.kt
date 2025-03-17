@@ -180,6 +180,11 @@ val appModule = module {
     }
 
     single {
+        val room = get<AppDatabase>()
+        room.datesDao()
+    }
+
+    single {
         FileDownloader()
     }
 

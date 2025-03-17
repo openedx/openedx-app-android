@@ -589,7 +589,8 @@ val screenModule = module {
     factory {
         DatesRepository(
             api = get(),
-            preferencesManager = get()
+            dao = get(),
+            preferencesManager = get(),
         )
     }
     factory {

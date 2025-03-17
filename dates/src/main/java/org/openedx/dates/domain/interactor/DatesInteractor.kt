@@ -6,6 +6,8 @@ class DatesInteractor(
     private val repository: DatesRepository
 ) {
 
-    suspend fun getUserDates() = repository.getUserDates()
+    suspend fun getUserDates(page: Int) = repository.getUserDates(page)
+
+    suspend fun getUserDatesFromCache() = repository.getUserDatesFromCache()
 
 }

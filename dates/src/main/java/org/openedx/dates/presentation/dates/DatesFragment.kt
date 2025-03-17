@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +41,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -66,12 +68,14 @@ import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.MainScreenTitle
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.displayCutoutForLandscape
+import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils
 import org.openedx.dates.R
+import org.openedx.dates.presentation.dates.DatesFragment.Companion.LOAD_MORE_THRESHOLD
 import org.openedx.foundation.presentation.UIMessage
 import org.openedx.foundation.presentation.rememberWindowSize
 import org.openedx.foundation.presentation.windowSizeValue
@@ -109,14 +113,25 @@ class DatesFragment : Fragment() {
                                 viewModel.refreshData()
                             }
 
-                            is DatesViewActions.OpenEvent -> {
+                            DatesViewActions.LoadMore -> {
+                                viewModel.fetchMore()
+                            }
 
+                            is DatesViewActions.OpenEvent -> {
+                                viewModel.navigateToCourseOutline(
+                                    requireActivity().supportFragmentManager,
+                                    action.date
+                                )
                             }
                         }
                     }
                 )
             }
         }
+    }
+
+    companion object {
+        const val LOAD_MORE_THRESHOLD = 4
     }
 
 }
@@ -146,6 +161,10 @@ private fun DatesScreen(
     var isInternetConnectionShown by rememberSaveable {
         mutableStateOf(false)
     }
+    val scrollState = rememberLazyListState()
+    val firstVisibleIndex = remember {
+        mutableIntStateOf(scrollState.firstVisibleItemIndex)
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -169,7 +188,7 @@ private fun DatesScreen(
                     .fillMaxSize()
                     .pullRefresh(pullRefreshState)
             ) {
-                if (uiState.isLoading) {
+                if (uiState.isLoading && uiState.dates.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -189,7 +208,8 @@ private fun DatesScreen(
                         contentAlignment = Alignment.TopCenter
                     ) {
                         LazyColumn(
-                            modifier = contentWidth,
+                            modifier = contentWidth.fillMaxSize(),
+                            state = scrollState,
                             contentPadding = PaddingValues(bottom = 20.dp)
                         ) {
                             uiState.dates.keys.forEach { dueDateCategory ->
@@ -213,12 +233,24 @@ private fun DatesScreen(
                                             lineColor = dueDateCategory.color,
                                             itemPosition = itemPosition,
                                             onClick = {
-                                                onAction(DatesViewActions.OpenEvent())
+                                                onAction(DatesViewActions.OpenEvent(date))
                                             }
                                         )
                                     }
                                 }
                             }
+                            if (uiState.isLoading) {
+                                item {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .align(Alignment.Center),
+                                        color = MaterialTheme.appColors.primary
+                                    )
+                                }
+                            }
+                        }
+                        if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
+                            onAction(DatesViewActions.LoadMore)
                         }
                     }
                 }

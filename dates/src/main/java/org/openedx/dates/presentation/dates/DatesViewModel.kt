@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.domain.model.CourseDate
-import org.openedx.core.domain.model.CourseDatesResponse
+import org.openedx.core.extension.isNotNull
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.isToday
 import org.openedx.core.utils.toCalendar
@@ -43,6 +43,8 @@ class DatesViewModel(
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
 
+    private var page = 1
+
     init {
         fetchDates(false)
     }
@@ -56,13 +58,36 @@ class DatesViewModel(
                         isRefreshing = refresh,
                     )
                 }
-                val courseDatesResponse = datesInteractor.getUserDates()
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        dates = groupCourseDates(courseDatesResponse)
-                    )
+                if (refresh) {
+                    page = 1
+                }
+                val response = if (networkConnection.isOnline() || page > 1) {
+                    datesInteractor.getUserDates(page)
+                } else {
+                    null
+                }
+                if (response != null) {
+                    if (response.next.isNotNull() && page != response.count) {
+                        _uiState.update { state -> state.copy(canLoadMore = true) }
+                        page++
+                    } else {
+                        _uiState.update { state -> state.copy(canLoadMore = false) }
+                        page = -1
+                    }
+                    _uiState.update { state ->
+                        state.copy(
+                            dates = state.dates + groupCourseDates(response.results)
+                        )
+                    }
+                } else {
+                    val cachedList = datesInteractor.getUserDatesFromCache()
+                    _uiState.update { state -> state.copy(canLoadMore = false) }
+                    page = -1
+                    _uiState.update { state ->
+                        state.copy(
+                            dates = groupCourseDates(cachedList)
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 if (e.isInternetError()) {
@@ -74,7 +99,20 @@ class DatesViewModel(
                         UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
                     )
                 }
+            } finally {
+                _uiState.update { state ->
+                    state.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                    )
+                }
             }
+        }
+    }
+
+    fun fetchMore() {
+        if (!_uiState.value.isLoading && page != -1) {
+            fetchDates(false)
         }
     }
 
@@ -86,10 +124,17 @@ class DatesViewModel(
         datesRouter.navigateToSettings(fragmentManager)
     }
 
-    private fun groupCourseDates(response: CourseDatesResponse): Map<DueDateCategory, List<CourseDate>> {
+    fun navigateToCourseOutline(
+        fragmentManager: FragmentManager,
+        courseDate: CourseDate,
+    ) {
+
+    }
+
+    private fun groupCourseDates(dates: List<CourseDate>): Map<DueDateCategory, List<CourseDate>> {
         val now = Date()
         val calNow = Calendar.getInstance().apply { time = now }
-        val grouped = response.results.groupBy { courseDate ->
+        val grouped = dates.groupBy { courseDate ->
             val dueDate = courseDate.dueDate
             if (dueDate.before(now)) {
                 DueDateCategory.PAST_DUE
@@ -115,6 +160,7 @@ class DatesViewModel(
 
 interface DatesViewActions {
     object OpenSettings : DatesViewActions
-    class OpenEvent() : DatesViewActions
+    class OpenEvent(val date: CourseDate) : DatesViewActions
+    object LoadMore : DatesViewActions
     object SwipeRefresh : DatesViewActions
 }
