@@ -128,7 +128,13 @@ class DatesViewModel(
         fragmentManager: FragmentManager,
         courseDate: CourseDate,
     ) {
-
+        datesRouter.navigateToCourseOutline(
+            fm = fragmentManager,
+            courseId = courseDate.courseId,
+            courseTitle = courseDate.courseName,
+            openTab = "",
+            resumeBlockId = courseDate.assignmentBlockId
+        )
     }
 
     private fun groupCourseDates(dates: List<CourseDate>): Map<DueDateCategory, List<CourseDate>> {

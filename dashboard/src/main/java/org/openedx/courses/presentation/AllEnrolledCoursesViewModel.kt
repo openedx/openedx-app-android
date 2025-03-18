@@ -203,7 +203,9 @@ class AllEnrolledCoursesViewModel(
         dashboardRouter.navigateToCourseOutline(
             fm = fragmentManager,
             courseId = courseId,
-            courseTitle = courseName
+            courseTitle = courseName,
+            openTab = "",
+            resumeBlockId = ""
         )
     }
 }

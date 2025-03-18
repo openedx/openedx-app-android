@@ -136,6 +136,8 @@ class DashboardListFragment : Fragment() {
                             fm = requireActivity().supportFragmentManager,
                             courseId = it.course.id,
                             courseTitle = it.course.name,
+                            resumeBlockId = "",
+                            openTab = ""
                         )
                     },
                     onSwipeRefresh = {

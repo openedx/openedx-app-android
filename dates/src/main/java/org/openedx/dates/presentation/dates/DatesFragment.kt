@@ -239,13 +239,17 @@ private fun DatesScreen(
                                     }
                                 }
                             }
-                            if (uiState.isLoading) {
+                            if (uiState.canLoadMore) {
                                 item {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .align(Alignment.Center),
-                                        color = MaterialTheme.appColors.primary
-                                    )
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(42.dp)
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(color = MaterialTheme.appColors.primary)
+                                    }
                                 }
                             }
                         }

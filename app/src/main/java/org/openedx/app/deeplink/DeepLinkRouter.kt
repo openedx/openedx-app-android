@@ -212,7 +212,9 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                openTab = "VIDEOS"
+                openTab = "VIDEOS",
+                resumeBlockId = "",
+
             )
         }
     }
@@ -223,7 +225,8 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                openTab = "DATES"
+                openTab = "DATES",
+                resumeBlockId = "",
             )
         }
     }
@@ -234,7 +237,8 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                openTab = "DISCUSSIONS"
+                openTab = "DISCUSSIONS",
+                resumeBlockId = "",
             )
         }
     }
@@ -245,7 +249,8 @@ class DeepLinkRouter(
                 fm = fm,
                 courseId = courseId,
                 courseTitle = "",
-                openTab = "MORE"
+                openTab = "MORE",
+                resumeBlockId = "",
             )
         }
     }
