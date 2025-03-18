@@ -11,11 +11,11 @@ enum class DueDateCategory(
     @StringRes
     val label: Int,
 ) {
-    PAST_DUE(R.string.dates_category_past_due),
-    TODAY(R.string.dates_category_today),
-    THIS_WEEK(R.string.dates_category_this_week),
+    UPCOMING(R.string.dates_category_upcoming),
     NEXT_WEEK(R.string.dates_category_next_week),
-    UPCOMING(R.string.dates_category_upcoming);
+    THIS_WEEK(R.string.dates_category_this_week),
+    TODAY(R.string.dates_category_today),
+    PAST_DUE(R.string.dates_category_past_due);
 
     val color: Color
         @Composable
