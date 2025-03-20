@@ -10,4 +10,6 @@ class DatesInteractor(
 
     suspend fun getUserDatesFromCache() = repository.getUserDatesFromCache()
 
+    suspend fun shiftDueDate(courseIds: List<String>) = repository.shiftDueDate(courseIds)
+
 }

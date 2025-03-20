@@ -217,6 +217,7 @@ private fun DatesScreen(
                                         item {
                                             ShiftDueDatesCard(
                                                 modifier = Modifier.padding(top = 12.dp),
+                                                isButtonEnabled = !uiState.isShiftDueDatesPressed,
                                                 onClick = {
                                                     onAction(DatesViewActions.ShiftDueDate)
                                                 }
@@ -285,6 +286,7 @@ private fun DatesScreen(
 @Composable
 private fun ShiftDueDatesCard(
     modifier: Modifier = Modifier,
+    isButtonEnabled: Boolean,
     onClick: () -> Unit
 ) {
     Card(
@@ -314,6 +316,7 @@ private fun ShiftDueDatesCard(
             )
             OpenEdXButton(
                 text = stringResource(id = R.string.dates_shift_due_date),
+                enabled = isButtonEnabled,
                 onClick = onClick
             )
         }
@@ -382,6 +385,7 @@ private fun DatesScreenPreview() {
 private fun ShiftDueDatesCardPreview() {
     OpenEdXTheme {
         ShiftDueDatesCard(
+            isButtonEnabled = true,
             onClick = {}
         )
     }

@@ -1,6 +1,7 @@
 package org.openedx.dates.data.repository
 
 import org.openedx.core.data.api.CourseApi
+import org.openedx.core.data.model.ShiftDueDatesBody
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
@@ -22,4 +23,7 @@ class DatesRepository(
     suspend fun getUserDatesFromCache(): List<CourseDate> {
         return dao.getCourseDateEntities().mapNotNull { it.mapToDomain() }
     }
+
+    suspend fun shiftDueDate(courseIds: List<String>) =
+        api.shiftDueDate(ShiftDueDatesBody(courseIds))
 }

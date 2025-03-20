@@ -116,7 +116,37 @@ class DatesViewModel(
     }
 
     fun shiftDueDate() {
-//TODO
+        viewModelScope.launch {
+            try {
+                _uiState.update { state ->
+                    state.copy(
+                        isShiftDueDatesPressed = true,
+                    )
+                }
+                val pastDueDates = _uiState.value.dates[DatesSection.PAST_DUE] ?: emptyList()
+                val courseIds = pastDueDates
+                    .filter { it.relative }
+                    .map { it.courseId }
+                datesInteractor.shiftDueDate(courseIds)
+                refreshData()
+            } catch (e: Exception) {
+                if (e.isInternetError()) {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+                    )
+                } else {
+                    _uiMessage.emit(
+                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+                    )
+                }
+            } finally {
+                _uiState.update { state ->
+                    state.copy(
+                        isShiftDueDatesPressed = false,
+                    )
+                }
+            }
+        }
     }
 
     fun fetchMore() {
