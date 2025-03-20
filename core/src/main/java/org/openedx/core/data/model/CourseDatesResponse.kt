@@ -16,6 +16,8 @@ data class CourseDate(
     val assignmentTitle: String?,
     @SerializedName("learner_has_access")
     val learnerHasAccess: Boolean?,
+    @SerializedName("relative")
+    val relative: Boolean?,
     @SerializedName("course_name")
     val courseName: String?
 ) {
@@ -27,7 +29,8 @@ data class CourseDate(
             dueDate = dueDate ?: return null,
             assignmentTitle = assignmentTitle ?: "",
             learnerHasAccess = learnerHasAccess ?: false,
-            courseName = courseName ?: ""
+            courseName = courseName ?: "",
+            relative = relative ?: false
         )
     }
 }

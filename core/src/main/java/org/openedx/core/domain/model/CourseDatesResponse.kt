@@ -15,5 +15,6 @@ data class CourseDate(
     val dueDate: Date,
     val assignmentTitle: String,
     val learnerHasAccess: Boolean,
+    val relative: Boolean,
     val courseName: String
 )

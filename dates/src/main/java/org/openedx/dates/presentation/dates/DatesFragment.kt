@@ -3,6 +3,7 @@ package org.openedx.dates.presentation.dates
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -48,15 +50,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.presentation.dates.CourseDateBlockSection
 import org.openedx.core.ui.HandleUIMessage
 import org.openedx.core.ui.MainScreenTitle
 import org.openedx.core.ui.OfflineModeDialog
+import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
+import org.openedx.core.ui.theme.appShapes
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.dates.R
 import org.openedx.dates.presentation.dates.DatesFragment.Companion.LOAD_MORE_THRESHOLD
@@ -101,6 +106,10 @@ class DatesFragment : Fragment() {
 
                             DatesViewActions.LoadMore -> {
                                 viewModel.fetchMore()
+                            }
+
+                            DatesViewActions.ShiftDueDate -> {
+                                viewModel.shiftDueDate()
                             }
 
                             is DatesViewActions.OpenEvent -> {
@@ -197,11 +206,23 @@ private fun DatesScreen(
                         LazyColumn(
                             modifier = contentWidth.fillMaxSize(),
                             state = scrollState,
-                            contentPadding = PaddingValues(bottom = 20.dp)
+                            contentPadding = PaddingValues(bottom = 48.dp)
                         ) {
                             uiState.dates.keys.forEach { sectionKey ->
-                                val dates = uiState.dates[sectionKey] ?: emptyList()
+                                val dates = uiState.dates[sectionKey].orEmpty()
                                 dates.isNotEmptyThenLet { sectionDates ->
+                                    val isHavePastRelatedDates =
+                                        sectionKey == DatesSection.PAST_DUE && dates.any { it.relative }
+                                    if (isHavePastRelatedDates) {
+                                        item {
+                                            ShiftDueDatesCard(
+                                                modifier = Modifier.padding(top = 12.dp),
+                                                onClick = {
+                                                    onAction(DatesViewActions.ShiftDueDate)
+                                                }
+                                            )
+                                        }
+                                    }
                                     item {
                                         CourseDateBlockSection(
                                             sectionKey = sectionKey,
@@ -262,6 +283,44 @@ private fun DatesScreen(
 }
 
 @Composable
+private fun ShiftDueDatesCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth(),
+        backgroundColor = MaterialTheme.appColors.cardViewBackground,
+        shape = MaterialTheme.appShapes.cardShape,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.dates_shift_due_date_card_title),
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.titleMedium,
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.dates_shift_due_date_card_description),
+                color = MaterialTheme.appColors.textDark,
+                style = MaterialTheme.appTypography.labelLarge,
+            )
+            OpenEdXButton(
+                text = stringResource(id = R.string.dates_shift_due_date),
+                onClick = onClick
+            )
+        }
+    }
+}
+
+@Composable
 private fun EmptyState(
     modifier: Modifier = Modifier
 ) {
@@ -314,6 +373,16 @@ private fun DatesScreenPreview() {
             hasInternetConnection = true,
             useRelativeDates = true,
             onAction = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ShiftDueDatesCardPreview() {
+    OpenEdXTheme {
+        ShiftDueDatesCard(
+            onClick = {}
         )
     }
 }

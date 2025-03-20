@@ -3,4 +3,7 @@
     <string name="dates">Dates</string>
     <string name="dates_empty_state_title">No Dates</string>
     <string name="dates_empty_state_description">You currently have no active courses with scheduled events. Enroll in a course to view important dates and deadlines.</string>
+    <string name="dates_shift_due_date_card_title">Missed Some Deadlines?</string>
+    <string name="dates_shift_due_date_card_description">Don’t worry - shift our suggested schedule to complete past due assignments without losing any progress.</string>
+    <string name="dates_shift_due_date">Shift Due Dates</string>
 </resources>

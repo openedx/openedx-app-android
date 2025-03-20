@@ -32,7 +32,7 @@ class DatesViewModel(
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
     private val datesInteractor: DatesInteractor,
-    private val corePreferences: CorePreferences,
+    corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(DatesUIState())
@@ -115,6 +115,10 @@ class DatesViewModel(
         }
     }
 
+    fun shiftDueDate() {
+//TODO
+    }
+
     fun fetchMore() {
         if (!_uiState.value.isLoading && page != -1) {
             fetchDates(false)
@@ -174,4 +178,5 @@ interface DatesViewActions {
     class OpenEvent(val date: CourseDate) : DatesViewActions
     object LoadMore : DatesViewActions
     object SwipeRefresh : DatesViewActions
+    object ShiftDueDate : DatesViewActions
 }
