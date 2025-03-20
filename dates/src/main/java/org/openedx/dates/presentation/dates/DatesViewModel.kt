@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.openedx.core.R
+import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
+import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotNull
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.isToday
@@ -29,7 +31,8 @@ class DatesViewModel(
     private val datesRouter: DatesRouter,
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
-    private val datesInteractor: DatesInteractor
+    private val datesInteractor: DatesInteractor,
+    private val corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow(DatesUIState())
@@ -42,6 +45,8 @@ class DatesViewModel(
 
     val hasInternetConnection: Boolean
         get() = networkConnection.isOnline()
+
+    var useRelativeDates = corePreferences.isRelativeDatesEnabled
 
     private var page = 1
 
@@ -137,15 +142,15 @@ class DatesViewModel(
         )
     }
 
-    private fun groupCourseDates(dates: List<CourseDate>): Map<DueDateCategory, List<CourseDate>> {
+    private fun groupCourseDates(dates: List<CourseDate>): Map<DatesSection, List<CourseDate>> {
         val now = Date()
         val calNow = Calendar.getInstance().apply { time = now }
         val grouped = dates.groupBy { courseDate ->
             val dueDate = courseDate.dueDate
             if (dueDate.before(now)) {
-                DueDateCategory.PAST_DUE
+                DatesSection.PAST_DUE
             } else if (dueDate.isToday()) {
-                DueDateCategory.TODAY
+                DatesSection.TODAY
             } else {
                 val calDue = dueDate.toCalendar()
                 val weekNow = calNow.get(Calendar.WEEK_OF_YEAR)
@@ -153,9 +158,9 @@ class DatesViewModel(
                 val yearNow = calNow.get(Calendar.YEAR)
                 val yearDue = calDue.get(Calendar.YEAR)
                 if (weekNow == weekDue && yearNow == yearDue) {
-                    DueDateCategory.THIS_WEEK
+                    DatesSection.THIS_WEEK
                 } else {
-                    DueDateCategory.UPCOMING
+                    DatesSection.UPCOMING
                 }
             }
         }

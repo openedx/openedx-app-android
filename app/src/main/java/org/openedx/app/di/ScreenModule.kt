@@ -603,7 +603,8 @@ val screenModule = module {
             datesRouter = get(),
             networkConnection = get(),
             resourceManager = get(),
-            datesInteractor = get()
+            datesInteractor = get(),
+            corePreferences = get()
         )
     }
 }
