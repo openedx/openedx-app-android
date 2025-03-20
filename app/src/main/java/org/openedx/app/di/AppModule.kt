@@ -65,6 +65,7 @@ import org.openedx.course.utils.ImageProcessor
 import org.openedx.course.worker.OfflineProgressSyncScheduler
 import org.openedx.dashboard.presentation.DashboardAnalytics
 import org.openedx.dashboard.presentation.DashboardRouter
+import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.dates.presentation.DatesRouter
 import org.openedx.discovery.presentation.DiscoveryAnalytics
 import org.openedx.discovery.presentation.DiscoveryRouter
@@ -216,6 +217,7 @@ val appModule = module {
     single<DiscussionAnalytics> { get<AnalyticsManager>() }
     single<ProfileAnalytics> { get<AnalyticsManager>() }
     single<WhatsNewAnalytics> { get<AnalyticsManager>() }
+    single<DatesAnalytics> { get<AnalyticsManager>() }
     single<DownloadsAnalytics> { get<AnalyticsManager>() }
 
     factory { AgreementProvider(get(), get()) }

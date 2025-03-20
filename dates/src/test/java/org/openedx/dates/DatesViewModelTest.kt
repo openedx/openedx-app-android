@@ -31,6 +31,7 @@ import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.dates.domain.interactor.DatesInteractor
+import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.dates.presentation.DatesRouter
 import org.openedx.dates.presentation.dates.DatesViewModel
 import org.openedx.foundation.presentation.UIMessage
@@ -51,6 +52,7 @@ class DatesViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val datesInteractor = mockk<DatesInteractor>()
     private val corePreferences = mockk<CorePreferences>()
+    private val analytics = mockk<DatesAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
     private val somethingWrong = "Something went wrong"
@@ -63,6 +65,7 @@ class DatesViewModelTest {
         // By default, assume we have an internet connection
         every { networkConnection.isOnline() } returns true
         every { corePreferences.isRelativeDatesEnabled } returns true
+        every { analytics.logEvent(any(), any()) } returns Unit
     }
 
     @After
@@ -88,7 +91,8 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
-            corePreferences
+            analytics,
+            corePreferences,
         )
         advanceUntilIdle()
 
@@ -109,6 +113,7 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
+            analytics,
             corePreferences
         )
         advanceUntilIdle()
@@ -131,6 +136,7 @@ class DatesViewModelTest {
                 networkConnection,
                 resourceManager,
                 datesInteractor,
+                analytics,
                 corePreferences
             )
             val message = async {
@@ -155,6 +161,7 @@ class DatesViewModelTest {
                 networkConnection,
                 resourceManager,
                 datesInteractor,
+                analytics,
                 corePreferences
             )
             val message = async {
@@ -193,6 +200,7 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
+            analytics,
             corePreferences
         )
         advanceUntilIdle()
@@ -228,6 +236,7 @@ class DatesViewModelTest {
                 networkConnection,
                 resourceManager,
                 datesInteractor,
+                analytics,
                 corePreferences
             )
             advanceUntilIdle()
@@ -251,6 +260,7 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
+            analytics,
             corePreferences
         )
         val fragmentManager = mockk<FragmentManager>(relaxed = true)
@@ -266,6 +276,7 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
+            analytics,
             corePreferences
         )
         val fragmentManager = mockk<FragmentManager>(relaxed = true)
@@ -308,6 +319,7 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
+            analytics,
             corePreferences
         )
         advanceUntilIdle()
@@ -339,6 +351,7 @@ class DatesViewModelTest {
             networkConnection,
             resourceManager,
             datesInteractor,
+            analytics,
             corePreferences
         )
         advanceUntilIdle()

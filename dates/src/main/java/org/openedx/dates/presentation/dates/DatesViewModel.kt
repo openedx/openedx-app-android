@@ -19,6 +19,9 @@ import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.isToday
 import org.openedx.core.utils.toCalendar
 import org.openedx.dates.domain.interactor.DatesInteractor
+import org.openedx.dates.presentation.DatesAnalytics
+import org.openedx.dates.presentation.DatesAnalyticsEvent
+import org.openedx.dates.presentation.DatesAnalyticsKey
 import org.openedx.dates.presentation.DatesRouter
 import org.openedx.foundation.extension.isInternetError
 import org.openedx.foundation.presentation.BaseViewModel
@@ -32,6 +35,7 @@ class DatesViewModel(
     private val networkConnection: NetworkConnection,
     private val resourceManager: ResourceManager,
     private val datesInteractor: DatesInteractor,
+    private val analytics: DatesAnalytics,
     corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
@@ -116,6 +120,7 @@ class DatesViewModel(
     }
 
     fun shiftDueDate() {
+        logEvent(DatesAnalyticsEvent.SHIFT_DUE_DATE_CLICK)
         viewModelScope.launch {
             try {
                 _uiState.update { state ->
@@ -167,6 +172,7 @@ class DatesViewModel(
         fragmentManager: FragmentManager,
         courseDate: CourseDate,
     ) {
+        logEvent(DatesAnalyticsEvent.ASSIGNMENT_CLICK)
         datesRouter.navigateToCourseOutline(
             fm = fragmentManager,
             courseId = courseDate.courseId,
@@ -200,6 +206,19 @@ class DatesViewModel(
         }
 
         return grouped
+    }
+
+    private fun logEvent(
+        event: DatesAnalyticsEvent,
+        params: Map<String, Any?> = emptyMap(),
+    ) {
+        analytics.logEvent(
+            event = event.eventName,
+            params = buildMap {
+                put(DatesAnalyticsKey.NAME.key, event.biValue)
+                putAll(params)
+            }
+        )
     }
 }
 
