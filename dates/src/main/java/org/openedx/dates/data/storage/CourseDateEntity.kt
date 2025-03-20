@@ -20,6 +20,8 @@ data class CourseDateEntity(
     val assignmentTitle: String?,
     @ColumnInfo("learnerHasAccess")
     val learnerHasAccess: Boolean?,
+    @ColumnInfo("relative")
+    val relative: Boolean?,
     @ColumnInfo("courseName")
     val courseName: String?,
 ) {
@@ -32,6 +34,7 @@ data class CourseDateEntity(
             dueDate = dueDate ?: return null,
             assignmentTitle = assignmentTitle ?: "",
             learnerHasAccess = learnerHasAccess ?: false,
+            relative = relative ?: false,
             courseName = courseName ?: ""
         )
     }
@@ -45,6 +48,7 @@ data class CourseDateEntity(
                     dueDate = dueDate,
                     assignmentTitle = assignmentTitle,
                     learnerHasAccess = learnerHasAccess,
+                    relative = relative,
                     courseName = courseName
                 )
             }
