@@ -67,9 +67,7 @@ class DatesViewModel(
                         isRefreshing = refresh,
                     )
                 }
-                if (refresh) {
-                    page = 1
-                }
+                if (refresh) page = 1
                 val response = if (networkConnection.isOnline() || page > 1) {
                     datesInteractor.getUserDates(page)
                 } else {

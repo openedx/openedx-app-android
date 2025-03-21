@@ -128,7 +128,6 @@ class DatesFragment : Fragment() {
     companion object {
         const val LOAD_MORE_THRESHOLD = 4
     }
-
 }
 
 @OptIn(ExperimentalMaterialApi::class)

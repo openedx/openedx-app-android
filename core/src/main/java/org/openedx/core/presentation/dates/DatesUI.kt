@@ -36,12 +36,9 @@ import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils.formatToString
 import org.openedx.core.utils.clearTime
 
-// --- Generic composables for reusability ---
-
 @Composable
 private fun CourseDateBlockSectionGeneric(
     sectionKey: DatesSection = DatesSection.NONE,
-    useRelativeDates: Boolean,
     content: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(start = 8.dp)) {
@@ -87,7 +84,7 @@ fun CourseDateBlockSection(
     sectionDates: List<CourseDateBlock>,
     onItemClick: (CourseDateBlock) -> Unit,
 ) {
-    CourseDateBlockSectionGeneric(sectionKey = sectionKey, useRelativeDates = useRelativeDates) {
+    CourseDateBlockSectionGeneric(sectionKey = sectionKey) {
         DateBlock(
             dateBlocks = sectionDates,
             onItemClick = onItemClick,
@@ -104,7 +101,7 @@ fun CourseDateBlockSection(
     sectionDates: List<CourseDate>,
     onItemClick: (CourseDate) -> Unit,
 ) {
-    CourseDateBlockSectionGeneric(sectionKey = sectionKey, useRelativeDates = useRelativeDates) {
+    CourseDateBlockSectionGeneric(sectionKey = sectionKey) {
         DateBlock(
             dateBlocks = sectionDates,
             onItemClick = onItemClick,
