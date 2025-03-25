@@ -9,20 +9,22 @@ import org.openedx.core.domain.model.CourseDate as DomainCourseDate
 
 @Entity(tableName = "course_date_table")
 data class CourseDateEntity(
-    @PrimaryKey
-    @ColumnInfo("assignmentBlockId")
-    val assignmentBlockId: String,
-    @ColumnInfo("courseId")
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo("course_date_id")
+    val id: Int,
+    @ColumnInfo("course_date_first_component_block_id")
+    val firstComponentBlockId: String?,
+    @ColumnInfo("course_date_courseId")
     val courseId: String,
-    @ColumnInfo("dueDate")
+    @ColumnInfo("course_date_dueDate")
     val dueDate: String?,
-    @ColumnInfo("assignmentTitle")
+    @ColumnInfo("course_date_assignmentTitle")
     val assignmentTitle: String?,
-    @ColumnInfo("learnerHasAccess")
+    @ColumnInfo("course_date_learnerHasAccess")
     val learnerHasAccess: Boolean?,
-    @ColumnInfo("relative")
+    @ColumnInfo("course_date_relative")
     val relative: Boolean?,
-    @ColumnInfo("courseName")
+    @ColumnInfo("course_date_courseName")
     val courseName: String?,
 ) {
 
@@ -30,7 +32,7 @@ data class CourseDateEntity(
         val dueDate = TimeUtils.iso8601ToDate(dueDate ?: "")
         return DomainCourseDate(
             courseId = courseId,
-            assignmentBlockId = assignmentBlockId,
+            firstComponentBlockId = firstComponentBlockId ?: "",
             dueDate = dueDate ?: return null,
             assignmentTitle = assignmentTitle ?: "",
             learnerHasAccess = learnerHasAccess ?: false,
@@ -43,8 +45,9 @@ data class CourseDateEntity(
         fun createFrom(courseDate: CourseDate): CourseDateEntity {
             with(courseDate) {
                 return CourseDateEntity(
+                    id = 0,
                     courseId = courseId,
-                    assignmentBlockId = assignmentBlockId,
+                    firstComponentBlockId = firstComponentBlockId,
                     dueDate = dueDate,
                     assignmentTitle = assignmentTitle,
                     learnerHasAccess = learnerHasAccess,
