@@ -273,7 +273,7 @@ private fun CourseDateItem(
                 .fillMaxWidth()
                 .padding(end = 4.dp)
                 .clickable(
-                    enabled = dateBlock.assignmentBlockId.isNotEmpty() && dateBlock.learnerHasAccess,
+                    enabled = dateBlock.firstComponentBlockId.isNotEmpty() && dateBlock.learnerHasAccess,
                     onClick = { onItemClick(dateBlock) }
                 )
         ) {
@@ -296,7 +296,7 @@ private fun CourseDateItem(
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = Modifier.width(7.dp))
-            if (dateBlock.assignmentBlockId.isNotEmpty() && dateBlock.learnerHasAccess) {
+            if (dateBlock.firstComponentBlockId.isNotEmpty() && dateBlock.learnerHasAccess) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     tint = MaterialTheme.appColors.textDark,

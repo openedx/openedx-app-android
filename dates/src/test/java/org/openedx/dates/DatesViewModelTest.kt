@@ -79,8 +79,8 @@ class DatesViewModelTest {
         val courseDate: CourseDate = mockk(relaxed = true)
         val courseDatesResponse = CourseDatesResponse(
             count = 10,
-            next = 2,
-            previous = 1,
+            next = "",
+            previous = "",
             results = listOf(courseDate)
         )
         coEvery { datesInteractor.getUserDates(1) } returns courseDatesResponse
@@ -283,7 +283,7 @@ class DatesViewModelTest {
         val courseDate: CourseDate = mockk(relaxed = true) {
             every { courseId } returns "course-123"
             every { courseName } returns "Test Course"
-            every { assignmentBlockId } returns "block-1"
+            every { firstComponentBlockId } returns "block-1"
         }
 
         viewModel.navigateToCourseOutline(fragmentManager, courseDate)
@@ -304,8 +304,8 @@ class DatesViewModelTest {
         val courseDate: CourseDate = mockk(relaxed = true)
         val courseDatesResponse = CourseDatesResponse(
             count = 10,
-            next = 2,
-            previous = 1,
+            next = "",
+            previous = "",
             results = listOf(courseDate)
         )
 

@@ -31,8 +31,8 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,7 +57,6 @@ import org.openedx.core.ui.MainScreenTitle
 import org.openedx.core.ui.OfflineModeDialog
 import org.openedx.core.ui.OpenEdXButton
 import org.openedx.core.ui.displayCutoutForLandscape
-import org.openedx.core.ui.shouldLoadMore
 import org.openedx.core.ui.statusBarsInset
 import org.openedx.core.ui.theme.OpenEdXTheme
 import org.openedx.core.ui.theme.appColors
@@ -126,7 +125,7 @@ class DatesFragment : Fragment() {
     }
 
     companion object {
-        const val LOAD_MORE_THRESHOLD = 4
+        const val LOAD_MORE_THRESHOLD = 0.8f
     }
 }
 
@@ -157,9 +156,7 @@ private fun DatesScreen(
         mutableStateOf(false)
     }
     val scrollState = rememberLazyListState()
-    val firstVisibleIndex = remember {
-        mutableIntStateOf(scrollState.firstVisibleItemIndex)
-    }
+    val layoutInfo by remember { derivedStateOf { scrollState.layoutInfo } }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -249,7 +246,12 @@ private fun DatesScreen(
                                 }
                             }
                         }
-                        if (scrollState.shouldLoadMore(firstVisibleIndex, LOAD_MORE_THRESHOLD)) {
+                        val lastVisibleItemIndex =
+                            layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                        val totalItemsCount = layoutInfo.totalItemsCount
+                        if (totalItemsCount > 0 &&
+                            lastVisibleItemIndex >= (totalItemsCount * LOAD_MORE_THRESHOLD).toInt()
+                        ) {
                             onAction(DatesViewActions.LoadMore)
                         }
                     }

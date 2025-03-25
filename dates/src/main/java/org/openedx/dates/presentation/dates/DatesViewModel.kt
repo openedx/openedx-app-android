@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import org.openedx.core.R
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
+import org.openedx.core.domain.model.CourseDatesResponse
 import org.openedx.core.domain.model.DatesSection
 import org.openedx.core.extension.isNotNull
 import org.openedx.core.system.connection.NetworkConnection
@@ -61,59 +62,90 @@ class DatesViewModel(
     private fun fetchDates(refresh: Boolean) {
         viewModelScope.launch {
             try {
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = !refresh,
-                        isRefreshing = refresh,
-                    )
-                }
-                if (refresh) page = 1
-                val response = if (networkConnection.isOnline() || page > 1) {
-                    datesInteractor.getUserDates(page)
-                } else {
-                    null
-                }
+                updateLoadingState(refresh)
+                val response = getUserDates(refresh)
                 if (response != null) {
-                    if (response.next.isNotNull() && page != response.count) {
-                        _uiState.update { state -> state.copy(canLoadMore = true) }
-                        page++
-                    } else {
-                        _uiState.update { state -> state.copy(canLoadMore = false) }
-                        page = -1
-                    }
-                    _uiState.update { state ->
-                        state.copy(
-                            dates = state.dates + groupCourseDates(response.results)
-                        )
-                    }
+                    updateUIWithResponse(response, refresh)
                 } else {
-                    val cachedList = datesInteractor.getUserDatesFromCache()
-                    _uiState.update { state -> state.copy(canLoadMore = false) }
-                    page = -1
-                    _uiState.update { state ->
-                        state.copy(
-                            dates = groupCourseDates(cachedList)
-                        )
-                    }
+                    updateUIWithCachedResponse()
                 }
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                    )
-                }
+                handleFetchException(e)
             } finally {
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                    )
-                }
+                clearLoadingState()
             }
+        }
+    }
+
+    private fun updateLoadingState(refresh: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                isLoading = !refresh,
+                isRefreshing = refresh
+            )
+        }
+    }
+
+    private suspend fun getUserDates(refresh: Boolean) = if (refresh) {
+        page = 1
+        datesInteractor.getUserDates(page)
+    } else {
+        if (networkConnection.isOnline() || page > 1) {
+            datesInteractor.getUserDates(page)
+        } else {
+            null
+        }
+    }
+
+    private fun updateUIWithResponse(response: CourseDatesResponse, refresh: Boolean) {
+        if (response.next.isNotNull() && page != response.count) {
+            _uiState.update { state -> state.copy(canLoadMore = true) }
+            page++
+        } else {
+            _uiState.update { state -> state.copy(canLoadMore = false) }
+            page = -1
+        }
+        _uiState.update { state ->
+            if (refresh) {
+                state.copy(
+                    dates = groupCourseDates(response.results)
+                )
+            } else {
+                val newDates = groupCourseDates(response.results)
+                state.copy(dates = mergeDates(state.dates, newDates))
+            }
+        }
+    }
+
+    private suspend fun updateUIWithCachedResponse() {
+        val cachedList = datesInteractor.getUserDatesFromCache()
+        _uiState.update { state -> state.copy(canLoadMore = false) }
+        page = -1
+        _uiState.update { state ->
+            state.copy(
+                dates = groupCourseDates(cachedList)
+            )
+        }
+    }
+
+    private suspend fun handleFetchException(e: Exception) {
+        if (e.isInternetError()) {
+            _uiMessage.emit(
+                UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
+            )
+        } else {
+            _uiMessage.emit(
+                UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
+            )
+        }
+    }
+
+    private fun clearLoadingState() {
+        _uiState.update { state ->
+            state.copy(
+                isLoading = false,
+                isRefreshing = false
+            )
         }
     }
 
@@ -130,18 +162,11 @@ class DatesViewModel(
                 val courseIds = pastDueDates
                     .filter { it.relative }
                     .map { it.courseId }
+                    .distinct()
                 datesInteractor.shiftDueDate(courseIds)
                 refreshData()
             } catch (e: Exception) {
-                if (e.isInternetError()) {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
-                    )
-                } else {
-                    _uiMessage.emit(
-                        UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_unknown_error))
-                    )
-                }
+                handleFetchException(e)
             } finally {
                 _uiState.update { state ->
                     state.copy(
@@ -176,34 +201,43 @@ class DatesViewModel(
             courseId = courseDate.courseId,
             courseTitle = courseDate.courseName,
             openTab = "",
-            resumeBlockId = courseDate.assignmentBlockId
+            resumeBlockId = courseDate.firstComponentBlockId
         )
     }
 
     private fun groupCourseDates(dates: List<CourseDate>): Map<DatesSection, List<CourseDate>> {
         val now = Date()
         val calNow = Calendar.getInstance().apply { time = now }
-        val grouped = dates.groupBy { courseDate ->
-            val dueDate = courseDate.dueDate
-            if (dueDate.before(now)) {
-                DatesSection.PAST_DUE
-            } else if (dueDate.isToday()) {
-                DatesSection.TODAY
-            } else {
-                val calDue = dueDate.toCalendar()
-                val weekNow = calNow.get(Calendar.WEEK_OF_YEAR)
-                val weekDue = calDue.get(Calendar.WEEK_OF_YEAR)
-                val yearNow = calNow.get(Calendar.YEAR)
-                val yearDue = calDue.get(Calendar.YEAR)
-                if (weekNow == weekDue && yearNow == yearDue) {
-                    DatesSection.THIS_WEEK
-                } else {
-                    DatesSection.UPCOMING
+        return dates.groupBy { courseDate ->
+            when {
+                courseDate.dueDate.before(now) -> DatesSection.PAST_DUE
+                courseDate.dueDate.isToday() -> DatesSection.TODAY
+                else -> {
+                    val calDue = courseDate.dueDate.toCalendar()
+                    val weekNow = calNow.get(Calendar.WEEK_OF_YEAR)
+                    val weekDue = calDue.get(Calendar.WEEK_OF_YEAR)
+                    val yearNow = calNow.get(Calendar.YEAR)
+                    val yearDue = calDue.get(Calendar.YEAR)
+                    if (weekNow == weekDue && yearNow == yearDue) {
+                        DatesSection.THIS_WEEK
+                    } else {
+                        DatesSection.UPCOMING
+                    }
                 }
             }
         }
+    }
 
-        return grouped
+    private fun mergeDates(
+        oldDates: Map<DatesSection, List<CourseDate>>,
+        newDates: Map<DatesSection, List<CourseDate>>
+    ): Map<DatesSection, List<CourseDate>> {
+        val merged = oldDates.toMutableMap()
+        newDates.forEach { (section, newList) ->
+            val existingList = merged[section] ?: emptyList()
+            merged[section] = existingList + newList
+        }
+        return merged
     }
 
     private fun logEvent(

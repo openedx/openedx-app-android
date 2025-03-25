@@ -4,14 +4,14 @@ import java.util.Date
 
 data class CourseDatesResponse(
     val count: Int,
-    val next: Int?,
-    val previous: Int?,
+    val next: String?,
+    val previous: String?,
     val results: List<CourseDate>
 )
 
 data class CourseDate(
     val courseId: String,
-    val assignmentBlockId: String,
+    val firstComponentBlockId: String,
     val dueDate: Date,
     val assignmentTitle: String,
     val learnerHasAccess: Boolean,
