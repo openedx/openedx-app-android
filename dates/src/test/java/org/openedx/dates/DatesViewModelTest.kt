@@ -208,7 +208,7 @@ class DatesViewModelTest {
         viewModel.shiftDueDate()
         advanceUntilIdle()
 
-        coVerify { datesInteractor.shiftDueDate(listOf("course-123")) }
+        coVerify { datesInteractor.shiftDueDate() }
         // isShiftDueDatesPressed should be reset to false after processing.
         assertFalse(viewModel.uiState.value.isShiftDueDatesPressed)
     }
@@ -229,7 +229,7 @@ class DatesViewModelTest {
                 results = listOf(courseDate)
             )
             coEvery { datesInteractor.getUserDates(1) } returns courseDatesResponse
-            coEvery { datesInteractor.shiftDueDate(any()) } throws Exception()
+            coEvery { datesInteractor.shiftDueDate() } throws Exception()
 
             val viewModel = DatesViewModel(
                 datesRouter,

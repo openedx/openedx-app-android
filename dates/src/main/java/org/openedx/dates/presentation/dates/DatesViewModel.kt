@@ -2,6 +2,7 @@ package org.openedx.dates.presentation.dates
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -54,13 +55,14 @@ class DatesViewModel(
     var useRelativeDates = corePreferences.isRelativeDatesEnabled
 
     private var page = 1
+    private var fetchDataJob: Job? = null
 
     init {
         fetchDates(false)
     }
 
     private fun fetchDates(refresh: Boolean) {
-        viewModelScope.launch {
+        fetchDataJob = viewModelScope.launch {
             try {
                 updateLoadingState(refresh)
                 val response = getUserDates(refresh)
@@ -70,6 +72,7 @@ class DatesViewModel(
                     updateUIWithCachedResponse()
                 }
             } catch (e: Exception) {
+                page = -1
                 handleFetchException(e)
             } finally {
                 clearLoadingState()
@@ -86,11 +89,9 @@ class DatesViewModel(
         }
     }
 
-    private suspend fun getUserDates(refresh: Boolean) = if (refresh) {
-        page = 1
-        datesInteractor.getUserDates(page)
-    } else {
-        if (networkConnection.isOnline() || page > 1) {
+    private suspend fun getUserDates(refresh: Boolean): CourseDatesResponse? {
+        if (refresh) page = 1
+        return if (networkConnection.isOnline() || page > 1) {
             datesInteractor.getUserDates(page)
         } else {
             null
@@ -98,7 +99,7 @@ class DatesViewModel(
     }
 
     private fun updateUIWithResponse(response: CourseDatesResponse, refresh: Boolean) {
-        if (response.next.isNotNull() && page != response.count) {
+        if (response.next.isNotNull()) {
             _uiState.update { state -> state.copy(canLoadMore = true) }
             page++
         } else {
@@ -158,12 +159,7 @@ class DatesViewModel(
                         isShiftDueDatesPressed = true,
                     )
                 }
-                val pastDueDates = _uiState.value.dates[DatesSection.PAST_DUE] ?: emptyList()
-                val courseIds = pastDueDates
-                    .filter { it.relative }
-                    .map { it.courseId }
-                    .distinct()
-                datesInteractor.shiftDueDate(courseIds)
+                datesInteractor.shiftDueDate()
                 refreshData()
             } catch (e: Exception) {
                 handleFetchException(e)
@@ -184,6 +180,7 @@ class DatesViewModel(
     }
 
     fun refreshData() {
+        fetchDataJob?.cancel()
         fetchDates(true)
     }
 

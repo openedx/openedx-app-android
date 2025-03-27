@@ -1,7 +1,6 @@
 package org.openedx.dates.data.repository
 
 import org.openedx.core.data.api.CourseApi
-import org.openedx.core.data.model.ShiftDueDatesBody
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
@@ -16,6 +15,9 @@ class DatesRepository(
     suspend fun getUserDates(page: Int): CourseDatesResponse {
         val username = preferencesManager.user?.username ?: ""
         val response = api.getUserDates(username, page)
+        if (page == 1) {
+            dao.clearCachedData()
+        }
         dao.insertCourseDateEntities(response.results.map { CourseDateEntity.createFrom(it) })
         return response.mapToDomain()
     }
@@ -24,6 +26,5 @@ class DatesRepository(
         return dao.getCourseDateEntities().mapNotNull { it.mapToDomain() }
     }
 
-    suspend fun shiftDueDate(courseIds: List<String>) =
-        api.shiftDueDate(ShiftDueDatesBody(courseIds))
+    suspend fun shiftDueDate() = api.shiftDueDate()
 }

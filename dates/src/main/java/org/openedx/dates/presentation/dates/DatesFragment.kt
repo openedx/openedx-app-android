@@ -250,7 +250,10 @@ private fun DatesScreen(
                             layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
                         val totalItemsCount = layoutInfo.totalItemsCount
                         if (totalItemsCount > 0 &&
-                            lastVisibleItemIndex >= (totalItemsCount * LOAD_MORE_THRESHOLD).toInt()
+                            lastVisibleItemIndex >= (totalItemsCount * LOAD_MORE_THRESHOLD).toInt() &&
+                            !uiState.isLoading &&
+                            !uiState.isRefreshing &&
+                            uiState.canLoadMore
                         ) {
                             onAction(DatesViewActions.LoadMore)
                         }

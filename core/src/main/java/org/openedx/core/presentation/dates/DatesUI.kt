@@ -312,6 +312,7 @@ private fun CourseDateItem(
                 .fillMaxWidth()
                 .padding(top = 4.dp),
             text = dateBlock.courseName,
+            maxLines = 1,
             style = MaterialTheme.appTypography.labelMedium,
         )
     }

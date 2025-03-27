@@ -15,7 +15,6 @@ import org.openedx.core.data.model.DownloadCoursePreview
 import org.openedx.core.data.model.EnrollmentStatus
 import org.openedx.core.data.model.HandoutsModel
 import org.openedx.core.data.model.ResetCourseDates
-import org.openedx.core.data.model.ShiftDueDatesBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -125,8 +124,6 @@ interface CourseApi {
         @Path("course_id") courseId: String,
     ): CourseProgressResponse
 
-    @POST("/api/course_experience/v1/reset_multiple_course_deadlines/")
-    suspend fun shiftDueDate(
-        @Body shiftDueDatesBody: ShiftDueDatesBody
-    )
+    @POST("/api/course_experience/v1/reset_all_relative_course_deadlines/")
+    suspend fun shiftDueDate()
 }
