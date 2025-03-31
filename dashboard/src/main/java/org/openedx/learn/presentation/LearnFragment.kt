@@ -41,7 +41,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.openedx.core.adapter.NavigationFragmentAdapter
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.core.ui.MainScreenTitle
+import org.openedx.core.ui.MainScreenToolbar
 import org.openedx.core.ui.crop
 import org.openedx.core.ui.displayCutoutForLandscape
 import org.openedx.core.ui.statusBarsInset
@@ -137,7 +137,7 @@ private fun Header(
             .then(contentWidth),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        MainScreenTitle(
+        MainScreenToolbar(
             label = stringResource(id = R.string.dashboard_learn),
             onSettingsClick = {
                 viewModel.onSettingsClick(fragmentManager)
@@ -240,7 +240,7 @@ private fun LearnDropdownMenu(
 @Composable
 private fun HeaderPreview() {
     OpenEdXTheme {
-        MainScreenTitle(
+        MainScreenToolbar(
             label = stringResource(id = R.string.dashboard_learn),
             onSettingsClick = {}
         )

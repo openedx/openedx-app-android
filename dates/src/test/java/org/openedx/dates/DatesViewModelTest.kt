@@ -30,6 +30,7 @@ import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
 import org.openedx.core.system.connection.NetworkConnection
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.dates.domain.interactor.DatesInteractor
 import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.dates.presentation.DatesRouter
@@ -52,6 +53,7 @@ class DatesViewModelTest {
     private val resourceManager = mockk<ResourceManager>()
     private val datesInteractor = mockk<DatesInteractor>()
     private val corePreferences = mockk<CorePreferences>()
+    private val calendarSyncScheduler = mockk<CalendarSyncScheduler>()
     private val analytics = mockk<DatesAnalytics>()
 
     private val noInternet = "Slow or no internet connection"
@@ -66,6 +68,8 @@ class DatesViewModelTest {
         every { networkConnection.isOnline() } returns true
         every { corePreferences.isRelativeDatesEnabled } returns true
         every { analytics.logEvent(any(), any()) } returns Unit
+        coEvery { datesInteractor.preloadFirstPageCachedDates() } returns null
+        coEvery { datesInteractor.getUserDatesFromCache() } returns emptyList()
     }
 
     @After
@@ -92,6 +96,7 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences,
         )
         advanceUntilIdle()
@@ -114,15 +119,13 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences
         )
         advanceUntilIdle()
 
-        // When offline, getUserDates is not called.
-        coVerify(exactly = 0) { datesInteractor.getUserDates(any()) }
         coVerify(exactly = 1) { datesInteractor.getUserDatesFromCache() }
         assertFalse(viewModel.uiState.value.isLoading)
-        // Expect no further pages to load.
         assertFalse(viewModel.uiState.value.canLoadMore)
     }
 
@@ -137,6 +140,7 @@ class DatesViewModelTest {
                 resourceManager,
                 datesInteractor,
                 analytics,
+                calendarSyncScheduler,
                 corePreferences
             )
             val message = async {
@@ -162,6 +166,7 @@ class DatesViewModelTest {
                 resourceManager,
                 datesInteractor,
                 analytics,
+                calendarSyncScheduler,
                 corePreferences
             )
             val message = async {
@@ -201,6 +206,7 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences
         )
         advanceUntilIdle()
@@ -237,6 +243,7 @@ class DatesViewModelTest {
                 resourceManager,
                 datesInteractor,
                 analytics,
+                calendarSyncScheduler,
                 corePreferences
             )
             advanceUntilIdle()
@@ -261,6 +268,7 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences
         )
         val fragmentManager = mockk<FragmentManager>(relaxed = true)
@@ -277,6 +285,7 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences
         )
         val fragmentManager = mockk<FragmentManager>(relaxed = true)
@@ -320,6 +329,7 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences
         )
         advanceUntilIdle()
@@ -352,6 +362,7 @@ class DatesViewModelTest {
             resourceManager,
             datesInteractor,
             analytics,
+            calendarSyncScheduler,
             corePreferences
         )
         advanceUntilIdle()

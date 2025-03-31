@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import org.openedx.core.data.model.room.BlockDb
+import org.openedx.core.data.model.room.CourseDateDB
 import org.openedx.core.data.model.room.GradingPolicyDb
 import org.openedx.core.data.model.room.SectionScoreDb
 import org.openedx.core.data.model.room.discovery.CourseDateBlockDb
@@ -83,4 +84,16 @@ class CourseConverter {
     @TypeConverter
     fun toGradeRangeMap(value: String): Map<String, Float> =
         Gson().fromJson(value, object : TypeToken<Map<String, Float>>() {}.type)
+
+    @TypeConverter
+    fun fromListOfCourseDateDB(value: List<CourseDateDB>): String {
+        val json = Gson().toJson(value)
+        return json.toString()
+    }
+
+    @TypeConverter
+    fun toListOfCourseDateDB(value: String): List<CourseDateDB> {
+        val type = genericType<List<CourseDateDB>>()
+        return Gson().fromJson(value, type)
+    }
 }

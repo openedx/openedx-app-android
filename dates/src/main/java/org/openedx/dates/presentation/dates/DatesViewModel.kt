@@ -20,6 +20,7 @@ import org.openedx.core.extension.isNotNull
 import org.openedx.core.system.connection.NetworkConnection
 import org.openedx.core.utils.isToday
 import org.openedx.core.utils.toCalendar
+import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.dates.domain.interactor.DatesInteractor
 import org.openedx.dates.presentation.DatesAnalytics
 import org.openedx.dates.presentation.DatesAnalyticsEvent
@@ -38,6 +39,7 @@ class DatesViewModel(
     private val resourceManager: ResourceManager,
     private val datesInteractor: DatesInteractor,
     private val analytics: DatesAnalytics,
+    private val calendarSyncScheduler: CalendarSyncScheduler,
     corePreferences: CorePreferences,
 ) : BaseViewModel() {
 
@@ -58,21 +60,23 @@ class DatesViewModel(
     private var fetchDataJob: Job? = null
 
     init {
+        preloadFirstPageCachedDates()
         fetchDates(false)
     }
 
     private fun fetchDates(refresh: Boolean) {
+        if (refresh) {
+            _uiState.update { state -> state.copy(canLoadMore = true) }
+            page = 1
+        }
         fetchDataJob = viewModelScope.launch {
             try {
                 updateLoadingState(refresh)
-                val response = getUserDates(refresh)
-                if (response != null) {
-                    updateUIWithResponse(response, refresh)
-                } else {
-                    updateUIWithCachedResponse()
-                }
+                val response = datesInteractor.getUserDates(page)
+                updateUIWithResponse(response, refresh)
             } catch (e: Exception) {
                 page = -1
+                updateUIWithCachedResponse()
                 handleFetchException(e)
             } finally {
                 clearLoadingState()
@@ -89,39 +93,26 @@ class DatesViewModel(
         }
     }
 
-    private suspend fun getUserDates(refresh: Boolean): CourseDatesResponse? {
-        if (refresh) page = 1
-        return if (networkConnection.isOnline() || page > 1) {
-            datesInteractor.getUserDates(page)
-        } else {
-            null
-        }
-    }
-
     private fun updateUIWithResponse(response: CourseDatesResponse, refresh: Boolean) {
+        _uiState.update { state ->
+            if (refresh || page == 1) {
+                state.copy(dates = groupCourseDates(response.results))
+            } else {
+                val newDates = groupCourseDates(response.results)
+                state.copy(dates = mergeDates(state.dates, newDates))
+            }
+        }
         if (response.next.isNotNull()) {
             _uiState.update { state -> state.copy(canLoadMore = true) }
             page++
         } else {
             _uiState.update { state -> state.copy(canLoadMore = false) }
-            page = -1
-        }
-        _uiState.update { state ->
-            if (refresh) {
-                state.copy(
-                    dates = groupCourseDates(response.results)
-                )
-            } else {
-                val newDates = groupCourseDates(response.results)
-                state.copy(dates = mergeDates(state.dates, newDates))
-            }
         }
     }
 
     private suspend fun updateUIWithCachedResponse() {
         val cachedList = datesInteractor.getUserDatesFromCache()
         _uiState.update { state -> state.copy(canLoadMore = false) }
-        page = -1
         _uiState.update { state ->
             state.copy(
                 dates = groupCourseDates(cachedList)
@@ -129,7 +120,19 @@ class DatesViewModel(
         }
     }
 
-    private suspend fun handleFetchException(e: Exception) {
+    private fun preloadFirstPageCachedDates() {
+        viewModelScope.launch {
+            val cachedList = datesInteractor.preloadFirstPageCachedDates()?.results ?: emptyList()
+            _uiState.update { state ->
+                state.copy(
+                    dates = groupCourseDates(cachedList),
+                    canLoadMore = true
+                )
+            }
+        }
+    }
+
+    private suspend fun handleFetchException(e: Throwable) {
         if (e.isInternetError()) {
             _uiMessage.emit(
                 UIMessage.SnackBarMessage(resourceManager.getString(R.string.core_error_no_connection))
@@ -161,6 +164,7 @@ class DatesViewModel(
                 }
                 datesInteractor.shiftDueDate()
                 refreshData()
+                calendarSyncScheduler.requestImmediateSync()
             } catch (e: Exception) {
                 handleFetchException(e)
             } finally {
@@ -174,7 +178,10 @@ class DatesViewModel(
     }
 
     fun fetchMore() {
-        if (!_uiState.value.isLoading && page != -1) {
+        if (!_uiState.value.isLoading &&
+            !_uiState.value.isRefreshing &&
+            _uiState.value.canLoadMore
+        ) {
             fetchDates(false)
         }
     }
@@ -217,6 +224,8 @@ class DatesViewModel(
                     val yearDue = calDue.get(Calendar.YEAR)
                     if (weekNow == weekDue && yearNow == yearDue) {
                         DatesSection.THIS_WEEK
+                    } else if (yearNow == yearDue && weekDue == weekNow + 1) {
+                        DatesSection.NEXT_WEEK
                     } else {
                         DatesSection.UPCOMING
                     }

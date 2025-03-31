@@ -1277,7 +1277,7 @@ private fun RoundTab(
 }
 
 @Composable
-fun MainScreenTitle(
+fun MainScreenToolbar(
     modifier: Modifier = Modifier,
     label: String,
     onSettingsClick: () -> Unit,
@@ -1314,7 +1314,7 @@ fun MainScreenTitle(
 @Composable
 private fun MainScreenTitlePreview() {
     OpenEdXTheme {
-        MainScreenTitle(
+        MainScreenToolbar(
             label = "Title",
             onSettingsClick = {}
         )

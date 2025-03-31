@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
+import org.openedx.core.data.model.room.CourseDatesResponseEntity
 import org.openedx.core.data.model.room.CourseEnrollmentDetailsEntity
 import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
@@ -19,7 +20,6 @@ import org.openedx.core.module.db.DownloadDao
 import org.openedx.core.module.db.DownloadModelEntity
 import org.openedx.course.data.storage.CourseConverter
 import org.openedx.dashboard.data.DashboardDao
-import org.openedx.dates.data.storage.CourseDateEntity
 import org.openedx.dates.data.storage.DatesDao
 import org.openedx.discovery.data.converter.DiscoveryConverter
 import org.openedx.discovery.data.model.room.CourseEntity
@@ -42,6 +42,7 @@ const val DATABASE_NAME = "OpenEdX_db"
         CourseEnrollmentDetailsEntity::class,
         CourseDateEntity::class,
         VideoProgressEntity::class,
+        CourseDatesResponseEntity::class,
         CourseProgressEntity::class,
     ],
     autoMigrations = [

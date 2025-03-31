@@ -4,16 +4,17 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import org.openedx.core.data.model.room.CourseDatesResponseEntity
 
 @Dao
 interface DatesDao {
 
-    @Query("SELECT * FROM course_date_table")
-    suspend fun getCourseDateEntities(): List<CourseDateEntity>
+    @Query("SELECT * FROM course_dates_response_table")
+    suspend fun getCourseDateResponses(): List<CourseDatesResponseEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCourseDateEntities(courseDate: List<CourseDateEntity>)
+    suspend fun insertCourseDateResponses(courseDates: CourseDatesResponseEntity)
 
-    @Query("DELETE FROM course_date_table")
+    @Query("DELETE FROM course_dates_response_table")
     suspend fun clearCachedData()
 }

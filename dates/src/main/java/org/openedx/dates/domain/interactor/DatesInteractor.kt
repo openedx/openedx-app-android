@@ -10,5 +10,7 @@ class DatesInteractor(
 
     suspend fun getUserDatesFromCache() = repository.getUserDatesFromCache()
 
+    suspend fun preloadFirstPageCachedDates() = repository.preloadFirstPageCachedDates()
+
     suspend fun shiftDueDate() = repository.shiftDueDate()
 }
