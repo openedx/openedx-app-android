@@ -50,9 +50,7 @@ data class CourseDatesResponse(
             count = count,
             next = next,
             previous = previous,
-            results = results
-                .mapNotNull { it.mapToDomain() }
-                .sortedBy { it.dueDate }
+            results = results.mapNotNull { it.mapToDomain() }
         )
     }
 }
