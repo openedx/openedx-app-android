@@ -68,7 +68,7 @@ class DatesViewModelTest {
         every { networkConnection.isOnline() } returns true
         every { corePreferences.isRelativeDatesEnabled } returns true
         every { analytics.logEvent(any(), any()) } returns Unit
-        coEvery { datesInteractor.preloadFirstPageCachedDates() } returns null
+        coEvery { datesInteractor.preloadFirstPageCachedDates() } returns emptyList()
         coEvery { datesInteractor.getUserDatesFromCache() } returns emptyList()
     }
 
@@ -181,7 +181,7 @@ class DatesViewModelTest {
         }
 
     @Test
-    fun `shiftDueDate success`() = runTest {
+    fun `shiftAllDueDates success`() = runTest {
         every { networkConnection.isOnline() } returns true
         // Prepare a dummy CourseDate that qualifies as past due and is marked as relative.
         val courseDate: CourseDate = mockk(relaxed = true) {
@@ -211,16 +211,16 @@ class DatesViewModelTest {
         )
         advanceUntilIdle()
 
-        viewModel.shiftDueDate()
+        viewModel.shiftAllDueDates()
         advanceUntilIdle()
 
-        coVerify { datesInteractor.shiftDueDate() }
+        coVerify { datesInteractor.shiftAllDueDates() }
         // isShiftDueDatesPressed should be reset to false after processing.
         assertFalse(viewModel.uiState.value.isShiftDueDatesPressed)
     }
 
     @Test
-    fun `shiftDueDate error emits error message and resets flag`() =
+    fun `shiftAllDueDates error emits error message and resets flag`() =
         runTest(UnconfinedTestDispatcher()) {
             every { networkConnection.isOnline() } returns true
             val courseDate: CourseDate = mockk(relaxed = true) {
@@ -235,7 +235,7 @@ class DatesViewModelTest {
                 results = listOf(courseDate)
             )
             coEvery { datesInteractor.getUserDates(1) } returns courseDatesResponse
-            coEvery { datesInteractor.shiftDueDate() } throws Exception()
+            coEvery { datesInteractor.shiftAllDueDates() } throws Exception()
 
             val viewModel = DatesViewModel(
                 datesRouter,
@@ -248,7 +248,7 @@ class DatesViewModelTest {
             )
             advanceUntilIdle()
 
-            viewModel.shiftDueDate()
+            viewModel.shiftAllDueDates()
             val message = async {
                 withTimeoutOrNull(5000) {
                     viewModel.uiMessage.first() as? UIMessage.SnackBarMessage

@@ -35,6 +35,7 @@ import org.openedx.core.ui.theme.appColors
 import org.openedx.core.ui.theme.appTypography
 import org.openedx.core.utils.TimeUtils.formatToString
 import org.openedx.core.utils.clearTime
+import org.openedx.core.utils.isToday
 
 @Composable
 private fun CourseDateBlockSectionGeneric(
@@ -261,13 +262,15 @@ private fun CourseDateItem(
         if (isMiddleChild) {
             Spacer(modifier = Modifier.height(20.dp))
         }
-        val timeTitle = formatToString(context, dateBlock.dueDate, useRelativeDates)
-        Text(
-            text = timeTitle,
-            style = MaterialTheme.appTypography.labelMedium,
-            color = MaterialTheme.appColors.textDark,
-            maxLines = 1,
-        )
+        if (!dateBlock.dueDate.isToday()) {
+            val timeTitle = formatToString(context, dateBlock.dueDate, useRelativeDates)
+            Text(
+                text = timeTitle,
+                style = MaterialTheme.appTypography.labelMedium,
+                color = MaterialTheme.appColors.textDark,
+                maxLines = 1,
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

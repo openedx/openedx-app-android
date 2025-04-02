@@ -25,7 +25,7 @@ class HeadersInterceptor(
                     addHeader("Accept", "application/json")
 
                     val httpAgent = System.getProperty("http.agent") ?: ""
-                    addHeader("User-Agent", "$httpAgent ${appData.versionName}")
+                    addHeader("User-Agent", "$httpAgent ${appData.appUserAgent}")
                 }.build()
         )
     }

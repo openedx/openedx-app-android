@@ -50,7 +50,7 @@ class DatesFragment : Fragment() {
                             }
 
                             DatesViewActions.ShiftDueDate -> {
-                                viewModel.shiftDueDate()
+                                viewModel.shiftAllDueDates()
                             }
 
                             is DatesViewActions.OpenEvent -> {

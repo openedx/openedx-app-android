@@ -26,8 +26,8 @@ import org.openedx.core.presentation.dialog.appupgrade.AppUpgradeDialogFragment
 import org.openedx.core.presentation.global.appupgrade.AppUpgradeRecommendedBox
 import org.openedx.core.presentation.global.appupgrade.UpgradeRequiredFragment
 import org.openedx.core.presentation.global.viewBinding
-import org.openedx.dates.presentation.dates.DatesFragment
 import org.openedx.core.system.notifier.app.AppUpgradeEvent
+import org.openedx.dates.presentation.dates.DatesFragment
 import org.openedx.discovery.presentation.DiscoveryRouter
 import org.openedx.downloads.presentation.download.DownloadsFragment
 import org.openedx.learn.presentation.LearnFragment
@@ -180,6 +180,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             } else {
                 R.id.fragmentLearn
             }
+
             HomeTab.DATES.name -> R.id.fragmentDates
             HomeTab.PROFILE.name -> R.id.fragmentProfile
             else -> R.id.fragmentLearn

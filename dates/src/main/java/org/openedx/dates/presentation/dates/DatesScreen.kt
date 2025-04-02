@@ -100,7 +100,7 @@ fun DatesScreen(
                 modifier = Modifier
                     .statusBarsInset()
                     .displayCutoutForLandscape(),
-                label = stringResource(id = R.string.dates),
+                label = stringResource(id = R.string.dates_title),
                 onSettingsClick = {
                     onAction(DatesViewActions.OpenSettings)
                 }

@@ -112,17 +112,17 @@ class DatesViewModel(
 
     private suspend fun updateUIWithCachedResponse() {
         val cachedList = datesInteractor.getUserDatesFromCache()
-        _uiState.update { state -> state.copy(canLoadMore = false) }
         _uiState.update { state ->
             state.copy(
-                dates = groupCourseDates(cachedList)
+                dates = groupCourseDates(cachedList),
+                canLoadMore = false
             )
         }
     }
 
     private fun preloadFirstPageCachedDates() {
         viewModelScope.launch {
-            val cachedList = datesInteractor.preloadFirstPageCachedDates()?.results ?: emptyList()
+            val cachedList = datesInteractor.preloadFirstPageCachedDates()
             _uiState.update { state ->
                 state.copy(
                     dates = groupCourseDates(cachedList),
@@ -153,7 +153,7 @@ class DatesViewModel(
         }
     }
 
-    fun shiftDueDate() {
+    fun shiftAllDueDates() {
         logEvent(DatesAnalyticsEvent.SHIFT_DUE_DATE_CLICK)
         viewModelScope.launch {
             try {
@@ -162,7 +162,7 @@ class DatesViewModel(
                         isShiftDueDatesPressed = true,
                     )
                 }
-                datesInteractor.shiftDueDate()
+                datesInteractor.shiftAllDueDates()
                 refreshData()
                 calendarSyncScheduler.requestImmediateSync()
             } catch (e: Exception) {
@@ -211,16 +211,16 @@ class DatesViewModel(
 
     private fun groupCourseDates(dates: List<CourseDate>): Map<DatesSection, List<CourseDate>> {
         val now = Date()
-        val calNow = Calendar.getInstance().apply { time = now }
+        val calendar = Calendar.getInstance().apply { time = now }
         return dates.groupBy { courseDate ->
             when {
                 courseDate.dueDate.before(now) -> DatesSection.PAST_DUE
                 courseDate.dueDate.isToday() -> DatesSection.TODAY
                 else -> {
                     val calDue = courseDate.dueDate.toCalendar()
-                    val weekNow = calNow.get(Calendar.WEEK_OF_YEAR)
+                    val weekNow = calendar.get(Calendar.WEEK_OF_YEAR)
                     val weekDue = calDue.get(Calendar.WEEK_OF_YEAR)
-                    val yearNow = calNow.get(Calendar.YEAR)
+                    val yearNow = calendar.get(Calendar.YEAR)
                     val yearDue = calDue.get(Calendar.YEAR)
                     if (weekNow == weekDue && yearNow == yearDue) {
                         DatesSection.THIS_WEEK

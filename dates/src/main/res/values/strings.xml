@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="dates">Dates</string>
+    <string name="dates_title">Dates</string>
     <string name="dates_empty_state_title">No Dates</string>
     <string name="dates_empty_state_description">You currently have no active courses with scheduled events. Enroll in a course to view important dates and deadlines.</string>
     <string name="dates_shift_due_date_card_title">Missed Some Deadlines?</string>

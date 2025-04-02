@@ -125,5 +125,5 @@ interface CourseApi {
     ): CourseProgressResponse
 
     @POST("/api/course_experience/v1/reset_all_relative_course_deadlines/")
-    suspend fun shiftDueDate()
+    suspend fun shiftAllDueDates()
 }

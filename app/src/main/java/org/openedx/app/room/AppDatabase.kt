@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
-import org.openedx.core.data.model.room.CourseDatesResponseEntity
+import org.openedx.core.data.model.room.CourseDateEntity
 import org.openedx.core.data.model.room.CourseEnrollmentDetailsEntity
 import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.CourseStructureEntity

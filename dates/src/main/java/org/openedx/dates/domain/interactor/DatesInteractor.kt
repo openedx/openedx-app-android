@@ -12,5 +12,5 @@ class DatesInteractor(
 
     suspend fun preloadFirstPageCachedDates() = repository.preloadFirstPageCachedDates()
 
-    suspend fun shiftDueDate() = repository.shiftDueDate()
+    suspend fun shiftAllDueDates() = repository.shiftAllDueDates()
 }

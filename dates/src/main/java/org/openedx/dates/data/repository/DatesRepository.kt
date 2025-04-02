@@ -1,7 +1,7 @@
 package org.openedx.dates.data.repository
 
 import org.openedx.core.data.api.CourseApi
-import org.openedx.core.data.model.room.CourseDatesResponseEntity
+import org.openedx.core.data.model.room.CourseDateEntity
 import org.openedx.core.data.storage.CorePreferences
 import org.openedx.core.domain.model.CourseDate
 import org.openedx.core.domain.model.CourseDatesResponse
@@ -18,23 +18,21 @@ class DatesRepository(
         if (page == 1) {
             dao.clearCachedData()
         }
-        dao.insertCourseDateResponses(CourseDatesResponseEntity.createFrom(response))
+        dao.insertCourseDates(response.results.map { CourseDateEntity.createFrom(it) })
         return response.mapToDomain()
     }
 
     suspend fun getUserDatesFromCache(): List<CourseDate> {
-        return dao.getCourseDateResponses()
-            .map { it.mapToDomain() }
-            .map { it.results }
-            .flatten()
-            .sortedBy { it.dueDate }
+        return dao.getCourseDates().mapNotNull { it.mapToDomain() }
     }
 
-    suspend fun preloadFirstPageCachedDates(): CourseDatesResponse? {
-        return dao.getCourseDateResponses()
-            .find { it.previous == null }
-            ?.mapToDomain()
+    suspend fun preloadFirstPageCachedDates(): List<CourseDate> {
+        return dao.getCourseDates(PAGE_SIZE).mapNotNull { it.mapToDomain() }
     }
 
-    suspend fun shiftDueDate() = api.shiftDueDate()
+    suspend fun shiftAllDueDates() = api.shiftAllDueDates()
+
+    companion object {
+        private const val PAGE_SIZE = 20
+    }
 }
