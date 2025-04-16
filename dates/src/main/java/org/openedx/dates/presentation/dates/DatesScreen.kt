@@ -134,7 +134,8 @@ fun DatesScreen(
                         LazyColumn(
                             modifier = contentWidth.fillMaxSize(),
                             state = scrollState,
-                            contentPadding = PaddingValues(bottom = 48.dp)
+                            contentPadding = PaddingValues(bottom = 48.dp, top = 24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             uiState.dates.keys.forEach { sectionKey ->
                                 val dates = uiState.dates[sectionKey].orEmpty()
@@ -144,7 +145,6 @@ fun DatesScreen(
                                     if (isHavePastRelatedDates) {
                                         item {
                                             ShiftDueDatesCard(
-                                                modifier = Modifier.padding(top = 12.dp),
                                                 isButtonEnabled = !uiState.isShiftDueDatesPressed,
                                                 onClick = {
                                                     onAction(DatesViewActions.ShiftDueDate)

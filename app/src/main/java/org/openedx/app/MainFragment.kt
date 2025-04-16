@@ -106,7 +106,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 add(R.id.fragmentDownloads to { DownloadsFragment() })
             }
             if (viewModel.isDatesFragmentEnabled) {
-                add(R.id.fragmentDates to DatesFragment())
+                add(R.id.fragmentDates to { DatesFragment() })
             }
             add(R.id.fragmentProfile to { ProfileFragment() })
         }
