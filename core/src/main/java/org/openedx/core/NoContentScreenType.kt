@@ -27,5 +27,9 @@ enum class NoContentScreenType(
     COURSE_ANNOUNCEMENTS(
         iconResId = R.drawable.core_ic_no_announcements,
         messageResId = R.string.core_no_announcements
-    )
+    ),
+    COURSE_PROGRESS(
+        iconResId = R.drawable.core_ic_no_content,
+        messageResId = R.string.core_no_progress
+    ),
 }

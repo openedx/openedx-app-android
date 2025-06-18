@@ -36,6 +36,15 @@
     <string name="course_gated_content_label">Some content in this part of the course is locked for upgraded users only.</string>
     <string name="course_change_quality_when_downloading">You cannot change the download video quality when all videos are downloading</string>
     <string name="course_dates_shifted_message">Dates Shifted</string>
+    <string name="course_progress_completion_title">Course Completion</string>
+    <string name="course_progress_completion_description">This represents how much of the course content you have completed. Note that some content may not yet be released.</string>
+    <string name="course_progress_overall_title">Overall Grade</string>
+    <string name="course_progress_overall_description">This represents your weighted grade against the grade needed to pass this course.</string>
+    <string name="course_progress_current_overall">Current Overall Weighted Grade:</string>
+    <string name="course_progress_required_grade_percent">A weighted grade of %1$d%% is required to pass this course</string>
+    <string name="course_progress_grade_details">Grade Details</string>
+    <string name="course_progress_assignment_type">ASSIGNMENT TYPE</string>
+    <string name="course_progress_current_max">CURRENT - MAX</string>
 
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
@@ -46,6 +55,7 @@
     <string name="course_container_nav_more">More</string>
     <string name="course_container_nav_dates">Dates</string>
     <string name="course_container_nav_downloads">Downloads</string>
+    <string name="course_container_nav_progress">Progress</string>
 
     <!-- Accessibility -->
     <string name="course_accessibility_video_player">Video player</string>

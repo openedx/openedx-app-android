@@ -5,6 +5,7 @@ import org.openedx.core.BlockType
 import org.openedx.core.domain.interactor.CourseInteractor
 import org.openedx.core.domain.model.Block
 import org.openedx.core.domain.model.CourseEnrollmentDetails
+import org.openedx.core.domain.model.CourseProgress
 import org.openedx.core.domain.model.CourseStructure
 import org.openedx.course.data.repository.CourseRepository
 
@@ -114,4 +115,8 @@ class CourseInteractor(
 
     suspend fun submitOfflineXBlockProgress(blockId: String, courseId: String) =
         repository.submitOfflineXBlockProgress(blockId, courseId)
+
+    suspend fun getCourseProgress(courseId: String): CourseProgress {
+        return repository.getCourseProgress(courseId)
+    }
 }

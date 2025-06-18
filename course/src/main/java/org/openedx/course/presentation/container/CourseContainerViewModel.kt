@@ -303,6 +303,10 @@ class CourseContainerViewModel(
                 }
             }
 
+            CourseContainerTab.PROGRESS -> {
+                _refreshing.value = false
+            }
+
             else -> {
                 _refreshing.value = false
             }
@@ -328,6 +332,7 @@ class CourseContainerViewModel(
             CourseContainerTab.VIDEOS -> videoTabClickedEvent()
             CourseContainerTab.DISCUSSIONS -> discussionTabClickedEvent()
             CourseContainerTab.DATES -> datesTabClickedEvent()
+            CourseContainerTab.PROGRESS -> {}
             CourseContainerTab.MORE -> moreTabClickedEvent()
             CourseContainerTab.OFFLINE -> {}
         }

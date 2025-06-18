@@ -88,6 +88,7 @@ import org.openedx.course.presentation.handouts.HandoutsScreen
 import org.openedx.course.presentation.handouts.HandoutsType
 import org.openedx.course.presentation.offline.CourseOfflineScreen
 import org.openedx.course.presentation.outline.CourseOutlineScreen
+import org.openedx.course.presentation.progress.CourseProgressScreen
 import org.openedx.course.presentation.ui.CourseVideosScreen
 import org.openedx.course.presentation.ui.DatesShiftedSnackBar
 import org.openedx.discussion.presentation.topics.DiscussionTopicsScreen
@@ -267,6 +268,7 @@ fun CourseDashboard(
                 CourseContainerTab.VIDEOS.name -> CourseContainerTab.VIDEOS
                 CourseContainerTab.DATES.name -> CourseContainerTab.DATES
                 CourseContainerTab.DISCUSSIONS.name -> CourseContainerTab.DISCUSSIONS
+                CourseContainerTab.PROGRESS.name -> CourseContainerTab.PROGRESS
                 CourseContainerTab.MORE.name -> CourseContainerTab.MORE
                 else -> CourseContainerTab.HOME
             }
@@ -344,8 +346,7 @@ fun CourseDashboard(
                             when (accessStatus.value) {
                                 CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE,
                                 CourseAccessError.NOT_YET_STARTED,
-                                CourseAccessError.UNKNOWN,
-                                -> {
+                                CourseAccessError.UNKNOWN -> {
                                     CourseAccessErrorView(
                                         viewModel = viewModel,
                                         accessError = accessStatus.value,
@@ -492,6 +493,14 @@ private fun DashboardPager(
                 )
             }
 
+            CourseContainerTab.PROGRESS -> {
+                CourseProgressScreen(
+                    windowSize = windowSize,
+                    viewModel = koinViewModel(parameters = { parametersOf(viewModel.courseId) }),
+                    fragmentManager = fragmentManager
+                )
+            }
+
             CourseContainerTab.MORE -> {
                 HandoutsScreen(
                     windowSize = windowSize,
@@ -608,8 +617,7 @@ private fun SetupCourseAccessErrorButtons(
 ) {
     when (accessError) {
         CourseAccessError.AUDIT_EXPIRED_NOT_UPGRADABLE,
-        CourseAccessError.NOT_YET_STARTED,
-        -> {
+        CourseAccessError.NOT_YET_STARTED -> {
             OpenEdXButton(
                 text = stringResource(R.string.course_label_back),
                 onClick = { fragmentManager.popBackStack() },
