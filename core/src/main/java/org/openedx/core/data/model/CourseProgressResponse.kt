@@ -1,6 +1,12 @@
 package org.openedx.core.data.model
 
 import com.google.gson.annotations.SerializedName
+import org.openedx.core.data.model.room.CertificateDataDb
+import org.openedx.core.data.model.room.CompletionSummaryDb
+import org.openedx.core.data.model.room.CourseGradeDb
+import org.openedx.core.data.model.room.CourseProgressEntity
+import org.openedx.core.data.model.room.GradingPolicyDb
+import org.openedx.core.data.model.room.SectionScoreDb
 import org.openedx.core.domain.model.CourseProgress
 
 data class CourseProgressResponse(
@@ -152,6 +158,82 @@ data class CourseProgressResponse(
             username = username ?: "",
             userHasPassingGrade = userHasPassingGrade ?: false,
             verificationData = CourseProgress.VerificationData(
+                link = verificationData?.link ?: "",
+                status = verificationData?.status ?: "",
+                statusDate = verificationData?.statusDate ?: ""
+            ),
+            disableProgressGraph = disableProgressGraph ?: false
+        )
+    }
+
+    fun mapToRoomEntity(courseId: String): CourseProgressEntity {
+        return CourseProgressEntity(
+            courseId = courseId,
+            verifiedMode = verifiedMode ?: "",
+            accessExpiration = accessExpiration ?: "",
+            certificateData = CertificateDataDb(
+                certStatus = certificateData?.certStatus ?: "",
+                certWebViewUrl = certificateData?.certWebViewUrl ?: "",
+                downloadUrl = certificateData?.downloadUrl ?: "",
+                certificateAvailableDate = certificateData?.certificateAvailableDate ?: ""
+            ),
+            completionSummary = CompletionSummaryDb(
+                completeCount = completionSummary?.completeCount ?: 0,
+                incompleteCount = completionSummary?.incompleteCount ?: 0,
+                lockedCount = completionSummary?.lockedCount ?: 0
+            ),
+            courseGrade = CourseGradeDb(
+                letterGrade = courseGrade?.letterGrade ?: "",
+                percent = courseGrade?.percent ?: 0.0,
+                isPassing = courseGrade?.isPassing ?: false
+            ),
+            creditCourseRequirements = creditCourseRequirements ?: "",
+            end = end ?: "",
+            enrollmentMode = enrollmentMode ?: "",
+            gradingPolicy = GradingPolicyDb(
+                assignmentPolicies = gradingPolicy?.assignmentPolicies?.map {
+                    GradingPolicyDb.AssignmentPolicyDb(
+                        numDroppable = it.numDroppable ?: 0,
+                        numTotal = it.numTotal ?: 0,
+                        shortLabel = it.shortLabel ?: "",
+                        type = it.type ?: "",
+                        weight = it.weight ?: 0.0
+                    )
+                } ?: emptyList(),
+                gradeRange = gradingPolicy?.gradeRange ?: emptyMap()
+            ),
+            hasScheduledContent = hasScheduledContent ?: false,
+            sectionScores = sectionScores?.map { section ->
+                SectionScoreDb(
+                    displayName = section.displayName ?: "",
+                    subsections = section.subsections?.map { subsection ->
+                        SectionScoreDb.SubsectionDb(
+                            assignmentType = subsection.assignmentType ?: "",
+                            blockKey = subsection.blockKey ?: "",
+                            displayName = subsection.displayName ?: "",
+                            hasGradedAssignment = subsection.hasGradedAssignment ?: false,
+                            override = subsection.override ?: "",
+                            learnerHasAccess = subsection.learnerHasAccess ?: false,
+                            numPointsEarned = subsection.numPointsEarned ?: 0,
+                            numPointsPossible = subsection.numPointsPossible ?: 0,
+                            percentGraded = subsection.percentGraded ?: 0.0,
+                            problemScores = subsection.problemScores?.map { problemScore ->
+                                SectionScoreDb.SubsectionDb.ProblemScoreDb(
+                                    earned = problemScore.earned ?: 0,
+                                    possible = problemScore.possible ?: 0
+                                )
+                            } ?: emptyList(),
+                            showCorrectness = subsection.showCorrectness ?: "",
+                            showGrades = subsection.showGrades ?: false,
+                            url = subsection.url ?: ""
+                        )
+                    } ?: emptyList()
+                )
+            } ?: emptyList(),
+            studioUrl = studioUrl ?: "",
+            username = username ?: "",
+            userHasPassingGrade = userHasPassingGrade ?: false,
+            verificationData = org.openedx.core.data.model.room.VerificationDataDb(
                 link = verificationData?.link ?: "",
                 status = verificationData?.status ?: "",
                 statusDate = verificationData?.statusDate ?: ""

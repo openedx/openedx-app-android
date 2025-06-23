@@ -7,6 +7,7 @@ import androidx.room.TypeConverters
 import org.openedx.core.data.model.room.CourseCalendarEventEntity
 import org.openedx.core.data.model.room.CourseCalendarStateEntity
 import org.openedx.core.data.model.room.CourseEnrollmentDetailsEntity
+import org.openedx.core.data.model.room.CourseProgressEntity
 import org.openedx.core.data.model.room.CourseStructureEntity
 import org.openedx.core.data.model.room.DownloadCoursePreview
 import org.openedx.core.data.model.room.OfflineXBlockProgress
@@ -21,7 +22,7 @@ import org.openedx.discovery.data.converter.DiscoveryConverter
 import org.openedx.discovery.data.model.room.CourseEntity
 import org.openedx.discovery.data.storage.DiscoveryDao
 
-const val DATABASE_VERSION = 2
+const val DATABASE_VERSION = 3
 const val DATABASE_NAME = "OpenEdX_db"
 
 @Database(
@@ -34,10 +35,12 @@ const val DATABASE_NAME = "OpenEdX_db"
         CourseCalendarEventEntity::class,
         CourseCalendarStateEntity::class,
         DownloadCoursePreview::class,
-        CourseEnrollmentDetailsEntity::class
+        CourseEnrollmentDetailsEntity::class,
+        CourseProgressEntity::class,
     ],
     autoMigrations = [
-        AutoMigration(1, DATABASE_VERSION)
+        AutoMigration(1, 2),
+        AutoMigration(2, DATABASE_VERSION),
     ],
     version = DATABASE_VERSION
 )

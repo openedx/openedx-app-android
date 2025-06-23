@@ -46,7 +46,10 @@ class CourseRepository(
 
     suspend fun getAllDownloadModels() = downloadDao.readAllData().map { it.mapToDomain() }
 
-    suspend fun getCourseStructureFlow(courseId: String, forceRefresh: Boolean = true): Flow<CourseStructure> =
+    suspend fun getCourseStructureFlow(
+        courseId: String,
+        forceRefresh: Boolean = true
+    ): Flow<CourseStructure> =
         channelFlowWithAwait {
             var hasCourseStructure = false
             val cachedCourseStructure = courseStructure[courseId] ?: (
@@ -237,8 +240,16 @@ class CourseRepository(
         }
     }
 
-    suspend fun getCourseProgress(courseId: String): CourseProgress {
-        val response = api.getCourseProgress(courseId)
-        return response.mapToDomain()
-    }
+    fun getCourseProgress(courseId: String, isRefresh: Boolean): Flow<CourseProgress> =
+        channelFlowWithAwait {
+            if (!isRefresh) {
+                val cached = courseDao.getCourseProgressById(courseId)
+                if (cached != null) {
+                    trySend(cached.mapToDomain())
+                }
+            }
+            val response = api.getCourseProgress(courseId)
+            courseDao.insertCourseProgressEntity(response.mapToRoomEntity(courseId))
+            trySend(response.mapToDomain())
+        }
 }

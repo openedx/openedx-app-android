@@ -1,14 +1,18 @@
 package org.openedx.course.presentation.progress
 
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.openedx.core.system.notifier.CourseCompletionSet
+import org.openedx.core.system.notifier.CourseLoading
 import org.openedx.core.system.notifier.CourseNotifier
 import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -29,29 +33,38 @@ class CourseProgressViewModel(
     val uiMessage: SharedFlow<UIMessage>
         get() = _uiMessage.asSharedFlow()
 
+    private var progressJob: Job? = null
+
     init {
-        loadCourseProgress()
+        loadCourseProgress(false)
         collectCourseNotifier()
     }
 
-    fun loadCourseProgress() {
-        viewModelScope.launch {
-            _uiState.value = CourseProgressUIState.Loading
-            try {
-                val progress = interactor.getCourseProgress(courseId)
-                _uiState.value = CourseProgressUIState.Data(progress)
-            } catch (_: Exception) {
-                _uiState.value = CourseProgressUIState.Error
+    fun loadCourseProgress(isRefresh: Boolean) {
+        progressJob?.cancel()
+        progressJob = viewModelScope.launch {
+            if (!isRefresh) {
+                _uiState.value = CourseProgressUIState.Loading
             }
+            interactor.getCourseProgress(courseId, isRefresh)
+                .catch {
+                    if (_uiState.value !is CourseProgressUIState.Data) {
+                        _uiState.value = CourseProgressUIState.Error
+                    }
+                    courseNotifier.send(CourseLoading(false))
+                }
+                .collectLatest { progress ->
+                    _uiState.value = CourseProgressUIState.Data(progress)
+                    courseNotifier.send(CourseLoading(false))
+                }
         }
     }
-
 
     private fun collectCourseNotifier() {
         viewModelScope.launch {
             courseNotifier.notifier.collect { event ->
                 when (event) {
-                    is RefreshProgress, is CourseCompletionSet -> loadCourseProgress()
+                    is RefreshProgress, is CourseCompletionSet -> loadCourseProgress(true)
                 }
             }
         }
