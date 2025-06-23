@@ -40,6 +40,7 @@ import org.openedx.core.system.notifier.CourseStructureGot
 import org.openedx.core.system.notifier.CourseStructureUpdated
 import org.openedx.core.system.notifier.RefreshDates
 import org.openedx.core.system.notifier.RefreshDiscussions
+import org.openedx.core.system.notifier.RefreshProgress
 import org.openedx.core.worker.CalendarSyncScheduler
 import org.openedx.course.DatesShiftedSnackBar
 import org.openedx.course.domain.interactor.CourseInteractor
@@ -304,7 +305,9 @@ class CourseContainerViewModel(
             }
 
             CourseContainerTab.PROGRESS -> {
-                _refreshing.value = false
+                viewModelScope.launch {
+                    courseNotifier.send(RefreshProgress)
+                }
             }
 
             else -> {
@@ -317,7 +320,7 @@ class CourseContainerViewModel(
         viewModelScope.launch {
             try {
                 interactor.getCourseStructure(courseId, isNeedRefresh = true)
-            } catch (ignore: Exception) {
+            } catch (_: Exception) {
                 _errorMessage.value =
                     resourceManager.getString(CoreR.string.core_error_unknown_error)
             }

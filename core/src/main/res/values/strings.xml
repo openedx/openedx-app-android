@@ -172,7 +172,7 @@
     <string name="core_no_course_content">No course content is currently available.</string>
     <string name="core_no_videos">There are currently no videos for this course.</string>
     <string name="core_no_dates">Course dates are currently not available.</string>
-    <string name="core_no_progress">Course progress are currently not available.</string>
+    <string name="core_no_progress">This course does not contain exams or graded assignments.</string>
     <string name="core_no_discussion">Unable to load discussions.\n Please try again later.</string>
     <string name="core_no_handouts">There are currently no handouts for this course.</string>
     <string name="core_no_announcements">There are currently no announcements for this course.</string>

@@ -8,6 +8,7 @@ import org.openedx.core.data.model.CourseDates
 import org.openedx.core.data.model.CourseDatesBannerInfo
 import org.openedx.core.data.model.CourseEnrollmentDetails
 import org.openedx.core.data.model.CourseEnrollments
+import org.openedx.core.data.model.CourseProgressResponse
 import org.openedx.core.data.model.CourseStructureModel
 import org.openedx.core.data.model.DownloadCoursePreview
 import org.openedx.core.data.model.EnrollmentStatus
@@ -106,4 +107,10 @@ interface CourseApi {
     suspend fun getDownloadCoursesPreview(
         @Path("username") username: String
     ): List<DownloadCoursePreview>
+
+
+    @GET("/api/course_home/progress/{course_id}")
+    suspend fun getCourseProgress(
+        @Path("course_id") courseId: String,
+    ): CourseProgressResponse
 }

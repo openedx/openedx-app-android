@@ -43,8 +43,8 @@
     <string name="course_progress_current_overall">Current Overall Weighted Grade:</string>
     <string name="course_progress_required_grade_percent">A weighted grade of %1$d%% is required to pass this course</string>
     <string name="course_progress_grade_details">Grade Details</string>
-    <string name="course_progress_assignment_type">ASSIGNMENT TYPE</string>
-    <string name="course_progress_current_max">CURRENT - MAX</string>
+    <string name="course_progress_assignment_type">Assignment Type</string>
+    <string name="course_progress_current_max">Current /  Max %</string>
 
     <!-- Error Message when course dates are not available -->
     <string name="course_dates_unavailable_message" tools:ignore="MissingTranslation">Course dates are not currently available.</string>
@@ -76,4 +76,8 @@
     <string name="course_find_new_course_button">Find a new course</string>
     <string name="course_error_not_started_title">This course will begin on %s. Come back then to start learning!</string>
     <string name="course_an_error_occurred">An error occurred while loading your course</string>
+    <string name="course_completed">Completed</string>
+    <string name="progress_earned_possible_assignment_problems">%1$s / %2$s Complete</string>
+    <string name="progress_of_grade">of Grade</string>
+    <string name="progress_current_and_max_weighted_graded_percent">%1$s / %2$s%%</string>
 </resources>

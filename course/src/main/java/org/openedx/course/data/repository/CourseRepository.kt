@@ -1,6 +1,5 @@
 package org.openedx.course.data.repository
 
-import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
@@ -239,46 +238,7 @@ class CourseRepository(
     }
 
     suspend fun getCourseProgress(courseId: String): CourseProgress {
-        // Mocked response
-        return CourseProgress(
-            mfeProctoredExamSettingsUrl = "",
-            courseAssignmentLists = mapOf(
-                "Homework" to listOf("Section :754c5e889ac3489e9947ba62b916bdab - Subsection :56c1bc20d270414b877e9c178954b6ed")
-            ),
-            courseDetails = CourseProgress.CourseDetails(
-                graders = listOf(
-                    CourseProgress.Grader(
-                        type = "Homework",
-                        minCount = 1,
-                        dropCount = 0,
-                        shortLabel = "",
-                        weight = 100,
-                        id = "A",
-                        color = Color(0xFFFF9733)
-                    ),
-                    CourseProgress.Grader(
-                        type = "Homework2",
-                        minCount = 1,
-                        dropCount = 0,
-                        shortLabel = "",
-                        weight = 100,
-                        id = "B",
-                        color = Color(0xFFFF0733)
-                    )
-                ),
-                gradeCutoffs = mapOf(
-                    "A" to 0.75f,
-                    "B" to 0.63f,
-                ),
-                gracePeriod = CourseProgress.GracePeriod(
-                    hours = 12,
-                    minutes = 0
-                ),
-                minimumGradeCredit = 0.7f
-            ),
-            showCreditEligibility = false,
-            isCreditCourse = true,
-            defaultGradeDesignations = listOf("A", "B")
-        )
+        val response = api.getCourseProgress(courseId)
+        return response.mapToDomain()
     }
 }

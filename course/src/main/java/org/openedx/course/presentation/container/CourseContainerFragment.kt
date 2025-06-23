@@ -497,7 +497,6 @@ private fun DashboardPager(
                 CourseProgressScreen(
                     windowSize = windowSize,
                     viewModel = koinViewModel(parameters = { parametersOf(viewModel.courseId) }),
-                    fragmentManager = fragmentManager
                 )
             }
 

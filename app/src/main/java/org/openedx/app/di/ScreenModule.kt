@@ -499,6 +499,7 @@ val screenModule = module {
     viewModel { (courseId: String) ->
         CourseProgressViewModel(
             courseId,
+            get(),
             get()
         )
     }
